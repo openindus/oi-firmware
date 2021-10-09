@@ -1,0 +1,79 @@
+menu "OpenIndus API Configuration"
+
+    config MODULE_STANDALONE
+        bool "Module stanalone"
+        default n
+
+    config BOARD
+        bool "Configure board"
+        default n
+
+    choice BOARD_TYPE
+        bool "OpenIndus board type"
+        depends on BOARD
+        default OI_CORE
+        help
+            Select OpenIndus board
+    
+        config OI_CORE
+            bool "OICore"
+        config OI_DISCRETE
+            bool "OIDiscrete"
+        config OI_DISCRETE_VERTICAL
+            bool "OIDiscreteVertical"
+        config OI_STEPPER
+            bool "OIStepper"
+        config OI_MIXED
+            bool "OIMixed"
+        config OI_RELAY_HP
+            bool "OIRelayHP"
+        config OI_RELAY_LP
+            bool "OIRelayLP"
+    endchoice
+
+    config AUTO_ID
+        bool "Configure ID automatically"
+        default y
+
+    config GLOBAL_INSTANCE
+        bool "Global instance"
+        default y
+
+    choice RS
+        bool "RS User"
+        depends on GLOBAL_INSTANCE
+        default GLOBAL_INSTANCE_RS485
+        help
+            Serial RS bus
+    
+        config GLOBAL_INSTANCE_RS485
+            bool "RS485"
+        config GLOBAL_INSTANCE_RS485
+            bool "RS232"
+    endchoice
+
+    choice STEPPER_DRIVER
+        bool "OIStepper driver"
+        default POWERSTEP01
+        help
+            driver used
+    
+        config POWERSTEP01
+            bool "POWERSTEP01"
+        config L6470
+            bool "L6470"
+    endchoice
+    
+    choice STEPPER_CMD
+        bool "OIStepper command"
+        default VOLTAGE_MODE
+        help
+            powerSTEP01 command mode
+    
+        config VOLTAGE_MODE
+            bool "voltage mode"
+        config CURRENT_MODE
+            bool "current mode"
+    endchoice
+
+endmenu

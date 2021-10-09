@@ -1,0 +1,3 @@
+[submodule "libraries/Arduino"]
+	path = libraries/Arduino
+	url = https://github.com/espressif/arduino-esp32.git

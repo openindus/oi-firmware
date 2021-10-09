@@ -1,0 +1,9 @@
+<RCC>
+  <qresource prefix="img">
+    <file>icon.ico</file>
+    <file>check.png</file>
+    <file>error.png</file>
+    <file>question.png</file>
+    <file>logo.png</file>
+  </qresource>
+</RCC>

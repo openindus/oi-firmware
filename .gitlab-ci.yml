@@ -1,0 +1,15 @@
+image: python:latest
+
+stages:
+  - build
+
+before_script:
+  - "pip install -U platformio"
+  - "pio platform update"
+
+job:
+  stage: build
+  script: "pio run -e core -e discrete -e stepper -e mixed"
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
