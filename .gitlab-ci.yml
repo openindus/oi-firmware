@@ -7,9 +7,16 @@ before_script:
   - "pip install -U platformio"
   - "pio platform update"
 
-job:
+jobs:
   stage: build
-  script: "pio run -e core -e discrete -e stepper -e mixed"
+  script: 
+    - "pio run -e core"
+    - "pio run -e discrete"
+    - "pio run -e discreteve"
+    - "pio run -e stepper"
+    - "pio run -e mixed"
+    - "pio run -e relayhp"
+    - "pio run -e relaylp"
 
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
