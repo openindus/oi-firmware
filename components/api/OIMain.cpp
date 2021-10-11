@@ -8,7 +8,7 @@
 OICore Core;
 #elif (defined CONFIG_OI_DISCRETE) || (defined CONFIG_OI_DISCRETE_VERTICAL)
 OIDiscrete Discrete;
-#elif defined CONFIG_OI_STEPPER
+#elif (defined CONFIG_OI_STEPPER) || (defined CONFIG_OI_STEPPER_VERTICAL)
 OIStepper Stepper;
 #elif defined CONFIG_OI_MIXED
 OIMixed Mixed;
@@ -98,7 +98,8 @@ void attachFunctions(void)
         return type;
     });
     
-    Fct.add(OIMessage(CMD_RESTART, Module.getId()), [](OIMessage msg) -> uint32_t {
+    Fct.add(OIMessage(CMD_RESTART, Module.getId()), [](OIMessage msg) -> uint32_t 
+    {
         Module.restart();
         return 0;
     });
@@ -211,8 +212,8 @@ void attachFunctions(void)
         return valueReturn;
     });
 
-     Fct.add(OIMessage(CMD_STOR_SENSOR_READ, Module.getId()), [](OIMessage msg) -> uint32_t 
-     { 
+    Fct.add(OIMessage(CMD_STOR_SENSOR_READ, Module.getId()), [](OIMessage msg) -> uint32_t 
+    { 
         float getValue = Module.getStorCurrent((Stor_t)msg.getConf());
         uint32_t valueReturn = 0;
         memcpy(&valueReturn, &getValue, sizeof(float));
@@ -231,7 +232,7 @@ void attachFunctions(void)
         return 0;
     });
 
-#elif defined CONFIG_OI_STEPPER
+#elif (defined CONFIG_OI_STEPPER) || (defined CONFIG_OI_STEPPER_VERTICAL)
 
     Fct.add(OIMessage(CMD_GET_ETOR_LEVEL, Module.getId()), [](OIMessage msg) -> uint32_t 
     { 

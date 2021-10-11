@@ -3,3 +3,13 @@
 sdkconfig.core
 docs/build
 docs/env
+build
+sdkconfig.core
+sdkconfig.discrete
+sdkconfig.discreteve
+sdkconfig.stepper
+sdkconfig.stepperve
+sdkconfig.mixed
+sdkconfig.relaylp
+sdkconfig.relayhp
+sdkconfig

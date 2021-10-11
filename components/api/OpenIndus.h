@@ -34,7 +34,7 @@ extern OICore Core;
 #elif (defined CONFIG_OI_DISCRETE) || (defined CONFIG_OI_DISCRETE_VERTICAL)
 extern OIDiscrete Discrete;
 #define Module Discrete
-#elif defined CONFIG_OI_STEPPER
+#elif (defined CONFIG_OI_STEPPER) || (defined CONFIG_OI_STEPPER_VERTICAL)
 extern OIStepper Stepper;
 #define Module Stepper
 #elif defined CONFIG_OI_MIXED

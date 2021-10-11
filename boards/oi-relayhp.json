@@ -4,7 +4,9 @@
             "ldscript": "esp32s2_out.ld"
         },
         "core": "esp32s2",
-        "extra_flags": "-D ARDUINO_ESP32S2_DEV",
+        "partitions": "partition.csv",
+        "extra_flags": ["-D ARDUINO_ESP32S2_DEV",
+                        "-D CONFIG_OI_RELAY_HP"],
         "f_cpu": "240000000L",
         "f_flash": "80000000L",
         "flash_mode": "dio",

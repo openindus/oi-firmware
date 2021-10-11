@@ -14,9 +14,13 @@ jobs:
     - "pio run -e discrete"
     - "pio run -e discreteve"
     - "pio run -e stepper"
+    - "pio run -e stepperve"
     - "pio run -e mixed"
     - "pio run -e relayhp"
     - "pio run -e relaylp"
+  rules:
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
 
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
