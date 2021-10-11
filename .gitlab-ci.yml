@@ -2,25 +2,61 @@ image: python:latest
 
 stages:
   - build
+  - flash
+  - test
+  - push
 
 before_script:
-  - "pip install -U platformio"
-  - "pio platform update"
+  - pip install -U platformio
+  - pio platform update
 
-jobs:
+build:
   stage: build
-  script: 
-    - "pio run -e core"
-    - "pio run -e discrete"
-    - "pio run -e discreteve"
-    - "pio run -e stepper"
-    - "pio run -e stepperve"
-    - "pio run -e mixed"
-    - "pio run -e relayhp"
-    - "pio run -e relaylp"
-  rules:
-    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+  script:
+    - pio run -e core
+    - pio run -e discrete
+    - pio run -e discreteve
+    - pio run -e stepper
+    - pio run -e stepperve
+    - pio run -e mixed
+    - pio run -e relayhp
+    - pio run -e relaylp
+
+build:examples:
+  stage: build
+  script: echo "./build-examples.sh"
+
+build:doc:
+  stage: build
+  script: echo "./build-doc.sh"
+
+flash:
+  stage: flash
+  needs:
+    - job: build
+  script: echo "pio run -e core -t upload"
+
+test:
+  stage: test
+  needs:
+    - job: flash
+  script: echo "pio test"
+
+push:bin:
+  stage: push
+  needs:
+    - job: test
+  script: echo "push binaries"
+
+push:doc:
+  stage: push
+  needs:
+    - job: build:doc
+  script: echo "push html"
+
+# rules:
+#   - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
+#   - if: '$CI_PIPELINE_SOURCE == "schedule"'
 
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
