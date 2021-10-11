@@ -3,3 +3,6 @@
 sdkconfig.core
 docs/build
 docs/env
+build
+sdkconfig.*
+sdkconfig
