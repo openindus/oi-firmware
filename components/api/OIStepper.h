@@ -55,10 +55,8 @@
 #define OISTEPPER_GPIO_PIN_D1_STBY_RST   GPIO_NUM_11
 
 /* Device 2 GPIOs pins */
-#ifndef CONFIG_OI_STEPPERVE
 #define OISTEPPER_GPIO_PIN_D2_SW         GPIO_NUM_15
 #define OISTEPPER_GPIO_PIN_D2_STBY_RST   GPIO_NUM_16
-#endif
 
 /* Common GPIO pins */
 #define OISTEPPER_GPIO_PIN_BUSY_SYNC     GPIO_NUM_12
@@ -72,7 +70,7 @@
 
 #define ESP_INTR_FLAG_DEFAULT           (0)
 
-#ifdef CONFIG_OI_STEPPER
+#if (defined CONFIG_OI_STEPPER) || (defined CONFIG_OI_STEPPER_VERTICAL)
 
 class OIStepper : public OIModuleMaster
 {
@@ -994,4 +992,4 @@ public:
     }
 };
 
-#endif /* CONFIG_OI_STEPPER */
+#endif /* (defined CONFIG_OI_STEPPER) || (defined CONFIG_OI_STEPPER_VERTICAL) */

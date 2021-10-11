@@ -15,7 +15,7 @@
 
 #include "OIStepper.h"
 
-#ifdef CONFIG_OI_STEPPER
+#if (defined CONFIG_OI_STEPPER) || (defined CONFIG_OI_STEPPER_VERTICAL)
 
 static const char OI_STEPPER_TAG[] = "OIStepper";
 
@@ -126,7 +126,7 @@ void OIStepper::init()
     #endif
     #else
     _type = OI_STEPPERVE;
-    Powerstep01_InitMotor(DEVICE1); // Init device 1
+    Powerstep01_InitDevice(DEVICE1); // Init device 1
     Powerstep01_SetSwitchLevel(DEVICE1, HIGH_LEVEL);
     #endif
 
@@ -263,4 +263,4 @@ void OIStepper::flagInterruptEvent(void)
     xEventGroupSetBits(_eventGroupHandle, FLAG_INTERRUPT_EVENT);
 }
 
-#endif /* CONFIG_OI_STEPPER */
+#endif /* (defined CONFIG_OI_STEPPER) || (defined CONFIG_OI_STEPPER_VERTICAL) */
