@@ -4,7 +4,7 @@
             "ldscript": "esp32s2_out.ld"
         },
         "core": "esp32s2",
-        "partitions": "boards/oi-partition.csv",
+        "partitions": "partition.csv",
         "extra_flags": ["-D ARDUINO_ESP32S2_DEV",
                         "-D CONFIG_OI_MIXED"],
         "f_cpu": "240000000L",
