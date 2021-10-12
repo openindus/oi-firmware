@@ -4,6 +4,9 @@
 #include "Arduino.h"
 #endif
 
+#include "esp_task_wdt.h"
+
+
 #if defined CONFIG_OI_CORE
 OICore Core;
 #elif (defined CONFIG_OI_DISCRETE) || (defined CONFIG_OI_DISCRETE_VERTICAL)
