@@ -28,7 +28,22 @@ build:examples:
 
 build:doc:
   stage: build
-  script: echo "./build-doc.sh"
+  before_script:
+    - python -V  # Print out python version for debugging
+    - pip install virtualenv
+    - export PATH="$HOME/.local/bin:$PATH"  
+    - virtualenv venv
+    - source venv/bin/activate
+    - cd docs
+    - pip install -r requirements.txt
+  script:
+    - make clean
+    - rm -rf tmp
+    - doxygen doxygen/Doxyfile
+    - make html    
+    - cd ..
+  rules:
+    - if: $CI_COMMIT_REF_NAME != $CI_DEFAULT_BRANCH
 
 flash:
   stage: flash
