@@ -191,21 +191,6 @@ public:
      */
     float getInternalTemp(void) const;
 
-
-    /**
-     * @brief Get the OI-ID analog value
-     * 
-     * @return uint32_t 
-     */
-    uint32_t getAnalogId(void) const;
-
-    /**
-     * @brief read OI-ID value
-     * 
-     * @return uint32_t 
-     */
-    uint32_t readOiId(void);
-
     /**
      * @brief Set the Oi Id object
      * 

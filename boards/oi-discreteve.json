@@ -1,4 +1,5 @@
 {
+    "name": "OIDiscreteVE",
     "build": {
         "arduino": {
             "ldscript": "esp32s2_out.ld"
@@ -17,7 +18,6 @@
         "arduino",
         "espidf"
     ],
-    "name": "OIESP32S2",
     "upload": {
         "flash_size": "4MB",
         "maximum_ram_size": 327680,

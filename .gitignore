@@ -13,3 +13,4 @@ sdkconfig.mixed
 sdkconfig.relaylp
 sdkconfig.relayhp
 sdkconfig
+venv

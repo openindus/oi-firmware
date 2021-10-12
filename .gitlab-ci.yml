@@ -2,25 +2,96 @@ image: python:latest
 
 stages:
   - build
+  - flash
+  - test
+  - push
 
-before_script:
-  - "pip install -U platformio"
-  - "pio platform update"
-
-jobs:
+build:
   stage: build
-  script: 
-    - "pio run -e core"
-    - "pio run -e discrete"
-    - "pio run -e discreteve"
-    - "pio run -e stepper"
-    - "pio run -e stepperve"
-    - "pio run -e mixed"
-    - "pio run -e relayhp"
-    - "pio run -e relaylp"
-  rules:
-    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+  before_script:
+    - pip install -U platformio
+    - pio platform update
+  script:
+    - pio run -e core
+    - pio run -e discrete
+    - pio run -e discreteve
+    - pio run -e stepper
+    - pio run -e stepperve
+    - pio run -e mixed
+    - pio run -e relayhp
+    - pio run -e relaylp
+  only:
+    - master
+    - dev
 
-variables:
-  GIT_SUBMODULE_STRATEGY: recursive
+build:examples:
+  stage: build
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+  script: echo "build examples"
+  only:
+    - master
+    - dev
+
+build:docs:
+  stage: build
+  before_script:
+    - pip install virtualenv
+    - export PATH="$HOME/.local/bin:$PATH"
+    - virtualenv venv
+    - source venv/bin/activate
+    - pip install -r docs/requirements.txt
+  script:
+    - cd docs
+    - make clean
+    - doxygen doxygen/Doxyfile
+    - make html
+  only:
+    - master
+    - dev
+
+flash:
+  stage: flash
+  needs:
+    - job: build
+  script: echo "pio run -e core -t upload"
+  cache:
+    paths:
+      - .pio/
+  only:
+    - master
+    - dev
+
+test:
+  stage: test
+  needs:
+    - job: flash
+  script: echo "pio test"
+  only:
+    - master
+    - dev
+
+push:bin:
+  stage: push
+  needs:
+    - job: test
+  script: echo "push binaries"
+  only:
+    - master
+
+push:docs:
+  stage: push
+  needs:
+    - job: build:docs
+  script:
+    # - lftp ftp.openindus.com -e "mirror --reverse --verbose --delete -R ./docs/build/html/ ./oi-content/doc/; quit" -u $FTP_USERNAME,$FTP_PASSWORD
+    - lftp $OVH_URI -e "mirror --reverse --verbose --delete -R ./docs/build/html/ ./www/oi-content/doc/; quit" -u $OVH_USERNAME,$OVH_PASSWORD
+
+  cache:
+    paths:
+      - docs/build/
+  only:
+    - master
+    - dev

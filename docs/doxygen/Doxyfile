@@ -22,5 +22,5 @@ INPUT = ./../components/api
 GENERATE_XML    = YES
 XML_OUTPUT      = xml
 
-GENERATE_HTML   = YES
+GENERATE_HTML   = NO
 GENERATE_LATEX  = NO
