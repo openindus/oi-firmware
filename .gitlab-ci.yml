@@ -6,12 +6,13 @@ stages:
   - test
   - push
 
-before_script:
-  - pip install -U platformio
-  - pio platform update
-
 build:
   stage: build
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+  before_script:
+    - pip install -U platformio
+    - pio platform update
   script:
     - pio run -e core
     - pio run -e discrete
@@ -21,57 +22,76 @@ build:
     - pio run -e mixed
     - pio run -e relayhp
     - pio run -e relaylp
+  only:
+    - master
+    - dev
 
 build:examples:
   stage: build
-  script: echo "./build-examples.sh"
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+  script: echo "build examples"
+  only:
+    - master
+    - dev
 
-build:doc:
+build:docs:
   stage: build
   before_script:
-    - python -V  # Print out python version for debugging
     - pip install virtualenv
-    - export PATH="$HOME/.local/bin:$PATH"  
+    - export PATH="$HOME/.local/bin:$PATH"
     - virtualenv venv
     - source venv/bin/activate
-    - cd docs
-    - pip install -r requirements.txt
+    - pip install -r docs/requirements.txt
   script:
+    - cd docs
     - make clean
-    - rm -rf tmp
     - doxygen doxygen/Doxyfile
-    - make html    
-    - cd ..
-  rules:
-    - if: $CI_COMMIT_REF_NAME != $CI_DEFAULT_BRANCH
+    - make html
+  only:
+    - master
+    - dev
 
 flash:
   stage: flash
   needs:
     - job: build
   script: echo "pio run -e core -t upload"
+  cache:
+    paths:
+      - .pio/
+  only:
+    - master
+    - dev
 
 test:
   stage: test
   needs:
     - job: flash
   script: echo "pio test"
+  only:
+    - master
+    - dev
 
 push:bin:
   stage: push
   needs:
     - job: test
   script: echo "push binaries"
+  only:
+    - master
 
-push:doc:
+push:docs:
   stage: push
   needs:
-    - job: build:doc
-  script: echo "push html"
+    - job: build:docs
+  script:
+    # - lftp ftp.openindus.com -e "mirror --reverse --verbose --delete -R ./docs/build/html/ ./oi-content/doc/; quit" -u $FTP_USERNAME,$FTP_PASSWORD
+    - lftp $OVH_URI -e "mirror --reverse --verbose --delete -R ./docs/build/html/ ./www/oi-content/doc/; quit" -u $OVH_USERNAME,$OVH_PASSWORD
 
-# rules:
-#   - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
-#   - if: '$CI_PIPELINE_SOURCE == "schedule"'
-
-variables:
-  GIT_SUBMODULE_STRATEGY: recursive
+  cache:
+    paths:
+      - docs/build/
+  only:
+    - master
+    - dev
