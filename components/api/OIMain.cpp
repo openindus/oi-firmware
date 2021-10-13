@@ -242,6 +242,11 @@ void attachFunctions(void)
         return Module.getEtorLevel(static_cast<Etor_t>(msg.getConf()));
     });
 
+    Fct.add(OIMessage(CMD_SET_LOGIC_SWITCH, Module.getId()), [](OIMessage msg) -> uint32_t { 
+        Module.setSwitchLogic(static_cast<bool>(msg.getConf()));
+        return 0;
+    });
+
     Fct.add(OIMessage(CMD_ATTACH_LIMIT_SWITCH, Module.getId()), [](OIMessage msg) -> uint32_t 
     { 
         Module.attachLimitSwitch(static_cast<Etor_t>(msg.getConf(1)), msg.getConf(0), static_cast<bool>(msg.getData()));
