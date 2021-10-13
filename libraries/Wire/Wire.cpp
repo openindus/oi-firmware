@@ -45,7 +45,7 @@ void TwoWire::setClock(uint32_t frequency)
 
 size_t TwoWire::getClock()
 {
-    return (size_t)400000;
+    return (size_t)100000;
 }
 
 void TwoWire::setTimeOut(uint16_t timeOutMillis)
