@@ -25,9 +25,6 @@
 #include "OIMixed.h"
 #include "OIRelay.h"
 
-#include "OICAN.h"
-#include "OIRS.h"
-
 #if defined CONFIG_OI_CORE
 extern OICore Core;
 #define Module Core

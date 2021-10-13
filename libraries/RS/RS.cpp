@@ -1,4 +1,4 @@
-#include "OIRS.h"
+#include "RS.h"
 
 void OIRS::begin(unsigned long baudrate, spi_host_device_t host, gpio_num_t cs, gpio_num_t interrupt)
 {

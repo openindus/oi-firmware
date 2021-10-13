@@ -1,0 +1,942 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index cd228a07..c4c7e0a5 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -101,7 +101,6 @@ set(LIBRARY_SRCS
+   libraries/WiFi/src/WiFiSTA.cpp
+   libraries/WiFi/src/WiFiUdp.cpp
+   libraries/WiFiProv/src/WiFiProv.cpp
+-  libraries/Wire/src/Wire.cpp
+   )
+ 
+ set(BLE_SRCS
+@@ -168,7 +167,6 @@ set(includedirs
+   libraries/WiFiClientSecure/src
+   libraries/WiFi/src
+   libraries/WiFiProv/src
+-  libraries/Wire/src
+   )
+ 
+ set(srcs ${CORE_SRCS} ${LIBRARY_SRCS} ${BLE_SRCS})
+@@ -185,7 +183,14 @@ target_compile_options(${COMPONENT_TARGET} PUBLIC
+     -DARDUINO_ARCH_ESP32
+     -DARDUINO_BOARD="${idf_target_caps}_DEV"
+     -DARDUINO_VARIANT="${CONFIG_IDF_TARGET}"
+-    -DESP32)
++    -DESP32
++    -Wno-missing-field-initializers
++    -Wno-unused-variable
++    -Wno-empty-body
++    -Wno-implicit-fallthrough
++    -Wno-unused-function
++    -Wno-maybe-uninitialized
++    -Wno-type-limits)
+ 
+ if(CONFIG_AUTOSTART_ARDUINO)
+     # in autostart mode, arduino-esp32 contains app_main() function and needs to
+diff --git a/libraries/WiFi/src/ETH.cpp b/libraries/WiFi/src/ETH.cpp
+index 092d6a3d..07217479 100644
+--- a/libraries/WiFi/src/ETH.cpp
++++ b/libraries/WiFi/src/ETH.cpp
+@@ -287,8 +287,8 @@ bool ETHClass::begin(uint8_t phy_addr, int power, int mdc, int mdio, eth_phy_typ
+             eth_phy = esp_eth_phy_new_dm9051(&phy_config);
+             break;
+ #endif
+-        case ETH_PHY_KSZ8081:
+-            eth_phy = esp_eth_phy_new_ksz8081(&phy_config);
++        // case ETH_PHY_KSZ8081:
++        //     eth_phy = esp_eth_phy_new_ksz8081(&phy_config);
+         default:
+             break;
+     }
+diff --git a/libraries/Wire/doc/i2c_debugging.md b/libraries/Wire/doc/i2c_debugging.md
+deleted file mode 100644
+index 35c6e2e7..00000000
+--- a/libraries/Wire/doc/i2c_debugging.md
++++ /dev/null
+@@ -1,276 +0,0 @@
+-# Debugging I2C
+-
+-With the release of Arduino-ESP32 V1.0.1 the I2C subsystem contains code to exhaustively report communication errors.  
+-* Basic debugging can be enable by setting the *CORE DEBUG LEVEL* at or above *ERROR*. All errors will be directed the the *DEBUG OUTPUT* normally connected to `Serial()`.  
+-* Enhanced debugging can be used to generate specified information at specific positions during the i2c communication sequence. Increase *CORE DEBUG LEVEL* to ***DEBUG***
+-
+-## Enable Debug Buffer
+-The Enhanced debug features are enabled by uncommenting the `\\#define ENABLE_I2C_DEBUG_BUFFER` at line 45 of `esp32-hal-i2c.c`.  
+-* When Arduino-Esp32 is installed in Windows with Arduino Boards Manager, `esp32-hal-i2c.c` can be found in:
+-`C:\Users\{user}\AppData\Local\Arduino15\packages\esp32\hardware\esp32\1.0.1\cores\esp32\`
+-* When Arduino-Esp32 Development version is installed from GitHub, `esp32-hal-i2c.c` can be found in:
+-`{arduino Sketch}\hardware\espressif\esp32\cores\esp32\`
+-
+-
+-```c++ 
+-//#define ENABLE_I2C_DEBUG_BUFFER
+-```
+-Change it to:
+-```c++ 
+-#define ENABLE_I2C_DEBUG_BUFFER
+-```
+-and recompile/upload the resulting code to your ESP32.
+-
+-Enabling this `#define` will consume an additional 2570 bytes of RAM and include a commensurate amount of code FLASH. If you see the message `"Debug Buffer not Enabled"` in your console log I would suggest you un-comment the line and regenerate the error.  Additional information will be supplied on the log console.
+-
+-## Manually controlled Debugging
+-Manual logging of the i2c control data buffers can be accomplished by using the debug control function of `Wire()`:
+-```c++
+-    uint32_t setDebugFlags( uint32_t setBits, uint32_t resetBits);
+-```
+-`setBits`, and `resetBits` manually cause output of the control structures to the log console.   They are bit fields that enable/disable the reporting of individual control structures during specific phases of the i2c communications sequence.  The 32bit values are divided into four 8bit fields.  Currently only five bits are defined. ***If an error is detected during normal operations, the relevant control structure will bit added to the log irrespective of the current debug flags.***
+-
+-* **bit 0** causes DumpI2c to execute 
+-header information about current communications event,
+-and the dataQueue elements showing the logical i2c transaction commands
+-* **bit 1** causes DumpInts to execute
+-Actual sequence of interrupts handled during last communications event, cleared on entry into `ProcQueue()`.
+-* **bit 2** causes DumpCmdqueue to execute
+-The last block of commands to the i2c peripheral.
+-* **bit 3** causes DumpStatus to execute
+-A descriptive display of the 32bit i2c peripheral status word.
+-* **bit 4** causes DumpFifo to execute
+-A buffer listing the sequence of data added to the txFifo of the i2c peripheral.
+-
+-Of the four division, only three are currently implemented:
+-* 0xXX - - - - - - : at entry of ProcQueue (`bitFlags << 24`)
+-* 0x - - XX - - - - : at exit of ProcQueue (`bitFlags << 16`)
+-* 0x - - - - - - XX : at entry of Flush    (`bitFlags`)
+- 
+-For example, to display the sequence of Interrupts processed during the i2c communication transaction, **bit 1** would be set, and, since this information on Interrupt usage would only be valid after the communications have completed, the locus would be *at exit of ProcQueue*.  The following code would be necessary.
+-### code
+-```c++
+-uint8_t flag = 1 << 1; // turn on bit 1
+-uint32_t debugFlag = flag << 16; // correctly position the 8bits of flag as the second byte of setBits.
+-Wire.setDebugFlags(debugFlag,0);// resetBits=0 says leave all current setBits as is.
+-
+-Wire.requestFrom(id,byteCount); // read byteCount bytes from slave at id 
+-
+-Wire.setDebugFlags(0,debugFlag); // don't add any new debug, remove debugFlag
+-``` 
+-### output of log console
+-```
+-[I][esp32-hal-i2c.c:437] i2cTriggerDumps(): after ProcQueue
+-[I][esp32-hal-i2c.c:346] i2cDumpInts(): 0 row	count	INTR	TX	RX	Tick 
+-[I][esp32-hal-i2c.c:350] i2cDumpInts(): [01]	0x0001	0x0002	0x0003	0x0000	0x005baac5
+-[I][esp32-hal-i2c.c:350] i2cDumpInts(): [02]	0x0001	0x0200	0x0000	0x0000	0x005baac5
+-[I][esp32-hal-i2c.c:350] i2cDumpInts(): [03]	0x0001	0x0080	0x0000	0x0008	0x005baac6
+-```    
+-# Debug Log example
+-### Code
+-To read eight bytes of data from a DS1307 RTCC
+-```
+-    uint32_t debugFlag = 0x001F0000;
+-    uint8_t ID = 0x68;
+-    uint8_t block=8;
+-    
+-    if(debugFlag >0){
+-        Wire.setDebugFlags(debugFlag,0);
+-    }
+-
+-    Wire.beginTransmission(ID);
+-    Wire.write(lowByte(addr));
+-    if((err=Wire.endTransmission(false))!=0)    {
+-        Serial.printf(" EndTransmission=%d(%s)",Wire.lastError(),Wire.getErrorText(Wire.lastError()));
+-
+-        if(err!=2) {
+-            Serial.printf(", resetting\n");
+-            if( !Wire.begin()) Serial.printf(" Reset Failed\n");
+-            if(debugFlag >0) Wire.setDebugFlags(0,debugFlag);
+-            return;
+-        } else {
+-            Serial.printf(", No Device present, aborting\n");
+-            currentCommand= NO_COMMAND;
+-            return;
+-        }
+-    }
+-    err = Wire.requestFrom(ID,block,true);
+-    if(debugFlag >0){
+-        Wire.setDebugFlags(0,debugFlag);
+-    }
+-```
+-### output of log console
+-```
+-[I][esp32-hal-i2c.c:437] i2cTriggerDumps(): after ProcQueue
+-[E][esp32-hal-i2c.c:318] i2cDumpI2c(): i2c=0x3ffbdc78
+-[I][esp32-hal-i2c.c:319] i2cDumpI2c(): dev=0x60013000 date=0x16042000
+-[I][esp32-hal-i2c.c:321] i2cDumpI2c(): lock=0x3ffb843c
+-[I][esp32-hal-i2c.c:323] i2cDumpI2c(): num=0
+-[I][esp32-hal-i2c.c:324] i2cDumpI2c(): mode=1
+-[I][esp32-hal-i2c.c:325] i2cDumpI2c(): stage=3
+-[I][esp32-hal-i2c.c:326] i2cDumpI2c(): error=1
+-[I][esp32-hal-i2c.c:327] i2cDumpI2c(): event=0x3ffb85c4 bits=10
+-[I][esp32-hal-i2c.c:328] i2cDumpI2c(): intr_handle=0x3ffb85f4
+-[I][esp32-hal-i2c.c:329] i2cDumpI2c(): dq=0x3ffb858c
+-[I][esp32-hal-i2c.c:330] i2cDumpI2c(): queueCount=2
+-[I][esp32-hal-i2c.c:331] i2cDumpI2c(): queuePos=1
+-[I][esp32-hal-i2c.c:332] i2cDumpI2c(): errorByteCnt=0
+-[I][esp32-hal-i2c.c:333] i2cDumpI2c(): errorQueue=0
+-[I][esp32-hal-i2c.c:334] i2cDumpI2c(): debugFlags=0x001F0000
+-[I][esp32-hal-i2c.c:288] i2cDumpDqData(): [0] 7bit 68 W  buf@=0x3ffc04b2, len=1, pos=1, ctrl=11101
+-[I][esp32-hal-i2c.c:306] i2cDumpDqData(): 0x0000: .                                00 
+-[I][esp32-hal-i2c.c:288] i2cDumpDqData(): [1] 7bit 68 R STOP buf@=0x3ffc042c, len=8, pos=8, ctrl=11111
+-[I][esp32-hal-i2c.c:306] i2cDumpDqData(): 0x0000: 5P......                         35 50 07 06 13 09 18 00 
+-[I][esp32-hal-i2c.c:346] i2cDumpInts(): 0 row	count	INTR	TX	RX	Tick 
+-[I][esp32-hal-i2c.c:350] i2cDumpInts(): [01]	0x0001	0x0002	0x0003	0x0000	0x000073d5
+-[I][esp32-hal-i2c.c:350] i2cDumpInts(): [02]	0x0001	0x0200	0x0000	0x0000	0x000073d5
+-[I][esp32-hal-i2c.c:350] i2cDumpInts(): [03]	0x0001	0x0080	0x0000	0x0008	0x000073d6
+-[E][esp32-hal-i2c.c:243] i2cDumpCmdQueue(): [ 0]	Y	RSTART	val[0]	exp[0]	en[0]	bytes[0]
+-[E][esp32-hal-i2c.c:243] i2cDumpCmdQueue(): [ 1]	Y	WRITE	val[0]	exp[0]	en[1]	bytes[1]
+-[E][esp32-hal-i2c.c:243] i2cDumpCmdQueue(): [ 2]	Y	WRITE	val[0]	exp[0]	en[1]	bytes[1]
+-[E][esp32-hal-i2c.c:243] i2cDumpCmdQueue(): [ 3]	Y	RSTART	val[0]	exp[0]	en[0]	bytes[0]
+-[E][esp32-hal-i2c.c:243] i2cDumpCmdQueue(): [ 4]	Y	WRITE	val[0]	exp[0]	en[1]	bytes[1]
+-[E][esp32-hal-i2c.c:243] i2cDumpCmdQueue(): [ 5]	Y	READ	val[0]	exp[0]	en[0]	bytes[7]
+-[E][esp32-hal-i2c.c:243] i2cDumpCmdQueue(): [ 6]	Y	READ	val[1]	exp[0]	en[0]	bytes[1]
+-[E][esp32-hal-i2c.c:243] i2cDumpCmdQueue(): [ 7]	Y	STOP	val[0]	exp[0]	en[0]	bytes[0]
+-[E][esp32-hal-i2c.c:243] i2cDumpCmdQueue(): [ 8]	N	RSTART	val[0]	exp[0]	en[0]	bytes[0]
+-[E][esp32-hal-i2c.c:243] i2cDumpCmdQueue(): [ 9]	N	RSTART	val[0]	exp[0]	en[0]	bytes[0]
+-[E][esp32-hal-i2c.c:243] i2cDumpCmdQueue(): [10]	N	RSTART	val[0]	exp[0]	en[0]	bytes[0]
+-[E][esp32-hal-i2c.c:243] i2cDumpCmdQueue(): [11]	N	RSTART	val[0]	exp[0]	en[0]	bytes[0]
+-[E][esp32-hal-i2c.c:243] i2cDumpCmdQueue(): [12]	N	RSTART	val[0]	exp[0]	en[0]	bytes[0]
+-[E][esp32-hal-i2c.c:243] i2cDumpCmdQueue(): [13]	N	RSTART	val[0]	exp[0]	en[0]	bytes[0]
+-[E][esp32-hal-i2c.c:243] i2cDumpCmdQueue(): [14]	N	RSTART	val[0]	exp[0]	en[0]	bytes[0]
+-[E][esp32-hal-i2c.c:243] i2cDumpCmdQueue(): [15]	N	RSTART	val[0]	exp[0]	en[0]	bytes[0]
+-[I][esp32-hal-i2c.c:385] i2cDumpStatus(): ack(0) sl_rw(0) to(0) arb(0) busy(0) sl(1) trans(0) rx(0) tx(0) sclMain(5) scl(6)
+-[I][esp32-hal-i2c.c:424] i2cDumpFifo(): WRITE 0x68   0 
+-[I][esp32-hal-i2c.c:424] i2cDumpFifo(): READ  0x68
+-```
+-## Explaination of log output
+-### DumpI2c
+-```
+-[I][esp32-hal-i2c.c:437] i2cTriggerDumps(): after ProcQueue
+-[E][esp32-hal-i2c.c:318] i2cDumpI2c(): i2c=0x3ffbdc78
+-[I][esp32-hal-i2c.c:319] i2cDumpI2c(): dev=0x60013000 date=0x16042000
+-[I][esp32-hal-i2c.c:321] i2cDumpI2c(): lock=0x3ffb843c
+-[I][esp32-hal-i2c.c:323] i2cDumpI2c(): num=0
+-[I][esp32-hal-i2c.c:324] i2cDumpI2c(): mode=1
+-[I][esp32-hal-i2c.c:325] i2cDumpI2c(): stage=3
+-[I][esp32-hal-i2c.c:326] i2cDumpI2c(): error=1
+-[I][esp32-hal-i2c.c:327] i2cDumpI2c(): event=0x3ffb85c4 bits=10
+-[I][esp32-hal-i2c.c:328] i2cDumpI2c(): intr_handle=0x3ffb85f4
+-[I][esp32-hal-i2c.c:329] i2cDumpI2c(): dq=0x3ffb858c
+-[I][esp32-hal-i2c.c:330] i2cDumpI2c(): queueCount=2
+-[I][esp32-hal-i2c.c:331] i2cDumpI2c(): queuePos=1
+-[I][esp32-hal-i2c.c:332] i2cDumpI2c(): errorByteCnt=0
+-[I][esp32-hal-i2c.c:333] i2cDumpI2c(): errorQueue=0
+-[I][esp32-hal-i2c.c:334] i2cDumpI2c(): debugFlags=0x001F0000
+-```
+-variable | description
+----- | ----
+-**i2c** | *memory address for control block*
+-**dev** | *memory address for access to i2c peripheral registers*
+-**date** | *revision date of peripheral silicon 2016, 42 week*
+-**lock** | *hal lock handle*
+-**num** | *0,1 which peripheral is being controlled*
+-**mode** | *configuration of driver 0=none, 1=MASTER, 2=SLAVE, 3=MASTER and SLAVE*
+-**stage** | *internal STATE of driver 0=not configured, 1=startup, 2=running, 3=done*
+-**error** | *internal ERROR status 0=not configured, 1=ok, 2=error, 3=address NAK, 4=data NAK, 5=arbitration loss, 6=timeout*
+-**event** | *handle for interprocess FreeRTOS eventSemaphore for communication between ISR and APP*
+-**intr_handle** | *FreeRTOS handle for allocated interrupt*
+-**dq** | *memory address for data queue control block*
+-**queueCount** | *number of data operations in queue control block*
+-**queuePos** | *last executed data block*
+-**errorByteCnt** | *position in current data block when error occured -1=address byte*
+-**errorQueue** | *queue that was executing when error occurred*
+-**debugFlags** | *current specified error bits*
+-
+-### DQ data
+-```
+-[I][esp32-hal-i2c.c:288] i2cDumpDqData(): [0] 7bit 68 W  buf@=0x3ffc04b2, len=1, pos=1, ctrl=11101
+-[I][esp32-hal-i2c.c:306] i2cDumpDqData(): 0x0000: .                                00 
+-[I][esp32-hal-i2c.c:288] i2cDumpDqData(): [1] 7bit 68 R STOP buf@=0x3ffc042c, len=8, pos=8, ctrl=11111
+-[I][esp32-hal-i2c.c:306] i2cDumpDqData(): 0x0000: 5P......                         35 50 07 06 13 09 18 00 
+-```
+-variable | description
+---- | ---
+-**[n]** | *index of data queue element*
+-**i2c address** | *7bit= 7bit i2c slave address, 10bit= 10bit i2c slave address*
+-**direction** | *W=Write, R=READ*
+-**STOP** | *command issued a I2C STOP, else if blank, a RESTART was issued by next dq element.*
+-**buf@** | *pointer to data buffer*
+-**len** | *length of data buffer*
+-**pos** | *last position used in buffer*
+-**ctrl** | *bit field for data queue control, this bits describe if all necessary commands have been added to peripheral command buffer. in order(START,ADDRESS_Write,DATA,STOP,ADDRESS_value*
+-**0xnnnn** | *data buffer content, displayable followed by HEX, 32 bytes on a line.*
+- 
+-### DumpInts
+-```
+-[I][esp32-hal-i2c.c:346] i2cDumpInts(): 0 row	count	INTR	TX	RX	Tick 
+-[I][esp32-hal-i2c.c:350] i2cDumpInts(): [01]	0x0001	0x0002	0x0003	0x0000	0x000073d5
+-[I][esp32-hal-i2c.c:350] i2cDumpInts(): [02]	0x0001	0x0200	0x0000	0x0000	0x000073d5
+-[I][esp32-hal-i2c.c:350] i2cDumpInts(): [03]	0x0001	0x0080	0x0000	0x0008	0x000073d6
+-```
+-variable | description
+----- | ----
+-**row** | *array index*
+-**count** | *number of consecutive, duplicate interrupts*
+-**INTR** | *bit value of active interrupt (from ..\esp32\tools\sdk\include\soc\soc\i2c_struct.h)*
+-**TX** | *number of bytes added to txFifo*
+-**RX** | *number of bytes read from rxFifo*
+-**Tick** | *current tick counter from xTaskGetTickCountFromISR()*
+-
+-### DumpCmdQueue
+-```
+-[E][esp32-hal-i2c.c:243] i2cDumpCmdQueue(): [ 0]	Y	RSTART	val[0]	exp[0]	en[0]	bytes[0]
+-[E][esp32-hal-i2c.c:243] i2cDumpCmdQueue(): [ 1]	Y	WRITE	val[0]	exp[0]	en[1]	bytes[1]
+-[E][esp32-hal-i2c.c:243] i2cDumpCmdQueue(): [ 2]	Y	WRITE	val[0]	exp[0]	en[1]	bytes[1]
+-[E][esp32-hal-i2c.c:243] i2cDumpCmdQueue(): [ 3]	Y	RSTART	val[0]	exp[0]	en[0]	bytes[0]
+-[E][esp32-hal-i2c.c:243] i2cDumpCmdQueue(): [ 4]	Y	WRITE	val[0]	exp[0]	en[1]	bytes[1]
+-[E][esp32-hal-i2c.c:243] i2cDumpCmdQueue(): [ 5]	Y	READ	val[0]	exp[0]	en[0]	bytes[7]
+-[E][esp32-hal-i2c.c:243] i2cDumpCmdQueue(): [ 6]	Y	READ	val[1]	exp[0]	en[0]	bytes[1]
+-[E][esp32-hal-i2c.c:243] i2cDumpCmdQueue(): [ 7]	Y	STOP	val[0]	exp[0]	en[0]	bytes[0]
+-[E][esp32-hal-i2c.c:243] i2cDumpCmdQueue(): [ 8]	N	RSTART	val[0]	exp[0]	en[0]	bytes[0]
+-[E][esp32-hal-i2c.c:243] i2cDumpCmdQueue(): [ 9]	N	RSTART	val[0]	exp[0]	en[0]	bytes[0]
+-[E][esp32-hal-i2c.c:243] i2cDumpCmdQueue(): [10]	N	RSTART	val[0]	exp[0]	en[0]	bytes[0]
+-[E][esp32-hal-i2c.c:243] i2cDumpCmdQueue(): [11]	N	RSTART	val[0]	exp[0]	en[0]	bytes[0]
+-[E][esp32-hal-i2c.c:243] i2cDumpCmdQueue(): [12]	N	RSTART	val[0]	exp[0]	en[0]	bytes[0]
+-[E][esp32-hal-i2c.c:243] i2cDumpCmdQueue(): [13]	N	RSTART	val[0]	exp[0]	en[0]	bytes[0]
+-[E][esp32-hal-i2c.c:243] i2cDumpCmdQueue(): [14]	N	RSTART	val[0]	exp[0]	en[0]	bytes[0]
+-[E][esp32-hal-i2c.c:243] i2cDumpCmdQueue(): [15]	N	RSTART	val[0]	exp[0]	en[0]	bytes[0]
+-```
+-Column | description
+----- | ----
+-**command** | *RSTART= generate i2c START sequence, WRITE= output byte(s), READ= input byte(s), STOP= generate i2c STOP sequence, END= continuation flag for peripheral to pause execution waiting for a refilled command list*
+-**val** | *value for ACK bit, 0 = LOW, 1= HIGH*
+-**exp** | *test of ACK bit 0=no, 1=yes*
+-**en** | *output of val, 0=no, 1=yes*
+-**bytes** | *number of byte to send(WRITE) or receive(READ) 1..255*
+- 
+-### DumpStatus
+-```
+-[I][esp32-hal-i2c.c:385] i2cDumpStatus(): ack(0) sl_rw(0) to(0) arb(0) busy(0) sl(1) trans(0) rx(0) tx(0) sclMain(5) scl(6)
+-```
+-variable | description
+----- | ----
+-**ack** | *last value for ACK bit*
+-**sl_rw** | *mode for SLAVE operation 0=write, 1=read*
+-**to** | *timeout*
+-**arb** | *arbitration loss*
+-**busy** | *bus is inuse by other Master, or SLAVE is holding SCL,SDA*
+-**sl** | *last address on bus was equal to slave_addr*
+-**trans** | *a byte has moved though peripheral*
+-**rx** | *count of bytes in rxFifo*
+-**tx** | *count of bytes in txFifo*
+-**sclMain** | *state machine for i2c module.  0: SCL_MAIN_IDLE,  1: SCL_ADDRESS_SHIFT, 2: SCL_ACK_ADDRESS, 3: SCL_RX_DATA, 4: SCL_TX_DATA, 5: SCL_SEND_ACK, 6 :SCL_WAIT_ACK*
+-**scl** | *SCL clock state. 0: SCL_IDLE, 1: SCL_START, 2: SCL_LOW_EDGE, 3: SCL_LOW, 4: SCL_HIGH_EDGE, 5: SCL_HIGH, 6:SCL_STOP*
+-
+-### DumpFifo
+-```
+-[I][esp32-hal-i2c.c:424] i2cDumpFifo(): WRITE 0x68   0 
+-[I][esp32-hal-i2c.c:424] i2cDumpFifo(): READ  0x68
+-```
+-Mode | datavalues
+---- | ---
+-**WRITE** | the following bytes added to the txFifo are in response to a WRITE command
+-**READ** | the following bytes added to the txFifo are in response to a READ command
+-
+diff --git a/libraries/Wire/keywords.txt b/libraries/Wire/keywords.txt
+deleted file mode 100644
+index 3344011d..00000000
+--- a/libraries/Wire/keywords.txt
++++ /dev/null
+@@ -1,33 +0,0 @@
+-#######################################
+-# Syntax Coloring Map For Wire
+-#######################################
+-
+-#######################################
+-# Datatypes (KEYWORD1)
+-#######################################
+-
+-#######################################
+-# Methods and Functions (KEYWORD2)
+-#######################################
+-
+-begin	KEYWORD2
+-setClock	KEYWORD2
+-setClockStretchLimit	KEYWORD2
+-beginTransmission	KEYWORD2
+-endTransmission	KEYWORD2
+-requestFrom	KEYWORD2
+-send	KEYWORD2
+-receive	KEYWORD2
+-onReceive	KEYWORD2
+-onRequest	KEYWORD2
+-
+-#######################################
+-# Instances (KEYWORD2)
+-#######################################
+-
+-Wire	KEYWORD2
+-
+-#######################################
+-# Constants (LITERAL1)
+-#######################################
+-
+diff --git a/libraries/Wire/library.properties b/libraries/Wire/library.properties
+deleted file mode 100644
+index f97fa0d0..00000000
+--- a/libraries/Wire/library.properties
++++ /dev/null
+@@ -1,9 +0,0 @@
+-name=Wire
+-version=2.0.0
+-author=Hristo Gochkov
+-maintainer=Hristo Gochkov <hristo@espressif.com>
+-sentence=Allows the communication between devices or sensors connected via Two Wire Interface Bus. For esp8266 boards. 
+-paragraph=
+-category=Signal Input/Output
+-url=http://arduino.cc/en/Reference/Wire
+-architectures=esp32
+diff --git a/libraries/Wire/src/Wire.cpp b/libraries/Wire/src/Wire.cpp
+deleted file mode 100644
+index 3acea70a..00000000
+--- a/libraries/Wire/src/Wire.cpp
++++ /dev/null
+@@ -1,388 +0,0 @@
+-/*
+-  TwoWire.cpp - TWI/I2C library for Arduino & Wiring
+-  Copyright (c) 2006 Nicholas Zambetti.  All right reserved.
+-
+-  This library is free software; you can redistribute it and/or
+-  modify it under the terms of the GNU Lesser General Public
+-  License as published by the Free Software Foundation; either
+-  version 2.1 of the License, or (at your option) any later version.
+-
+-  This library is distributed in the hope that it will be useful,
+-  but WITHOUT ANY WARRANTY; without even the implied warranty of
+-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+-  Lesser General Public License for more details.
+-
+-  You should have received a copy of the GNU Lesser General Public
+-  License along with this library; if not, write to the Free Software
+-  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+-
+-  Modified 2012 by Todd Krein (todd@krein.org) to implement repeated starts
+-  Modified December 2014 by Ivan Grokhotkov (ivan@esp8266.com) - esp8266 support
+-  Modified April 2015 by Hrsto Gochkov (ficeto@ficeto.com) - alternative esp8266 support
+-  Modified Nov 2017 by Chuck Todd (ctodd@cableone.net) - ESP32 ISR Support
+- */
+-
+-extern "C" {
+-#include <stdlib.h>
+-#include <string.h>
+-#include <inttypes.h>
+-}
+-
+-#include "esp32-hal-i2c.h"
+-#include "Wire.h"
+-#include "Arduino.h"
+-
+-TwoWire::TwoWire(uint8_t bus_num)
+-    :num(bus_num & 1)
+-    ,sda(-1)
+-    ,scl(-1)
+-    ,i2c(NULL)
+-    ,rxIndex(0)
+-    ,rxLength(0)
+-    ,rxQueued(0)
+-    ,txIndex(0)
+-    ,txLength(0)
+-    ,txAddress(0)
+-    ,txQueued(0)
+-    ,transmitting(0)
+-    ,last_error(I2C_ERROR_OK)
+-    ,_timeOutMillis(50)
+-{}
+-
+-TwoWire::~TwoWire()
+-{
+-    flush();
+-    if(i2c) {
+-        i2cRelease(i2c);
+-        i2c=NULL;
+-    }
+-}
+-
+-bool TwoWire::setPins(int sdaPin, int sclPin)
+-{
+-    if(i2c) {
+-        log_e("can not set pins if begin was already called");
+-        return false;
+-    }
+-    sda = sdaPin;
+-    scl = sclPin;
+-    return true;
+-}
+-
+-bool TwoWire::begin(int sdaPin, int sclPin, uint32_t frequency)
+-{
+-    if(sdaPin < 0) { // default param passed
+-        if(num == 0) {
+-            if(sda==-1) {
+-                sdaPin = SDA;    //use Default Pin
+-            } else {
+-                sdaPin = sda;    // reuse prior pin
+-            }
+-        } else {
+-            if(sda==-1) {
+-                log_e("no Default SDA Pin for Second Peripheral");
+-                return false; //no Default pin for Second Peripheral
+-            } else {
+-                sdaPin = sda;    // reuse prior pin
+-            }
+-        }
+-    }
+-
+-    if(sclPin < 0) { // default param passed
+-        if(num == 0) {
+-            if(scl == -1) {
+-                sclPin = SCL;    // use Default pin
+-            } else {
+-                sclPin = scl;    // reuse prior pin
+-            }
+-        } else {
+-            if(scl == -1) {
+-                log_e("no Default SCL Pin for Second Peripheral");
+-                return false; //no Default pin for Second Peripheral
+-            } else {
+-                sclPin = scl;    // reuse prior pin
+-            }
+-        }
+-    }
+-
+-    sda = sdaPin;
+-    scl = sclPin;
+-    i2c = i2cInit(num, sda, scl, frequency);
+-    if(!i2c) {
+-        return false;
+-    }
+-
+-    flush();
+-    return true;
+-
+-}
+-
+-void TwoWire::setTimeOut(uint16_t timeOutMillis)
+-{
+-    _timeOutMillis = timeOutMillis;
+-}
+-
+-uint16_t TwoWire::getTimeOut()
+-{
+-    return _timeOutMillis;
+-}
+-
+-void TwoWire::setClock(uint32_t frequency)
+-{
+-#if CONFIG_IDF_TARGET_ESP32S2
+-    i2c = i2cInit(num, sda, scl, frequency);
+-    if(!i2c) {
+-        return;
+-    }
+-#endif
+-    i2cSetFrequency(i2c, frequency);
+-}
+-
+-size_t TwoWire::getClock()
+-{
+-    return i2cGetFrequency(i2c);
+-}
+-
+-/* stickBreaker Nov 2017 ISR, and bigblock 64k-1
+- */
+-i2c_err_t TwoWire::writeTransmission(uint16_t address, uint8_t *buff, uint16_t size, bool sendStop)
+-{
+-    last_error = i2cWrite(i2c, address, buff, size, sendStop, _timeOutMillis);
+-    return last_error;
+-}
+-
+-i2c_err_t TwoWire::readTransmission(uint16_t address, uint8_t *buff, uint16_t size, bool sendStop, uint32_t *readCount)
+-{
+-    last_error = i2cRead(i2c, address, buff, size, sendStop, _timeOutMillis, readCount);
+-    return last_error;
+-}
+-
+-void TwoWire::beginTransmission(uint16_t address)
+-{
+-    transmitting = 1;
+-    txAddress = address;
+-    txIndex = txQueued; // allow multiple beginTransmission(),write(),endTransmission(false) until endTransmission(true)
+-    txLength = txQueued;
+-    last_error = I2C_ERROR_OK;
+-}
+-
+-/*stickbreaker isr
+- */
+-uint8_t TwoWire::endTransmission(bool sendStop)  // Assumes Wire.beginTransaction(), Wire.write()
+-{
+-    if(transmitting == 1) {
+-            // txlength is howmany bytes in txbuffer have been use
+-        last_error = writeTransmission(txAddress, &txBuffer[txQueued], txLength - txQueued, sendStop);
+-        if(last_error == I2C_ERROR_CONTINUE){
+-            txQueued = txLength;
+-        } else if( last_error == I2C_ERROR_OK){
+-          rxIndex = 0;
+-          rxLength = rxQueued;
+-          rxQueued = 0;
+-          txQueued = 0; // the SendStop=true will restart all Queueing
+-        }
+-    } else {
+-        last_error = I2C_ERROR_NO_BEGIN;
+-        flush();
+-    }
+-    txIndex = 0;
+-    txLength = 0;
+-    transmitting = 0;
+-    return (last_error == I2C_ERROR_CONTINUE)?I2C_ERROR_OK:last_error; // Don't return Continue for compatibility.
+-}
+-
+-/* @stickBreaker 11/2017 fix for ReSTART timeout, ISR
+- */
+-uint8_t TwoWire::requestFrom(uint16_t address, uint8_t size, bool sendStop)
+-{
+-    //use internal Wire rxBuffer, multiple requestFrom()'s may be pending, try to share rxBuffer
+-    uint32_t cnt = rxQueued; // currently queued reads, next available position in rxBuffer
+-    if(cnt < (I2C_BUFFER_LENGTH-1) && (size + cnt) <= I2C_BUFFER_LENGTH) { // any room left in rxBuffer
+-        rxQueued += size;
+-    } else { // no room to receive more!
+-        log_e("rxBuff overflow %d", cnt + size);
+-        cnt = 0;
+-        last_error = I2C_ERROR_MEMORY;
+-        flush();
+-        return cnt;
+-    }
+-
+-    last_error = readTransmission(address, &rxBuffer[cnt], size, sendStop, &cnt);
+-    rxIndex = 0;
+-  
+-    rxLength = cnt;
+-  
+-    if( last_error != I2C_ERROR_CONTINUE){ // not a  buffered ReSTART operation
+-      // so this operation actually moved data, queuing is done.
+-        rxQueued = 0;
+-        txQueued = 0; // the SendStop=true will restart all Queueing or error condition
+-    }
+-  
+-    if(last_error != I2C_ERROR_OK){ // ReSTART on read does not return any data
+-        cnt = 0;
+-    }
+-  
+-    return cnt;
+-}
+-
+-size_t TwoWire::write(uint8_t data)
+-{
+-    if(transmitting) {
+-        if(txLength >= I2C_BUFFER_LENGTH) {
+-            last_error = I2C_ERROR_MEMORY;
+-            return 0;
+-        }
+-        txBuffer[txIndex] = data;
+-        ++txIndex;
+-        txLength = txIndex;
+-        return 1;
+-    }
+-    last_error = I2C_ERROR_NO_BEGIN; // no begin, not transmitting
+-    return 0;
+-}
+-
+-size_t TwoWire::write(const uint8_t *data, size_t quantity)
+-{
+-    for(size_t i = 0; i < quantity; ++i) {
+-        if(!write(data[i])) {
+-            return i;
+-        }
+-    }
+-    return quantity;
+-
+-}
+-
+-int TwoWire::available(void)
+-{
+-    int result = rxLength - rxIndex;
+-    return result;
+-}
+-
+-int TwoWire::read(void)
+-{
+-    int value = -1;
+-    if(rxIndex < rxLength) {
+-        value = rxBuffer[rxIndex];
+-        ++rxIndex;
+-    }
+-    return value;
+-}
+-
+-int TwoWire::peek(void)
+-{
+-    int value = -1;
+-    if(rxIndex < rxLength) {
+-        value = rxBuffer[rxIndex];
+-    }
+-    return value;
+-}
+-
+-void TwoWire::flush(void)
+-{
+-    rxIndex = 0;
+-    rxLength = 0;
+-    txIndex = 0;
+-    txLength = 0;
+-    rxQueued = 0;
+-    txQueued = 0;
+-    i2cFlush(i2c); // cleanup
+-}
+-
+-uint8_t TwoWire::requestFrom(uint8_t address, uint8_t quantity, uint8_t sendStop)
+-{
+-    return requestFrom(static_cast<uint16_t>(address), static_cast<size_t>(quantity), static_cast<bool>(sendStop));
+-}
+-
+-uint8_t TwoWire::requestFrom(uint16_t address, uint8_t quantity, uint8_t sendStop)
+-{
+-    return requestFrom(address, static_cast<size_t>(quantity), static_cast<bool>(sendStop));
+-}
+-
+-uint8_t TwoWire::requestFrom(uint8_t address, uint8_t quantity)
+-{
+-    return requestFrom(static_cast<uint16_t>(address), static_cast<size_t>(quantity), true);
+-}
+-
+-uint8_t TwoWire::requestFrom(uint16_t address, uint8_t quantity)
+-{
+-    return requestFrom(address, static_cast<size_t>(quantity), true);
+-}
+-
+-uint8_t TwoWire::requestFrom(int address, int quantity)
+-{
+-    return requestFrom(static_cast<uint16_t>(address), static_cast<size_t>(quantity), true);
+-}
+-
+-uint8_t TwoWire::requestFrom(int address, int quantity, int sendStop)
+-{
+-    return static_cast<uint8_t>(requestFrom(static_cast<uint16_t>(address), static_cast<size_t>(quantity), static_cast<bool>(sendStop)));
+-}
+-
+-void TwoWire::beginTransmission(int address)
+-{
+-    beginTransmission(static_cast<uint16_t>(address));
+-}
+-
+-void TwoWire::beginTransmission(uint8_t address)
+-{
+-    beginTransmission(static_cast<uint16_t>(address));
+-}
+-
+-uint8_t TwoWire::endTransmission(void)
+-{
+-    return endTransmission(true);
+-}
+-
+-/* stickbreaker Nov2017 better error reporting
+- */
+-uint8_t TwoWire::lastError()
+-{
+-    return (uint8_t)last_error;
+-}
+-
+-const char ERRORTEXT[] =
+-    "OK\0"
+-    "DEVICE\0"
+-    "ACK\0"
+-    "TIMEOUT\0"
+-    "BUS\0"
+-    "BUSY\0"
+-    "MEMORY\0"
+-    "CONTINUE\0"
+-    "NO_BEGIN\0"
+-    "\0";
+-
+-
+-char * TwoWire::getErrorText(uint8_t err)
+-{
+-    uint8_t t = 0;
+-    bool found = false;
+-    char * message = (char*)&ERRORTEXT;
+-
+-    while(!found && message[0]) {
+-        found = t == err;
+-        if(!found) {
+-            message = message + strlen(message) + 1;
+-            t++;
+-        }
+-    }
+-    if(!found) {
+-        return NULL;
+-    } else {
+-        return message;
+-    }
+-}
+-
+-/*stickbreaker Dump i2c Interrupt buffer, i2c isr Debugging
+- */
+- 
+-uint32_t TwoWire::setDebugFlags( uint32_t setBits, uint32_t resetBits){
+-  return i2cDebug(i2c,setBits,resetBits);
+-}
+-
+-bool TwoWire::busy(void){
+-  return ((i2cGetStatus(i2c) & 16 )==16);
+-}
+-
+-TwoWire Wire = TwoWire(0);
+-TwoWire Wire1 = TwoWire(1);
+diff --git a/libraries/Wire/src/Wire.h b/libraries/Wire/src/Wire.h
+deleted file mode 100644
+index 3cee7310..00000000
+--- a/libraries/Wire/src/Wire.h
++++ /dev/null
+@@ -1,155 +0,0 @@
+-/*
+-  TwoWire.h - TWI/I2C library for Arduino & Wiring
+-  Copyright (c) 2006 Nicholas Zambetti.  All right reserved.
+-
+-  This library is free software; you can redistribute it and/or
+-  modify it under the terms of the GNU Lesser General Public
+-  License as published by the Free Software Foundation; either
+-  version 2.1 of the License, or (at your option) any later version.
+-
+-  This library is distributed in the hope that it will be useful,
+-  but WITHOUT ANY WARRANTY; without even the implied warranty of
+-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+-  Lesser General Public License for more details.
+-
+-  You should have received a copy of the GNU Lesser General Public
+-  License along with this library; if not, write to the Free Software
+-  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+-
+-  Modified 2012 by Todd Krein (todd@krein.org) to implement repeated starts
+-  Modified December 2014 by Ivan Grokhotkov (ivan@esp8266.com) - esp8266 support
+-  Modified April 2015 by Hrsto Gochkov (ficeto@ficeto.com) - alternative esp8266 support
+-  Modified November 2017 by Chuck Todd <stickbreaker on GitHub> to use ISR and increase stability.
+-*/
+-
+-#ifndef TwoWire_h
+-#define TwoWire_h
+-
+-#include <esp32-hal.h>
+-#include "freertos/FreeRTOS.h"
+-#include "freertos/queue.h"
+-#include "Stream.h"
+-
+-#define STICKBREAKER 'V1.1.0'
+-#ifndef I2C_BUFFER_LENGTH
+-    #define I2C_BUFFER_LENGTH 128
+-#endif
+-typedef void(*user_onRequest)(void);
+-typedef void(*user_onReceive)(uint8_t*, int);
+-
+-class TwoWire: public Stream
+-{
+-protected:
+-    uint8_t num;
+-    int8_t sda;
+-    int8_t scl;
+-    i2c_t * i2c;
+-
+-    uint8_t rxBuffer[I2C_BUFFER_LENGTH];
+-    uint16_t rxIndex;
+-    uint16_t rxLength;
+-    uint16_t rxQueued; //@stickBreaker
+-
+-    uint8_t txBuffer[I2C_BUFFER_LENGTH];
+-    uint16_t txIndex;
+-    uint16_t txLength;
+-    uint16_t txAddress;
+-    uint16_t txQueued; //@stickbreaker
+-
+-    uint8_t transmitting;
+-    /* slave Mode, not yet Stickbreaker
+-            static user_onRequest uReq[2];
+-            static user_onReceive uRcv[2];
+-        void onRequestService(void);
+-        void onReceiveService(uint8_t*, int);
+-    */
+-    i2c_err_t last_error; // @stickBreaker from esp32-hal-i2c.h
+-    uint16_t _timeOutMillis;
+-
+-public:
+-    TwoWire(uint8_t bus_num);
+-    ~TwoWire();
+-    
+-    //call setPins() first, so that begin() can be called without arguments from libraries
+-    bool setPins(int sda, int scl);
+-    
+-    bool begin(int sda=-1, int scl=-1, uint32_t frequency=0); // returns true, if successful init of i2c bus
+-      // calling will attemp to recover hung bus
+-
+-    void setClock(uint32_t frequency); // change bus clock without initing hardware
+-    size_t getClock(); // current bus clock rate in hz
+-
+-    void setTimeOut(uint16_t timeOutMillis); // default timeout of i2c transactions is 50ms
+-    uint16_t getTimeOut();
+-
+-    uint8_t lastError();
+-    char * getErrorText(uint8_t err);
+-
+-    //@stickBreaker for big blocks and ISR model
+-    i2c_err_t writeTransmission(uint16_t address, uint8_t* buff, uint16_t size, bool sendStop=true);
+-    i2c_err_t readTransmission(uint16_t address, uint8_t* buff, uint16_t size, bool sendStop=true, uint32_t *readCount=NULL);
+-
+-    void beginTransmission(uint16_t address);
+-    void beginTransmission(uint8_t address);
+-    void beginTransmission(int address);
+-
+-    uint8_t endTransmission(bool sendStop);
+-    uint8_t endTransmission(void);
+-
+-    uint8_t requestFrom(uint16_t address, uint8_t size, bool sendStop);
+-    uint8_t requestFrom(uint16_t address, uint8_t size, uint8_t sendStop);
+-    uint8_t requestFrom(uint16_t address, uint8_t size);
+-    uint8_t requestFrom(uint8_t address, uint8_t size, uint8_t sendStop);
+-    uint8_t requestFrom(uint8_t address, uint8_t size);
+-    uint8_t requestFrom(int address, int size, int sendStop);
+-    uint8_t requestFrom(int address, int size);
+-
+-    size_t write(uint8_t);
+-    size_t write(const uint8_t *, size_t);
+-    int available(void);
+-    int read(void);
+-    int peek(void);
+-    void flush(void);
+-
+-    inline size_t write(const char * s)
+-    {
+-        return write((uint8_t*) s, strlen(s));
+-    }
+-    inline size_t write(unsigned long n)
+-    {
+-        return write((uint8_t)n);
+-    }
+-    inline size_t write(long n)
+-    {
+-        return write((uint8_t)n);
+-    }
+-    inline size_t write(unsigned int n)
+-    {
+-        return write((uint8_t)n);
+-    }
+-    inline size_t write(int n)
+-    {
+-        return write((uint8_t)n);
+-    }
+-
+-    void onReceive( void (*)(int) );
+-    void onRequest( void (*)(void) );
+-
+-    uint32_t setDebugFlags( uint32_t setBits, uint32_t resetBits);
+-    bool busy();
+-};
+-
+-extern TwoWire Wire;
+-extern TwoWire Wire1;
+-
+-
+-/*
+-V1.1.0 08JAN2019 Support CPU Clock frequency changes
+-V1.0.2 30NOV2018 stop returning I2C_ERROR_CONTINUE on ReSTART operations, regain compatibility with Arduino libs
+-V1.0.1 02AUG2018 First Fix after release, Correct ReSTART handling, change Debug control, change begin()
+-  to a function, this allow reporting if bus cannot be initialized, Wire.begin() can be used to recover
+-  a hung bus busy condition.
+-V0.2.2 13APR2018 preserve custom SCL,SDA,Frequency when no parameters passed to begin()
+-V0.2.1 15MAR2018 Hardware reset, Glitch prevention, adding destructor for second i2c testing
+-*/
+-#endif

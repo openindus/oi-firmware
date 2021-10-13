@@ -1,22 +1,7 @@
-#include "OICAN.h"
+#include "CAN.h"
 
 void OICAN::begin(unsigned long baudrate, bool extended_mode, spi_host_device_t host, gpio_num_t cs, gpio_num_t interrupt)
 {
-    //HARDWARE RESET////////////////////////////////////////////////////////
-    // ioex_config_t io_conf;
-
-    // io_conf.mode = IOEX_OUTPUT;
-    // io_conf.pull_mode = IOEX_FLOATING;
-    // io_conf.interrupt_type = IOEX_INTERRUPT_DISABLE;
-    // io_conf.pin_bit_mask = (1ULL<<IOEX_NUM_17/*IOEX_NUM_20*/);
-    // ioex_config(_ioex, &io_conf);
-    // ioex_set_level(_ioex, IOEX_NUM_17/*IOEX_NUM_20*/, HIGH);
-    // vTaskDelay(10);
-    // ioex_set_level(_ioex, IOEX_NUM_17/*IOEX_NUM_20*/, LOW);
-    // vTaskDelay(10);
-    // ioex_set_level(_ioex, IOEX_NUM_17/*IOEX_NUM_20*/, HIGH);
-    //////////////////////////////////////////////////////////////////////////
-
     MCP25625_DeviceConfig_t deviceConfig;
     deviceConfig.spi_host = host;
     deviceConfig.spi_pin_cs = cs;
