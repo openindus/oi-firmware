@@ -84,6 +84,11 @@ public:
      */
     void init();
 
+     inline void setSwitchLogic(bool no_logic)
+    {
+        _no_logic = no_logic;
+    }
+
     inline int getEtorLevel(Etor_t etor) {
         return gpio_get_level(_etor[etor]);
     }
@@ -452,6 +457,7 @@ private:
 
     static int _limitSwitchToMotor[4];
     static bool _limitSwitchToNotify[4];
+    static bool _no_logic; 
 
     static const gpio_num_t _etor[4];
 

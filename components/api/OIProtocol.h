@@ -114,6 +114,7 @@ enum {
     CMD_SET_PARAM =                     CMD_TYPE_SET(0x1B),
     CMD_ATTACH_LIMIT_SWITCH =           CMD_TYPE_SET(0x1C),
     CMD_DETACH_LIMIT_SWITCH =           CMD_TYPE_SET(0x1D),
+    CMD_SET_LOGIC_SWITCH =              CMD_TYPE_SET(0x1E),
     
     /* get */
     CMD_CHECK_BUSY_HW =                 CMD_TYPE_GET(0x00),    
