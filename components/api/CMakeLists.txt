@@ -12,9 +12,6 @@ set(COMPONENT_SRCS
     "OIStepper.cpp"
     "OIMixed.cpp"
     "OIRelay.cpp"
-    "OIRS.cpp"
-    "OICAN.cpp"
-    "OIWire.cpp"
 )
 
 set(COMPONENT_INCLUDE_DIRS
