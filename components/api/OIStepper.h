@@ -482,6 +482,15 @@ public:
     }
 
     /**
+    * @brief Set switch logic. Default is normally open (NO).
+    * @param[in] no_logic True for normally open logic, false to set normally closed logic.
+    */
+    inline void setSwitchLogic(bool no_logic)
+    {
+        setMessage(OIMessage(CMD_SET_LOGIC_SWITCH, _senderId, static_cast<uint16_t>(no_logic)));
+    }
+
+    /**
     * @brief Set an Etor connected to a limit switch to stop a motor, the user can register a callback when an interrupt occurs
     * @param[in] etor ETOR to attach interrupt
     * @param[in] deviceId (from 0 to MAX_NUMBER_OF_DEVICES-1)
