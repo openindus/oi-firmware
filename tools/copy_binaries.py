@@ -23,10 +23,10 @@ def copy_binaries(source, target, env):
 
     # Move binaries
     try:
-        shutil.copyfile(join(BUILD_DIR, "firmware.bin"), join(oi_bin_dir, PIOENV + "-firmware-" + oi_tag + ".bin"))
-        shutil.copyfile(join(BUILD_DIR, "ota_data_initial.bin"), join(oi_bin_dir, PIOENV + "-ota_data_initial-" + oi_tag + ".bin"))
-        shutil.copyfile(join(BUILD_DIR, "bootloader.bin"), join(oi_bin_dir, PIOENV + "-bootloader-" + oi_tag + ".bin"))
-        shutil.copyfile(join(BUILD_DIR, "partitions.bin"), join(oi_bin_dir, PIOENV + "-partitions-" + oi_tag + ".bin"))
+        shutil.copyfile(join(BUILD_DIR, "firmware.bin"), join(oi_bin_dir, PIOENV + "_firmware-" + oi_tag + ".bin"))
+        shutil.copyfile(join(BUILD_DIR, "ota_data_initial.bin"), join(oi_bin_dir, PIOENV + "_ota_data_initial-" + oi_tag + ".bin"))
+        shutil.copyfile(join(BUILD_DIR, "bootloader.bin"), join(oi_bin_dir, PIOENV + "_bootloader-" + oi_tag + ".bin"))
+        shutil.copyfile(join(BUILD_DIR, "partitions.bin"), join(oi_bin_dir, PIOENV + "_partitions-" + oi_tag + ".bin"))
         print("Copy binaries to the %s directory" % oi_bin_dir)
     except:
         print("Cannot copy binaries")
