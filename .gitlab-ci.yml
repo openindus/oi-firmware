@@ -2,11 +2,16 @@ image: python:latest
 
 stages:
   - build
-  - flash
   - test
-  - push
+  - deploy
 
-build:
+cache:
+  paths:
+    - .oi/
+    - .pio/
+    - docs/build/
+
+build:firmware:
   stage: build
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
@@ -14,26 +19,25 @@ build:
     - pip install -U platformio
     - pio platform update
   script:
+    - pio run -t clean
     - pio run -e core
-    - pio run -e discrete
-    - pio run -e discreteve
-    - pio run -e stepper
-    - pio run -e stepperve
-    - pio run -e mixed
-    - pio run -e relayhp
-    - pio run -e relaylp
-  only:
-    - master
-    - dev
+    # - pio run -e discrete
+    # - pio run -e discreteve
+    # - pio run -e stepper
+    # - pio run -e stepperve
+    # - pio run -e mixed
+    # - pio run -e relayhp
+    # - pio run -e relaylp
+  rules:
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
 
 build:examples:
   stage: build
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
   script: echo "build examples"
-  only:
-    - master
-    - dev
+  rules:
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
 
 build:docs:
   stage: build
@@ -48,52 +52,34 @@ build:docs:
     - make clean
     - doxygen doxygen/Doxyfile
     - make html
-  only:
-    - master
-    - dev
+  rules:
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
 
-flash:
-  stage: flash
-  needs:
-    - job: build
-  script: echo "pio run -e core -t upload"
-  cache:
-    paths:
-      - .pio/
-  only:
-    - master
-    - dev
-
-test:
+test:firmware:
   stage: test
   needs:
-    - job: flash
-  script: echo "pio test"
-  only:
-    - master
-    - dev
+    - job: build:firmware
+  script: 
+    - echo "pio run -t upload"
+    - echo "pio test"
+  rules:
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
 
-push:bin:
-  stage: push
+deploy:bin:
+  stage: deploy
   needs:
-    - job: test
+    - job: test:firmware
   script: 
     - lftp $OVH_URI -e "mirror --reverse --verbose -R ./.oi/bin/ ./www/oi-content/bin/; quit" -u $OVH_USERNAME,$OVH_PASSWORD
-  cache:
-    paths:
-      - .oi/
-  only:
-    - master
+  rules:
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
 
-push:docs:
-  stage: push
+deploy:docs:
+  stage: deploy
   needs:
     - job: build:docs
+    - job: build:examples
   script:
     - lftp $OVH_URI -e "mirror --reverse --verbose --delete -R ./docs/build/html/ ./www/oi-content/doc/; quit" -u $OVH_USERNAME,$OVH_PASSWORD
-  cache:
-    paths:
-      - docs/build/
-  only:
-    - master
-    - dev
+  rules:
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'

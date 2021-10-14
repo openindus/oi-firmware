@@ -12,7 +12,7 @@ def copy_binaries(source, target, env):
     with open("version.txt", "r") as f:
         oi_tag = f.readline().strip()
 
-    oi_bin_dir = join(PROJECT_DIR, ".oi", "bin", "firmware-" + oi_tag)
+    oi_bin_dir = join(PROJECT_DIR, ".oi", "bin", "oi-firmware-" + oi_tag)
 
     # Create OpenIndus bin directory
     try:
@@ -32,4 +32,4 @@ def copy_binaries(source, target, env):
         print("Cannot copy binaries")
 
 
-env.AddPostAction("buildprog", copy_binaries)
+env.AddPostAction("checkprogsize", copy_binaries)
