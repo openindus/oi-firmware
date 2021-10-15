@@ -2,11 +2,16 @@ image: python:latest
 
 stages:
   - build
-  - flash
   - test
-  - push
+  - deploy
 
-build:
+cache:
+  paths:
+    - .oi/
+    - .pio/
+    - docs/build/
+
+build:firmware:
   stage: build
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
@@ -14,6 +19,7 @@ build:
     - pip install -U platformio
     - pio platform update
   script:
+    - pio run -t clean
     - pio run -e core
     - pio run -e discrete
     - pio run -e discreteve
@@ -23,6 +29,7 @@ build:
     - pio run -e relayhp
     - pio run -e relaylp
   only:
+    - tags
     - master
     - dev
 
@@ -32,6 +39,7 @@ build:examples:
     GIT_SUBMODULE_STRATEGY: recursive
   script: echo "build examples"
   only:
+    - tags
     - master
     - dev
 
@@ -49,49 +57,48 @@ build:docs:
     - doxygen doxygen/Doxyfile
     - make html
   only:
+    - tags
     - master
     - dev
 
-flash:
-  stage: flash
-  needs:
-    - job: build
-  script: echo "pio run -e core -t upload"
-  cache:
-    paths:
-      - .pio/
-  only:
-    - master
-    - dev
-
-test:
+test:firmware:
   stage: test
   needs:
-    - job: flash
-  script: echo "pio test"
+    - job: build:firmware
+  script: 
+    - echo "pio run -t upload"
+    - echo "pio test"
   only:
-    - master
-    - dev
-
-push:bin:
-  stage: push
-  needs:
-    - job: test
-  script: echo "push binaries"
-  only:
+    - tags
     - master
 
-push:docs:
-  stage: push
+deploy:
+  stage: deploy
   needs:
-    - job: build:docs
+  - job: build:firmware
+  - job: build:examples
+  - job: build:docs
+  script: 
+    - echo "deploy"
+  only:
+    - tags
+
+deploy:bin:
+  stage: deploy
+  needs:
+    - job: deploy
+  script: 
+    - lftp ftp.openindus.com -e "mirror --reverse --verbose -R ./.oi/bin/ ./oi-content/bin/; quit" -u $FTP_USERNAME,$FTP_PASSWORD
+    - lftp $OVH_URI -e "mirror --reverse --verbose -R ./.oi/bin/ ./www/oi-content/bin/; quit" -u $OVH_USERNAME,$OVH_PASSWORD
+  only:
+    - tags
+
+deploy:docs:
+  stage: deploy
+  needs:
+    - job: deploy
   script:
-    # - lftp ftp.openindus.com -e "mirror --reverse --verbose --delete -R ./docs/build/html/ ./oi-content/doc/; quit" -u $FTP_USERNAME,$FTP_PASSWORD
+    - lftp ftp.openindus.com -e "mirror --reverse --verbose --delete -R ./docs/build/html/ ./oi-content/doc/; quit" -u $FTP_USERNAME,$FTP_PASSWORD
     - lftp $OVH_URI -e "mirror --reverse --verbose --delete -R ./docs/build/html/ ./www/oi-content/doc/; quit" -u $OVH_USERNAME,$OVH_PASSWORD
-
-  cache:
-    paths:
-      - docs/build/
   only:
-    - master
-    - dev
+    - tags
