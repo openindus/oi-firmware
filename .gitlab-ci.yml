@@ -21,23 +21,27 @@ build:firmware:
   script:
     - pio run -t clean
     - pio run -e core
-    # - pio run -e discrete
-    # - pio run -e discreteve
-    # - pio run -e stepper
-    # - pio run -e stepperve
-    # - pio run -e mixed
-    # - pio run -e relayhp
-    # - pio run -e relaylp
-  rules:
-    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
+    - pio run -e discrete
+    - pio run -e discreteve
+    - pio run -e stepper
+    - pio run -e stepperve
+    - pio run -e mixed
+    - pio run -e relayhp
+    - pio run -e relaylp
+  only:
+    - tags
+    - master
+    - dev
 
 build:examples:
   stage: build
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
   script: echo "build examples"
-  rules:
-    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
+  only:
+    - tags
+    - master
+    - dev
 
 build:docs:
   stage: build
@@ -52,8 +56,10 @@ build:docs:
     - make clean
     - doxygen doxygen/Doxyfile
     - make html
-  rules:
-    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
+  only:
+    - tags
+    - master
+    - dev
 
 test:firmware:
   stage: test
@@ -62,24 +68,37 @@ test:firmware:
   script: 
     - echo "pio run -t upload"
     - echo "pio test"
-  rules:
-    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
+  only:
+    - tags
+    - master
+
+deploy:
+  stage: deploy
+  needs:
+  - job: build:firmware
+  - job: build:examples
+  - job: build:docs
+  script: 
+    - echo "deploy"
+  only:
+    - tags
 
 deploy:bin:
   stage: deploy
   needs:
-    - job: test:firmware
+    - job: deploy
   script: 
+    - lftp ftp.openindus.com -e "mirror --reverse --verbose -R ./.oi/bin/ ./oi-content/bin/; quit" -u $FTP_USERNAME,$FTP_PASSWORD
     - lftp $OVH_URI -e "mirror --reverse --verbose -R ./.oi/bin/ ./www/oi-content/bin/; quit" -u $OVH_USERNAME,$OVH_PASSWORD
-  rules:
-    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
+  only:
+    - tags
 
 deploy:docs:
   stage: deploy
   needs:
-    - job: build:docs
-    - job: build:examples
+    - job: deploy
   script:
+    - lftp ftp.openindus.com -e "mirror --reverse --verbose --delete -R ./docs/build/html/ ./oi-content/doc/; quit" -u $FTP_USERNAME,$FTP_PASSWORD
     - lftp $OVH_URI -e "mirror --reverse --verbose --delete -R ./docs/build/html/ ./www/oi-content/doc/; quit" -u $OVH_USERNAME,$OVH_PASSWORD
-  rules:
-    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
+  only:
+    - tags
