@@ -28,20 +28,16 @@ build:firmware:
     - pio run -e mixed
     - pio run -e relayhp
     - pio run -e relaylp
-  only:
-    - tags
-    - master
-    - dev
+  rules:
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
 
 build:examples:
   stage: build
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
   script: echo "build examples"
-  only:
-    - tags
-    - master
-    - dev
+  rules:
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
 
 build:docs:
   stage: build
@@ -56,10 +52,8 @@ build:docs:
     - make clean
     - doxygen doxygen/Doxyfile
     - make html
-  only:
-    - tags
-    - master
-    - dev
+  rules:
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
 
 test:firmware:
   stage: test
@@ -68,9 +62,8 @@ test:firmware:
   script: 
     - echo "pio run -t upload"
     - echo "pio test"
-  only:
-    - tags
-    - master
+  rules:
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
 
 deploy:
   stage: deploy
@@ -80,8 +73,8 @@ deploy:
   - job: build:docs
   script: 
     - echo "deploy"
-  only:
-    - tags
+  rules:
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
 
 deploy:bin:
   stage: deploy
@@ -90,8 +83,8 @@ deploy:bin:
   script: 
     - lftp ftp.openindus.com -e "mirror --reverse --verbose -R ./.oi/bin/ ./oi-content/bin/; quit" -u $FTP_USERNAME,$FTP_PASSWORD
     - lftp $OVH_URI -e "mirror --reverse --verbose -R ./.oi/bin/ ./www/oi-content/bin/; quit" -u $OVH_USERNAME,$OVH_PASSWORD
-  only:
-    - tags
+  rules:
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
 
 deploy:docs:
   stage: deploy
@@ -100,5 +93,5 @@ deploy:docs:
   script:
     - lftp ftp.openindus.com -e "mirror --reverse --verbose --delete -R ./docs/build/html/ ./oi-content/doc/; quit" -u $FTP_USERNAME,$FTP_PASSWORD
     - lftp $OVH_URI -e "mirror --reverse --verbose --delete -R ./docs/build/html/ ./www/oi-content/doc/; quit" -u $OVH_USERNAME,$OVH_PASSWORD
-  only:
-    - tags
+  rules:
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
