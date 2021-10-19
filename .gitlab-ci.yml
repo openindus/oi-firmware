@@ -29,6 +29,7 @@ build:
     - pio run -e relayhp
     - pio run -e relaylp
   rules:
+    - if: '($CI_PIPELINE_SOURCE == "push") && ($CI_COMMIT_BRANCH == "dev")'
     - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
     - if: '($CI_COMMIT_BRANCH == "master") && ($CI_COMMIT_TAG != null)'
 
@@ -38,6 +39,7 @@ build:examples:
     GIT_SUBMODULE_STRATEGY: recursive
   script: echo "build examples"
   rules:
+    - if: '($CI_PIPELINE_SOURCE == "push") && ($CI_COMMIT_BRANCH == "dev")'
     - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
     - if: '($CI_COMMIT_BRANCH == "master") && ($CI_COMMIT_TAG != null)'
 
@@ -55,6 +57,7 @@ build:doc:
     - doxygen doxygen/Doxyfile
     - make html
   rules:
+    - if: '($CI_PIPELINE_SOURCE == "push") && ($CI_COMMIT_BRANCH == "dev")'
     - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
     - if: '($CI_COMMIT_BRANCH == "master") && ($CI_COMMIT_TAG != null)'
 
@@ -80,6 +83,8 @@ deploy:
   release:
     tag_name: $(cat version.txt)
     description: 'CHANGELOG.md'
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
 
 ftp:deploy:
   stage: deploy
