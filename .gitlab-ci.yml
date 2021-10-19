@@ -78,7 +78,6 @@ deploy:
     description: 'CHANGELOG.md'
   rules:
     - if: '$CI_COMMIT_BRANCH == "master"'
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
 
 ftp:deploy:
   stage: deploy
@@ -86,10 +85,12 @@ ftp:deploy:
     - job: deploy
   script:
     - echo "Push the binaries and the doc on the server"
-    - lftp ftp.openindus.com -e "mirror --reverse --verbose -R ./.oi/bin/ ./oi-content/bin/; quit" -u $FTP_USERNAME,$FTP_PASSWORD
-    - lftp ftp.openindus.com -e "mirror --reverse --verbose --delete -R ./docs/build/html/ ./oi-content/doc/; quit" -u $FTP_USERNAME,$FTP_PASSWORD
+    # - lftp ftp.openindus.com -e "mirror --reverse --verbose -R ./.oi/bin/ ./oi-content/bin/; quit" -u $FTP_USERNAME,$FTP_PASSWORD
+    # - lftp ftp.openindus.com -e "mirror --reverse --verbose --delete -R ./docs/build/html/ ./oi-content/doc/; quit" -u $FTP_USERNAME,$FTP_PASSWORD
     - lftp $OVH_URI -e "mirror --reverse --verbose -R ./.oi/bin/ ./www/oi-content/bin/; quit" -u $OVH_USERNAME,$OVH_PASSWORD
     - lftp $OVH_URI -e "mirror --reverse --verbose --delete -R ./docs/build/html/ ./www/oi-content/doc/; quit" -u $OVH_USERNAME,$OVH_PASSWORD
+    - zip -r "./.oi/src/oi-firmware-`cat version.txt`.zip" ./boards ./bootloader_components/ ./components/ ./docs/ ./examples/ ./libraries/ ./main/ ./tools/ ./CHANGELOG.md ./CMakeLists.txt ./partition.csv ./platformio.ini ./README.md ./sdkconfig.defaults ./version.txt
+    - lftp $OVH_URI -e "mirror --reverse --verbose -R ./.oi/src/ ./www/oi-content/src/; quit" -u $OVH_USERNAME,$OVH_PASSWORD
+    - rm "./.oi/src/oi-firmware-`cat version.txt`.zip"
   rules:
     - if: '($CI_COMMIT_BRANCH == "master") && ($CI_COMMIT_TAG != null)'
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
