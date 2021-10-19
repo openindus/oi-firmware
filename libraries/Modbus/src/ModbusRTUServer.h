@@ -24,7 +24,7 @@
 #ifdef ARDUINO_RS485
 #include <ArduinoRS485.h>
 #else
-#include "OIRS.h"
+#include "RS.h"
 #endif
 
 class ModbusRTUServerClass : public ModbusServer {

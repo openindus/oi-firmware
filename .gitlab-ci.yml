@@ -2,14 +2,101 @@ image: python:latest
 
 stages:
   - build
+  - test
+  - deploy
 
-before_script:
-  - "pip install -U platformio"
-  - "pio platform update"
+cache:
+  paths:
+    - .oi/
+    - .pio/
+    - docs/build/
 
-job:
+build:
   stage: build
-  script: "pio run -e core -e discrete -e stepper -e mixed"
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+  before_script:
+    - pip install -U platformio
+    - pio platform update
+  script:
+    - pio run -t clean
+    - pio run -e core
+    - pio run -e discrete
+    - pio run -e discreteve
+    - pio run -e stepper
+    - pio run -e stepperve
+    - pio run -e mixed
+    - pio run -e relayhp
+    - pio run -e relaylp
+  rules:
+    - if: '($CI_PIPELINE_SOURCE == "push") && ($CI_COMMIT_BRANCH == "dev")'
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
+    - if: '($CI_COMMIT_BRANCH == "master") && ($CI_COMMIT_TAG != null)'
 
-variables:
-  GIT_SUBMODULE_STRATEGY: recursive
+build:examples:
+  stage: build
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+  script: echo "build examples"
+  rules:
+    - if: '($CI_PIPELINE_SOURCE == "push") && ($CI_COMMIT_BRANCH == "dev")'
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
+    - if: '($CI_COMMIT_BRANCH == "master") && ($CI_COMMIT_TAG != null)'
+
+build:doc:
+  stage: build
+  before_script:
+    - pip install virtualenv
+    - export PATH="$HOME/.local/bin:$PATH"
+    - virtualenv venv
+    - source venv/bin/activate
+    - pip install -r docs/requirements.txt
+  script:
+    - cd docs
+    - make clean
+    - doxygen doxygen/Doxyfile
+    - make html
+  rules:
+    - if: '($CI_PIPELINE_SOURCE == "push") && ($CI_COMMIT_BRANCH == "dev")'
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
+    - if: '($CI_COMMIT_BRANCH == "master") && ($CI_COMMIT_TAG != null)'
+
+test:
+  stage: test
+  needs:
+    - job: build
+  script: 
+    - echo "pio run -t upload"
+    - echo "pio test"
+  rules:
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master")'
+    - if: '($CI_COMMIT_BRANCH == "master") && ($CI_COMMIT_TAG != null)'
+
+deploy:
+  stage: deploy
+  needs:
+    - job: build:doc
+    - job: build:examples
+    - job: test
+  script:
+    - echo "Create Tag $(cat version.txt)"
+  release:
+    tag_name: $(cat version.txt)
+    description: 'CHANGELOG.md'
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+
+ftp:deploy:
+  stage: deploy
+  needs:
+    - job: deploy
+  script:
+    - echo "Push the binaries and the doc on the server"
+    - lftp $OVH_URI -e "mirror --reverse --verbose -R ./.oi/bin/ ./www/oi-content/bin/; quit" -u $OVH_USERNAME,$OVH_PASSWORD
+    - lftp $OVH_URI -e "mirror --reverse --verbose --delete -R ./docs/build/html/ ./www/oi-content/doc/; quit" -u $OVH_USERNAME,$OVH_PASSWORD
+    - zip -r "./.oi/src/oi-firmware-`cat version.txt`.zip" ./boards ./bootloader_components/ ./components/ ./examples/ ./libraries/ ./main/ ./tools/ ./CHANGELOG.md ./CMakeLists.txt ./partition.csv ./platformio.ini ./README.md ./sdkconfig.defaults ./version.txt
+    - lftp $OVH_URI -e "mirror --reverse --verbose -R ./.oi/src/ ./www/oi-content/src/; quit" -u $OVH_USERNAME,$OVH_PASSWORD
+  after_script:
+    - rm -rf .oi
+  rules:
+    - if: '($CI_COMMIT_BRANCH == "master") && ($CI_COMMIT_TAG != null)'

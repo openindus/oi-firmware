@@ -1,7 +1,7 @@
 menu "OpenIndus API Configuration"
 
     config MODULE_STANDALONE
-        bool "Module stanalone"
+        bool "Module standalone"
         default n
 
     config BOARD
@@ -23,6 +23,8 @@ menu "OpenIndus API Configuration"
             bool "OIDiscreteVertical"
         config OI_STEPPER
             bool "OIStepper"
+        config OI_STEPPER_VERTICAL
+            bool "OIStepperVertical"
         config OI_MIXED
             bool "OIMixed"
         config OI_RELAY_HP

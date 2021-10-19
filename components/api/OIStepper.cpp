@@ -15,7 +15,7 @@
 
 #include "OIStepper.h"
 
-#ifdef CONFIG_OI_STEPPER
+#if (defined CONFIG_OI_STEPPER) || (defined CONFIG_OI_STEPPER_VERTICAL)
 
 static const char OI_STEPPER_TAG[] = "OIStepper";
 
@@ -32,6 +32,7 @@ EventGroupHandle_t OIStepper::_eventGroupHandle = NULL;
 
 int OIStepper::_limitSwitchToMotor[4] = {-1, -1, -1, -1};
 bool OIStepper::_limitSwitchToNotify[4] = {false, false, false, false};
+bool OIStepper::_no_logic = true;  /* set switch logic to NO */
 
 const gpio_num_t OIStepper::_etor[4] = { 
     OISTEPPER_GPIO_PIN_ETOR1,
@@ -126,7 +127,7 @@ void OIStepper::init()
     #endif
     #else
     _type = OI_STEPPERVE;
-    Powerstep01_InitMotor(DEVICE1); // Init device 1
+    Powerstep01_InitDevice(DEVICE1); // Init device 1
     Powerstep01_SetSwitchLevel(DEVICE1, HIGH_LEVEL);
     #endif
 
@@ -192,9 +193,23 @@ void OIStepper::_handleEvent(void *pvParameters)
             if(_limitSwitchToMotor[index] != -1)
             {
                 #ifdef CONFIG_L6470
-                L6470_SetSwitchLevel(_limitSwitchToMotor[index], gpio_get_level(_etor[index])?LOW_LEVEL:HIGH_LEVEL);
+                if(_no_logic)
+                {
+                    L6470_SetSwitchLevel(_limitSwitchToMotor[index], gpio_get_level(_etor[index])?LOW_LEVEL:HIGH_LEVEL);
+                }
+                else
+                {
+                    L6470_SetSwitchLevel(_limitSwitchToMotor[index], gpio_get_level(_etor[index]));
+                }
                 #else
-                Powerstep01_SetSwitchLevel(_limitSwitchToMotor[index], gpio_get_level(_etor[index])?LOW_LEVEL:HIGH_LEVEL); // SW logic is inverted
+                if(_no_logic)
+                {
+                    Powerstep01_SetSwitchLevel(_limitSwitchToMotor[index], gpio_get_level(_etor[index])?LOW_LEVEL:HIGH_LEVEL); // SW logic is inverted
+                }
+                else 
+                {
+                    Powerstep01_SetSwitchLevel(_limitSwitchToMotor[index], gpio_get_level(_etor[index])); // SW logic is not inverted
+                }
                 #endif
             }
             if(_limitSwitchToNotify[index])
@@ -263,4 +278,4 @@ void OIStepper::flagInterruptEvent(void)
     xEventGroupSetBits(_eventGroupHandle, FLAG_INTERRUPT_EVENT);
 }
 
-#endif /* CONFIG_OI_STEPPER */
+#endif /* (defined CONFIG_OI_STEPPER) || (defined CONFIG_OI_STEPPER_VERTICAL) */

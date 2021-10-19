@@ -55,10 +55,8 @@
 #define OISTEPPER_GPIO_PIN_D1_STBY_RST   GPIO_NUM_11
 
 /* Device 2 GPIOs pins */
-#ifndef CONFIG_OI_STEPPERVE
 #define OISTEPPER_GPIO_PIN_D2_SW         GPIO_NUM_15
 #define OISTEPPER_GPIO_PIN_D2_STBY_RST   GPIO_NUM_16
-#endif
 
 /* Common GPIO pins */
 #define OISTEPPER_GPIO_PIN_BUSY_SYNC     GPIO_NUM_12
@@ -72,7 +70,7 @@
 
 #define ESP_INTR_FLAG_DEFAULT           (0)
 
-#ifdef CONFIG_OI_STEPPER
+#if (defined CONFIG_OI_STEPPER) || (defined CONFIG_OI_STEPPER_VERTICAL)
 
 class OIStepper : public OIModuleMaster
 {
@@ -85,6 +83,11 @@ public:
      * 
      */
     void init();
+
+     inline void setSwitchLogic(bool no_logic)
+    {
+        _no_logic = no_logic;
+    }
 
     inline int getEtorLevel(Etor_t etor) {
         return gpio_get_level(_etor[etor]);
@@ -454,6 +457,7 @@ private:
 
     static int _limitSwitchToMotor[4];
     static bool _limitSwitchToNotify[4];
+    static bool _no_logic; 
 
     static const gpio_num_t _etor[4];
 
@@ -475,6 +479,15 @@ public:
 
     inline int getEtorLevel(Etor_t etor) {
         return getMessage(OIMessage(CMD_GET_ETOR_LEVEL, _senderId, static_cast<uint16_t>(etor)));
+    }
+
+    /**
+    * @brief Set switch logic. Default is normally open (NO).
+    * @param[in] no_logic True for normally open logic, false to set normally closed logic.
+    */
+    inline void setSwitchLogic(bool no_logic)
+    {
+        setMessage(OIMessage(CMD_SET_LOGIC_SWITCH, _senderId, static_cast<uint16_t>(no_logic)));
     }
 
     /**
@@ -994,4 +1007,4 @@ public:
     }
 };
 
-#endif /* CONFIG_OI_STEPPER */
+#endif /* (defined CONFIG_OI_STEPPER) || (defined CONFIG_OI_STEPPER_VERTICAL) */

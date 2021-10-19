@@ -25,16 +25,13 @@
 #include "OIMixed.h"
 #include "OIRelay.h"
 
-#include "OICAN.h"
-#include "OIRS.h"
-
 #if defined CONFIG_OI_CORE
 extern OICore Core;
 #define Module Core
 #elif (defined CONFIG_OI_DISCRETE) || (defined CONFIG_OI_DISCRETE_VERTICAL)
 extern OIDiscrete Discrete;
 #define Module Discrete
-#elif defined CONFIG_OI_STEPPER
+#elif (defined CONFIG_OI_STEPPER) || (defined CONFIG_OI_STEPPER_VERTICAL)
 extern OIStepper Stepper;
 #define Module Stepper
 #elif defined CONFIG_OI_MIXED

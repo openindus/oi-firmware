@@ -10,7 +10,6 @@ if __name__ == "__main__":
 
     # Clean project
     subprocess.call("make clean", shell=True)
-    subprocess.call("rm -rf tmp", shell=True)
 
     # Generate Doxyfile
     # subprocess.call("doxygen -g tmp/Doxyfile", shell=True)
