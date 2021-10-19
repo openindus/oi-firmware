@@ -1,6 +1,6 @@
 # To regenerate resource file:
 ```
-pyrcc5 ./resource.qrc -o ./../resource_rc.py
+pyrcc5 ./resource.qrc -o ./resource_rc.py
 ```
 
 # To regenerate ui
