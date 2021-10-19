@@ -31,7 +31,7 @@ build:
   rules:
     - if: '($CI_PIPELINE_SOURCE == "push") && ($CI_COMMIT_BRANCH == "dev")'
     - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
-    - if: '($CI_COMMIT_BRANCH == "master") && ($CI_COMMIT_TAG != null)'
+    - if: '$CI_COMMIT_BRANCH == "master"'
 
 build:examples:
   stage: build
@@ -41,7 +41,7 @@ build:examples:
   rules:
     - if: '($CI_PIPELINE_SOURCE == "push") && ($CI_COMMIT_BRANCH == "dev")'
     - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
-    - if: '($CI_COMMIT_BRANCH == "master") && ($CI_COMMIT_TAG != null)'
+    - if: '$CI_COMMIT_BRANCH == "master"'
 
 build:doc:
   stage: build
@@ -59,7 +59,7 @@ build:doc:
   rules:
     - if: '($CI_PIPELINE_SOURCE == "push") && ($CI_COMMIT_BRANCH == "dev")'
     - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
-    - if: '($CI_COMMIT_BRANCH == "master") && ($CI_COMMIT_TAG != null)'
+    - if: '$CI_COMMIT_BRANCH == "master"'
 
 test:
   stage: test
@@ -70,7 +70,7 @@ test:
     - echo "pio test"
   rules:
     - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master")'
-    - if: '($CI_COMMIT_BRANCH == "master") && ($CI_COMMIT_TAG != null)'
+    - if: '$CI_COMMIT_BRANCH == "master"'
 
 deploy:
   stage: deploy
