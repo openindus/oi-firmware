@@ -67,10 +67,10 @@ test:
 
 deploy:
   stage: deploy
-  needs:
-    - job: build:doc
-    - job: build:examples
-    - job: test
+  # needs:
+  #   - job: build:doc
+  #   - job: build:examples
+  #   - job: test
   before_script:
     - echo $CI_COMMIT_TAG
     - echo $(cat version.txt)
