@@ -86,7 +86,8 @@ deploy:
   after_script:
     - lftp $OVH_URI -e "mirror --reverse --verbose -R ./.oi/bin/ ./www/oi-content/bin/; quit" -u $OVH_USERNAME,$OVH_PASSWORD
     - lftp $OVH_URI -e "mirror --reverse --verbose --delete -R ./docs/build/html/ ./www/oi-content/doc/; quit" -u $OVH_USERNAME,$OVH_PASSWORD
-    - zip -r "./.oi/src/oi-firmware-`cat version.txt`.zip" ./boards ./bootloader_components/ ./components/ ./examples/ ./libraries/ ./main/ ./tools/ ./CHANGELOG.md ./CMakeLists.txt ./partition.csv ./platformio.ini ./README.md ./sdkconfig.defaults ./version.txt
+    - mkdir -p .oi/src/
+    - zip -r ".oi/src/oi-firmware-`cat version.txt`.zip" ./boards ./bootloader_components/ ./components/ ./examples/ ./libraries/ ./main/ ./tools/ ./CHANGELOG.md ./CMakeLists.txt ./partition.csv ./platformio.ini ./README.md ./sdkconfig.defaults ./version.txt
     - lftp $OVH_URI -e "mirror --reverse --verbose -R ./.oi/src/ ./www/oi-content/src/; quit" -u $OVH_USERNAME,$OVH_PASSWORD
     - rm -rf .oi
   rules:
