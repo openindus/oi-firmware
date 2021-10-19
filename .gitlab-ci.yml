@@ -29,7 +29,9 @@ build:
     - pio run -e relayhp
     - pio run -e relaylp
   rules:
+    - if: '($CI_PIPELINE_SOURCE == "push") && ($CI_COMMIT_BRANCH == "master" || "dev")'
     - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
+    - if: '($CI_COMMIT_BRANCH == "master") && ($CI_COMMIT_TAG != null)'
 
 build:examples:
   stage: build
@@ -37,7 +39,9 @@ build:examples:
     GIT_SUBMODULE_STRATEGY: recursive
   script: echo "build examples"
   rules:
+    - if: '($CI_PIPELINE_SOURCE == "push") && ($CI_COMMIT_BRANCH == "master" || "dev")'
     - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
+    - if: '($CI_COMMIT_BRANCH == "master") && ($CI_COMMIT_TAG != null)'
 
 build:doc:
   stage: build
@@ -53,7 +57,9 @@ build:doc:
     - doxygen doxygen/Doxyfile
     - make html
   rules:
+    - if: '($CI_PIPELINE_SOURCE == "push") && ($CI_COMMIT_BRANCH == "master" || "dev")'
     - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
+    - if: '($CI_COMMIT_BRANCH == "master") && ($CI_COMMIT_TAG != null)'
 
 test:
   stage: test
@@ -64,28 +70,31 @@ test:
     - echo "pio test"
   rules:
     - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master")'
+    - if: '($CI_COMMIT_BRANCH == "master") && ($CI_COMMIT_TAG != null)'
 
 deploy:
   stage: deploy
-  # needs:
-  #   - job: build:doc
-  #   - job: build:examples
-  #   - job: test
-  before_script:
-    - echo $CI_COMMIT_TAG
-    - echo $(cat version.txt)
-    - if (($(cat version.txt)!=$CI_COMMIT_TAG)); then exit 1; fi
+  needs:
+    - job: build:doc
+    - job: build:examples
+    - job: test
+  script:
+    - echo "Create Tag $(cat version.txt)"
+  release:
+    tag_name: $(cat version.txt)
+    description: 'CHANGELOG.md'
+
+ftp:deploy:
+  stage: deploy
+  needs:
+    - job: deploy
   script:
     - echo "Push the binaries and the doc on the server"
-    # - lftp ftp.openindus.com -e "mirror --reverse --verbose -R ./.oi/bin/ ./oi-content/bin/; quit" -u $FTP_USERNAME,$FTP_PASSWORD
-    # - lftp ftp.openindus.com -e "mirror --reverse --verbose --delete -R ./docs/build/html/ ./oi-content/doc/; quit" -u $FTP_USERNAME,$FTP_PASSWORD
-    # - lftp $OVH_URI -e "mirror --reverse --verbose -R ./.oi/bin/ ./www/oi-content/bin/; quit" -u $OVH_USERNAME,$OVH_PASSWORD
-    # - lftp $OVH_URI -e "mirror --reverse --verbose --delete -R ./docs/build/html/ ./www/oi-content/doc/; quit" -u $OVH_USERNAME,$OVH_PASSWORD
-    # - zip -r "./.oi/src/oi-firmware-`cat version.txt`.zip" ./boards ./bootloader_components/ ./components/ ./examples/ ./libraries/ ./main/ ./tools/ ./CHANGELOG.md ./CMakeLists.txt ./partition.csv ./platformio.ini ./README.md ./sdkconfig.defaults ./version.txt
-    # - lftp $OVH_URI -e "mirror --reverse --verbose -R ./.oi/src/ ./www/oi-content/src/; quit" -u $OVH_USERNAME,$OVH_PASSWORD
-    # - rm "./.oi/src/oi-firmware-`cat version.txt`.zip"
-  # release:
-  #   tag_name: $(cat version.txt)
-  #   description: 'CHANGELOG.md'
-  # rules:
-  #   - if: '($CI_COMMIT_BRANCH == "master") && ($CI_COMMIT_TAG != null)'
+    - lftp $OVH_URI -e "mirror --reverse --verbose -R ./.oi/bin/ ./www/oi-content/bin/; quit" -u $OVH_USERNAME,$OVH_PASSWORD
+    - lftp $OVH_URI -e "mirror --reverse --verbose --delete -R ./docs/build/html/ ./www/oi-content/doc/; quit" -u $OVH_USERNAME,$OVH_PASSWORD
+    - zip -r "./.oi/src/oi-firmware-`cat version.txt`.zip" ./boards ./bootloader_components/ ./components/ ./examples/ ./libraries/ ./main/ ./tools/ ./CHANGELOG.md ./CMakeLists.txt ./partition.csv ./platformio.ini ./README.md ./sdkconfig.defaults ./version.txt
+    - lftp $OVH_URI -e "mirror --reverse --verbose -R ./.oi/src/ ./www/oi-content/src/; quit" -u $OVH_USERNAME,$OVH_PASSWORD
+  after_script:
+    - rm -rf .oi
+  rules:
+    - if: '($CI_COMMIT_BRANCH == "master") && ($CI_COMMIT_TAG != null)'
