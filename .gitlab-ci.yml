@@ -28,6 +28,10 @@ build:
     - pio run -e mixed
     - pio run -e relayhp
     - pio run -e relaylp
+  after_script:
+    - rm -rf .oi/src/
+    - mkdir .oi/src/
+    - zip -r ".oi/src/oi-firmware-`cat version.txt`.zip" ./boards ./bootloader_components/ ./components/ ./examples/ ./libraries/ ./main/ ./tools/ ./CHANGELOG.md ./CMakeLists.txt ./partition.csv ./platformio.ini ./README.md ./sdkconfig.defaults ./version.txt
   rules:
     - if: '($CI_PIPELINE_SOURCE == "push") && ($CI_COMMIT_BRANCH == "dev")'
     - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
@@ -86,9 +90,6 @@ deploy:
   after_script:
     - lftp $OVH_URI -e "mirror --reverse --verbose -R ./.oi/bin/ ./www/oi-content/bin/; quit" -u $OVH_USERNAME,$OVH_PASSWORD
     - lftp $OVH_URI -e "mirror --reverse --verbose --delete -R ./docs/build/html/ ./www/oi-content/doc/; quit" -u $OVH_USERNAME,$OVH_PASSWORD
-    - mkdir -p .oi/src/
-    - zip -r ".oi/src/oi-firmware-`cat version.txt`.zip" ./boards ./bootloader_components/ ./components/ ./examples/ ./libraries/ ./main/ ./tools/ ./CHANGELOG.md ./CMakeLists.txt ./partition.csv ./platformio.ini ./README.md ./sdkconfig.defaults ./version.txt
     - lftp $OVH_URI -e "mirror --reverse --verbose -R ./.oi/src/ ./www/oi-content/src/; quit" -u $OVH_USERNAME,$OVH_PASSWORD
-    - rm -rf .oi
   rules:
     - if: '$CI_COMMIT_BRANCH == "master"'
