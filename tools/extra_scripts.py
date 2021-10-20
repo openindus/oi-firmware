@@ -1,6 +1,9 @@
+import os
+from os.path import join, isfile
+
 Import("env")
 
-from os.path import join
+PROJECT_DIR = env.subst("$PROJECT_DIR")
 
 platform = env.PioPlatform()
 board = env.BoardConfig()
