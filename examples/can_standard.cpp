@@ -1,5 +1,6 @@
 #include "OpenIndus.h"
 #include "Arduino.h"
+#include "CAN.h"
 
 OICanMessage_t rx_msg;
 OICanMessage_t tx_msg;

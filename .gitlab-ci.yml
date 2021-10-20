@@ -41,7 +41,18 @@ build:examples:
   stage: build
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
-  script: echo "build examples"
+  before_script:
+    - mv main/main.cpp .oi/main.cpp
+  script:
+    - |
+      for f in examples/*.cpp
+      do
+        echo "build $f"
+        cat $f > main/main.cpp
+        pio run
+      done
+  after_script:
+    - mv .oi/main.cpp main/main.cpp
   rules:
     - if: '($CI_PIPELINE_SOURCE == "push") && ($CI_COMMIT_BRANCH == "dev")'
     - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'

@@ -1,5 +1,6 @@
 #include "OpenIndus.h"
 #include "Arduino.h"
+#include "RS.h"
 
 void setup()
 {
