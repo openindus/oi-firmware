@@ -361,8 +361,9 @@ public:
      */
     inline void attachInterrupt(Etor_t etor, void (*callback)(void), InterruptMode_t mode) {
         setMessage(OIMessage(CMD_ATTACH_INTERRUPT, _senderId, (uint16_t) etor, (uint32_t) mode));
-        Fct.add(OIMessage(CMD_ETOR_INTERRUPT, _senderId), [callback](OIMessage msg) -> uint32_t {
-            callback();
+        callbackTable[etor] = callback;
+        Fct.add(OIMessage(CMD_ETOR_INTERRUPT, _destId), [this](OIMessage msg) -> uint32_t {
+            this->runCallbackTable(((Etor_t)msg.getConf()));
             return 0;
         });
     }
@@ -515,6 +516,10 @@ public:
         setMessage(OIMessage(CMD_CURRENT_WRITE_DAC, _senderId, (uint16_t)((units << 8) | sana), val));
     }
 
+private:
+    void (*callbackTable[ETOR10])(void);
+
+    inline void runCallbackTable(Etor_t etor) { callbackTable[etor](); }
 };
 
 #endif /* CONFIG_OI_MIXED */
