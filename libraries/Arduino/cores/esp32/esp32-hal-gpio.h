@@ -25,6 +25,7 @@ extern "C" {
 #endif
 
 #include "esp32-hal.h"
+#include "driver/gpio.h"
 #include "soc/soc_caps.h"
 
 #if (CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32S3)
