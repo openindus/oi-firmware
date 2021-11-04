@@ -1,1 +1,3 @@
-Version 1.0.0
+- Use the old Arduino version
+- Bugfixes OIMixed
+- Build Examples [CI/CD]
