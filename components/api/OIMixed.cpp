@@ -281,7 +281,7 @@ void OIMixed::_mixed_isr_task(void* arg)
                 gpio_intr_disable(mixed->getGpioFromEtor(etor));
                 ESP_LOGV(OI_MIXED_TAG, "An ISR occured\n");
                 mode = (mixed->digitalRead(etor) == LOW_LEVEL ? FALLING_MODE : RISING_MODE );
-                BusTWAI.sendMessage(OIMessage(CMD_ATTACH_INTERRUPT, mixed->getId(), etor, mode), BROADCAST_ID);
+                BusTWAI.sendMessage(OIMessage(CMD_ETOR_INTERRUPT, mixed->getId(), etor, mode), BROADCAST_ID);
                 gpio_intr_enable(mixed->getGpioFromEtor(etor));
         }
     }
