@@ -63,13 +63,13 @@ void OICore::init()
         OICORE_PIN_I2C_SDA, OICORE_PIN_I2C_SCL);
 
     i2c_config_t i2c_config;
+	memset(&i2c_config, 0, sizeof(i2c_config_t));
     i2c_config.mode = I2C_MODE_MASTER;
     i2c_config.sda_io_num = OICORE_PIN_I2C_SDA;
     i2c_config.sda_pullup_en = GPIO_PULLUP_ENABLE;
     i2c_config.scl_io_num = OICORE_PIN_I2C_SCL;
     i2c_config.scl_pullup_en = GPIO_PULLUP_ENABLE;
     i2c_config.master.clk_speed = OICORE_DEFAULT_I2C_SPEED;
-    i2c_config.clk_flags = 0;
 
     ESP_ERROR_CHECK(i2c_param_config(OICORE_I2C_PORT_NUM, &i2c_config));
     ESP_ERROR_CHECK(i2c_driver_install(OICORE_I2C_PORT_NUM, i2c_config.mode, 0, 0, 0));
