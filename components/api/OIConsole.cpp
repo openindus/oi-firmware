@@ -6,9 +6,9 @@ static const char* OI_CONSOLE_TAG = "OIConsole";
 
 #if defined CONFIG_OI_CORE
 #define PROMPT_STR "OICore"
-#elif defined CONFIG_OI_DISCRETE || defined CONFIG_OI_DISCRETE_VERTICAL
+#elif defined(CONFIG_OI_DISCRETE) || defined(CONFIG_OI_DISCRETE_VERTICAL)
 #define PROMPT_STR "OIDiscrete"
-#elif defined CONFIG_OI_STEPPER
+#elif defined(CONFIG_OI_STEPPER) || defined(CONFIG_OI_STEPPER_VERTICAL)
 #define PROMPT_STR "OIStepper"
 #elif defined CONFIG_OI_MIXED
 #define PROMPT_STR "OIMixed"

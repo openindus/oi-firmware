@@ -74,13 +74,17 @@ void OIStepper::init()
     ESP_LOGI(OI_STEPPER_TAG, "Hardware initialization");
 
     /* ETOR */
-    uint32_t etor_mask = 0;
+    /*uint32_t etor_mask = 0;
     for (i = 0; i < OISTEPPER_NB_ETORS; i++)
     {
         etor_mask  |= (1ULL << _etor[i]);
-    }
+    }*/
     gpio_config_t etor_conf = {
-        .pin_bit_mask = etor_mask,
+        .pin_bit_mask = ((1ULL<<OISTEPPER_GPIO_PIN_ETOR1) |
+                        (1ULL<<OISTEPPER_GPIO_PIN_ETOR2) |
+                        (1ULL<<OISTEPPER_GPIO_PIN_ETOR3) |
+                        (1ULL<<OISTEPPER_GPIO_PIN_ETOR4)),
+
         .mode = GPIO_MODE_INPUT,
         .pull_up_en = GPIO_PULLUP_DISABLE,
         .pull_down_en = GPIO_PULLDOWN_DISABLE,
