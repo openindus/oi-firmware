@@ -26,29 +26,29 @@
 #include "OIModule.h"
 #include "OIType.h"
 
-/* ETOR */
-#define OISTEPPER_GPIO_PIN_ETOR1        GPIO_NUM_41
-#define OISTEPPER_GPIO_PIN_ETOR2        GPIO_NUM_40
-#define OISTEPPER_GPIO_PIN_ETOR3        GPIO_NUM_39
-#define OISTEPPER_GPIO_PIN_ETOR4        GPIO_NUM_38
 
-/* powerSTEP01 */
+/************ DEFINES FOR BOI13 STEPPER MODULE *******************/
+#if defined(CONFIG_OI_STEPPER)
 
-/* SPI Device Host */
-#define OISTEPPER_SPI_HOST              FSPI_HOST
-#define OISTEPPER_SPI_FREQ              SPI_MASTER_FREQ_8M
+#define OISTEPPER_NUMBER_OF_DEVICES     (2)
 
 /* SPI pins */
 #define OISTEPPER_SPI_PIN_MOSI          GPIO_NUM_37
 #define OISTEPPER_SPI_PIN_MISO          GPIO_NUM_35
 #define OISTEPPER_SPI_PIN_CLK           GPIO_NUM_36
 #define OISTEPPER_SPI_PIN_CS            GPIO_NUM_34
+/* SPI Device Host */
+#define OISTEPPER_SPI_HOST              FSPI_HOST
+#define OISTEPPER_SPI_FREQ              SPI_MASTER_FREQ_8M
 
-#ifdef CONFIG_OI_STEPPER
-#define OISTEPPER_NUMBER_OF_DEVICES     (2)
-#else
-#define OISTEPPER_NUMBER_OF_DEVICES     (1)
-#endif
+#define ESP_INTR_FLAG_DEFAULT           (0)
+
+/* ETOR */
+#define OISTEPPER_NB_ETORS              (4)
+#define OISTEPPER_GPIO_PIN_ETOR1        GPIO_NUM_41
+#define OISTEPPER_GPIO_PIN_ETOR2        GPIO_NUM_40
+#define OISTEPPER_GPIO_PIN_ETOR3        GPIO_NUM_39
+#define OISTEPPER_GPIO_PIN_ETOR4        GPIO_NUM_38
 
 /* Device 1 GPIOs pins */
 #define OISTEPPER_GPIO_PIN_D1_SW         GPIO_NUM_42
@@ -68,7 +68,53 @@
 #define OISTEPPER_PWM_MODE              LEDC_LOW_SPEED_MODE
 #define OISTEPPER_PWM_CHANNEL           LEDC_CHANNEL_0
 
+/************ DEFINES FOR STEPPER VERTICAL MODULE *******************/
+#elif defined(CONFIG_OI_STEPPER_VERTICAL)
+
+#define OISTEPPER_NUMBER_OF_DEVICES     (1)
+
+/* SPI pins */
+#define OISTEPPER_SPI_PIN_MOSI          GPIO_NUM_35
+#define OISTEPPER_SPI_PIN_MISO          GPIO_NUM_37
+#define OISTEPPER_SPI_PIN_CLK           GPIO_NUM_36
+#define OISTEPPER_SPI_PIN_CS            GPIO_NUM_34
+/* SPI Device Host */
+#define OISTEPPER_SPI_HOST              FSPI_HOST
+#define OISTEPPER_SPI_FREQ              SPI_MASTER_FREQ_8M
+
 #define ESP_INTR_FLAG_DEFAULT           (0)
+
+/* ETOR */
+#define OISTEPPER_NB_ETORS              (6)
+#define OISTEPPER_GPIO_PIN_ETOR1        GPIO_NUM_13
+#define OISTEPPER_GPIO_PIN_ETOR2        GPIO_NUM_6
+#define OISTEPPER_GPIO_PIN_ETOR3        GPIO_NUM_8
+#define OISTEPPER_GPIO_PIN_ETOR4        GPIO_NUM_12
+#define OISTEPPER_GPIO_PIN_ETOR5        GPIO_NUM_11
+#define OISTEPPER_GPIO_PIN_ETOR6        GPIO_NUM_9
+
+/* STOR */
+#define OISTEPPER_GPIO_PIN_STOR1        GPIO_NUM_15
+#define OISTEPPER_GPIO_PIN_STOR2        GPIO_NUM_16
+#define OISTEPPER_GPIO_PIN_STOR1_STAT   GPIO_NUM_14
+#define OISTEPPER_GPIO_PIN_STOR2_STAT   GPIO_NUM_45
+
+/* Device 1 GPIOs pins */
+#define OISTEPPER_GPIO_PIN_D1_SW         GPIO_NUM_19
+#define OISTEPPER_GPIO_PIN_D1_STBY_RST   GPIO_NUM_20
+
+/* Common GPIO pins */
+#define OISTEPPER_GPIO_PIN_BUSY_SYNC     GPIO_NUM_38
+#define OISTEPPER_GPIO_PIN_FLAG          GPIO_NUM_26
+
+/* step clock */
+#define OISTEPPER_PWM_PIN_STCK          GPIO_NUM_33
+#define OISTEPPER_PWM_TIMER             LEDC_TIMER_1
+#define OISTEPPER_PWM_MODE              LEDC_LOW_SPEED_MODE
+#define OISTEPPER_PWM_CHANNEL           LEDC_CHANNEL_0
+
+#endif
+
 
 #if (defined CONFIG_OI_STEPPER) || (defined CONFIG_OI_STEPPER_VERTICAL)
 
@@ -84,21 +130,28 @@ public:
      */
     void init();
 
-     inline void setSwitchLogic(bool no_logic)
+    inline void setSwitchLogic(bool no_logic)
     {
         _no_logic = no_logic;
     }
 
     inline int getEtorLevel(Etor_t etor) {
-        return gpio_get_level(_etor[etor]);
+        int ret = -1;
+
+        if (etor < OISTEPPER_NB_ETORS)
+            ret = gpio_get_level(_etor[etor]);
+
+        return ret;
     }
 
     inline void attachEtorInterrupt(Etor_t etor, void (*callback)(void)) {
-        gpio_isr_handler_add(_etor[etor], (gpio_isr_t)callback, NULL);
+        if (etor < OISTEPPER_NB_ETORS)
+            gpio_isr_handler_add(_etor[etor], (gpio_isr_t)callback, NULL);
     }
 
     inline void detachEtorInterrupt(Etor_t etor) {
-        gpio_isr_handler_remove(_etor[etor]);
+        if (etor < OISTEPPER_NB_ETORS)
+            gpio_isr_handler_remove(_etor[etor]);
     }
 
     void attachLimitSwitch(Etor_t etor, uint8_t deviceId, bool notify = false);
@@ -459,7 +512,7 @@ private:
     static bool _limitSwitchToNotify[4];
     static bool _no_logic; 
 
-    static const gpio_num_t _etor[4];
+    static const gpio_num_t _etor[OISTEPPER_NB_ETORS];
 
 
     #ifdef CONFIG_L6470

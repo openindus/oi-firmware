@@ -254,12 +254,12 @@ uint8_t Ads866x_getAdcResolution(void)
 
 float Ads866x_getAnalogReference(void)
 {
-    return ads866x_analogReference;
+    return ads866x_analogReference * 1000;
 }
 
 void Ads866x_setAnalogReference(float analogReference)
 {
-    ads866x_analogReference = analogReference;
+    ads866x_analogReference = analogReference / 1000.0;
 }
 
 uint16_t Ads866x_NoOp(void)

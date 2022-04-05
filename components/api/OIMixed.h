@@ -426,7 +426,7 @@ public:
      */ 
     inline float getAnalogReference(Units_t units)
     {
-        uint32_t value = getMessage(OIMessage(CMD_GET_ANALOG_ADC_REFERENCE, _senderId, (uint16_t)units));
+        uint32_t value = getMessage(OIMessage(CMD_GET_ANALOG_ADC_REFERENCE, _senderId, (uint16_t)(units << 8)));
         return reinterpret_cast<float &>(value);        
     }
 

@@ -17,8 +17,6 @@
 
 #if (defined CONFIG_OI_STEPPER) || (defined CONFIG_OI_STEPPER_VERTICAL)
 
-static const char OI_STEPPER_TAG[] = "OIStepper";
-
 #define BUSY_INTERRUPT_EVENT    (1 << 0)
 #define ERROR_HANDLER_EVENT     (1 << 1)
 #define FLAG_INTERRUPT_EVENT    (1 << 2)
@@ -34,12 +32,29 @@ int OIStepper::_limitSwitchToMotor[4] = {-1, -1, -1, -1};
 bool OIStepper::_limitSwitchToNotify[4] = {false, false, false, false};
 bool OIStepper::_no_logic = true;  /* set switch logic to NO */
 
-const gpio_num_t OIStepper::_etor[4] = { 
+#ifdef CONFIG_OI_STEPPER
+
+static const char OI_STEPPER_TAG[] = "OIStepper";
+
+const gpio_num_t OIStepper::_etor[OISTEPPER_NB_ETORS] = { 
     OISTEPPER_GPIO_PIN_ETOR1,
     OISTEPPER_GPIO_PIN_ETOR2,
     OISTEPPER_GPIO_PIN_ETOR3,
     OISTEPPER_GPIO_PIN_ETOR4,
 };
+#elif defined(CONFIG_OI_STEPPER_VERTICAL)
+
+static const char OI_STEPPER_TAG[] = "OIStepperVE";
+
+const gpio_num_t OIStepper::_etor[OISTEPPER_NB_ETORS] = { 
+    OISTEPPER_GPIO_PIN_ETOR1,
+    OISTEPPER_GPIO_PIN_ETOR2,
+    OISTEPPER_GPIO_PIN_ETOR3,
+    OISTEPPER_GPIO_PIN_ETOR4,
+    OISTEPPER_GPIO_PIN_ETOR5,
+    OISTEPPER_GPIO_PIN_ETOR6,
+};
+#endif
 
 #ifdef CONFIG_L6470
 L6470_DeviceConfig_t OIStepper::device_conf;
@@ -58,11 +73,17 @@ void OIStepper::init()
     ESP_LOGI(OI_STEPPER_TAG, "Hardware initialization");
 
     /* ETOR */
+    /*uint32_t etor_mask = 0;
+    for (i = 0; i < OISTEPPER_NB_ETORS; i++)
+    {
+        etor_mask  |= (1ULL << _etor[i]);
+    }*/
     gpio_config_t etor_conf = {
         .pin_bit_mask = ((1ULL<<OISTEPPER_GPIO_PIN_ETOR1) |
                         (1ULL<<OISTEPPER_GPIO_PIN_ETOR2) |
                         (1ULL<<OISTEPPER_GPIO_PIN_ETOR3) |
                         (1ULL<<OISTEPPER_GPIO_PIN_ETOR4)),
+
         .mode = GPIO_MODE_INPUT,
         .pull_up_en = GPIO_PULLUP_DISABLE,
         .pull_down_en = GPIO_PULLDOWN_DISABLE,
@@ -85,12 +106,15 @@ void OIStepper::init()
         .pin_flag = OISTEPPER_GPIO_PIN_FLAG,
 
         .num_of_devices = OISTEPPER_NUMBER_OF_DEVICES,
-
+#if OISTEPPER_NUMBER_OF_DEVICES == 1
+        .pin_sw = {OISTEPPER_GPIO_PIN_D1_SW},
+        .pin_stby_rst = {OISTEPPER_GPIO_PIN_D1_STBY_RST},
+#else
         .pin_sw = {OISTEPPER_GPIO_PIN_D1_SW, 
                    OISTEPPER_GPIO_PIN_D2_SW},
         .pin_stby_rst = {OISTEPPER_GPIO_PIN_D1_STBY_RST, 
                          OISTEPPER_GPIO_PIN_D2_STBY_RST},
-
+#endif
         .pwm_pin_stck = OISTEPPER_PWM_PIN_STCK,
 
         .pwm_timer = OISTEPPER_PWM_TIMER,
@@ -125,9 +149,10 @@ void OIStepper::init()
     Powerstep01_SetSwitchLevel(DEVICE1, HIGH_LEVEL);
     Powerstep01_SetSwitchLevel(DEVICE2, HIGH_LEVEL);
     #endif
-    #else
+    #elif defined(CONFIG_OI_STEPPER_VERTICAL)
     _type = OI_STEPPERVE;
     Powerstep01_InitDevice(DEVICE1); // Init device 1
+    Powerstep01_InitNVSParameters(DEVICE1);
     Powerstep01_SetSwitchLevel(DEVICE1, HIGH_LEVEL);
     #endif
 
@@ -221,45 +246,51 @@ void OIStepper::_handleEvent(void *pvParameters)
 }
 
 void OIStepper::attachLimitSwitch(Etor_t etor, uint8_t deviceId, bool notify) {
-    if (_limitSwitchToMotor[static_cast<uint8_t>(etor)] == -1)
-    {   
-        _limitSwitchToMotor[static_cast<uint8_t>(etor)] = deviceId;
-        _limitSwitchToNotify[static_cast<uint8_t>(etor)] = notify;
-        switch (etor) {
-            case ETOR1 : 
-                attachEtorInterrupt(etor, [](void) {
-                    xEventGroupSetBits(_eventGroupHandle, ETOR1_INTERRUPT_EVENT);
-                });
-                break;
-            case ETOR2 : 
-                attachEtorInterrupt(etor, [](void) {
-                    xEventGroupSetBits(_eventGroupHandle, ETOR2_INTERRUPT_EVENT);
-                });
-                break;
-            case ETOR3 : 
-                attachEtorInterrupt(etor, [](void) {
-                    xEventGroupSetBits(_eventGroupHandle, ETOR3_INTERRUPT_EVENT);
-                });
-                break;
-            case ETOR4 : 
-                attachEtorInterrupt(etor, [](void) {
-                    xEventGroupSetBits(_eventGroupHandle, ETOR4_INTERRUPT_EVENT);
-                });
-                break;
-            default:
-                break;
+    if (etor < OISTEPPER_NB_ETORS)
+    {
+        if (_limitSwitchToMotor[static_cast<uint8_t>(etor)] == -1)
+        {   
+            _limitSwitchToMotor[static_cast<uint8_t>(etor)] = deviceId;
+            _limitSwitchToNotify[static_cast<uint8_t>(etor)] = notify;
+            switch (etor) {
+                case ETOR1 : 
+                    attachEtorInterrupt(etor, [](void) {
+                        xEventGroupSetBits(_eventGroupHandle, ETOR1_INTERRUPT_EVENT);
+                    });
+                    break;
+                case ETOR2 : 
+                    attachEtorInterrupt(etor, [](void) {
+                        xEventGroupSetBits(_eventGroupHandle, ETOR2_INTERRUPT_EVENT);
+                    });
+                    break;
+                case ETOR3 : 
+                    attachEtorInterrupt(etor, [](void) {
+                        xEventGroupSetBits(_eventGroupHandle, ETOR3_INTERRUPT_EVENT);
+                    });
+                    break;
+                case ETOR4 : 
+                    attachEtorInterrupt(etor, [](void) {
+                        xEventGroupSetBits(_eventGroupHandle, ETOR4_INTERRUPT_EVENT);
+                    });
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }
 
 void OIStepper::detachLimitSwitch(Etor_t etor) 
 {
-    if (_limitSwitchToMotor[static_cast<uint8_t>(etor)] != -1)
+    if (etor < OISTEPPER_NB_ETORS)
     {
-        L6470_SetSwitchLevel(_limitSwitchToMotor[etor], HIGH_LEVEL);
-        _limitSwitchToMotor[static_cast<uint8_t>(etor)] = -1;
-        _limitSwitchToNotify[static_cast<uint8_t>(etor)] = false;
-        detachEtorInterrupt(etor);
+        if (_limitSwitchToMotor[static_cast<uint8_t>(etor)] != -1)
+        {
+            L6470_SetSwitchLevel(_limitSwitchToMotor[etor], HIGH_LEVEL);
+            _limitSwitchToMotor[static_cast<uint8_t>(etor)] = -1;
+            _limitSwitchToNotify[static_cast<uint8_t>(etor)] = false;
+            detachEtorInterrupt(etor);
+        }
     }
 }
 

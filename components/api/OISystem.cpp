@@ -32,7 +32,7 @@ void OISystem::start()
     xTaskCreate(_busCanTask, "bus task to receive can message", 4096, this, 1, &_busCanTaskHandle);
     #endif
 
-    #if defined(CONFIG_OI_CORE) & defined(CONFIG_AUTO_ID)
+    #if defined(CONFIG_OI_CORE) && defined(CONFIG_AUTO_ID)
 
     automaticId();
     
