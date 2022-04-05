@@ -64,7 +64,6 @@ Powerstep01_DeviceConfig_t OIStepper::device_conf;
 
 void OIStepper::init()
 {
-    uint8_t i = 0;
     OIModuleMaster::init();
 
     /* Init GPIO service */
