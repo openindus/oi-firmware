@@ -26,7 +26,11 @@
 #include "OIModule.h"
 #include "OIType.h"
 
-/************ COMMON DEFINES FOR ALL STEPPERS MODULE **************/
+
+/************ DEFINES FOR BOI13 STEPPER MODULE *******************/
+#if defined(CONFIG_OI_STEPPER)
+
+#define OISTEPPER_NUMBER_OF_DEVICES     (2)
 
 /* SPI pins */
 #define OISTEPPER_SPI_PIN_MOSI          GPIO_NUM_37
@@ -38,11 +42,6 @@
 #define OISTEPPER_SPI_FREQ              SPI_MASTER_FREQ_8M
 
 #define ESP_INTR_FLAG_DEFAULT           (0)
-
-/************ DEFINES FOR BOI13 STEPPER MODULE *******************/
-#if defined(CONFIG_OI_STEPPER)
-
-#define OISTEPPER_NUMBER_OF_DEVICES     (2)
 
 /* ETOR */
 #define OISTEPPER_NB_ETORS              (4)
@@ -73,6 +72,17 @@
 #elif defined(CONFIG_OI_STEPPER_VERTICAL)
 
 #define OISTEPPER_NUMBER_OF_DEVICES     (1)
+
+/* SPI pins */
+#define OISTEPPER_SPI_PIN_MOSI          GPIO_NUM_35
+#define OISTEPPER_SPI_PIN_MISO          GPIO_NUM_37
+#define OISTEPPER_SPI_PIN_CLK           GPIO_NUM_36
+#define OISTEPPER_SPI_PIN_CS            GPIO_NUM_34
+/* SPI Device Host */
+#define OISTEPPER_SPI_HOST              FSPI_HOST
+#define OISTEPPER_SPI_FREQ              SPI_MASTER_FREQ_8M
+
+#define ESP_INTR_FLAG_DEFAULT           (0)
 
 /* ETOR */
 #define OISTEPPER_NB_ETORS              (6)

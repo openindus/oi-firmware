@@ -1,6 +1,6 @@
+.oi
 .pio
 .vscode
-sdkconfig.core
 docs/build
 docs/env
 build
@@ -13,6 +13,5 @@ sdkconfig.mixed
 sdkconfig.relaylp
 sdkconfig.relayhp
 sdkconfig
-venv
-.oi
+env
 __pycache__
