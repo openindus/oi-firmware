@@ -116,8 +116,21 @@
 #endif
 
 
+typedef enum {
+    MOTOR1 = 0,
+    MOTOR2 = 1,
+    NUMBER_OF_MOTORS,
+} Motor_t;
+
+
 class OIStepperInterface
 {
+    /**
+     * @brief Get Etor Level
+     * 
+     * @param etor 
+     * @return int level
+     */
     virtual int getEtorLevel(Etor_t etor) = 0;
 
     /**
@@ -129,10 +142,10 @@ class OIStepperInterface
     /**
     * @brief Set an Etor connected to a limit switch to stop a motor, the user can register a callback when an interrupt occurs
     * @param[in] etor ETOR to attach interrupt
-    * @param[in] deviceId (from 0 to MAX_NUMBER_OF_DEVICES-1)
+    * @param[in] motor Motor num
     * @param[in] callback (optionnal)
     */
-    virtual void attachLimitSwitch(Etor_t etor, uint8_t deviceId, void (*callback)(void) = NULL) = 0;
+    virtual void attachLimitSwitch(Etor_t etor, Motor_t motor, void (*callback)(void) = NULL) = 0;
 
     /**
     * @brief Detach an Etor connected to a limit switch to stop a motor
@@ -175,7 +188,7 @@ class OIStepperInterface
     /**
     * @brief Checks if at least one OIStepper is busy by checking 
     * busy pin position. 
-    * The busy pin is shared between all devices.
+    * The busy pin is shared between all motors.
     * @return One if at least one OIStepper is busy, otherwise zero
     **/
     virtual uint8_t checkBusyHw(void) const = 0;
@@ -183,7 +196,7 @@ class OIStepperInterface
     /**
     * @brief Checks if at least one OIStepper has an alarm flag set
     * by reading flag pin position.
-    * The flag pin is shared between all devices.
+    * The flag pin is shared between all motors.
     * @return One if at least one OIStepper has an alarm flag set ,
     * otherwise zero
     **/
@@ -191,57 +204,57 @@ class OIStepperInterface
 
     /**
     * @brief Issues OIStepper Get Status command
-    * @param[in] deviceId (from 0 to MAX_NUMBER_OF_DEVICES-1 )
+    * @param[in] motor Motor num
     * @return Status Register content
     */
-    virtual uint16_t getStatus(uint8_t deviceId) const = 0;
+    virtual uint16_t getStatus(Motor_t motor) const = 0;
 
     /**
     * @brief Issues OIStepper Go Home command (Shortest path to zero position)
-    * @param[in] deviceId (from 0 to MAX_NUMBER_OF_DEVICES-1 )
+    * @param[in] motor Motor num
     * @return None
     */
-    virtual void goHome(uint8_t deviceId) const = 0;
+    virtual void goHome(Motor_t motor) const = 0;
 
     /**
     * @brief Issues OIStepper Go Mark command
-    * @param[in] deviceId (from 0 to MAX_NUMBER_OF_DEVICES-1 )
+    * @param[in] motor Motor num
     * @return None
     */
-    virtual void goMark(uint8_t deviceId) const = 0;
+    virtual void goMark(Motor_t motor) const = 0;
 
     /**
     * @brief Issues OIStepper Go To command
-    * @param[in] deviceId (from 0 to MAX_NUMBER_OF_DEVICES-1 )
+    * @param[in] motor Motor num
     * @param[in] abs_pos absolute position in steps in agreement
     * with the step mode where requested to move
     * @return None
     */
-    virtual void goTo(uint8_t deviceId, int32_t abs_pos) const = 0;
+    virtual void goTo(Motor_t motor, int32_t abs_pos) const = 0;
 
     /**
     * @brief Issues OIStepper Go To Dir command
-    * @param[in] deviceId (from 0 to MAX_NUMBER_OF_DEVICES-1 )
+    * @param[in] motor Motor num
     * @param[in] direction movement direction
     * @param[in] abs_pos absolute position in steps in agreement
     * with the step mode where requested to move
     * @return None
     */
-    virtual void goToDir(uint8_t deviceId, motorDir_t direction, int32_t abs_pos) const = 0;
+    virtual void goToDir(Motor_t motor, motorDir_t direction, int32_t abs_pos) const = 0;
 
     /**
     * @brief Issues OIStepper Go Until command
-    * @param[in] deviceId (from 0 to MAX_NUMBER_OF_DEVICES-1 )
+    * @param[in] motor Motor num
     * @param[in] action ACTION_RESET or ACTION_COPY
     * @param[in] direction movement direction
     * @param[in] speed in 2^-28 step/tick
     * @return None
     */
-    virtual void goUntil(uint8_t deviceId, motorAction_t action, motorDir_t direction, uint32_t speed) const = 0;
+    virtual void goUntil(Motor_t motor, motorAction_t action, motorDir_t direction, uint32_t speed) const = 0;
 
     /**
     * @brief Issues OIStepper Hard HiZ command
-    * @param[in] deviceId (from 0 to MAX_NUMBER_OF_DEVICES-1 )
+    * @param[in] motor Motor num
     * @return None
     * @note The HardHiZ command immediately disables the power bridges
     * (high impedance state) and raises the HiZ flag. 
@@ -249,11 +262,11 @@ class OIStepperInterface
     * to enter high impedance state.
     * This command can be given anytime and is immediately executed.
     */
-    virtual void hardHiZ(uint8_t deviceId) const = 0;
+    virtual void hardHiZ(Motor_t motor) const = 0;
 
     /**
     * @brief Issues OIStepper Hard Stop command
-    * @param[in] deviceId (from 0 to MAX_NUMBER_OF_DEVICES-1 )
+    * @param[in] motor Motor num
     * @return None
     * @note The HardStop command causes an immediate motor stop with
     * infinite deceleration.
@@ -262,53 +275,53 @@ class OIStepperInterface
     * This command can be given anytime and is immediately executed.
     * This command keeps the BUSY flag low until the motor is stopped.
     */
-    virtual void hardStop(uint8_t deviceId) const = 0;
+    virtual void hardStop(Motor_t motor) const = 0;
     
     /**
     * @brief Issues OIStepper Move command
-    * @param[in] deviceId (from 0 to MAX_NUMBER_OF_DEVICES-1 )
+    * @param[in] motor Motor num
     * @param[in] direction Movement direction
     * @param[in] n_step number of steps
     * @return None
     */
-    virtual void move(uint8_t deviceId, motorDir_t direction, uint32_t n_step) const = 0;
+    virtual void move(Motor_t motor, motorDir_t direction, uint32_t n_step) const = 0;
 
     /**
     * @brief Issues OIStepper Release SW command
-    * @param[in] deviceId (from 0 to MAX_NUMBER_OF_DEVICES-1 )
+    * @param[in] motor Motor num
     * @param[in] action type of action to undertake when the SW
     * input is forced high
     * @param[in] direction movement direction
     * @return None
     */
-    virtual void releaseSw(uint8_t deviceId, motorAction_t action, motorDir_t direction) const = 0;
+    virtual void releaseSw(Motor_t motor, motorAction_t action, motorDir_t direction) const = 0;
 
     /**
     * @brief Issues OIStepper Reset Device command
-    * @param[in] deviceId (from 0 to MAX_NUMBER_OF_DEVICES-1 )
+    * @param[in] motor Motor num
     * @return None
     */
-    virtual void resetDevice(uint8_t deviceId) const = 0;
+    virtual void resetDevice(Motor_t motor) const = 0;
 
     /**
     * @brief Issues OIStepper Reset Pos command
-    * @param[in] deviceId (from 0 to MAX_NUMBER_OF_DEVICES-1 )
+    * @param[in] motor Motor num
     * @return None
     */
-    virtual void resetPos(uint8_t deviceId) const = 0;
+    virtual void resetPos(Motor_t motor) const = 0;
 
     /**
     * @brief Issues OIStepper Run command
-    * @param[in] deviceId (from 0 to MAX_NUMBER_OF_DEVICES-1 )
+    * @param[in] motor Motor num
     * @param[in] direction Movement direction (FORWARD, BACKWARD)
     * @param[in] speed in 2^-28 step/tick
     * @return None
     */
-    virtual void run(uint8_t deviceId, motorDir_t direction, uint32_t speed) const = 0;
+    virtual void run(Motor_t motor, motorDir_t direction, uint32_t speed) const = 0;
 
     /**
     * @brief Issues OIStepper Soft HiZ command
-    * @param[in] deviceId (from 0 to MAX_NUMBER_OF_DEVICES-1 )
+    * @param[in] motor Motor num
     * @return None
     * @note The SoftHiZ command disables the power bridges
     * (high impedance state) after a deceleration to zero.
@@ -319,11 +332,11 @@ class OIStepperInterface
     * This command can be given anytime and is immediately executed.
     * This command keeps the BUSY flag low until the motor is stopped.
     */
-    virtual void softHiZ(uint8_t deviceId) const = 0;
+    virtual void softHiZ(Motor_t motor) const = 0;
 
     /**
     * @brief Issues OIStepper Soft Stop command
-    * @param[in] deviceId (from 0 to MAX_NUMBER_OF_DEVICES-1 )
+    * @param[in] motor Motor num
     * @return None
     * @note The SoftStop command causes an immediate deceleration
     * to zero speed and a consequent motor stop.
@@ -334,21 +347,21 @@ class OIStepperInterface
     * This command can be given anytime and is immediately executed.
     * This command keeps the BUSY flag low until the motor is stopped.
     */
-    virtual void softStop(uint8_t deviceId) const = 0;
+    virtual void softStop(Motor_t motor) const = 0;
 
     /**
     * @brief Issues OIStepper Step Clock command
-    * @param[in] deviceId (from 0 to MAX_NUMBER_OF_DEVICES-1 )
+    * @param[in] motor Motor num
     * @param[in] direction Movement direction (FORWARD, BACKWARD)
     * @return None
     */
-    virtual void stepClock(uint8_t deviceId, motorDir_t direction) const = 0;
+    virtual void stepClock(Motor_t motor, motorDir_t direction) const = 0;
 
     /**
-    * @brief Fetch and clear status flags of all devices 
+    * @brief Fetch and clear status flags of all motors 
     * by issuing a GET_STATUS command simultaneously  
-    * to all devices.
-    * Then, the fetched status of each device can be retrieved
+    * to all motors.
+    * Then, the fetched status of each motor can be retrieved
     * by using the GetFetchedStatus function
     * provided there is no other calls to functions which 
     * use the SPI in between.
@@ -361,32 +374,32 @@ class OIStepperInterface
     * fetched by using FetchAndClearAllStatus.
     * The fetched values are available  as long as there
     * no other calls to functions which use the SPI.
-    * @param[in] deviceId (from 0 to MAX_NUMBER_OF_DEVICES-1 )
+    * @param[in] motor Motor num
     * @return Last fetched value of the STATUS register
     */
-    virtual uint16_t getFetchedStatus(uint8_t deviceId) const = 0;
+    virtual uint16_t getFetchedStatus(Motor_t motor) const = 0;
 
     /**
     * @brief  Returns the mark position  of the specified device
-    * @param[in] deviceId (from 0 to MAX_NUMBER_OF_DEVICES-1 )
+    * @param[in] motor Motor num
     * @return Mark register value converted in a 32b signed integer 
     **/
-    virtual int32_t getMark(uint8_t deviceId) const = 0;
+    virtual int32_t getMark(Motor_t motor) const = 0;
 
     /**
     * @brief  Returns the ABS_POSITION of the specified device
-    * @param[in] deviceId (from 0 to MAX_NUMBER_OF_DEVICES-1 )
+    * @param[in] motor Motor num
     * @return ABS_POSITION register value converted in a 32b signed integer
     **/
-    virtual int32_t getPosition(uint8_t deviceId) const = 0;
+    virtual int32_t getPosition(Motor_t motor) const = 0;
 
     /**
-    * @brief Checks if the specified device is busy
+    * @brief Checks if the specified motor is busy
     * by reading the Busy flag bit ot its status Register
-    * @param[in] deviceId (from 0 to MAX_NUMBER_OF_DEVICES-1 )
-    * @return true if device is busy, false zero
+    * @param[in] motor Motor num
+    * @return true if motor is busy, false zero
     */
-    virtual bool isDeviceBusy(uint8_t deviceId) const = 0;
+    virtual bool isDeviceBusy(Motor_t motor) const = 0;
 
     /**
     * @brief Put commands in queue before synchronous sending
@@ -394,47 +407,47 @@ class OIStepperInterface
     * Any call to functions that use the SPI between the calls of 
     * QueueCommands and SendQueuedCommands 
     * will corrupt the queue.
-    * A command for each device of the daisy chain must be 
+    * A command for each motor of the daisy chain must be 
     * specified before calling SendQueuedCommands.
-    * @param[in] deviceId deviceId (from 0 to MAX_NUMBER_OF_DEVICES-1 )
+    * @param[in] motor motor Motor num
     * @param[in] command Command to queue (all OIStepper commmands 
     * except Powerstep01_SET_PARAM, Powerstep01_GET_PARAM, 
     * Powerstep01_GET_STATUS)
     * @param[in] value argument of the command to queue
     * @return None
     */
-    virtual void queueCommands(uint8_t deviceId, uint8_t command, int32_t value) const = 0;
+    virtual void queueCommands(Motor_t motor, uint8_t command, int32_t value) const = 0;
 
     /**
     * @brief  Reads the Status Register value
-    * @param[in] deviceId (from 0 to MAX_NUMBER_OF_DEVICES-1 )
+    * @param[in] motor Motor num
     * @return Status register value
     * @note The status register flags are not cleared 
     * at the difference with getStatus()
     **/
-    virtual uint16_t readStatusRegister(uint8_t deviceId) const = 0;
+    virtual uint16_t readStatusRegister(Motor_t motor) const = 0;
 
     /**
-    * @brief  Releases the OIStepper reset (pin set to High) of all devices
-    * @param[in] deviceId (from 0 to MAX_NUMBER_OF_DEVICES-1 )
+    * @brief  Releases the OIStepper reset (pin set to High) of all motors
+    * @param[in] motor Motor num
     * @return None
     **/
-    virtual void releaseReset(uint8_t deviceId) const = 0;
+    virtual void releaseReset(Motor_t motor) const = 0;
 
     /**
-    * @brief  Resets the OIStepper (reset pin set to low) of all devices
-    * @param[in] deviceId (from 0 to MAX_NUMBER_OF_DEVICES-1 )
+    * @brief  Resets the OIStepper (reset pin set to low) of all motors
+    * @param[in] motor Motor num
     * @return None
     **/
-    virtual void reset(uint8_t deviceId) const = 0;
+    virtual void reset(Motor_t motor) const = 0;
 
     /**
     * @brief  Set the stepping mode 
-    * @param[in] deviceId (from 0 to MAX_NUMBER_OF_DEVICES-1 )
+    * @param[in] motor Motor num
     * @param[in] stepMode from full step to 1/128 microstep as specified in enum motorStepMode_t
     * @return TRUE if successfull, FALSE if failure
     **/
-    virtual bool selectStepMode(uint8_t deviceId, motorStepMode_t stepMode) const = 0;
+    virtual bool selectStepMode(Motor_t motor, motorStepMode_t stepMode) const = 0;
 
     /**
     * @brief Sends commands stored previously in the queue by 
@@ -446,19 +459,19 @@ class OIStepperInterface
     /**
     * @brief  Sets Home Position 
     * (ABS pos set to current pos minus new home position)
-    * @param[in] deviceId (from 0 to MAX_NUMBER_OF_DEVICES-1 )
+    * @param[in] motor Motor num
     * @param[in] homePos new home position
     * @return None
     **/
-    virtual void setHome(uint8_t deviceId, int32_t homePos) const = 0;
+    virtual void setHome(Motor_t motor, int32_t homePos) const = 0;
 
     /**
     * @brief  Sets Mark position 
-    * @param[in] deviceId (from 0 to MAX_NUMBER_OF_DEVICES-1 )
+    * @param[in] motor Motor num
     * @param[in] markPos new mark position
     * @return None
     **/
-    virtual void setMark(uint8_t deviceId, int32_t markPos) const = 0;
+    virtual void setMark(Motor_t motor, int32_t markPos) const = 0;
     
     /**
     * @brief  Start the step clock by using the given frequency
@@ -475,52 +488,52 @@ class OIStepperInterface
     virtual void stopStepClock(void) const = 0;
 
     /**
-    * @brief  Locks until all devices become not busy
+    * @brief  Locks until all motors become not busy
     * @return None
     **/
     virtual void waitForAllDevicesNotBusy(void) const = 0;
 
     /**
-    * @brief  Locks until the device becomes not busy
-    * @param[in] deviceId (from 0 to MAX_NUMBER_OF_DEVICES-1 )
+    * @brief  Locks until the motor becomes not busy
+    * @param[in] motor Motor num
     * @return None
     **/
-    virtual void waitWhileActive(uint8_t deviceId) const = 0;
+    virtual void waitWhileActive(Motor_t motor) const = 0;
 
     /**
     * @brief Issues the SetParam command to the OIStepper of the specified device
-    * @param[in] deviceId (from 0 to MAX_NUMBER_OF_DEVICES-1 )
+    * @param[in] motor Motor num
     * @param[in] param Register adress (Powerstep01_ABS_POS, Powerstep01_MARK,...)
     * @param[in] value Value to set in the register
     * @return None
     */
-    virtual void setParam(uint8_t deviceId, uint32_t param, uint32_t value) const = 0;
+    virtual void setParam(Motor_t motor, uint32_t param, uint32_t value) const = 0;
 
     /**
     * @brief Issues OIStepper Get Param command
-    * @param[in] deviceId (from 0 to MAX_NUMBER_OF_DEVICES-1 )
+    * @param[in] motor Motor num
     * @param[in] param OIStepper register address
     * @return Register value - 1 to 3 bytes (depends on register)
     */
-    virtual uint32_t getParam(uint8_t deviceId, uint32_t param) const = 0;
+    virtual uint32_t getParam(Motor_t motor, uint32_t param) const = 0;
 
     /**
     * @brief Issues the SetParam command to the OIStepper of the specified device
-    * @param[in] deviceId (from 0 to MAX_NUMBER_OF_DEVICES-1 )
+    * @param[in] motor Motor num
     * @param[in] param Register adress (Powerstep01_ABS_POS, Powerstep01_MARK,...)
     * @param[in] value Floating point value to convert and set into the register
     * @return TRUE if param and value are valid, FALSE otherwise
     */
-    virtual bool setAnalogValue(uint8_t deviceId, uint32_t param, float value) const = 0;
+    virtual bool setAnalogValue(Motor_t motor, uint32_t param, float value) const = 0;
 
     /**
     * @brief Issues OIStepper Get Parameter command and convert the result to
     * floating point if meaningfull
-    * @param[in] deviceId (from 0 to MAX_NUMBER_OF_DEVICES-1 )
+    * @param[in] motor Motor num
     * @param[in] param Powerstep01 register address
     * @return Register value - 1 to 3 bytes (depends on register)
     */
-    virtual float getAnalogValue(uint8_t deviceId, uint32_t param) const = 0;
+    virtual float getAnalogValue(Motor_t motor, uint32_t param) const = 0;
 };
 
 
@@ -562,9 +575,9 @@ public:
             gpio_isr_handler_remove(_etor[etor]);
     }
 
-    void attachLimitSwitch(Etor_t etor, uint8_t deviceId, bool notify = false);
+    void attachLimitSwitch(Etor_t etor, Motor_t motor, bool notify = false);
 
-    inline void attachLimitSwitch(Etor_t etor, uint8_t deviceId, void (*callback)(void) = NULL) {
+    inline void attachLimitSwitch(Etor_t etor, Motor_t motor, void (*callback)(void) = NULL) {
         /**
          * @todo
          * 
@@ -617,131 +630,131 @@ public:
         #endif
     }
 
-    inline uint16_t getStatus(uint8_t deviceId) const {
+    inline uint16_t getStatus(Motor_t motor) const {
         #ifdef CONFIG_L6470
-        return L6470_CmdGetStatus(deviceId);
+        return L6470_CmdGetStatus(motor);
         #else
-        return Powerstep01_CmdGetStatus(deviceId);
+        return Powerstep01_CmdGetStatus(motor);
         #endif
     }
 
-    inline void goHome(uint8_t deviceId) const {
+    inline void goHome(Motor_t motor) const {
         #ifdef CONFIG_L6470
-        L6470_CmdGoHome(deviceId);
+        L6470_CmdGoHome(motor);
         #else
-        Powerstep01_CmdGoHome(deviceId);
+        Powerstep01_CmdGoHome(motor);
         #endif
     }
 
-    inline void goMark(uint8_t deviceId) const {
+    inline void goMark(Motor_t motor) const {
         #ifdef CONFIG_L6470
-        L6470_CmdGoMark(deviceId);
+        L6470_CmdGoMark(motor);
         #else
-        Powerstep01_CmdGoMark(deviceId);
+        Powerstep01_CmdGoMark(motor);
         #endif
     }
 
-    inline void goTo(uint8_t deviceId, int32_t abs_pos) const {
+    inline void goTo(Motor_t motor, int32_t abs_pos) const {
         #ifdef CONFIG_L6470
-        L6470_CmdGoTo(deviceId, abs_pos);
+        L6470_CmdGoTo(motor, abs_pos);
         #else
-        Powerstep01_CmdGoTo(deviceId, abs_pos);
+        Powerstep01_CmdGoTo(motor, abs_pos);
         #endif
     }
 
-    inline void goToDir(uint8_t deviceId, motorDir_t direction, int32_t abs_pos) const {
+    inline void goToDir(Motor_t motor, motorDir_t direction, int32_t abs_pos) const {
         #ifdef CONFIG_L6470
-        L6470_CmdGoToDir(deviceId, direction, abs_pos);
+        L6470_CmdGoToDir(motor, direction, abs_pos);
         #else
-        Powerstep01_CmdGoToDir(deviceId, direction, abs_pos);
+        Powerstep01_CmdGoToDir(motor, direction, abs_pos);
         #endif
     }
 
-    inline void goUntil(uint8_t deviceId, motorAction_t action, motorDir_t direction, uint32_t speed) const {
+    inline void goUntil(Motor_t motor, motorAction_t action, motorDir_t direction, uint32_t speed) const {
         #ifdef CONFIG_L6470
-        L6470_CmdGoUntil(deviceId, action, direction, speed);
+        L6470_CmdGoUntil(motor, action, direction, speed);
         #else
-        Powerstep01_CmdGoUntil(deviceId, action, direction, speed);
+        Powerstep01_CmdGoUntil(motor, action, direction, speed);
         #endif
     }
 
-    inline void hardHiZ(uint8_t deviceId) const {
+    inline void hardHiZ(Motor_t motor) const {
         #ifdef CONFIG_L6470
-        L6470_CmdHardHiZ(deviceId);
+        L6470_CmdHardHiZ(motor);
         #else
-        Powerstep01_CmdHardHiZ(deviceId);
+        Powerstep01_CmdHardHiZ(motor);
         #endif
     }
 
-    inline void hardStop(uint8_t deviceId) const {
+    inline void hardStop(Motor_t motor) const {
         #ifdef CONFIG_L6470
-        L6470_CmdHardStop(deviceId);
+        L6470_CmdHardStop(motor);
         #else
-        Powerstep01_CmdHardStop(deviceId);
+        Powerstep01_CmdHardStop(motor);
         #endif
     }
 
-    inline void move(uint8_t deviceId, motorDir_t direction, uint32_t n_step) const {
+    inline void move(Motor_t motor, motorDir_t direction, uint32_t n_step) const {
         #ifdef CONFIG_L6470
-        L6470_CmdMove(deviceId, direction, n_step);
+        L6470_CmdMove(motor, direction, n_step);
         #else
-        Powerstep01_CmdMove(deviceId, direction, n_step);
+        Powerstep01_CmdMove(motor, direction, n_step);
         #endif
     }
 
-    inline void releaseSw(uint8_t deviceId, motorAction_t action, motorDir_t direction) const {
+    inline void releaseSw(Motor_t motor, motorAction_t action, motorDir_t direction) const {
         #ifdef CONFIG_L6470
-        L6470_CmdReleaseSw(deviceId, action, direction);
+        L6470_CmdReleaseSw(motor, action, direction);
         #else
-        Powerstep01_CmdReleaseSw(deviceId, action, direction);
+        Powerstep01_CmdReleaseSw(motor, action, direction);
         #endif
     }
 
-    inline void resetDevice(uint8_t deviceId) const {
+    inline void resetDevice(Motor_t motor) const {
         #ifdef CONFIG_L6470
-        L6470_CmdResetDevice(deviceId);
+        L6470_CmdResetDevice(motor);
         #else
-        Powerstep01_CmdResetDevice(deviceId);
+        Powerstep01_CmdResetDevice(motor);
         #endif
     }
 
-    inline void resetPos(uint8_t deviceId) const {
+    inline void resetPos(Motor_t motor) const {
         #ifdef CONFIG_L6470
-        L6470_CmdResetPos(deviceId);
+        L6470_CmdResetPos(motor);
         #else
-        Powerstep01_CmdResetPos(deviceId);
+        Powerstep01_CmdResetPos(motor);
         #endif
     }
 
-    inline void run(uint8_t deviceId, motorDir_t direction, uint32_t speed) const {
+    inline void run(Motor_t motor, motorDir_t direction, uint32_t speed) const {
         #ifdef CONFIG_L6470
-        L6470_CmdRun(deviceId, direction, speed);
+        L6470_CmdRun(motor, direction, speed);
         #else
-        Powerstep01_CmdRun(deviceId, direction, speed);
+        Powerstep01_CmdRun(motor, direction, speed);
         #endif
     }
 
-    inline void softHiZ(uint8_t deviceId) const {
+    inline void softHiZ(Motor_t motor) const {
         #ifdef CONFIG_L6470
-        L6470_CmdSoftHiZ(deviceId);
+        L6470_CmdSoftHiZ(motor);
         #else
-        Powerstep01_CmdSoftHiZ(deviceId);
+        Powerstep01_CmdSoftHiZ(motor);
         #endif
     }
 
-    inline void softStop(uint8_t deviceId) const {
+    inline void softStop(Motor_t motor) const {
         #ifdef CONFIG_L6470
-        L6470_CmdSoftStop(deviceId);
+        L6470_CmdSoftStop(motor);
         #else
-        Powerstep01_CmdSoftStop(deviceId);
+        Powerstep01_CmdSoftStop(motor);
         #endif
     }
 
-    inline void stepClock(uint8_t deviceId, motorDir_t direction) const {
+    inline void stepClock(Motor_t motor, motorDir_t direction) const {
         #ifdef CONFIG_L6470
-        L6470_CmdStepClock(deviceId, direction);
+        L6470_CmdStepClock(motor, direction);
         #else
-        Powerstep01_CmdStepClock(deviceId, direction);
+        Powerstep01_CmdStepClock(motor, direction);
         #endif
     }
 
@@ -753,75 +766,75 @@ public:
         #endif
     }
 
-    inline uint16_t getFetchedStatus(uint8_t deviceId) const {
+    inline uint16_t getFetchedStatus(Motor_t motor) const {
         #ifdef CONFIG_L6470
-        return L6470_GetFetchedStatus(deviceId);
+        return L6470_GetFetchedStatus(motor);
         #else
-        return Powerstep01_GetFetchedStatus(deviceId);
+        return Powerstep01_GetFetchedStatus(motor);
         #endif
     }
 
-    inline int32_t getMark(uint8_t deviceId) const {
+    inline int32_t getMark(Motor_t motor) const {
         #ifdef CONFIG_L6470
-        return L6470_GetMark(deviceId);
+        return L6470_GetMark(motor);
         #else
-        return Powerstep01_GetMark(deviceId);
+        return Powerstep01_GetMark(motor);
         #endif
     }
 
-    inline int32_t getPosition(uint8_t deviceId) const {
+    inline int32_t getPosition(Motor_t motor) const {
         #ifdef CONFIG_L6470
-        return L6470_GetPosition(deviceId);
+        return L6470_GetPosition(motor);
         #else
-        return Powerstep01_GetPosition(deviceId);
+        return Powerstep01_GetPosition(motor);
         #endif
     }
 
-    inline bool isDeviceBusy(uint8_t deviceId) const {
+    inline bool isDeviceBusy(Motor_t motor) const {
         #ifdef CONFIG_L6470
-        return L6470_IsDeviceBusy(deviceId);
+        return L6470_IsDeviceBusy(motor);
         #else
-        return Powerstep01_IsDeviceBusy(deviceId);
+        return Powerstep01_IsDeviceBusy(motor);
         #endif
     }
 
-    inline void queueCommands(uint8_t deviceId, uint8_t command, int32_t value) const {
+    inline void queueCommands(Motor_t motor, uint8_t command, int32_t value) const {
         #ifdef CONFIG_L6470
-        L6470_QueueCommands(deviceId, command, value);
+        L6470_QueueCommands(motor, command, value);
         #else
-        Powerstep01_QueueCommands(deviceId, command, value);
+        Powerstep01_QueueCommands(motor, command, value);
         #endif
     }
 
-    inline uint16_t readStatusRegister(uint8_t deviceId) const {
+    inline uint16_t readStatusRegister(Motor_t motor) const {
         #ifdef CONFIG_L6470
-        return L6470_ReadStatusRegister(deviceId);
+        return L6470_ReadStatusRegister(motor);
         #else
-        return Powerstep01_ReadStatusRegister(deviceId);
+        return Powerstep01_ReadStatusRegister(motor);
         #endif
     }
 
-    inline void releaseReset(uint8_t deviceId) const {
+    inline void releaseReset(Motor_t motor) const {
         #ifdef CONFIG_L6470
-        L6470_ReleaseReset(deviceId);
+        L6470_ReleaseReset(motor);
         #else
-        Powerstep01_ReleaseReset(deviceId);
+        Powerstep01_ReleaseReset(motor);
         #endif
     }
 
-    inline void reset(uint8_t deviceId) const {
+    inline void reset(Motor_t motor) const {
         #ifdef CONFIG_L6470
-        L6470_Reset(deviceId);
+        L6470_Reset(motor);
         #else
-        Powerstep01_Reset(deviceId);
+        Powerstep01_Reset(motor);
         #endif
     }
 
-    inline bool selectStepMode(uint8_t deviceId, motorStepMode_t stepMode) const {
+    inline bool selectStepMode(Motor_t motor, motorStepMode_t stepMode) const {
         #ifdef CONFIG_L6470
-        return L6470_SelectStepMode(deviceId, stepMode);
+        return L6470_SelectStepMode(motor, stepMode);
         #else
-        return Powerstep01_SelectStepMode(deviceId, stepMode);
+        return Powerstep01_SelectStepMode(motor, stepMode);
         #endif
     }
 
@@ -833,19 +846,19 @@ public:
         #endif
     }
 
-    inline void setHome(uint8_t deviceId, int32_t homePos) const {
+    inline void setHome(Motor_t motor, int32_t homePos) const {
         #ifdef CONFIG_L6470
-        L6470_SetHome(deviceId, homePos);
+        L6470_SetHome(motor, homePos);
         #else
-        Powerstep01_SetHome(deviceId, homePos);
+        Powerstep01_SetHome(motor, homePos);
         #endif
     }
 
-    inline void setMark(uint8_t deviceId, int32_t markPos) const {
+    inline void setMark(Motor_t motor, int32_t markPos) const {
         #ifdef CONFIG_L6470
-        L6470_SetMark(deviceId, markPos);
+        L6470_SetMark(motor, markPos);
         #else
-        Powerstep01_SetMark(deviceId, markPos);
+        Powerstep01_SetMark(motor, markPos);
         #endif
     }
 
@@ -873,45 +886,45 @@ public:
         #endif
     }
 
-    inline void waitWhileActive(uint8_t deviceId) const {
+    inline void waitWhileActive(Motor_t motor) const {
         #ifdef CONFIG_L6470
-        L6470_WaitWhileActive(deviceId);
+        L6470_WaitWhileActive(motor);
         #else
-        Powerstep01_WaitWhileActive(deviceId);
+        Powerstep01_WaitWhileActive(motor);
         #endif
     }
 
-    inline void setParam(uint8_t deviceId, uint32_t param, uint32_t value) const {
+    inline void setParam(Motor_t motor, uint32_t param, uint32_t value) const {
         #ifdef CONFIG_L6470
-        L6470_SetMotorConfigToNVS(deviceId, param, (uint16_t)value);
-        L6470_CmdSetParam(deviceId, param, value);
+        L6470_SetMotorConfigToNVS(motor, param, (uint16_t)value);
+        L6470_CmdSetParam(motor, param, value);
         #else
-        Powerstep01_SetMotorConfigToNVS(deviceId, param, (uint16_t)value);
-        Powerstep01_CmdSetParam(deviceId, param, value);
+        Powerstep01_SetMotorConfigToNVS(motor, param, (uint16_t)value);
+        Powerstep01_CmdSetParam(motor, param, value);
         #endif
     }
     
-    inline uint32_t getParam(uint8_t deviceId, uint32_t param) const {
+    inline uint32_t getParam(Motor_t motor, uint32_t param) const {
         #ifdef CONFIG_L6470
-        return L6470_CmdGetParam(deviceId, param);
+        return L6470_CmdGetParam(motor, param);
         #else
-        return Powerstep01_CmdGetParam(deviceId, param);
+        return Powerstep01_CmdGetParam(motor, param);
         #endif
     }
     
-    inline bool setAnalogValue(uint8_t deviceId, uint32_t param, float value) const {
+    inline bool setAnalogValue(Motor_t motor, uint32_t param, float value) const {
         #ifdef CONFIG_L6470
-        return L6470_SetAnalogValue(deviceId, param, value);
+        return L6470_SetAnalogValue(motor, param, value);
         #else
-        return Powerstep01_SetAnalogValue(deviceId, param, value);
+        return Powerstep01_SetAnalogValue(motor, param, value);
         #endif
     }
     
-    inline float getAnalogValue(uint8_t deviceId, uint32_t param) const {
+    inline float getAnalogValue(Motor_t motor, uint32_t param) const {
         #ifdef CONFIG_L6470
-        return L6470_GetAnalogValue(deviceId, param);
+        return L6470_GetAnalogValue(motor, param);
         #else
-        return Powerstep01_GetAnalogValue(deviceId, param);
+        return Powerstep01_GetAnalogValue(motor, param);
         #endif
     }
 
@@ -954,10 +967,10 @@ public:
         setMessage(OIMessage(CMD_SET_LOGIC_SWITCH, _senderId, static_cast<uint16_t>(no_logic)));
     }
 
-    inline void attachLimitSwitch(Etor_t etor, uint8_t deviceId, void (*callback)(void) = NULL) {
+    inline void attachLimitSwitch(Etor_t etor, Motor_t motor, void (*callback)(void) = NULL) {
         if ((callback != NULL))
         {
-            setMessage(OIMessage(CMD_ATTACH_LIMIT_SWITCH, _senderId, static_cast<uint16_t>((etor << 8) | deviceId), static_cast<uint32_t>(true)));
+            setMessage(OIMessage(CMD_ATTACH_LIMIT_SWITCH, _senderId, static_cast<uint16_t>((etor << 8) | motor), static_cast<uint32_t>(true)));
             Fct.add(OIMessage(CMD_ETOR_INTERRUPT, _senderId), [callback](OIMessage msg) -> uint32_t {
                 callback();
                 return 0;
@@ -965,7 +978,7 @@ public:
         }
         else
         {
-            setMessage(OIMessage(CMD_ATTACH_LIMIT_SWITCH, _senderId, static_cast<uint16_t>((etor << 8) | deviceId), static_cast<uint32_t>(false)));
+            setMessage(OIMessage(CMD_ATTACH_LIMIT_SWITCH, _senderId, static_cast<uint16_t>((etor << 8) | motor), static_cast<uint32_t>(false)));
         }
     }
 
@@ -1005,120 +1018,120 @@ public:
         return (uint8_t)getMessage(OIMessage(CMD_CHECK_STATUS_HW, _senderId));
     }
 
-    inline uint16_t getStatus(uint8_t deviceId) const {
-        return (uint16_t)getMessage(OIMessage(CMD_GET_STATUS, _senderId, deviceId));
+    inline uint16_t getStatus(Motor_t motor) const {
+        return (uint16_t)getMessage(OIMessage(CMD_GET_STATUS, _senderId, motor));
     }
 
-    inline void goHome(uint8_t deviceId) const {
-        setMessage(OIMessage(CMD_GO_HOME, _senderId, deviceId));
+    inline void goHome(Motor_t motor) const {
+        setMessage(OIMessage(CMD_GO_HOME, _senderId, motor));
     }
 
-    inline void goMark(uint8_t deviceId) const {
-        setMessage(OIMessage(CMD_GO_MARK, _senderId, deviceId));
+    inline void goMark(Motor_t motor) const {
+        setMessage(OIMessage(CMD_GO_MARK, _senderId, motor));
     }
 
-    inline void goTo(uint8_t deviceId, int32_t abs_pos) const {
-        setMessage(OIMessage(CMD_GO_TO, _senderId, deviceId, abs_pos));
+    inline void goTo(Motor_t motor, int32_t abs_pos) const {
+        setMessage(OIMessage(CMD_GO_TO, _senderId, motor, abs_pos));
     }
 
-    inline void goToDir(uint8_t deviceId, motorDir_t direction, int32_t abs_pos) const {
-        setMessage(OIMessage(CMD_GO_TO_DIR, _senderId, (uint16_t)((direction << 8) | deviceId), abs_pos));
+    inline void goToDir(Motor_t motor, motorDir_t direction, int32_t abs_pos) const {
+        setMessage(OIMessage(CMD_GO_TO_DIR, _senderId, (uint16_t)((direction << 8) | motor), abs_pos));
     }
 
-    inline void goUntil(uint8_t deviceId, motorAction_t action, motorDir_t direction, uint32_t speed) const {
-        setMessage(OIMessage(CMD_GO_UNTIL, _senderId, (uint16_t)((action << 12) | (direction << 8) | deviceId), speed));
+    inline void goUntil(Motor_t motor, motorAction_t action, motorDir_t direction, uint32_t speed) const {
+        setMessage(OIMessage(CMD_GO_UNTIL, _senderId, (uint16_t)((action << 12) | (direction << 8) | motor), speed));
     }
 
-    inline void hardHiZ(uint8_t deviceId) const {
-        setMessage(OIMessage(CMD_HARD_HIZ, _senderId, deviceId));
+    inline void hardHiZ(Motor_t motor) const {
+        setMessage(OIMessage(CMD_HARD_HIZ, _senderId, motor));
     }
 
-    inline void hardStop(uint8_t deviceId) const {
-        setMessage(OIMessage(CMD_HARD_STOP, _senderId, deviceId));
+    inline void hardStop(Motor_t motor) const {
+        setMessage(OIMessage(CMD_HARD_STOP, _senderId, motor));
     }
 
-    inline void move(uint8_t deviceId, motorDir_t direction, uint32_t n_step) const {
-        setMessage(OIMessage(CMD_MOVE, _senderId, (uint16_t)((direction << 8) | deviceId), n_step));
+    inline void move(Motor_t motor, motorDir_t direction, uint32_t n_step) const {
+        setMessage(OIMessage(CMD_MOVE, _senderId, (uint16_t)((direction << 8) | motor), n_step));
     }
 
-    inline void releaseSw(uint8_t deviceId, motorAction_t action, motorDir_t direction) const {
-        setMessage(OIMessage(CMD_RELEASE_SW, _senderId, (uint16_t)((action << 12) | (direction << 8) | deviceId)));
+    inline void releaseSw(Motor_t motor, motorAction_t action, motorDir_t direction) const {
+        setMessage(OIMessage(CMD_RELEASE_SW, _senderId, (uint16_t)((action << 12) | (direction << 8) | motor)));
     }
 
-    inline void resetDevice(uint8_t deviceId) const {
-        setMessage(OIMessage(CMD_RESET_DEVICE, _senderId, deviceId));
+    inline void resetDevice(Motor_t motor) const {
+        setMessage(OIMessage(CMD_RESET_DEVICE, _senderId, motor));
     }
 
-    inline void resetPos(uint8_t deviceId) const {
-        setMessage(OIMessage(CMD_RESET_POS, _senderId, deviceId));
+    inline void resetPos(Motor_t motor) const {
+        setMessage(OIMessage(CMD_RESET_POS, _senderId, motor));
     }
 
-    inline void run(uint8_t deviceId, motorDir_t direction, uint32_t speed) const {
-        setMessage(OIMessage(CMD_RUN, _senderId, (uint16_t)((direction << 8) | deviceId), speed));
+    inline void run(Motor_t motor, motorDir_t direction, uint32_t speed) const {
+        setMessage(OIMessage(CMD_RUN, _senderId, (uint16_t)((direction << 8) | motor), speed));
     }
 
-    inline void softHiZ(uint8_t deviceId) const {
-        setMessage(OIMessage(CMD_SOFT_HIZ, _senderId, deviceId));
+    inline void softHiZ(Motor_t motor) const {
+        setMessage(OIMessage(CMD_SOFT_HIZ, _senderId, motor));
     }
 
-    inline void softStop(uint8_t deviceId) const {
-        setMessage(OIMessage(CMD_SOFT_STOP, _senderId, deviceId));
+    inline void softStop(Motor_t motor) const {
+        setMessage(OIMessage(CMD_SOFT_STOP, _senderId, motor));
     }
 
-    inline void stepClock(uint8_t deviceId, motorDir_t direction) const {
-        setMessage(OIMessage(CMD_STEP_CLOCK, _senderId, (uint16_t)((direction << 8) | deviceId)));
+    inline void stepClock(Motor_t motor, motorDir_t direction) const {
+        setMessage(OIMessage(CMD_STEP_CLOCK, _senderId, (uint16_t)((direction << 8) | motor)));
     }
 
     inline void fetchAndClearAllStatus(void) const {
         setMessage(OIMessage(CMD_FETCH_AND_CLEAR_ALL_STATUS, _senderId));
     }
 
-    inline uint16_t getFetchedStatus(uint8_t deviceId) const {
-        return (uint16_t)getMessage(OIMessage(CMD_GET_FETCHED_STATUS, _senderId, deviceId));
+    inline uint16_t getFetchedStatus(Motor_t motor) const {
+        return (uint16_t)getMessage(OIMessage(CMD_GET_FETCHED_STATUS, _senderId, motor));
     }
 
-    inline int32_t getMark(uint8_t deviceId) const {
-        return getMessage(OIMessage(CMD_GET_MARK, _senderId, deviceId));
+    inline int32_t getMark(Motor_t motor) const {
+        return getMessage(OIMessage(CMD_GET_MARK, _senderId, motor));
     }
 
-    inline int32_t getPosition(uint8_t deviceId) const {
-        return getMessage(OIMessage(CMD_GET_POSITION, _senderId, deviceId));
+    inline int32_t getPosition(Motor_t motor) const {
+        return getMessage(OIMessage(CMD_GET_POSITION, _senderId, motor));
     }
 
-    bool isDeviceBusy(uint8_t deviceId) const {
-        return (bool)getMessage(OIMessage(CMD_IS_DEVICE_BUSY, _senderId, deviceId));
+    bool isDeviceBusy(Motor_t motor) const {
+        return (bool)getMessage(OIMessage(CMD_IS_DEVICE_BUSY, _senderId, motor));
     }
 
-    void queueCommands(uint8_t deviceId, uint8_t command, int32_t value) const {
-        setMessage(OIMessage(CMD_QUEUE_COMMANDS, _senderId, (uint16_t)((command << 8) | deviceId), value));
+    void queueCommands(Motor_t motor, uint8_t command, int32_t value) const {
+        setMessage(OIMessage(CMD_QUEUE_COMMANDS, _senderId, (uint16_t)((command << 8) | motor), value));
     }
 
-    uint16_t readStatusRegister(uint8_t deviceId) const {
-        return (uint16_t)getMessage(OIMessage(CMD_READ_STATUS_REGISTER, _senderId, deviceId));
+    uint16_t readStatusRegister(Motor_t motor) const {
+        return (uint16_t)getMessage(OIMessage(CMD_READ_STATUS_REGISTER, _senderId, motor));
     }
 
-    void releaseReset(uint8_t deviceId) const {
-        setMessage(OIMessage(CMD_RELEASE_RESET, _senderId, deviceId));
+    void releaseReset(Motor_t motor) const {
+        setMessage(OIMessage(CMD_RELEASE_RESET, _senderId, motor));
     }
 
-    void reset(uint8_t deviceId) const {
-        setMessage(OIMessage(CMD_RESET, _senderId, deviceId));
+    void reset(Motor_t motor) const {
+        setMessage(OIMessage(CMD_RESET, _senderId, motor));
     }
 
-    bool selectStepMode(uint8_t deviceId, motorStepMode_t stepMode) const {
-        return (bool)getMessage(OIMessage(CMD_SELECT_STEP_MODE, _senderId, (uint16_t)((stepMode << 8) | deviceId)));
+    bool selectStepMode(Motor_t motor, motorStepMode_t stepMode) const {
+        return (bool)getMessage(OIMessage(CMD_SELECT_STEP_MODE, _senderId, (uint16_t)((stepMode << 8) | motor)));
     }
 
     void sendQueuedCommands(void) const {
         sendMessage(OIMessage(CMD_SEND_QUEUED_COMMANDS, _senderId));
     }
 
-    void setHome(uint8_t deviceId, int32_t homePos) const {
-        setMessage(OIMessage(CMD_SET_HOME, _senderId, deviceId, homePos));
+    void setHome(Motor_t motor, int32_t homePos) const {
+        setMessage(OIMessage(CMD_SET_HOME, _senderId, motor, homePos));
     }
 
-    void setMark(uint8_t deviceId, int32_t markPos) const {
-        setMessage(OIMessage(CMD_SET_MARK, _senderId, deviceId, markPos));
+    void setMark(Motor_t motor, int32_t markPos) const {
+        setMessage(OIMessage(CMD_SET_MARK, _senderId, motor, markPos));
     }
 
     void startStepClock(uint16_t newFreq) const {
@@ -1136,29 +1149,29 @@ public:
          */
     }
 
-    void waitWhileActive(uint8_t deviceId) const {
+    void waitWhileActive(Motor_t motor) const {
         /**
          * @todo add blocking callback
          * 
          */
     }
 
-    void setParam(uint8_t deviceId, uint32_t param, uint32_t value) const {
-        setMessage(OIMessage(CMD_SET_PARAM, _senderId, (uint16_t)(((uint8_t)param << 8) | deviceId), value));
+    void setParam(Motor_t motor, uint32_t param, uint32_t value) const {
+        setMessage(OIMessage(CMD_SET_PARAM, _senderId, (uint16_t)(((uint8_t)param << 8) | motor), value));
     }
 
-    uint32_t getParam(uint8_t deviceId, uint32_t param) const {
-        return getMessage(OIMessage(CMD_GET_PARAM, _senderId, (uint16_t)(((uint8_t)param << 8) | deviceId)));
+    uint32_t getParam(Motor_t motor, uint32_t param) const {
+        return getMessage(OIMessage(CMD_GET_PARAM, _senderId, (uint16_t)(((uint8_t)param << 8) | motor)));
     }
 
-    bool setAnalogValue(uint8_t deviceId, uint32_t param, float value) const {
+    bool setAnalogValue(Motor_t motor, uint32_t param, float value) const {
         uint32_t castedValue = reinterpret_cast<uint32_t &>(value);
-        setMessage(OIMessage(CMD_SET_ANALOG_VALUE, _senderId, (uint16_t)(((uint8_t)param << 8) | deviceId), castedValue));
+        setMessage(OIMessage(CMD_SET_ANALOG_VALUE, _senderId, (uint16_t)(((uint8_t)param << 8) | motor), castedValue));
         return true;
     }
 
-    float getAnalogValue(uint8_t deviceId, uint32_t param) const {
-        uint32_t value = getMessage(OIMessage(CMD_GET_ANALOG_VALUE, _senderId, (uint16_t)(((uint8_t)param << 8) | deviceId)));
+    float getAnalogValue(Motor_t motor, uint32_t param) const {
+        uint32_t value = getMessage(OIMessage(CMD_GET_ANALOG_VALUE, _senderId, (uint16_t)(((uint8_t)param << 8) | motor)));
         return reinterpret_cast<float &>(value);
     }
 };

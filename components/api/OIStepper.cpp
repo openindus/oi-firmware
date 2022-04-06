@@ -245,12 +245,12 @@ void OIStepper::_handleEvent(void *pvParameters)
     }
 }
 
-void OIStepper::attachLimitSwitch(Etor_t etor, uint8_t deviceId, bool notify) {
+void OIStepper::attachLimitSwitch(Etor_t etor, Motor_t motor, bool notify) {
     if (etor < OISTEPPER_NB_ETORS)
     {
         if (_limitSwitchToMotor[static_cast<uint8_t>(etor)] == -1)
         {   
-            _limitSwitchToMotor[static_cast<uint8_t>(etor)] = deviceId;
+            _limitSwitchToMotor[static_cast<uint8_t>(etor)] = motor;
             _limitSwitchToNotify[static_cast<uint8_t>(etor)] = notify;
             switch (etor) {
                 case ETOR1 : 
