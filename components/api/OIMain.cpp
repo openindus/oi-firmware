@@ -296,31 +296,31 @@ void attachFunctions(void)
 
     Fct.add(OIMessage(CMD_GET_STATUS, Module.getId()), [](OIMessage msg) -> uint32_t 
     { 
-        return Module.cmdGetStatus(static_cast<uint8_t>(msg.getConf()));
+        return Module.getStatus(static_cast<uint8_t>(msg.getConf()));
     });
 
     Fct.add(OIMessage(CMD_GO_HOME, Module.getId()), [](OIMessage msg) -> uint32_t 
     { 
-        Module.cmdGoHome(static_cast<uint8_t>(msg.getConf()));
+        Module.goHome(static_cast<uint8_t>(msg.getConf()));
         return 0;
     });
 
     Fct.add(OIMessage(CMD_GO_MARK, Module.getId()), [](OIMessage msg) -> uint32_t 
     { 
-        Module.cmdGoMark(static_cast<uint8_t>(msg.getConf()));
+        Module.goMark(static_cast<uint8_t>(msg.getConf()));
         return 0;
     });
 
     Fct.add(OIMessage(CMD_GO_TO, Module.getId()), [](OIMessage msg) -> uint32_t 
     { 
-        Module.cmdGoTo(static_cast<uint8_t>(msg.getConf()), 
+        Module.goTo(static_cast<uint8_t>(msg.getConf()), 
             msg.getData());
         return 0;
     });
 
     Fct.add(OIMessage(CMD_GO_TO_DIR, Module.getId()), [](OIMessage msg) -> uint32_t 
     { 
-        Module.cmdGoToDir(static_cast<uint8_t>(msg.getConf()), 
+        Module.goToDir(static_cast<uint8_t>(msg.getConf()), 
             static_cast<motorDir_t>((msg.getConf() & 0xFF00) >> 8), 
             msg.getData());
         return 0;
@@ -328,7 +328,7 @@ void attachFunctions(void)
 
     Fct.add(OIMessage(CMD_GO_UNTIL, Module.getId()), [](OIMessage msg) -> uint32_t 
     { 
-        Module.cmdGoUntil(static_cast<uint8_t>(msg.getConf()), 
+        Module.goUntil(static_cast<uint8_t>(msg.getConf()), 
             static_cast<motorAction_t>((msg.getConf() & 0xF000) >> 12), 
             static_cast<motorDir_t>((msg.getConf() & 0x0F00) >> 8), 
             msg.getData());
@@ -337,19 +337,19 @@ void attachFunctions(void)
 
     Fct.add(OIMessage(CMD_HARD_HIZ, Module.getId()), [](OIMessage msg) -> uint32_t 
     { 
-        Module.cmdHardHiZ(static_cast<uint8_t>(msg.getConf()));
+        Module.hardHiZ(static_cast<uint8_t>(msg.getConf()));
         return 0;
     });
 
     Fct.add(OIMessage(CMD_HARD_STOP, Module.getId()), [](OIMessage msg) -> uint32_t 
     { 
-        Module.cmdHardStop(static_cast<uint8_t>(msg.getConf()));
+        Module.hardStop(static_cast<uint8_t>(msg.getConf()));
         return 0;
     });
 
     Fct.add(OIMessage(CMD_MOVE, Module.getId()), [](OIMessage msg) -> uint32_t 
     { 
-        Module.cmdMove(static_cast<uint8_t>(msg.getConf()), 
+        Module.move(static_cast<uint8_t>(msg.getConf()), 
             static_cast<motorDir_t>((msg.getConf() & 0xFF00) >> 8), 
             msg.getData());
         return 0;
@@ -357,7 +357,7 @@ void attachFunctions(void)
 
     Fct.add(OIMessage(CMD_RELEASE_SW, Module.getId()), [](OIMessage msg) -> uint32_t 
     { 
-        Module.cmdReleaseSw(static_cast<uint8_t>(msg.getConf()), 
+        Module.releaseSw(static_cast<uint8_t>(msg.getConf()), 
             static_cast<motorAction_t>((msg.getConf() & 0xF000) >> 12), 
             static_cast<motorDir_t>((msg.getConf() & 0x0F00) >> 8));
         return 0;
@@ -365,19 +365,19 @@ void attachFunctions(void)
 
     Fct.add(OIMessage(CMD_RESET_DEVICE, Module.getId()), [](OIMessage msg) -> uint32_t 
     { 
-        Module.cmdResetDevice(static_cast<uint8_t>(msg.getConf()));
+        Module.resetDevice(static_cast<uint8_t>(msg.getConf()));
         return 0;
     });
 
     Fct.add(OIMessage(CMD_RESET_POS, Module.getId()), [](OIMessage msg) -> uint32_t 
     { 
-        Module.cmdResetPos(static_cast<uint8_t>(msg.getConf()));
+        Module.resetPos(static_cast<uint8_t>(msg.getConf()));
         return 0;
     });
 
     Fct.add(OIMessage(CMD_RUN, Module.getId()), [](OIMessage msg) -> uint32_t 
     { 
-        Module.cmdRun(static_cast<uint8_t>(msg.getConf()), 
+        Module.run(static_cast<uint8_t>(msg.getConf()), 
             static_cast<motorDir_t>((msg.getConf() & 0xFF00) >> 8), 
             msg.getData());
         return 0;
@@ -385,20 +385,20 @@ void attachFunctions(void)
 
     Fct.add(OIMessage(CMD_SOFT_HIZ, Module.getId()), [](OIMessage msg) -> uint32_t 
     { 
-        Module.cmdSoftHiZ(static_cast<uint8_t>(msg.getConf()));
+        Module.softHiZ(static_cast<uint8_t>(msg.getConf()));
         return 0;
     });
 
 
     Fct.add(OIMessage(CMD_SOFT_STOP, Module.getId()), [](OIMessage msg) -> uint32_t 
     { 
-        Module.cmdSoftStop(static_cast<uint8_t>(msg.getConf()));
+        Module.softStop(static_cast<uint8_t>(msg.getConf()));
         return 0;
     });
 
     Fct.add(OIMessage(CMD_STEP_CLOCK, Module.getId()), [](OIMessage msg) -> uint32_t 
     { 
-        Module.cmdStepClock(static_cast<uint8_t>(msg.getConf()), 
+        Module.stepClock(static_cast<uint8_t>(msg.getConf()), 
             static_cast<motorDir_t>((msg.getConf() & 0xFF00) >> 8));
         return 0;
     });
@@ -494,7 +494,7 @@ void attachFunctions(void)
 
     Fct.add(OIMessage(CMD_SET_PARAM, Module.getId()), [](OIMessage msg) -> uint32_t 
     { 
-        Module.cmdSetParam(static_cast<uint8_t>(msg.getConf()), 
+        Module.setParam(static_cast<uint8_t>(msg.getConf()), 
             ((msg.getConf() & 0xFF00) >> 8), 
             msg.getData());
         return 0;
@@ -502,7 +502,7 @@ void attachFunctions(void)
 
     Fct.add(OIMessage(CMD_GET_PARAM, Module.getId()), [](OIMessage msg) -> uint32_t 
     { 
-        return Module.cmdGetParam(static_cast<uint8_t>(msg.getConf()), 
+        return Module.getParam(static_cast<uint8_t>(msg.getConf()), 
             ((msg.getConf() & 0xFF00) >> 8));
     });
 
