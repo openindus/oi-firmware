@@ -103,27 +103,22 @@ enum {
     CMD_SOFT_HIZ =                      CMD_TYPE_SET(0x10),
     CMD_SOFT_STOP =                     CMD_TYPE_SET(0x11),
     CMD_STEP_CLOCK =                    CMD_TYPE_SET(0x12),
-    CMD_FETCH_AND_CLEAR_ALL_STATUS =    CMD_TYPE_SET(0x13),
-    CMD_QUEUE_COMMANDS =                CMD_TYPE_SET(0x14),
-    CMD_RELEASE_RESET =                 CMD_TYPE_SET(0x15),
-    CMD_RESET =                         CMD_TYPE_SET(0x16),
+
     CMD_SET_HOME =                      CMD_TYPE_SET(0x17),
     CMD_SET_MARK =                      CMD_TYPE_SET(0x18),
-    CMD_START_STEP_CLOCK =              CMD_TYPE_SET(0x19),
-    CMD_STOP_STEP_CLOCK =               CMD_TYPE_SET(0x1A),
+
     CMD_SET_PARAM =                     CMD_TYPE_SET(0x1B),
     CMD_ATTACH_LIMIT_SWITCH =           CMD_TYPE_SET(0x1C),
     CMD_DETACH_LIMIT_SWITCH =           CMD_TYPE_SET(0x1D),
     CMD_SET_LOGIC_SWITCH =              CMD_TYPE_SET(0x1E),
     
     /* get */
-    CMD_CHECK_BUSY_HW =                 CMD_TYPE_GET(0x00),    
-    CMD_CHECK_STATUS_HW =               CMD_TYPE_GET(0x01),
+
     CMD_GET_STATUS =                    CMD_TYPE_GET(0x02),
-    CMD_GET_FETCHED_STATUS =            CMD_TYPE_GET(0x03),
+
     CMD_GET_MARK =                      CMD_TYPE_GET(0x04),
     CMD_GET_POSITION =                  CMD_TYPE_GET(0x05),
-    CMD_IS_DEVICE_BUSY =                CMD_TYPE_GET(0x06),
+    CMD_IS_DEVICE_BUSY =                      CMD_TYPE_GET(0x06),
     CMD_READ_STATUS_REGISTER =          CMD_TYPE_GET(0x07),
     CMD_SELECT_STEP_MODE =              CMD_TYPE_GET(0x08),
     CMD_GET_PARAM =                     CMD_TYPE_GET(0x09),

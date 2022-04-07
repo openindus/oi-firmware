@@ -186,23 +186,6 @@ class OIStepperInterface
     virtual void attachFlagInterrupt(void (*callback)(void)) = 0;
 
     /**
-    * @brief Checks if at least one OIStepper is busy by checking 
-    * busy pin position. 
-    * The busy pin is shared between all motors.
-    * @return One if at least one OIStepper is busy, otherwise zero
-    **/
-    virtual uint8_t checkBusyHw(void) const = 0;
-
-    /**
-    * @brief Checks if at least one OIStepper has an alarm flag set
-    * by reading flag pin position.
-    * The flag pin is shared between all motors.
-    * @return One if at least one OIStepper has an alarm flag set ,
-    * otherwise zero
-    **/
-    virtual uint8_t checkStatusHw(void) const = 0;
-
-    /**
     * @brief Issues OIStepper Get Status command
     * @param[in] motor Motor num
     * @return Status Register content
@@ -358,28 +341,6 @@ class OIStepperInterface
     virtual void stepClock(Motor_t motor, motorDir_t direction) const = 0;
 
     /**
-    * @brief Fetch and clear status flags of all motors 
-    * by issuing a GET_STATUS command simultaneously  
-    * to all motors.
-    * Then, the fetched status of each motor can be retrieved
-    * by using the GetFetchedStatus function
-    * provided there is no other calls to functions which 
-    * use the SPI in between.
-    * @return None
-    */
-    virtual void fetchAndClearAllStatus(void) const = 0;
-
-    /**
-    * @brief Get the value of the STATUS register which was 
-    * fetched by using FetchAndClearAllStatus.
-    * The fetched values are available  as long as there
-    * no other calls to functions which use the SPI.
-    * @param[in] motor Motor num
-    * @return Last fetched value of the STATUS register
-    */
-    virtual uint16_t getFetchedStatus(Motor_t motor) const = 0;
-
-    /**
     * @brief  Returns the mark position  of the specified device
     * @param[in] motor Motor num
     * @return Mark register value converted in a 32b signed integer 
@@ -402,23 +363,6 @@ class OIStepperInterface
     virtual bool isDeviceBusy(Motor_t motor) const = 0;
 
     /**
-    * @brief Put commands in queue before synchronous sending
-    * done by calling SendQueuedCommands.
-    * Any call to functions that use the SPI between the calls of 
-    * QueueCommands and SendQueuedCommands 
-    * will corrupt the queue.
-    * A command for each motor of the daisy chain must be 
-    * specified before calling SendQueuedCommands.
-    * @param[in] motor motor Motor num
-    * @param[in] command Command to queue (all OIStepper commmands 
-    * except Powerstep01_SET_PARAM, Powerstep01_GET_PARAM, 
-    * Powerstep01_GET_STATUS)
-    * @param[in] value argument of the command to queue
-    * @return None
-    */
-    virtual void queueCommands(Motor_t motor, uint8_t command, int32_t value) const = 0;
-
-    /**
     * @brief  Reads the Status Register value
     * @param[in] motor Motor num
     * @return Status register value
@@ -428,33 +372,12 @@ class OIStepperInterface
     virtual uint16_t readStatusRegister(Motor_t motor) const = 0;
 
     /**
-    * @brief  Releases the OIStepper reset (pin set to High) of all motors
-    * @param[in] motor Motor num
-    * @return None
-    **/
-    virtual void releaseReset(Motor_t motor) const = 0;
-
-    /**
-    * @brief  Resets the OIStepper (reset pin set to low) of all motors
-    * @param[in] motor Motor num
-    * @return None
-    **/
-    virtual void reset(Motor_t motor) const = 0;
-
-    /**
     * @brief  Set the stepping mode 
     * @param[in] motor Motor num
     * @param[in] stepMode from full step to 1/128 microstep as specified in enum motorStepMode_t
     * @return TRUE if successfull, FALSE if failure
     **/
     virtual bool selectStepMode(Motor_t motor, motorStepMode_t stepMode) const = 0;
-
-    /**
-    * @brief Sends commands stored previously in the queue by 
-    * QueueCommands
-    * @return None
-    */
-    virtual void sendQueuedCommands(void) const = 0;
 
     /**
     * @brief  Sets Home Position 
@@ -472,20 +395,6 @@ class OIStepperInterface
     * @return None
     **/
     virtual void setMark(Motor_t motor, int32_t markPos) const = 0;
-    
-    /**
-    * @brief  Start the step clock by using the given frequency
-    * @param[in] newFreq in Hz of the step clock
-    * @return None
-    * @note The frequency is directly the current speed of the device
-    **/
-    virtual void startStepClock(uint16_t newFreq) const = 0;
-
-    /**
-    * @brief  Stops the PWM uses for the step clock
-    * @return None
-    **/
-    virtual void stopStepClock(void) const = 0;
 
     /**
     * @brief Issues the SetParam command to the OIStepper of the specified device
@@ -531,7 +440,7 @@ public:
     void detachEtorInterrupt(Etor_t etor);
 
     void attachLimitSwitch(Etor_t etor, Motor_t motor, bool notify = false);
-    void attachLimitSwitch(Etor_t etor, Motor_t motor, void (*callback)(void) = NULL);
+    void attachLimitSwitch(Etor_t etor, Motor_t motor, void (*callback)(void) = NULL) {};
     void detachLimitSwitch(Etor_t etor);
 
 
@@ -553,29 +462,15 @@ public:
     void attachErrorHandler(void (*callback)(uint16_t));
     void attachFlagInterrupt(void (*callback)(void));
 
-    void busyInterruptEvent(void); // Private
-    void errorHandlerEvent(void); // Private
-    void flagInterruptEvent(void); // Private
-
     /* Status */
-    uint8_t checkBusyHw(void) const;
-    uint8_t checkStatusHw(void) const;
     uint16_t getStatus(Motor_t motor) const;
-    void fetchAndClearAllStatus(void) const;
-    uint16_t getFetchedStatus(Motor_t motor) const;
     bool isDeviceBusy(Motor_t motor) const;
     uint16_t readStatusRegister(Motor_t motor) const;
 
     /* Positionning */
     int32_t getPosition(Motor_t motor) const;    
 
-    /* Queue commands */
-    void sendQueuedCommands(void) const;
-    void queueCommands(Motor_t motor, uint8_t command, int32_t value) const;
-
     /* Step clock */
-    void startStepClock(uint16_t newFreq) const;
-    void stopStepClock(void) const;
     void stepClock(Motor_t motor, motorDir_t direction) const;
 
     /* Constant speed commands */
@@ -605,8 +500,6 @@ public:
 
     /* Reset commands */
     void resetDevice(Motor_t motor) const;
-    void releaseReset(Motor_t motor) const;
-    void reset(Motor_t motor) const;
 
     /* Register access */
     void setParam(Motor_t motor, uint32_t param, uint32_t value) const;
@@ -693,14 +586,6 @@ public:
         });
     }
 
-    inline uint8_t checkBusyHw(void) const {
-        return (uint8_t)getMessage(OIMessage(CMD_CHECK_BUSY_HW, _senderId));
-    }
-
-    inline uint8_t checkStatusHw(void) const {
-        return (uint8_t)getMessage(OIMessage(CMD_CHECK_STATUS_HW, _senderId));
-    }
-
     inline uint16_t getStatus(Motor_t motor) const {
         return (uint16_t)getMessage(OIMessage(CMD_GET_STATUS, _senderId, motor));
     }
@@ -765,14 +650,6 @@ public:
         setMessage(OIMessage(CMD_STEP_CLOCK, _senderId, (uint16_t)((direction << 8) | motor)));
     }
 
-    inline void fetchAndClearAllStatus(void) const {
-        setMessage(OIMessage(CMD_FETCH_AND_CLEAR_ALL_STATUS, _senderId));
-    }
-
-    inline uint16_t getFetchedStatus(Motor_t motor) const {
-        return (uint16_t)getMessage(OIMessage(CMD_GET_FETCHED_STATUS, _senderId, motor));
-    }
-
     inline int32_t getMark(Motor_t motor) const {
         return getMessage(OIMessage(CMD_GET_MARK, _senderId, motor));
     }
@@ -785,20 +662,8 @@ public:
         return (bool)getMessage(OIMessage(CMD_IS_DEVICE_BUSY, _senderId, motor));
     }
 
-    void queueCommands(Motor_t motor, uint8_t command, int32_t value) const {
-        setMessage(OIMessage(CMD_QUEUE_COMMANDS, _senderId, (uint16_t)((command << 8) | motor), value));
-    }
-
     uint16_t readStatusRegister(Motor_t motor) const {
         return (uint16_t)getMessage(OIMessage(CMD_READ_STATUS_REGISTER, _senderId, motor));
-    }
-
-    void releaseReset(Motor_t motor) const {
-        setMessage(OIMessage(CMD_RELEASE_RESET, _senderId, motor));
-    }
-
-    void reset(Motor_t motor) const {
-        setMessage(OIMessage(CMD_RESET, _senderId, motor));
     }
 
     bool selectStepMode(Motor_t motor, motorStepMode_t stepMode) const {
@@ -815,14 +680,6 @@ public:
 
     void setMark(Motor_t motor, int32_t markPos) const {
         setMessage(OIMessage(CMD_SET_MARK, _senderId, motor, markPos));
-    }
-
-    void startStepClock(uint16_t newFreq) const {
-        setMessage(OIMessage(CMD_START_STEP_CLOCK, _senderId, newFreq));
-    }
-
-    void stopStepClock(void) const {
-        setMessage(OIMessage(CMD_STOP_STEP_CLOCK, _senderId));
     }
 
     void setParam(Motor_t motor, uint32_t param, uint32_t value) const {

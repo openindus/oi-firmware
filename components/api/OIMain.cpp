@@ -262,7 +262,7 @@ void attachFunctions(void)
     CMD.add(OIMessage(CMD_ATTACH_BUSY_INTERRUPT, Module.getId()), [](OIMessage msg) -> uint32_t 
     { 
         Module.attachBusyInterrupt([](void) {
-            Module.busyInterruptEvent();
+            BusTWAI.sendMessage(OIMessage(CMD_BUSY_INTERRUPT, Module.getId()), BROADCAST_ID);
         }); 
         return 0;
     });
@@ -270,8 +270,7 @@ void attachFunctions(void)
     CMD.add(OIMessage(CMD_ATTACH_ERROR_HANDLER, Module.getId()), [](OIMessage msg) -> uint32_t 
     { 
         // Module.attachErrorHandler([](uint32_t) { 
-        //     Module.errorHandlerEvent();
-        //     /** @todo add queue to send error */
+        //     BusTWAI.sendMessage(OIMessage(CMD_ERROR_HANDLER, Module.getId()), BROADCAST_ID);
         // }); 
         return 0;
     });
@@ -279,19 +278,9 @@ void attachFunctions(void)
     CMD.add(OIMessage(CMD_ATTACH_FLAG_INTERRUPT, Module.getId()), [](OIMessage msg) -> uint32_t 
     { 
         Module.attachFlagInterrupt([](void) { 
-            Module.flagInterruptEvent();
+            BusTWAI.sendMessage(OIMessage(CMD_FLAG_INTERRUPT, Module.getId()), BROADCAST_ID);
         }); 
         return 0;
-    });
-
-    CMD.add(OIMessage(CMD_CHECK_BUSY_HW, Module.getId()), [](OIMessage msg) -> uint32_t 
-    { 
-        return Module.checkBusyHw();
-    });
-
-    CMD.add(OIMessage(CMD_CHECK_STATUS_HW, Module.getId()), [](OIMessage msg) -> uint32_t 
-    { 
-        return Module.checkStatusHw();
     });
 
     CMD.add(OIMessage(CMD_GET_STATUS, Module.getId()), [](OIMessage msg) -> uint32_t 
@@ -403,17 +392,6 @@ void attachFunctions(void)
         return 0;
     });
 
-    CMD.add(OIMessage(CMD_FETCH_AND_CLEAR_ALL_STATUS, Module.getId()), [](OIMessage msg) -> uint32_t 
-    {
-        Module.fetchAndClearAllStatus();
-        return 0;
-    });
-
-    CMD.add(OIMessage(CMD_GET_FETCHED_STATUS, Module.getId()), [](OIMessage msg) -> uint32_t 
-    { 
-        return Module.getFetchedStatus(static_cast<Motor_t>(msg.getConf()));
-    });
-
     CMD.add(OIMessage(CMD_GET_MARK, Module.getId()), [](OIMessage msg) -> uint32_t 
     { 
         return Module.getMark(static_cast<Motor_t>(msg.getConf()));
@@ -429,41 +407,15 @@ void attachFunctions(void)
         return static_cast<uint32_t>(Module.isDeviceBusy(static_cast<Motor_t>(msg.getConf())));
     });
 
-    CMD.add(OIMessage(CMD_QUEUE_COMMANDS, Module.getId()), [](OIMessage msg) -> uint32_t 
-    { 
-        Module.queueCommands(static_cast<Motor_t>(msg.getConf()), 
-            static_cast<Motor_t>((msg.getConf() & 0xFF00) >> 8), 
-            msg.getData());
-        return 0;
-    });
-
     CMD.add(OIMessage(CMD_READ_STATUS_REGISTER, Module.getId()), [](OIMessage msg) -> uint32_t 
     { 
         return Module.readStatusRegister(static_cast<Motor_t>(msg.getConf()));
-    });
-
-    CMD.add(OIMessage(CMD_RELEASE_RESET, Module.getId()), [](OIMessage msg) -> uint32_t 
-    { 
-        Module.releaseReset(static_cast<Motor_t>(msg.getConf()));
-        return 0;
-    });
-
-    CMD.add(OIMessage(CMD_RESET, Module.getId()), [](OIMessage msg) -> uint32_t 
-    { 
-        Module.reset(static_cast<Motor_t>(msg.getConf()));
-        return 0;
     });
 
     CMD.add(OIMessage(CMD_SELECT_STEP_MODE, Module.getId()), [](OIMessage msg) -> uint32_t 
     { 
         return static_cast<uint32_t>(Module.selectStepMode(static_cast<Motor_t>(msg.getConf()), 
             static_cast<motorStepMode_t>((msg.getConf() & 0xFF00) >> 8)));
-    });
-
-    CMD.add(OIMessage(CMD_SEND_QUEUED_COMMANDS, Module.getId()), [](OIMessage msg) -> uint32_t 
-    { 
-        Module.sendQueuedCommands();
-        return 0;
     });
 
     CMD.add(OIMessage(CMD_SET_HOME, Module.getId()), [](OIMessage msg) -> uint32_t 
@@ -477,18 +429,6 @@ void attachFunctions(void)
     { 
         Module.setMark(static_cast<Motor_t>(msg.getConf()),
             msg.getData());
-        return 0;
-    });
-
-    CMD.add(OIMessage(CMD_START_STEP_CLOCK, Module.getId()), [](OIMessage msg) -> uint32_t 
-    { 
-        Module.startStepClock(msg.getConf());
-        return 0;
-    });
-
-    CMD.add(OIMessage(CMD_STOP_STEP_CLOCK, Module.getId()), [](OIMessage msg) -> uint32_t 
-    { 
-        Module.stopStepClock();
         return 0;
     });
 

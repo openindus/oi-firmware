@@ -223,14 +223,6 @@ void OIStepper::attachLimitSwitch(Etor_t etor, Motor_t motor, bool notify)
     }
 }
 
-void OIStepper::attachLimitSwitch(Etor_t etor, Motor_t motor, void (*callback)(void)) 
-{
-    /**
-     * @todo
-     * 
-     */
-}
-
 void OIStepper::detachLimitSwitch(Etor_t etor) 
 {
     if (etor < OISTEPPER_NB_ETORS)
@@ -243,21 +235,6 @@ void OIStepper::detachLimitSwitch(Etor_t etor)
             detachEtorInterrupt(etor);
         }
     }
-}
-
-void OIStepper::busyInterruptEvent(void)
-{
-    xEventGroupSetBits(_eventGroupHandle, BUSY_INTERRUPT_EVENT);
-}
-
-void OIStepper::errorHandlerEvent(void)
-{
-    xEventGroupSetBits(_eventGroupHandle, ERROR_HANDLER_EVENT);
-}
-
-void OIStepper::flagInterruptEvent(void)
-{
-    xEventGroupSetBits(_eventGroupHandle, FLAG_INTERRUPT_EVENT);
 }
 
 void OIStepper::attachBusyInterrupt(void (*callback)(void)) 
@@ -284,24 +261,6 @@ void OIStepper::attachFlagInterrupt(void (*callback)(void))
     L6470_AttachFlagInterrupt(callback);
 #else
     Powerstep01_AttachFlagInterrupt(callback);
-#endif
-}
-
-uint8_t OIStepper::checkBusyHw(void) const 
-{
-#ifdef CONFIG_L6470
-    return L6470_CheckBusyHw();
-#else
-    return Powerstep01_CheckBusyHw();
-#endif
-}
-
-uint8_t OIStepper::checkStatusHw(void) const 
-{
-#ifdef CONFIG_L6470
-    return L6470_CheckStatusHw();
-#else
-    return Powerstep01_CheckStatusHw();
 #endif
 }
 
@@ -449,24 +408,6 @@ void OIStepper::stepClock(Motor_t motor, motorDir_t direction) const
 #endif
 }
 
-void OIStepper::fetchAndClearAllStatus(void) const 
-{
-#ifdef CONFIG_L6470
-    L6470_FetchAndClearAllStatus();
-#else
-    Powerstep01_FetchAndClearAllStatus();
-#endif
-}
-
-uint16_t OIStepper::getFetchedStatus(Motor_t motor) const 
-{
-#ifdef CONFIG_L6470
-    return L6470_GetFetchedStatus(motor);
-#else
-    return Powerstep01_GetFetchedStatus(motor);
-#endif
-}
-
 int32_t OIStepper::getMark(Motor_t motor) const 
 {
 #ifdef CONFIG_L6470
@@ -494,15 +435,6 @@ bool OIStepper::isDeviceBusy(Motor_t motor) const
 #endif
 }
 
-void OIStepper::queueCommands(Motor_t motor, uint8_t command, int32_t value) const 
-{
-#ifdef CONFIG_L6470
-    L6470_QueueCommands(motor, command, value);
-#else
-    Powerstep01_QueueCommands(motor, command, value);
-#endif
-}
-
 uint16_t OIStepper::readStatusRegister(Motor_t motor) const 
 {
 #ifdef CONFIG_L6470
@@ -512,39 +444,12 @@ uint16_t OIStepper::readStatusRegister(Motor_t motor) const
 #endif
 }
 
-void OIStepper::releaseReset(Motor_t motor) const 
-{
-#ifdef CONFIG_L6470
-    L6470_ReleaseReset(motor);
-#else
-    Powerstep01_ReleaseReset(motor);
-#endif
-}
-
-void OIStepper::reset(Motor_t motor) const 
-{
-#ifdef CONFIG_L6470
-    L6470_Reset(motor);
-#else
-    Powerstep01_Reset(motor);
-#endif
-}
-
 bool OIStepper::selectStepMode(Motor_t motor, motorStepMode_t stepMode) const 
 {
 #ifdef CONFIG_L6470
     return L6470_SelectStepMode(motor, stepMode);
 #else
     return Powerstep01_SelectStepMode(motor, stepMode);
-#endif
-}
-
-void OIStepper::sendQueuedCommands(void) const 
-{
-#ifdef CONFIG_L6470
-    L6470_SendQueuedCommands();
-#else
-    Powerstep01_SendQueuedCommands();
 #endif
 }
 
@@ -563,24 +468,6 @@ void OIStepper::setMark(Motor_t motor, int32_t markPos) const
     L6470_SetMark(motor, markPos);
 #else
     Powerstep01_SetMark(motor, markPos);
-#endif
-}
-
-void OIStepper::startStepClock(uint16_t newFreq) const 
-{
-#ifdef CONFIG_L6470
-    L6470_StartStepClock(newFreq);
-#else
-    Powerstep01_StartStepClock(newFreq);
-#endif
-}
-
-void OIStepper::stopStepClock(void) const 
-{
-#ifdef CONFIG_L6470
-    L6470_StopStepClock();
-#else
-    Powerstep01_StopStepClock();
 #endif
 }
 
@@ -623,16 +510,7 @@ void OIStepper::_handleEvent(void *pvParameters)
 
         index = 0xFF;
         
-        if (eventBits & BUSY_INTERRUPT_EVENT) {
-            BusTWAI.sendMessage(OIMessage(CMD_BUSY_INTERRUPT, stepper->getId()), BROADCAST_ID);
-        }
-        else if (eventBits & ERROR_HANDLER_EVENT) {
-            BusTWAI.sendMessage(OIMessage(CMD_ERROR_HANDLER, stepper->getId()), BROADCAST_ID);
-        }
-        else if (eventBits & FLAG_INTERRUPT_EVENT) {
-            BusTWAI.sendMessage(OIMessage(CMD_FLAG_INTERRUPT, stepper->getId()), BROADCAST_ID);
-        }
-        else if (eventBits & ETOR1_INTERRUPT_EVENT) {
+        if (eventBits & ETOR1_INTERRUPT_EVENT) {
             index = static_cast<uint8_t>(ETOR1);
         }
         else if (eventBits & ETOR2_INTERRUPT_EVENT) {
