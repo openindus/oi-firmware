@@ -622,24 +622,6 @@ uint32_t OIStepper::getParam(Motor_t motor, uint32_t param) const
 #endif
 }
 
-bool OIStepper::setAnalogValue(Motor_t motor, uint32_t param, float value) const 
-{
-#ifdef CONFIG_L6470
-    return L6470_SetAnalogValue(motor, param, value);
-#else
-    return Powerstep01_SetAnalogValue(motor, param, value);
-#endif
-}
-
-float OIStepper::getAnalogValue(Motor_t motor, uint32_t param) const 
-{
-#ifdef CONFIG_L6470
-    return L6470_GetAnalogValue(motor, param);
-#else
-    return Powerstep01_GetAnalogValue(motor, param);
-#endif
-}
-
 /* Private */
 
 void OIStepper::_handleEvent(void *pvParameters)

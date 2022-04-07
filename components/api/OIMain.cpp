@@ -506,21 +506,6 @@ void attachFunctions(void)
             ((msg.getConf() & 0xFF00) >> 8));
     });
 
-    Fct.add(OIMessage(CMD_SET_ANALOG_VALUE, Module.getId()), [](OIMessage msg) -> uint32_t 
-    {
-        uint32_t value = msg.getData();
-        return static_cast<uint32_t>(Module.setAnalogValue(static_cast<Motor_t>(msg.getConf()), 
-            ((msg.getConf() & 0xFF00) >> 8),
-            reinterpret_cast<float &>(value)));
-    });
-
-    Fct.add(OIMessage(CMD_GET_ANALOG_VALUE, Module.getId()), [](OIMessage msg) -> uint32_t 
-    { 
-        float value = Module.getAnalogValue(static_cast<Motor_t>(msg.getConf()), 
-            ((msg.getConf() & 0xFF00) >> 8));
-        return reinterpret_cast<uint32_t &>(value);
-    });
-
 #elif defined CONFIG_OI_MIXED
 
     Fct.add(OIMessage(CMD_DIGITAL_WRITE, Module.getId()), [](OIMessage msg) -> uint32_t 

@@ -77,5 +77,4 @@ Functions
 .. doxygenfunction:: OIStepper::waitWhileActive
 .. doxygenfunction:: OIStepper::cmdSetParam
 .. doxygenfunction:: OIStepper::cmdGetParam
-.. doxygenfunction:: OIStepper::setAnalogValue
-.. doxygenfunction:: OIStepper::getAnalogValue
+    

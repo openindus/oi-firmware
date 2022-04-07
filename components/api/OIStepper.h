@@ -516,24 +516,6 @@ class OIStepperInterface
     * @return Register value - 1 to 3 bytes (depends on register)
     */
     virtual uint32_t getParam(Motor_t motor, uint32_t param) const = 0;
-
-    /**
-    * @brief Issues the SetParam command to the OIStepper of the specified device
-    * @param[in] motor Motor num
-    * @param[in] param Register adress (Powerstep01_ABS_POS, Powerstep01_MARK,...)
-    * @param[in] value Floating point value to convert and set into the register
-    * @return TRUE if param and value are valid, FALSE otherwise
-    */
-    virtual bool setAnalogValue(Motor_t motor, uint32_t param, float value) const = 0;
-
-    /**
-    * @brief Issues OIStepper Get Parameter command and convert the result to
-    * floating point if meaningfull
-    * @param[in] motor Motor num
-    * @param[in] param Powerstep01 register address
-    * @return Register value - 1 to 3 bytes (depends on register)
-    */
-    virtual float getAnalogValue(Motor_t motor, uint32_t param) const = 0;
 };
 
 
@@ -646,8 +628,6 @@ public:
     /* Register access */
     void setParam(Motor_t motor, uint32_t param, uint32_t value) const;
     uint32_t getParam(Motor_t motor, uint32_t param) const;
-    bool setAnalogValue(Motor_t motor, uint32_t param, float value) const;
-    float getAnalogValue(Motor_t motor, uint32_t param) const;
 
 private:
 
@@ -884,16 +864,6 @@ public:
         return getMessage(OIMessage(CMD_GET_PARAM, _senderId, (uint16_t)(((uint8_t)param << 8) | motor)));
     }
 
-    bool setAnalogValue(Motor_t motor, uint32_t param, float value) const {
-        uint32_t castedValue = reinterpret_cast<uint32_t &>(value);
-        setMessage(OIMessage(CMD_SET_ANALOG_VALUE, _senderId, (uint16_t)(((uint8_t)param << 8) | motor), castedValue));
-        return true;
-    }
-
-    float getAnalogValue(Motor_t motor, uint32_t param) const {
-        uint32_t value = getMessage(OIMessage(CMD_GET_ANALOG_VALUE, _senderId, (uint16_t)(((uint8_t)param << 8) | motor)));
-        return reinterpret_cast<float &>(value);
-    }
 };
 
 #endif /* (defined CONFIG_OI_STEPPER) || (defined CONFIG_OI_STEPPER_VERTICAL) */

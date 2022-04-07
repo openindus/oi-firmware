@@ -95,7 +95,7 @@ enum {
     CMD_HARD_HIZ =                      CMD_TYPE_SET(0x08),
     CMD_HARD_STOP =                     CMD_TYPE_SET(0x09),
     CMD_MOVE =                          CMD_TYPE_SET(0x0A),
-    CMD_SET_ANALOG_VALUE =              CMD_TYPE_SET(0x0B),
+
     CMD_RELEASE_SW =                    CMD_TYPE_SET(0x0C),
     CMD_RESET_DEVICE =                  CMD_TYPE_SET(0x0D),
     CMD_RESET_POS =                     CMD_TYPE_SET(0x0E),
@@ -127,7 +127,7 @@ enum {
     CMD_READ_STATUS_REGISTER =          CMD_TYPE_GET(0x07),
     CMD_SELECT_STEP_MODE =              CMD_TYPE_GET(0x08),
     CMD_GET_PARAM =                     CMD_TYPE_GET(0x09),
-    CMD_GET_ANALOG_VALUE =              CMD_TYPE_GET(0x0A),
+
     CMD_GET_ETOR_LEVEL =                CMD_TYPE_GET(0x0B),
     
     /* send */
