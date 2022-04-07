@@ -584,24 +584,6 @@ void OIStepper::stopStepClock(void) const
 #endif
 }
 
-void OIStepper::waitForAllDevicesNotBusy(void) const 
-{
-#ifdef CONFIG_L6470
-    L6470_WaitForAllDevicesNotBusy();
-#else
-    Powerstep01_WaitForAllDevicesNotBusy();
-#endif
-}
-
-void OIStepper::waitWhileActive(Motor_t motor) const 
-{
-#ifdef CONFIG_L6470
-    L6470_WaitWhileActive(motor);
-#else
-    Powerstep01_WaitWhileActive(motor);
-#endif
-}
-
 void OIStepper::setParam(Motor_t motor, uint32_t param, uint32_t value) const 
 {
 #ifdef CONFIG_L6470

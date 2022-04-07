@@ -488,19 +488,6 @@ class OIStepperInterface
     virtual void stopStepClock(void) const = 0;
 
     /**
-    * @brief  Locks until all motors become not busy
-    * @return None
-    **/
-    virtual void waitForAllDevicesNotBusy(void) const = 0;
-
-    /**
-    * @brief  Locks until the motor becomes not busy
-    * @param[in] motor Motor num
-    * @return None
-    **/
-    virtual void waitWhileActive(Motor_t motor) const = 0;
-
-    /**
     * @brief Issues the SetParam command to the OIStepper of the specified device
     * @param[in] motor Motor num
     * @param[in] param Register adress (Powerstep01_ABS_POS, Powerstep01_MARK,...)
@@ -585,10 +572,6 @@ public:
     /* Queue commands */
     void sendQueuedCommands(void) const;
     void queueCommands(Motor_t motor, uint8_t command, int32_t value) const;
-
-    /* Waiting */
-    void waitForAllDevicesNotBusy(void) const;
-    void waitWhileActive(Motor_t motor) const;
 
     /* Step clock */
     void startStepClock(uint16_t newFreq) const;
@@ -840,20 +823,6 @@ public:
 
     void stopStepClock(void) const {
         setMessage(OIMessage(CMD_STOP_STEP_CLOCK, _senderId));
-    }
-
-    void waitForAllDevicesNotBusy(void) const {
-        /**
-         * @todo add blocking callback
-         * 
-         */
-    }
-
-    void waitWhileActive(Motor_t motor) const {
-        /**
-         * @todo add blocking callback
-         * 
-         */
     }
 
     void setParam(Motor_t motor, uint32_t param, uint32_t value) const {
