@@ -545,388 +545,109 @@ public:
 
     OIStepper() : OIModuleMaster() {}
 
-    /**
-     * @brief Initialization
-     * 
-     */
+    /***************************/
+    /* Hardware initialization */
+    /***************************/
+
     void init(void);
 
-    inline void setSwitchLogic(bool no_logic)
-    {
-        _no_logic = no_logic;
-    }
+    /********/
+    /* ETOR */
+    /********/
 
-    inline int getEtorLevel(Etor_t etor) {
-        int ret = -1;
+    void setSwitchLogic(bool no_logic);
+    int getEtorLevel(Etor_t etor);
 
-        if (etor < OISTEPPER_NB_ETORS)
-            ret = gpio_get_level(_etor[etor]);
-
-        return ret;
-    }
-
-    inline void attachEtorInterrupt(Etor_t etor, void (*callback)(void)) {
-        if (etor < OISTEPPER_NB_ETORS)
-            gpio_isr_handler_add(_etor[etor], (gpio_isr_t)callback, NULL);
-    }
-
-    inline void detachEtorInterrupt(Etor_t etor) {
-        if (etor < OISTEPPER_NB_ETORS)
-            gpio_isr_handler_remove(_etor[etor]);
-    }
+    void attachEtorInterrupt(Etor_t etor, void (*callback)(void));
+    void detachEtorInterrupt(Etor_t etor);
 
     void attachLimitSwitch(Etor_t etor, Motor_t motor, bool notify = false);
-
-    inline void attachLimitSwitch(Etor_t etor, Motor_t motor, void (*callback)(void) = NULL) {
-        /**
-         * @todo
-         * 
-         */
-    }
-
+    void attachLimitSwitch(Etor_t etor, Motor_t motor, void (*callback)(void) = NULL);
     void detachLimitSwitch(Etor_t etor);
 
-    void busyInterruptEvent(void);
-    void errorHandlerEvent(void);
-    void flagInterruptEvent(void);
 
-    inline void attachBusyInterrupt(void (*callback)(void)) {
-        #ifdef CONFIG_L6470
-        L6470_AttachBusyInterrupt(callback);
-        #else
-        Powerstep01_AttachBusyInterrupt(callback);
-        #endif
-    }
+    /********/
+    /* STOR */
+    /********/
 
-    inline void attachErrorHandler(void (*callback)(uint16_t)) {
-        #ifdef CONFIG_L6470
-        L6470_AttachErrorHandler(callback);
-        #else
-        Powerstep01_AttachErrorHandler(callback);
-        #endif
-    }
+    //TODO
 
-    inline void attachFlagInterrupt(void (*callback)(void)) {
-        #ifdef CONFIG_L6470
-        L6470_AttachFlagInterrupt(callback);
-        #else
-        Powerstep01_AttachFlagInterrupt(callback);
-        #endif
-    }
+    /*********/
+    /* MOTOR */
+    /*********/
 
-    inline uint8_t checkBusyHw(void) const {
-        #ifdef CONFIG_L6470
-        return L6470_CheckBusyHw();
-        #else
-        return Powerstep01_CheckBusyHw();
-        #endif
-    }
+    /* Configuration */
+    bool selectStepMode(Motor_t motor, motorStepMode_t stepMode) const;
 
-    inline uint8_t checkStatusHw(void) const {
-        #ifdef CONFIG_L6470
-        return L6470_CheckStatusHw();
-        #else
-        return Powerstep01_CheckStatusHw();
-        #endif
-    }
+    /* Interrupts */
+    void attachBusyInterrupt(void (*callback)(void));
+    void attachErrorHandler(void (*callback)(uint16_t));
+    void attachFlagInterrupt(void (*callback)(void));
 
-    inline uint16_t getStatus(Motor_t motor) const {
-        #ifdef CONFIG_L6470
-        return L6470_CmdGetStatus(motor);
-        #else
-        return Powerstep01_CmdGetStatus(motor);
-        #endif
-    }
+    void busyInterruptEvent(void); // Private
+    void errorHandlerEvent(void); // Private
+    void flagInterruptEvent(void); // Private
 
-    inline void goHome(Motor_t motor) const {
-        #ifdef CONFIG_L6470
-        L6470_CmdGoHome(motor);
-        #else
-        Powerstep01_CmdGoHome(motor);
-        #endif
-    }
+    /* Status */
+    uint8_t checkBusyHw(void) const;
+    uint8_t checkStatusHw(void) const;
+    uint16_t getStatus(Motor_t motor) const;
+    void fetchAndClearAllStatus(void) const;
+    uint16_t getFetchedStatus(Motor_t motor) const;
+    bool isDeviceBusy(Motor_t motor) const;
+    uint16_t readStatusRegister(Motor_t motor) const;
 
-    inline void goMark(Motor_t motor) const {
-        #ifdef CONFIG_L6470
-        L6470_CmdGoMark(motor);
-        #else
-        Powerstep01_CmdGoMark(motor);
-        #endif
-    }
+    /* Positionning */
+    int32_t getPosition(Motor_t motor) const;    
 
-    inline void goTo(Motor_t motor, int32_t abs_pos) const {
-        #ifdef CONFIG_L6470
-        L6470_CmdGoTo(motor, abs_pos);
-        #else
-        Powerstep01_CmdGoTo(motor, abs_pos);
-        #endif
-    }
+    /* Queue commands */
+    void sendQueuedCommands(void) const;
+    void queueCommands(Motor_t motor, uint8_t command, int32_t value) const;
 
-    inline void goToDir(Motor_t motor, motorDir_t direction, int32_t abs_pos) const {
-        #ifdef CONFIG_L6470
-        L6470_CmdGoToDir(motor, direction, abs_pos);
-        #else
-        Powerstep01_CmdGoToDir(motor, direction, abs_pos);
-        #endif
-    }
+    /* Waiting */
+    void waitForAllDevicesNotBusy(void) const;
+    void waitWhileActive(Motor_t motor) const;
 
-    inline void goUntil(Motor_t motor, motorAction_t action, motorDir_t direction, uint32_t speed) const {
-        #ifdef CONFIG_L6470
-        L6470_CmdGoUntil(motor, action, direction, speed);
-        #else
-        Powerstep01_CmdGoUntil(motor, action, direction, speed);
-        #endif
-    }
+    /* Step clock */
+    void startStepClock(uint16_t newFreq) const;
+    void stopStepClock(void) const;
+    void stepClock(Motor_t motor, motorDir_t direction) const;
 
-    inline void hardHiZ(Motor_t motor) const {
-        #ifdef CONFIG_L6470
-        L6470_CmdHardHiZ(motor);
-        #else
-        Powerstep01_CmdHardHiZ(motor);
-        #endif
-    }
+    /* Constant speed commands */
+    void run(Motor_t motor, motorDir_t direction, uint32_t speed) const;
+    void goUntil(Motor_t motor, motorAction_t action, motorDir_t direction, uint32_t speed) const;
+    void releaseSw(Motor_t motor, motorAction_t action, motorDir_t direction) const;
 
-    inline void hardStop(Motor_t motor) const {
-        #ifdef CONFIG_L6470
-        L6470_CmdHardStop(motor);
-        #else
-        Powerstep01_CmdHardStop(motor);
-        #endif
-    }
+    /* Step commands */
+    void move(Motor_t motor, motorDir_t direction, uint32_t n_step) const;
 
-    inline void move(Motor_t motor, motorDir_t direction, uint32_t n_step) const {
-        #ifdef CONFIG_L6470
-        L6470_CmdMove(motor, direction, n_step);
-        #else
-        Powerstep01_CmdMove(motor, direction, n_step);
-        #endif
-    }
+    /* Absolute positionning commands */
+    void setHome(Motor_t motor, int32_t homePos) const;
+    void setMark(Motor_t motor, int32_t markPos) const;
+    int32_t getMark(Motor_t motor) const;
+    void resetPos(Motor_t motor) const;
 
-    inline void releaseSw(Motor_t motor, motorAction_t action, motorDir_t direction) const {
-        #ifdef CONFIG_L6470
-        L6470_CmdReleaseSw(motor, action, direction);
-        #else
-        Powerstep01_CmdReleaseSw(motor, action, direction);
-        #endif
-    }
+    void goHome(Motor_t motor) const;
+    void goMark(Motor_t motor) const;
+    void goTo(Motor_t motor, int32_t abs_pos) const;
+    void goToDir(Motor_t motor, motorDir_t direction, int32_t abs_pos) const;
 
-    inline void resetDevice(Motor_t motor) const {
-        #ifdef CONFIG_L6470
-        L6470_CmdResetDevice(motor);
-        #else
-        Powerstep01_CmdResetDevice(motor);
-        #endif
-    }
+    /* Stop commands */
+    void softHiZ(Motor_t motor) const;
+    void softStop(Motor_t motor) const;
+    void hardHiZ(Motor_t motor) const;
+    void hardStop(Motor_t motor) const;
 
-    inline void resetPos(Motor_t motor) const {
-        #ifdef CONFIG_L6470
-        L6470_CmdResetPos(motor);
-        #else
-        Powerstep01_CmdResetPos(motor);
-        #endif
-    }
+    /* Reset commands */
+    void resetDevice(Motor_t motor) const;
+    void releaseReset(Motor_t motor) const;
+    void reset(Motor_t motor) const;
 
-    inline void run(Motor_t motor, motorDir_t direction, uint32_t speed) const {
-        #ifdef CONFIG_L6470
-        L6470_CmdRun(motor, direction, speed);
-        #else
-        Powerstep01_CmdRun(motor, direction, speed);
-        #endif
-    }
-
-    inline void softHiZ(Motor_t motor) const {
-        #ifdef CONFIG_L6470
-        L6470_CmdSoftHiZ(motor);
-        #else
-        Powerstep01_CmdSoftHiZ(motor);
-        #endif
-    }
-
-    inline void softStop(Motor_t motor) const {
-        #ifdef CONFIG_L6470
-        L6470_CmdSoftStop(motor);
-        #else
-        Powerstep01_CmdSoftStop(motor);
-        #endif
-    }
-
-    inline void stepClock(Motor_t motor, motorDir_t direction) const {
-        #ifdef CONFIG_L6470
-        L6470_CmdStepClock(motor, direction);
-        #else
-        Powerstep01_CmdStepClock(motor, direction);
-        #endif
-    }
-
-    inline void fetchAndClearAllStatus(void) const {
-        #ifdef CONFIG_L6470
-        L6470_FetchAndClearAllStatus();
-        #else
-        Powerstep01_FetchAndClearAllStatus();
-        #endif
-    }
-
-    inline uint16_t getFetchedStatus(Motor_t motor) const {
-        #ifdef CONFIG_L6470
-        return L6470_GetFetchedStatus(motor);
-        #else
-        return Powerstep01_GetFetchedStatus(motor);
-        #endif
-    }
-
-    inline int32_t getMark(Motor_t motor) const {
-        #ifdef CONFIG_L6470
-        return L6470_GetMark(motor);
-        #else
-        return Powerstep01_GetMark(motor);
-        #endif
-    }
-
-    inline int32_t getPosition(Motor_t motor) const {
-        #ifdef CONFIG_L6470
-        return L6470_GetPosition(motor);
-        #else
-        return Powerstep01_GetPosition(motor);
-        #endif
-    }
-
-    inline bool isDeviceBusy(Motor_t motor) const {
-        #ifdef CONFIG_L6470
-        return L6470_IsDeviceBusy(motor);
-        #else
-        return Powerstep01_IsDeviceBusy(motor);
-        #endif
-    }
-
-    inline void queueCommands(Motor_t motor, uint8_t command, int32_t value) const {
-        #ifdef CONFIG_L6470
-        L6470_QueueCommands(motor, command, value);
-        #else
-        Powerstep01_QueueCommands(motor, command, value);
-        #endif
-    }
-
-    inline uint16_t readStatusRegister(Motor_t motor) const {
-        #ifdef CONFIG_L6470
-        return L6470_ReadStatusRegister(motor);
-        #else
-        return Powerstep01_ReadStatusRegister(motor);
-        #endif
-    }
-
-    inline void releaseReset(Motor_t motor) const {
-        #ifdef CONFIG_L6470
-        L6470_ReleaseReset(motor);
-        #else
-        Powerstep01_ReleaseReset(motor);
-        #endif
-    }
-
-    inline void reset(Motor_t motor) const {
-        #ifdef CONFIG_L6470
-        L6470_Reset(motor);
-        #else
-        Powerstep01_Reset(motor);
-        #endif
-    }
-
-    inline bool selectStepMode(Motor_t motor, motorStepMode_t stepMode) const {
-        #ifdef CONFIG_L6470
-        return L6470_SelectStepMode(motor, stepMode);
-        #else
-        return Powerstep01_SelectStepMode(motor, stepMode);
-        #endif
-    }
-
-    inline void sendQueuedCommands(void) const {
-        #ifdef CONFIG_L6470
-        L6470_SendQueuedCommands();
-        #else
-        Powerstep01_SendQueuedCommands();
-        #endif
-    }
-
-    inline void setHome(Motor_t motor, int32_t homePos) const {
-        #ifdef CONFIG_L6470
-        L6470_SetHome(motor, homePos);
-        #else
-        Powerstep01_SetHome(motor, homePos);
-        #endif
-    }
-
-    inline void setMark(Motor_t motor, int32_t markPos) const {
-        #ifdef CONFIG_L6470
-        L6470_SetMark(motor, markPos);
-        #else
-        Powerstep01_SetMark(motor, markPos);
-        #endif
-    }
-
-    inline void startStepClock(uint16_t newFreq) const {
-        #ifdef CONFIG_L6470
-        L6470_StartStepClock(newFreq);
-        #else
-        Powerstep01_StartStepClock(newFreq);
-        #endif
-    }
-
-    inline void stopStepClock(void) const {
-        #ifdef CONFIG_L6470
-        L6470_StopStepClock();
-        #else
-        Powerstep01_StopStepClock();
-        #endif
-    }
-
-    inline void waitForAllDevicesNotBusy(void) const {
-        #ifdef CONFIG_L6470
-        L6470_WaitForAllDevicesNotBusy();
-        #else
-        Powerstep01_WaitForAllDevicesNotBusy();
-        #endif
-    }
-
-    inline void waitWhileActive(Motor_t motor) const {
-        #ifdef CONFIG_L6470
-        L6470_WaitWhileActive(motor);
-        #else
-        Powerstep01_WaitWhileActive(motor);
-        #endif
-    }
-
-    inline void setParam(Motor_t motor, uint32_t param, uint32_t value) const {
-        #ifdef CONFIG_L6470
-        L6470_SetMotorConfigToNVS(motor, param, (uint16_t)value);
-        L6470_CmdSetParam(motor, param, value);
-        #else
-        Powerstep01_SetMotorConfigToNVS(motor, param, (uint16_t)value);
-        Powerstep01_CmdSetParam(motor, param, value);
-        #endif
-    }
-    
-    inline uint32_t getParam(Motor_t motor, uint32_t param) const {
-        #ifdef CONFIG_L6470
-        return L6470_CmdGetParam(motor, param);
-        #else
-        return Powerstep01_CmdGetParam(motor, param);
-        #endif
-    }
-    
-    inline bool setAnalogValue(Motor_t motor, uint32_t param, float value) const {
-        #ifdef CONFIG_L6470
-        return L6470_SetAnalogValue(motor, param, value);
-        #else
-        return Powerstep01_SetAnalogValue(motor, param, value);
-        #endif
-    }
-    
-    inline float getAnalogValue(Motor_t motor, uint32_t param) const {
-        #ifdef CONFIG_L6470
-        return L6470_GetAnalogValue(motor, param);
-        #else
-        return Powerstep01_GetAnalogValue(motor, param);
-        #endif
-    }
+    /* Register access */
+    void setParam(Motor_t motor, uint32_t param, uint32_t value) const;
+    uint32_t getParam(Motor_t motor, uint32_t param) const;
+    bool setAnalogValue(Motor_t motor, uint32_t param, float value) const;
+    float getAnalogValue(Motor_t motor, uint32_t param) const;
 
 private:
 
@@ -941,7 +662,6 @@ private:
     static bool _no_logic; 
 
     static const gpio_num_t _etor[OISTEPPER_NB_ETORS];
-
 
     #ifdef CONFIG_L6470
     static L6470_DeviceConfig_t device_conf;
