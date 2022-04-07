@@ -146,7 +146,7 @@ extern "C"
 /// powerSTEP01 thermal compensation max value
 #define POWERSTEP01_K_THERM_MAX_VALUE       (float)(1.46875)
 /// powerSTEP01 voltage amplitude regulation max value
-#define POWERSTEP01_KVAL_MAX_VALUE          (float)(255/256)
+#define POWERSTEP01_KVAL_MAX_VALUE          (float)((255.0/256.0) * 100.0)
 /// powerSTEP01 BEMF compensation curve slope max value
 #define POWERSTEP01_SLP_MAX_VALUE           (float)(0.4)
 /// powerSTEP01 torque regulation DAC reference voltage max value

@@ -444,21 +444,21 @@ bool OIStepper::selectStepMode(Motor_t motor, motorStepMode_t stepMode) const
 #endif
 }
 
-void OIStepper::setHome(Motor_t motor, int32_t homePos) const 
+void OIStepper::setHome(Motor_t motor, int32_t position) const 
 {
 #ifdef CONFIG_L6470
-    L6470_SetHome(motor, homePos);
+    L6470_SetHome(motor, position);
 #else
-    Powerstep01_SetHome(motor, homePos);
+    Powerstep01_SetHome(motor, position);
 #endif
 }
 
-void OIStepper::setMark(Motor_t motor, int32_t markPos) const 
+void OIStepper::setMark(Motor_t motor, int32_t position) const 
 {
 #ifdef CONFIG_L6470
-    L6470_SetMark(motor, markPos);
+    L6470_SetMark(motor, position);
 #else
-    Powerstep01_SetMark(motor, markPos);
+    Powerstep01_SetMark(motor, position);
 #endif
 }
 
@@ -507,25 +507,104 @@ float OIStepper::getMinSpeed(Motor_t motor) const
     return Powerstep01_GetAnalogValue(motor, POWERSTEP01_MIN_SPEED);
 }
 
+float OIStepper::getFsSpeed(Motor_t motor) const
+{
+    return Powerstep01_GetAnalogValue(motor, POWERSTEP01_FS_SPD);
+}
+
+float OIStepper::getKValHold(Motor_t motor) const
+{
+    return Powerstep01_GetAnalogValue(motor, POWERSTEP01_KVAL_HOLD);
+}
+
+float OIStepper::getKValRun(Motor_t motor) const
+{
+    return Powerstep01_GetAnalogValue(motor, POWERSTEP01_KVAL_RUN);
+}
+
+float OIStepper::getKValAcceleration(Motor_t motor) const
+{
+    return Powerstep01_GetAnalogValue(motor, POWERSTEP01_KVAL_ACC);
+}
+
+float OIStepper::getKValDeceleration(Motor_t motor) const
+{
+    return Powerstep01_GetAnalogValue(motor, POWERSTEP01_KVAL_DEC);  
+}
+
 void OIStepper::setAcceleration(Motor_t motor, float acceleration) const
 {
-    Powerstep01_SetAnalogValue(motor, POWERSTEP01_ACC, acceleration);
+    if (!Powerstep01_SetAnalogValue(motor, POWERSTEP01_ACC, acceleration))
+    {
+        ESP_LOGW(OI_STEPPER_TAG, "%s() error to set value", __FUNCTION__);
+    }
 }
 
 void OIStepper::setDeceleration(Motor_t motor, float deceleration) const
 {
-    Powerstep01_SetAnalogValue(motor, POWERSTEP01_DEC, deceleration);
+    if (!Powerstep01_SetAnalogValue(motor, POWERSTEP01_DEC, deceleration))
+    {
+        ESP_LOGW(OI_STEPPER_TAG, "%s() error to set value", __FUNCTION__);
+    }
 }
 
-void OIStepper::setMaxSpeed(Motor_t motor, float maxSpeed) const
+void OIStepper::setMaxSpeed(Motor_t motor, float speed) const
 {
-    Powerstep01_SetAnalogValue(motor, POWERSTEP01_MAX_SPEED, maxSpeed);
+    if (!Powerstep01_SetAnalogValue(motor, POWERSTEP01_MAX_SPEED, speed))
+    {
+        ESP_LOGW(OI_STEPPER_TAG, "%s() error to set value", __FUNCTION__);
+    }
 }
 
-void OIStepper::setMinSpeed(Motor_t motor, float minSpeed) const
+void OIStepper::setMinSpeed(Motor_t motor, float speed) const
 {
-    Powerstep01_SetAnalogValue(motor, POWERSTEP01_MIN_SPEED, minSpeed);
+    if (!Powerstep01_SetAnalogValue(motor, POWERSTEP01_MIN_SPEED, speed))
+    {
+        ESP_LOGW(OI_STEPPER_TAG, "%s() error to set value", __FUNCTION__); 
+    }
 }
+
+void OIStepper::setFsSpeed(Motor_t motor, float speed) const
+{
+    if (!Powerstep01_SetAnalogValue(motor, POWERSTEP01_FS_SPD, speed))
+    {
+        ESP_LOGW(OI_STEPPER_TAG, "%s() error to set value", __FUNCTION__);
+    }
+}
+
+void OIStepper::setKValHold(Motor_t motor, float kval) const
+{
+    if (!Powerstep01_SetAnalogValue(motor, POWERSTEP01_KVAL_HOLD, kval))
+    {
+        ESP_LOGW(OI_STEPPER_TAG, "%s() error to set value", __FUNCTION__);
+    }
+}
+
+void OIStepper::setKValRun(Motor_t motor, float kval) const
+{
+    if (!Powerstep01_SetAnalogValue(motor, POWERSTEP01_KVAL_RUN, kval))
+    {
+        ESP_LOGW(OI_STEPPER_TAG, "%s() error to set value", __FUNCTION__);
+    }
+}
+
+void OIStepper::setKValAcceleration(Motor_t motor, float kval) const
+{
+    if (!Powerstep01_SetAnalogValue(motor, POWERSTEP01_KVAL_ACC, kval))
+    {
+        ESP_LOGW(OI_STEPPER_TAG, "%s() error to set value", __FUNCTION__);
+    }
+}
+
+void OIStepper::setKValDeceleration(Motor_t motor, float kval) const
+{
+    if (!Powerstep01_SetAnalogValue(motor, POWERSTEP01_KVAL_DEC, kval))
+    {
+        ESP_LOGW(OI_STEPPER_TAG, "%s() error to set value", __FUNCTION__);
+    }
+}
+
+
 
 /* Private */
 

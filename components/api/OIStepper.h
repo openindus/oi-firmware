@@ -451,6 +451,11 @@ public:
 
     bool isDeviceBusy(Motor_t motor) const;
 
+    //TODO
+    //checkBusy()
+    //checkFlag()
+    //checkError()
+
     /* Configuration */
     int32_t getPosition(Motor_t motor) const;
     int32_t getMark(Motor_t motor) const;
@@ -459,13 +464,24 @@ public:
     float getDeceleration(Motor_t motor) const;
     float getMaxSpeed(Motor_t motor) const;
     float getMinSpeed(Motor_t motor) const;
+    float getFsSpeed(Motor_t motor) const;
+    float getKValHold(Motor_t motor) const;
+    float getKValRun(Motor_t motor) const;
+    float getKValAcceleration(Motor_t motor) const;
+    float getKValDeceleration(Motor_t motor) const;
 
-    void setHome(Motor_t motor, int32_t homePos) const;
-    void setMark(Motor_t motor, int32_t markPos) const;
+
+    void setHome(Motor_t motor, int32_t position) const;
+    void setMark(Motor_t motor, int32_t position) const;
     void setAcceleration(Motor_t motor, float acceleration) const;
     void setDeceleration(Motor_t motor, float deceleration) const;
-    void setMaxSpeed(Motor_t motor, float maxSpeed) const;
-    void setMinSpeed(Motor_t motor, float minSpeed) const;
+    void setMaxSpeed(Motor_t motor, float speed) const;
+    void setMinSpeed(Motor_t motor, float speed) const;
+    void setFsSpeed(Motor_t motor, float speed) const;
+    void setKValHold(Motor_t motor, float kval) const;
+    void setKValRun(Motor_t motor, float kval) const;
+    void setKValAcceleration(Motor_t motor, float kval) const;
+    void setKValDeceleration(Motor_t motor, float kval) const;
 
 
 
