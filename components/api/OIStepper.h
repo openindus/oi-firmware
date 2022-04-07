@@ -363,15 +363,6 @@ class OIStepperInterface
     virtual bool isDeviceBusy(Motor_t motor) const = 0;
 
     /**
-    * @brief  Reads the Status Register value
-    * @param[in] motor Motor num
-    * @return Status register value
-    * @note The status register flags are not cleared 
-    * at the difference with getStatus()
-    **/
-    virtual uint16_t readStatusRegister(Motor_t motor) const = 0;
-
-    /**
     * @brief  Set the stepping mode 
     * @param[in] motor Motor num
     * @param[in] stepMode from full step to 1/128 microstep as specified in enum motorStepMode_t
@@ -454,56 +445,52 @@ public:
     /* MOTOR */
     /*********/
 
-    /* Configuration */
-    bool selectStepMode(Motor_t motor, motorStepMode_t stepMode) const;
-
-    /* Interrupts */
     void attachBusyInterrupt(void (*callback)(void));
     void attachErrorHandler(void (*callback)(uint16_t));
     void attachFlagInterrupt(void (*callback)(void));
 
-    /* Status */
-    uint16_t getStatus(Motor_t motor) const;
     bool isDeviceBusy(Motor_t motor) const;
-    uint16_t readStatusRegister(Motor_t motor) const;
 
-    /* Positionning */
-    int32_t getPosition(Motor_t motor) const;    
+    /* Configuration */
+    int32_t getPosition(Motor_t motor) const;
+    int32_t getMark(Motor_t motor) const;
+    float getSpeed(Motor_t motor) const;
+    float getAcceleration(Motor_t motor) const;
+    float getDeceleration(Motor_t motor) const;
+    float getMaxSpeed(Motor_t motor) const;
+    float getMinSpeed(Motor_t motor) const;
 
-    /* Step clock */
-    void stepClock(Motor_t motor, motorDir_t direction) const;
-
-    /* Constant speed commands */
-    void run(Motor_t motor, motorDir_t direction, uint32_t speed) const;
-    void goUntil(Motor_t motor, motorAction_t action, motorDir_t direction, uint32_t speed) const;
-    void releaseSw(Motor_t motor, motorAction_t action, motorDir_t direction) const;
-
-    /* Step commands */
-    void move(Motor_t motor, motorDir_t direction, uint32_t n_step) const;
-
-    /* Absolute positionning commands */
     void setHome(Motor_t motor, int32_t homePos) const;
     void setMark(Motor_t motor, int32_t markPos) const;
-    int32_t getMark(Motor_t motor) const;
-    void resetPos(Motor_t motor) const;
+    void setAcceleration(Motor_t motor, float acceleration) const;
+    void setDeceleration(Motor_t motor, float deceleration) const;
+    void setMaxSpeed(Motor_t motor, float maxSpeed) const;
+    void setMinSpeed(Motor_t motor, float minSpeed) const;
 
-    void goHome(Motor_t motor) const;
-    void goMark(Motor_t motor) const;
-    void goTo(Motor_t motor, int32_t abs_pos) const;
-    void goToDir(Motor_t motor, motorDir_t direction, int32_t abs_pos) const;
 
-    /* Stop commands */
-    void softHiZ(Motor_t motor) const;
-    void softStop(Motor_t motor) const;
-    void hardHiZ(Motor_t motor) const;
-    void hardStop(Motor_t motor) const;
 
-    /* Reset commands */
-    void resetDevice(Motor_t motor) const;
 
-    /* Register access */
+    bool selectStepMode(Motor_t motor, motorStepMode_t stepMode) const;
+
+    /* Commands */
     void setParam(Motor_t motor, uint32_t param, uint32_t value) const;
     uint32_t getParam(Motor_t motor, uint32_t param) const;
+    void run(Motor_t motor, motorDir_t direction, uint32_t speed) const;
+    void stepClock(Motor_t motor, motorDir_t direction) const;
+    void move(Motor_t motor, motorDir_t direction, uint32_t n_step) const;
+    void goTo(Motor_t motor, int32_t abs_pos) const;
+    void goToDir(Motor_t motor, motorDir_t direction, int32_t abs_pos) const;
+    void goUntil(Motor_t motor, motorAction_t action, motorDir_t direction, uint32_t speed) const;
+    void releaseSw(Motor_t motor, motorAction_t action, motorDir_t direction) const;
+    void goHome(Motor_t motor) const;
+    void goMark(Motor_t motor) const;
+    void resetPos(Motor_t motor) const;
+    void resetDevice(Motor_t motor) const;
+    void softStop(Motor_t motor) const;
+    void hardStop(Motor_t motor) const;
+    void softHiZ(Motor_t motor) const;    
+    void hardHiZ(Motor_t motor) const;
+    uint16_t getStatus(Motor_t motor) const;
 
 private:
 
@@ -660,10 +647,6 @@ public:
 
     bool isDeviceBusy(Motor_t motor) const {
         return (bool)getMessage(OIMessage(CMD_IS_DEVICE_BUSY, _senderId, motor));
-    }
-
-    uint16_t readStatusRegister(Motor_t motor) const {
-        return (uint16_t)getMessage(OIMessage(CMD_READ_STATUS_REGISTER, _senderId, motor));
     }
 
     bool selectStepMode(Motor_t motor, motorStepMode_t stepMode) const {

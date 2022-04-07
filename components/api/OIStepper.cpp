@@ -435,15 +435,6 @@ bool OIStepper::isDeviceBusy(Motor_t motor) const
 #endif
 }
 
-uint16_t OIStepper::readStatusRegister(Motor_t motor) const 
-{
-#ifdef CONFIG_L6470
-    return L6470_ReadStatusRegister(motor);
-#else
-    return Powerstep01_ReadStatusRegister(motor);
-#endif
-}
-
 bool OIStepper::selectStepMode(Motor_t motor, motorStepMode_t stepMode) const 
 {
 #ifdef CONFIG_L6470
@@ -489,6 +480,51 @@ uint32_t OIStepper::getParam(Motor_t motor, uint32_t param) const
 #else
     return Powerstep01_CmdGetParam(motor, param);
 #endif
+}
+
+float OIStepper::getSpeed(Motor_t motor) const
+{
+    return Powerstep01_GetAnalogValue(motor, POWERSTEP01_SPEED);
+}
+
+float OIStepper::getAcceleration(Motor_t motor) const
+{
+    return Powerstep01_GetAnalogValue(motor, POWERSTEP01_ACC);
+}
+
+float OIStepper::getDeceleration(Motor_t motor) const
+{
+    return Powerstep01_GetAnalogValue(motor, POWERSTEP01_DEC);
+}
+
+float OIStepper::getMaxSpeed(Motor_t motor) const
+{
+    return Powerstep01_GetAnalogValue(motor, POWERSTEP01_MAX_SPEED);
+}
+
+float OIStepper::getMinSpeed(Motor_t motor) const
+{
+    return Powerstep01_GetAnalogValue(motor, POWERSTEP01_MIN_SPEED);
+}
+
+void OIStepper::setAcceleration(Motor_t motor, float acceleration) const
+{
+    Powerstep01_SetAnalogValue(motor, POWERSTEP01_ACC, acceleration);
+}
+
+void OIStepper::setDeceleration(Motor_t motor, float deceleration) const
+{
+    Powerstep01_SetAnalogValue(motor, POWERSTEP01_DEC, deceleration);
+}
+
+void OIStepper::setMaxSpeed(Motor_t motor, float maxSpeed) const
+{
+    Powerstep01_SetAnalogValue(motor, POWERSTEP01_MAX_SPEED, maxSpeed);
+}
+
+void OIStepper::setMinSpeed(Motor_t motor, float minSpeed) const
+{
+    Powerstep01_SetAnalogValue(motor, POWERSTEP01_MIN_SPEED, minSpeed);
 }
 
 /* Private */

@@ -405,12 +405,7 @@ void attachFunctions(void)
     CMD.add(OIMessage(CMD_IS_DEVICE_BUSY, Module.getId()), [](OIMessage msg) -> uint32_t 
     { 
         return static_cast<uint32_t>(Module.isDeviceBusy(static_cast<Motor_t>(msg.getConf())));
-    });
-
-    CMD.add(OIMessage(CMD_READ_STATUS_REGISTER, Module.getId()), [](OIMessage msg) -> uint32_t 
-    { 
-        return Module.readStatusRegister(static_cast<Motor_t>(msg.getConf()));
-    });
+    });;
 
     CMD.add(OIMessage(CMD_SELECT_STEP_MODE, Module.getId()), [](OIMessage msg) -> uint32_t 
     { 
