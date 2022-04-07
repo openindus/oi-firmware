@@ -671,7 +671,7 @@ public:
         if ((callback != NULL))
         {
             setMessage(OIMessage(CMD_ATTACH_LIMIT_SWITCH, _senderId, static_cast<uint16_t>((etor << 8) | motor), static_cast<uint32_t>(true)));
-            Fct.add(OIMessage(CMD_ETOR_INTERRUPT, _senderId), [callback](OIMessage msg) -> uint32_t {
+            CMD.add(OIMessage(CMD_ETOR_INTERRUPT, _senderId), [callback](OIMessage msg) -> uint32_t {
                 callback();
                 return 0;
             });
@@ -688,7 +688,7 @@ public:
 
     inline void attachBusyInterrupt(void (*callback)(void)) {
         setMessage(OIMessage(CMD_ATTACH_BUSY_INTERRUPT, _senderId));
-        Fct.add(OIMessage(CMD_BUSY_INTERRUPT, _senderId), [callback](OIMessage msg) -> uint32_t {
+        CMD.add(OIMessage(CMD_BUSY_INTERRUPT, _senderId), [callback](OIMessage msg) -> uint32_t {
             callback();
             return 0;
         });
@@ -696,7 +696,7 @@ public:
 
     inline void attachErrorHandler(void (*callback)(uint16_t)) {
         setMessage(OIMessage(CMD_ATTACH_ERROR_HANDLER, _senderId));
-        Fct.add(OIMessage(CMD_ERROR_HANDLER, _senderId), [callback](OIMessage msg) -> uint32_t {
+        CMD.add(OIMessage(CMD_ERROR_HANDLER, _senderId), [callback](OIMessage msg) -> uint32_t {
             callback((uint16_t)msg.getData());
             return 0;
         });
@@ -704,7 +704,7 @@ public:
 
     inline void attachFlagInterrupt(void (*callback)(void)) {
         setMessage(OIMessage(CMD_ATTACH_FLAG_INTERRUPT, _senderId));
-        Fct.add(OIMessage(CMD_FLAG_INTERRUPT, _senderId), [callback](OIMessage msg) -> uint32_t {
+        CMD.add(OIMessage(CMD_FLAG_INTERRUPT, _senderId), [callback](OIMessage msg) -> uint32_t {
             callback();
             return 0;
         });

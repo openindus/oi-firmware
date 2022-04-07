@@ -283,7 +283,7 @@ int OIConsole::_downloadMode(int argc, char **argv)
     
     if (downloadModeArgs.id->count == 0)
     {
-        Fct.run(msg);
+        CMD.run(msg);
     }
     else
     {
@@ -293,7 +293,7 @@ int OIConsole::_downloadMode(int argc, char **argv)
         {
             if (id == (System.getModule())->getId())
             {
-                Fct.run(msg);
+                CMD.run(msg);
             }
             else
             {
@@ -461,11 +461,11 @@ int OIConsole::_cmd(int argc, char **argv)
         {
             if ((msg.getType() & MASK_GET) == TYPE_GET)
             {
-                printf("%d\n", Fct.run(msg));
+                printf("%d\n", CMD.run(msg));
             }
             else
             {
-                Fct.run(msg);
+                CMD.run(msg);
             }
         }
         else
@@ -507,11 +507,11 @@ int OIConsole::_cmd(int argc, char **argv)
     {
         if ((msg.getType() & MASK_GET) == TYPE_GET)
         {
-            printf("%d\n", Fct.run(msg));
+            printf("%d\n", CMD.run(msg));
         }
         else
         {
-            Fct.run(msg);
+            CMD.run(msg);
         }
     }
 

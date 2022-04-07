@@ -24,7 +24,7 @@
 #include "ledonewire/ledonewire.h"
 
 #include "OIBus.h"
-#include "OIFunction.h"
+#include "OICommand.h"
 #include "OIType.h"
 
 /* NVS Memory */

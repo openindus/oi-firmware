@@ -6,7 +6,7 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file OIFunction.h
+ * @file OICommand.h
  * @brief OpenIndus function table
  *
  * For more information on OpenIndus:
@@ -24,20 +24,20 @@
 
 #include "OIMessage.h"
 
-typedef std::function<uint32_t(OIMessage msg)> OICommand;
+typedef std::function<uint32_t(OIMessage msg)> OIFonction;
 
 
-class OIFunction
+class OICommand
 {
-    std::multimap<OIMessage, OICommand> _commandTable;
+    std::multimap<OIMessage, OIFonction> _commandTable;
 
 public:
 
-    void add(OIMessage const& msg, OICommand function);
+    void add(OIMessage const& msg, OIFonction function);
     void remove(OIMessage const& msg);
     bool exist(OIMessage const& msg);
     uint32_t run(OIMessage const& msg);
     void list(void);
 };
 
-extern OIFunction Fct;
+extern OICommand CMD;
