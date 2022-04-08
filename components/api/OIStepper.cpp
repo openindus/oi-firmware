@@ -433,7 +433,14 @@ bool OIStepper::busyCheck(Motor_t motor, bool software) const
 #ifdef CONFIG_L6470
     return L6470_IsDeviceBusy(motor);
 #else
-    return Powerstep01_IsDeviceBusy(motor);
+    if (software == true)
+    {
+        return Powerstep01_IsDeviceBusy(motor);
+    }
+    else 
+    {
+        return static_cast<bool>(Powerstep01_CheckBusyHw());
+    }    
 #endif
 }
 

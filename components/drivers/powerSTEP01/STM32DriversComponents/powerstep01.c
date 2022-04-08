@@ -352,7 +352,7 @@ void Powerstep01_Init(void* pInit)
  **********************************************************/
 uint8_t Powerstep01_CheckBusyHw(void)
 {
-	if(!(Powerstep01_Board_BUSY_PIN_GetState()))
+	if(Powerstep01_Board_BUSY_PIN_GetState())
   {
     return 0x01;
   }
