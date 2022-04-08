@@ -372,12 +372,13 @@ void OIStepper::resetPos(Motor_t motor) const
 #endif
 }
 
-void OIStepper::run(Motor_t motor, motorDir_t direction, uint32_t speed) const 
+void OIStepper::run(Motor_t motor, motorDir_t direction, float speed) const 
 {
+    uint32_t regVal = static_cast<uint32_t>(((speed)*67.108864f)+0.5f);
 #ifdef CONFIG_L6470
-    L6470_CmdRun(motor, direction, speed);
+    L6470_CmdRun(motor, direction, regVal);
 #else
-    Powerstep01_CmdRun(motor, direction, speed);
+    Powerstep01_CmdRun(motor, direction, regVal);
 #endif
 }
 

@@ -368,7 +368,7 @@ void attachFunctions(void)
     { 
         Module.run(static_cast<Motor_t>(msg.getConf()), 
             static_cast<motorDir_t>((msg.getConf() & 0xFF00) >> 8), 
-            msg.getData());
+            static_cast<float>(msg.getData()));
         return 0;
     });
 

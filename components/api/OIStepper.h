@@ -186,28 +186,28 @@ class OIStepperInterface
     virtual void attachFlagInterrupt(void (*callback)(void)) = 0;
 
     /**
-    * @brief Issues OIStepper Get Status command
+    * @brief OIStepper Get Status command
     * @param[in] motor Motor num
     * @return Status Register content
     */
     virtual uint16_t getStatus(Motor_t motor) const = 0;
 
     /**
-    * @brief Issues OIStepper Go Home command (Shortest path to zero position)
+    * @brief OIStepper Go Home command (Shortest path to zero position)
     * @param[in] motor Motor num
     * @return None
     */
     virtual void goHome(Motor_t motor) const = 0;
 
     /**
-    * @brief Issues OIStepper Go Mark command
+    * @brief OIStepper Go Mark command
     * @param[in] motor Motor num
     * @return None
     */
     virtual void goMark(Motor_t motor) const = 0;
 
     /**
-    * @brief Issues OIStepper Go To command
+    * @brief OIStepper Go To command
     * @param[in] motor Motor num
     * @param[in] abs_pos absolute position in steps in agreement
     * with the step mode where requested to move
@@ -216,7 +216,7 @@ class OIStepperInterface
     virtual void goTo(Motor_t motor, int32_t abs_pos) const = 0;
 
     /**
-    * @brief Issues OIStepper Go To Dir command
+    * @brief OIStepper Go To Dir command
     * @param[in] motor Motor num
     * @param[in] direction movement direction
     * @param[in] abs_pos absolute position in steps in agreement
@@ -226,7 +226,7 @@ class OIStepperInterface
     virtual void goToDir(Motor_t motor, motorDir_t direction, int32_t abs_pos) const = 0;
 
     /**
-    * @brief Issues OIStepper Go Until command
+    * @brief OIStepper Go Until command
     * @param[in] motor Motor num
     * @param[in] action ACTION_RESET or ACTION_COPY
     * @param[in] direction movement direction
@@ -236,7 +236,7 @@ class OIStepperInterface
     virtual void goUntil(Motor_t motor, motorAction_t action, motorDir_t direction, uint32_t speed) const = 0;
 
     /**
-    * @brief Issues OIStepper Hard HiZ command
+    * @brief OIStepper Hard HiZ command
     * @param[in] motor Motor num
     * @return None
     * @note The HardHiZ command immediately disables the power bridges
@@ -248,7 +248,7 @@ class OIStepperInterface
     virtual void hardHiZ(Motor_t motor) const = 0;
 
     /**
-    * @brief Issues OIStepper Hard Stop command
+    * @brief OIStepper Hard Stop command
     * @param[in] motor Motor num
     * @return None
     * @note The HardStop command causes an immediate motor stop with
@@ -261,7 +261,7 @@ class OIStepperInterface
     virtual void hardStop(Motor_t motor) const = 0;
     
     /**
-    * @brief Issues OIStepper Move command
+    * @brief OIStepper Move command
     * @param[in] motor Motor num
     * @param[in] direction Movement direction
     * @param[in] n_step number of steps
@@ -270,7 +270,7 @@ class OIStepperInterface
     virtual void move(Motor_t motor, motorDir_t direction, uint32_t n_step) const = 0;
 
     /**
-    * @brief Issues OIStepper Release SW command
+    * @brief OIStepper Release SW command
     * @param[in] motor Motor num
     * @param[in] action type of action to undertake when the SW
     * input is forced high
@@ -280,30 +280,30 @@ class OIStepperInterface
     virtual void releaseSw(Motor_t motor, motorAction_t action, motorDir_t direction) const = 0;
 
     /**
-    * @brief Issues OIStepper Reset Device command
+    * @brief OIStepper Reset Device command
     * @param[in] motor Motor num
     * @return None
     */
     virtual void resetDevice(Motor_t motor) const = 0;
 
     /**
-    * @brief Issues OIStepper Reset Pos command
+    * @brief OIStepper Reset Pos command
     * @param[in] motor Motor num
     * @return None
     */
     virtual void resetPos(Motor_t motor) const = 0;
 
     /**
-    * @brief Issues OIStepper Run command
+    * @brief OIStepper Run command
     * @param[in] motor Motor num
     * @param[in] direction Movement direction (FORWARD, BACKWARD)
-    * @param[in] speed in 2^-28 step/tick
+    * @param[in] speed in step/s
     * @return None
     */
-    virtual void run(Motor_t motor, motorDir_t direction, uint32_t speed) const = 0;
+    virtual void run(Motor_t motor, motorDir_t direction, float speed) const = 0;
 
     /**
-    * @brief Issues OIStepper Soft HiZ command
+    * @brief OIStepper Soft HiZ command
     * @param[in] motor Motor num
     * @return None
     * @note The SoftHiZ command disables the power bridges
@@ -318,7 +318,7 @@ class OIStepperInterface
     virtual void softHiZ(Motor_t motor) const = 0;
 
     /**
-    * @brief Issues OIStepper Soft Stop command
+    * @brief OIStepper Soft Stop command
     * @param[in] motor Motor num
     * @return None
     * @note The SoftStop command causes an immediate deceleration
@@ -333,7 +333,7 @@ class OIStepperInterface
     virtual void softStop(Motor_t motor) const = 0;
 
     /**
-    * @brief Issues OIStepper Step Clock command
+    * @brief OIStepper Step Clock command
     * @param[in] motor Motor num
     * @param[in] direction Movement direction (FORWARD, BACKWARD)
     * @return None
@@ -389,7 +389,7 @@ class OIStepperInterface
     virtual void setMark(Motor_t motor, int32_t markPos) const = 0;
 
     /**
-    * @brief Issues the SetParam command to the OIStepper of the specified device
+    * @brief the SetParam command to the OIStepper of the specified device
     * @param[in] motor Motor num
     * @param[in] param Register adress (Powerstep01_ABS_POS, Powerstep01_MARK,...)
     * @param[in] value Value to set in the register
@@ -398,7 +398,7 @@ class OIStepperInterface
     virtual void setParam(Motor_t motor, uint32_t param, uint32_t value) const = 0;
 
     /**
-    * @brief Issues OIStepper Get Param command
+    * @brief OIStepper Get Param command
     * @param[in] motor Motor num
     * @param[in] param OIStepper register address
     * @return Register value - 1 to 3 bytes (depends on register)
@@ -483,7 +483,7 @@ public:
     /* Commands */
     void setParam(Motor_t motor, uint32_t param, uint32_t value) const;
     uint32_t getParam(Motor_t motor, uint32_t param) const;
-    void run(Motor_t motor, motorDir_t direction, uint32_t speed) const;
+    void run(Motor_t motor, motorDir_t direction, float speed) const;
     void stepClock(Motor_t motor, motorDir_t direction) const;
     void move(Motor_t motor, motorDir_t direction, uint32_t n_step) const;
     void goTo(Motor_t motor, int32_t abs_pos) const;
@@ -629,8 +629,8 @@ public:
         setMessage(OIMessage(CMD_RESET_POS, _senderId, motor));
     }
 
-    inline void run(Motor_t motor, motorDir_t direction, uint32_t speed) const {
-        setMessage(OIMessage(CMD_RUN, _senderId, (uint16_t)((direction << 8) | motor), speed));
+    inline void run(Motor_t motor, motorDir_t direction, float speed) const {
+        setMessage(OIMessage(CMD_RUN, _senderId, (uint16_t)((direction << 8) | motor), static_cast<uint32_t>(speed)));
     }
 
     inline void softHiZ(Motor_t motor) const {
@@ -659,10 +659,6 @@ public:
 
     bool selectStepMode(Motor_t motor, motorStepMode_t stepMode) const {
         return (bool)getMessage(OIMessage(CMD_SELECT_STEP_MODE, _senderId, (uint16_t)((stepMode << 8) | motor)));
-    }
-
-    void sendQueuedCommands(void) const {
-        sendMessage(OIMessage(CMD_SEND_QUEUED_COMMANDS, _senderId));
     }
 
     void setHome(Motor_t motor, int32_t homePos) const {

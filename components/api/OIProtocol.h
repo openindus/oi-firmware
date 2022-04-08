@@ -128,7 +128,6 @@ enum {
     CMD_BUSY_INTERRUPT =                CMD_TYPE_SEND(0x00),
     CMD_ERROR_HANDLER =                 CMD_TYPE_SEND(0x01),
     CMD_FLAG_INTERRUPT =                CMD_TYPE_SEND(0x02),
-    CMD_SEND_QUEUED_COMMANDS =          CMD_TYPE_SEND(0x03),
 };
 
 /*------------------------ RELAY ---------------------------*/
