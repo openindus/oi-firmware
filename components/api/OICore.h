@@ -353,7 +353,7 @@ public:
      */
     inline void attachInterrupt(Etor_t etor, void (*callback)(void), InterruptMode_t mode) {
         setMessage(OIMessage(CMD_ATTACH_INTERRUPT, _senderId, (uint16_t) etor, (uint16_t) mode));
-        Fct.add(OIMessage(CMD_ETOR_INTERRUPT, _senderId), [callback](OIMessage msg) -> uint32_t {
+        CMD.add(OIMessage(CMD_ETOR_INTERRUPT, _senderId), [callback](OIMessage msg) -> uint32_t {
             callback();
             return 0;
         });

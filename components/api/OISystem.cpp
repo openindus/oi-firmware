@@ -139,14 +139,14 @@ void OISystem::_busRsTask(void *pvParameters)
                     {
                         BusRS.sendMessage(OIMessage(msg.getType(), (system->getModule())->getId(), msg.getConf()), msg.getId());
                     }
-                    Fct.run(msg);
+                    CMD.run(msg);
                 }
                 else if ((msg.getType() & MASK_GET) == TYPE_GET)
                 {
                     ESP_LOGV(OI_SYSTEM_TAG, "received get message");
 
                     /* run the command */
-                    data = Fct.run(msg);
+                    data = CMD.run(msg);
 
                     if (id != BROADCAST_ID)
                     {
@@ -159,7 +159,7 @@ void OISystem::_busRsTask(void *pvParameters)
                 else if ((msg.getType() & MASK_SEND) == TYPE_SEND)
                 {
                     ESP_LOGV(OI_SYSTEM_TAG, "received send message");
-                    Fct.run(msg);
+                    CMD.run(msg);
                 }
             }
         }
@@ -184,7 +184,7 @@ void OISystem::_busCanTask(void *pvParameters)
             {
                 if ((msg.getType() & MASK_SEND) == TYPE_SEND)
                 {
-                    Fct.run(msg);
+                    CMD.run(msg);
                 }
                 else
                 {
