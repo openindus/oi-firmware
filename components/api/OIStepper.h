@@ -359,10 +359,9 @@ class OIStepperInterface
     * @brief Checks if the specified motor is busy
     * by reading the Busy flag bit ot its status Register
     * @param[in] motor Motor num
-    * @param software if true, check register else check pin
     * @return true if motor is busy, false zero
     */
-    virtual bool busyCheck(Motor_t motor, bool software) const = 0;
+    virtual bool busyCheck(Motor_t motor) const = 0;
 
     /**
     * @brief  Set the stepping mode 
@@ -451,7 +450,7 @@ public:
     void attachErrorHandler(void (*callback)(uint16_t));
     void attachFlagInterrupt(void (*callback)(void));
 
-    bool busyCheck(Motor_t motor, bool software=true) const;
+    bool busyCheck(Motor_t motor) const;
 
     /* Configuration */
     int32_t getPosition(Motor_t motor) const;
@@ -655,7 +654,7 @@ public:
         return getMessage(OIMessage(CMD_GET_POSITION, _senderId, motor));
     }
 
-    bool busyCheck(Motor_t motor, bool software=0) const {
+    bool busyCheck(Motor_t motor) const {
         return (bool)getMessage(OIMessage(CMD_BUSY_CHECK, _senderId, motor));
     }
 
