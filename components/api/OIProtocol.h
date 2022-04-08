@@ -118,7 +118,7 @@ enum {
 
     CMD_GET_MARK =                      CMD_TYPE_GET(0x04),
     CMD_GET_POSITION =                  CMD_TYPE_GET(0x05),
-    CMD_IS_DEVICE_BUSY =                CMD_TYPE_GET(0x06),
+    CMD_BUSY_CHECK =                    CMD_TYPE_GET(0x06),
     CMD_SELECT_STEP_MODE =              CMD_TYPE_GET(0x08),
     CMD_GET_PARAM =                     CMD_TYPE_GET(0x09),
 

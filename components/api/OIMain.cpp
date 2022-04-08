@@ -402,9 +402,9 @@ void attachFunctions(void)
         return Module.getPosition(static_cast<Motor_t>(msg.getConf()));
     });
 
-    CMD.add(OIMessage(CMD_IS_DEVICE_BUSY, Module.getId()), [](OIMessage msg) -> uint32_t 
+    CMD.add(OIMessage(CMD_BUSY_CHECK, Module.getId()), [](OIMessage msg) -> uint32_t 
     { 
-        return static_cast<uint32_t>(Module.isDeviceBusy(static_cast<Motor_t>(msg.getConf())));
+        return static_cast<uint32_t>(Module.busyCheck(static_cast<Motor_t>(msg.getConf())));
     });;
 
     CMD.add(OIMessage(CMD_SELECT_STEP_MODE, Module.getId()), [](OIMessage msg) -> uint32_t 

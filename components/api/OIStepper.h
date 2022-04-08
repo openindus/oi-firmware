@@ -358,9 +358,10 @@ class OIStepperInterface
     * @brief Checks if the specified motor is busy
     * by reading the Busy flag bit ot its status Register
     * @param[in] motor Motor num
+    * @param software if true, check register else check pin
     * @return true if motor is busy, false zero
     */
-    virtual bool isDeviceBusy(Motor_t motor) const = 0;
+    virtual bool busyCheck(Motor_t motor, bool software) const = 0;
 
     /**
     * @brief  Set the stepping mode 
@@ -449,12 +450,7 @@ public:
     void attachErrorHandler(void (*callback)(uint16_t));
     void attachFlagInterrupt(void (*callback)(void));
 
-    bool isDeviceBusy(Motor_t motor) const;
-
-    //TODO
-    //checkBusy()
-    //checkFlag()
-    //checkError()
+    bool busyCheck(Motor_t motor, bool software=true) const;
 
     /* Configuration */
     int32_t getPosition(Motor_t motor) const;
@@ -470,7 +466,6 @@ public:
     float getKValAcceleration(Motor_t motor) const;
     float getKValDeceleration(Motor_t motor) const;
 
-
     void setHome(Motor_t motor, int32_t position) const;
     void setMark(Motor_t motor, int32_t position) const;
     void setAcceleration(Motor_t motor, float acceleration) const;
@@ -482,9 +477,6 @@ public:
     void setKValRun(Motor_t motor, float kval) const;
     void setKValAcceleration(Motor_t motor, float kval) const;
     void setKValDeceleration(Motor_t motor, float kval) const;
-
-
-
 
     bool selectStepMode(Motor_t motor, motorStepMode_t stepMode) const;
 
@@ -661,8 +653,8 @@ public:
         return getMessage(OIMessage(CMD_GET_POSITION, _senderId, motor));
     }
 
-    bool isDeviceBusy(Motor_t motor) const {
-        return (bool)getMessage(OIMessage(CMD_IS_DEVICE_BUSY, _senderId, motor));
+    bool busyCheck(Motor_t motor, bool software=0) const {
+        return (bool)getMessage(OIMessage(CMD_BUSY_CHECK, _senderId, motor));
     }
 
     bool selectStepMode(Motor_t motor, motorStepMode_t stepMode) const {

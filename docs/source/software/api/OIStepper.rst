@@ -63,7 +63,7 @@ Functions
 .. doxygenfunction:: OIStepper::fetchAndClearAllStatus
 .. doxygenfunction:: OIStepper::getMark
 .. doxygenfunction:: OIStepper::getPosition
-.. doxygenfunction:: OIStepper::isDeviceBusy
+.. doxygenfunction:: OIStepper::busyCheck
 .. doxygenfunction:: OIStepper::readStatusRegister
 .. doxygenfunction:: OIStepper::releaseReset
 .. doxygenfunction:: OIStepper::reset
