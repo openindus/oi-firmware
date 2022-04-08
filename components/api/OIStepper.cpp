@@ -462,6 +462,11 @@ void OIStepper::setHome(Motor_t motor, int32_t position) const
 #endif
 }
 
+void OIStepper::setPosition(Motor_t motor, int32_t position) const
+{
+    Powerstep01_CmdSetParam(motor, POWERSTEP01_ABS_POS, position);
+}
+
 void OIStepper::setMark(Motor_t motor, int32_t position) const 
 {
 #ifdef CONFIG_L6470

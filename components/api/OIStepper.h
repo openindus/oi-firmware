@@ -468,6 +468,7 @@ public:
     float getKValDeceleration(Motor_t motor) const;
 
     void setHome(Motor_t motor, int32_t position) const;
+    void setPosition(Motor_t motor, int32_t position) const;
     void setMark(Motor_t motor, int32_t position) const;
     void setAcceleration(Motor_t motor, float acceleration) const;
     void setDeceleration(Motor_t motor, float deceleration) const;
