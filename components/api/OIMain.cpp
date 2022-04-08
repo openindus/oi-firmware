@@ -388,7 +388,8 @@ void attachFunctions(void)
     CMD.add(OIMessage(CMD_STEP_CLOCK, Module.getId()), [](OIMessage msg) -> uint32_t 
     { 
         Module.stepClock(static_cast<Motor_t>(msg.getConf()), 
-            static_cast<motorDir_t>((msg.getConf() & 0xFF00) >> 8));
+            static_cast<motorDir_t>((msg.getConf() & 0xFF00) >> 8), 
+            msg.getData());
         return 0;
     });
 

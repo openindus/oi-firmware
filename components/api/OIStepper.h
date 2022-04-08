@@ -336,9 +336,10 @@ class OIStepperInterface
     * @brief OIStepper Step Clock command
     * @param[in] motor Motor num
     * @param[in] direction Movement direction (FORWARD, BACKWARD)
+    * @param[in] frequency rotational frequency (Hz)
     * @return None
     */
-    virtual void stepClock(Motor_t motor, motorDir_t direction) const = 0;
+    virtual void stepClock(Motor_t motor, motorDir_t direction, uint16_t frequency) const = 0;
 
     /**
     * @brief  Returns the mark position  of the specified device
@@ -484,7 +485,7 @@ public:
     void setParam(Motor_t motor, uint32_t param, uint32_t value) const;
     uint32_t getParam(Motor_t motor, uint32_t param) const;
     void run(Motor_t motor, motorDir_t direction, float speed) const;
-    void stepClock(Motor_t motor, motorDir_t direction) const;
+    void stepClock(Motor_t motor, motorDir_t direction, uint16_t frequency) const;
     void move(Motor_t motor, motorDir_t direction, uint32_t n_step) const;
     void goTo(Motor_t motor, int32_t abs_pos) const;
     void goToDir(Motor_t motor, motorDir_t direction, int32_t abs_pos) const;
@@ -641,8 +642,8 @@ public:
         setMessage(OIMessage(CMD_SOFT_STOP, _senderId, motor));
     }
 
-    inline void stepClock(Motor_t motor, motorDir_t direction) const {
-        setMessage(OIMessage(CMD_STEP_CLOCK, _senderId, (uint16_t)((direction << 8) | motor)));
+    inline void stepClock(Motor_t motor, motorDir_t direction, uint16_t frequency) const {
+        setMessage(OIMessage(CMD_STEP_CLOCK, _senderId, (uint16_t)((direction << 8) | motor), frequency));
     }
 
     inline int32_t getMark(Motor_t motor) const {

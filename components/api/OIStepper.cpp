@@ -400,11 +400,12 @@ void OIStepper::softStop(Motor_t motor) const
 #endif
 }
 
-void OIStepper::stepClock(Motor_t motor, motorDir_t direction) const 
+void OIStepper::stepClock(Motor_t motor, motorDir_t direction, uint16_t frequency) const 
 {
 #ifdef CONFIG_L6470
     L6470_CmdStepClock(motor, direction);
 #else
+    Powerstep01_StartStepClock(frequency);
     Powerstep01_CmdStepClock(motor, direction);
 #endif
 }

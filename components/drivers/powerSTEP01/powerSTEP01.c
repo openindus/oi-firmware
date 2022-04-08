@@ -156,9 +156,9 @@ void Powerstep01_Board_StepClockInit(void)
             
             ledc_timer_config_t pwm_timer = {
                 .speed_mode         = _deviceConfig->pwm_mode,
-                .duty_resolution    = LEDC_TIMER_13_BIT,
+                .duty_resolution    = LEDC_TIMER_8_BIT,
                 .timer_num          = _deviceConfig->pwm_timer,
-                .freq_hz            = 1000,
+                .freq_hz            = 10000,
                 .clk_cfg            = LEDC_AUTO_CLK,
             };
 
@@ -195,7 +195,7 @@ void Powerstep01_Board_StartStepClock(uint16_t newFreq)
             .channel    = _deviceConfig->pwm_channel,
             .intr_type  = LEDC_INTR_DISABLE,
             .timer_sel  = _deviceConfig->pwm_timer,
-            .duty       = 0x1000,
+            .duty       = 127, // (((2^8)/2) - 1)
             .hpoint     = 0,
         };
 
