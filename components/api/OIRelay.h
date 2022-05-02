@@ -98,6 +98,7 @@ class OIRelay : public OIModuleMaster
 
 class OIRelay : public OIModuleSlave
 {
+    public:
 
     OIRelay(uint8_t id) : OIModuleSlave(id) {}
 

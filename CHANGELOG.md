@@ -1,3 +1,3 @@
-- Use the old Arduino version
-- Bugfixes OIMixed
-- Build Examples [CI/CD]
+- Downgrade Platform espressif to 3.2.0
+- Bugfixes: OIStepperVE
+- Update OIStepper
