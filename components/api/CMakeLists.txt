@@ -2,7 +2,7 @@ set(COMPONENT_SRCS
     "OIMain.cpp"
     "OISystem.cpp"
     "OIConsole.cpp"
-    "OIFunction.cpp"
+    "OICommand.cpp"
     "OIBus.cpp"
     "OIModule.cpp"
     "OIType.cpp"

@@ -1,24 +1,24 @@
-#include "OIFunction.h"
+#include "OICommand.h"
 
 
-static const char OI_FUNCTION_TAG[] = "OIFunction";
+static const char OI_COMMAND_TAG[] = "OICommand";
 
-void OIFunction::add(OIMessage const& msg, OICommand function)
+void OICommand::add(OIMessage const& msg, OIFonction function)
 {
     _commandTable.insert(
-        std::multimap<OIMessage, OICommand>::value_type(
+        std::multimap<OIMessage, OIFonction>::value_type(
             msg, 
             function
         )
     );
 }
 
-void OIFunction::remove(OIMessage const& msg)
+void OICommand::remove(OIMessage const& msg)
 {
     _commandTable.erase(msg);
 }
 
-bool OIFunction::exist(OIMessage const& msg)
+bool OICommand::exist(OIMessage const& msg)
 {
     if (_commandTable.find(msg) != _commandTable.end()) {
         return true;
@@ -28,9 +28,9 @@ bool OIFunction::exist(OIMessage const& msg)
     }
 }
 
-uint32_t OIFunction::run(OIMessage const& msg)
+uint32_t OICommand::run(OIMessage const& msg)
 {
-    if (Fct.exist(msg))
+    if (CMD.exist(msg))
     {
         for (auto it=_commandTable.equal_range(msg).first; it!=_commandTable.equal_range(msg).second; ++it)
         {
@@ -49,12 +49,12 @@ uint32_t OIFunction::run(OIMessage const& msg)
     }
     else
     {
-        ESP_LOGW(OI_FUNCTION_TAG, "command does not exist: 0x%02x", msg.getType());
+        ESP_LOGW(OI_COMMAND_TAG, "command does not exist: 0x%02x", msg.getType());
     }
     return 0;
 }
 
-void OIFunction::list(void)
+void OICommand::list(void)
 {
     for (auto it=_commandTable.begin(); it!=_commandTable.end(); ++it)
     {
@@ -62,4 +62,4 @@ void OIFunction::list(void)
     }
 }
 
-OIFunction Fct;
+OICommand CMD;

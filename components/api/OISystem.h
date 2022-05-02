@@ -24,7 +24,7 @@
 
 #include "OIModule.h"
 #include "OIBus.h"
-#include "OIFunction.h"
+#include "OICommand.h"
 
 #ifdef CONFIG_OI_CORE
 #define DISABLE_RS_TASK

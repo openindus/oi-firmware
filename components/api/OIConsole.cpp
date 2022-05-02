@@ -6,9 +6,9 @@ static const char* OI_CONSOLE_TAG = "OIConsole";
 
 #if defined CONFIG_OI_CORE
 #define PROMPT_STR "OICore"
-#elif defined CONFIG_OI_DISCRETE || defined CONFIG_OI_DISCRETE_VERTICAL
+#elif defined(CONFIG_OI_DISCRETE) || defined(CONFIG_OI_DISCRETE_VERTICAL)
 #define PROMPT_STR "OIDiscrete"
-#elif defined CONFIG_OI_STEPPER
+#elif defined(CONFIG_OI_STEPPER) || defined(CONFIG_OI_STEPPER_VERTICAL)
 #define PROMPT_STR "OIStepper"
 #elif defined CONFIG_OI_MIXED
 #define PROMPT_STR "OIMixed"
@@ -283,7 +283,7 @@ int OIConsole::_downloadMode(int argc, char **argv)
     
     if (downloadModeArgs.id->count == 0)
     {
-        Fct.run(msg);
+        CMD.run(msg);
     }
     else
     {
@@ -293,7 +293,7 @@ int OIConsole::_downloadMode(int argc, char **argv)
         {
             if (id == (System.getModule())->getId())
             {
-                Fct.run(msg);
+                CMD.run(msg);
             }
             else
             {
@@ -461,11 +461,11 @@ int OIConsole::_cmd(int argc, char **argv)
         {
             if ((msg.getType() & MASK_GET) == TYPE_GET)
             {
-                printf("%d\n", Fct.run(msg));
+                printf("%d\n", CMD.run(msg));
             }
             else
             {
-                Fct.run(msg);
+                CMD.run(msg);
             }
         }
         else
@@ -507,11 +507,11 @@ int OIConsole::_cmd(int argc, char **argv)
     {
         if ((msg.getType() & MASK_GET) == TYPE_GET)
         {
-            printf("%d\n", Fct.run(msg));
+            printf("%d\n", CMD.run(msg));
         }
         else
         {
-            Fct.run(msg);
+            CMD.run(msg);
         }
     }
 

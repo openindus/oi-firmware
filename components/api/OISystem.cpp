@@ -32,7 +32,7 @@ void OISystem::start()
     xTaskCreate(_busCanTask, "bus task to receive can message", 4096, this, 1, &_busCanTaskHandle);
     #endif
 
-    #if defined(CONFIG_OI_CORE) & defined(CONFIG_AUTO_ID)
+    #if defined(CONFIG_OI_CORE) && defined(CONFIG_AUTO_ID)
 
     automaticId();
     
@@ -139,14 +139,14 @@ void OISystem::_busRsTask(void *pvParameters)
                     {
                         BusRS.sendMessage(OIMessage(msg.getType(), (system->getModule())->getId(), msg.getConf()), msg.getId());
                     }
-                    Fct.run(msg);
+                    CMD.run(msg);
                 }
                 else if ((msg.getType() & MASK_GET) == TYPE_GET)
                 {
                     ESP_LOGV(OI_SYSTEM_TAG, "received get message");
 
                     /* run the command */
-                    data = Fct.run(msg);
+                    data = CMD.run(msg);
 
                     if (id != BROADCAST_ID)
                     {
@@ -159,7 +159,7 @@ void OISystem::_busRsTask(void *pvParameters)
                 else if ((msg.getType() & MASK_SEND) == TYPE_SEND)
                 {
                     ESP_LOGV(OI_SYSTEM_TAG, "received send message");
-                    Fct.run(msg);
+                    CMD.run(msg);
                 }
             }
         }
@@ -184,7 +184,7 @@ void OISystem::_busCanTask(void *pvParameters)
             {
                 if ((msg.getType() & MASK_SEND) == TYPE_SEND)
                 {
-                    Fct.run(msg);
+                    CMD.run(msg);
                 }
                 else
                 {

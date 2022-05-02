@@ -362,7 +362,7 @@ public:
     inline void attachInterrupt(Etor_t etor, void (*callback)(void), InterruptMode_t mode) {
         setMessage(OIMessage(CMD_ATTACH_INTERRUPT, _senderId, (uint16_t) etor, (uint32_t) mode));
         callbackTable[etor] = callback;
-        Fct.add(OIMessage(CMD_ETOR_INTERRUPT, _destId), [this](OIMessage msg) -> uint32_t {
+        CMD.add(OIMessage(CMD_ETOR_INTERRUPT, _destId), [this](OIMessage msg) -> uint32_t {
             this->runCallbackTable(((Etor_t)msg.getConf()));
             return 0;
         });
@@ -426,7 +426,7 @@ public:
      */ 
     inline float getAnalogReference(Units_t units)
     {
-        uint32_t value = getMessage(OIMessage(CMD_GET_ANALOG_ADC_REFERENCE, _senderId, (uint16_t)units));
+        uint32_t value = getMessage(OIMessage(CMD_GET_ANALOG_ADC_REFERENCE, _senderId, (uint16_t)(units << 8)));
         return reinterpret_cast<float &>(value);        
     }
 
