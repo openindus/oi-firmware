@@ -29,7 +29,7 @@ void BusIO::init(Config_t* config)
     /* OI-ID */
     ESP_LOGI(BUS_IO_TAG, "Init OI-ID");
     adc1_config_width(_config->adcWidthId);
-    adc1_config_channel_atten((adc1_channel_t)_config->adcChannelId, ADC_ATTEN_DB_11);
+    adc1_config_channel_atten(_config->adcChannelId, ADC_ATTEN_DB_11);
     // Characterize ADC
     _adcCharsId = (esp_adc_cal_characteristics_t*)calloc(1, sizeof(esp_adc_cal_characteristics_t));
     esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, _config->adcWidthId, 1100, _adcCharsId);
@@ -71,7 +71,7 @@ uint16_t BusIO::readId(void)
     uint32_t adc_reading = 0;
     for (int i = 0; i < 64; i++)
     {
-        adc_reading += adc1_get_raw((adc1_channel_t)_config->adcChannelId);
+        adc_reading += adc1_get_raw(_config->adcChannelId);
     }
     adc_reading /= 64;
     return (uint16_t)((esp_adc_cal_raw_to_voltage(adc_reading, _adcCharsId) * 1024) / 4096);

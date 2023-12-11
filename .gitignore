@@ -11,9 +11,4 @@ sdkconfig.mixed
 sdkconfig.relaylp
 sdkconfig.relayhp
 sdkconfig.brushless
-sdkconfig.stepperve-s2
-sdkconfig.discrete-s2
-sdkconfig.core-s1
-sdkconfig.analogls
-sdkconfig.relayhp-s2
 dependencies.lock

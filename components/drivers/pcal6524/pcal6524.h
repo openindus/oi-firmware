@@ -51,7 +51,7 @@ typedef enum
     IOEX_NUM_5      = 5,
     IOEX_NUM_6      = 6,
     IOEX_NUM_7      = 7,
-    /*!< PORT2 */
+    /*!< PORT1 */
     IOEX_NUM_10     = 8,
     IOEX_NUM_11     = 9,
     IOEX_NUM_12     = 10,
@@ -60,7 +60,7 @@ typedef enum
     IOEX_NUM_15     = 13,
     IOEX_NUM_16     = 14,
     IOEX_NUM_17     = 15,
-    /*!< PORT1 */
+    /*!< PORT2 */
     IOEX_NUM_20     = 16,
     IOEX_NUM_21     = 17,
     IOEX_NUM_22     = 18,

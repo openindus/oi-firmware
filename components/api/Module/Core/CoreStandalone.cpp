@@ -103,14 +103,13 @@ void CoreStandalone::init()
      */
     _ioex = ioex_create(CORE_I2C_PORT_NUM, CORE_I2C_IOEXPANDER_ADDRESS, true, CORE_PIN_DIGITAL_INTERRUPT);
 
-    ESP_ERROR_CHECK(ioex_set_level(_ioex, CORE_IOEX_PIN_CMD_MOSFET, IOEX_LOW));
-    ESP_ERROR_CHECK(ioex_set_level(_ioex, CORE_IOEX_PIN_ALIM_EXT, IOEX_HIGH));
+    ESP_ERROR_CHECK(ioex_set_level(_ioex, CORE_IOEX_PIN_ALIM_AUX, IOEX_HIGH));
 
     ioex_config_t config;
     config.mode = IOEX_OUTPUT;
     config.pull_mode = IOEX_FLOATING;
     config.interrupt_type = IOEX_INTERRUPT_DISABLE;
-    config.pin_bit_mask = (1ULL<<CORE_IOEX_PIN_CMD_MOSFET) | (1ULL<<CORE_IOEX_PIN_ALIM_EXT);
+    config.pin_bit_mask = (1ULL<<CORE_IOEX_PIN_ALIM_AUX);
     ESP_ERROR_CHECK(ioex_config(_ioex, &config));
 
     /**

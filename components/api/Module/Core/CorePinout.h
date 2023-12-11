@@ -19,57 +19,64 @@
 #if defined(CONFIG_CORE)
 
 /* I2C pins */
-#define CORE_PIN_I2C_SDA              GPIO_NUM_32
-#define CORE_PIN_I2C_SCL              GPIO_NUM_33
+#define CORE_PIN_I2C_SDA                GPIO_NUM_5
+#define CORE_PIN_I2C_SCL                GPIO_NUM_6
 
-/* SPI pins */
-#define CORE_PIN_SPI_MISO             GPIO_NUM_12
-#define CORE_PIN_SPI_MOSI             GPIO_NUM_13
-#define CORE_PIN_SPI_SCK              GPIO_NUM_14
-
-/* RS EXT pins */
-#define CORE_PIN_RS_INTERRUPT         GPIO_NUM_34
-#define CORE_PIN_RS_SPI_CS            GPIO_NUM_19
-#define CORE_IOEX_PIN_RS_RESET        IOEX_NUM_21
-
-/* CAN EXT pins */
-#define CORE_PIN_CAN_INTERRUPT        GPIO_NUM_23
-#define CORE_PIN_CAN_SPI_CS           GPIO_NUM_27
-#define CORE_IOEX_PIN_CAN_RESET       IOEX_NUM_20
-
-/* USB Host pins */
-#define CORE_PIN_USB_HOST_SPI_CS      GPIO_NUM_18
-#define CORE_IOEX_PIN_USB_HOST_RESET  IOEX_NUM_23
-
-/* Ethernet pins */
-#define CORE_PIN_ETHERNET_SPI_CS      GPIO_NUM_25
-#define CORE_IOEX_PIN_ETHERNET_RESET  IOEX_NUM_22
-
-/* USB Host pins */
-#define CORE_PIN_SD_SPI_CS            GPIO_NUM_26
+/* I2C User pins */
+#define CORE_PIN_I2C_USER_SDA           GPIO_NUM_36
+#define CORE_PIN_I2C_USER_SCL           GPIO_NUM_37
 
 /* RTC pins */
-#define CORE_PIN_RTC_INTERRUPT        IOEX_NUM_25
+#define CORE_PIN_RTC_INTERRUPT          GPIO_NUM_7
+#define CORE_RTC_INTERRUPT_PRIORITY     10
 
-/* Module ext pins */
-#define CORE_PIN_MODULE_EXT_IO15      GPIO_NUM_15
-#define CORE_PIN_MODULE_EXT_IO2       GPIO_NUM_12
+/* SPI pins */
+#define CORE_PIN_SPI_MISO               GPIO_NUM_16
+#define CORE_PIN_SPI_MOSI               GPIO_NUM_15
+#define CORE_PIN_SPI_SCK                GPIO_NUM_17
+
+/* SPI User pins */
+#define CORE_PIN_SPI_USER_MISO          GPIO_NUM_9
+#define CORE_PIN_SPI_USER_MOSI          GPIO_NUM_8
+#define CORE_PIN_SPI_USER_SCK           GPIO_NUM_10
+
+/* RS EXT pins */
+#define CORE_PIN_RS_INTERRUPT           GPIO_NUM_14
+#define CORE_PIN_RS_SPI_CS              GPIO_NUM_12
+#define CORE_IOEX_PIN_RS_RESET          IOEX_NUM_21
+
+/* CAN EXT pins */
+#define CORE_PIN_CAN_INTERRUPT          GPIO_NUM_13
+#define CORE_PIN_CAN_SPI_CS             GPIO_NUM_11
+#define CORE_IOEX_PIN_CAN_RESET         IOEX_NUM_20
+
+/* USB Host pins */
+#define CORE_PIN_USB_HOST_SPI_CS        GPIO_NUM_48
+#define CORE_PIN_USB_HOST_INTERRUPT     GPIO_NUM_33
+#define CORE_IOEX_PIN_USB_HOST_RESET    IOEX_NUM_24
+#define CORE_IOEX_PIN_VBUS_OC           IOEX_NUM_25
+#define CORE_IOEX_PIN_VBUS_EN           IOEX_NUM_26
+
+/* Ethernet pins */
+#define CORE_PIN_ETHERNET_SPI_CS        GPIO_NUM_18
+#define CORE_PIN_ETHERNET_INTERRUPT     GPIO_NUM_34
+#define CORE_PIN_ETHERNET_RESET         GPIO_NUM_35
+
+/* SDCard pins */
+#define CORE_PIN_SD_SPI_CS              GPIO_NUM_47
+
+/* 4G pins */
+#define CORE_PIN_4G_TX                  GPIO_NUM_20
+#define CORE_PIN_4G_RX                  GPIO_NUM_19
+#define CORE_PIN_4G_PWR_ON              GPIO_NUM_21
+#define CORE_PIN_4G_RESET               IOEX_NUM_23
 
 /* DIN Interrupt */
-#if CONFIG_IDF_TARGET_ESP32
-#define CORE_PIN_DIGITAL_INTERRUPT       GPIO_NUM_22
-#else // Dummy value if esp32s2
-#define CORE_PIN_DIGITAL_INTERRUPT       (gpio_num_t) 0
-#endif
+#define CORE_PIN_DIGITAL_INTERRUPT      GPIO_NUM_4
 
 /* AIN */
-#if CONFIG_IDF_TARGET_ESP32
-#define CORE_CHANNEL_AIN_1            ADC1_GPIO36_CHANNEL
-#define CORE_CHANNEL_AIN_2            ADC1_GPIO39_CHANNEL
-#else // Dummy value if esp32s2
-#define CORE_CHANNEL_AIN_1            (adc1_channel_t) 0
-#define CORE_CHANNEL_AIN_2            (adc1_channel_t) 0
-#endif
+#define CORE_CHANNEL_AIN_1              ADC1_GPIO1_CHANNEL
+#define CORE_CHANNEL_AIN_2              ADC1_GPIO2_CHANNEL
 
 /* DOUT */
 #define CORE_IOEX_PIN_DOUT_1           IOEX_NUM_0
@@ -95,19 +102,17 @@
 #define CORE_IOEX_PIN_MODULE_EXT_2    IOEX_NUM_16
 #define CORE_IOEX_PIN_MODULE_EXT_3    IOEX_NUM_17
 
-/* RTC */
-#define CORE_IOEX_PIN_RTC_INT         IOEX_NUM_25
-#define CORE_RTC_INTERRUPT_PRIORITY   10
-
 /* Command mosfet alim ext */
-#define CORE_IOEX_PIN_CMD_MOSFET      IOEX_NUM_24
+#define CORE_IOEX_PIN_ALIM_AUX        IOEX_NUM_22
 
-/* Command mosfet alim ext */
-#define CORE_IOEX_PIN_ALIM_EXT        IOEX_NUM_27
+/* 5V User power good*/
+#define CORE_IOEX_PIN_5V_USER_PG      IOEX_NUM_27
 
 /* Module configuration */
 #define CORE_I2C_PORT_NUM             I2C_NUM_0
+#define CORE_I2C_USER_PORT_NUM        I2C_NUM_1
 #define CORE_SPI_HOST                 SPI2_HOST
+#define CORE_SPI_USER_HOST            SPI3_HOST
 
 #define CORE_I2C_IOEXPANDER_ADDRESS   0x23
 #define CORE_I2C_RTC_ADDRESS          0xD0

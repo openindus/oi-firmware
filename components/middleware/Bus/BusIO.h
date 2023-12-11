@@ -26,7 +26,7 @@ class BusIO
 public:
 
     typedef struct {
-        adc_channel_t adcChannelId;
+        adc1_channel_t adcChannelId;
         adc_bits_width_t adcWidthId;
         gpio_num_t gpioNumSync;
         gpio_num_t gpioNumPower;
