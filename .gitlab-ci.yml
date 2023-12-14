@@ -81,21 +81,6 @@ build:analogls:
   script:
     - pio run -e analogls 
 
-build:core-s1:
-  extends: .build
-  script:
-    - pio run -e core-s1 
-
-build:discrete-s2:
-  extends: .build
-  script:
-    - pio run -e discrete-s2 
-
-build:stepperve-s2:
-  extends: .build
-  script:
-    - pio run -e stepperve-s2 
-
 build:examples:
   stage: build:examples
   needs:

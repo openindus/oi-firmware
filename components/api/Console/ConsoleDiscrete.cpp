@@ -27,7 +27,7 @@ void ConsoleDiscrete::registerCli(void)
 /** 'digital-write' */
 
 static struct {
-    struct arg_int *stor;
+    struct arg_int *dout;
     struct arg_int *level;
     struct arg_end *end;
 } digitalWriteArgs;
@@ -40,17 +40,17 @@ static int digitalWrite(int argc, char **argv)
         return 1;
     }
 
-    DigitalOutputNum_t stor = (DigitalOutputNum_t)(digitalWriteArgs.stor->ival[0] -1);
+    DigitalOutputNum_t dout = (DigitalOutputNum_t)(digitalWriteArgs.dout->ival[0] -1);
     uint8_t level = (uint8_t)digitalWriteArgs.level->ival[0];
 
-    DiscreteStandalone::digitalWrite(stor, level);
+    DiscreteStandalone::digitalWrite(dout, level);
 
     return 0;
 }
 
 void ConsoleDiscrete::_registerDigitalWrite(void)
 {
-    digitalWriteArgs.stor = arg_int1(NULL, NULL, "<DOUT>", "[1-8]");
+    digitalWriteArgs.dout = arg_int1(NULL, NULL, "<DOUT>", "[1-8]");
     digitalWriteArgs.level = arg_int1(NULL, NULL, "<LEVEL>", "0 = LOW, 1 = HIGH");
     digitalWriteArgs.end = arg_end(2);
 
@@ -67,7 +67,7 @@ void ConsoleDiscrete::_registerDigitalWrite(void)
 /** 'digital-read' */
 
 static struct {
-    struct arg_int *etor;
+    struct arg_int *din;
     struct arg_end *end;
 } digitalReadArgs;
 
@@ -79,16 +79,16 @@ static int digitalRead(int argc, char **argv)
         return 1;
     }
 
-    DigitalInputNum_t etor = (DigitalInputNum_t)(digitalReadArgs.etor->ival[0] - 1);
+    DigitalInputNum_t din = (DigitalInputNum_t)(digitalReadArgs.din->ival[0] - 1);
 
-    printf("%d\n", DiscreteStandalone::digitalRead(etor));
+    printf("%d\n", DiscreteStandalone::digitalRead(din));
 
     return 0;
 }
 
 void ConsoleDiscrete::_registerDigitalRead(void)
 {
-    digitalReadArgs.etor = arg_int1(NULL, NULL, "<DIN>", "[1-10]");
+    digitalReadArgs.din = arg_int1(NULL, NULL, "<DIN>", "[1-10]");
     digitalReadArgs.end = arg_end(2);
 
     const esp_console_cmd_t cmd = {
@@ -104,7 +104,7 @@ void ConsoleDiscrete::_registerDigitalRead(void)
 /** 'analog-read' */
 
 static struct {
-    struct arg_int *eana;
+    struct arg_int *ain;
     struct arg_end *end;
 } analogReadArgs;
 
@@ -116,16 +116,16 @@ static int analogRead(int argc, char **argv)
         return 1;
     }
 
-    AnalogInputNum_t eana = (AnalogInputNum_t)(analogReadArgs.eana->ival[0] - 1);
+    AnalogInputNum_t ain = (AnalogInputNum_t)(analogReadArgs.ain->ival[0] - 1);
 
-    printf("%d\n", DiscreteStandalone::analogRead(eana));
+    printf("%d\n", DiscreteStandalone::analogRead(ain));
 
     return 0;
 }
 
 void ConsoleDiscrete::_registerAnalogRead(void)
 {
-    analogReadArgs.eana = arg_int1(NULL, NULL, "<AIN>", "[1-3]");
+    analogReadArgs.ain = arg_int1(NULL, NULL, "<AIN>", "[1-3]");
     analogReadArgs.end = arg_end(2);
 
     const esp_console_cmd_t cmd = {

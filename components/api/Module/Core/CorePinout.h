@@ -109,8 +109,8 @@
 #define CORE_IOEX_PIN_5V_USER_PG      IOEX_NUM_27
 
 /* Module configuration */
-#define CORE_I2C_PORT_NUM             I2C_NUM_0
-#define CORE_I2C_USER_PORT_NUM        I2C_NUM_1
+#define CORE_I2C_PORT_NUM             I2C_NUM_1
+#define CORE_I2C_USER_PORT_NUM        I2C_NUM_0
 #define CORE_SPI_HOST                 SPI2_HOST
 #define CORE_SPI_USER_HOST            SPI3_HOST
 

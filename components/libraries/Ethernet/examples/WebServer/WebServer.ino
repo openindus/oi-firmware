@@ -34,7 +34,7 @@ EthernetServer server(80);
 
 void setup() {
   // You can use Ethernet.init(pin) to configure the CS pin
-  //Ethernet.init(10);  // Most Arduino shields
+  Ethernet.init(10);  // Most Arduino shields
   //Ethernet.init(5);   // MKR ETH shield
   //Ethernet.init(0);   // Teensy 2.0
   //Ethernet.init(20);  // Teensy++ 2.0

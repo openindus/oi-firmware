@@ -32,7 +32,6 @@
 /* ESP Components */
 #include "esp_err.h"
 #include "esp_log.h"
-#include "esp_adc_cal.h"
 #include "esp_partition.h"
 #include "esp_vfs_fat.h"
 #include "esp_ota_ops.h"
@@ -51,10 +50,9 @@
 #include "driver/spi_common.h"
 #include "driver/sdspi_host.h"
 #include "driver/adc.h"
+#include "esp_adc_cal.h"
 #include "driver/usb_serial_jtag.h"
-#if !defined(CONFIG_IDF_TARGET_ESP32)
 #include "driver/temp_sensor.h"
-#endif
 #include "soc/adc_channel.h"
 #include "argtable3/argtable3.h"
 #include "nvs_flash.h"

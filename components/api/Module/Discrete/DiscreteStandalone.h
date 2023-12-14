@@ -26,13 +26,13 @@ public:
     static void init(void);
 
     /* DigitalOutput */
-    static void digitalWrite(DigitalOutputNum_t stor, uint8_t level);
-    static void analogWrite(DigitalOutputNum_t stor, uint8_t duty);
+    static void digitalWrite(DigitalOutputNum_t dout, uint8_t level);
+    static void analogWrite(DigitalOutputNum_t dout, uint8_t duty);
 
     /* DigitalInput */
-    static int digitalRead(DigitalInputNum_t etorNum);
-    static void attachInterrupt(DigitalInputNum_t etorNum, IsrCallback_t callback, InterruptMode_t mode=RISING_MODE, void* arg=NULL);
-    static void detachInterrupt(DigitalInputNum_t etorNum);
+    static int digitalRead(DigitalInputNum_t dinNum);
+    static void attachInterrupt(DigitalInputNum_t dinNum, IsrCallback_t callback, InterruptMode_t mode=RISING_MODE, void* arg=NULL);
+    static void detachInterrupt(DigitalInputNum_t dinNum);
 
     /* AnalogInput */
     static int analogRead(AnalogInputNum_t eana);
@@ -40,7 +40,7 @@ public:
 
 private:
 
-    static DigitalInput* etor;
+    static DigitalInput* din;
 
 };
 

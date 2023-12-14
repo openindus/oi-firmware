@@ -32,12 +32,12 @@ class StepperStandalone : public ModuleStandalone
 public:
 
     /* DigitalInput */
-    static int digitalRead(DigitalInputNum_t etorNum);
-    static void attachInterrupt(DigitalInputNum_t etorNum, IsrCallback_t callback, InterruptMode_t mode=RISING_MODE, void* arg=NULL);
-    static void detachInterrupt(DigitalInputNum_t etorNum);
+    static int digitalRead(DigitalInputNum_t dinNum);
+    static void attachInterrupt(DigitalInputNum_t dinNum, IsrCallback_t callback, InterruptMode_t mode=RISING_MODE, void* arg=NULL);
+    static void detachInterrupt(DigitalInputNum_t dinNum);
 
     /* Motor */
-    static void setLimitSwitch(MotorNum_t motor, DigitalInputNum_t etorNum, DigitalInputLogic_t logic=ACTIVE_HIGH);
+    static void setLimitSwitch(MotorNum_t motor, DigitalInputNum_t dinNum, DigitalInputLogic_t logic=ACTIVE_HIGH);
     static void setStepResolution(MotorNum_t motor, MotorStepResolution_t res);
     static void setSpeed(MotorNum_t motor, float speed);
     static int32_t getPosition(MotorNum_t motor);
@@ -56,7 +56,7 @@ public:
 
 private:
 
-    static DigitalInput* etor;
+    static DigitalInput* din;
     static Motor* motor;
 
 };

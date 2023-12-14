@@ -27,6 +27,9 @@ static const char MODULE_TAG[] = "Module";
 
 void ModuleStandalone::init()
 {
+    /* Init GPIO service */
+    ESP_ERROR_CHECK(gpio_install_isr_service(0));
+
     /* LED */
     ESP_LOGI(MODULE_TAG, "Init LED");
     ledonewire_install(MODULE_PIN_LED);

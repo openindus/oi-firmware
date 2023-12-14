@@ -27,11 +27,11 @@ public:
 
     StepperControl(void) : ModuleControl() {}
 
-    int digitalRead(DigitalInputNum_t etor);
-    void attachInterrupt(DigitalInputNum_t etor, IsrCallback_t callback, InterruptMode_t mode=RISING_MODE);
-    void detachInterrupt(DigitalInputNum_t etor);
+    int digitalRead(DigitalInputNum_t din);
+    void attachInterrupt(DigitalInputNum_t din, IsrCallback_t callback, InterruptMode_t mode=RISING_MODE);
+    void detachInterrupt(DigitalInputNum_t din);
 
-    void setLimitSwitch(MotorNum_t motor, DigitalInputNum_t etor, DigitalInputLogic_t logic=ACTIVE_HIGH);
+    void setLimitSwitch(MotorNum_t motor, DigitalInputNum_t din, DigitalInputLogic_t logic=ACTIVE_HIGH);
     void setStepResolution(MotorNum_t motor, MotorStepResolution_t res);
     void setSpeed(MotorNum_t motor, float speed);
     int32_t getPosition(MotorNum_t motor);

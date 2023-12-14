@@ -20,23 +20,23 @@
 
 static const char MIXED_TAG[] = "Mixed";
 
-gpio_num_t _etorGpio[] = {
+gpio_num_t _dinGpio[] = {
     MIXED_PIN_DIN_1,
     MIXED_PIN_DIN_2,
     MIXED_PIN_DIN_3,
     MIXED_PIN_DIN_4
 };
 
-gpio_num_t _storGpio[] = {
+gpio_num_t _doutGpio[] = {
     MIXED_PIN_DOUT_1,
     MIXED_PIN_DOUT_2,
     MIXED_PIN_DOUT_3,
     MIXED_PIN_DOUT_4
 };
 
-uint32_t _eanaToNum[] = {2, 3, 1, 0};
+uint32_t _ainToNum[] = {2, 3, 1, 0};
 
-DigitalInput* MixedStandalone::etor = new DigitalInput(_etorGpio, 4);
+DigitalInput* MixedStandalone::din = new DigitalInput(_dinGpio, 4);
 
 void MixedStandalone::init()
 {
@@ -44,17 +44,17 @@ void MixedStandalone::init()
 
     /* Init DOUT */
     ESP_LOGI(MIXED_TAG, "Init DOUT");
-    gpio_config_t storConf = {
+    gpio_config_t doutConf = {
         .pin_bit_mask = MIXED_PIN_DOUTS,
         .mode = GPIO_MODE_OUTPUT,
         .pull_up_en = GPIO_PULLUP_DISABLE,
         .pull_down_en = GPIO_PULLDOWN_DISABLE,
         .intr_type = GPIO_INTR_DISABLE,
     };
-    gpio_config(&storConf);
+    gpio_config(&doutConf);
 
     /* Init DIN */
-    etor->init();
+    din->init();
 
     /* Init SPI */
     ESP_LOGI(MIXED_TAG, "Initializes the bus SPI%u", MIXED_SPI_HOST+1);
@@ -120,43 +120,43 @@ void MixedStandalone::init()
     gpio_install_isr_service(ESP_INTR_FLAG_LEVEL3);
 }
 
-void MixedStandalone::digitalWrite(DigitalOutputNum_t stor, uint8_t level) 
+void MixedStandalone::digitalWrite(DigitalOutputNum_t dout, uint8_t level) 
 {
-    if (stor < DOUT_MAX) {
-        gpio_set_level(_storGpio[stor], level);
+    if (dout < DOUT_MAX) {
+        gpio_set_level(_doutGpio[dout], level);
     } else {
-        ESP_LOGE(MIXED_TAG, "Invalid DOUT_%d", stor+1);
+        ESP_LOGE(MIXED_TAG, "Invalid DOUT_%d", dout+1);
     }
 }
 
-int MixedStandalone::digitalRead(DigitalInputNum_t etorNum)
+int MixedStandalone::digitalRead(DigitalInputNum_t dinNum)
 {
-    return etor->digitalRead(etorNum);
+    return din->digitalRead(dinNum);
 }
 
-void MixedStandalone::attachInterrupt(DigitalInputNum_t etorNum, IsrCallback_t callback, InterruptMode_t mode, void* arg) 
+void MixedStandalone::attachInterrupt(DigitalInputNum_t dinNum, IsrCallback_t callback, InterruptMode_t mode, void* arg) 
 {
-    etor->attachInterrupt(etorNum, callback, mode, arg);
+    din->attachInterrupt(dinNum, callback, mode, arg);
 }
 
-void MixedStandalone::detachInterrupt(DigitalInputNum_t etorNum)
+void MixedStandalone::detachInterrupt(DigitalInputNum_t dinNum)
 {
-    etor->detachInterrupt(etorNum);
+    din->detachInterrupt(dinNum);
 }
 
 int MixedStandalone::analogRead(AnalogInputNum_t ana)
 {
-    return (int)Ads866x_AnalogRead(_eanaToNum[ana]);
+    return (int)Ads866x_AnalogRead(_ainToNum[ana]);
 }
 
 int MixedStandalone::analogReadMilliVolts(AnalogInputNum_t ana)
 {
-    return (int)Ads866x_AnalogReadUnits(_eanaToNum[ana], ADS866x_UNITS_MILLIVOLTS);
+    return (int)Ads866x_AnalogReadUnits(_ainToNum[ana], ADS866x_UNITS_MILLIVOLTS);
 }
 
 void MixedStandalone::analogReadMode(AnalogInputNum_t ana, AdcMode_t mode)
 {
-    Ads866x_setAdcMode(_eanaToNum[ana], (Ads866x_AdcMode_t)mode);
+    Ads866x_setAdcMode(_ainToNum[ana], (Ads866x_AdcMode_t)mode);
 }
 
 void MixedStandalone::analogReadResolution(AdcResBits_t res)

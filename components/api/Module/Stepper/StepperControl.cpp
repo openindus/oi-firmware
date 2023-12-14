@@ -17,41 +17,41 @@
 
 #if !defined(CONFIG_STEPPER) && !defined(CONFIG_STEPPER_VE)
 
-int StepperControl::digitalRead(DigitalInputNum_t etor) 
+int StepperControl::digitalRead(DigitalInputNum_t din) 
 {
     RequestMsg_t msg;
     msg.cmd = CMD_DIGITAL_READ;
-    msg.param = (uint16_t)etor;
+    msg.param = (uint16_t)din;
     return (int)request(msg);
 }
 
-void StepperControl::attachInterrupt(DigitalInputNum_t etor, IsrCallback_t callback, InterruptMode_t mode)
+void StepperControl::attachInterrupt(DigitalInputNum_t din, IsrCallback_t callback, InterruptMode_t mode)
 {
     RequestMsg_t msg;
     msg.cmd = CMD_ATTACH_INTERRUPT;
-    msg.param = (uint16_t)etor;
+    msg.param = (uint16_t)din;
     msg.data = (uint32_t)mode;
     request(msg);
-    _isrCallback[etor] = callback;
+    _isrCallback[din] = callback;
     uint16_t id = ModuleControl::getId(this);
     ModuleMaster::onEvent(DIGITAL_INTERRUPT, id, [this](uint8_t num) {
         _isrCallback[num](NULL);
     });
 }
 
-void StepperControl::detachInterrupt(DigitalInputNum_t etor)
+void StepperControl::detachInterrupt(DigitalInputNum_t din)
 {
     RequestMsg_t msg;
     msg.cmd = CMD_DETACH_INTERRUPT;
-    msg.param = (uint16_t)etor;
+    msg.param = (uint16_t)din;
     request(msg);
 }
 
-void StepperControl::setLimitSwitch(MotorNum_t motor, DigitalInputNum_t etor, DigitalInputLogic_t logic)
+void StepperControl::setLimitSwitch(MotorNum_t motor, DigitalInputNum_t din, DigitalInputLogic_t logic)
 {
     RequestMsg_t msg;
     msg.cmd = CMD_MOTOR_SET_LIMIT_SWITCH;
-    msg.param = (uint16_t)((etor << 8) | motor);
+    msg.param = (uint16_t)((din << 8) | motor);
     msg.data = (uint32_t)logic;
     request(msg);
 }

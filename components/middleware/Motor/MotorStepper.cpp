@@ -55,9 +55,9 @@ static void _limitSwitchTask(void* arg)
 static void _homingTask(void* arg)
 {
     MotorNum_t motor = *(MotorNum_t*)arg;
-    DigitalInputNum_t etor = _limitSwitchDigitalInput[motor];
+    DigitalInputNum_t din = _limitSwitchDigitalInput[motor];
     DigitalInputLogic_t logic = _limitSwitchDigitalInputLogic[motor];
-    gpio_num_t gpio = _gpio[etor];
+    gpio_num_t gpio = _gpio[din];
     uint32_t stepPerTick = PS01_Speed_Steps_s_to_RegVal(_homingSpeed[motor]);
     gpio_int_type_t intrType = GPIO_INTR_DISABLE;
 
@@ -117,9 +117,9 @@ void MotorStepper::init(PS01_Hal_Config_t* config, PS01_Param_t* param, gpio_num
     xTaskCreate(_limitSwitchTask, "Limit switch task", 2048, NULL, 3, NULL);
 }
 
-void MotorStepper::setLimitSwitch(MotorNum_t motor, DigitalInputNum_t etor, DigitalInputLogic_t logic)
+void MotorStepper::setLimitSwitch(MotorNum_t motor, DigitalInputNum_t din, DigitalInputLogic_t logic)
 {
-    _limitSwitchDigitalInput[motor] = etor;
+    _limitSwitchDigitalInput[motor] = din;
     _limitSwitchDigitalInputLogic[motor] = logic;
     _limitSwitchSetted[motor] = true;
 }

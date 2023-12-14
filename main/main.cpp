@@ -3,7 +3,7 @@
 
 void setup(void)
 {
-
+    printf("SDA is pin: %d\n", SDA);
 }
 
 void loop(void)

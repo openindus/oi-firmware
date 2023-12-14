@@ -30,39 +30,39 @@ void DiscreteSlave::init(void)
     ModuleSlave::init();
     
     onRequest(CMD_DIGITAL_WRITE, [](RequestMsg_t msg) -> uint32_t {
-        DigitalOutputNum_t stor = (DigitalOutputNum_t)msg.param;
+        DigitalOutputNum_t dout = (DigitalOutputNum_t)msg.param;
         uint8_t level = (uint8_t)msg.data;
-        DiscreteStandalone::digitalWrite(stor, level);
+        DiscreteStandalone::digitalWrite(dout, level);
         return 0;
     });
 
     onRequest(CMD_ANALOG_WRITE, [](RequestMsg_t msg) -> uint32_t {
-        DigitalOutputNum_t stor = (DigitalOutputNum_t)msg.param;
+        DigitalOutputNum_t dout = (DigitalOutputNum_t)msg.param;
         uint8_t duty = (uint8_t)msg.data;
-        DiscreteStandalone::analogWrite(stor, duty);
+        DiscreteStandalone::analogWrite(dout, duty);
         return 0;
     });
 
     onRequest(CMD_DIGITAL_READ, [](RequestMsg_t msg) -> uint32_t {
-        DigitalInputNum_t etor = (DigitalInputNum_t)msg.param;
-        return DiscreteStandalone::digitalRead(etor);
+        DigitalInputNum_t din = (DigitalInputNum_t)msg.param;
+        return DiscreteStandalone::digitalRead(din);
     });
 
     onRequest(CMD_ANALOG_READ, [](RequestMsg_t msg) -> uint32_t {
-        AnalogInputNum_t eana = (AnalogInputNum_t)msg.param;
-        return DiscreteStandalone::analogRead(eana);
+        AnalogInputNum_t ain = (AnalogInputNum_t)msg.param;
+        return DiscreteStandalone::analogRead(ain);
     });
 
     onRequest(CMD_ATTACH_INTERRUPT, [](RequestMsg_t msg) -> uint32_t {
-        DigitalInputNum_t etor = (DigitalInputNum_t)msg.param;
+        DigitalInputNum_t din = (DigitalInputNum_t)msg.param;
         InterruptMode_t mode = (InterruptMode_t)msg.data;
-        DiscreteStandalone::attachInterrupt(etor, _isrCallback[etor], mode); 
+        DiscreteStandalone::attachInterrupt(din, _isrCallback[din], mode); 
         return 0;
     });
 
     onRequest(CMD_DETACH_INTERRUPT, [](RequestMsg_t msg) -> uint32_t {
-        DigitalInputNum_t etor = (DigitalInputNum_t)msg.param;
-        DiscreteStandalone::detachInterrupt(etor); 
+        DigitalInputNum_t din = (DigitalInputNum_t)msg.param;
+        DiscreteStandalone::detachInterrupt(din); 
         return 0;
     });
 }

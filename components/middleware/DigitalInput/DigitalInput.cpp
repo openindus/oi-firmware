@@ -7,7 +7,7 @@
  * Proprietary and confidential
  * 
  * @file DigitalInput.c
- * @brief Functions for etor
+ * @brief Functions for din
  *
  * For more information on OpenIndus:
  * @see https://openindus.com
@@ -26,9 +26,6 @@ void DigitalInput::init(void)
 {
     ESP_LOGI(DIN_TAG, "Init");
 
-    /* Init GPIO service */
-    ESP_ERROR_CHECK(gpio_install_isr_service(0));
-
     /* Init Gpio */
     for (int i=0; i<DIN_MAX; i++) {
         if (_gpio[i] != GPIO_NUM_NC) {
@@ -40,44 +37,44 @@ void DigitalInput::init(void)
     xTaskCreate(_task, "DIN interrupt task", 2048, NULL, 10, NULL);
 }
 
-int DigitalInput::digitalRead(DigitalInputNum_t etor)
+int DigitalInput::digitalRead(DigitalInputNum_t din)
 {
-    if (etor < DIN_MAX) {
-        return gpio_get_level(_gpio[etor]);
+    if (din < DIN_MAX) {
+        return gpio_get_level(_gpio[din]);
     } else {
-        ESP_LOGE(DIN_TAG, "Invalid DIN_%d", etor+1);
+        ESP_LOGE(DIN_TAG, "Invalid DIN_%d", din+1);
         return -1;
     }
 }
 
-void DigitalInput::attachInterrupt(DigitalInputNum_t etor, IsrCallback_t callback, InterruptMode_t mode, void* arg) 
+void DigitalInput::attachInterrupt(DigitalInputNum_t din, IsrCallback_t callback, InterruptMode_t mode, void* arg) 
 {
-    _callback[etor] = callback;
-    _arg[etor] = arg;
-    gpio_isr_handler_add(_gpio[etor], _isr, (void *)etor);
-    gpio_set_intr_type(_gpio[etor], (gpio_int_type_t)mode);
-    gpio_intr_enable(_gpio[etor]);
+    _callback[din] = callback;
+    _arg[din] = arg;
+    gpio_isr_handler_add(_gpio[din], _isr, (void *)din);
+    gpio_set_intr_type(_gpio[din], (gpio_int_type_t)mode);
+    gpio_intr_enable(_gpio[din]);
 }
 
-void DigitalInput::detachInterrupt(DigitalInputNum_t etor)
+void DigitalInput::detachInterrupt(DigitalInputNum_t din)
 {
-    gpio_isr_handler_remove(_gpio[etor]);
+    gpio_isr_handler_remove(_gpio[din]);
 }
 
 void IRAM_ATTR DigitalInput::_isr(void* arg)
 {
-    uint32_t etor = (uint32_t)arg;
-    xQueueSendFromISR(_event, &etor, NULL);
+    uint32_t din = (uint32_t)arg;
+    xQueueSendFromISR(_event, &din, NULL);
 }
 
 void DigitalInput::_task(void* arg)
 {
-    DigitalInputNum_t etor;
+    DigitalInputNum_t din;
     while(1) {
-        if(xQueueReceive(_event, &etor, portMAX_DELAY)) {
-            gpio_intr_disable(_gpio[etor]);
-            _callback[etor](_arg[etor]);
-            gpio_intr_enable(_gpio[etor]);
+        if(xQueueReceive(_event, &din, portMAX_DELAY)) {
+            gpio_intr_disable(_gpio[din]);
+            _callback[din](_arg[din]);
+            gpio_intr_enable(_gpio[din]);
         }
     }
 }

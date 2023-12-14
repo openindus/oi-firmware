@@ -11,4 +11,5 @@ sdkconfig.mixed
 sdkconfig.relaylp
 sdkconfig.relayhp
 sdkconfig.brushless
+sdkconfig.analogls
 dependencies.lock

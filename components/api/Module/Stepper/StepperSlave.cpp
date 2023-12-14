@@ -30,20 +30,20 @@ void StepperSlave::init(void)
     ModuleSlave::init();
 
     onRequest(CMD_DIGITAL_READ, [](RequestMsg_t msg) -> uint32_t { 
-        DigitalInputNum_t etor = (DigitalInputNum_t)msg.param;
-        return StepperStandalone::digitalRead(etor);
+        DigitalInputNum_t din = (DigitalInputNum_t)msg.param;
+        return StepperStandalone::digitalRead(din);
     });
 
     onRequest(CMD_ATTACH_INTERRUPT, [](RequestMsg_t msg) -> uint32_t {
-        DigitalInputNum_t etor = (DigitalInputNum_t)msg.param;
+        DigitalInputNum_t din = (DigitalInputNum_t)msg.param;
         InterruptMode_t mode = (InterruptMode_t)msg.data;
-        StepperStandalone::attachInterrupt(etor, _isrCallback[etor], mode); 
+        StepperStandalone::attachInterrupt(din, _isrCallback[din], mode); 
         return 0;
     });
 
     onRequest(CMD_DETACH_INTERRUPT, [](RequestMsg_t msg) -> uint32_t {
-        DigitalInputNum_t etor = (DigitalInputNum_t)msg.param;
-        StepperStandalone::detachInterrupt(etor); 
+        DigitalInputNum_t din = (DigitalInputNum_t)msg.param;
+        StepperStandalone::detachInterrupt(din); 
         return 0;
     });
 
@@ -95,9 +95,9 @@ void StepperSlave::init(void)
 
     onRequest(CMD_MOTOR_SET_LIMIT_SWITCH, [](RequestMsg_t msg) -> uint32_t {
         MotorNum_t motor = (MotorNum_t)(msg.param & 0x0000FF);
-        DigitalInputNum_t etor = (DigitalInputNum_t)((msg.param & 0x00FF00) >> 8);
+        DigitalInputNum_t din = (DigitalInputNum_t)((msg.param & 0x00FF00) >> 8);
         DigitalInputLogic_t logic = (DigitalInputLogic_t)msg.data;
-        StepperStandalone::setLimitSwitch(motor, etor, logic); 
+        StepperStandalone::setLimitSwitch(motor, din, logic); 
         return 0;
     });
 

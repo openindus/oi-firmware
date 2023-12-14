@@ -482,7 +482,6 @@ void ADS1x4S08_init(gpio_num_t adc_start, gpio_num_t adc_drdy, gpio_num_t adc_re
     gpio_set_level(cs, 0);          // To communicate with ADS1x4S08, always keep /CS low (works only if device is alone on is spi bus)
 
     // ISR definition
-    gpio_install_isr_service(0);
     gpio_set_intr_type(adc_drdy, GPIO_INTR_NEGEDGE);
     gpio_isr_handler_add(adc_drdy, ADS1x4S08_ISR_data_ready, NULL);
     gpio_intr_enable(adc_drdy);
