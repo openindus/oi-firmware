@@ -18,10 +18,12 @@
 #include <stdint.h>
 #include "esp_err.h"
 #include "esp_log.h"
-#include "pcal6524.h"
+#include "driver/gpio.h"
 #include "m41t62.h"
 
 #if defined(CONFIG_CORE)
+
+#include "CorePinout.h"
 
 class DateTime
 {

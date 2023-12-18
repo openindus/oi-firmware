@@ -14,15 +14,21 @@
  */
 
 #pragma once
+
+#if defined(CONFIG_CORE)
+
 #include <stdint.h>
 #include "pcal6524/pcal6524.h"
 #include "mcp25625/DriversComponents/MCP25625.h"
 
-#define OICAN_DEFAULT_SPI_HOST                   SPI3_HOST
-#define OICAN_DEFAULT_SPI_PIN_CS                 GPIO_NUM_27
+// Driver is specific to OICore, we use CorePinout.h for hadrware gpio number
+#include "CorePinout.h"
+
+#define OICAN_DEFAULT_SPI_HOST                   CORE_SPI_USER_HOST
+#define OICAN_DEFAULT_SPI_PIN_CS                 CORE_PIN_CAN_SPI_CS
 
 #if defined CONFIG_OI_CORE
-#define OICAN_DEFAULT_SPI_PIN_INTERRUPT          GPIO_NUM_23
+#define OICAN_DEFAULT_SPI_PIN_INTERRUPT          CORE_PIN_CAN_INTERRUPT
 #else
 #define OICAN_DEFAULT_SPI_PIN_INTERRUPT          GPIO_NUM_26
 #endif
@@ -108,3 +114,5 @@ void setExtendedFilter(uint32_t mask, uint32_t filter);
 };
 
 extern OICAN CAN;
+
+#endif

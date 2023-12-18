@@ -1,3 +1,5 @@
+#if defined(CONFIG_CORE)
+
 #include "RS.h"
 
 void OIRS::begin(unsigned long baudrate, spi_host_device_t host, gpio_num_t cs, gpio_num_t interrupt)
@@ -75,4 +77,6 @@ size_t OIRS::write(uint8_t* data, size_t len)
 OIRS RS485(RS_485);
 #elif defined CONFIG_GLOBAL_INSTANCE_RS232
 OIRS RS232(RS_232);
+#endif
+
 #endif

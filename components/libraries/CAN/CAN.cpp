@@ -1,3 +1,5 @@
+#if defined(CONFIG_CORE)
+
 #include "CAN.h"
 
 void OICAN::begin(unsigned long baudrate, bool extended_mode, spi_host_device_t host, gpio_num_t cs, gpio_num_t interrupt)
@@ -52,3 +54,5 @@ void OICAN::setExtendedFilter(uint32_t mask, uint32_t filter)
 }
 
 OICAN CAN;
+
+#endif

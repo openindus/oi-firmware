@@ -17,21 +17,20 @@
 
 #if defined(CONFIG_CORE)
 
-ioex_device_t *OIRTC::_ioex;
-
 void OIRTC::init(void)
 {
     /**
      * @brief RTC Init
      * Configure IOExpander RTC Interrupt pin
      */
-    ioex_config_t io_rtc_conf;        
-    io_rtc_conf.mode = IOEX_INPUT;
-    io_rtc_conf.pull_mode = IOEX_PULLUP;
-    io_rtc_conf.interrupt_type = IOEX_INTERRUPT_NEGEDGE;
-    io_rtc_conf.pin_bit_mask = (1ULL<<IOEX_NUM_25);
+    gpio_config_t gpio_rtc_conf;        
+    gpio_rtc_conf.mode = GPIO_MODE_INPUT;
+    gpio_rtc_conf.pull_up_en = GPIO_PULLUP_ENABLE;
+    gpio_rtc_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
+    gpio_rtc_conf.intr_type = GPIO_INTR_NEGEDGE;
+    gpio_rtc_conf.pin_bit_mask = (1ULL<<CORE_PIN_RTC_INTERRUPT);
 
-    ESP_ERROR_CHECK(ioex_config(_ioex, &io_rtc_conf));
+    ESP_ERROR_CHECK(gpio_config(&gpio_rtc_conf));
 }
 
 time_t OIRTC::time(void)
@@ -78,12 +77,12 @@ void OIRTC::setTime(DateTime datetime)
 void OIRTC::enableRTCAlarm(void)
 {
     M41T62_Set_AFE_Bit(M41T62_AFE_HIGH);
-    ioex_interrupt_enable(_ioex, IOEX_NUM_25);
+    gpio_intr_enable(CORE_PIN_RTC_INTERRUPT);
 }
 
 void OIRTC::disableRTCAlarm(void)
 {
-    ioex_interrupt_disable(_ioex, IOEX_NUM_25);
+    gpio_intr_disable(CORE_PIN_RTC_INTERRUPT);
     M41T62_Set_AFE_Bit(M41T62_AFE_LOW);
 }
 
@@ -109,12 +108,12 @@ void OIRTC::setRTCAlarm(DateTime alarm)
 void OIRTC::attachRTCAlarm(void (*callback)(void), void * args)
 {
     rtc_user_handler = (rtc_isr_t)callback;
-    ioex_isr_handler_add(_ioex, IOEX_NUM_25, (ioex_isr_t) rtc_isr_handler, args, 10);
+    gpio_isr_handler_add(CORE_PIN_RTC_INTERRUPT, (gpio_isr_t) rtc_isr_handler, args);
 }
 
 void OIRTC::detachRTCAlarm(void)
 {
-    ioex_isr_handler_remove(_ioex, IOEX_NUM_25);
+    gpio_isr_handler_remove(CORE_PIN_RTC_INTERRUPT);
 }
 
 const uint8_t daysInMonth [] = { 31,28,31,30,31,30,31,31,30,31,30,31 };

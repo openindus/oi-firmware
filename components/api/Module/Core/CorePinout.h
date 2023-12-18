@@ -28,7 +28,6 @@
 
 /* RTC pins */
 #define CORE_PIN_RTC_INTERRUPT          GPIO_NUM_7
-#define CORE_RTC_INTERRUPT_PRIORITY     10
 
 /* SPI pins */
 #define CORE_PIN_SPI_MISO               GPIO_NUM_16
@@ -121,6 +120,6 @@
 #define CORE_DIGITAL_INTERRUPT_PRIORITY  20U
 
 #define CORE_ADC_NO_OF_SAMPLES        64U
-#define CORE_ADC_REDUCTION_FACTOR     9.432f
+#define CORE_ADC_REDUCTION_FACTOR     11.6965f
 
 #endif

@@ -118,99 +118,121 @@ void CoreStandalone::init()
      * @brief IO Expander init
      * 
      */
-    // _ioex = ioex_create(CORE_I2C_PORT_NUM, CORE_I2C_IOEXPANDER_ADDRESS, true, CORE_PIN_DIGITAL_INTERRUPT);
+    _ioex = ioex_create(CORE_I2C_PORT_NUM, CORE_I2C_IOEXPANDER_ADDRESS, true, CORE_PIN_DIGITAL_INTERRUPT);
 
-    // ESP_ERROR_CHECK(ioex_set_level(_ioex, CORE_IOEX_PIN_ALIM_AUX, IOEX_HIGH));
+    
+    /**
+     * @brief Command mosfet alim Init
+     * 
+     */
 
-    // ioex_config_t config;
-    // config.mode = IOEX_OUTPUT;
-    // config.pull_mode = IOEX_FLOATING;
-    // config.interrupt_type = IOEX_INTERRUPT_DISABLE;
-    // config.pin_bit_mask = (1ULL<<CORE_IOEX_PIN_ALIM_AUX);
-    // ESP_ERROR_CHECK(ioex_config(_ioex, &config));
+    // /!\ Set level before setting to output
+    ESP_ERROR_CHECK(ioex_set_level(_ioex, CORE_IOEX_PIN_ALIM_AUX, IOEX_HIGH));
+
+    ioex_config_t config;
+    config.mode = IOEX_OUTPUT;
+    config.pull_mode = IOEX_FLOATING;
+    config.interrupt_type = IOEX_INTERRUPT_DISABLE;
+    config.pin_bit_mask = (1ULL<<CORE_IOEX_PIN_ALIM_AUX);
+    ESP_ERROR_CHECK(ioex_config(_ioex, &config));
 
     /**
      * @brief DIN Init
      * 
      */
-    // ioex_config_t din_config;
-    // din_config.mode = IOEX_INPUT;
-    // din_config.pull_mode = IOEX_PULLDOWN;
-    // din_config.interrupt_type = IOEX_INTERRUPT_DISABLE;
-    // din_config.pin_bit_mask = (1ULL<<_din[0]) | 
-    //                            (1ULL<<_din[1]) | 
-    //                            (1ULL<<_din[2]) | 
-    //                            (1ULL<<_din[3]);
+    ioex_config_t din_config;
+    din_config.mode = IOEX_INPUT;
+    din_config.pull_mode = IOEX_PULLDOWN;
+    din_config.interrupt_type = IOEX_INTERRUPT_DISABLE;
+    din_config.pin_bit_mask = (1ULL<<_din[0]) | 
+                              (1ULL<<_din[1]) | 
+                              (1ULL<<_din[2]) | 
+                              (1ULL<<_din[3]);
     
-    // ESP_ERROR_CHECK(ioex_config(_ioex, &din_config));
+    ESP_ERROR_CHECK(ioex_config(_ioex, &din_config));
 
-    // _dinCurrentMode[DIN_1] = NONE_MODE;
-    // _dinCurrentMode[DIN_2] = NONE_MODE;
-    // _dinCurrentMode[DIN_3] = NONE_MODE;
-    // _dinCurrentMode[DIN_4] = NONE_MODE;
+    _dinCurrentMode[DIN_1] = NONE_MODE;
+    _dinCurrentMode[DIN_2] = NONE_MODE;
+    _dinCurrentMode[DIN_3] = NONE_MODE;
+    _dinCurrentMode[DIN_4] = NONE_MODE;
 
     /**
      * @brief DOUT Init
      * 
      */
     // /!\ Set level before setting to output
-    // ESP_ERROR_CHECK(ioex_set_level(_ioex, _dout[0], IOEX_LOW));
-    // ESP_ERROR_CHECK(ioex_set_level(_ioex, _dout[1], IOEX_LOW));
-    // ESP_ERROR_CHECK(ioex_set_level(_ioex, _dout[2], IOEX_LOW));
-    // ESP_ERROR_CHECK(ioex_set_level(_ioex, _dout[3], IOEX_LOW));
+    ESP_ERROR_CHECK(ioex_set_level(_ioex, _dout[0], IOEX_LOW));
+    ESP_ERROR_CHECK(ioex_set_level(_ioex, _dout[1], IOEX_LOW));
+    ESP_ERROR_CHECK(ioex_set_level(_ioex, _dout[2], IOEX_LOW));
+    ESP_ERROR_CHECK(ioex_set_level(_ioex, _dout[3], IOEX_LOW));
     
-    // ioex_config_t dout_config;
-    // dout_config.mode = IOEX_OUTPUT;
-    // dout_config.pull_mode = IOEX_FLOATING;
-    // dout_config.interrupt_type = IOEX_INTERRUPT_DISABLE;
-    // dout_config.pin_bit_mask = (1ULL<<_dout[0]) | 
-    //                            (1ULL<<_dout[1]) | 
-    //                            (1ULL<<_dout[2]) | 
-    //                            (1ULL<<_dout[3]);
+    ioex_config_t dout_config;
+    dout_config.mode = IOEX_OUTPUT;
+    dout_config.pull_mode = IOEX_FLOATING;
+    dout_config.interrupt_type = IOEX_INTERRUPT_DISABLE;
+    dout_config.pin_bit_mask = (1ULL<<_dout[0]) | 
+                               (1ULL<<_dout[1]) | 
+                               (1ULL<<_dout[2]) | 
+                               (1ULL<<_dout[3]);
     
-    // ESP_ERROR_CHECK(ioex_config(_ioex, &dout_config));
+    ESP_ERROR_CHECK(ioex_config(_ioex, &dout_config));
 
     /**
      * @brief DOUT Sensor init
      * 
      */
-    // ioex_config_t dout_sensor_config;        
-    // dout_sensor_config.mode = IOEX_INPUT;
-    // dout_sensor_config.pull_mode = IOEX_PULLDOWN;
-    // dout_sensor_config.interrupt_type = IOEX_INTERRUPT_POSEDGE;
-    // dout_sensor_config.pin_bit_mask = (1ULL<<_doutSensor[0]) | 
-    //                                   (1ULL<<_doutSensor[0]) | 
-    //                                   (1ULL<<_doutSensor[0]) | 
-    //                                   (1ULL<<_doutSensor[0]);
+    ioex_config_t dout_sensor_config;        
+    dout_sensor_config.mode = IOEX_INPUT;
+    dout_sensor_config.pull_mode = IOEX_PULLDOWN;
+    dout_sensor_config.interrupt_type = IOEX_INTERRUPT_POSEDGE;
+    dout_sensor_config.pin_bit_mask = (1ULL<<_doutSensor[0]) | 
+                                      (1ULL<<_doutSensor[0]) | 
+                                      (1ULL<<_doutSensor[0]) | 
+                                      (1ULL<<_doutSensor[0]);
 
-    // ESP_ERROR_CHECK(ioex_config(_ioex, &dout_sensor_config));
+    ESP_ERROR_CHECK(ioex_config(_ioex, &dout_sensor_config));
 
     /**
      * @brief AIN Init
      * 
      */
-    // ESP_ERROR_CHECK(adc1_config_width(ADC_WIDTH_BIT_12));
-    // for (auto i: _eana) {
-    //     ESP_ERROR_CHECK(adc1_config_channel_atten(_eana[i], ADC_ATTEN_DB_11));
-    // }
-    // esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &_adc1Characteristics);
+    ESP_ERROR_CHECK(adc1_config_width(ADC_WIDTH_BIT_12));
+    for (auto i: _eana) {
+        ESP_ERROR_CHECK(adc1_config_channel_atten(_eana[i], ADC_ATTEN_DB_11));
+    }
+    esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &_adc1Characteristics);
 
     /**
      * @brief CAN EXT init
      * 
      */
-    // ioex_config_t io_can_conf;
+    ioex_config_t io_can_conf;
 
-    // io_can_conf.mode = IOEX_OUTPUT;
-    // io_can_conf.pull_mode = IOEX_FLOATING;
-    // io_can_conf.interrupt_type = IOEX_INTERRUPT_DISABLE;
-    // io_can_conf.pin_bit_mask = (1ULL<<CORE_IOEX_PIN_CAN_RESET);
-    // ioex_config(_ioex, &io_can_conf);
-    // ioex_set_level(_ioex, CORE_IOEX_PIN_CAN_RESET, IOEX_HIGH);
-    // vTaskDelay(10);
-    // ioex_set_level(_ioex, CORE_IOEX_PIN_CAN_RESET, IOEX_LOW);
-    // vTaskDelay(10);
-    // ioex_set_level(_ioex, CORE_IOEX_PIN_CAN_RESET, IOEX_HIGH);
+    io_can_conf.mode = IOEX_OUTPUT;
+    io_can_conf.pull_mode = IOEX_FLOATING;
+    io_can_conf.interrupt_type = IOEX_INTERRUPT_DISABLE;
+    io_can_conf.pin_bit_mask = (1ULL<<CORE_IOEX_PIN_CAN_RESET);
+    ioex_config(_ioex, &io_can_conf);
+    ioex_set_level(_ioex, CORE_IOEX_PIN_CAN_RESET, IOEX_HIGH);
+    vTaskDelay(10);
+    ioex_set_level(_ioex, CORE_IOEX_PIN_CAN_RESET, IOEX_LOW);
+    vTaskDelay(10);
+    ioex_set_level(_ioex, CORE_IOEX_PIN_CAN_RESET, IOEX_HIGH);
+
+    /**
+     * @brief RS Ext Init
+     * 
+     */
+    ioex_config_t io_rs_conf;
+
+    io_rs_conf.mode = IOEX_OUTPUT;
+    io_rs_conf.pull_mode = IOEX_FLOATING;
+    io_rs_conf.interrupt_type = IOEX_INTERRUPT_DISABLE;
+    io_rs_conf.pin_bit_mask = (1ULL<<CORE_IOEX_PIN_RS_RESET);
+    ioex_config(_ioex, &io_rs_conf);
+    ioex_set_level(_ioex, CORE_IOEX_PIN_RS_RESET, IOEX_HIGH);
+
+
 }
 
 void CoreStandalone::digitalWrite(DigitalOutputNum_t dout, uint8_t level)

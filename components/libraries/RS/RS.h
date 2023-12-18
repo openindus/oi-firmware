@@ -15,18 +15,23 @@
 
 #pragma once
 
+#if defined(CONFIG_CORE)
+
 #include <stdint.h>
 #include "sc16is750/sc16is750.h"
+
+// Driver is specific to OICore, we use CorePinout.h for hadrware gpio number
+#include "CorePinout.h"
 
 #define CONFIG_GLOBAL_INSTANCE_RS485
 
 /* SPI Device configuration */
-#define OIRS_DEFAULT_SPI_HOST                   SPI2_HOST
-#define OIRS_DEFAULT_SPI_PIN_CS                 GPIO_NUM_19
-#define OIRS_DEFAULT_SPI_PIN_INTERRUPT          GPIO_NUM_34
+#define OIRS_DEFAULT_SPI_HOST                   CORE_SPI_USER_HOST
+#define OIRS_DEFAULT_SPI_PIN_CS                 CORE_PIN_RS_SPI_CS
+#define OIRS_DEFAULT_SPI_PIN_INTERRUPT          CORE_PIN_RS_INTERRUPT
 
 /* IO Configuration */
-#define OIRS_GPIO_SET                          (SC16IS750_IO0_OUTPUT | SC16IS750_IO1_OUTPUT)
+#define OIRS_GPIO_SET                           (SC16IS750_IO0_OUTPUT | SC16IS750_IO1_OUTPUT)
 #define OIRS_GPIO_MODE485                       (SC16IS750_IO0 | SC16IS750_IO1)
 #define OIRS_GPIO_MODE232                       (0x00)
 
@@ -157,4 +162,6 @@ private:
 extern OIRS RS485;
 #elif defined CONFIG_GLOBAL_INSTANCE_RS232
 extern OIRS RS232;
+#endif
+
 #endif
