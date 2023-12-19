@@ -245,7 +245,7 @@ int CoreStandalone::digitalRead(DigitalInputNum_t din)
     return ioex_get_level(_ioex, _din[din]);
 }
 
-float CoreStandalone::analogRead(AnalogInputNum_t ana)
+int CoreStandalone::analogRead(AnalogInputNum_t ana)
 {
     int adc_reading = 0;
 
@@ -255,6 +255,13 @@ float CoreStandalone::analogRead(AnalogInputNum_t ana)
     }
 
     adc_reading /= CORE_ADC_NO_OF_SAMPLES;
+
+    return adc_reading;
+}
+
+float CoreStandalone::analogReadMilliVolts(AnalogInputNum_t ana)
+{
+    int adc_reading = CoreStandalone::analogRead(ana);
 
     // Convert adc_reading to voltage in mV
     uint32_t voltage = esp_adc_cal_raw_to_voltage(adc_reading, &_adc1Characteristics);

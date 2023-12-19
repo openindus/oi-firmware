@@ -74,6 +74,7 @@ void System::init(void)
     /* Console */
     ConsoleModule::registerCli();
 #if defined(CONFIG_CORE)
+    ConsoleCore::registerCli();
 #if !defined(CONFIG_MODULE_STANDALONE)
     ConsoleMaster::registerCli();
 #endif

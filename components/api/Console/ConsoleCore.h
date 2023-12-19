@@ -6,7 +6,7 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file Console.h
+ * @file ConsoleCore.h
  * @brief OpenIndus console
  *
  * For more information on OpenIndus:
@@ -15,8 +15,23 @@
 
 #pragma once
 
-#include "ConsoleCore.h"
-#include "ConsoleDiscrete.h"
-#include "ConsoleMaster.h"
-#include "ConsoleModule.h"
-#include "ConsoleStepper.h"
+#include "Global.h"
+#include "CoreStandalone.h"
+
+#if defined(CONFIG_CORE)
+
+class ConsoleCore
+{
+public:
+
+    static void registerCli(void);
+
+private:
+
+    static void _registerDigitalWrite(void);
+    static void _registerDigitalRead(void);
+    static void _registerAnalogRead(void);
+
+};
+
+#endif

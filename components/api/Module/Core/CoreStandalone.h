@@ -30,7 +30,7 @@ public:
      * @param dout DOUT to drive.
      * @param level DOUT level, HIGH or LOW.
      */
-    void digitalWrite(DigitalOutputNum_t dout, uint8_t level);
+    static void digitalWrite(DigitalOutputNum_t dout, uint8_t level);
 
     /**
      * @brief Read an input current level. Argument is the DIN to read.
@@ -39,7 +39,16 @@ public:
      * @param din DIN to monitor.
      * @return Value of the DIN input (1 or 0). 
      */
-    int digitalRead(DigitalInputNum_t din);
+    static int digitalRead(DigitalInputNum_t din);
+
+    /**
+     * @brief Read the value of AIN. 
+     * The function return the raw value (0-4096) that correspond to the voltage of the ANA.
+     * 
+     * @param eana ANA input to monitor.
+     * @return int Value of the AIN input.
+     */
+    static int analogRead(AnalogInputNum_t eana);
 
     /**
      * @brief Read the value of AIN. 
@@ -48,7 +57,7 @@ public:
      * @param eana ANA input to monitor.
      * @return float Value of the AIN input.
      */
-    float analogRead(AnalogInputNum_t eana);
+    static float analogReadMilliVolts(AnalogInputNum_t eana);
 
     /**
      * @brief Attach a user callback to the DIN interrupts.
@@ -59,14 +68,14 @@ public:
      * @param mode mode of interruption on rising edge, 
      * falling edge or both (rising edge by default).
      */
-    void attachInterrupt(DigitalInputNum_t din, void (*callback)(void *), void* args=NULL, InterruptMode_t mode=RISING_MODE);
+    static void attachInterrupt(DigitalInputNum_t din, void (*callback)(void *), void* args=NULL, InterruptMode_t mode=RISING_MODE);
     
     /**
      * @brief Detach an interrupt to a given DIN.
      * 
      * @param din DIN to detach interrupt.
      */
-    void detachInterrupt(DigitalInputNum_t din, InterruptMode_t mode);
+    static void detachInterrupt(DigitalInputNum_t din, InterruptMode_t mode);
 
 // protected:
 

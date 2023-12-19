@@ -127,10 +127,6 @@ public:
      */
     virtual void detachRTCAlarm(void);
 
-private:
-
-    static ioex_device_t *_ioex;
-
 };
 
 #define SECONDS_FROM_1970_TO_2000 946684800
