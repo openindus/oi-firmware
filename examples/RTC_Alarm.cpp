@@ -15,6 +15,7 @@ void rtc_alarm(void)
 
 void setup(void)
 {
+    RTC.init()
     RTC.setTime(DateTime(__DATE__, __TIME__));
 
     currTime = RTC.now();
@@ -28,7 +29,7 @@ void setup(void)
 void loop(void)
 {
     currTime = RTC.now();
-    printf("[%d-%d %d:%d:%d]", 
+    printf("[%d-%d %d:%d:%d]\r\n", 
             currTime.day(), 
             currTime.month(), 
             currTime.hour(), 

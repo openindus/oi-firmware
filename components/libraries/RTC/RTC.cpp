@@ -21,7 +21,7 @@ void OIRTC::init(void)
 {
     /**
      * @brief RTC Init
-     * Configure IOExpander RTC Interrupt pin
+     * Configure RTC Interrupt pin and I2C port
      */
     gpio_config_t gpio_rtc_conf;        
     gpio_rtc_conf.mode = GPIO_MODE_INPUT;
@@ -31,6 +31,8 @@ void OIRTC::init(void)
     gpio_rtc_conf.pin_bit_mask = (1ULL<<CORE_PIN_RTC_INTERRUPT);
 
     ESP_ERROR_CHECK(gpio_config(&gpio_rtc_conf));
+
+    rtc_i2c_set_port(CORE_I2C_PORT_NUM);
 }
 
 time_t OIRTC::time(void)

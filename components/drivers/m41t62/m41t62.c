@@ -16,6 +16,7 @@
 #include "m41t62/m41t62.h"
 
 static const char RTC_TAG[] = "RTC";
+i2c_port_t rtc_i2c_port = I2C_NUM_0;
 
 #define RTC_CHECK(a, str, goto_tag, ...)                                                    \
     do                                                                                      \
@@ -38,7 +39,7 @@ rtc_isr_t rtc_user_handler = NULL;
 
 bool HAL_ReadReg(uint8_t i2cAddr ,uint8_t regAddr, uint32_t numByteToRead, uint8_t *data)
 {
-    esp_err_t ret = rtc_i2c_read(RTC_I2C_PORT_NUM, i2cAddr, regAddr, data, numByteToRead);
+    esp_err_t ret = rtc_i2c_read(rtc_i2c_port, i2cAddr, regAddr, data, numByteToRead);
     if(ret == ESP_OK)
     {
         return false;
@@ -49,7 +50,7 @@ bool HAL_ReadReg(uint8_t i2cAddr ,uint8_t regAddr, uint32_t numByteToRead, uint8
 
 bool HAL_WriteReg(uint8_t i2cAddr, uint8_t regAddr, uint32_t numByteToWrite, uint8_t *data)
 {
-    esp_err_t ret = rtc_i2c_write(RTC_I2C_PORT_NUM, i2cAddr, regAddr, data, numByteToWrite);
+    esp_err_t ret = rtc_i2c_write(rtc_i2c_port, i2cAddr, regAddr, data, numByteToWrite);
     if(ret == ESP_OK)
     {
         return false;
@@ -103,6 +104,11 @@ esp_err_t rtc_i2c_read(i2c_port_t i2c_port, uint8_t address, uint8_t reg, uint8_
     ret = i2c_master_cmd_begin(i2c_port, cmd, 1000 / portTICK_RATE_MS);
     i2c_cmd_link_delete(cmd);
     return ret;
+}
+
+void rtc_i2c_set_port(i2c_port_t i2c_port)
+{
+    rtc_i2c_port = i2c_port;
 }
 
 ///////////////////////////////INTERRUPTION FUNCTIONS/////////////////////////////////////////////////////////////////////////

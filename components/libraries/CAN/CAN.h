@@ -27,11 +27,7 @@
 #define OICAN_DEFAULT_SPI_HOST                   CORE_SPI_USER_HOST
 #define OICAN_DEFAULT_SPI_PIN_CS                 CORE_PIN_CAN_SPI_CS
 
-#if defined CONFIG_OI_CORE
 #define OICAN_DEFAULT_SPI_PIN_INTERRUPT          CORE_PIN_CAN_INTERRUPT
-#else
-#define OICAN_DEFAULT_SPI_PIN_INTERRUPT          GPIO_NUM_26
-#endif
 
 #define CAN_MAX_LENGTH               8
 

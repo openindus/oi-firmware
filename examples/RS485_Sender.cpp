@@ -9,6 +9,6 @@ void setup()
 
 void loop()
 {
-    RS485.write("Hello OpenIndus\n");
+    RS485.write("Hello OpenIndus\r\n");
     delay(1000);
 }

@@ -231,8 +231,6 @@ void CoreStandalone::init()
     io_rs_conf.pin_bit_mask = (1ULL<<CORE_IOEX_PIN_RS_RESET);
     ioex_config(_ioex, &io_rs_conf);
     ioex_set_level(_ioex, CORE_IOEX_PIN_RS_RESET, IOEX_HIGH);
-
-
 }
 
 void CoreStandalone::digitalWrite(DigitalOutputNum_t dout, uint8_t level)

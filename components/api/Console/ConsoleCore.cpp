@@ -22,6 +22,7 @@ void ConsoleCore::registerCli(void)
     _registerDigitalWrite();
     _registerDigitalRead();
     _registerAnalogRead();
+    _registerAnalogReadMillivolts();
 }
 
 /** 'digital-write' */
@@ -134,6 +135,40 @@ void ConsoleCore::_registerAnalogRead(void)
         .help = "Get analog input value (RAW)",
         .hint = NULL,
         .func = &analogRead,
+        .argtable = &analogReadArgs
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+}
+
+
+/** 'analog-read-millivolts' */
+
+static int analogReadMilliVolts(int argc, char **argv)
+{
+    int nerrors = arg_parse(argc, argv, (void **) &analogReadArgs);
+    if (nerrors != 0) {
+        arg_print_errors(stderr, analogReadArgs.end, argv[0]);
+        return 1;
+    }
+
+    AnalogInputNum_t ain = (AnalogInputNum_t)(analogReadArgs.ain->ival[0] - 1);
+
+    printf("%f\n", CoreStandalone::analogReadMilliVolts(ain));
+
+
+    return 0;
+}
+
+void ConsoleCore::_registerAnalogReadMillivolts(void)
+{
+    analogReadArgs.ain = arg_int1(NULL, NULL, "<AIN>", "[1-2]");
+    analogReadArgs.end = arg_end(2);
+
+    const esp_console_cmd_t cmd = {
+        .command = "analog-read-millivolts",
+        .help = "Get analog input value (MilliVolts)",
+        .hint = NULL,
+        .func = &analogReadMilliVolts,
         .argtable = &analogReadArgs
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
