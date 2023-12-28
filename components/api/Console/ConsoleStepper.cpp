@@ -65,7 +65,7 @@ static struct {
     struct arg_end *end;
 } digitalReadArgs;
 
-static int digitalRead(int argc, char **argv)
+static int dRead(int argc, char **argv)
 {
     int nerrors = arg_parse(argc, argv, (void **) &digitalReadArgs);
     if (nerrors != 0) {
@@ -89,7 +89,7 @@ void ConsoleStepper::_registerDigitalRead(void)
         .command = "digital-read",
         .help = "Get DIN level",
         .hint = NULL,
-        .func = &digitalRead,
+        .func = &dRead,
         .argtable = &digitalReadArgs
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));

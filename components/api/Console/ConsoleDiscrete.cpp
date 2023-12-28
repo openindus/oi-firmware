@@ -32,7 +32,7 @@ static struct {
     struct arg_end *end;
 } digitalWriteArgs;
 
-static int digitalWrite(int argc, char **argv)
+static int dWrite(int argc, char **argv)
 {
     int nerrors = arg_parse(argc, argv, (void **) &digitalWriteArgs);
     if (nerrors != 0) {
@@ -58,7 +58,7 @@ void ConsoleDiscrete::_registerDigitalWrite(void)
         .command = "digital-write",
         .help = "Set DOUT level",
         .hint = NULL,
-        .func = &digitalWrite,
+        .func = &dWrite,
         .argtable = &digitalWriteArgs
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
@@ -71,7 +71,7 @@ static struct {
     struct arg_end *end;
 } digitalReadArgs;
 
-static int digitalRead(int argc, char **argv)
+static int dRead(int argc, char **argv)
 {
     int nerrors = arg_parse(argc, argv, (void **) &digitalReadArgs);
     if (nerrors != 0) {
@@ -95,7 +95,7 @@ void ConsoleDiscrete::_registerDigitalRead(void)
         .command = "digital-read",
         .help = "Get DIN level",
         .hint = NULL,
-        .func = &digitalRead,
+        .func = &dRead,
         .argtable = &digitalReadArgs
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));

@@ -16,7 +16,7 @@
 #include "m41t62/m41t62.h"
 
 static const char RTC_TAG[] = "RTC";
-i2c_port_t rtc_i2c_port = I2C_NUM_0;
+i2c_port_t rtc_i2c_port = NULL;
 
 #define RTC_CHECK(a, str, goto_tag, ...)                                                    \
     do                                                                                      \
