@@ -2,7 +2,7 @@
 
 static const char ADS866x_TAG[] = "Ads866x";
 
-static uint8_t ads866x_mode = MODE_IDLE;
+static uint8_t ads866x_mode = ADS866X_MODE_IDLE;
 static Ads866x_DeviceConfig_t*_deviceConfig = NULL;
 static float ads866x_analogReference = ADS8664_ANALOG_REFERENCE;
 static spi_device_handle_t _spiHandler = NULL;
@@ -173,7 +173,7 @@ float Ads866x_AnalogReadUnits(uint32_t analogNum, Ads866x_Units_t units)
         // VOLTAGE MODE
         if (_deviceConfig->adc_mode[analogNum] == ADS866X_VOLTAGE_MODE)
         {
-            res = Ads866x_ConvertRaw2Volt(adc_raw, R5);
+            res = Ads866x_ConvertRaw2Volt(adc_raw, ADS866X_R5);
 
             if (units == ADS866x_UNITS_VOLTS)
             {
@@ -192,7 +192,7 @@ float Ads866x_AnalogReadUnits(uint32_t analogNum, Ads866x_Units_t units)
         }
         else // CURRENT MODE
         {
-            res = Ads866x_ConvertRaw2Volt(adc_raw, R6) / ADS866x_CURRENT_MES_RES_VALUE;
+            res = Ads866x_ConvertRaw2Volt(adc_raw, ADS866X_R6) / ADS866x_CURRENT_MES_RES_VALUE;
             if (units == ADS866x_UNITS_AMPS)
             {
 
@@ -224,11 +224,11 @@ void Ads866x_setAdcMode(uint32_t analogNum, Ads866x_AdcMode_t mode)
 
             if (mode == ADS866X_VOLTAGE_MODE)
             {
-                Ads866x_setChannelRange(analogNum, R5); // Range 0 - 10.24V
+                Ads866x_setChannelRange(analogNum, ADS866X_R5); // Range 0 - 10.24V
             }
             else // ADS866X_CURRENT_MODE
             {
-                Ads866x_setChannelRange(analogNum, R6); // Range 0 - 5.12V
+                Ads866x_setChannelRange(analogNum, ADS866X_R6); // Range 0 - 5.12V
             }
         }
         else
@@ -254,12 +254,12 @@ uint8_t Ads866x_getAdcResolution(void)
 
 float Ads866x_getAnalogReference(void)
 {
-    return ads866x_analogReference;
+    return ads866x_analogReference * 1000;
 }
 
 void Ads866x_setAnalogReference(float analogReference)
 {
-    ads866x_analogReference = analogReference;
+    ads866x_analogReference = analogReference / 1000.0;
 }
 
 uint16_t Ads866x_NoOp(void)
@@ -277,7 +277,7 @@ uint16_t Ad866x_Standby(void)
 {
     uint16_t ret = 0;
     ret = Ads866x_SpiWriteCmdRegister(ADS866X_CMD_STDBY);
-    ads866x_mode = MODE_STANDBY;
+    ads866x_mode = ADS866X_MODE_STANDBY;
     return ret;
 }
 
@@ -285,7 +285,7 @@ uint16_t Ads866x_PowerDown(void)
 {
     uint16_t ret = 0;
     ret = Ads866x_SpiWriteCmdRegister(ADS866X_CMD_PWR_DN);
-    ads866x_mode = MODE_POWER_DN;
+    ads866x_mode = ADS866X_MODE_POWER_DN;
     return ret;
 }
 
@@ -293,7 +293,7 @@ uint16_t Ads866x_AutoRst(void)
 {
     uint16_t ret = 0;
     ret = Ads866x_SpiWriteCmdRegister(ADS866X_CMD_AUTO_RST);
-    ads866x_mode = MODE_AUTO_RST;
+    ads866x_mode = ADS866X_MODE_AUTO_RST;
     return ret;
 }
 
@@ -352,7 +352,7 @@ uint8_t Ads866x_GetDeviceId(void)
     return (Ads866x_getFeatureSelect() >> 6);
 }
 
-void Ads866x_SetDeviceId(uint8_t id)
+void Ads866x_SetDeviceId(uint16_t id)
 {
     uint8_t reg = 0;
     reg = Ads866x_getFeatureSelect();
@@ -563,35 +563,35 @@ float Ads866x_ConvertRaw2Volt(uint16_t rawValue, uint8_t inputRange)
     float out_min, out_max;
     switch (inputRange)
     {
-        case R1:
+        case ADS866X_R1:
             out_min = -1.25 * ads866x_analogReference;
             out_max = 1.25 * ads866x_analogReference;
             break;
-        case R2:
+        case ADS866X_R2:
             out_min = -0.625 * ads866x_analogReference;
             out_max = 0.625 * ads866x_analogReference;
             break;
-        case R3:
+        case ADS866X_R3:
             out_min = -0.3125 * ads866x_analogReference;
             out_max = 0.3125 * ads866x_analogReference;
             break;
-        case R4:
+        case ADS866X_R4:
             out_min = -0.15625 * ads866x_analogReference;
             out_max = 0.15625 * ads866x_analogReference;
             break;
-        case R5:
+        case ADS866X_R5:
             out_min = 0 * ads866x_analogReference;
             out_max = 2.5 * ads866x_analogReference;
             break;
-        case R6:
+        case ADS866X_R6:
             out_min = 0 * ads866x_analogReference;
             out_max = 1.25 * ads866x_analogReference;
             break;
-        case R7:
+        case ADS866X_R7:
             out_min = 0 * ads866x_analogReference;
             out_max = 0.625 * ads866x_analogReference;
             break;
-        case R8:
+        case ADS866X_R8:
             out_min = 0 * ads866x_analogReference;
             out_max = 0.3125 * ads866x_analogReference;
             break;
@@ -608,35 +608,35 @@ uint16_t Ads866x_ConvertVolt2Raw(float voltageValue, uint8_t inputRange)
     float in_min, in_max;
     switch (inputRange)
     {
-        case R1:
+        case ADS866X_R1:
             in_min = -1.25 * ads866x_analogReference;
             in_max = 1.25 * ads866x_analogReference;
             break;
-        case R2:
+        case ADS866X_R2:
             in_min = -0.625 * ads866x_analogReference;
             in_max = 0.625 * ads866x_analogReference;
             break;
-        case R3:
+        case ADS866X_R3:
             in_min = -0.3125 * ads866x_analogReference;
             in_max = 0.3125 * ads866x_analogReference;
             break;
-        case R4:
+        case ADS866X_R4:
             in_min = -0.15625 * ads866x_analogReference;
             in_max = 0.15625 * ads866x_analogReference;
             break;
-        case R5:
+        case ADS866X_R5:
             in_min = 0 * ads866x_analogReference;
             in_max = 2.5 * ads866x_analogReference;
             break;
-        case R6:
+        case ADS866X_R6:
             in_min = 0 * ads866x_analogReference;
             in_max = 1.25 * ads866x_analogReference;
             break;
-        case R7:
+        case ADS866X_R7:
             in_min = 0 * ads866x_analogReference;
             in_max = 0.625 * ads866x_analogReference;
             break;
-        case R8:
+        case ADS866X_R8:
             in_min = 0 * ads866x_analogReference;
             in_max = 0.3125 * ads866x_analogReference;
             break;
@@ -667,7 +667,7 @@ esp_err_t Ads866x_SpiWriteRegister(uint8_t reg, uint8_t value)
 
         ESP_ERROR_CHECK(spi_device_polling_transmit(_spiHandler, &trans));
 
-        ads866x_mode = MODE_PROG;
+        ads866x_mode = ADS866X_MODE_PROG;
     }
     else
     {
@@ -696,7 +696,7 @@ uint8_t Ads866x_SpiReadRegister(uint8_t reg)
 
         ESP_ERROR_CHECK(spi_device_polling_transmit(_spiHandler, &trans));
 
-        ads866x_mode = MODE_PROG;
+        ads866x_mode = ADS866X_MODE_PROG;
     }
     else
     {
@@ -723,7 +723,7 @@ uint16_t Ads866x_SpiWriteCmdRegister(uint8_t reg)
             .rx_buffer = rxBuffer
         };
 
-        if (ads866x_mode > MODE_PROG)
+        if (ads866x_mode > ADS866X_MODE_PROG)
         {
             // only 16 bit if POWERDOWN or STDBY or RST or IDLE
             trans.length = 32;
@@ -736,7 +736,7 @@ uint16_t Ads866x_SpiWriteCmdRegister(uint8_t reg)
         ESP_LOGE(ADS866x_TAG, "SPI is not initialized !!!");
     }
 
-    if (ads866x_mode == MODE_POWER_DN)
+    if (ads866x_mode == ADS866X_MODE_POWER_DN)
     {
         vTaskDelay(15 / portTICK_PERIOD_MS);
     }
@@ -745,28 +745,28 @@ uint16_t Ads866x_SpiWriteCmdRegister(uint8_t reg)
     {
         case ADS866X_CMD_NO_OP:
             switch (ads866x_mode) {
-                case MODE_RESET:    ads866x_mode = MODE_IDLE;
+                case ADS866X_MODE_RESET:    ads866x_mode = ADS866X_MODE_IDLE;
                     break;
-                case MODE_PROG :    ads866x_mode = MODE_IDLE;
+                case ADS866X_MODE_PROG :    ads866x_mode = ADS866X_MODE_IDLE;
                     break;
-                case MODE_AUTO_RST: ads866x_mode = MODE_AUTO;
+                case ADS866X_MODE_AUTO_RST: ads866x_mode = ADS866X_MODE_AUTO;
                     break;
             }
             break;
         case ADS866X_CMD_STDBY:
-            ads866x_mode = MODE_STANDBY;
+            ads866x_mode = ADS866X_MODE_STANDBY;
             break;
         case ADS866X_CMD_PWR_DN:
-            ads866x_mode = MODE_POWER_DN;
+            ads866x_mode = ADS866X_MODE_POWER_DN;
             break;
         case ADS866X_CMD_RST:
-            ads866x_mode = MODE_RESET;
+            ads866x_mode = ADS866X_MODE_RESET;
             break;
         case ADS866X_CMD_AUTO_RST:
-            ads866x_mode = MODE_AUTO_RST;
+            ads866x_mode = ADS866X_MODE_AUTO_RST;
             break;
         default:
-            ads866x_mode = MODE_MANUAL;
+            ads866x_mode = ADS866X_MODE_MANUAL;
             break;
     }
 

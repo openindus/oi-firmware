@@ -1,15 +1,12 @@
 #include "OpenIndus.h"
 #include "Arduino.h"
 
-void setup()
+void setup(void)
 {
-#ifdef DEBUG
-    Serial.begin(115200);
-#endif
+
 }
 
-void loop()
+void loop(void)
 {
-    Serial.println("Hello OpenIndus");
     delay(1000);
 }

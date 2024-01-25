@@ -64,7 +64,7 @@ void ledonewire_install(gpio_num_t gpio_num)
         ledControl.blinkStatus = true;
         ledControl.installed = true;
         ledControl.intensity = 255;
-        ESP_LOGD(LEDONEWIRE_TAG, "creating led task");
+        ESP_LOGV(LEDONEWIRE_TAG, "creating led task");
         xTaskCreate(ledTask, "led task", 1024, NULL, 10, &ledTaskHandle);
     }
 }

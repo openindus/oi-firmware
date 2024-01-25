@@ -1,79 +1,225 @@
-menu "OpenIndus API Configuration"
+menu "OpenIndus Configuration"
 
     config MODULE_STANDALONE
-        bool "Module stanalone"
+        bool "Module standalone"
         default n
 
-    config BOARD
-        bool "Configure board"
+    config MODULE
+        bool "Configure module"
         default n
 
-    choice BOARD_TYPE
-        bool "OpenIndus board type"
-        depends on BOARD
-        default OI_CORE
+    choice MODULE_TYPE
+        bool "OpenIndus module type"
+        depends on MODULE
+        default CORE
         help
-            Select OpenIndus board
-    
-        config OI_CORE
-            bool "OICore"
-        config OI_DISCRETE
-            bool "OIDiscrete"
-        config OI_DISCRETE_VERTICAL
-            bool "OIDiscreteVertical"
-        config OI_STEPPER
-            bool "OIStepper"
-        config OI_MIXED
-            bool "OIMixed"
-        config OI_RELAY_HP
-            bool "OIRelayHP"
-        config OI_RELAY_LP
-            bool "OIRelayLP"
+            Select OpenIndus module
+
+        config BRUSHLESS
+            bool "Brushless"
+        config CORE
+            bool "Core"
+        config DISCRETE
+            bool "Discrete"
+        config DISCRETE_VE
+            bool "DiscreteVertical"
+        config STEPPER
+            bool "Stepper"
+        config STEPPER_VE
+            bool "StepperVertical"
+        config MIXED
+            bool "Mixed"
+        config RELAY_HP
+            bool "RelayHP"
+        config RELAY_LP
+            bool "RelayLP"
     endchoice
 
     config AUTO_ID
         bool "Configure ID automatically"
         default y
 
-    config GLOBAL_INSTANCE
-        bool "Global instance"
-        default y
-
-    choice RS
-        bool "RS User"
-        depends on GLOBAL_INSTANCE
-        default GLOBAL_INSTANCE_RS485
-        help
-            Serial RS bus
-    
-        config GLOBAL_INSTANCE_RS485
-            bool "RS485"
-        config GLOBAL_INSTANCE_RS485
-            bool "RS232"
-    endchoice
-
     choice STEPPER_DRIVER
-        bool "OIStepper driver"
+        bool "Stepper driver"
         default POWERSTEP01
         help
             driver used
-    
+
         config POWERSTEP01
             bool "POWERSTEP01"
         config L6470
             bool "L6470"
     endchoice
-    
-    choice STEPPER_CMD
-        bool "OIStepper command"
+
+    choice STEPPER_MODE
+        bool "Stepper mode"
         default VOLTAGE_MODE
         help
-            powerSTEP01 command mode
-    
+            powerSTEP01 mode
+
         config VOLTAGE_MODE
             bool "voltage mode"
         config CURRENT_MODE
             bool "current mode"
     endchoice
+
+    config STEPPER_NUMBER_OF_DEVICES
+        int "Number of powerSTEP01 devices"
+        default 2
+        range 1 2
+        help
+            Number of powerSTEP01 devices
+
+    menu "Cloud Configuration"
+        menu "MQTT Configuration"
+            config CLOUD_MQTT_HOST
+                string "Hostname or IP of the MQTT Broker"
+                default "oicloud-mqtt.openindus.com"
+
+            config CLOUD_MQTT_DEFAULT_PORT
+                int "MQTT Broker Port without TLS"
+                default 31111
+
+            config CLOUD_MQTT_TLS_PORT
+                int "MQTTS (MQTT over TLS) Port"
+                default 31111
+
+            config CLOUD_MQTT_USE_TLS
+                bool "Use MQTTS (MQTT over TLS) ?"
+                default y
+
+            config CLOUD_MQTTS_ENABLE_CHECK
+                bool "Enable MQTTS cert validation"
+                default y
+
+            config CLOUD_MQTT_TIMEOUT
+                int "MQTT Disconnect timeout (in seconds)"
+                default 15
+
+            config CLOUD_MQTT_QOS
+                int "MQTT Quality Of Service"
+                default 1
+                range 0 2
+
+            config CLOUD_MQTT_TOPIC_SEND_SUFFIX
+                string "MQTT Topic Send Suffix"
+                default "/publish"
+
+            config CLOUD_MQTT_TOPIC_RECEIVE_SUFFIX
+                string "MQTT Topic Receive Suffix"
+                default "/receive"
+
+            config CLOUD_MQTT_LAST_WILL_TOPIC_SUFFIX
+                string "MQTT LWT Suffix"
+                default "/disconnect"
+        endmenu
+
+        menu "Authentication Configuration"
+            config CLOUD_HTTP_HOST
+                string "Hostname or IP of the HTTP Authentication Server"
+                default "oicloud.openindus.com"
+
+            config CLOUD_HTTP_PORT
+                int "Authentication Server HTTP Port"
+                default 8000
+
+            config CLOUD_HTTP_TLS
+                bool "Enable HTTPS"
+                default y
+
+            config CLOUD_HTTPS_ENABLE_CHECK
+                bool "Enable HTTPS certificate validation"
+                default y
+
+            config CLOUD_TOKEN_VALIDITY_PERIOD
+                int "Token Validity Period (in seconds)"
+                default 6840
+
+            config CLOUD_TOKEN_REFRESH_ROUTE
+                string "Token refresh route"
+                default "/en/refresh/"
+
+            config CLOUD_TOKEN_CHECK_ROUTE
+                string "Authentication route"
+                default "/en/auth/"
+
+            config CLOUD_SETUP_ROUTE
+                string "Setup route"
+                default "/en/setup/"
+
+            config CLOUD_AUTHENTICATION_TIMEOUT
+                int "Authentication Timeout"
+                default 20
+
+            config CLOUD_RETRY_DELAY
+                int "Authentication Retry Delay"
+                default 10
+
+        endmenu
+
+        menu "NTP Configuration"
+            config CLOUD_NTP_HOSTNAME
+                string "NTP server hostname"
+                default "pool.ntp.org"
+
+            config CLOUD_NTP_REFRESH_DELAY
+                int "Delay between system time updates from NTP"
+                default 14400
+        endmenu
+
+    endmenu
+
+    menu "Netif Configuration"
+        menu "Wifi Configuration"
+            config NETIF_E_WIFI
+                bool "Enable Interface"
+                default y
+
+            config NETIF_RECONNECT_DELAY_WIFI
+                int "Wifi Reconnect Delay"
+                default 15
+                depends on NETIF_E_WIFI
+
+            config NETIF_TIMEOUT_DELAY_WIFI
+                int "Wifi Connect Timeout"
+                default 30
+                depends on NETIF_E_WIFI
+        endmenu
+
+        menu "Ethernet Configuration"
+            config NETIF_E_ETHERNET
+                bool "Enable Interface"
+                default n
+
+            config NETIF_SPI_ETHERNET_SPEED
+                int "Ethernet SPI Speed"
+                default 15
+                depends on NETIF_E_ETHERNET
+        endmenu
+
+        menu "4G Configuration"
+            config NETIF_E_4G
+                bool "Enable Interface"
+                default n
+
+            config NETIF_BAUD_RATE_MODEM
+                int "Modem Baud Rate"
+                default 115200
+                depends on NETIF_E_4G
+
+            config NETIF_ENABLE_NBIOT
+                bool "Use NB-IoT instead of LTE"
+                default n
+                depends on NETIF_E_4G
+        endmenu
+
+        config NETIF_TASK_STACK_DEPTH
+            int "Callback Task Stack Depth"
+            default 16384
+
+        config NETIF_TASK_PRIORITY
+            int "Callback Task Priority"
+            default 10
+    endmenu
 
 endmenu

@@ -211,7 +211,7 @@ int can_queue_push(MCP25625_canMessage_t element)
     xSemaphoreTake(xSemaphoreQueue, portTICK_PERIOD_MS);
     if((rx_queue.count == MCP25625_CAN_RX_QUEUE_SIZE))
     {
-        ESP_LOGD(CAN_USR_TAG, "RX internal queue is full");
+        ESP_LOGV(CAN_USR_TAG, "RX internal queue is full");
         return -1;
     }
 
@@ -227,7 +227,7 @@ int can_queue_pop(MCP25625_canMessage_t * element)
     xSemaphoreTake(xSemaphoreQueue, portTICK_PERIOD_MS);
     if(!(rx_queue.count == MCP25625_CAN_RX_QUEUE_SIZE) && (rx_queue.head == rx_queue.tail)) //queue is empty ?
     {
-        ESP_LOGD(CAN_USR_TAG, "RX internal queue is empty");
+        ESP_LOGV(CAN_USR_TAG, "RX internal queue is empty");
         return -1;
     }
     *element = rx_queue.e[rx_queue.head];
