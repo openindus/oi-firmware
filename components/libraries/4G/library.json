@@ -1,0 +1,22 @@
+{
+    "name": "OI4G",
+    "description": "Library to drive the ublox R412 LTE-M module with ESP32",
+    "keywords": "",
+    "authors":
+    {
+      "name": "Aly N'DAW"
+    },
+    "repository":
+    {
+      "type": "git",
+      "url": "https://bitbucket.openindus.com/scm/piol/oi4g.git"
+    },
+    "version": "0.0.0",
+    "frameworks": [
+          "arduino"
+    ],
+    "platforms": "*",
+    "dependencies": {
+      "name": ""
+    }
+  }

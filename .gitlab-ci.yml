@@ -1,15 +1,147 @@
 image: python:latest
 
 stages:
+  - setup
   - build
+  - build:examples
+  - pkg:library
+  - deploy
 
-before_script:
-  - "pip install -U platformio"
-  - "pio platform update"
+cache:
+  paths:
+    - .oi/
+    - .pio/
 
-job:
+setup:
+  stage: setup
+  script:
+    - pip install -U platformio
+    - pio platform update
+  rules:
+    - if: '($CI_PIPELINE_SOURCE == "push") && ($CI_COMMIT_BRANCH == "dev")'
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
+    - if: '$CI_COMMIT_BRANCH == "master"'
+
+.build:
   stage: build
-  script: "pio run -e core -e discrete -e stepper -e mixed"
+  needs:
+    - job: setup
+  rules:
+    - if: '($CI_PIPELINE_SOURCE == "push") && ($CI_COMMIT_BRANCH == "dev")'
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
+    - if: '$CI_COMMIT_BRANCH == "master"'
 
-variables:
-  GIT_SUBMODULE_STRATEGY: recursive
+build:core:
+  extends: .build
+  script:
+    - pio run -e core 
+
+build:discrete:
+  extends: .build
+  script:
+    - pio run -e discrete 
+
+build:discreteve:
+  extends: .build
+  script:
+    - pio run -e discreteve 
+
+build:stepper:
+  extends: .build
+  script:
+    - pio run -e stepper 
+
+build:stepperve:
+  extends: .build
+  script:
+    - pio run -e stepperve 
+
+build:mixed:
+  extends: .build
+  script:
+    - pio run -e mixed 
+
+build:relayhp:
+  extends: .build
+  script:
+    - pio run -e relayhp 
+
+build:relaylp:
+  extends: .build
+  script:
+    - pio run -e relaylp 
+
+build:brushless:
+  extends: .build
+  script:
+    - pio run -e brushless 
+
+build:analogls:
+  extends: .build
+  script:
+    - pio run -e analogls 
+
+build:core-s1:
+  extends: .build
+  script:
+    - pio run -e core-s1 
+
+build:discrete-s2:
+  extends: .build
+  script:
+    - pio run -e discrete-s2 
+
+build:stepperve-s2:
+  extends: .build
+  script:
+    - pio run -e stepperve-s2 
+
+build:examples:
+  stage: build:examples
+  needs:
+    - job: build:core
+  script:
+    - ./scripts/build_examples.sh
+  after_script:
+    - git restore main/main.cpp
+  rules:
+    - if: '($CI_PIPELINE_SOURCE == "push") && ($CI_COMMIT_BRANCH == "dev")'
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
+    - if: '$CI_COMMIT_BRANCH == "master"'
+
+pkg:library:
+  stage: pkg:library
+  needs:
+    - job: build:examples
+  before_script:
+    - rm -rf .oi/lib/
+    - mkdir .oi/lib/
+  script:
+    - pio pkg pack --output=".oi/lib/"
+  rules:
+    - if: '($CI_PIPELINE_SOURCE == "push") && ($CI_COMMIT_BRANCH == "dev")'
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
+    - if: '$CI_COMMIT_BRANCH == "master"'
+
+deploy:
+  stage: deploy
+  needs:
+    - job: build:core
+    - job: build:discrete
+    - job: build:discreteve
+    - job: build:stepper
+    - job: build:stepperve
+    - job: build:mixed
+    - job: build:relayhp
+    - job: build:relaylp
+    - job: build:brushless
+    - job: build:analogls
+    - job: build:core-s1
+    - job: build:discrete-s2
+    - job: build:stepperve-s2
+  script:
+    - lftp $OVH_URI -e "mirror --reverse --verbose -R ./.oi/bin/ ./www/oi-content/bin/; quit" -u $OVH_USERNAME,$OVH_PASSWORD
+  only:
+    - tags
+  except:
+    - branches

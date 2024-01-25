@@ -5,5 +5,7 @@
     <file>error.png</file>
     <file>question.png</file>
     <file>logo.png</file>
+    <file>circle.png</file>
+    <file>empty.png</file>
   </qresource>
 </RCC>

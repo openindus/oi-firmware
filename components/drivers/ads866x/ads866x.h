@@ -86,25 +86,25 @@
 // SPECIFIC VALUES -------------------------------------------------------------------------------------------
 
 //RANGE SELECTION
-#define R0            0x00   // Input range to -2.5/+2.5         Vref   +/- 10.24V
-#define R1            0x01   // Input range to -1.25/+1.25       Vref   +/-  5.12V
-#define R2            0x02   // Input range to -0.625/+0.625     Vref   +/-  2.56V
-#define R3            0x03   // Input range to -0.3125/+0.3125   Vref   +/-  1.28V
-#define R4            0x0B   // Input range to -0.15625/+0.15625 Vref   +/-  0.64V
-#define R5            0x05   // Input range to +2.5    Vref   10.24V
-#define R6            0x06   // Input range to +1.25   Vref    5.12V
-#define R7            0x07   // Input range to +0.625  Vref    2.56V
-#define R8            0x0F   // Input range to +0.3125 Vref    1.28V
+#define ADS866X_R0            0x00   // Input range to -2.5/+2.5         Vref   +/- 10.24V
+#define ADS866X_R1            0x01   // Input range to -1.25/+1.25       Vref   +/-  5.12V
+#define ADS866X_R2            0x02   // Input range to -0.625/+0.625     Vref   +/-  2.56V
+#define ADS866X_R3            0x03   // Input range to -0.3125/+0.3125   Vref   +/-  1.28V
+#define ADS866X_R4            0x0B   // Input range to -0.15625/+0.15625 Vref   +/-  0.64V
+#define ADS866X_R5            0x05   // Input range to +2.5    Vref   10.24V
+#define ADS866X_R6            0x06   // Input range to +1.25   Vref    5.12V
+#define ADS866X_R7            0x07   // Input range to +0.625  Vref    2.56V
+#define ADS866X_R8            0x0F   // Input range to +0.3125 Vref    1.28V
 
 // OPERATION MODES
-#define MODE_IDLE       (uint8_t)0
-#define MODE_RESET      (uint8_t)1
-#define MODE_STANDBY    (uint8_t)2
-#define MODE_POWER_DN   (uint8_t)3
-#define MODE_PROG       (uint8_t)4
-#define MODE_MANUAL     (uint8_t)5
-#define MODE_AUTO       (uint8_t)6
-#define MODE_AUTO_RST   (uint8_t)7
+#define ADS866X_MODE_IDLE       (uint8_t)0
+#define ADS866X_MODE_RESET      (uint8_t)1
+#define ADS866X_MODE_STANDBY    (uint8_t)2
+#define ADS866X_MODE_POWER_DN   (uint8_t)3
+#define ADS866X_MODE_PROG       (uint8_t)4
+#define ADS866X_MODE_MANUAL     (uint8_t)5
+#define ADS866X_MODE_AUTO       (uint8_t)6
+#define ADS866X_MODE_AUTO_RST   (uint8_t)7
 
 typedef struct 
 {
@@ -297,7 +297,7 @@ uint8_t Ads866x_GetDeviceId(void);
  * @brief Set device id used for daisy chain (Feature Select Register)
  * @param[in] id : value of id. Must be an integer between [0;3]
  */
-void Ads866x_SetDeviceId(uint8_t id);
+void Ads866x_SetDeviceId(uint16_t id);
 
 /**
  * @brief retvals the status of alarm (4th bit of Feature Select Register)

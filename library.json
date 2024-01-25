@@ -1,0 +1,108 @@
+{
+    "name": "OpenIndus",
+    "version": "2.1.0", 
+    "keywords": "OpenIndus",
+    "description": "OpenIndus Library",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/openindus"
+    },
+    "authors": [
+        {
+            "name": "OpenIndus Team",
+            "email": "contact@openindus.com",
+            "url": "https://openindus.com"
+        }
+    ],
+    "frameworks": ["espidf"],
+    "platforms": "espressif32",
+    "export": {
+        "include": [
+            "boards",
+            "components",
+            "examples",
+            "tools",
+            "partitions.csv",
+            "README.md"
+        ],
+        "exclude": [
+            "components/bootloader",
+            "components/Libraries"
+        ]
+    },
+    "build": {
+        "flags": [
+            "-I components/api",
+            "-I components/api/System",
+            "-I components/api/Module",
+            "-I components/api/Module/AnalogLS",
+            "-I components/api/Module/Brushless",
+            "-I components/api/Module/Core",
+            "-I components/api/Module/Discrete",
+            "-I components/api/Module/Mixed",
+            "-I components/api/Module/Relay",
+            "-I components/api/Module/Stepper",    
+            "-I components/api/Console",
+            "-I components/middleware",
+            "-I components/middleware/Bus",
+            "-I components/middleware/Encoder",
+            "-I components/middleware/DigitalInput",
+            "-I components/middleware/DigitalOutput",
+            "-I components/middleware/AnalogInput",
+            "-I components/middleware/AnalogOutput",
+            "-I components/middleware/Motor",
+            "-I components/middleware/Usb",
+            "-I components/middleware/FlashLoader",
+            "-I components/drivers",
+            "-I components/drivers/ledonewire",
+            "-I components/drivers/ads866x",
+            "-I components/drivers/dac8760",
+            "-I components/drivers/powerSTEP01",
+            "-I components/drivers/pcal6524",
+            "-I components/drivers/m41t62",
+            "-I components/drivers/m41t62/STM32DriversComponents",
+            "-I components/drivers/sc16is750",
+            "-I components/drivers/mcp25625",
+            "-I components/drivers/mcp25625/DriversComponents",
+            "-I components/drivers/ads1x4s08",
+            "-I components/drivers/stds75",
+            "-I components/drivers/cd74hc4052"
+        ],
+        "includeDir": ".",
+        "srcDir": ".",
+        "srcFilter": [
+            "-<*>",
+            "+<components/api/System>",
+            "+<components/api/Module>",
+            "+<components/api/Module/AnalogLS>",
+            "+<components/api/Module/Brushless>",
+            "+<components/api/Module/Core>",
+            "+<components/api/Module/Discrete>",
+            "+<components/api/Module/Mixed>",
+            "+<components/api/Module/Relay",
+            "+<components/api/Module/Stepper>",    
+            "+<components/api/Console>",
+            "+<components/middleware/Bus>",
+            "+<components/middleware/Encoder>",
+            "+<components/middleware/DigitalInput>",
+            "+<components/middleware/DigitalOutput>",
+            "+<components/middleware/AnalogInput>",
+            "+<components/middleware/AnalogOutput>",
+            "+<components/middleware/Motor>",
+            "+<components/middleware/Usb>",
+            "+<components/middleware/FlashLoader>",
+            "+<components/drivers/ledonewire>",
+            "+<components/drivers/ads866x>",
+            "+<components/drivers/dac8760>",
+            "+<components/drivers/powerSTEP01>",
+            "+<components/drivers/pcal6524>",
+            "+<components/drivers/m41t62>",
+            "+<components/drivers/m41t62/STM32DriversComponents>",
+            "+<components/drivers/sc16is750>",
+            "+<components/drivers/mcp25625>",
+            "+<components/drivers/mcp25625/DriversComponents>",
+            "+<components/drivers/ads1x4s08>",
+            "+<components/drivers/stds75>"
+        ]
+    }
+}

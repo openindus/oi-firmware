@@ -7,6 +7,8 @@ import time
 import serial
 import serial.tools.list_ports
 import re
+from stepper_strucutre import SteperCommunication, CommandFrame, AvailableRegisters, CommandByte
+
 
 #define OI_CORE          0
 #define OI_DISCRETE      1
@@ -27,15 +29,14 @@ class OIStepperConfig(Ui_MainWindow):
     def setupAction(self):
 
         self.lock()
-            
+        
+        # init communication
+        self.com = SteperCommunication()
+        self.com.init_com()
+
         ############################################################
         # portGroup parameters
         ############################################################
-        self.serialPort = serial.Serial(baudrate=115200, timeout=0.1)
-        self.serialPort.dtr = False
-        self.serialPort.rts = False
-        for port in serial.tools.list_ports.comports():
-            self.portSelect.addItem(str(port))
         self.portSelect.currentTextChanged.connect(self.lock)
         self.connectButton.clicked.connect(self.connectPort)
         self.refreshButton.clicked.connect(self.refreshPort)
@@ -57,16 +58,16 @@ class OIStepperConfig(Ui_MainWindow):
         ############################################################
         # Stop commands
         ############################################################
-        self.hardhizButton.clicked.connect(self.hardHiz)
-        self.hardstopButton.clicked.connect(self.hardStop)
-        self.softhizButton.clicked.connect(self.softHiz)
-        self.softstopButton.clicked.connect(self.softStop)
+        self.hardhizButton.clicked.connect(self.com.send(CommandFrame.HARD_HIZ))
+        self.hardstopButton.clicked.connect(self.com.send(CommandFrame.HARD_STOP))
+        self.softhizButton.clicked.connect(self.com.send(CommandFrame.SOFT_HIZ))
+        self.softstopButton.clicked.connect(self.com.send(CommandFrame.SOFT_STOP))
 
         ############################################################
         # Reset commands
         ############################################################
-        self.resetdeviceButton.clicked.connect(self.resetDevice)
-        self.resetposButton.clicked.connect(self.resetPos) 
+        self.resetdeviceButton.clicked.connect(self.com.send(CommandFrame.RESET_DEVICE))
+        self.resetposButton.clicked.connect(self.com.send(CommandFrame.RESET_POS)) 
 
         ############################################################
         # Contant speed commands
@@ -85,8 +86,8 @@ class OIStepperConfig(Ui_MainWindow):
         ############################################################
         self.gotoButton.clicked.connect(self.goTo)
         self.gotodirButton.clicked.connect(self.goToDir)
-        self.gohomeButton.clicked.connect(self.goHome)
-        self.gomarkButton.clicked.connect(self.goMark)
+        self.gohomeButton.clicked.connect(self.com.send(CommandFrame.GO_HOME))
+        self.gomarkButton.clicked.connect(self.com.send(CommandFrame.GO_MARK))
 
         ############################################################
         # Config param commands
@@ -108,6 +109,8 @@ class OIStepperConfig(Ui_MainWindow):
         self.autoRead.clicked.connect(self.autoReadStatus)
         self.autoReadEnable = False
 
+    #------------------------------------------------------------------------------------------------#
+    # visual
     def autoReadStatus(self):
         if (self.autoRead.isChecked()):
             self.autoReadEnable = True
@@ -145,158 +148,66 @@ class OIStepperConfig(Ui_MainWindow):
         self.vpGroup_2.setHidden(False)
         self.vpGroup_3.setHidden(True)
 
-    def performCommand(self, cmd, conf, data):
-        try:
-        #     # open port
-        #     self.serialPort.open()
-
-            # flush I/O
-            self.serialPort.flushInput()
-            self.serialPort.flushOutput()
-
-            if(self.motor1.isChecked()):
-                command = 'cmd %i %i %i\r\n' % (cmd, conf, data)
-                self.serialPort.write(bytes(command, 'utf-8'))
-                self.serialPort.readline()
-                print("cmd " + str(cmd) + " " + str(conf) + " " + str(data))
-
-            if(self.motor2.isChecked()):
-                command = 'cmd %i %i %i\r\n' % (cmd, conf+1, data)
-                self.serialPort.write(bytes(command, 'utf-8'))
-                self.serialPort.readline()
-                print("cmd " + str(cmd) + " " + str(conf+1) + " " + str(data))
-
-        except:
-            print("Cannot perform command: cmd " + str(cmd) + " " + str(conf) + " " + str(data))
-            # close port
-            self.serialPort.close()
-            return -1
-    
-        # # close port
-        # self.serialPort.close()
-        return 0
-
-    def performCommandWithReturn(self, cmd, conf, motor = True):
-        
-        returnData = -1
-
-        if (motor == True and self.motor2.isChecked()):
-            conf += 1
-
-        try:
-        #     # open port
-        #     self.serialPort.open()
-
-            # flush I/O
-            self.serialPort.flushInput()
-            self.serialPort.flushOutput()
-
-            command = 'cmd %i %i\r\n' % (cmd, conf)
-            self.serialPort.write(bytes(command, 'utf-8'))
-            self.serialPort.readline() # echo
-            data = self.serialPort.readline()
-            while(data != b''):
-                data = str(data, 'utf-8')
-                match = re.search('\d+', data)
-                if (match.group != None):
-                    returnData = match.group()
-                    break
-                data = self.serialPort.readline()
-            
-            print("cmd " + str(cmd) + " " + str(conf))
-            print("return " + str(returnData))
-
-        except:
-            print("Cannot perform command: cmd " + str(cmd) + " " + str(conf))
-            self.serialPort.close()
-            return returnData
-    
-        # # close port
-        # self.serialPort.close()
-        
-        return int(returnData)
-
-    def hardHiz(self):
-        self.performCommand(8, 0, 0)
-
-    def hardStop(self):
-        self.performCommand(9, 0, 0)
-
-    def softHiz(self):
-        self.performCommand(16, 0, 0)
-
-    def softStop(self):
-        self.performCommand(17, 0, 0)
-
-    def resetPos(self):
-        self.performCommand(14, 0, 0)
-
-    def resetDevice(self):
-        self.performCommand(13, 0, 0)
+    #------------------------------------------------------------------------------------------------#
 
     def run(self):
-
         speed = int((float(self.constantSpeed.value())*67.108864)+0.5)
-
         if (self.constantDirection.currentText() == 'FORWARD'):
-            conf = 256
+            dire = 1
         else:
-            conf = 0
-        self.performCommand(15, conf, speed)
+            dire = 0
+        self.com.send(CommandFrame.RUN, dire=dire, spd=speed)()
       
     def gountil(self):
 
         speed = int((float(self.constantSpeed.value())*67.108864)+0.5)
 
         if (self.constantDirection.currentText() == 'FORWARD'):
-            conf = 256
+            dire = 1
         else:
-            conf = 0
+            dire = 0
 
         if (self.constantAction.currentText() == 'RESET'):
-            conf = conf + 0
+            act = 1
         else:
-            conf = conf + 2048
+            act = 0
 
-        self.performCommand(7, conf, speed)
+        self.com.send(CommandFrame.GO_UNTIL, act=act, dire=dire, spd=speed)()
 
     def releasesw(self):
         if (self.constantDirection.currentText() == 'FORWARD'):
-            conf = 256
+            dire = 1
         else:
-            conf = 0
+            dire = 0
 
         if (self.constantAction.currentText() == 'RESET'):
-            conf = conf + 0
+            act = 1
         else:
-            conf = conf + 2048
+            act = 0
 
-        self.performCommand(12, conf, 0)
+        self.com.send(CommandFrame.RELEASE_SW, act=act, dire=dire)()
 
     def move(self):
         if (self.stepDirection.currentText() == 'FORWARD'):
-            conf = 256
+            dire = 1
         else:
-            conf = 0
+            dire = 0
         
-        self.performCommand(10, conf, int(self.stepNumber.value()))
+        self.com.send(CommandFrame.MOVE, dire=dire, n_step=int(self.stepNumber.value()))()
 
     def goTo(self):
-        self.performCommand(5, 0, int(self.absPosition.value()))
+        self.com.send(CommandFrame.GO_TO, abs_pos=int(self.absPosition.value()))()
 
     def goToDir(self):
         if (self.absDirection.currentText() == 'FORWARD'):
-            conf = 256
+            dire = 1
         else:
-            conf = 0
-        self.performCommand(6, conf, int(self.absPosition.value()))
+            dire = 0
+        
+        self.com.send(CommandFrame.GO_TO_DIR, dire=dire, abs_pos = int(self.absPosition.value()))()
 
-    def goHome(self):
-        self.performCommand(3, 0, 0)
 
-    def goMark(self):
-        self.performCommand(4, 0, 0)
-    
+
     def setParam(self):
 
         # if(not self.connectPort()):
@@ -310,116 +221,151 @@ class OIStepperConfig(Ui_MainWindow):
 
         # ACC
         data = int((float(self.acc.value())*0.068719476736)+0.5)
-        if (self.performCommand(27, 0x500, data & 0xFFF) == -1):
+        data = data & AvailableRegisters.ACC.value_mask()
+
+        if self.com.send(CommandFrame.SET_PARAM, param=AvailableRegisters.ACC.address, value=data)() == -1:
             success = False
 
         # DEC
         data = int((float(self.dec.value())*0.068719476736)+0.5)
-        if (self.performCommand(27, 0x600, data & 0xFFF) == -1):
+        data = data & AvailableRegisters.DEC.value_mask()
+
+        if self.com.send(CommandFrame.SET_PARAM, param=AvailableRegisters.DEC.address, value=data)() == -1:
             success = False
 
         # MAX SPEED
         data = int((float(self.maxSpeed.value())*0.065536)+0.5)
-        if (self.performCommand(27, 0x700, data & 0x3FF) == -1):
+        data = data & AvailableRegisters.MAX_SPEED.value_mask()
+        if self.com.send(CommandFrame.SET_PARAM, param=AvailableRegisters.MAX_SPEED.address, value=data)() == -1:
             success = False
 
         # MIN SPEED
         data = int((float(self.minSpeed.value())*4.194304)+0.5)
-        if (self.lowSpeedOptimisation.isChecked()):
-            data = (data & 0xFFF) | 0x1000
-        if (self.performCommand(27, 0x800, data & 0x1FFF) == -1):
+        data = data & AvailableRegisters.MIN_SPEED.value_mask()
+
+        if self.lowSpeedOptimisation.isChecked():
+            data = data | 0x1000
+        if self.com.send(CommandFrame.SET_PARAM, param=AvailableRegisters.MIN_SPEED.address, value=data)() == -1:
             success = False
 
         # FS SPEED
         data = int((float(self.fsSpeed.value())*0.065536))
-        if (self.performCommand(27, 0x1500, data & 0x3FF) == -1):
+        data = data & AvailableRegisters.FS_SPD.value_mask()
+        if self.com.send(CommandFrame.SET_PARAM, param=AvailableRegisters.FS_SPD.address, value=data)() == -1:
             success = False
 
         # KVAL HOLD
         data = int((float(self.kvalHold.value())*2.56)+0.5)
-        if (self.performCommand(27, 0x900, data & 0xFF) == -1):
+        data = data & AvailableRegisters.KVAL_HOLD.value_mask()
+        if self.com.send(CommandFrame.SET_PARAM, param=AvailableRegisters.KVAL_HOLD.address, value=data)() == -1:
             success = False
 
         # KVAL RUN
         data = int((float(self.kvalRun.value())*2.56)+0.5)
-        if (self.performCommand(27, 0xA00, data & 0xFF) == -1):
+        data = data & AvailableRegisters.KVAL_RUN.value_mask()
+        if self.com.send(CommandFrame.SET_PARAM, param=AvailableRegisters.KVAL_RUN.address, value=data)() == -1:
             success = False
 
         # KVAL ACC
         data = int((float(self.kvalAcc.value())*2.56)+0.5)
-        if (self.performCommand(27, 0xB00, data & 0xFF) == -1):
+        data = data & AvailableRegisters.KVAL_ACC.value_mask()
+        if self.com.send(CommandFrame.SET_PARAM, param=AvailableRegisters.KVAL_ACC.address, value=data)() == -1:
             success = False
 
         # KVAL DEC
         data = int((float(self.kvalDec.value())*2.56)+0.5)
-        if (self.performCommand(27, 0xC00, data & 0xFF) == -1):
+        data = data & AvailableRegisters.KVAL_DEC.value_mask()
+        if self.com.send(CommandFrame.SET_PARAM, param=AvailableRegisters.KVAL_DEC.address, value=data)() == -1:
             success = False
 
         # INT SPEED
         data = int((float(self.intSpeed.value())*16.777216)+0.5)
-        if (self.performCommand(27, 0xD00, data & 0x3FFF) == -1):
+        data = data & AvailableRegisters.INT_SPEED.value_mask()
+        if self.com.send(CommandFrame.SET_PARAM, param=AvailableRegisters.INT_SPEED.address, value=data)() == -1:
             success = False
 
         # START SLOPE
         data = int((float(self.startSlope.value())*637.5)+0.5)
-        if (self.performCommand(27, 0xE00, data & 0xFF) == -1):
+        data = data & AvailableRegisters.ST_SLP.value_mask()
+        if self.com.send(CommandFrame.SET_PARAM, param=AvailableRegisters.ST_SLP.address, value=data)() == -1:
             success = False
 
         # FN SLOPE ACC
         data = int((float(self.accFinalSlope.value())*637.5)+0.5)
-        if (self.performCommand(27, 0xF00, data & 0xFF) == -1):
+        data = data & AvailableRegisters.FN_SLP_ACC.value_mask()
+        if self.com.send(CommandFrame.SET_PARAM, param=AvailableRegisters.FN_SLP_ACC.address, value=data)() == -1:
             success = False
 
         # FN SLOPE DEC
         data = int((float(self.decFinalSlope.value())*637.5)+0.5)
-        if (self.performCommand(27, 0x1000, data & 0xFF) == -1):
+        data = data & AvailableRegisters.FN_SLP_DEC.value_mask()
+        if self.com.send(CommandFrame.SET_PARAM, param=AvailableRegisters.FN_SLP_DEC.address, value=data)() == -1:
             success = False
 
         # K THERM
         data = int(((float(self.thermalCompFactor.value())-1)*32)+0.5)
-        if (self.performCommand(27, 0x1100, data & 0xF) == -1):
+        data = data & AvailableRegisters.K_THERM.value_mask()
+        if self.com.send(CommandFrame.SET_PARAM, param=AvailableRegisters.K_THERM.address, value=data)() == -1:
             success = False
 
         # OCD THRESHOLD
         data = int(self.ocdThreshold.currentIndex())
-        if (self.performCommand(27, 0x1300, data & 0xF) == -1):
+        data = data & AvailableRegisters.OCD_TH.value_mask()
+        if self.com.send(CommandFrame.SET_PARAM, param=AvailableRegisters.OCD_TH.address, value=data)() == -1:
             success = False
 
         # STALL THRESHOLD
         data = int(((float(self.stallthreshold.value())-31.25)*0.032)+0.5)
-        if (self.performCommand(27, 0x1400, data & 0x7F) == -1):
+        data = data & AvailableRegisters.STALL_TH.value_mask()
+        if self.com.send(CommandFrame.SET_PARAM, param=AvailableRegisters.STALL_TH.address, value=data)() == -1:
             success = False
 
         # STEP MODE
+        # TODO check for implementation of cmvm & step_sel => voltage mode and full step atm (page 61)
         data = self.stepMode.currentIndex()
+        data = data & AvailableRegisters.STEP_MODE.value_mask()
         if (self.syncSelection.currentIndex() != 0):
-            data |= 0x80
-            data |= ((self.syncSelection.currentIndex() - 1) << 4)
-        if (self.performCommand(27, 0x1600, data & 0xFF) == -1):
+            data = CommandByte.to_int([1,0,0,self.syncSelection.currentIndex()-1, 0,0,0,0])
+
+        
+        if (self.com.send(CommandFrame.SET_PARAM, param=AvailableRegisters.STEP_MODE.address, value=data)() == -1):
             success = False
         
         # ALARM
-        data =  int(self.alarmOCD.isChecked()) | \
-                int(self.alarmThermalShutdown.isChecked()) << 1 | \
-                int(self.alarmThermalWarning.isChecked()) << 2 | \
-                int(self.alarmUVLO.isChecked()) << 3 | \
-                int(self.alarmStallA.isChecked()) << 4 | \
-                int(self.alarmStallB.isChecked()) << 5 | \
-                int(self.alarmSW.isChecked()) << 6 | \
-                int(self.alarmWrongCmd.isChecked()) << 7
-        if (self.performCommand(27, 0x1700, data & 0xFF) == -1):
+        data = CommandByte.to_int([
+            int(self.alarmWrongCmd.isChecked()),
+            int(self.alarmSW.isChecked()),
+            int(self.alarmStallB.isChecked()),
+            int(self.alarmStallA.isChecked()), # <- ADC UVLO according to doc page 63
+            int(self.alarmUVLO.isChecked()),
+            int(self.alarmThermalWarning.isChecked()),
+            int(self.alarmThermalShutdown.isChecked()),
+            int(self.alarmOCD.isChecked())
+        ])
+        data = data & AvailableRegisters.ALARM_EN.value_mask()
+        if (self.com.send(CommandFrame.SET_PARAM, param=AvailableRegisters.ALARM_EN.address, value=data)() == -1):
             success = False
 
         # CONFIG
-        data =  self.pwmDiv.currentIndex() << 13 | \
-                self.pwmMul.currentIndex() << 10 | \
-                self.slewRate.currentIndex() << 8 | \
-                int(self.ocdShutdown.isChecked()) << 7 | \
-                int(self.vsCompEn.isChecked()) << 5 | \
-                int(not(self.swHardStop.isChecked())) << 4
+
+        f_pwm_int = self.pwmDiv.currentIndex() & 7
+        f_pwm_dec = self.pwmMul.currentIndex() & 7
+        vccval = 0 & 1
+        uvloval = self.slewRate.currentIndex() & 1
+
+        oc_sd = int(self.ocdShutdown.isChecked()) & 1
+        en_vscomp = int(self.vsCompEn.isChecked()) & 1
+        sw_mode = int(not(self.swHardStop.isChecked())) & 1
+        ext_clk = 0 & 1
+        osc_sel = 0 & 7
         if (self.oscSelection.currentIndex() != 0):
-            data |= self.oscSelection.currentIndex()+3
-        if (self.performCommand(27, 0x1800, data & 0xFFFF) == -1):
+            osc_sel = self.oscSelection.currentIndex()+3
+
+        data = CommandByte.to_int([0,0,f_pwm_int,0, 0,f_pwm_dec,vccval,uvloval,
+                                   oc_sd,0,en_vscomp,sw_mode, ext_clk,0,0,osc_sel
+                                   ])
+
+        if (self.com.send(CommandFrame.SET_PARAM, param=AvailableRegisters.CONFIG.address, value=data)() == -1):
             success = False
 
         if (success):
@@ -442,31 +388,31 @@ class OIStepperConfig(Ui_MainWindow):
 
         # ACC
         data = int((float(self.acc_2.value())*0.068719476736)+0.5)
-        if (self.performCommand(27, 0x500, data & 0xFFF) == -1):
+        if (self.performCommand(0, (0x5<<24) and (data & 0xFFF)) == -1):
             success = False
 
         # DEC
         data = int((float(self.dec_2.value())*0.068719476736)+0.5)
-        if (self.performCommand(27, 0x600, data & 0xFFF) == -1):
+        if (self.performCommand(0, (0x6<<24) and (data & 0xFFF)) == -1):
             success = False
 
         # MAX SPEED
         data = int((float(self.maxSpeed_2.value())*0.065536)+0.5)
-        if (self.performCommand(27, 0x700, data & 0x3FF) == -1):
+        if (self.performCommand(0, (0x7<<24) and (data & 0x3FF)) == -1):
             success = False
 
         # MIN SPEED
         data = int((float(self.minSpeed_2.value())*4.194304)+0.5)
         if (self.lowSpeedOptimisation_2.isChecked()):
             data = (data & 0xFFF) | 0x1000
-        if (self.performCommand(27, 0x800, data & 0x1FFF) == -1):
+        if (self.performCommand(0, (0x8<<24) and (data & 0x1FFF)) == -1):
             success = False
 
         # FS SPEED
         data = int((float(self.fsSpeed_2.value())*0.065536))
         if (self.boostMode_2.isChecked()):
             data = (data & 0x3FF) | 0x400
-        if (self.performCommand(27, 0x1500, data & 0x7FF) == -1):
+        if (self.performCommand(0, (0x15<<24) and (data & 0x7FF)) == -1):
             success = False
         
         # STEP MODE
@@ -476,59 +422,59 @@ class OIStepperConfig(Ui_MainWindow):
         if (self.syncSelection_2.currentIndex() != 0):
             data |= 0x80
             data |= ((self.syncSelection_2.currentIndex() - 1) << 4)
-        if (self.performCommand(27, 0x1600, data & 0xFF) == -1):
+        if (self.performCommand(0, (0x16<<24) and (data & 0xFF)) == -1):
             success = False
 
         if (self.vmMode_2.isChecked()):
 
             # KVAL HOLD
             data = int((float(self.kvalHold_2.value())*2.56)+0.5)
-            if (self.performCommand(27, 0x900, data & 0xFF) == -1):
+            if (self.performCommand(0, (0x9<<24) and (data & 0xFF)) == -1):
                 success = False
 
             # KVAL RUN
             data = int((float(self.kvalRun_2.value())*2.56)+0.5)
-            if (self.performCommand(27, 0xA00, data & 0xFF) == -1):
+            if (self.performCommand(0, (0xA<<24) and (data & 0xFF)) == -1):
                 success = False
 
             # KVAL ACC
             data = int((float(self.kvalAcc_2.value())*2.56)+0.5)
-            if (self.performCommand(27, 0xB00, data & 0xFF) == -1):
+            if (self.performCommand(0, (0xB<<24) and (data & 0xFF)) == -1):
                 success = False
 
             # KVAL DEC
             data = int((float(self.kvalDec_2.value())*2.56)+0.5)
-            if (self.performCommand(27, 0xC00, data & 0xFF) == -1):
+            if (self.performCommand(0, (0xC<<24) and (data & 0xFF)) == -1):
                 success = False
 
             # INT SPEED
             data = int((float(self.intSpeed_2.value())*16.777216)+0.5)
-            if (self.performCommand(27, 0xD00, data & 0x3FFF) == -1):
+            if (self.performCommand(0, (0xD<<24) and (data & 0x3FFF)) == -1):
                 success = False
 
             # START SLOPE
             data = int((float(self.startSlope_2.value())*637.5)+0.5)
-            if (self.performCommand(27, 0xE00, data & 0xFF) == -1):
+            if (self.performCommand(0, (0xE<<24) and (data & 0xFF)) == -1):
                 success = False
 
             # FN SLOPE ACC
             data = int((float(self.accFinalSlope_2.value())*637.5)+0.5)
-            if (self.performCommand(27, 0xF00, data & 0xFF) == -1):
+            if (self.performCommand(0, (0xF<<24) and (data & 0xFF)) == -1):
                 success = False
 
             # FN SLOPE DEC
             data = int((float(self.decFinalSlope_2.value())*637.5)+0.5)
-            if (self.performCommand(27, 0x1000, data & 0xFF) == -1):
+            if (self.performCommand(0, (0x10<<24) and (data & 0xFF)) == -1):
                 success = False
 
             # K THERM
             data = int(((float(self.thermalCompFactor_2.value())-1)*32)+0.5)
-            if (self.performCommand(27, 0x1100, data & 0xF) == -1):
+            if (self.performCommand(0, (0x11<<24) and (data & 0xF)) == -1):
                 success = False
 
             # STALL THRESHOLD
             data = self.stallThreshold_2.currentIndex()
-            if (self.performCommand(27, 0x1400, data & 0x1F) == -1):
+            if (self.performCommand(0, (0x14<<24) and (data & 0x1F)) == -1):
                 success = False
 
             # CONFIG
@@ -541,44 +487,44 @@ class OIStepperConfig(Ui_MainWindow):
                    int(not(self.swHardStop_2.isChecked())) << 4
             if (self.oscSelection_2.currentIndex() != 0):
                 data |= self.oscSelection_2.currentIndex()+3
-            if (self.performCommand(27, 0x1A00, data & 0xFFFF) == -1):
+            if (self.performCommand(0, (0x1A<<24) and (data & 0xFFFF)) == -1):
                 success = False
             
         elif self.cpMode_2.isChecked():
 
             # TVAL HOLD
             data = int(((float(self.tvalHold_2.value())-7.8125)*0.128)+0.5)
-            if (self.performCommand(27, 0x0900, data & 0x7F) == -1):
+            if (self.performCommand(0, (0x9<<24) and (data & 0x7F)) == -1):
                 success = False
 
             # TVAL RUN
             data = int(((float(self.tvalRun_2.value())-7.8125)*0.128)+0.5)
-            if (self.performCommand(27, 0x0A00, data & 0x7F) == -1):
+            if (self.performCommand(0, (0xA<<24) and (data & 0x7F)) == -1):
                 success = False
 
             # TVAL ACC
             data = int(((float(self.tvalAcc_2.value())-7.8125)*0.128)+0.5)
-            if (self.performCommand(27, 0x0B00, data & 0x7F) == -1):
+            if (self.performCommand(0, (0xB<<24) and (data & 0x7F)) == -1):
                 success = False
 
             # TVAL DEC
             data = int(((float(self.tvalDec_2.value())-7.8125)*0.128)+0.5)
-            if (self.performCommand(27, 0x0C00, data & 0x7F) == -1):
+            if (self.performCommand(0, (0xC<<24) and (data & 0x7F)) == -1):
                 success = False
 
             # T FAST
             data = (self.toffFast_2.currentIndex() << 4) | self.fastStep_2.currentIndex()
-            if (self.performCommand(27, 0x0E00, data & 0xFF) == -1):
+            if (self.performCommand(0, (0xE<<24) and (data & 0xFF)) == -1):
                 success = False
 
             # T ON MIN
             data = int((float(self.tonmin_2.value())-0.5)*2.0+0.5)
-            if (self.performCommand(27, 0x0F00, data & 0x7F) == -1):
+            if (self.performCommand(0, (0xF<<24) and (data & 0x7F)) == -1):
                 success = False
 
             # T OFF MIN
             data = int((float(self.toffmin_2.value())-0.5)*2.0+0.5)
-            if (self.performCommand(27, 0x1000, data & 0x7F) == -1):
+            if (self.performCommand(0, (0x10<<24) and (data & 0x7F)) == -1):
                 success = False
 
             # CONFIG
@@ -591,7 +537,7 @@ class OIStepperConfig(Ui_MainWindow):
                     int(not(self.swHardStop_3.isChecked())) << 4
             if (self.oscSelection_3.currentIndex() != 0):
                 data |= self.oscSelection_3.currentIndex()+3
-            if (self.performCommand(27, 0x1A00, data & 0xFFFF) == -1):
+            if (self.performCommand(0, (0x1A<<24) and (data & 0xFFFF)) == -1):
                 success = False
 
         else:
@@ -600,7 +546,7 @@ class OIStepperConfig(Ui_MainWindow):
 
         # OCD THRESHOLD
         data = int(self.ocdThreshold_2.currentIndex())
-        if (self.performCommand(27, 0x1300, data & 0x1F) == -1):
+        if (self.performCommand(0, (0x13<<24) and (data & 0x1F)) == -1):
             success = False
 
         # ALARM
@@ -612,7 +558,7 @@ class OIStepperConfig(Ui_MainWindow):
                 int(self.alarmStall_2.isChecked()) << 5 | \
                 int(self.alarmSW_2.isChecked()) << 6 | \
                 int(self.alarmCommandError_2.isChecked()) << 7
-        if (self.performCommand(27, 0x1700, data & 0xFF) == -1):
+        if (self.performCommand(0, (0x17<<24) and (data & 0xFF)) == -1):
             success = False
     
         # GATECFG1
@@ -621,12 +567,12 @@ class OIStepperConfig(Ui_MainWindow):
         data |= self.tboost_2.currentIndex() << 8
         data |= self.whatchDogEnable_2.isChecked() << 11
 
-        if (self.performCommand(27, 0x1800, data & 0xFFF) == -1):
+        if (self.performCommand(0, (0x18<<24) and (data & 0xFFF)) == -1):
             success = False
 
         # GATECFG2
         data = self.tdead_2.currentIndex() | self.tblank_2.currentIndex() << 5
-        if (self.performCommand(27, 0x1900, data & 0xFF) == -1):
+        if (self.performCommand(0, (0x19<<24) and (data & 0xFF)) == -1):
             success = False
 
         if (success):
@@ -648,25 +594,25 @@ class OIStepperConfig(Ui_MainWindow):
         self.getSetStatus.repaint()
 
         # ACC
-        data = self.performCommandWithReturn(137, 0x500)
+        data = self.performCommandWithReturn(0x20, 0x5)
         if (data == -1):
             success = False
         self.acc.setValue(float(data & 0xFFF)*14.5519152283)
 
         # DEC
-        data = self.performCommandWithReturn(137, 0x600)
+        data = self.performCommandWithReturn(0x20, 0x6)
         if (data == -1):
             success = False
         self.dec.setValue(float(data & 0xFFF)*14.5519152283)
 
         # MAX SPEED
-        data = self.performCommandWithReturn(137, 0x700)
+        data = self.performCommandWithReturn(0x20, 0x7)
         if (data == -1):
             success = False
         self.maxSpeed.setValue(float(data & 0x3FF)*15.258789)
 
         # MIN SPEED
-        data = self.performCommandWithReturn(137, 0x800)
+        data = self.performCommandWithReturn(0x20, 0x8)
         if (data == -1):
             success = False
         self.minSpeed.setValue(float(data & 0xFFF)*0.238418579)
@@ -676,79 +622,79 @@ class OIStepperConfig(Ui_MainWindow):
             self.lowSpeedOptimisation.setChecked(False)
 
         # FS SPEED
-        data = self.performCommandWithReturn(137, 0x1500)
+        data = self.performCommandWithReturn(0x20, 0x15)
         if (data == -1):
             success = False
         self.fsSpeed.setValue((float(data & 0x3FF))*15.258789)
 
         # KVAL HOLD
-        data = self.performCommandWithReturn(137, 0x900)
+        data = self.performCommandWithReturn(0x20, 0x9)
         if (data == -1):
             success = False
         self.kvalHold.setValue(float(data & 0xFF)*0.390625)
         
         # KVAL RUN
-        data = self.performCommandWithReturn(137, 0xA00)
+        data = self.performCommandWithReturn(0x20, 0xA)
         if (data == -1):
             success = False
         self.kvalRun.setValue(float(data & 0xFF)*0.390625)
         
         # KVAL ACC
-        data = self.performCommandWithReturn(137, 0xB00)
+        data = self.performCommandWithReturn(0x20, 0xB)
         if (data == -1):
             success = False
         self.kvalAcc.setValue(float(data & 0xFF)*0.390625)
         
         # KVAL DEC
-        data = self.performCommandWithReturn(137, 0xC00)
+        data = self.performCommandWithReturn(0x20, 0xC)
         if (data == -1):
             success = False
         self.kvalDec.setValue(float(data & 0xFF)*0.390625)
 
         # INT SPEED
-        data = self.performCommandWithReturn(137, 0xD00)
+        data = self.performCommandWithReturn(0x20, 0xD)
         if (data == -1):
             success = False
         self.intSpeed.setValue(float(data & 0x3FFF)*0.0596045)
 
         # START SLOPE
-        data = self.performCommandWithReturn(137, 0xE00)
+        data = self.performCommandWithReturn(0x20, 0xE)
         if (data == -1):
             success = False
         self.startSlope.setValue(float(data & 0xFF)*0.00156862745098)
 
         # FN SLOPE ACC
-        data = self.performCommandWithReturn(137, 0xF00)
+        data = self.performCommandWithReturn(0x20, 0xF)
         if (data == -1):
             success = False
         self.accFinalSlope.setValue(float(data & 0xFF)*0.00156862745098)
 
         # FN SLOPE DEC
-        data = self.performCommandWithReturn(137, 0x1000)
+        data = self.performCommandWithReturn(0x20, 0x10)
         if (data == -1):
             success = False
         self.decFinalSlope.setValue(float(data & 0xFF)*0.00156862745098)
 
         # K THERM
-        data = self.performCommandWithReturn(137, 0x1100)
+        data = self.performCommandWithReturn(0x20, 0x11)
         if (data == -1):
             success = False
         self.thermalCompFactor.setValue(float(data & 0xF)*0.03125+1)
 
         # OCD THRESHOLD
-        data = self.performCommandWithReturn(137, 0x1300)
+        data = self.performCommandWithReturn(0x20, 0x13)
         if (data == -1):
             success = False
         self.ocdThreshold.setCurrentIndex(data & 0xF)
 
         # STALL THRESHOLD
-        data = self.performCommandWithReturn(137, 0x1400)
+        data = self.performCommandWithReturn(0x20, 0x14)
         if (data == -1):
             success = False
         self.stallthreshold.setValue((float(data & 0x7F)+1)*31.25)
 
         # STEP MODE
-        data = self.performCommandWithReturn(137, 0x1600)
+        data = self.performCommandWithReturn(0x20, 0x16)
         if (data == -1):
             success = False
         self.stepMode.setCurrentIndex(data & 0x7)
@@ -758,7 +704,7 @@ class OIStepperConfig(Ui_MainWindow):
             self.syncSelection.setCurrentIndex(((data & 0x70) >> 4) + 1)
         
         # ALARM
-        data = self.performCommandWithReturn(137, 0x1700)
+        data = self.performCommandWithReturn(0x20, 0x17)
         if (data == -1):
             success = False
 
@@ -803,7 +749,7 @@ class OIStepperConfig(Ui_MainWindow):
             self.alarmWrongCmd.setChecked(False)
 
         # CONFIG
-        data = self.performCommandWithReturn(137, 0x1800)
+        data = self.performCommandWithReturn(0x20, 0x18)
         if (data == -1):
             success = False
         self.pwmDiv.setCurrentIndex((data & 0xE000) >> 13)
@@ -849,25 +795,25 @@ class OIStepperConfig(Ui_MainWindow):
         self.getSetStatus_2.repaint()
 
         # ACC
-        data = self.performCommandWithReturn(137, 0x500)
+        data = self.performCommandWithReturn(0x20, 0x5)
         if (data == -1):
             success = False
         self.acc_2.setValue(float(data & 0xFFF)*14.5519152283)
 
         # DEC
-        data = self.performCommandWithReturn(137, 0x600)
+        data = self.performCommandWithReturn(0x20, 0x6)
         if (data == -1):
             success = False
         self.dec_2.setValue(float(data & 0xFFF)*14.5519152283)
 
         # MAX SPEED
-        data = self.performCommandWithReturn(137, 0x700)
+        data = self.performCommandWithReturn(0x20, 0x7)
         if (data == -1):
             success = False
         self.maxSpeed_2.setValue(float(data & 0x3FF)*15.258789)
 
         # MIN SPEED
-        data = self.performCommandWithReturn(137, 0x800)
+        data = self.performCommandWithReturn(0x20, 0x8)
         if (data == -1):
             success = False
         self.minSpeed_2.setValue(float(data & 0xFFF)*0.238418579)
@@ -877,7 +823,7 @@ class OIStepperConfig(Ui_MainWindow):
             self.lowSpeedOptimisation_2.setChecked(False)
 
         # FS SPEED
-        data = self.performCommandWithReturn(137, 0x1500)
+        data = self.performCommandWithReturn(0x20, 0x15)
         if (data == -1):
             success = False
         self.fsSpeed_2.setValue((float(data & 0x3FF))*15.258789)
@@ -887,7 +833,7 @@ class OIStepperConfig(Ui_MainWindow):
             self.boostMode_2.setChecked(False)
 
         # STEP MODE
-        data = self.performCommandWithReturn(137, 0x1600)
+        data = self.performCommandWithReturn(0x20, 0x16)
         if (data == -1):
             success = False
         if (data & 0x08):
@@ -909,67 +855,67 @@ class OIStepperConfig(Ui_MainWindow):
         if (self.vmMode_2.isChecked()):
 
             # KVAL HOLD
-            data = self.performCommandWithReturn(137, 0x900)
+            data = self.performCommandWithReturn(0x20, 0x9)
             if (data == -1):
                 success = False
             self.kvalHold_2.setValue(float(data & 0xFF)*0.390625)
             
             # KVAL RUN
-            data = self.performCommandWithReturn(137, 0xA00)
+            data = self.performCommandWithReturn(0x20, 0xA)
             if (data == -1):
                 success = False
             self.kvalRun_2.setValue(float(data & 0xFF)*0.390625)
             
             # KVAL ACC
-            data = self.performCommandWithReturn(137, 0xB00)
+            data = self.performCommandWithReturn(0x20, 0xB)
             if (data == -1):
                 success = False
             self.kvalAcc_2.setValue(float(data & 0xFF)*0.390625)
             
             # KVAL DEC
-            data = self.performCommandWithReturn(137, 0xC00)
+            data = self.performCommandWithReturn(0x20, 0xC)
             if (data == -1):
                 success = False
             self.kvalDec_2.setValue(float(data & 0xFF)*0.390625)
 
             # INT SPEED
-            data = self.performCommandWithReturn(137, 0xD00)
+            data = self.performCommandWithReturn(0x20, 0xD)
             if (data == -1):
                 success = False
             self.intSpeed_2.setValue(float(data & 0x3FFF)*0.0596045)
 
             # START SLOPE
-            data = self.performCommandWithReturn(137, 0xE00)
+            data = self.performCommandWithReturn(0x20, 0xE)
             if (data == -1):
                 success = False
             self.startSlope_2.setValue(float(data & 0xFF)*0.00156862745098)
 
             # FN SLOPE ACC
-            data = self.performCommandWithReturn(137, 0xF00)
+            data = self.performCommandWithReturn(0x20, 0xF)
             if (data == -1):
                 success = False
             self.accFinalSlope_2.setValue(float(data & 0xFF)*0.00156862745098)
 
             # FN SLOPE DEC
-            data = self.performCommandWithReturn(137, 0x1000)
+            data = self.performCommandWithReturn(0x20, 0x10)
             if (data == -1):
                 success = False
             self.decFinalSlope_2.setValue(float(data & 0xFF)*0.00156862745098)
 
             # K THERM
-            data = self.performCommandWithReturn(137, 0x1100)
+            data = self.performCommandWithReturn(0x20, 0x11)
             if (data == -1):
                 success = False
             self.thermalCompFactor_2.setValue(float(data & 0xF)*0.03125+1)
 
             # STALL THRESHOLD
-            data = self.performCommandWithReturn(137, 0x1400)
+            data = self.performCommandWithReturn(0x20, 0x14)
             if (data == -1):
                 success = False
             self.stallThreshold_2.setCurrentIndex(data & 0x1F)
 
             # CONFIG
-            data = self.performCommandWithReturn(137, 0x1A00)
+            data = self.performCommandWithReturn(0x20, 0x1A)
             if (data == -1):
                 success = False
             self.pwmDiv_2.setCurrentIndex((data & 0xE000) >> 13)
@@ -1008,50 +954,50 @@ class OIStepperConfig(Ui_MainWindow):
         elif self.cpMode_2.isChecked():
 
             # TVAL HOLD
-            data = self.performCommandWithReturn(137, 0x0900)
+            data = self.performCommandWithReturn(0x20, 0x09)
             if (data == -1):
                 success = False
             self.tvalHold_2.setValue(float((data & 0xFF)+1)*7.8)
 
             # TVAL RUN
-            data = self.performCommandWithReturn(137, 0x0A00)
+            data = self.performCommandWithReturn(0x20, 0x0A)
             if (data == -1):
                 success = False
             self.tvalRun_2.setValue(float((data & 0xFF)+1)*7.8)
 
             # TVAL ACC
-            data = self.performCommandWithReturn(137, 0x0B00)
+            data = self.performCommandWithReturn(0x20, 0x0B)
             if (data == -1):
                 success = False
             self.tvalAcc_2.setValue(float((data & 0xFF)+1)*7.8)
 
             # TVAL DEC
-            data = self.performCommandWithReturn(137, 0x0C00)
+            data = self.performCommandWithReturn(0x20, 0x0C)
             if (data == -1):
                 success = False
             self.tvalDec_2.setValue(float(data & 0xFF)*7.8+7.8)
 
             # T FAST
-            data = self.performCommandWithReturn(137, 0x0E00)
+            data = self.performCommandWithReturn(0x20, 0x0E)
             if (data == -1):
                 success = False
             self.fastStep_2.setCurrentIndex(data & 0x0F)
             self.toffFast_2.setCurrentIndex((data & 0xF0) >> 4)
 
             # T ON MIN
-            data = self.performCommandWithReturn(137, 0x0F00)
+            data = self.performCommandWithReturn(0x20, 0x0F)
             if (data == -1):
                 success = False
             self.tonmin_2.setValue(float(data & 0x7F)*0.5+0.5)
 
             # T OFF MIN
-            data = self.performCommandWithReturn(137, 0x1000)
+            data = self.performCommandWithReturn(0x20, 0x10)
             if (data == -1):
                 success = False
             self.toffmin_2.setValue(float(data & 0x7F)*0.5+0.5)
 
             # CONFIG
-            data = self.performCommandWithReturn(137, 0x1A00)
+            data = self.performCommandWithReturn(0x20, 0x1A)
             if (data == -1):
                 success = False
             
@@ -1097,13 +1043,13 @@ class OIStepperConfig(Ui_MainWindow):
             success = False
 
         # OCD THRESHOLD
-        data = self.performCommandWithReturn(137, 0x1300)
+        data = self.performCommandWithReturn(0x20, 0x13)
         if (data == -1):
             success = False
         self.ocdThreshold_2.setCurrentIndex(data & 0x1F)
 
         # ALARM
-        data = self.performCommandWithReturn(137, 0x1700)
+        data = self.performCommandWithReturn(0x20, 0x17)
         if (data == -1):
             success = False
 
@@ -1148,7 +1094,7 @@ class OIStepperConfig(Ui_MainWindow):
             self.alarmCommandError_2.setChecked(False)
     
         # GATECFG1
-        data = self.performCommandWithReturn(137, 0x1800)
+        data = self.performCommandWithReturn(0x20, 0x18)
         if (data == -1):
             success = False
         
@@ -1164,7 +1110,7 @@ class OIStepperConfig(Ui_MainWindow):
         self.tcc_2.setCurrentIndex(data & 0x1F)
 
         # GATECFG2
-        data = self.performCommandWithReturn(137, 0x1900)
+        data = self.performCommandWithReturn(0x20, 0x19)
         if (data == -1):
             success = False
 
@@ -1179,6 +1125,7 @@ class OIStepperConfig(Ui_MainWindow):
 
         self.unlock()
 
+    # NOT PURELY VISUAL
     def refreshStatus(self, silent = False):
 
         # if (not silent):
@@ -1187,12 +1134,12 @@ class OIStepperConfig(Ui_MainWindow):
         if self.motor1.isChecked():
 
             if (not silent):
-                data = self.performCommandWithReturn(130, 0, False)
+                data = self.performCommandWithReturn(0x20, 0, False)
             else:
                 if (self.OIStepper.isChecked()):
-                    data = self.performCommandWithReturn(137, 6912,False)
+                    data = self.performCommandWithReturn(0x20, 6912,False)
                 else:
-                    data = self.performCommandWithReturn(137, 6400,False)
+                    data = self.performCommandWithReturn(0x20, 6400,False)
 
             # Common for OIStepper and OIStepperLP
             if (data & 0x0001):
@@ -1263,12 +1210,12 @@ class OIStepperConfig(Ui_MainWindow):
         if self.motor2.isChecked():
 
             if (not silent):
-                data = self.performCommandWithReturn(130, 1, False)
+                data = self.performCommandWithReturn(0x20, 1, False)
             else:
                 if (self.OIStepper.isChecked()):
-                    data = self.performCommandWithReturn(137, 6913,False)
+                    data = self.performCommandWithReturn(0x20, 6913,False)
                 else:
-                    data = self.performCommandWithReturn(137, 6401,False)
+                    data = self.performCommandWithReturn(0x20, 6401,False)
 
             if (data & 0x0001):
                 self.HiZ2.setPixmap(QtGui.QPixmap(":/img/circle.png"))
@@ -1335,7 +1282,12 @@ class OIStepperConfig(Ui_MainWindow):
                 else:
                     self.STALL2.setPixmap(QtGui.QPixmap(":/img/circle.png"))
 
+    # VISUAL
     def checkConfigEnable(self):
+        # update com
+        self.com.motor1_selected = self.motor1.isChecked()
+        self.com.motor2_selected = self.motor2.isChecked()
+
         if ((self.motor1.isChecked() and self.motor2.isChecked()) or (not self.motor1.isChecked() and not self.motor2.isChecked())):  
             self.ConfigureMotor.setEnabled(False)
             self.ConfigureMotorLP.setEnabled(False)
@@ -1397,7 +1349,7 @@ class OIStepperConfig(Ui_MainWindow):
             self.serialPort.readline()
 
             # get type
-            self.serialPort.write(b"cmd 190\r\n") # CMD_GET_TYPE
+            self.serialPort.write(b"cmd 190\r\n") # CMD_GET_BOARD_TYPE
             self.serialPort.readline()
             data = self.serialPort.readline()
             self.serialPort.readline()
@@ -1423,37 +1375,41 @@ class OIStepperConfig(Ui_MainWindow):
             while(self.serialPort.read() != b'>' and time.time() < timeout_start + 5):
                 None
 
-        if (connected == False):
-            try:
-                # set log level
-                self.serialPort.write(b"log-level 0\r\n")
-                self.serialPort.readline()
+        # if (connected == False):
+        #     try:
+        #         # set log level
+        #         self.serialPort.write(b"log-level 0\r\n")
+        #         self.serialPort.readline()
 
-                # get type
-                self.serialPort.write(b"cmd 190\r\n") # CMD_GET_TYPE
-                self.serialPort.readline()
-                self.serialPort.readline()
-                board = self.serialPort.readline()
-                data = str(board, 'utf-8')
-                # get name of board from type
-                print(BOARD_LIST[data[:-2]])
+        #         # get type
+        #         self.serialPort.write(b"cmd 190\r\n") # CMD_GET_BOARD_TYPE
+        #         self.serialPort.readline()
+        #         self.serialPort.readline()
+        #         board = self.serialPort.readline()
+        #         data = str(board, 'utf-8')
+        #         # get name of board from type
+        #         print(BOARD_LIST[data[:-2]])
 
-            except:
-                print("Could not communicate with board on", self.serialPort.port)
-                self.portStatus.setPixmap(QtGui.QPixmap(":/img/error.png"))
-                self.serialPort.close()        
-                return False
+        #     except:
+        #         print("Could not communicate with board on", self.serialPort.port)
+        #         self.portStatus.setPixmap(QtGui.QPixmap(":/img/error.png"))
+        #         self.serialPort.close()        
+        #         return False
 
         # self.serialPort.close()
 
-        if (BOARD_LIST[data[:-2]] == 'OIStepper' or BOARD_LIST[data[:-2]] ==  'OIStepperVertical'):
-            self.portStatus.setPixmap(QtGui.QPixmap(":/img/check.png"))
-            self.unlock()
-            self.activateAutoRead()
-            return True
-        else:
-            self.portStatus.setPixmap(QtGui.QPixmap(":/img/question.png"))
-            return False     
+        # if (BOARD_LIST[data[:-2]] == 'OIStepper' or BOARD_LIST[data[:-2]] ==  'OIStepperVertical'):
+        #     self.portStatus.setPixmap(QtGui.QPixmap(":/img/check.png"))
+        #     self.unlock()
+        #     self.activateAutoRead()
+        #     return True
+        # else:
+        #     self.portStatus.setPixmap(QtGui.QPixmap(":/img/question.png"))
+        #     return False
+
+        self.portStatus.setPixmap(QtGui.QPixmap(":/img/check.png"))
+        self.unlock()
+        self.activateAutoRead()
 
     def refreshPort(self):
         self.serialPort.close()

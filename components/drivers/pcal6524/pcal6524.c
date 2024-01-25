@@ -741,7 +741,7 @@ esp_err_t ioex_isr_handler_add(ioex_device_t *io, ioex_num_t ioex_num, ioex_isr_
     // add interrupt element to the list
     if (add_to_list(io, interrupt_element) == ESP_OK)
     {
-        ESP_LOGD(IOEX_TAG, "handler added for IOEX_NUM_%u", ioex_num_to_num(ioex_num));
+        ESP_LOGV(IOEX_TAG, "handler added for IOEX_NUM_%u", ioex_num_to_num(ioex_num));
         io->interrupt_list->count++;
     }
     else 
@@ -770,7 +770,7 @@ esp_err_t ioex_isr_handler_remove(ioex_device_t *io, ioex_num_t ioex_num)
     if (remove_from_list(io, ioex_num) == ESP_OK)
     {
         io->interrupt_list->count--;
-        ESP_LOGD(IOEX_TAG, "handler removed for IOEX_NUM_%u", ioex_num_to_num(ioex_num));
+        ESP_LOGV(IOEX_TAG, "handler removed for IOEX_NUM_%u", ioex_num_to_num(ioex_num));
         ioex_interrupt_disable(io, ioex_num);
     }
     else
@@ -839,7 +839,7 @@ static void ioex_task_interrupt_handler(void* arg)
             {
                 pin &= ~(1ULL<<interrupt_element->ioex_num);
                 /* Call isr for the gpio */
-                ESP_LOGD(IOEX_TAG, "Interrupt from IOEX_NUM_%u", ioex_num_to_num(interrupt_element->ioex_num));
+                ESP_LOGV(IOEX_TAG, "Interrupt from IOEX_NUM_%u", ioex_num_to_num(interrupt_element->ioex_num));
                 interrupt_element->isr_handler(interrupt_element->args);
                 /* Clear interrupt */
                 i2c_write(io->i2c_port, io->address, INTERRUPT_CLEAR_PORT_0 + (interrupt_element->ioex_num / 8), (1U<<(interrupt_element->ioex_num-(8*(interrupt_element->ioex_num / 8)))));

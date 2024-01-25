@@ -123,7 +123,7 @@ int queue_push(uint8_t element)
     xSemaphoreTake(xSemaphoreQueue, portTICK_PERIOD_MS);
     if((rx_queue.count == SC16IS750_RX_QUEUE_SIZE))
     {
-        ESP_LOGD(SC16IS750_TAG, "RX internal queue is full");
+        ESP_LOGV(SC16IS750_TAG, "RX internal queue is full");
         return -1;
     }
 
@@ -139,14 +139,14 @@ int queue_pop(uint8_t * element)
     xSemaphoreTake(xSemaphoreQueue, portTICK_PERIOD_MS);
     if(!(rx_queue.count == SC16IS750_RX_QUEUE_SIZE) && (rx_queue.head == rx_queue.tail)) //queue is empty ?
     {
-        ESP_LOGD(SC16IS750_TAG, "RX internal queue is empty");
+        ESP_LOGV(SC16IS750_TAG, "RX internal queue is empty");
         return -1;
     }
-    ESP_LOGD(SC16IS750_TAG, "RX internal queue number of chars before reading: %d", rx_queue.count);
+    ESP_LOGV(SC16IS750_TAG, "RX internal queue number of chars before reading: %d", rx_queue.count);
     *element = rx_queue.e[rx_queue.head];
     rx_queue.head = (rx_queue.head + 1) % SC16IS750_RX_QUEUE_SIZE;
     rx_queue.count--;
-    ESP_LOGD(SC16IS750_TAG, "RX internal queue number of chars after reading: %d", rx_queue.count);
+    ESP_LOGV(SC16IS750_TAG, "RX internal queue number of chars after reading: %d", rx_queue.count);
     xSemaphoreGive(xSemaphoreQueue);
     return 0;
 }
@@ -219,12 +219,12 @@ uint8_t SC16IS750_readable()
     SC16IS750_readRegister(LSR, &data_reg);
     if(data_reg & LSR_DR) // Data in Receiver Bit, at least one character waiting
     { 
-        ESP_LOGD(SC16IS750_TAG, "There is at least one byte in RX FIFO");
+        ESP_LOGV(SC16IS750_TAG, "There is at least one byte in RX FIFO");
         return 1;
     }
     else 
     {
-        ESP_LOGD(SC16IS750_TAG, "RX FIFO is empty");
+        ESP_LOGV(SC16IS750_TAG, "RX FIFO is empty");
         return 0; 
     }
 }
@@ -233,7 +233,7 @@ uint8_t SC16IS750_readableCount()
 {
     uint8_t data_reg;
     SC16IS750_readRegister(RXLVL, &data_reg);
-    ESP_LOGD(SC16IS750_TAG, "Number of chars in RX FIFO : %d", data_reg);
+    ESP_LOGV(SC16IS750_TAG, "Number of chars in RX FIFO : %d", data_reg);
     return data_reg;
 }
 
@@ -243,12 +243,12 @@ uint8_t SC16IS750_writable()
     SC16IS750_readRegister(LSR, &data_reg);
     if (data_reg & LSR_THRE) // THR Empty, space for at least one character
     { 
-        ESP_LOGD(SC16IS750_TAG, "There is space for at least one byte in TX FIFO");
+        ESP_LOGV(SC16IS750_TAG, "There is space for at least one byte in TX FIFO");
         return 1;
     }
     else 
     {
-        ESP_LOGD(SC16IS750_TAG, "No space in TX FIFO");
+        ESP_LOGV(SC16IS750_TAG, "No space in TX FIFO");
         return 0;  
     }
 }
@@ -257,7 +257,7 @@ uint8_t SC16IS750_writableCount()
 {
     uint8_t data_reg;
     SC16IS750_readRegister(TXLVL, &data_reg);
-    ESP_LOGD(SC16IS750_TAG, "Number of space in TX FIFO : %d", data_reg);
+    ESP_LOGV(SC16IS750_TAG, "Number of space in TX FIFO : %d", data_reg);
     return data_reg;  // TX Level
 }
 
@@ -295,7 +295,7 @@ void SC16IS750_writeBytes(uint8_t *data, int len)
     // Write blocks of BULK_BLOCK_LEN  
     while (len > 0) 
     {
-        ESP_LOGD(SC16IS750_TAG, "LEN remaining to send : %d \n", len);
+        ESP_LOGV(SC16IS750_TAG, "LEN remaining to send : %d \n", len);
         if(len < SC16IS750_FIFO_TX)
         {
             while(data_reg < len) 
@@ -699,7 +699,7 @@ static void SC16IS750_task(void* arg)
             readable = SC16IS750_readableCount();
             if(readable > 0 )
             {
-                ESP_LOGD(SC16IS750_TAG, "Readable data : %d", readable);
+                ESP_LOGV(SC16IS750_TAG, "Readable data : %d", readable);
                 if((rx_queue.count + readable < SC16IS750_RX_QUEUE_SIZE))
                 {
                     SC16IS750_readDataBlock(&temp_buff[0], readable);

@@ -1,0 +1,20 @@
+menu "RS Configuration"
+
+    config GLOBAL_INSTANCE
+        bool "Global instance"
+        default y
+
+    choice RS
+        bool "RS User"
+        depends on GLOBAL_INSTANCE
+        default GLOBAL_INSTANCE_RS485
+        help
+            Serial RS bus
+    
+        config GLOBAL_INSTANCE_RS485
+            bool "RS485"
+        config GLOBAL_INSTANCE_RS232
+            bool "RS232"
+    endchoice
+
+endmenu
