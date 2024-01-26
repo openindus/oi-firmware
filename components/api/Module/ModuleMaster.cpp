@@ -98,25 +98,25 @@ bool ModuleMaster::ping(uint32_t num)
     return (BusRs::requestFrom(&frame, pdMS_TO_TICKS(10)) == 0);
 }
 
-void ModuleMaster::onEvent(EventType_t type, uint16_t id, EventCallback_t event)
+void ModuleMaster::onEvent(EventType_t eventType, uint16_t id, EventCallback_t event)
 {
     _event.insert({
-        std::make_pair(type, id),
+        std::make_pair(eventType, id),
         event
     });
 }
 
-void ModuleMaster::handleEvent(EventType_t type, uint16_t id, int num)
+void ModuleMaster::handleEvent(EventType_t eventType, uint16_t id, int num)
 {
-    if (_event.find(std::make_pair(type, id)) != _event.end()) {
+    if (_event.find(std::make_pair(eventType, id)) != _event.end()) {
         for (auto it=_event.begin(); it!=_event.end(); it++) {
-            if ((it->first.first == type) && 
+            if ((it->first.first == eventType) && 
                 (it->first.second == id)) {
                 (*it).second(num);
             }
         }
     } else {
-        ESP_LOGW(MODULE_TAG, "Interrupt does not exist: intr=0x%02x, id=%d", type, id);
+        ESP_LOGW(MODULE_TAG, "Interrupt does not exist: intr=0x%02x, id=%d", eventType, id);
     }
 }
 
@@ -126,15 +126,15 @@ void ModuleMaster::_busTask(void *pvParameters)
     uint16_t id;
     while (1) {
         if (BusCan::read(&frame, &id, portMAX_DELAY) != -1) { 
-            printf("Bus CAN read to %d | cmd(%d), type(%d), id(%d), data(%d)\n", 
-                id, frame.command, frame.type, frame.identifier, frame.data);
+            printf("Bus CAN read to %d | command(%d), eventType(%d), data(%d)\n", 
+                id, frame.command, frame.eventType, frame.data);
             switch (frame.command)
             {
             case MODULE_EVENT:
-                handleEvent((EventType_t)frame.type, frame.identifier, (int)frame.data);
+                handleEvent((EventType_t)frame.eventType, id, (int)frame.data);
                 break;
             case MODULE_AUTO_ID:
-                _ids.push_back((uint16_t)frame.identifier);
+                _ids.push_back((uint16_t)id);
                 break;
             
             default:

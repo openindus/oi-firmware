@@ -45,14 +45,13 @@ void ModuleSlave::init(void)
     xTaskCreate(_busTask, "Bus task", 4096, NULL, 1, NULL);
 }
 
-void ModuleSlave::event(EventType_t type, int num)
+void ModuleSlave::event(EventType_t eventType, int num)
 {
     BusCan::Frame_t frame;
     frame.command = MODULE_EVENT;
-    frame.type = type;
-    frame.identifier = _id;
+    frame.eventType = eventType;
     frame.data = num;
-    BusCan::write(&frame, 0);
+    BusCan::write(&frame, _id);
 }
 
 void ModuleSlave::onRequest(RequestCmd_t cmd, RequestCallback_t request)
@@ -106,8 +105,7 @@ void ModuleSlave::_busTask(void *pvParameters)
             {
                 BusCan::Frame_t autoIdFrame;
                 autoIdFrame.command = MODULE_AUTO_ID;
-                autoIdFrame.identifier = _id;
-                if (BusCan::write(&autoIdFrame, frame.identifier) == -1)
+                if (BusCan::write(&autoIdFrame, _id) == -1)
                     MODULE_ERROR();
                 break;
             }            
