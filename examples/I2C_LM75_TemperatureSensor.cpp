@@ -9,7 +9,6 @@
  * 
  */
 
-
 #include "OpenIndus.h"
 #include "Arduino.h"
 #include "Wire.h"
@@ -21,7 +20,6 @@
 unsigned LM75_getReg(uint8_t reg)
 {
     unsigned Result = 0xFFFF;
-    Serial.print("getReg"); Serial.println(uint8_t(reg),HEX);
 
     Wire.beginTransmission(LM75_I2C_ADDRESS);
     Wire.write(reg); // pointer reg
@@ -29,7 +27,7 @@ unsigned LM75_getReg(uint8_t reg)
 
     uint8_t c;
 
-    Wire.requestFrom(LM75_I2C_ADDRESS, uint8_t(2));
+    Wire.requestFrom(LM75_I2C_ADDRESS, 2);
     if (Wire.available())
     {
         c = Wire.read();
@@ -44,7 +42,7 @@ unsigned LM75_getReg(uint8_t reg)
             }
             else
             {
-                Serial.println("Error ");
+                printf("Error\n");
                 Result = 0xFFFF;
             }
         }
@@ -69,13 +67,21 @@ float LM75_getTemp()
 
 void setup() 
 {
-    Serial.begin(115200);
+    /* Initialize I2C */
     Wire.begin();
+    
+    /* Set clock speed */
+    Wire.setClock(100000);
 }
 
 void loop()
 {
-    Serial.print("Temperature from LM75 is: ");
-    Serial.print(LM75_getTemp());
-    Serial.println("°C");
+    /* Read temperature */
+    float temperature = LM75_getTemp();
+
+    /* Print result */
+    printf("Temperature from LM75 is: %.1f°C\n", temperature);
+
+    /* Wait until next read */
+    delay(500);
 }
