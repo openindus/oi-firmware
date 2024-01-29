@@ -29,7 +29,7 @@
 /* RS */
 #define MODULE_RS_NUM_PORT              UART_NUM_1
 #define MODULE_PIN_RS_UART_TX           GPIO_NUM_41
-#define MODULE_PIN_RS_UART_RX           GPIO_NUM_20
+#define MODULE_PIN_RS_UART_RX           GPIO_NUM_42
 
 /* LED */
 #define MODULE_PIN_LED                  GPIO_NUM_45

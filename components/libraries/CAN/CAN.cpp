@@ -21,7 +21,7 @@ void OICAN::end()
 
 void OICAN::write(OICanMessage_t msg)
 {
-        mcp25625_msg_transfer(msg.msg, msg.count, msg.id, msg.IDE, msg.RTR);
+    mcp25625_msg_transfer(msg.msg, msg.count, msg.id, msg.IDE, msg.RTR);
 }
 
 int OICAN::available()
