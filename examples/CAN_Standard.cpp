@@ -7,9 +7,9 @@ OICanMessage_t tx_msg;
 
 void setup()
 {
-    CAN.begin();
+    CAN.begin(1000000UL);
 
-    tx_msg.id = 11;
+    tx_msg.id = 1;
     tx_msg.count = 8;
     tx_msg.msg[0] = 'A';
     tx_msg.msg[1] = 'U';
@@ -23,7 +23,6 @@ void setup()
     tx_msg.IDE = false; //Standard ID, not extended
     tx_msg.RTR = false; //No remote request frame
     
-    CAN.write(tx_msg);
     CAN.setStandardFilter(0xFF0, 0x0AA);
 }
 
@@ -38,7 +37,12 @@ void loop()
             printf("%x", rx_msg.msg[i]);
         }
         printf(" // \n");
-        
+
+        // If a new message is received, increasse ID of message
+        tx_msg.id = (tx_msg.id+1)%1000;
     }
+
+    CAN.write(tx_msg);
+
     delay(100);
 }
