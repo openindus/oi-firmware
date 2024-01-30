@@ -9,12 +9,13 @@ void setup()
 
 void loop()
 {
-    int data;
+    char data[100];
+    size_t size = RS485.available();
 
-    if (RS485.available())
+    if (size)
     {
-        data = RS485.read();
-        printf("%c\n", data);
+        RS485.read(data, size);
+        printf("%s\n", data);
     }
     delay(10);
 }

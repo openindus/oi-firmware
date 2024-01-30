@@ -10,5 +10,5 @@ void setup()
 void loop()
 {
     RS485.write("Hello OpenIndus\r\n");
-    delay(1000);
+    delay(10);
 }
