@@ -1,12 +1,12 @@
 #include "OpenIndus.h"
 #include "Arduino.h"
 
-void setup(void) 
+void setup(void)
 {
     printf("Hello World !\n");
 }
 
-void loop(void) 
+void loop(void)
 {
     delay(1000);
 }

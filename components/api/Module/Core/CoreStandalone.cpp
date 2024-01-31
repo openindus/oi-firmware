@@ -231,6 +231,19 @@ void CoreStandalone::init()
     io_rs_conf.pin_bit_mask = (1ULL<<CORE_IOEX_PIN_RS_RESET);
     ioex_config(_ioex, &io_rs_conf);
     ioex_set_level(_ioex, CORE_IOEX_PIN_RS_RESET, IOEX_HIGH);
+
+    /**
+     * @brief RTC Init
+     * Configure IOExpander RTC Interrupt pin
+     */
+
+    ioex_config_t io_rtc_conf;    
+    io_rtc_conf.mode = IOEX_INPUT;
+    io_rtc_conf.pull_mode = IOEX_PULLUP;
+    io_rtc_conf.interrupt_type = IOEX_INTERRUPT_NEGEDGE;
+    io_rtc_conf.pin_bit_mask = (1ULL<<CORE_PIN_RTC_INTERRUPT);
+
+    ESP_ERROR_CHECK(ioex_config(_ioex, &io_rtc_conf));
 }
 
 void CoreStandalone::digitalWrite(DigitalOutputNum_t dout, uint8_t level)

@@ -1,6 +1,6 @@
 #include "OpenIndus.h"
 #include "Arduino.h"
-#include "RTC.h"
+#include "RTClock.h"
 
 DateTime currTime;
 
@@ -15,7 +15,7 @@ void rtc_alarm(void)
 
 void setup(void)
 {
-    RTC.init()
+    RTC.init();
     RTC.setTime(DateTime(__DATE__, __TIME__));
 
     currTime = RTC.now();
