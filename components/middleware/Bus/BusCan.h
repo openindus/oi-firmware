@@ -29,8 +29,8 @@ public:
 
     typedef struct __attribute__((__packed__)) {
         uint8_t command;
-        uint8_t type;
-        uint16_t identifier;
+        uint8_t eventType;
+        uint16_t unused;
         uint32_t data;
     } Frame_t;
 

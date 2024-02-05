@@ -30,8 +30,8 @@ public:
     static void program(uint32_t num);
     static bool ping(uint32_t num); 
     
-    static void onEvent(EventType_t type, uint16_t id, EventCallback_t event);
-    static void handleEvent(EventType_t type, uint16_t id, int num);
+    static void onEvent(EventType_t eventType, uint16_t id, EventCallback_t event);
+    static void handleEvent(EventType_t eventType, uint16_t id, int num);
 
 private:
 

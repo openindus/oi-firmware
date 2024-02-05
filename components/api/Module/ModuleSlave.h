@@ -25,7 +25,7 @@ public:
 
     static void init(void);
 
-    static void event(EventType_t type, int num);
+    static void event(EventType_t eventType, int num);
     static void onRequest(RequestCmd_t cmd, RequestCallback_t request);
     static uint32_t handleRequest(RequestMsg_t msg);
 
