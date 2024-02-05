@@ -225,11 +225,9 @@ void MotorStepper::run(MotorNum_t motor, MotorDirection_t direction, float speed
     PS01_Cmd_Run(motor, (motorDir_t)direction, stepPerTick);
 }
 
-void MotorStepper::waitWhileMotorIsRunning(MotorNum_t motor)
+bool MotorStepper::isRunning(MotorNum_t motor)
 {
-    do {
-        vTaskDelay(10/portTICK_PERIOD_MS);
-    } while (PS01_Param_GetBusyStatus(motor));
+    return PS01_Param_GetBusyStatus(motor);
 }
 
 void MotorStepper::homing(MotorNum_t motor, float speed)

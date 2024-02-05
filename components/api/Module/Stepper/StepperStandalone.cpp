@@ -122,9 +122,9 @@ void StepperStandalone::run(MotorNum_t motor, MotorDirection_t direction, float 
     MotorStepper::run(motor, direction, speed);
 }
 
-void StepperStandalone::waitWhileMotorIsRunning(MotorNum_t motor)
+bool StepperStandalone::isRunning(MotorNum_t motor)
 {
-    MotorStepper::waitWhileMotorIsRunning(motor);
+    return MotorStepper::isRunning(motor);
 }
 
 void StepperStandalone::homing(MotorNum_t motor, float speed)

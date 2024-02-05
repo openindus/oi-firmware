@@ -281,7 +281,7 @@ public:
     static void moveAbsolute(MotorNum_t motor, uint32_t position, bool microStep);
     static void moveRelative(MotorNum_t motor, int32_t position, bool microStep);
     static void run(MotorNum_t motor, MotorDirection_t direction, float speed);
-    static void waitWhileMotorIsRunning(MotorNum_t motor);
+    static bool isRunning(MotorNum_t motor);
     static void homing(MotorNum_t motor, float speed);
 
     static int setAdvancedParam(MotorNum_t motor, AdvancedParameter_t advParam, void* value);

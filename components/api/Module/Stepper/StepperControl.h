@@ -42,7 +42,7 @@ public:
     void moveAbsolute(MotorNum_t motor, uint32_t position);
     void moveRelative(MotorNum_t motor, int32_t position);
     void run(MotorNum_t motor, MotorDirection_t direction, float speed);
-    void waitWhileMotorIsRunning(MotorNum_t motor);
+    bool isRunning(MotorNum_t motor);
     void homing(MotorNum_t motor, float speed);
 
 private:

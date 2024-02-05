@@ -47,7 +47,7 @@ public:
     static void moveAbsolute(MotorNum_t motor, uint32_t position, bool microStep=true);
     static void moveRelative(MotorNum_t motor, int32_t position, bool microStep=true);
     static void run(MotorNum_t motor, MotorDirection_t direction, float speed);
-    static void waitWhileMotorIsRunning(MotorNum_t motor);
+    static bool isRunning(MotorNum_t motor);
     static void homing(MotorNum_t motor, float speed);
 
 // protected:

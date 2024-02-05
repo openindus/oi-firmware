@@ -135,10 +135,13 @@ public:
     virtual void run(MotorNum_t motor, MotorDirection_t direction, float speed) = 0;
 
     /**
-     * @brief Wait while motor is runnig
+     * @brief Check if motor is running
      * 
+     * @param motor 
+     * @return true 
+     * @return false 
      */
-    virtual void waitWhileMotorIsRunning(MotorNum_t motor) = 0;
+    virtual bool isRunning(MotorNum_t motor) = 0;
 
     /**
      * @brief Run task to perform homing

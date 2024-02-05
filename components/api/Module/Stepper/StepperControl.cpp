@@ -142,7 +142,7 @@ void StepperControl::run(MotorNum_t motor, MotorDirection_t direction, float spe
     request(msg);
 }
 
-void StepperControl::waitWhileMotorIsRunning(MotorNum_t motor)
+bool StepperControl::isRunning(MotorNum_t motor)
 {
     RequestMsg_t msg;
     msg.request = MOTOR_IS_RUNNING;
