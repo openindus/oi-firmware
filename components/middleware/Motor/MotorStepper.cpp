@@ -24,74 +24,9 @@ static DigitalInputLogic_t _limitSwitchDigitalInputLogic[MOTOR_MAX];
 static bool _limitSwitchSetted[MOTOR_MAX];
 static xQueueHandle _limitSwitchEvent;
 
-static void IRAM_ATTR _limitSwitchIsr(void* arg)
-{
-    uint32_t motor = (uint32_t)arg;
-    xQueueSendFromISR(_limitSwitchEvent, &motor, NULL);
-}
-
-static void _limitSwitchTask(void* arg)
-{
-    MotorNum_t motor;
-    while(1) {
-        if(xQueueReceive(_limitSwitchEvent, &motor, portMAX_DELAY)) {
-            gpio_intr_disable(_gpio[_limitSwitchDigitalInput[motor]]);
-            PS01_Hal_SetSwitchLevel((MotorNum_t)motor, 1);
-            vTaskDelay(1/portTICK_PERIOD_MS);
-            PS01_Hal_SetSwitchLevel((MotorNum_t)motor, 0);
-            gpio_intr_enable(_gpio[_limitSwitchDigitalInput[motor]]);
-        }
-    }
-}
-
-static void _homingTask(void* arg)
-{
-    MotorNum_t motor = *(MotorNum_t*)arg;
-    DigitalInputNum_t din = _limitSwitchDigitalInput[motor];
-    DigitalInputLogic_t logic = _limitSwitchDigitalInputLogic[motor];
-    gpio_num_t gpio = _gpio[din];
-    uint32_t stepPerTick = PS01_Speed_Steps_s_to_RegVal(_homingSpeed[motor]);
-    gpio_int_type_t intrType = GPIO_INTR_DISABLE;
-
-    /* Set switch level and releases the SW_EVN flag */
-    PS01_Hal_SetSwitchLevel(motor, 0);
-
-    /* Fetch and clear status */
-    PS01_Cmd_GetStatus(motor);
-
-    /* Attach interrupt to limit switch */
-    gpio_isr_handler_add(gpio, _limitSwitchIsr, (void *)motor);
-    intrType = (logic == ACTIVE_LOW) ? GPIO_INTR_NEGEDGE : GPIO_INTR_POSEDGE;
-    gpio_set_intr_type(gpio, intrType);
-    gpio_intr_enable(gpio);
-
-    /* Check if motor is at home */
-    if (gpio_get_level(gpio) != logic) {
-        /* Perform go until command and wait */
-        PS01_Cmd_GoUntil(motor, ACTION_RESET, (motorDir_t)REVERSE, stepPerTick);
-        do {
-            vTaskDelay(10/portTICK_PERIOD_MS);
-        } while (PS01_Param_GetBusyStatus(motor));
-    }
-
-    /* Change interrupt mode */
-    gpio_intr_disable(gpio);
-    intrType = (logic == ACTIVE_LOW) ? GPIO_INTR_POSEDGE : GPIO_INTR_NEGEDGE;
-    gpio_set_intr_type(gpio, intrType);
-    gpio_intr_enable(gpio);
-
-    /* Perform release SW command anfd wait */
-    PS01_Cmd_ReleaseSw(motor, ACTION_RESET, (motorDir_t)FORWARD);
-    do {
-        vTaskDelay(10/portTICK_PERIOD_MS);
-    } while (PS01_Param_GetBusyStatus(motor));
-
-    /* Detach interrupt to limit switch */
-    gpio_isr_handler_remove(gpio);
-
-    /* Delete task */
-    vTaskDelete(NULL);
-}
+static void IRAM_ATTR _limitSwitchIsr(void* arg);
+static void _limitSwitchTask(void* arg);
+static void _homingTask(void* arg);
 
 void MotorStepper::init(PS01_Hal_Config_t* config, PS01_Param_t* param, gpio_num_t* num)
 {
@@ -227,4 +162,72 @@ void MotorStepper::homing(MotorNum_t motor, float speed)
 {
     _homingSpeed[motor] = speed;
     xTaskCreate(_homingTask, "Homing task", 2048, &motor, 7, NULL);
+}
+static void IRAM_ATTR _limitSwitchIsr(void* arg)
+{
+    uint32_t motor = (uint32_t)arg;
+    xQueueSendFromISR(_limitSwitchEvent, &motor, NULL);
+}
+
+static void _limitSwitchTask(void* arg)
+{
+    MotorNum_t motor;
+    while(1) {
+        if(xQueueReceive(_limitSwitchEvent, &motor, portMAX_DELAY)) {
+            gpio_intr_disable(_gpio[_limitSwitchDigitalInput[motor]]);
+            PS01_Hal_SetSwitchLevel((MotorNum_t)motor, 1);
+            vTaskDelay(1/portTICK_PERIOD_MS);
+            PS01_Hal_SetSwitchLevel((MotorNum_t)motor, 0);
+            gpio_intr_enable(_gpio[_limitSwitchDigitalInput[motor]]);
+        }
+    }
+}
+
+static void _homingTask(void* arg)
+{
+    MotorNum_t motor = *(MotorNum_t*)arg;
+    DigitalInputNum_t din = _limitSwitchDigitalInput[motor];
+    DigitalInputLogic_t logic = _limitSwitchDigitalInputLogic[motor];
+    gpio_num_t gpio = _gpio[din];
+    uint32_t stepPerTick = PS01_Speed_Steps_s_to_RegVal(_homingSpeed[motor]);
+    gpio_int_type_t intrType = GPIO_INTR_DISABLE;
+
+    /* Set switch level and releases the SW_EVN flag */
+    PS01_Hal_SetSwitchLevel(motor, 0);
+
+    /* Fetch and clear status */
+    PS01_Cmd_GetStatus(motor);
+
+    /* Attach interrupt to limit switch */
+    gpio_isr_handler_add(gpio, _limitSwitchIsr, (void *)motor);
+    intrType = (logic == ACTIVE_LOW) ? GPIO_INTR_NEGEDGE : GPIO_INTR_POSEDGE;
+    gpio_set_intr_type(gpio, intrType);
+    gpio_intr_enable(gpio);
+
+    /* Check if motor is at home */
+    if (gpio_get_level(gpio) != logic) {
+        /* Perform go until command and wait */
+        PS01_Cmd_GoUntil(motor, ACTION_RESET, (motorDir_t)REVERSE, stepPerTick);
+        do {
+            vTaskDelay(10/portTICK_PERIOD_MS);
+        } while (PS01_Param_GetBusyStatus(motor));
+    }
+
+    /* Change interrupt mode */
+    gpio_intr_disable(gpio);
+    intrType = (logic == ACTIVE_LOW) ? GPIO_INTR_POSEDGE : GPIO_INTR_NEGEDGE;
+    gpio_set_intr_type(gpio, intrType);
+    gpio_intr_enable(gpio);
+
+    /* Perform release SW command anfd wait */
+    PS01_Cmd_ReleaseSw(motor, ACTION_RESET, (motorDir_t)FORWARD);
+    do {
+        vTaskDelay(10/portTICK_PERIOD_MS);
+    } while (PS01_Param_GetBusyStatus(motor));
+
+    /* Detach interrupt to limit switch */
+    gpio_isr_handler_remove(gpio);
+
+    /* Delete task */
+    vTaskDelete(NULL);
 }

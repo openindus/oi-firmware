@@ -687,11 +687,13 @@ int MotorStepperParam::setAdvancedParamWithoutNvs(MotorNum_t motor, AdvancedPara
             .ext_clk = config.vm.ext_clk,
             .sw_mode = config.vm.sw_mode,
             .en_vscomp = config.vm.en_vscomp,
+            .reserved = 0,
             .oc_sd = config.vm.oc_sd,
             .uvloval = config.vm.uvloval,
             .vccval = config.vm.vccval,
             .f_pwm_dec = config.vm.f_pwm_dec,
             .f_pwm_int = config.vm.f_pwm_int,
+            .reserved_2 = 0
         };
         config.vm = config_vm;
 
@@ -708,11 +710,13 @@ int MotorStepperParam::setAdvancedParamWithoutNvs(MotorNum_t motor, AdvancedPara
             .ext_clk = vm_ext_clk,
             .sw_mode = config1.vm.sw_mode,
             .en_vscomp = config1.vm.en_vscomp,
+            .reserved = 0,
             .oc_sd = config1.vm.oc_sd,
             .uvloval = config1.vm.uvloval,
             .vccval = config1.vm.vccval,
             .f_pwm_dec = config1.vm.f_pwm_dec,
             .f_pwm_int = config1.vm.f_pwm_int,
+            .reserved_2 = 0
         };
         config1.vm = config_vm1;
 
@@ -729,11 +733,13 @@ int MotorStepperParam::setAdvancedParamWithoutNvs(MotorNum_t motor, AdvancedPara
             .ext_clk = config2.vm.ext_clk,
             .sw_mode = vm_sw_mode,
             .en_vscomp = config2.vm.en_vscomp,
+            .reserved = 0,
             .oc_sd = config2.vm.oc_sd,
             .uvloval = config2.vm.uvloval,
             .vccval = config2.vm.vccval,
             .f_pwm_dec = config2.vm.f_pwm_dec,
             .f_pwm_int = config2.vm.f_pwm_int,
+            .reserved_2 = 0
         };
         config2.vm = config_vm2;
 
@@ -750,11 +756,13 @@ int MotorStepperParam::setAdvancedParamWithoutNvs(MotorNum_t motor, AdvancedPara
             .ext_clk = config3.vm.ext_clk,
             .sw_mode = config3.vm.sw_mode,
             .en_vscomp = config3.vm.en_vscomp,
+            .reserved = 0,
             .oc_sd = vm_oc_sd,
             .uvloval = config3.vm.uvloval,
             .vccval = config3.vm.vccval,
             .f_pwm_dec = config3.vm.f_pwm_dec,
             .f_pwm_int = config3.vm.f_pwm_int,
+            .reserved_2 = 0
         };
         config3.vm = config_vm3;
 
@@ -771,11 +779,13 @@ int MotorStepperParam::setAdvancedParamWithoutNvs(MotorNum_t motor, AdvancedPara
             .ext_clk = config4.vm.ext_clk,
             .sw_mode = config4.vm.sw_mode,
             .en_vscomp = config4.vm.en_vscomp,
+            .reserved = 0,
             .oc_sd = config4.vm.oc_sd,
             .uvloval = vm_uvloval,
             .vccval = config4.vm.vccval,
             .f_pwm_dec = config4.vm.f_pwm_dec,
             .f_pwm_int = config4.vm.f_pwm_int,
+            .reserved_2 = 0
         };
         config4.vm = config_vm4;
 
@@ -792,11 +802,13 @@ int MotorStepperParam::setAdvancedParamWithoutNvs(MotorNum_t motor, AdvancedPara
             .ext_clk = config5.vm.ext_clk,
             .sw_mode = config5.vm.sw_mode,
             .en_vscomp = config5.vm.en_vscomp,
+            .reserved = 0,
             .oc_sd = config5.vm.oc_sd,
             .uvloval = config5.vm.uvloval,
             .vccval = vm_vccval,
             .f_pwm_dec = config5.vm.f_pwm_dec,
             .f_pwm_int = config5.vm.f_pwm_int,
+            .reserved_2 = 0
         };
         config5.vm = config_vm5;
 
@@ -831,11 +843,13 @@ int MotorStepperParam::setAdvancedParamWithoutNvs(MotorNum_t motor, AdvancedPara
             .ext_clk = config6.vm.ext_clk,
             .sw_mode = config6.vm.sw_mode,
             .en_vscomp = vm_en_vscomp,
+            .reserved = 0,
             .oc_sd = config6.vm.oc_sd,
             .uvloval = config6.vm.uvloval,
             .vccval = config6.vm.vccval,
             .f_pwm_dec = config6.vm.f_pwm_dec,
             .f_pwm_int = config6.vm.f_pwm_int,
+            .reserved_2 = 0
         };
         config6.vm = config_vm6;
 
@@ -852,11 +866,13 @@ int MotorStepperParam::setAdvancedParamWithoutNvs(MotorNum_t motor, AdvancedPara
             .ext_clk = config7.vm.ext_clk,
             .sw_mode = config7.vm.sw_mode,
             .en_vscomp = config7.vm.en_vscomp,
+            .reserved = 0,
             .oc_sd = config7.vm.oc_sd,
             .uvloval = config7.vm.uvloval,
             .vccval = config7.vm.vccval,
             .f_pwm_dec = vm_f_pwm_dec,
             .f_pwm_int = config7.vm.f_pwm_int,
+            .reserved_2 = 0
         };
         config7.vm = config_vm_7;
 
@@ -873,11 +889,13 @@ int MotorStepperParam::setAdvancedParamWithoutNvs(MotorNum_t motor, AdvancedPara
             .ext_clk = config8.vm.ext_clk,
             .sw_mode = config8.vm.sw_mode,
             .en_vscomp = config8.vm.en_vscomp,
+            .reserved = 0,
             .oc_sd = config8.vm.oc_sd,
             .uvloval = config8.vm.uvloval,
             .vccval = config8.vm.vccval,
             .f_pwm_dec = config8.vm.f_pwm_dec,
             .f_pwm_int = vm_f_pwm_int,
+            .reserved_2 = 0
         };
         config8.vm = config_vm_8;
         errorCode = PS01_Param_SetConfig(motor, config8);
@@ -1447,7 +1465,7 @@ void MotorStepperParam::initNVSParam() {
         if (PS01_IsActive(i)) {
             // Get or create the advanced param from NVS
             PS01_AdvancedParam_t param = MotorStepperParam::getNVSParam((MotorNum_t) i);
-            printf("param step sel %d\n", param.stepModeStepSel);
+            // printf("param step sel %d\n", param.stepModeStepSel);
             MotorStepperParam::setAllAdvancedParamPS01((MotorNum_t) i, param);
         } else {
             ESP_LOGE("MotorStepper", "Motor %d is not active", i);

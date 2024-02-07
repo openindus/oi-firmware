@@ -57,9 +57,9 @@ public:
     static int32_t getPosition(MotorNum_t motor);
     static float getSpeed(MotorNum_t motor);
     static void resetHomePosition(MotorNum_t motor);
-    static void stop(MotorNum_t motor, MotorStopMode_t mode);
-    static void moveAbsolute(MotorNum_t motor, uint32_t position, bool microStep);
-    static void moveRelative(MotorNum_t motor, int32_t position, bool microStep);
+    static void stop(MotorNum_t motor, MotorStopMode_t mode=SOFT_HIZ);
+    static void moveAbsolute(MotorNum_t motor, uint32_t position, bool microStep=true);
+    static void moveRelative(MotorNum_t motor, int32_t position, bool microStep=true);
     static void run(MotorNum_t motor, MotorDirection_t direction, float speed);
     static bool isRunning(MotorNum_t motor);
     static void homing(MotorNum_t motor, float speed);
