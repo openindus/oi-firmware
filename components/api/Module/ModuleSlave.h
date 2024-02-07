@@ -25,14 +25,14 @@ public:
 
     static void init(void);
 
-    static void event(EventType_t eventType, int num);
-    static void onRequest(RequestCmd_t cmd, RequestCallback_t request);
+    static void event(Event_t event, int num);
+    static void onRequest(Request_t request, RequestCallback_t callback);
     static uint32_t handleRequest(RequestMsg_t msg);
 
 private:
 
     static uint16_t _id;
-    static std::map<RequestCmd_t, RequestCallback_t> _request;
+    static std::map<Request_t, RequestCallback_t> _request;
 
     static void _busTask(void *pvParameters);
 };

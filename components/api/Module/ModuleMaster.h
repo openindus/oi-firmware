@@ -30,12 +30,12 @@ public:
     static void program(uint32_t num);
     static bool ping(uint32_t num); 
     
-    static void onEvent(EventType_t eventType, uint16_t id, EventCallback_t event);
-    static void handleEvent(EventType_t eventType, uint16_t id, int num);
+    static void onEvent(Event_t event, uint16_t id, EventCallback_t callback);
+    static void handleEvent(Event_t event, uint16_t id, int num);
 
 private:
 
-    static std::map<std::pair<EventType_t,uint16_t>, EventCallback_t> _event;
+    static std::map<std::pair<Event_t,uint16_t>, EventCallback_t> _event;
     static std::vector<uint16_t> _ids;
 
     static void _busTask(void *pvParameters);

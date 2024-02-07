@@ -19,7 +19,7 @@
 
 static const char MODULE_TAG[] = "Module";
 
-std::map<std::pair<EventType_t,uint16_t>, EventCallback_t> ModuleMaster::_event;
+std::map<std::pair<Event_t,uint16_t>, EventCallback_t> ModuleMaster::_event;
 std::vector<uint16_t> ModuleMaster::_ids;
 
 void ModuleMaster::init(void)
@@ -98,25 +98,25 @@ bool ModuleMaster::ping(uint32_t num)
     return (BusRs::requestFrom(&frame, pdMS_TO_TICKS(10)) == 0);
 }
 
-void ModuleMaster::onEvent(EventType_t eventType, uint16_t id, EventCallback_t event)
+void ModuleMaster::onEvent(Event_t event, uint16_t id, EventCallback_t callback)
 {
     _event.insert({
-        std::make_pair(eventType, id),
-        event
+        std::make_pair(event, id),
+        callback
     });
 }
 
-void ModuleMaster::handleEvent(EventType_t eventType, uint16_t id, int num)
+void ModuleMaster::handleEvent(Event_t event, uint16_t id, int num)
 {
-    if (_event.find(std::make_pair(eventType, id)) != _event.end()) {
+    if (_event.find(std::make_pair(event, id)) != _event.end()) {
         for (auto it=_event.begin(); it!=_event.end(); it++) {
-            if ((it->first.first == eventType) && 
+            if ((it->first.first == event) && 
                 (it->first.second == id)) {
                 (*it).second(num);
             }
         }
     } else {
-        ESP_LOGW(MODULE_TAG, "Interrupt does not exist: intr=0x%02x, id=%d", eventType, id);
+        ESP_LOGW(MODULE_TAG, "Event does not exist: intr=0x%02x, id=%d", event, id);
     }
 }
 
@@ -126,12 +126,12 @@ void ModuleMaster::_busTask(void *pvParameters)
     uint16_t id;
     while (1) {
         if (BusCan::read(&frame, &id, portMAX_DELAY) != -1) { 
-            printf("Bus CAN read to %d | command(%d), eventType(%d), data(%d)\n", 
-                id, frame.command, frame.eventType, frame.data);
+            printf("Bus CAN read to %d | command(%d), event(%d), data(%d)\n", 
+                id, frame.command, frame.event, frame.data);
             switch (frame.command)
             {
             case MODULE_EVENT:
-                handleEvent((EventType_t)frame.eventType, id, (int)frame.data);
+                handleEvent((Event_t)frame.event, id, (int)frame.data);
                 break;
             case MODULE_AUTO_ID:
                 _ids.push_back((uint16_t)id);

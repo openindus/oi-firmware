@@ -29,7 +29,7 @@ public:
 
     typedef struct __attribute__((__packed__)) {
         uint8_t command;
-        uint8_t eventType;
+        uint8_t event;
         uint16_t unused;
         uint32_t data;
     } Frame_t;
