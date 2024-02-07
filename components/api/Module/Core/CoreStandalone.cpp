@@ -233,6 +233,38 @@ void CoreStandalone::init()
     ioex_set_level(_ioex, CORE_IOEX_PIN_RS_RESET, IOEX_HIGH);
 
     /**
+     * @brief USB Host Init
+     * 
+     */
+    ioex_config_t usb_host_conf;
+
+    usb_host_conf.mode = IOEX_OUTPUT;
+    usb_host_conf.pull_mode = IOEX_FLOATING;
+    usb_host_conf.interrupt_type = IOEX_INTERRUPT_DISABLE;
+    usb_host_conf.pin_bit_mask = (1ULL<<CORE_IOEX_PIN_USB_HOST_RESET) | (1ULL<<CORE_IOEX_PIN_VBUS_EN);
+    ioex_config(_ioex, &usb_host_conf);
+    ioex_set_level(_ioex, CORE_IOEX_PIN_USB_HOST_RESET, IOEX_HIGH);
+    ioex_set_level(_ioex, CORE_IOEX_PIN_VBUS_EN, IOEX_LOW);
+
+    usb_host_conf.mode = IOEX_INPUT;
+    usb_host_conf.pull_mode = IOEX_PULLUP;
+    usb_host_conf.interrupt_type = IOEX_INTERRUPT_DISABLE;
+    usb_host_conf.pin_bit_mask = (1ULL<<CORE_IOEX_PIN_VBUS_OC);
+    ioex_config(_ioex, &usb_host_conf);
+
+    /**
+     * @brief 5V User Init
+     * 
+     */
+    ioex_config_t v_user_conf;
+
+    v_user_conf.mode = IOEX_INPUT;
+    v_user_conf.pull_mode = IOEX_PULLUP;
+    v_user_conf.interrupt_type = IOEX_INTERRUPT_DISABLE;
+    v_user_conf.pin_bit_mask = (1ULL<<CORE_IOEX_PIN_5V_USER_PG);
+    ioex_config(_ioex, &v_user_conf);
+    
+    /**
      * @brief RTC Init
      * Configure IOExpander RTC Interrupt pin
      */
