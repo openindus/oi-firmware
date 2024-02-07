@@ -8,6 +8,7 @@ set(COMPONENT_SRCS
     "Motor/Motor.cpp"
     "Motor/MotorBLDC.cpp"
     "Motor/MotorStepper.cpp"
+    "Motor/MotorStepperParam.cpp"
     "Usb/UsbConsole.cpp"
     "Usb/UsbSerial.cpp"
     "FlashLoader/FlashLoader.cpp"

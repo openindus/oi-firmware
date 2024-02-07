@@ -71,7 +71,7 @@ void System::init(void)
     }
 #endif
 
-    /* Console */
+    /* Command Line Interface (CLI) */
     ConsoleModule::registerCli();
 #if defined(CONFIG_CORE)
     ConsoleCore::registerCli();
@@ -81,7 +81,8 @@ void System::init(void)
 #elif defined(CONFIG_DISCRETE) || defined(CONFIG_DISCRETE_VE)
     ConsoleDiscrete::registerCli();
 #elif defined(CONFIG_STEPPER) || defined(CONFIG_STEPPER_VE)
-    ConsoleStepper::registerCli();
+    ConsoleStepper::registerCommand();
+    MotorStepperParamCLI::registerCommand();
 #endif
     UsbConsole::begin();
 }

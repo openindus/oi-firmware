@@ -93,3 +93,4 @@
 #include "FlashLoader.h"
 #include "Encoder.h"
 #include "MotorBLDC.h"
+#include "MotorStepperParam.h"
