@@ -33,7 +33,7 @@ private:
     static void _registerDetachInterrupt(void);
     static void _registerLimitSwitch(void);
     static void _registerStepResolution(void);
-    static void _registerSetSpeed(void);
+    static void _registerSetMaxSpeed(void);
     static void _registerGetPosition(void);
     static void _registerGetSpeed(void);
     static void _registerStop(void);

@@ -107,12 +107,48 @@ void StepperSlave::init(void)
         return 0;
     });
 
-    onRequest(MOTOR_SET_SPEED, [](RequestMsg_t msg) -> uint32_t {
+    onRequest(MOTOR_SET_MAX_SPEED, [](RequestMsg_t msg) -> uint32_t {
         MotorNum_t motor = (MotorNum_t)msg.param;
         uint32_t data = msg.data;
         float speed = 0;
         memcpy(&speed, &data, sizeof(float));
-        StepperStandalone::setSpeed(motor, speed); 
+        StepperStandalone::setMaxSpeed(motor, speed); 
+        return 0;
+    });
+
+    onRequest(MOTOR_SET_MIN_SPEED, [](RequestMsg_t msg) -> uint32_t {
+        MotorNum_t motor = (MotorNum_t)msg.param;
+        uint32_t data = msg.data;
+        float speed = 0;
+        memcpy(&speed, &data, sizeof(float));
+        StepperStandalone::setMinSpeed(motor, speed); 
+        return 0;
+    });
+
+    onRequest(MOTOR_SET_FULL_STEP_SPEED, [](RequestMsg_t msg) -> uint32_t {
+        MotorNum_t motor = (MotorNum_t)msg.param;
+        uint32_t data = msg.data;
+        float speed = 0;
+        memcpy(&speed, &data, sizeof(float));
+        StepperStandalone::setFullStepSpeed(motor, speed); 
+        return 0;
+    });
+
+    onRequest(MOTOR_SET_ACCELERATION, [](RequestMsg_t msg) -> uint32_t {
+        MotorNum_t motor = (MotorNum_t)msg.param;
+        uint32_t data = msg.data;
+        float acc = 0;
+        memcpy(&acc, &data, sizeof(float));
+        StepperStandalone::setAcceleration(motor, acc); 
+        return 0;
+    });
+
+    onRequest(MOTOR_SET_DECELERATION, [](RequestMsg_t msg) -> uint32_t {
+        MotorNum_t motor = (MotorNum_t)msg.param;
+        uint32_t data = msg.data;
+        float dec = 0;
+        memcpy(&dec, &data, sizeof(float));
+        StepperStandalone::setDeceleration(motor, dec); 
         return 0;
     });
 

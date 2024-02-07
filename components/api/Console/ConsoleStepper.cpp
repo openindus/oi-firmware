@@ -24,7 +24,7 @@ void ConsoleStepper::registerCommand(void)
     _registerDetachInterrupt();
     _registerLimitSwitch();
     _registerStepResolution();
-    _registerSetSpeed();
+    _registerSetMaxSpeed();
     _registerGetPosition();
     _registerGetSpeed();
     _registerStop();
@@ -246,36 +246,36 @@ static struct {
     struct arg_int *motor;
     struct arg_int *speed;
     struct arg_end *end;
-} setSpeedArgs;
+} setMaxSpeedArgs;
 
-static int setSpeed(int argc, char **argv)
+static int setMaxSpeed(int argc, char **argv)
 {
-    int nerrors = arg_parse(argc, argv, (void **) &setSpeedArgs);
+    int nerrors = arg_parse(argc, argv, (void **) &setMaxSpeedArgs);
     if (nerrors != 0) {
-        arg_print_errors(stderr, setSpeedArgs.end, argv[0]);
+        arg_print_errors(stderr, setMaxSpeedArgs.end, argv[0]);
         return 1;
     }
 
-    MotorNum_t motor = (MotorNum_t)(setSpeedArgs.motor->ival[0] - 1);
-    float speed = (float)(setSpeedArgs.speed->ival[0]);
+    MotorNum_t motor = (MotorNum_t)(setMaxSpeedArgs.motor->ival[0] - 1);
+    float speed = (float)(setMaxSpeedArgs.speed->ival[0]);
 
-    StepperStandalone::setSpeed(motor, speed);
+    StepperStandalone::setMaxSpeed(motor, speed);
 
     return 0;
 }
 
-void ConsoleStepper::_registerSetSpeed(void)
+void ConsoleStepper::_registerSetMaxSpeed(void)
 {
-    setSpeedArgs.motor  = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
-    setSpeedArgs.speed  = arg_int1(NULL, NULL, "SPEED", "motor speed in step/s");
-    setSpeedArgs.end    = arg_end(3);
+    setMaxSpeedArgs.motor  = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
+    setMaxSpeedArgs.speed  = arg_int1(NULL, NULL, "SPEED", "motor max speed in step/s");
+    setMaxSpeedArgs.end    = arg_end(3);
 
     const esp_console_cmd_t cmd = {
         .command = "set-speed",
         .help = "set motor speed",
         .hint = NULL,
-        .func = &setSpeed,
-        .argtable = &setSpeedArgs
+        .func = &setMaxSpeed,
+        .argtable = &setMaxSpeedArgs
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
 }

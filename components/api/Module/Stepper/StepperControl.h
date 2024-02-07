@@ -33,11 +33,15 @@ public:
 
     void setLimitSwitch(MotorNum_t motor, DigitalInputNum_t din, DigitalInputLogic_t logic=ACTIVE_HIGH);
     void setStepResolution(MotorNum_t motor, MotorStepResolution_t res);
-    void setSpeed(MotorNum_t motor, float speed);
+    void setMaxSpeed(MotorNum_t motor, float speed);
+    void setMinSpeed(MotorNum_t motor, float speed);
+    void setFullStepSpeed(MotorNum_t motor, float speed);
+    void setAcceleration(MotorNum_t motor, float acc);
+    void setDeceleration(MotorNum_t motor, float dec);
     int32_t getPosition(MotorNum_t motor);
     float getSpeed(MotorNum_t motor);
     void resetHomePosition(MotorNum_t motor);
-    
+
     void stop(MotorNum_t motor, MotorStopMode_t mode=SOFT_HIZ);
     void moveAbsolute(MotorNum_t motor, uint32_t position);
     void moveRelative(MotorNum_t motor, int32_t position);

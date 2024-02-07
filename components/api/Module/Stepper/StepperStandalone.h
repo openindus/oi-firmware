@@ -39,7 +39,11 @@ public:
     /* Motor */
     static void setLimitSwitch(MotorNum_t motor, DigitalInputNum_t dinNum, DigitalInputLogic_t logic=ACTIVE_HIGH);
     static void setStepResolution(MotorNum_t motor, MotorStepResolution_t res);
-    static void setSpeed(MotorNum_t motor, float speed);
+    static void setMaxSpeed(MotorNum_t motor, float speed);
+    static void setMinSpeed(MotorNum_t motor, float speed);
+    static void setFullStepSpeed(MotorNum_t motor, float speed);
+    static void setAcceleration(MotorNum_t motor, float acc);
+    static void setDeceleration(MotorNum_t motor, float dec);
     static int32_t getPosition(MotorNum_t motor);
     static float getSpeed(MotorNum_t motor);
     static void resetHomePosition(MotorNum_t motor);

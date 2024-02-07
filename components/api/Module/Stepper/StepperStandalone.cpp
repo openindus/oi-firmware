@@ -79,15 +79,29 @@ void StepperStandalone::setStepResolution(MotorNum_t motor, MotorStepResolution_
     MotorStepper::setStepResolution(motor, res);
 }
 
-void StepperStandalone::setSpeed(MotorNum_t motor, float speed)
+void StepperStandalone::setMaxSpeed(MotorNum_t motor, float speed)
 {
-    float acc = speed * 2.0;
-    float dec = speed * 2.0;
-    MotorStepper::setAcceleration(motor, acc);
-    MotorStepper::setDeceleration(motor, dec);
     MotorStepper::setMaxSpeed(motor, speed);
-    MotorStepper::setMinSpeed(motor, 0);
+}
+
+void StepperStandalone::setMinSpeed(MotorNum_t motor, float speed)
+{
+    MotorStepper::setMinSpeed(motor, speed);
+}
+
+void StepperStandalone::setFullStepSpeed(MotorNum_t motor, float speed)
+{
     MotorStepper::setFullStepSpeed(motor, speed);
+}
+
+void StepperStandalone::setAcceleration(MotorNum_t motor, float acc)
+{
+    MotorStepper::setAcceleration(motor, acc);
+}
+
+void StepperStandalone::setDeceleration(MotorNum_t motor, float dec)
+{
+    MotorStepper::setDeceleration(motor, dec);
 }
 
 int32_t StepperStandalone::getPosition(MotorNum_t motor)

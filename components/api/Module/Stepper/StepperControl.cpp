@@ -65,12 +65,48 @@ void StepperControl::setStepResolution(MotorNum_t motor, MotorStepResolution_t r
     request(msg);
 }
 
-void StepperControl::setSpeed(MotorNum_t motor, float speed)
+void StepperControl::setMaxSpeed(MotorNum_t motor, float speed)
 {
     RequestMsg_t msg;
-    msg.request = MOTOR_SET_SPEED;
+    msg.request = MOTOR_SET_MAX_SPEED;
     msg.param = (uint16_t)motor;
     memcpy(&msg.data, &speed, sizeof(uint32_t));
+    request(msg);
+}
+
+void StepperControl::setMinSpeed(MotorNum_t motor, float speed)
+{
+    RequestMsg_t msg;
+    msg.request = MOTOR_SET_MIN_SPEED;
+    msg.param = (uint16_t)motor;
+    memcpy(&msg.data, &speed, sizeof(uint32_t));
+    request(msg);
+}
+
+void StepperControl::setFullStepSpeed(MotorNum_t motor, float speed)
+{
+    RequestMsg_t msg;
+    msg.request = MOTOR_SET_FULL_STEP_SPEED;
+    msg.param = (uint16_t)motor;
+    memcpy(&msg.data, &speed, sizeof(uint32_t));
+    request(msg);
+}
+
+void StepperControl::setAcceleration(MotorNum_t motor, float acc)
+{
+    RequestMsg_t msg;
+    msg.request = MOTOR_SET_ACCELERATION;
+    msg.param = (uint16_t)motor;
+    memcpy(&msg.data, &acc, sizeof(uint32_t));
+    request(msg);
+}
+
+void StepperControl::setDeceleration(MotorNum_t motor, float dec)
+{
+    RequestMsg_t msg;
+    msg.request = MOTOR_SET_DECELERATION;
+    msg.param = (uint16_t)motor;
+    memcpy(&msg.data, &dec, sizeof(uint32_t));
     request(msg);
 }
 
