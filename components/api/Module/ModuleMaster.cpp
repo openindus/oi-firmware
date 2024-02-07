@@ -116,7 +116,7 @@ void ModuleMaster::handleEvent(Event_t event, uint16_t id, int num)
             }
         }
     } else {
-        ESP_LOGW(MODULE_TAG, "Event does not exist: intr=0x%02x, id=%d", event, id);
+        ESP_LOGW(MODULE_TAG, "Event does not exist: event=0x%02x, id=%d", event, id);
     }
 }
 
@@ -126,12 +126,12 @@ void ModuleMaster::_busTask(void *pvParameters)
     uint16_t id;
     while (1) {
         if (BusCan::read(&frame, &id, portMAX_DELAY) != -1) { 
-            printf("Bus CAN read to %d | command(%d), event(%d), data(%d)\n", 
-                id, frame.command, frame.event, frame.data);
+            printf("Bus CAN read to %d | command(%d), type(%d), data(%d)\n", 
+                id, frame.command, frame.type, frame.data);
             switch (frame.command)
             {
             case MODULE_EVENT:
-                handleEvent((Event_t)frame.event, id, (int)frame.data);
+                handleEvent((Event_t)frame.type, id, (int)frame.data);
                 break;
             case MODULE_AUTO_ID:
                 _ids.push_back((uint16_t)id);

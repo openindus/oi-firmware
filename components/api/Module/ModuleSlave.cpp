@@ -49,7 +49,7 @@ void ModuleSlave::event(Event_t event, int num)
 {
     BusCan::Frame_t frame;
     frame.command = MODULE_EVENT;
-    frame.event = event;
+    frame.type = event;
     frame.data = num;
     BusCan::write(&frame, _id);
 }

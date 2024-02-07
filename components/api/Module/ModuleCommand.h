@@ -95,7 +95,7 @@ typedef enum {
 } Request_t;
 
 typedef enum {
-    DIGITAL_INTERRUPT = 0x00,
+    DIGITAL_INTERRUPT               = 0x00,
 } Event_t;
 
 typedef struct {
