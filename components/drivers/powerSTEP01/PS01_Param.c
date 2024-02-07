@@ -681,9 +681,11 @@ int PS01_Param_SetStepModeComplete(uint8_t deviceId, register_step_mode_t stepMo
 {
 	stepMode.reserved = 0;
 	uint32_t value = *((uint32_t *)&stepMode);
+	PS01_Cmd_HardHiZ(deviceId);
+	
 	PS01_Cmd_SetParam(deviceId, POWERSTEP01_STEP_MODE, value);
 	uint32_t read_value = PS01_Cmd_GetParam(deviceId, POWERSTEP01_STEP_MODE);
-	if (value != read_value) {
+		if (value != read_value) {
 		ESP_LOGW(PS01_TAG, "%s() Unable to set step mode", __FUNCTION__);
 		return 1;
 	}
