@@ -15,6 +15,7 @@
 
 #pragma once
 
+#include "ConsoleCore.h"
 #include "ConsoleDiscrete.h"
 #include "ConsoleMaster.h"
 #include "ConsoleModule.h"

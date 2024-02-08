@@ -13,15 +13,16 @@
  * @see https://openindus.com
  */
 
-#include "ConsoleDiscrete.h"
+#include "ConsoleCore.h"
 
-#if defined(CONFIG_DISCRETE) || defined(CONFIG_DISCRETE_VE)
+#if defined(CONFIG_CORE)
 
-void ConsoleDiscrete::registerCli(void)
+void ConsoleCore::registerCli(void)
 {
     _registerDigitalWrite();
     _registerDigitalRead();
     _registerAnalogRead();
+    _registerAnalogReadMillivolts();
 }
 
 /** 'digital-write' */
@@ -43,14 +44,14 @@ static int dWrite(int argc, char **argv)
     DigitalOutputNum_t dout = (DigitalOutputNum_t)(digitalWriteArgs.dout->ival[0] -1);
     uint8_t level = (uint8_t)digitalWriteArgs.level->ival[0];
 
-    DiscreteStandalone::digitalWrite(dout, level);
+    CoreStandalone::digitalWrite(dout, level);
 
     return 0;
 }
 
-void ConsoleDiscrete::_registerDigitalWrite(void)
+void ConsoleCore::_registerDigitalWrite(void)
 {
-    digitalWriteArgs.dout = arg_int1(NULL, NULL, "<DOUT>", "[1-8]");
+    digitalWriteArgs.dout = arg_int1(NULL, NULL, "<DOUT>", "[1-4]");
     digitalWriteArgs.level = arg_int1(NULL, NULL, "<LEVEL>", "0 = LOW, 1 = HIGH");
     digitalWriteArgs.end = arg_end(2);
 
@@ -81,14 +82,14 @@ static int dRead(int argc, char **argv)
 
     DigitalInputNum_t din = (DigitalInputNum_t)(digitalReadArgs.din->ival[0] - 1);
 
-    printf("%d\n", DiscreteStandalone::digitalRead(din));
+    printf("%d\n", CoreStandalone::digitalRead(din));
 
     return 0;
 }
 
-void ConsoleDiscrete::_registerDigitalRead(void)
+void ConsoleCore::_registerDigitalRead(void)
 {
-    digitalReadArgs.din = arg_int1(NULL, NULL, "<DIN>", "[1-10]");
+    digitalReadArgs.din = arg_int1(NULL, NULL, "<DIN>", "[1-4]");
     digitalReadArgs.end = arg_end(2);
 
     const esp_console_cmd_t cmd = {
@@ -118,14 +119,15 @@ static int analogRead(int argc, char **argv)
 
     AnalogInputNum_t ain = (AnalogInputNum_t)(analogReadArgs.ain->ival[0] - 1);
 
-    printf("%d\n", DiscreteStandalone::analogRead(ain));
+    printf("%d\n", CoreStandalone::analogRead(ain));
+
 
     return 0;
 }
 
-void ConsoleDiscrete::_registerAnalogRead(void)
+void ConsoleCore::_registerAnalogRead(void)
 {
-    analogReadArgs.ain = arg_int1(NULL, NULL, "<AIN>", "[1-3]");
+    analogReadArgs.ain = arg_int1(NULL, NULL, "<AIN>", "[1-2]");
     analogReadArgs.end = arg_end(2);
 
     const esp_console_cmd_t cmd = {
@@ -133,6 +135,40 @@ void ConsoleDiscrete::_registerAnalogRead(void)
         .help = "Get analog input value (RAW)",
         .hint = NULL,
         .func = &analogRead,
+        .argtable = &analogReadArgs
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+}
+
+
+/** 'analog-read-millivolts' */
+
+static int analogReadMilliVolts(int argc, char **argv)
+{
+    int nerrors = arg_parse(argc, argv, (void **) &analogReadArgs);
+    if (nerrors != 0) {
+        arg_print_errors(stderr, analogReadArgs.end, argv[0]);
+        return 1;
+    }
+
+    AnalogInputNum_t ain = (AnalogInputNum_t)(analogReadArgs.ain->ival[0] - 1);
+
+    printf("%f\n", CoreStandalone::analogReadMilliVolts(ain));
+
+
+    return 0;
+}
+
+void ConsoleCore::_registerAnalogReadMillivolts(void)
+{
+    analogReadArgs.ain = arg_int1(NULL, NULL, "<AIN>", "[1-2]");
+    analogReadArgs.end = arg_end(2);
+
+    const esp_console_cmd_t cmd = {
+        .command = "analog-read-millivolts",
+        .help = "Get analog input value (MilliVolts)",
+        .hint = NULL,
+        .func = &analogReadMilliVolts,
         .argtable = &analogReadArgs
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));

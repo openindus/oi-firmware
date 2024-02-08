@@ -32,35 +32,35 @@ void DigitalOutput::init(gpio_config_t* config, gpio_num_t* num)
     /** @todo */
 }
 
-void DigitalOutput::digitalWrite(DigitalOutputNum_t stor, uint8_t level) 
+void DigitalOutput::digitalWrite(DigitalOutputNum_t dout, uint8_t level)
 {
-    if (stor < DOUT_MAX) {
-        gpio_set_level(_gpio[stor], level);
+    if (dout < DOUT_MAX) {
+        gpio_set_level(_gpio[dout], level);
     } else {
-        ESP_LOGE(DOUT_TAG, "Invalid DOUT_%d", stor+1);
+        ESP_LOGE(DOUT_TAG, "Invalid DOUT_%d", dout+1);
     }
 }
 
-void DigitalOutput::digitalToggle(DigitalOutputNum_t stor)
+void DigitalOutput::digitalToggle(DigitalOutputNum_t dout)
 {
     int level;
-    if (stor < DOUT_MAX) {
-        level = (gpio_get_level(_gpio[stor]) == 1 ? 0 : 1);
-        gpio_set_level(_gpio[stor], level);
+    if (dout < DOUT_MAX) {
+        level = (gpio_get_level(_gpio[dout]) == 1 ? 0 : 1);
+        gpio_set_level(_gpio[dout], level);
     } else {
-        ESP_LOGE(DOUT_TAG, "Invalid DOUT_%d", stor+1);
+        ESP_LOGE(DOUT_TAG, "Invalid DOUT_%d", dout+1);
     }
 }
 
-void DigitalOutput::analogWrite(DigitalOutputNum_t stor, uint8_t duty) 
+void DigitalOutput::analogWrite(DigitalOutputNum_t dout, uint8_t duty)
 {
-    DigitalOutput::ledcSetup(stor, 50, LEDC_TIMER_8_BIT);
-    DigitalOutput::ledcWrite(stor, duty);
+    DigitalOutput::ledcSetup(dout, 50, LEDC_TIMER_8_BIT);
+    DigitalOutput::ledcWrite(dout, duty);
 }
 
-void DigitalOutput::ledcSetup(DigitalOutputNum_t stor, uint32_t freq, ledc_timer_bit_t bit)
+void DigitalOutput::ledcSetup(DigitalOutputNum_t dout, uint32_t freq, ledc_timer_bit_t bit)
 {
-    if (stor < DOUT_MAX) {
+    if (dout < DOUT_MAX) {
         ledc_timer_config_t ledcTimer = {
             .speed_mode = LEDC_LOW_SPEED_MODE,
             .duty_resolution = bit,
@@ -71,9 +71,9 @@ void DigitalOutput::ledcSetup(DigitalOutputNum_t stor, uint32_t freq, ledc_timer
         ESP_ERROR_CHECK(ledc_timer_config(&ledcTimer));
 
         ledc_channel_config_t ledcChannel = {
-            .gpio_num           = _gpio[stor],
+            .gpio_num           = _gpio[dout],
             .speed_mode         = LEDC_LOW_SPEED_MODE,
-            .channel            = (ledc_channel_t)(LEDC_CHANNEL_0 + stor),
+            .channel            = (ledc_channel_t)(LEDC_CHANNEL_0 + dout),
             .intr_type          = LEDC_INTR_DISABLE,
             .timer_sel          = LEDC_TIMER_1,
             .duty               = 0,
@@ -84,16 +84,16 @@ void DigitalOutput::ledcSetup(DigitalOutputNum_t stor, uint32_t freq, ledc_timer
         };
         ESP_ERROR_CHECK(ledc_channel_config(&ledcChannel));
     } else {
-        ESP_LOGE(DOUT_TAG, "Invalid DOUT_%d", stor+1);
+        ESP_LOGE(DOUT_TAG, "Invalid DOUT_%d", dout+1);
     }
 }
 
-void DigitalOutput::ledcWrite(DigitalOutputNum_t stor, uint32_t duty)
+void DigitalOutput::ledcWrite(DigitalOutputNum_t dout, uint32_t duty)
 {
-    if (stor < DOUT_MAX) {
+    if (dout < DOUT_MAX) {
         ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, duty);
         ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0);
     } else {
-        ESP_LOGE(DOUT_TAG, "Invalid DOUT_%d", stor+1);
+        ESP_LOGE(DOUT_TAG, "Invalid DOUT_%d", dout+1);
     }
 }

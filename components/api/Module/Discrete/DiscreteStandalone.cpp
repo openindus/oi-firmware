@@ -20,7 +20,7 @@
 
 static const char DISCRETE_TAG[] = "Discrete";
 
-gpio_num_t _storNum[] = {
+gpio_num_t _doutNum[] = {
     DISCRETE_PIN_DOUT_1,
     DISCRETE_PIN_DOUT_2,
     DISCRETE_PIN_DOUT_3,
@@ -31,7 +31,7 @@ gpio_num_t _storNum[] = {
     DISCRETE_PIN_DOUT_8
 };
 
-gpio_num_t _etorGpio[] = {
+gpio_num_t _dinGpio[] = {
     DISCRETE_PIN_DIN_1,
     DISCRETE_PIN_DIN_2,
     DISCRETE_PIN_DIN_3,
@@ -45,20 +45,20 @@ gpio_num_t _etorGpio[] = {
 };
 
 #if defined(CONFIG_IDF_TARGET_ESP32S3)
-adc2_channel_t _eanaChannel[] = {
+adc2_channel_t _ainChannel[] = {
     DISCRETE_CHANNEL_AIN_1,
     DISCRETE_CHANNEL_AIN_2,
     DISCRETE_CHANNEL_AIN_3
 };
 #elif defined(CONFIG_IDF_TARGET_ESP32S2)
-adc1_channel_t _eanaChannel[] = {
+adc1_channel_t _ainChannel[] = {
     DISCRETE_CHANNEL_AIN_1
 };
 #endif
 
-esp_adc_cal_characteristics_t* _eanaAdcChar;
+esp_adc_cal_characteristics_t* _ainAdcChar;
 
-DigitalInput* DiscreteStandalone::etor = new DigitalInput(_etorGpio, 10); 
+DigitalInput* DiscreteStandalone::din = new DigitalInput(_dinGpio, 10); 
 
 void DiscreteStandalone::init()
 {
@@ -66,66 +66,66 @@ void DiscreteStandalone::init()
     ModuleStandalone::init();
 
     /* Init DOUT */
-    gpio_config_t storConf = DISCRETE_CONFIG_DOUT_DEFAULT();
-    DigitalOutput::init(&storConf, _storNum);
+    gpio_config_t doutConf = DISCRETE_CONFIG_DOUT_DEFAULT();
+    DigitalOutput::init(&doutConf, _doutNum);
 
-    etor->init();
+    din->init();
 
     /* Init AIN */
     ESP_LOGI(DISCRETE_TAG, "Init AIN");
     for (int i=0; i<AIN_MAX; i++) {
 #if defined(CONFIG_IDF_TARGET_ESP32S3)
-        ESP_ERROR_CHECK(adc2_config_channel_atten(_eanaChannel[i], ADC_ATTEN_DB_11));
+        ESP_ERROR_CHECK(adc2_config_channel_atten(_ainChannel[i], ADC_ATTEN_DB_11));
 // #elif defined(CONFIG_IDF_TARGET_ESP32S2)
-//         ESP_ERROR_CHECK(adc1_config_channel_atten(_eanaChannel[i], ADC_ATTEN_DB_11));
+//         ESP_ERROR_CHECK(adc1_config_channel_atten(_ainChannel[i], ADC_ATTEN_DB_11));
 #endif
     }
 }
 
-void DiscreteStandalone::digitalWrite(DigitalOutputNum_t stor, uint8_t level) 
+void DiscreteStandalone::digitalWrite(DigitalOutputNum_t dout, uint8_t level)
 {
-    DigitalOutput::digitalWrite(stor, level);
+    DigitalOutput::digitalWrite(dout, level);
 }
 
-int DiscreteStandalone::digitalRead(DigitalInputNum_t etorNum)
+int DiscreteStandalone::digitalRead(DigitalInputNum_t dinNum)
 {
-    return etor->digitalRead(etorNum);
+    return din->digitalRead(dinNum);
 }
 
-void DiscreteStandalone::attachInterrupt(DigitalInputNum_t etorNum, IsrCallback_t callback, InterruptMode_t mode, void* arg) 
+void DiscreteStandalone::attachInterrupt(DigitalInputNum_t dinNum, IsrCallback_t callback, InterruptMode_t mode, void* arg)
 {
-    etor->attachInterrupt(etorNum, callback, mode, arg);
+    din->attachInterrupt(dinNum, callback, mode, arg);
 }
 
-void DiscreteStandalone::detachInterrupt(DigitalInputNum_t etorNum)
+void DiscreteStandalone::detachInterrupt(DigitalInputNum_t dinNum)
 {
-    etor->detachInterrupt(etorNum);
+    din->detachInterrupt(dinNum);
 }
 
-int DiscreteStandalone::analogRead(AnalogInputNum_t eana) 
+int DiscreteStandalone::analogRead(AnalogInputNum_t ain)
 {
     int raw = -1;
-    if (eana < AIN_MAX) {
+    if (ain < AIN_MAX) {
 #if defined(CONFIG_IDF_TARGET_ESP32S3)
-        adc2_get_raw(_eanaChannel[eana], (adc_bits_width_t)(ADC_WIDTH_MAX-1), &raw);
+        adc2_get_raw(_ainChannel[ain], (adc_bits_width_t)(ADC_WIDTH_MAX-1), &raw);
 #elif defined(CONFIG_IDF_TARGET_ESP32S2)
-        raw = adc1_get_raw(_eanaChannel[eana]);
+        raw = adc1_get_raw(_ainChannel[ain]);
 #endif
     } else {
-        ESP_LOGE(DISCRETE_TAG, "Invalid AIN_%d", eana+1);
+        ESP_LOGE(DISCRETE_TAG, "Invalid AIN_%d", ain+1);
     }
     return raw;
 }
 
-int DiscreteStandalone::analogReadMilliVolts(AnalogInputNum_t eana)
+int DiscreteStandalone::analogReadMilliVolts(AnalogInputNum_t ain)
 {
     /** @todo */
     return -1;
 }
 
-void DiscreteStandalone::analogWrite(DigitalOutputNum_t stor, uint8_t duty) 
+void DiscreteStandalone::analogWrite(DigitalOutputNum_t dout, uint8_t duty)
 {
-    DigitalOutput::analogWrite(stor, duty);
+    DigitalOutput::analogWrite(dout, duty);
 }
 
 #endif

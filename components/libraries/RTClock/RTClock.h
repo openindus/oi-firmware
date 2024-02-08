@@ -6,7 +6,7 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file RTC.h
+ * @file RTClock.h
  * @brief Functions for RTC
  *
  * For more information on OpenIndus:
@@ -22,6 +22,8 @@
 #include "m41t62.h"
 
 #if defined(CONFIG_CORE)
+
+#include "CorePinout.h"
 
 class DateTime
 {

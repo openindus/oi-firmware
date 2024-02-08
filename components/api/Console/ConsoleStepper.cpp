@@ -61,11 +61,11 @@ void ConsoleStepper::registerCli(void)
 /** 'digital-read' */
 
 static struct {
-    struct arg_int *etor;
+    struct arg_int *din;
     struct arg_end *end;
 } digitalReadArgs;
 
-static int digitalRead(int argc, char **argv)
+static int dRead(int argc, char **argv)
 {
     int nerrors = arg_parse(argc, argv, (void **) &digitalReadArgs);
     if (nerrors != 0) {
@@ -73,23 +73,23 @@ static int digitalRead(int argc, char **argv)
         return 1;
     }
 
-    DigitalInputNum_t etor = (DigitalInputNum_t)(digitalReadArgs.etor->ival[0] - 1);
+    DigitalInputNum_t din = (DigitalInputNum_t)(digitalReadArgs.din->ival[0] - 1);
 
-    printf("%d\n", StepperStandalone::digitalRead(etor));
+    printf("%d\n", StepperStandalone::digitalRead(din));
 
     return 0;
 }
 
 void ConsoleStepper::_registerDigitalRead(void)
 {
-    digitalReadArgs.etor    = arg_int1(NULL, NULL, "DIN", "[1-10]");
+    digitalReadArgs.din    = arg_int1(NULL, NULL, "DIN", "[1-10]");
     digitalReadArgs.end     = arg_end(2);
 
     const esp_console_cmd_t cmd = {
         .command = "digital-read",
         .help = "Get DIN level",
         .hint = NULL,
-        .func = &digitalRead,
+        .func = &dRead,
         .argtable = &digitalReadArgs
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
@@ -98,7 +98,7 @@ void ConsoleStepper::_registerDigitalRead(void)
 /** 'attach-interrupt' */
 
 static struct {
-    struct arg_int *etor;
+    struct arg_int *din;
     struct arg_int *mode;
     struct arg_end *end;
 } attachInterruptArgs;
@@ -116,17 +116,17 @@ static int attachInterrupt(int argc, char **argv)
         return 1;
     }
 
-    DigitalInputNum_t etor = (DigitalInputNum_t)(attachInterruptArgs.etor->ival[0] - 1);
+    DigitalInputNum_t din = (DigitalInputNum_t)(attachInterruptArgs.din->ival[0] - 1);
     InterruptMode_t mode = (InterruptMode_t)(attachInterruptArgs.mode->ival[0]);
 
-    StepperStandalone::attachInterrupt(etor, callback, mode, NULL);
+    StepperStandalone::attachInterrupt(din, callback, mode, NULL);
 
     return 0;
 }
 
 void ConsoleStepper::_registerAttachInterrupt(void)
 {
-    attachInterruptArgs.etor    = arg_int1(NULL, NULL, "DIN", "[1-10]");
+    attachInterruptArgs.din    = arg_int1(NULL, NULL, "DIN", "[1-10]");
     attachInterruptArgs.mode    = arg_int1(NULL, NULL, "MODE", "[1: rising, 2: falling, 3: change]");
     attachInterruptArgs.end     = arg_end(4);
 
@@ -143,7 +143,7 @@ void ConsoleStepper::_registerAttachInterrupt(void)
 /** 'detach-interrupt' */
 
 static struct {
-    struct arg_int *etor;
+    struct arg_int *din;
     struct arg_end *end;
 } detachInterruptArgs;
 
@@ -155,16 +155,16 @@ static int detachInterrupt(int argc, char **argv)
         return 1;
     }
 
-    DigitalInputNum_t etor = (DigitalInputNum_t)(detachInterruptArgs.etor->ival[0] - 1);
+    DigitalInputNum_t din = (DigitalInputNum_t)(detachInterruptArgs.din->ival[0] - 1);
 
-    StepperStandalone::detachInterrupt(etor);
+    StepperStandalone::detachInterrupt(din);
 
     return 0;
 }
 
 void ConsoleStepper::_registerDetachInterrupt(void)
 {
-    detachInterruptArgs.etor    = arg_int1(NULL, NULL, "DIN", "[1-10]");
+    detachInterruptArgs.din    = arg_int1(NULL, NULL, "DIN", "[1-10]");
     detachInterruptArgs.end     = arg_end(2);
 
     const esp_console_cmd_t cmd = {
@@ -181,7 +181,7 @@ void ConsoleStepper::_registerDetachInterrupt(void)
 
 static struct {
     struct arg_int *motor;
-    struct arg_int *etor;
+    struct arg_int *din;
     struct arg_int *logic;
     struct arg_end *end;
 } limitSwitchArgs;
@@ -195,13 +195,13 @@ static int limitSwitch(int argc, char **argv)
     }
 
     MotorNum_t motor = (MotorNum_t)(limitSwitchArgs.motor->ival[0] - 1);
-    DigitalInputNum_t etor = (DigitalInputNum_t)(limitSwitchArgs.etor->ival[0] - 1);
+    DigitalInputNum_t din = (DigitalInputNum_t)(limitSwitchArgs.din->ival[0] - 1);
 
     if (limitSwitchArgs.logic->count > 0) {
         DigitalInputLogic_t logic = (DigitalInputLogic_t)(limitSwitchArgs.logic->ival[0]);
-        StepperStandalone::setLimitSwitch(motor, etor, logic);
+        StepperStandalone::setLimitSwitch(motor, din, logic);
     } else {
-        StepperStandalone::setLimitSwitch(motor, etor);
+        StepperStandalone::setLimitSwitch(motor, din);
     }
 
     return 0;
@@ -210,7 +210,7 @@ static int limitSwitch(int argc, char **argv)
 void ConsoleStepper::_registerLimitSwitch(void)
 {
     limitSwitchArgs.motor   = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
-    limitSwitchArgs.etor    = arg_int1(NULL, NULL, "DIN", "[1-10]");
+    limitSwitchArgs.din    = arg_int1(NULL, NULL, "DIN", "[1-10]");
     limitSwitchArgs.logic   = arg_int0(NULL, NULL, "logic", "[0: Active low, 1: Active high]");
     limitSwitchArgs.end     = arg_end(4);
 

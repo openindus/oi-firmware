@@ -29,8 +29,8 @@ void MixedSlave::init(void)
     MixedStandalone::init();
     ModuleSlave::init();
 
-    onRequest(CMD_DIGITAL_WRITE, [](RequestMsg_t msg) -> uint32_t { 
-        MixedStandalone::digitalWrite((DigitalOutputNum_t)msg.param, (uint8_t)msg.data); 
+    onRequest(CMD_DIGITAL_WRITE, [](RequestMsg_t msg) -> uint32_t {
+        MixedStandalone::digitalWrite((DigitalOutputNum_t)msg.param, (uint8_t)msg.data);
         return 0;
     });
 
@@ -39,19 +39,19 @@ void MixedSlave::init(void)
     });
 
     onRequest(CMD_ATTACH_INTERRUPT, [](RequestMsg_t msg) -> uint32_t {
-        DigitalInputNum_t etor = (DigitalInputNum_t)msg.param;
+        DigitalInputNum_t din = (DigitalInputNum_t)msg.param;
         InterruptMode_t mode = (InterruptMode_t)msg.data;
-        MixedStandalone::attachInterrupt(etor, _isrCallback[etor], mode); 
+        MixedStandalone::attachInterrupt(din, _isrCallback[din], mode); 
         return 0;
     });
 
     onRequest(CMD_DETACH_INTERRUPT, [](RequestMsg_t msg) -> uint32_t {
-        DigitalInputNum_t etor = (DigitalInputNum_t)msg.param;
-        MixedStandalone::detachInterrupt(etor); 
+        DigitalInputNum_t din = (DigitalInputNum_t)msg.param;
+        MixedStandalone::detachInterrupt(din);
         return 0;
     });
 
-    onRequest(CMD_ANALOG_READ, [](RequestMsg_t msg) -> uint32_t { 
+    onRequest(CMD_ANALOG_READ, [](RequestMsg_t msg) -> uint32_t {
         return MixedStandalone::analogRead((AnalogInputNum_t)msg.param);
     });
 

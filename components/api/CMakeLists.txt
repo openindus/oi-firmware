@@ -20,6 +20,7 @@ set(COMPONENT_SRCS
     "Module/ModuleControl.cpp"
     "Console/ConsoleModule.cpp"
     "Console/ConsoleMaster.cpp"
+    "Console/ConsoleCore.cpp"
     "Console/ConsoleDiscrete.cpp"
     "Console/ConsoleStepper.cpp"
     "Module/Brushless/BrushlessStandalone.cpp"

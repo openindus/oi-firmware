@@ -22,7 +22,7 @@
 
 static const char STEPPER_TAG[] = "Stepper";
 
-gpio_num_t _etorGpio[] = { 
+gpio_num_t _dinGpio[] = {
     STEPPER_GPIO_PIN_DIN_1,
     STEPPER_GPIO_PIN_DIN_2,
     STEPPER_GPIO_PIN_DIN_3,
@@ -33,7 +33,7 @@ gpio_num_t _etorGpio[] = {
 #endif
 };
 
-DigitalInput* StepperStandalone::etor = new DigitalInput(_etorGpio, STEPPER_DIN_NUM);
+DigitalInput* StepperStandalone::din = new DigitalInput(_dinGpio, STEPPER_DIN_NUM);
 
 void StepperStandalone::init()
 {
@@ -42,33 +42,33 @@ void StepperStandalone::init()
     ESP_LOGI(STEPPER_TAG, "Init");
 
     /* Init DIN */
-    etor->init();
+    din->init();
 
     /* Init Motor stepper */
     ESP_LOGI(STEPPER_TAG, "Init Motor stepper");
     PS01_Hal_Config_t ps01Conf = STEPPER_CONFIG_MOTOR_DEFAULT();
     PS01_Param_t ps01Param = STEPPER_PARAM_MOTOR_DEFAULT();
-    MotorStepper::init(&ps01Conf, &ps01Param, _etorGpio);
+    MotorStepper::init(&ps01Conf, &ps01Param, _dinGpio);
 }
 
-int StepperStandalone::digitalRead(DigitalInputNum_t etorNum)
+int StepperStandalone::digitalRead(DigitalInputNum_t dinNum)
 {
-    return etor->digitalRead(etorNum);
+    return din->digitalRead(dinNum);
 }
 
-void StepperStandalone::attachInterrupt(DigitalInputNum_t etorNum, IsrCallback_t callback, InterruptMode_t mode, void* arg) 
+void StepperStandalone::attachInterrupt(DigitalInputNum_t dinNum, IsrCallback_t callback, InterruptMode_t mode, void* arg)
 {
-    etor->attachInterrupt(etorNum, callback, mode, arg);
+    din->attachInterrupt(dinNum, callback, mode, arg);
 }
 
-void StepperStandalone::detachInterrupt(DigitalInputNum_t etorNum)
+void StepperStandalone::detachInterrupt(DigitalInputNum_t dinNum)
 {
-    etor->detachInterrupt(etorNum);
+    din->detachInterrupt(dinNum);
 }
 
-void StepperStandalone::setLimitSwitch(MotorNum_t motor, DigitalInputNum_t etorNum, DigitalInputLogic_t logic)
+void StepperStandalone::setLimitSwitch(MotorNum_t motor, DigitalInputNum_t dinNum, DigitalInputLogic_t logic)
 {
-    MotorStepper::setLimitSwitch(motor, etorNum, logic);
+    MotorStepper::setLimitSwitch(motor, dinNum, logic);
 }
 
 void StepperStandalone::setStepResolution(MotorNum_t motor, MotorStepResolution_t res)

@@ -27,46 +27,55 @@ public:
      * @brief Set an output at high or low level.
      * First argument is the DOUT to drive and second argument is the level to set.
      * 
-     * @param stor DOUT to drive.
+     * @param dout DOUT to drive.
      * @param level DOUT level, HIGH or LOW.
      */
-    void digitalWrite(DigitalOutputNum_t stor, uint8_t level);
+    static void digitalWrite(DigitalOutputNum_t dout, uint8_t level);
 
     /**
      * @brief Read an input current level. Argument is the DIN to read.
      * The function return an integer that correspond to the value of the DIN.
      * 
-     * @param etor DIN to monitor.
+     * @param din DIN to monitor.
      * @return Value of the DIN input (1 or 0). 
      */
-    int digitalRead(DigitalInputNum_t etor);
+    static int digitalRead(DigitalInputNum_t din);
 
     /**
-     * @brief Read the value of AIN. 
+     * @brief Read the value of AIN.
+     * The function return the raw value (0-4096) that correspond to the voltage of the ANA.
+     *
+     * @param eana ANA input to monitor.
+     * @return int Value of the AIN input.
+     */
+    static int analogRead(AnalogInputNum_t eana);
+
+    /**
+     * @brief Read the value of AIN.
      * The function return a float that correspond to the voltage of the ANA (from 0 to 2.6V).
-     * 
+     *
      * @param eana ANA input to monitor.
      * @return float Value of the AIN input.
      */
-    float analogRead(AnalogInputNum_t eana);
+    static float analogReadMilliVolts(AnalogInputNum_t eana);
 
     /**
      * @brief Attach a user callback to the DIN interrupts.
      * 
-     * @param etor DIN to attach interrupt.
+     * @param din DIN to attach interrupt.
      * @param callback function to attach
      * @param args function arguments
      * @param mode mode of interruption on rising edge, 
      * falling edge or both (rising edge by default).
      */
-    void attachInterrupt(DigitalInputNum_t etor, void (*callback)(void *), void* args=NULL, InterruptMode_t mode=RISING_MODE);
+    static void attachInterrupt(DigitalInputNum_t din, void (*callback)(void *), void* args=NULL, InterruptMode_t mode=RISING_MODE);
     
     /**
      * @brief Detach an interrupt to a given DIN.
      * 
-     * @param etor DIN to detach interrupt.
+     * @param din DIN to detach interrupt.
      */
-    void detachInterrupt(DigitalInputNum_t etor, InterruptMode_t mode);
+    static void detachInterrupt(DigitalInputNum_t din, InterruptMode_t mode);
 
 // protected:
 
@@ -77,11 +86,11 @@ private:
     static ioex_device_t *_ioex;
 
     static esp_adc_cal_characteristics_t _adc1Characteristics;
-    static std::map<DigitalInputNum_t, InterruptMode_t> _etorCurrentMode;
+    static std::map<DigitalInputNum_t, InterruptMode_t> _dinCurrentMode;
 
-    static const ioex_num_t _stor[4];
-    static const ioex_num_t _storSensor[4];
-    static const ioex_num_t _etor[4];
+    static const ioex_num_t _dout[4];
+    static const ioex_num_t _doutSensor[4];
+    static const ioex_num_t _din[4];
     static const adc1_channel_t _eana[2];
 };
 

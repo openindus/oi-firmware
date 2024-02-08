@@ -13,7 +13,7 @@
  * @see https://openindus.com
  */
 
-#include "RTC.h"
+#include "RTClock.h"
 
 #if defined(CONFIG_CORE)
 
@@ -21,17 +21,7 @@ ioex_device_t *OIRTC::_ioex;
 
 void OIRTC::init(void)
 {
-    /**
-     * @brief RTC Init
-     * Configure IOExpander RTC Interrupt pin
-     */
-    ioex_config_t io_rtc_conf;        
-    io_rtc_conf.mode = IOEX_INPUT;
-    io_rtc_conf.pull_mode = IOEX_PULLUP;
-    io_rtc_conf.interrupt_type = IOEX_INTERRUPT_NEGEDGE;
-    io_rtc_conf.pin_bit_mask = (1ULL<<IOEX_NUM_25);
-
-    ESP_ERROR_CHECK(ioex_config(_ioex, &io_rtc_conf));
+    rtc_i2c_set_port(CORE_I2C_PORT_NUM);
 }
 
 time_t OIRTC::time(void)

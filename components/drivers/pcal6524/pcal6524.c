@@ -129,7 +129,6 @@ ioex_device_t *ioex_create(i2c_port_t i2c_port, uint8_t i2c_address, bool use_in
         io_conf.mode = GPIO_MODE_INPUT;
         io_conf.pull_up_en = GPIO_PULLUP_ENABLE;
         gpio_config(&io_conf);
-        //gpio_install_isr_service(ESP_INTR_FLAG_DEFAULT);
 
         // Hook isr handler for specific gpio pin
         gpio_isr_handler_add(interrupt_pin, ioex_isr_handler, (void*)io);

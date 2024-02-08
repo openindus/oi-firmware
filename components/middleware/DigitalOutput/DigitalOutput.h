@@ -45,11 +45,11 @@ class DigitalOutput
 public:
 
     static void init(gpio_config_t* config, gpio_num_t* num);
-    static void digitalWrite(DigitalOutputNum_t stor, uint8_t level);
-    static void digitalToggle(DigitalOutputNum_t stor);
-    static void analogWrite(DigitalOutputNum_t stor, uint8_t duty);
-    static void ledcSetup(DigitalOutputNum_t stor, uint32_t freq, ledc_timer_bit_t bit);
-    static void ledcWrite(DigitalOutputNum_t stor, uint32_t duty);
+    static void digitalWrite(DigitalOutputNum_t dout, uint8_t level);
+    static void digitalToggle(DigitalOutputNum_t dout);
+    static void analogWrite(DigitalOutputNum_t dout, uint8_t duty);
+    static void ledcSetup(DigitalOutputNum_t dout, uint32_t freq, ledc_timer_bit_t bit);
+    static void ledcWrite(DigitalOutputNum_t dout, uint32_t duty);
 
 private:
 

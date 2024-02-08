@@ -60,9 +60,9 @@ public:
     }
 
     void init(void);
-    int digitalRead(DigitalInputNum_t etor);
-    void attachInterrupt(DigitalInputNum_t etor, IsrCallback_t callback, InterruptMode_t mode, void* arg);
-    void detachInterrupt(DigitalInputNum_t etor);
+    int digitalRead(DigitalInputNum_t din);
+    void attachInterrupt(DigitalInputNum_t din, IsrCallback_t callback, InterruptMode_t mode, void* arg);
+    void detachInterrupt(DigitalInputNum_t din);
 
 private:
 

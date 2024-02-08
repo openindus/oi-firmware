@@ -3,7 +3,7 @@
 
 void setup(void)
 {
-
+    printf("Hello World !\n");
 }
 
 void loop(void)

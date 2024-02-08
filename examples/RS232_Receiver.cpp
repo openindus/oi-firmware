@@ -4,17 +4,17 @@
 
 void setup()
 {
-    RS485.begin();
+    RS232.begin();
 }
 
 void loop()
 {
     char data[100];
-    size_t size = RS485.available();
+    size_t size = RS232.available();
 
     if (size)
     {
-        RS485.read(data, size);
+        RS232.read(data, size);
         printf("%s\n", data);
     }
     delay(10);
