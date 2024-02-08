@@ -60,7 +60,7 @@ void DiscreteControl::attachInterrupt(DigitalInputNum_t din, IsrCallback_t callb
 void DiscreteControl::detachInterrupt(DigitalInputNum_t din)
 {
     RequestMsg_t msg;
-    msg.cmd = DETACH_INTERRUPT;
+    msg.request = DETACH_INTERRUPT;
     msg.param = (uint16_t)din;
     request(msg);
 }

@@ -19,7 +19,7 @@ void setup()
     xTaskCreatePinnedToCore(printTask, "Task to print parameters", 10000, NULL, 1, NULL, 0);
 
     /* Settings */
-    stepper.setSpeed(MOTOR_1, 1000);
+    stepper.setMaxSpeed(MOTOR_1, 1000);
     stepper.resetHomePosition(MOTOR_1);
 
     delay(1000);
@@ -34,22 +34,19 @@ void setup()
     /* Move relative */
     printf("moveRelative\n");
     stepper.moveRelative(MOTOR_1, 100);
-    printf("waitWhileMotorIsRunning\n");
-    stepper.waitWhileMotorIsRunning(MOTOR_1);
+    delay(1000);
     printf("position: %d\n", stepper.getPosition(MOTOR_1));
 
     /* Move relative */
     printf("moveRelative\n");
     stepper.moveRelative(MOTOR_1, -200);
-    printf("waitWhileMotorIsRunning\n");
-    stepper.waitWhileMotorIsRunning(MOTOR_1);
+    delay(1000);
     printf("position: %d\n", stepper.getPosition(MOTOR_1));
 
     /* Move absolute */
     printf("moveAbsolute\n");
     stepper.moveAbsolute(MOTOR_1, 200);
-    printf("waitWhileMotorIsRunning\n");
-    stepper.waitWhileMotorIsRunning(MOTOR_1);
+    delay(1000);
     printf("position: %d\n", stepper.getPosition(MOTOR_1));
 }
 
