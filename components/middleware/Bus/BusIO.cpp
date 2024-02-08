@@ -35,21 +35,15 @@ void BusIO::init(Config_t* config)
     esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, _config->adcWidthId, 1100, _adcCharsId);
 
     /* OI-GPIO */
-#if !defined(CONFIG_IDF_TARGET_ESP32)
-    ESP_LOGI(BUS_IO_TAG, "Init OI-GPIO");
+    ESP_LOGI(BUS_IO_TAG, "Init SYNC (OI-GPIO)");
     gpio_config_t gpioConf = {
         .pin_bit_mask = (1ULL<<_config->gpioNumSync),
-#ifdef CONFIG_CORE
-        .mode = GPIO_MODE_OUTPUT,
-#else
-        .mode = GPIO_MODE_INPUT,
-#endif
+        .mode = _config->gpioModeSync,
         .pull_up_en = GPIO_PULLUP_DISABLE,
         .pull_down_en = GPIO_PULLDOWN_DISABLE,
         .intr_type = GPIO_INTR_DISABLE,
     };
     gpio_config(&gpioConf);
-#endif
 
     /* Cmd MOSFET Alim */
 #if !defined(CONFIG_IDF_TARGET_ESP32) 
@@ -66,7 +60,7 @@ void BusIO::init(Config_t* config)
 #endif
 }
 
-uint16_t BusIO::readId(void)
+uint32_t BusIO::readId(void)
 {
     uint32_t adc_reading = 0;
     for (int i = 0; i < 64; i++)
@@ -74,7 +68,7 @@ uint16_t BusIO::readId(void)
         adc_reading += adc1_get_raw((adc1_channel_t)_config->adcChannelId);
     }
     adc_reading /= 64;
-    return (uint16_t)((esp_adc_cal_raw_to_voltage(adc_reading, _adcCharsId) * 1024) / 4096);
+    return esp_adc_cal_raw_to_voltage(adc_reading, _adcCharsId);
 }
 
 void BusIO::powerOn(void)
@@ -85,4 +79,19 @@ void BusIO::powerOn(void)
 void BusIO::powerOff(void)
 {
     gpio_set_level(_config->gpioNumPower, 1);
+}
+
+uint8_t BusIO::readSync(void)
+{
+    return gpio_get_level(_config->gpioNumSync);
+}
+
+void BusIO::writeSync(uint8_t level)
+{
+    if (_config->gpioModeSync != GPIO_MODE_INPUT_OUTPUT)
+    {
+        ESP_LOGW(BUS_IO_TAG, "Sync cannot be write in slave mode !");
+    } else {
+        gpio_set_level(_config->gpioNumSync, level);
+    }
 }

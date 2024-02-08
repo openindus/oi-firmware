@@ -33,11 +33,13 @@ void ModuleSlave::init(void)
         .adcChannelId = MODULE_OI_ID_ADC_CHANNEL,
         .adcWidthId = MODULE_OI_ID_ADC_WIDTH,
         .gpioNumSync = MODULE_PIN_OI_GPIO,
+        .gpioModeSync = GPIO_MODE_INPUT,
         .gpioNumPower = MODULE_PIN_CMD_MOSFET_ALIM,
     };
     BusIO::init(&config);
 
-    _id = BusIO::readId();
+    /* Board ID is represented by the 10 most significants bits of the adc reading (12 bits) */
+    _id = (uint16_t) (BusIO::readId()>>2);
     ESP_LOGI(MODULE_TAG, "Bus Id: %d", _id);
 
     /* Bus task */
