@@ -510,4 +510,11 @@ void CoreStandalone::detachInterrupt(DigitalInputNum_t din, InterruptMode_t mode
     }
 }
 
+uint8_t CoreStandalone::digitalReadOverCurrent(DigitalOutputNum_t dout)
+{
+    printf("%u\n", dout);
+    printf("%u\n", _doutSensor[(uint8_t)dout]);
+    return ioex_get_level(_ioex, _doutSensor[(uint8_t)dout]);
+}
+
 #endif

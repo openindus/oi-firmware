@@ -23,6 +23,7 @@ void ConsoleCore::registerCli(void)
     _registerDigitalRead();
     _registerAnalogRead();
     _registerAnalogReadMillivolts();
+    _registerDigitalReadOverCurrent();
 }
 
 /** 'digital-write' */
@@ -41,7 +42,7 @@ static int dWrite(int argc, char **argv)
         return 1;
     }
 
-    DigitalOutputNum_t dout = (DigitalOutputNum_t)(digitalWriteArgs.dout->ival[0] -1);
+    DigitalOutputNum_t dout = (DigitalOutputNum_t)(digitalWriteArgs.dout->ival[0] - 1);
     uint8_t level = (uint8_t)digitalWriteArgs.level->ival[0];
 
     CoreStandalone::digitalWrite(dout, level);
@@ -53,7 +54,7 @@ void ConsoleCore::_registerDigitalWrite(void)
 {
     digitalWriteArgs.dout = arg_int1(NULL, NULL, "<DOUT>", "[1-4]");
     digitalWriteArgs.level = arg_int1(NULL, NULL, "<LEVEL>", "0 = LOW, 1 = HIGH");
-    digitalWriteArgs.end = arg_end(2);
+    digitalWriteArgs.end = arg_end(3);
 
     const esp_console_cmd_t cmd = {
         .command = "digital-write",
@@ -121,7 +122,6 @@ static int analogRead(int argc, char **argv)
 
     printf("%d\n", CoreStandalone::analogRead(ain));
 
-
     return 0;
 }
 
@@ -170,6 +170,41 @@ void ConsoleCore::_registerAnalogReadMillivolts(void)
         .hint = NULL,
         .func = &analogReadMilliVolts,
         .argtable = &analogReadArgs
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+}
+
+/** 'digital-read-overcurrent' */
+
+static struct {
+    struct arg_int *dout;
+    struct arg_end *end;
+} digitalReadOverCurrentArgs;
+
+static int digitalReadOverCurrent(int argc, char **argv)
+{
+    int nerrors = arg_parse(argc, argv, (void **) &digitalReadOverCurrentArgs);
+    if (nerrors != 0) {
+        arg_print_errors(stderr, digitalReadOverCurrentArgs.end, argv[0]);
+        return 1;
+    }
+
+    DigitalOutputNum_t dout = (DigitalOutputNum_t)(digitalReadOverCurrentArgs.dout->ival[0] - 1);
+    printf("%u\n", CoreStandalone::digitalReadOverCurrent(dout));
+    return 0;
+}
+
+void ConsoleCore::_registerDigitalReadOverCurrent(void)
+{
+    digitalReadOverCurrentArgs.dout = arg_int1(NULL, NULL, "<DOUT>", "[1-4]");
+    digitalReadOverCurrentArgs.end = arg_end(2);
+
+    const esp_console_cmd_t cmd = {
+        .command = "digital-read-overcurrent",
+        .help = "Read the overcurrent status for the given output",
+        .hint = NULL,
+        .func = &digitalReadOverCurrent,
+        .argtable = &digitalReadOverCurrentArgs
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
 }
