@@ -31,5 +31,7 @@ private:
     static void _registerGetBoardInfo(void);
     static void _registerLed(void);
     static void _registerLog(void);
-
+    static void _registerReadId(void);
+    static void _registerWriteSync(void);
+    static void _registerReadSync(void);
 };

@@ -22,6 +22,9 @@ void ConsoleModule::registerCli(void)
     _registerRestart();
     _registerLog();
     _registerLed();
+    _registerReadId();
+    _registerWriteSync();
+    _registerReadSync();
 }
 
 /** 'restart' */
@@ -232,6 +235,83 @@ void ConsoleModule::_registerLog(void)
         .hint = NULL,
         .func = &log,
         .argtable = &logArgs
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+}
+
+/** 'read-id' */
+
+static int readId(int argc, char **argv) 
+{
+    printf("%umV\n", BusIO::readId());
+    return 0;
+}
+
+void ConsoleModule::_registerReadId(void)
+{
+    const esp_console_cmd_t cmd = {
+        .command = "read-id",
+        .help = "Read the bus ID of the device",
+        .hint = NULL,
+        .func = &readId,
+        .argtable = NULL
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+}
+
+/** 'write-sync' */
+
+static struct {
+    struct arg_int *level;
+    struct arg_end *end;
+} writeSyncArgs;
+
+static int writeSync(int argc, char **argv) 
+{
+    int nerrors = arg_parse(argc, argv, (void **) &writeSyncArgs);
+    if (nerrors != 0) {
+        arg_print_errors(stderr, writeSyncArgs.end, argv[0]);
+        return 1;
+    }
+
+    BusIO::writeSync((uint8_t)writeSyncArgs.level->ival[0]);
+
+    return 0;
+}
+
+void ConsoleModule::_registerWriteSync(void)
+{
+    writeSyncArgs.level = arg_int1(NULL, NULL, "<LEVEL>", "0 = LOW, 1 = HIGH");
+    writeSyncArgs.end = arg_end(1);
+
+    const esp_console_cmd_t cmd = {
+        .command = "write-sync",
+        .help = "set sync pin level",
+        .hint = NULL,
+        .func = &writeSync,
+        .argtable = &writeSyncArgs
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+}
+
+/** 'read-sync' */
+
+
+static int readSync(int argc, char **argv) 
+{
+    printf("%u\n", BusIO::readSync());
+
+    return 0;
+}
+
+void ConsoleModule::_registerReadSync(void)
+{
+    const esp_console_cmd_t cmd = {
+        .command = "read-sync",
+        .help = "get sync pin level",
+        .hint = NULL,
+        .func = &readSync,
+        .argtable = NULL
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
 }

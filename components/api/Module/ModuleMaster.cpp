@@ -34,6 +34,7 @@ void ModuleMaster::init(void)
         .adcChannelId = MODULE_OI_ID_ADC_CHANNEL,
         .adcWidthId = MODULE_OI_ID_ADC_WIDTH,
         .gpioNumSync = MODULE_PIN_OI_GPIO,
+        .gpioModeSync = GPIO_MODE_OUTPUT,
         .gpioNumPower = MODULE_PIN_CMD_MOSFET_ALIM,
     };
     BusIO::init(&config);
