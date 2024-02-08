@@ -38,7 +38,7 @@ public:
     } Config_t;
 
     static void init(Config_t* config);
-    static uint16_t readId(void);
+    static uint32_t readId(void);
     static void powerOn(void);
     static void powerOff(void);
     static uint8_t readSync(void);

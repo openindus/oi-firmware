@@ -38,7 +38,8 @@ void ModuleSlave::init(void)
     };
     BusIO::init(&config);
 
-    _id = BusIO::readId();
+    /* Board ID is represented by the 10 most significants bits of the adc reading (12 bits) */
+    _id = (uint16_t) (BusIO::readId()>>2);
     ESP_LOGI(MODULE_TAG, "Bus Id: %d", _id);
 
     /* Bus task */

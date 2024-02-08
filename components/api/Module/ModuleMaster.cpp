@@ -34,10 +34,11 @@ void ModuleMaster::init(void)
         .adcChannelId = MODULE_OI_ID_ADC_CHANNEL,
         .adcWidthId = MODULE_OI_ID_ADC_WIDTH,
         .gpioNumSync = MODULE_PIN_OI_GPIO,
-        .gpioModeSync = GPIO_MODE_OUTPUT,
+        .gpioModeSync = GPIO_MODE_INPUT_OUTPUT,
         .gpioNumPower = MODULE_PIN_CMD_MOSFET_ALIM,
     };
     BusIO::init(&config);
+    BusIO::writeSync(0);
 
     ESP_LOGI(MODULE_TAG, "Create bus task");
     xTaskCreate(_busTask, "Bus task", 4096, NULL, 1, NULL);

@@ -60,7 +60,7 @@ void BusIO::init(Config_t* config)
 #endif
 }
 
-uint16_t BusIO::readId(void)
+uint32_t BusIO::readId(void)
 {
     uint32_t adc_reading = 0;
     for (int i = 0; i < 64; i++)
@@ -68,7 +68,7 @@ uint16_t BusIO::readId(void)
         adc_reading += adc1_get_raw((adc1_channel_t)_config->adcChannelId);
     }
     adc_reading /= 64;
-    return (uint16_t)((esp_adc_cal_raw_to_voltage(adc_reading, _adcCharsId) * 1024) / 4096);
+    return esp_adc_cal_raw_to_voltage(adc_reading, _adcCharsId);
 }
 
 void BusIO::powerOn(void)
@@ -88,10 +88,10 @@ uint8_t BusIO::readSync(void)
 
 void BusIO::writeSync(uint8_t level)
 {
-    if (_config->gpioModeSync != GPIO_MODE_OUTPUT)
+    if (_config->gpioModeSync != GPIO_MODE_INPUT_OUTPUT)
     {
         ESP_LOGW(BUS_IO_TAG, "Sync cannot be write in slave mode !");
     } else {
-        gpio_set_level(_config->gpioNumPower, level);
+        gpio_set_level(_config->gpioNumSync, level);
     }
 }
