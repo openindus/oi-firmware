@@ -907,10 +907,9 @@ int MotorStepper::setAdvancedParamWithoutNvs(MotorNum_t motor, AdvancedParameter
             .f_pwm_dec = config.vm.f_pwm_dec,
             .f_pwm_int = config.vm.f_pwm_int,
         };
+        config.vm = config_vm;
 
-        errorCode = PS01_Param_SetConfig(motor, {
-            .vm = config_vm
-        });
+        errorCode = PS01_Param_SetConfig(motor, config);
         break;
     }
     case CONFIG_EXT_CLK:
@@ -929,10 +928,9 @@ int MotorStepper::setAdvancedParamWithoutNvs(MotorNum_t motor, AdvancedParameter
             .f_pwm_dec = config1.vm.f_pwm_dec,
             .f_pwm_int = config1.vm.f_pwm_int,
         };
+        config1.vm = config_vm1;
 
-        errorCode = PS01_Param_SetConfig(motor, {
-            .vm = config_vm1
-        });
+        errorCode = PS01_Param_SetConfig(motor, config1);
         break;
     }
     case CONFIG_SW_MODE:
@@ -951,10 +949,9 @@ int MotorStepper::setAdvancedParamWithoutNvs(MotorNum_t motor, AdvancedParameter
             .f_pwm_dec = config2.vm.f_pwm_dec,
             .f_pwm_int = config2.vm.f_pwm_int,
         };
+        config2.vm = config_vm2;
 
-        errorCode = PS01_Param_SetConfig(motor, {
-            .vm = config_vm2
-        });
+        errorCode = PS01_Param_SetConfig(motor, config2);
         break;
     }
     case CONFIG_OC_SD:
@@ -973,10 +970,9 @@ int MotorStepper::setAdvancedParamWithoutNvs(MotorNum_t motor, AdvancedParameter
             .f_pwm_dec = config3.vm.f_pwm_dec,
             .f_pwm_int = config3.vm.f_pwm_int,
         };
+        config3.vm = config_vm3;
 
-        errorCode = PS01_Param_SetConfig(motor, {
-            .vm = config_vm3
-        });
+        errorCode = PS01_Param_SetConfig(motor, config3);
         break;
     }
     case CONFIG_UVLOVAL:
@@ -995,10 +991,9 @@ int MotorStepper::setAdvancedParamWithoutNvs(MotorNum_t motor, AdvancedParameter
             .f_pwm_dec = config4.vm.f_pwm_dec,
             .f_pwm_int = config4.vm.f_pwm_int,
         };
-        errorCode = PS01_Param_SetConfig(motor, 
-        {
-            .vm = config_vm4
-        });
+        config4.vm = config_vm4;
+
+        errorCode = PS01_Param_SetConfig(motor, config4);
         break;
     }
     case CONFIG_VCCVAL:
@@ -1017,10 +1012,9 @@ int MotorStepper::setAdvancedParamWithoutNvs(MotorNum_t motor, AdvancedParameter
             .f_pwm_dec = config5.vm.f_pwm_dec,
             .f_pwm_int = config5.vm.f_pwm_int,
         };
+        config5.vm = config_vm5;
 
-        errorCode = PS01_Param_SetConfig(motor, {
-            .vm = config_vm5
-            });
+        errorCode = PS01_Param_SetConfig(motor, config5);
         break;
     }
 #ifdef CONFIG_CURRENT_MODE
@@ -1057,10 +1051,9 @@ int MotorStepper::setAdvancedParamWithoutNvs(MotorNum_t motor, AdvancedParameter
             .f_pwm_dec = config6.vm.f_pwm_dec,
             .f_pwm_int = config6.vm.f_pwm_int,
         };
+        config6.vm = config_vm6;
 
-        errorCode = PS01_Param_SetConfig(motor, {
-            .vm = config_vm6
-        });
+        errorCode = PS01_Param_SetConfig(motor, config6);
         break;
     }
     case VM_CONFIG_F_PWM_DEC:
@@ -1079,10 +1072,9 @@ int MotorStepper::setAdvancedParamWithoutNvs(MotorNum_t motor, AdvancedParameter
             .f_pwm_dec = vm_f_pwm_dec,
             .f_pwm_int = config7.vm.f_pwm_int,
         };
+        config7.vm = config_vm_7;
 
-        errorCode = PS01_Param_SetConfig(motor, {
-            .vm = config_vm_7
-        });
+        errorCode = PS01_Param_SetConfig(motor, config7);
         break;
     }
     case VM_CONFIG_F_PWM_INT:
@@ -1101,9 +1093,8 @@ int MotorStepper::setAdvancedParamWithoutNvs(MotorNum_t motor, AdvancedParameter
             .f_pwm_dec = config8.vm.f_pwm_dec,
             .f_pwm_int = vm_f_pwm_int,
         };
-        errorCode = PS01_Param_SetConfig(motor, {
-            .vm = config_vm_8
-        });
+        config8.vm = config_vm_8;
+        errorCode = PS01_Param_SetConfig(motor, config8);
         break;
     }
     case VM_KVAL_HOLD:
