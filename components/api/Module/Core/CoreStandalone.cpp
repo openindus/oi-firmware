@@ -56,9 +56,6 @@ void CoreStandalone::init()
 
 #if defined(CONFIG_IDF_TARGET_ESP32)
 
-/* Init GPIO service */
-    gpio_install_isr_service(0);
-
     /**
      * @brief I2C init
      * 
@@ -197,7 +194,7 @@ void CoreStandalone::init()
     ioex_set_level(_ioex, CORE_IOEX_PIN_CAN_RESET, IOEX_LOW);
     vTaskDelay(10);
     ioex_set_level(_ioex, CORE_IOEX_PIN_CAN_RESET, IOEX_HIGH);
-    
+
 #elif defined(CONFIG_IDF_TARGET_ESP32S3)
 
     /**
