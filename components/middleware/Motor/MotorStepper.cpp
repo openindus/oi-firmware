@@ -629,161 +629,391 @@ int MotorStepper::setAdvancedParamWithoutNvs(MotorNum_t motor, AdvancedParameter
     case STEP_MODE_CM_VM:
     {
         register_step_mode_t stpmd1 = PS01_Param_GetStepMode(motor);
-        stpmd1.cm_vm = *((uint8_t *) value) & 1;
-        errorCode = PS01_Param_SetStepModeComplete(motor,stpmd1);
+        bool cmvm = *((bool *) value) & 1;
+        errorCode = PS01_Param_SetStepModeComplete(motor,
+        {
+            .step_sel = stpmd1.step_sel,
+            .cm_vm = cmvm,
+            .sync_sel = stpmd1.sync_sel,
+            .sync_en = stpmd1.sync_en,
+            .reserved = 0
+
+        });
         break;
     }
     case STEP_MODE_SYNC_SEL:
     {
         register_step_mode_t stpmd2 = PS01_Param_GetStepMode(motor);
-        stpmd2.step_sel = *((uint8_t *) value) & 7;
-        errorCode = PS01_Param_SetStepModeComplete(motor,stpmd2);
+        uint8_t syncsel = *((uint8_t *) value) & 7;
+        errorCode = PS01_Param_SetStepModeComplete(motor,{
+            .step_sel = stpmd2.step_sel,
+            .cm_vm = stpmd2.cm_vm,
+            .sync_sel = syncsel,
+            .sync_en = stpmd2.sync_en,
+            .reserved = 0
+        });
         break;
     }
     case STEP_MODE_SYNC_EN:
     {
         register_step_mode_t stpmd3 = PS01_Param_GetStepMode(motor);
-        stpmd3.sync_en = *((uint8_t *) value) & 1;
-        errorCode = PS01_Param_SetStepModeComplete(motor,stpmd3);
+        bool syncen = *((uint8_t *) value) & 1;
+        errorCode = PS01_Param_SetStepModeComplete(motor,
+        {
+            .step_sel = stpmd3.step_sel,
+            .cm_vm = stpmd3.cm_vm,
+            .sync_sel = stpmd3.sync_sel,
+            .sync_en = syncen,
+            .reserved = 0
+        });
         break;
     }
     case ALARM_EN_OVERCURRENT:
     {
         register_alarm_enabled_t alarm = PS01_Param_GetAlarmEnabled(motor);
-        alarm.overcurrent = *((uint8_t *) value) & 1;
-        errorCode = PS01_Param_SetAlarmEnabled(motor, alarm);
+        bool overcurrent = *((uint8_t *) value) & 1;
+        errorCode = PS01_Param_SetAlarmEnabled(motor, {
+            .overcurrent = overcurrent,
+            .thermal_shutdown = alarm.thermal_shutdown,
+            .thermal_warning = alarm.thermal_warning,
+            .uvlo = alarm.uvlo,
+            .adc_uvlo = alarm.adc_uvlo,
+            .stall_detection = alarm.stall_detection,
+            .switch_turn_on = alarm.switch_turn_on,
+            .command_error = alarm.command_error,
+            .reserved = 0
+        });
         break;
     }
     case ALARM_EN_THERMAL_SHUTDOWN:
     {
         register_alarm_enabled_t alarm1 = PS01_Param_GetAlarmEnabled(motor);
-        alarm1.thermal_shutdown = *((uint8_t *) value) & 1;
-        errorCode = PS01_Param_SetAlarmEnabled(motor, alarm1);
+        bool thermal_shutdown = *((uint8_t *) value) & 1;
+        errorCode = PS01_Param_SetAlarmEnabled(motor, {
+            .overcurrent = alarm1.overcurrent,
+            .thermal_shutdown = thermal_shutdown,
+            .thermal_warning = alarm1.thermal_warning,
+            .uvlo = alarm1.uvlo,
+            .adc_uvlo = alarm1.adc_uvlo,
+            .stall_detection = alarm1.stall_detection,
+            .switch_turn_on = alarm1.switch_turn_on,
+            .command_error = alarm1.command_error,
+            .reserved = 0
+        });
         break;
     }
     case ALARM_EN_THERMAL_WARNING:
     {
         register_alarm_enabled_t alarm2 = PS01_Param_GetAlarmEnabled(motor);
-        alarm2.thermal_warning = *((uint8_t *) value) & 1;
-        errorCode = PS01_Param_SetAlarmEnabled(motor, alarm2);
+        bool thermal_warning = *((uint8_t *) value) & 1;
+        errorCode = PS01_Param_SetAlarmEnabled(motor, 
+        {
+            .overcurrent = alarm2.overcurrent,
+            .thermal_shutdown = alarm2.thermal_shutdown,
+            .thermal_warning = thermal_warning,
+            .uvlo = alarm2.uvlo,
+            .adc_uvlo = alarm2.adc_uvlo,
+            .stall_detection = alarm2.stall_detection,
+            .switch_turn_on = alarm2.switch_turn_on,
+            .command_error = alarm2.command_error,
+            .reserved = 0
+        });
         break;
     }
     case ALARM_EN_UVLO:
     {
         register_alarm_enabled_t alarm3 = PS01_Param_GetAlarmEnabled(motor);
-        alarm3.uvlo = *((uint8_t *) value) & 1;
-        errorCode = PS01_Param_SetAlarmEnabled(motor, alarm3);
+        bool uvlo = *((uint8_t *) value) & 1;
+        errorCode = PS01_Param_SetAlarmEnabled(motor, {
+            .overcurrent = alarm3.overcurrent,
+            .thermal_shutdown = alarm3.thermal_shutdown,
+            .thermal_warning = alarm3.thermal_warning,
+            .uvlo = uvlo,
+            .adc_uvlo = alarm3.adc_uvlo,
+            .stall_detection = alarm3.stall_detection,
+            .switch_turn_on = alarm3.switch_turn_on,
+            .command_error = alarm3.command_error,
+            .reserved = 0
+        });
         break;
     }
     case ALARM_EN_ADC_UVLO:
     {
         register_alarm_enabled_t alarm4 = PS01_Param_GetAlarmEnabled(motor);
-        alarm4.adc_uvlo = *((uint8_t *) value) & 1;
-        errorCode = PS01_Param_SetAlarmEnabled(motor, alarm4);
+        bool adc_uvlo = *((uint8_t *) value) & 1;
+        errorCode = PS01_Param_SetAlarmEnabled(motor, {
+            .overcurrent = alarm4.overcurrent,
+            .thermal_shutdown = alarm4.thermal_shutdown,
+            .thermal_warning = alarm4.thermal_warning,
+            .uvlo = alarm4.uvlo,
+            .adc_uvlo = adc_uvlo,
+            .stall_detection = alarm4.stall_detection,
+            .switch_turn_on = alarm4.switch_turn_on,
+            .command_error = alarm4.command_error,
+            .reserved = 0
+        
+        });
         break;
     }
     case ALARM_EN_STALL_DETECTION:
     {
         register_alarm_enabled_t alarm5 = PS01_Param_GetAlarmEnabled(motor);
-        alarm5.stall_detection = *((uint8_t *) value) & 1;
-        errorCode = PS01_Param_SetAlarmEnabled(motor, alarm5);
+        bool stall_detection = *((uint8_t *) value) & 1;
+        errorCode = PS01_Param_SetAlarmEnabled(motor, 
+        {
+            .overcurrent = alarm5.overcurrent,
+            .thermal_shutdown = alarm5.thermal_shutdown,
+            .thermal_warning = alarm5.thermal_warning,
+            .uvlo = alarm5.uvlo,
+            .adc_uvlo = alarm5.adc_uvlo,
+            .stall_detection = stall_detection,
+            .switch_turn_on = alarm5.switch_turn_on,
+            .command_error = alarm5.command_error,
+            .reserved = 0
+        });
         break;
     }
     case ALARM_EN_SW_TURN_ON:
     {
         register_alarm_enabled_t alarm6 = PS01_Param_GetAlarmEnabled(motor);
-        alarm6.switch_turn_on = *((uint8_t *) value) & 1;
-        errorCode = PS01_Param_SetAlarmEnabled(motor, alarm6);
+        bool switch_turn_on = *((uint8_t *) value) & 1;
+        errorCode = PS01_Param_SetAlarmEnabled(motor, {
+            .overcurrent = alarm6.overcurrent,
+            .thermal_shutdown = alarm6.thermal_shutdown,
+            .thermal_warning = alarm6.thermal_warning,
+            .uvlo = alarm6.uvlo,
+            .adc_uvlo = alarm6.adc_uvlo,
+            .stall_detection = alarm6.stall_detection,
+            .switch_turn_on = switch_turn_on,
+            .command_error = alarm6.command_error,
+            .reserved = 0
+        });
         break;
     }
     case ALARM_EN_COMMAND_ERROR:
     {
         register_alarm_enabled_t alarm7 = PS01_Param_GetAlarmEnabled(motor);
-        alarm7.command_error = *((uint8_t *) value) & 1;
-        errorCode = PS01_Param_SetAlarmEnabled(motor, alarm7);
+        bool command_error = *((uint8_t *) value) & 1;
+        errorCode = PS01_Param_SetAlarmEnabled(motor, 
+        {
+            .overcurrent = alarm7.overcurrent,
+            .thermal_shutdown = alarm7.thermal_shutdown,
+            .thermal_warning = alarm7.thermal_warning,
+            .uvlo = alarm7.uvlo,
+            .adc_uvlo = alarm7.adc_uvlo,
+            .stall_detection = alarm7.stall_detection,
+            .switch_turn_on = alarm7.switch_turn_on,
+            .command_error = command_error,
+            .reserved = 0
+        
+        });
         break;
     }
     case GATECFG1_TCC:
     {
         register_gate_cfg_1_t cfg = PS01_Param_GetGateDriverConfig1(motor);
-        cfg.tcc = *((uint8_t *) value) & 31;
-        errorCode = PS01_Param_SetGateDriverConfig1(motor, cfg);
+        uint8_t tcc = *((uint8_t *) value) & 31;
+        errorCode = PS01_Param_SetGateDriverConfig1(motor, 
+        {
+            .tcc = tcc,
+            .igate = cfg.igate,
+            .tboost = cfg.tboost,
+            .wd_en = cfg.wd_en,
+            .reserved = 0
+        });
         break;
     }
     case GATECFG1_IGATE:
     {
         register_gate_cfg_1_t cfg1 = PS01_Param_GetGateDriverConfig1(motor);
-        cfg1.igate = *((uint8_t *) value) & 7;
-        errorCode = PS01_Param_SetGateDriverConfig1(motor, cfg1);
+        uint8_t igate = *((uint8_t *) value) & 7;
+        errorCode = PS01_Param_SetGateDriverConfig1(motor, 
+        {
+            .tcc = cfg1.tcc,
+            .igate = igate,
+            .tboost = cfg1.tboost,
+            .wd_en = cfg1.wd_en,
+            .reserved = 0
+        });
         break;
     }
     case GATECFG1_TBOOST:
     {
         register_gate_cfg_1_t cfg2 = PS01_Param_GetGateDriverConfig1(motor);
-        cfg2.tboost = *((uint8_t *) value) & 7;
-        errorCode = PS01_Param_SetGateDriverConfig1(motor, cfg2);
+        uint8_t tboost = *((uint8_t *) value) & 7;
+        errorCode = PS01_Param_SetGateDriverConfig1(motor, 
+        {
+            .tcc = cfg2.tcc,
+            .igate = cfg2.igate,
+            .tboost = tboost,
+            .wd_en = cfg2.wd_en,
+            .reserved = 0
+        
+        });
         break;
     }
     case GATECFG1_WD_EN:
     {
         register_gate_cfg_1_t cfg3 = PS01_Param_GetGateDriverConfig1(motor);
-        cfg3.wd_en = *((uint8_t *) value) & 1;
-        errorCode = PS01_Param_SetGateDriverConfig1(motor, cfg3);
+        bool wd_en = *((uint8_t *) value) & 1;
+        errorCode = PS01_Param_SetGateDriverConfig1(motor, 
+        {
+            .tcc = cfg3.tcc,
+            .igate = cfg3.igate,
+            .tboost = cfg3.tboost,
+            .wd_en = wd_en,
+            .reserved = 0
+        
+        });
         break;
     }
     case GATECFG2_TDT:
     {
         register_gate_cfg_2_t cfg21 = PS01_Param_GetGateDriverConfig2(motor);
-        cfg21.tdt = *((uint8_t *) value) & 31;
-        errorCode = PS01_Param_SetGateDriverConfig2(motor, cfg21);
+        uint8_t tdt = *((uint8_t *) value) & 31;
+        errorCode = PS01_Param_SetGateDriverConfig2(motor, {
+            .tdt = tdt,
+            .tblank = cfg21.tblank,
+            .reserved = 0
+        });
         break;
     }
     case GATECFG2_TBLANK:
     {
         register_gate_cfg_2_t cfg22 = PS01_Param_GetGateDriverConfig2(motor);
-        cfg22.tdt = *((uint8_t *) value) & 7;
-        errorCode = PS01_Param_SetGateDriverConfig2(motor, cfg22);
+        uint8_t tblank = *((uint8_t *) value) & 7;
+        errorCode = PS01_Param_SetGateDriverConfig2(motor, 
+        {
+            .tdt = cfg22.tdt,
+            .tblank = tblank,
+            .reserved = 0
+        
+        });
         break;
     }
     case CONFIG_OSC_SEL:
     {
         register_config_t config = PS01_Param_GetConfig(motor);
-        config.vm.osc_sel = *((uint8_t *) value) & 7;
+        uint8_t vm_osc_sel = *((uint8_t *) value) & 7;
+
+        register_config_vm_t config_vm = {
+            .osc_sel = vm_osc_sel,
+            .ext_clk = config.vm.ext_clk,
+            .sw_mode = config.vm.sw_mode,
+            .en_vscomp = config.vm.en_vscomp,
+            .oc_sd = config.vm.oc_sd,
+            .uvloval = config.vm.uvloval,
+            .vccval = config.vm.vccval,
+            .f_pwm_dec = config.vm.f_pwm_dec,
+            .f_pwm_int = config.vm.f_pwm_int,
+        };
+        config.vm = config_vm;
+
         errorCode = PS01_Param_SetConfig(motor, config);
         break;
     }
     case CONFIG_EXT_CLK:
     {
         register_config_t config1 = PS01_Param_GetConfig(motor);
-        config1.vm.ext_clk = *((uint8_t *) value) & 1;
+        bool vm_ext_clk = *((uint8_t *) value) & 1;
+
+        register_config_vm_t config_vm1 = {
+            .osc_sel = config1.vm.osc_sel,
+            .ext_clk = vm_ext_clk,
+            .sw_mode = config1.vm.sw_mode,
+            .en_vscomp = config1.vm.en_vscomp,
+            .oc_sd = config1.vm.oc_sd,
+            .uvloval = config1.vm.uvloval,
+            .vccval = config1.vm.vccval,
+            .f_pwm_dec = config1.vm.f_pwm_dec,
+            .f_pwm_int = config1.vm.f_pwm_int,
+        };
+        config1.vm = config_vm1;
+
         errorCode = PS01_Param_SetConfig(motor, config1);
         break;
     }
     case CONFIG_SW_MODE:
     {
         register_config_t config2 = PS01_Param_GetConfig(motor);
-        config2.vm.sw_mode = *((uint8_t *) value) & 1;
+        bool vm_sw_mode = *((uint8_t *) value) & 1;
+
+        register_config_vm_t config_vm2 = {
+            .osc_sel = config2.vm.osc_sel,
+            .ext_clk = config2.vm.ext_clk,
+            .sw_mode = vm_sw_mode,
+            .en_vscomp = config2.vm.en_vscomp,
+            .oc_sd = config2.vm.oc_sd,
+            .uvloval = config2.vm.uvloval,
+            .vccval = config2.vm.vccval,
+            .f_pwm_dec = config2.vm.f_pwm_dec,
+            .f_pwm_int = config2.vm.f_pwm_int,
+        };
+        config2.vm = config_vm2;
+
         errorCode = PS01_Param_SetConfig(motor, config2);
         break;
     }
     case CONFIG_OC_SD:
     {
         register_config_t config3 = PS01_Param_GetConfig(motor);
-        config3.vm.oc_sd = *((uint8_t *) value) & 1;
+        bool vm_oc_sd = *((uint8_t *) value) & 1;
+
+        register_config_vm_t config_vm3 = {
+            .osc_sel = config3.vm.osc_sel,
+            .ext_clk = config3.vm.ext_clk,
+            .sw_mode = config3.vm.sw_mode,
+            .en_vscomp = config3.vm.en_vscomp,
+            .oc_sd = vm_oc_sd,
+            .uvloval = config3.vm.uvloval,
+            .vccval = config3.vm.vccval,
+            .f_pwm_dec = config3.vm.f_pwm_dec,
+            .f_pwm_int = config3.vm.f_pwm_int,
+        };
+        config3.vm = config_vm3;
+
         errorCode = PS01_Param_SetConfig(motor, config3);
         break;
     }
     case CONFIG_UVLOVAL:
     {
         register_config_t config4 = PS01_Param_GetConfig(motor);
-        config4.vm.uvloval =  *((uint8_t *) value) & 1;
+        bool vm_uvloval = *((uint8_t *) value) & 1;
+
+        register_config_vm_t config_vm4 = {
+            .osc_sel = config4.vm.osc_sel,
+            .ext_clk = config4.vm.ext_clk,
+            .sw_mode = config4.vm.sw_mode,
+            .en_vscomp = config4.vm.en_vscomp,
+            .oc_sd = config4.vm.oc_sd,
+            .uvloval = vm_uvloval,
+            .vccval = config4.vm.vccval,
+            .f_pwm_dec = config4.vm.f_pwm_dec,
+            .f_pwm_int = config4.vm.f_pwm_int,
+        };
+        config4.vm = config_vm4;
+
         errorCode = PS01_Param_SetConfig(motor, config4);
         break;
     }
     case CONFIG_VCCVAL:
     {
         register_config_t config5 = PS01_Param_GetConfig(motor);
-        config5.vm.vccval = *((uint8_t *) value) & 1;
+        bool vm_vccval = *((uint8_t *) value) & 1;
+
+        register_config_vm_t config_vm5 = {
+            .osc_sel = config5.vm.osc_sel,
+            .ext_clk = config5.vm.ext_clk,
+            .sw_mode = config5.vm.sw_mode,
+            .en_vscomp = config5.vm.en_vscomp,
+            .oc_sd = config5.vm.oc_sd,
+            .uvloval = config5.vm.uvloval,
+            .vccval = vm_vccval,
+            .f_pwm_dec = config5.vm.f_pwm_dec,
+            .f_pwm_int = config5.vm.f_pwm_int,
+        };
+        config5.vm = config_vm5;
+
         errorCode = PS01_Param_SetConfig(motor, config5);
         break;
     }
@@ -808,21 +1038,62 @@ int MotorStepper::setAdvancedParamWithoutNvs(MotorNum_t motor, AdvancedParameter
     case VM_CONFIG_EN_VSCOMP:
     {
         register_config_t config6 = PS01_Param_GetConfig(motor);
-        config6.vm.en_vscomp = *((uint8_t *) value) & 1;
+        bool vm_en_vscomp = *((uint8_t *) value) & 1;
+
+        register_config_vm_t config_vm6 = {
+            .osc_sel = config6.vm.osc_sel,
+            .ext_clk = config6.vm.ext_clk,
+            .sw_mode = config6.vm.sw_mode,
+            .en_vscomp = vm_en_vscomp,
+            .oc_sd = config6.vm.oc_sd,
+            .uvloval = config6.vm.uvloval,
+            .vccval = config6.vm.vccval,
+            .f_pwm_dec = config6.vm.f_pwm_dec,
+            .f_pwm_int = config6.vm.f_pwm_int,
+        };
+        config6.vm = config_vm6;
+
         errorCode = PS01_Param_SetConfig(motor, config6);
         break;
     }
     case VM_CONFIG_F_PWM_DEC:
     {
         register_config_t config7 = PS01_Param_GetConfig(motor);
-        config7.vm.f_pwm_dec = *((uint8_t *) value) & 7;
+        uint8_t vm_f_pwm_dec = *((uint8_t *) value) & 7;
+
+        register_config_vm_t config_vm_7 = {
+            .osc_sel = config7.vm.osc_sel,
+            .ext_clk = config7.vm.ext_clk,
+            .sw_mode = config7.vm.sw_mode,
+            .en_vscomp = config7.vm.en_vscomp,
+            .oc_sd = config7.vm.oc_sd,
+            .uvloval = config7.vm.uvloval,
+            .vccval = config7.vm.vccval,
+            .f_pwm_dec = vm_f_pwm_dec,
+            .f_pwm_int = config7.vm.f_pwm_int,
+        };
+        config7.vm = config_vm_7;
+
         errorCode = PS01_Param_SetConfig(motor, config7);
         break;
     }
     case VM_CONFIG_F_PWM_INT:
     {
         register_config_t config8 = PS01_Param_GetConfig(motor);
-        config8.vm.f_pwm_int = *((uint8_t *) value) & 7;
+        uint8_t vm_f_pwm_int = *((uint8_t *) value) & 7;
+
+        register_config_vm_t config_vm_8 = {
+            .osc_sel = config8.vm.osc_sel,
+            .ext_clk = config8.vm.ext_clk,
+            .sw_mode = config8.vm.sw_mode,
+            .en_vscomp = config8.vm.en_vscomp,
+            .oc_sd = config8.vm.oc_sd,
+            .uvloval = config8.vm.uvloval,
+            .vccval = config8.vm.vccval,
+            .f_pwm_dec = config8.vm.f_pwm_dec,
+            .f_pwm_int = vm_f_pwm_int,
+        };
+        config8.vm = config_vm_8;
         errorCode = PS01_Param_SetConfig(motor, config8);
         break;
     }
@@ -1390,6 +1661,7 @@ void MotorStepper::initNVSParam() {
         if (PS01_IsActive(i)) {
             // Get or create the advanced param from NVS
             PS01_AdvancedParam_t param = MotorStepper::getNVSParam((MotorNum_t) i);
+            printf("param step sel %d\n", param.stepModeStepSel);
             MotorStepper::setAllAdvancedParamPS01((MotorNum_t) i, param);
         } else {
             ESP_LOGE("MotorStepper", "Motor %d is not active", i);
