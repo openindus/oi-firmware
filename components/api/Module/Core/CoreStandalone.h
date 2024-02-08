@@ -42,18 +42,18 @@ public:
     static int digitalRead(DigitalInputNum_t din);
 
     /**
-     * @brief Read the value of AIN. 
+     * @brief Read the value of AIN.
      * The function return the raw value (0-4096) that correspond to the voltage of the ANA.
-     * 
+     *
      * @param eana ANA input to monitor.
      * @return int Value of the AIN input.
      */
     static int analogRead(AnalogInputNum_t eana);
 
     /**
-     * @brief Read the value of AIN. 
+     * @brief Read the value of AIN.
      * The function return a float that correspond to the voltage of the ANA (from 0 to 2.6V).
-     * 
+     *
      * @param eana ANA input to monitor.
      * @return float Value of the AIN input.
      */

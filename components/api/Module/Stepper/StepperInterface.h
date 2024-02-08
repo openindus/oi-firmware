@@ -55,7 +55,7 @@ public:
      * @brief Configure limit switch to perform homing
      * 
      * @param motor 
-     * @param dinNum 
+     * @param dinNum
      * @param logic 
      */
     virtual void setLimitSwitch(MotorNum_t motor, DigitalInputNum_t dinNum, DigitalInputLogic_t logic=ACTIVE_HIGH) = 0;

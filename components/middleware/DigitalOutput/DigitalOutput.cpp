@@ -32,7 +32,7 @@ void DigitalOutput::init(gpio_config_t* config, gpio_num_t* num)
     /** @todo */
 }
 
-void DigitalOutput::digitalWrite(DigitalOutputNum_t dout, uint8_t level) 
+void DigitalOutput::digitalWrite(DigitalOutputNum_t dout, uint8_t level)
 {
     if (dout < DOUT_MAX) {
         gpio_set_level(_gpio[dout], level);
@@ -52,7 +52,7 @@ void DigitalOutput::digitalToggle(DigitalOutputNum_t dout)
     }
 }
 
-void DigitalOutput::analogWrite(DigitalOutputNum_t dout, uint8_t duty) 
+void DigitalOutput::analogWrite(DigitalOutputNum_t dout, uint8_t duty)
 {
     DigitalOutput::ledcSetup(dout, 50, LEDC_TIMER_8_BIT);
     DigitalOutput::ledcWrite(dout, duty);

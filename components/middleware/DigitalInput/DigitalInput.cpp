@@ -47,7 +47,7 @@ int DigitalInput::digitalRead(DigitalInputNum_t din)
     }
 }
 
-void DigitalInput::attachInterrupt(DigitalInputNum_t din, IsrCallback_t callback, InterruptMode_t mode, void* arg) 
+void DigitalInput::attachInterrupt(DigitalInputNum_t din, IsrCallback_t callback, InterruptMode_t mode, void* arg)
 {
     _callback[din] = callback;
     _arg[din] = arg;

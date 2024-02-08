@@ -26,7 +26,11 @@ class BusIO
 public:
 
     typedef struct {
+#if defined(CONFIG_IDF_TARGET_ESP32S3)
         adc1_channel_t adcChannelId;
+#else
+        adc_channel_t adcChannelId;
+#endif
         adc_bits_width_t adcWidthId;
         gpio_num_t gpioNumSync;
         gpio_num_t gpioNumPower;

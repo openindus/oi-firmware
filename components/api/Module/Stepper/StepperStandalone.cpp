@@ -22,7 +22,7 @@
 
 static const char STEPPER_TAG[] = "Stepper";
 
-gpio_num_t _dinGpio[] = { 
+gpio_num_t _dinGpio[] = {
     STEPPER_GPIO_PIN_DIN_1,
     STEPPER_GPIO_PIN_DIN_2,
     STEPPER_GPIO_PIN_DIN_3,
@@ -56,7 +56,7 @@ int StepperStandalone::digitalRead(DigitalInputNum_t dinNum)
     return din->digitalRead(dinNum);
 }
 
-void StepperStandalone::attachInterrupt(DigitalInputNum_t dinNum, IsrCallback_t callback, InterruptMode_t mode, void* arg) 
+void StepperStandalone::attachInterrupt(DigitalInputNum_t dinNum, IsrCallback_t callback, InterruptMode_t mode, void* arg)
 {
     din->attachInterrupt(dinNum, callback, mode, arg);
 }

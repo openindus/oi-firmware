@@ -56,13 +56,13 @@ void DiscreteSlave::init(void)
     onRequest(CMD_ATTACH_INTERRUPT, [](RequestMsg_t msg) -> uint32_t {
         DigitalInputNum_t din = (DigitalInputNum_t)msg.param;
         InterruptMode_t mode = (InterruptMode_t)msg.data;
-        DiscreteStandalone::attachInterrupt(din, _isrCallback[din], mode); 
+        DiscreteStandalone::attachInterrupt(din, _isrCallback[din], mode);
         return 0;
     });
 
     onRequest(CMD_DETACH_INTERRUPT, [](RequestMsg_t msg) -> uint32_t {
         DigitalInputNum_t din = (DigitalInputNum_t)msg.param;
-        DiscreteStandalone::detachInterrupt(din); 
+        DiscreteStandalone::detachInterrupt(din);
         return 0;
     });
 }

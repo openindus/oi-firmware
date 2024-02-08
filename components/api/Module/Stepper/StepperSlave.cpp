@@ -37,13 +37,13 @@ void StepperSlave::init(void)
     onRequest(CMD_ATTACH_INTERRUPT, [](RequestMsg_t msg) -> uint32_t {
         DigitalInputNum_t din = (DigitalInputNum_t)msg.param;
         InterruptMode_t mode = (InterruptMode_t)msg.data;
-        StepperStandalone::attachInterrupt(din, _isrCallback[din], mode); 
+        StepperStandalone::attachInterrupt(din, _isrCallback[din], mode);
         return 0;
     });
 
     onRequest(CMD_DETACH_INTERRUPT, [](RequestMsg_t msg) -> uint32_t {
         DigitalInputNum_t din = (DigitalInputNum_t)msg.param;
-        StepperStandalone::detachInterrupt(din); 
+        StepperStandalone::detachInterrupt(din);
         return 0;
     });
 
@@ -97,7 +97,7 @@ void StepperSlave::init(void)
         MotorNum_t motor = (MotorNum_t)(msg.param & 0x0000FF);
         DigitalInputNum_t din = (DigitalInputNum_t)((msg.param & 0x00FF00) >> 8);
         DigitalInputLogic_t logic = (DigitalInputLogic_t)msg.data;
-        StepperStandalone::setLimitSwitch(motor, din, logic); 
+        StepperStandalone::setLimitSwitch(motor, din, logic);
         return 0;
     });
 

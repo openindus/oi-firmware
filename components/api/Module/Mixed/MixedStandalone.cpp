@@ -120,7 +120,7 @@ void MixedStandalone::init()
     gpio_install_isr_service(ESP_INTR_FLAG_LEVEL3);
 }
 
-void MixedStandalone::digitalWrite(DigitalOutputNum_t dout, uint8_t level) 
+void MixedStandalone::digitalWrite(DigitalOutputNum_t dout, uint8_t level)
 {
     if (dout < DOUT_MAX) {
         gpio_set_level(_doutGpio[dout], level);
@@ -134,7 +134,7 @@ int MixedStandalone::digitalRead(DigitalInputNum_t dinNum)
     return din->digitalRead(dinNum);
 }
 
-void MixedStandalone::attachInterrupt(DigitalInputNum_t dinNum, IsrCallback_t callback, InterruptMode_t mode, void* arg) 
+void MixedStandalone::attachInterrupt(DigitalInputNum_t dinNum, IsrCallback_t callback, InterruptMode_t mode, void* arg)
 {
     din->attachInterrupt(dinNum, callback, mode, arg);
 }

@@ -20,21 +20,21 @@
 
 static const char CORE_TAG[] = "Core";
 
-const ioex_num_t CoreStandalone::_dout[4] = { 
+const ioex_num_t CoreStandalone::_dout[4] = {
     CORE_IOEX_PIN_DOUT_1,
     CORE_IOEX_PIN_DOUT_2,
     CORE_IOEX_PIN_DOUT_3,
     CORE_IOEX_PIN_DOUT_4,
 };
 
-const ioex_num_t CoreStandalone::_doutSensor[4] = { 
+const ioex_num_t CoreStandalone::_doutSensor[4] = {
     CORE_IOEX_PIN_DOUT_CURRENT_1,
     CORE_IOEX_PIN_DOUT_CURRENT_2,
     CORE_IOEX_PIN_DOUT_CURRENT_3,
     CORE_IOEX_PIN_DOUT_CURRENT_4,
 };
 
-const ioex_num_t CoreStandalone::_din[4] = { 
+const ioex_num_t CoreStandalone::_din[4] = {
     CORE_IOEX_PIN_DIN_1,
     CORE_IOEX_PIN_DIN_2,
     CORE_IOEX_PIN_DIN_3,
@@ -53,6 +53,11 @@ std::map<DigitalInputNum_t, InterruptMode_t> CoreStandalone::_dinCurrentMode;
 void CoreStandalone::init()
 {
     ModuleStandalone::init();
+
+#if defined(CONFIG_IDF_TARGET_ESP32)
+
+
+#elif defined(CONFIG_IDF_TARGET_ESP32S3)
 
     /**
      * @brief I2C init
@@ -254,7 +259,7 @@ void CoreStandalone::init()
 
     /**
      * @brief 5V User Init
-     * 
+     *
      */
     ioex_config_t v_user_conf;
 
@@ -263,19 +268,30 @@ void CoreStandalone::init()
     v_user_conf.interrupt_type = IOEX_INTERRUPT_DISABLE;
     v_user_conf.pin_bit_mask = (1ULL<<CORE_IOEX_PIN_5V_USER_PG);
     ioex_config(_ioex, &v_user_conf);
-    
+
+    /* 5V user EN is set as floating input for normal operation. Set as OUTPUT LOW to disable 5V Output */
+    v_user_conf.mode = IOEX_INPUT;
+    v_user_conf.pull_mode = IOEX_FLOATING;
+    v_user_conf.interrupt_type = IOEX_INTERRUPT_DISABLE;
+    v_user_conf.pin_bit_mask = (1ULL<<CORE_IOEX_PIN_5V_USER_PG);
+    v_user_conf.pin_bit_mask = (1ULL<<CORE_IOEX_PIN_5V_USER_EN);
+    ioex_config(_ioex, &v_user_conf);
+
     /**
      * @brief RTC Init
      * Configure IOExpander RTC Interrupt pin
      */
 
-    ioex_config_t io_rtc_conf;    
+    ioex_config_t io_rtc_conf;
     io_rtc_conf.mode = IOEX_INPUT;
     io_rtc_conf.pull_mode = IOEX_PULLUP;
     io_rtc_conf.interrupt_type = IOEX_INTERRUPT_NEGEDGE;
     io_rtc_conf.pin_bit_mask = (1ULL<<CORE_PIN_RTC_INTERRUPT);
 
     ESP_ERROR_CHECK(ioex_config(_ioex, &io_rtc_conf));
+
+#endif
+
 }
 
 void CoreStandalone::digitalWrite(DigitalOutputNum_t dout, uint8_t level)

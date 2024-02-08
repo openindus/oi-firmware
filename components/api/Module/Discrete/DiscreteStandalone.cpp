@@ -82,7 +82,7 @@ void DiscreteStandalone::init()
     }
 }
 
-void DiscreteStandalone::digitalWrite(DigitalOutputNum_t dout, uint8_t level) 
+void DiscreteStandalone::digitalWrite(DigitalOutputNum_t dout, uint8_t level)
 {
     DigitalOutput::digitalWrite(dout, level);
 }
@@ -92,7 +92,7 @@ int DiscreteStandalone::digitalRead(DigitalInputNum_t dinNum)
     return din->digitalRead(dinNum);
 }
 
-void DiscreteStandalone::attachInterrupt(DigitalInputNum_t dinNum, IsrCallback_t callback, InterruptMode_t mode, void* arg) 
+void DiscreteStandalone::attachInterrupt(DigitalInputNum_t dinNum, IsrCallback_t callback, InterruptMode_t mode, void* arg)
 {
     din->attachInterrupt(dinNum, callback, mode, arg);
 }
@@ -102,7 +102,7 @@ void DiscreteStandalone::detachInterrupt(DigitalInputNum_t dinNum)
     din->detachInterrupt(dinNum);
 }
 
-int DiscreteStandalone::analogRead(AnalogInputNum_t ain) 
+int DiscreteStandalone::analogRead(AnalogInputNum_t ain)
 {
     int raw = -1;
     if (ain < AIN_MAX) {
@@ -123,7 +123,7 @@ int DiscreteStandalone::analogReadMilliVolts(AnalogInputNum_t ain)
     return -1;
 }
 
-void DiscreteStandalone::analogWrite(DigitalOutputNum_t dout, uint8_t duty) 
+void DiscreteStandalone::analogWrite(DigitalOutputNum_t dout, uint8_t duty)
 {
     DigitalOutput::analogWrite(dout, duty);
 }
