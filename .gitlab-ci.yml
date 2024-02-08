@@ -41,20 +41,20 @@ build:discrete:
   script:
     - pio run -e discrete 
 
-build:discreteve:
-  extends: .build
-  script:
-    - pio run -e discreteve 
+# build:discreteve:
+#   extends: .build
+#   script:
+#     - pio run -e discreteve 
 
 build:stepper:
   extends: .build
   script:
     - pio run -e stepper 
 
-build:stepperve:
-  extends: .build
-  script:
-    - pio run -e stepperve 
+# build:stepperve:
+#   extends: .build
+#   script:
+#     - pio run -e stepperve 
 
 build:mixed:
   extends: .build
@@ -66,30 +66,25 @@ build:relayhp:
   script:
     - pio run -e relayhp 
 
-build:relaylp:
-  extends: .build
-  script:
-    - pio run -e relaylp 
+# build:relaylp:
+#   extends: .build
+#   script:
+#     - pio run -e relaylp 
 
-build:brushless:
-  extends: .build
-  script:
-    - pio run -e brushless 
+# build:brushless:
+#   extends: .build
+#   script:
+#     - pio run -e brushless 
 
-build:analogls:
-  extends: .build
-  script:
-    - pio run -e analogls 
+# build:analogls:
+#   extends: .build
+#   script:
+#     - pio run -e analogls 
 
 build:core-s1:
   extends: .build
   script:
     - pio run -e core-s1 
-
-build:discrete-s2:
-  extends: .build
-  script:
-    - pio run -e discrete-s2 
 
 build:stepperve-s2:
   extends: .build
@@ -128,16 +123,15 @@ deploy:
   needs:
     - job: build:core
     - job: build:discrete
-    - job: build:discreteve
+    # - job: build:discreteve
     - job: build:stepper
-    - job: build:stepperve
+    # - job: build:stepperve
     - job: build:mixed
     - job: build:relayhp
-    - job: build:relaylp
-    - job: build:brushless
-    - job: build:analogls
+    # - job: build:relaylp
+    # - job: build:brushless
+    # - job: build:analogls
     - job: build:core-s1
-    - job: build:discrete-s2
     - job: build:stepperve-s2
   script:
     - lftp $OVH_URI -e "mirror --reverse --verbose -R ./.oi/bin/ ./www/oi-content/bin/; quit" -u $OVH_USERNAME,$OVH_PASSWORD

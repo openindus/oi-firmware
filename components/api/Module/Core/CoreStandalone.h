@@ -77,6 +77,14 @@ public:
      */
     static void detachInterrupt(DigitalInputNum_t din, InterruptMode_t mode);
 
+    /**
+     * @brief Read the overcurrent status of a given DOUT. 
+     * 
+     * @param dout DOUT channel to read overcurrent status.
+     * @return 0 is current is under 4Amps and 1 is current is above 4Amps
+     */
+    static uint8_t digitalReadOverCurrent(DigitalOutputNum_t dout);
+
 // protected:
 
     static void init(void);
