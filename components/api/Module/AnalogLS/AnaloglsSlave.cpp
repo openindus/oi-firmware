@@ -23,14 +23,14 @@ void AnaloglsSlave::init(void)
     AnaloglsStandalone::init();
     ModuleSlave::init();
 
-    onRequest(CMD_ANALOG_ADD_VOLTMETER,[](RequestMsg_t msg) -> uint32_t {
+    onRequest(ANALOG_ADD_VOLTMETER,[](RequestMsg_t msg) -> uint32_t {
         analog_channel_t channel = (analog_channel_t)msg.param;
         ads1x4s08_voltage_range_t range = (ads1x4s08_voltage_range_t)msg.data;
         AnaloglsStandalone::AddVoltmeter(channel, range);
         return 0;
     });
 
-    onRequest(CMD_ANALOG_GET_CHANNEL_DATA,[](RequestMsg_t msg) -> uint32_t {
+    onRequest(ANALOG_GET_CHANNEL_DATA,[](RequestMsg_t msg) -> uint32_t {
         rtd_type_t rtd = (rtd_type_t)(msg.param & 0x0000FF);
         analog_channel_t channel = (analog_channel_t)((msg.param & 0x00FF00) >> 8);
         uint32_t data = 0;
@@ -39,7 +39,7 @@ void AnaloglsSlave::init(void)
         return data;
     }); 
 
-    onRequest(CMD_ANALOG_ADD_TC,[](RequestMsg_t msg) -> uint32_t {
+    onRequest(ANALOG_ADD_TC,[](RequestMsg_t msg) -> uint32_t {
         analog_channel_t channel = (analog_channel_t)(msg.param & 0x0000FF);
         ads1x4s08_voltage_range_t range = (ads1x4s08_voltage_range_t)((msg.param & 0x00FF00) >> 8);
         float coef = 0;
@@ -49,13 +49,13 @@ void AnaloglsSlave::init(void)
         return 0;
     });
 
-    onRequest(CMD_ANALOG_ADD_LEVEL_DETECTOR,[](RequestMsg_t msg) -> uint32_t {
+    onRequest(ANALOG_ADD_LEVEL_DETECTOR,[](RequestMsg_t msg) -> uint32_t {
         analog_channel_t channel = (analog_channel_t)msg.param;
         AnaloglsStandalone::AddLevelDetector(channel);
         return 0;
     });
 
-    onRequest(CMD_ANALOG_ADD_RTD,[](RequestMsg_t msg) -> uint32_t {
+    onRequest(ANALOG_ADD_RTD,[](RequestMsg_t msg) -> uint32_t {
         analog_channel_t channel = (analog_channel_t)((msg.param & 0xFF0000)>>16);
         rtd_type_t type = (rtd_type_t)((msg.param & 0x00F000)>>12);
         wire_t nb_wire = (wire_t)((msg.param & 0x000F00)>>8);

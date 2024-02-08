@@ -20,3 +20,4 @@
 #include "ConsoleMaster.h"
 #include "ConsoleModule.h"
 #include "ConsoleStepper.h"
+#include "MotorStepperParamCLI.h"

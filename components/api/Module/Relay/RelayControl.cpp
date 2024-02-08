@@ -20,7 +20,7 @@
 void RelayControl::digitalWrite(Relay_t relay, uint8_t level)
 {
     RequestMsg_t msg;
-    msg.cmd = CMD_DIGITAL_WRITE;
+    msg.request = DIGITAL_WRITE;
     msg.param = (uint16_t)relay;
     msg.data = (uint32_t)level;
     request(msg);

@@ -20,7 +20,7 @@
 void MixedControl::digitalWrite(DigitalOutputNum_t dout, uint8_t level)
 {
     RequestMsg_t msg;
-    msg.cmd = CMD_DIGITAL_WRITE;
+    msg.request = DIGITAL_WRITE;
     msg.param = (uint16_t)dout;
     msg.data = (uint32_t)level;
     request(msg);
@@ -29,7 +29,7 @@ void MixedControl::digitalWrite(DigitalOutputNum_t dout, uint8_t level)
 int MixedControl::digitalRead(DigitalInputNum_t din)
 {
     RequestMsg_t msg;
-    msg.cmd = CMD_DIGITAL_READ;
+    msg.request = DIGITAL_READ;
     msg.param = (uint16_t)din;
     return (int)request(msg);
 }
@@ -37,7 +37,7 @@ int MixedControl::digitalRead(DigitalInputNum_t din)
 void MixedControl::attachInterrupt(DigitalInputNum_t din, IsrCallback_t callback, InterruptMode_t mode)
 {
     RequestMsg_t msg;
-    msg.cmd = CMD_ATTACH_INTERRUPT;
+    msg.request = ATTACH_INTERRUPT;
     msg.param = (uint16_t)din;
     msg.data = (uint32_t)mode;
     request(msg);
@@ -51,7 +51,7 @@ void MixedControl::attachInterrupt(DigitalInputNum_t din, IsrCallback_t callback
 void MixedControl::detachInterrupt(DigitalInputNum_t din)
 {
     RequestMsg_t msg;
-    msg.cmd = CMD_DETACH_INTERRUPT;
+    msg.request = DETACH_INTERRUPT;
     msg.param = (uint16_t)din;
     request(msg);
 }
@@ -59,7 +59,7 @@ void MixedControl::detachInterrupt(DigitalInputNum_t din)
 int MixedControl::analogRead(AnalogInputNum_t ain)
 {
     RequestMsg_t msg;
-    msg.cmd = CMD_ANALOG_READ;
+    msg.request = ANALOG_READ;
     msg.param = (uint16_t)ain;
     return request(msg);
 }
@@ -67,7 +67,7 @@ int MixedControl::analogRead(AnalogInputNum_t ain)
 int MixedControl::analogReadMilliVolts(AnalogInputNum_t ain)
 {
     RequestMsg_t msg;
-    msg.cmd = CMD_ANALOG_READ_MILLIVOLTS;
+    msg.request = ANALOG_READ_MILLIVOLTS;
     msg.param = (uint16_t)ain;
     return request(msg);
 }
@@ -75,7 +75,7 @@ int MixedControl::analogReadMilliVolts(AnalogInputNum_t ain)
 void MixedControl::analogReadMode(AnalogInputNum_t ain, AdcMode_t mode)
 {
     RequestMsg_t msg;
-    msg.cmd = CMD_ANALOG_READ_MODE;
+    msg.request = ANALOG_READ_MODE;
     msg.param = (uint16_t)ain;
     msg.data = (uint32_t)mode;
     request(msg);
@@ -84,7 +84,7 @@ void MixedControl::analogReadMode(AnalogInputNum_t ain, AdcMode_t mode)
 void MixedControl::analogReadResolution(AdcResBits_t res)
 {
     RequestMsg_t msg;
-    msg.cmd = CMD_ANALOG_READ_RESOLUTION;
+    msg.request = ANALOG_READ_RESOLUTION;
     msg.data = (uint32_t)res;
     request(msg);
 }
@@ -92,7 +92,7 @@ void MixedControl::analogReadResolution(AdcResBits_t res)
 void MixedControl::analogReadReference(float ref)
 {
     RequestMsg_t msg;
-    msg.cmd = CMD_ANALOG_READ_REFERENCE;
+    msg.request = ANALOG_READ_REFERENCE;
     memcpy(&msg.data, &ref, sizeof(uint32_t));
     request(msg);
 }
@@ -100,7 +100,7 @@ void MixedControl::analogReadReference(float ref)
 void MixedControl::analogWriteVoltage(AnalogOutputNum_t aout, uint32_t value)
 {
     RequestMsg_t msg;
-    msg.cmd = CMD_ANALOG_WRITE_VOLTAGE;
+    msg.request = ANALOG_WRITE_VOLTAGE;
     msg.param = (uint16_t)aout;
     msg.data = (uint32_t)value;
     request(msg);
@@ -109,7 +109,7 @@ void MixedControl::analogWriteVoltage(AnalogOutputNum_t aout, uint32_t value)
 void MixedControl::analogWriteVoltageMilliVolts(AnalogOutputNum_t aout, uint32_t value)
 {
     RequestMsg_t msg;
-    msg.cmd = CMD_ANALOG_WRITE_VOLTAGE_MILLIVOLTS;
+    msg.request = ANALOG_WRITE_VOLTAGE_MILLIVOLTS;
     msg.param = (uint16_t)aout;
     msg.data = (uint32_t)value;
     request(msg);
@@ -118,7 +118,7 @@ void MixedControl::analogWriteVoltageMilliVolts(AnalogOutputNum_t aout, uint32_t
 void MixedControl::analogWriteVoltageMode(AnalogOutputNum_t aout, DacVoltageMode_t mode)
 {
     RequestMsg_t msg;
-    msg.cmd = CMD_ANALOG_WRITE_VOLTAGE_MODE;
+    msg.request = ANALOG_WRITE_VOLTAGE_MODE;
     msg.param = (uint16_t)aout;
     msg.data = (uint32_t)mode;
     request(msg);
@@ -127,7 +127,7 @@ void MixedControl::analogWriteVoltageMode(AnalogOutputNum_t aout, DacVoltageMode
 void MixedControl::analogWriteCurrent(AnalogOutputNum_t aout, uint32_t value)
 {
     RequestMsg_t msg;
-    msg.cmd = CMD_ANALOG_WRITE_CURRENT;
+    msg.request = ANALOG_WRITE_CURRENT;
     msg.param = (uint16_t)aout;
     msg.data = (uint32_t)value;
     request(msg);
@@ -136,7 +136,7 @@ void MixedControl::analogWriteCurrent(AnalogOutputNum_t aout, uint32_t value)
 void MixedControl::analogWriteCurrentMilliAmps(AnalogOutputNum_t aout, uint32_t value)
 {
     RequestMsg_t msg;
-    msg.cmd = CMD_ANALOG_WRITE_CURRENT_MILLIAMPS;
+    msg.request = ANALOG_WRITE_CURRENT_MILLIAMPS;
     msg.param = (uint16_t)aout;
     msg.data = (uint32_t)value;
     request(msg);
@@ -145,7 +145,7 @@ void MixedControl::analogWriteCurrentMilliAmps(AnalogOutputNum_t aout, uint32_t 
 void MixedControl::analogWriteCurrentMode(AnalogOutputNum_t aout, DacCurrentMode_t mode)
 {
     RequestMsg_t msg;
-    msg.cmd = CMD_ANALOG_WRITE_CURRENT_MODE;
+    msg.request = ANALOG_WRITE_CURRENT_MODE;
     msg.param = (uint16_t)aout;
     msg.data = (uint32_t)mode;
     request(msg);

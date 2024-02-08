@@ -49,6 +49,9 @@ void StepperStandalone::init()
     PS01_Hal_Config_t ps01Conf = STEPPER_CONFIG_MOTOR_DEFAULT();
     PS01_Param_t ps01Param = STEPPER_PARAM_MOTOR_DEFAULT();
     MotorStepper::init(&ps01Conf, &ps01Param, _dinGpio);
+
+    /* Init Motor stepper NVS param */
+    MotorStepperParam::initNVSParam();
 }
 
 int StepperStandalone::digitalRead(DigitalInputNum_t dinNum)
@@ -76,15 +79,29 @@ void StepperStandalone::setStepResolution(MotorNum_t motor, MotorStepResolution_
     MotorStepper::setStepResolution(motor, res);
 }
 
-void StepperStandalone::setSpeed(MotorNum_t motor, float speed)
+void StepperStandalone::setMaxSpeed(MotorNum_t motor, float speed)
 {
-    float acc = speed * 2.0;
-    float dec = speed * 2.0;
-    MotorStepper::setAcceleration(motor, acc);
-    MotorStepper::setDeceleration(motor, dec);
     MotorStepper::setMaxSpeed(motor, speed);
-    MotorStepper::setMinSpeed(motor, 0);
+}
+
+void StepperStandalone::setMinSpeed(MotorNum_t motor, float speed)
+{
+    MotorStepper::setMinSpeed(motor, speed);
+}
+
+void StepperStandalone::setFullStepSpeed(MotorNum_t motor, float speed)
+{
     MotorStepper::setFullStepSpeed(motor, speed);
+}
+
+void StepperStandalone::setAcceleration(MotorNum_t motor, float acc)
+{
+    MotorStepper::setAcceleration(motor, acc);
+}
+
+void StepperStandalone::setDeceleration(MotorNum_t motor, float dec)
+{
+    MotorStepper::setDeceleration(motor, dec);
 }
 
 int32_t StepperStandalone::getPosition(MotorNum_t motor)
@@ -122,9 +139,9 @@ void StepperStandalone::run(MotorNum_t motor, MotorDirection_t direction, float 
     MotorStepper::run(motor, direction, speed);
 }
 
-void StepperStandalone::waitWhileMotorIsRunning(MotorNum_t motor)
+bool StepperStandalone::isRunning(MotorNum_t motor)
 {
-    MotorStepper::waitWhileMotorIsRunning(motor);
+    return MotorStepper::isRunning(motor);
 }
 
 void StepperStandalone::homing(MotorNum_t motor, float speed)

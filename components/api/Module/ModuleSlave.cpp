@@ -19,7 +19,7 @@
 static const char MODULE_TAG[] = "Module";
 
 uint16_t ModuleSlave::_id;
-std::map<RequestCmd_t, RequestCallback_t> ModuleSlave::_request;
+std::map<Request_t, RequestCallback_t> ModuleSlave::_request;
 
 void ModuleSlave::init(void)
 {
@@ -45,30 +45,30 @@ void ModuleSlave::init(void)
     xTaskCreate(_busTask, "Bus task", 4096, NULL, 1, NULL);
 }
 
-void ModuleSlave::event(EventType_t eventType, int num)
+void ModuleSlave::event(Event_t event, int num)
 {
     BusCan::Frame_t frame;
     frame.command = MODULE_EVENT;
-    frame.eventType = eventType;
+    frame.type = event;
     frame.data = num;
     BusCan::write(&frame, _id);
 }
 
-void ModuleSlave::onRequest(RequestCmd_t cmd, RequestCallback_t request)
+void ModuleSlave::onRequest(Request_t request, RequestCallback_t callback)
 {
-    _request.insert({cmd, request});
+    _request.insert({request, callback});
 }
 
 uint32_t ModuleSlave::handleRequest(RequestMsg_t msg)
 {
-    if (_request.find((RequestCmd_t)msg.cmd) != _request.end()) {
+    if (_request.find((Request_t)msg.request) != _request.end()) {
         for (auto it=_request.begin(); it!=_request.end(); it++) {
-            if (it->first == msg.cmd) {
+            if (it->first == msg.request) {
                 return (*it).second(msg);
             }
         }
     } else {
-        ESP_LOGW(MODULE_TAG, "Command does not exist: cmd=0x%02x", msg.cmd);
+        ESP_LOGW(MODULE_TAG, "Request does not exist: request=0x%02x", msg.request);
     }
     return 0;
 }
