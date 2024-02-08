@@ -120,36 +120,36 @@ void CoreStandalone::init()
     etor_config.mode = IOEX_INPUT;
     etor_config.pull_mode = IOEX_PULLDOWN;
     etor_config.interrupt_type = IOEX_INTERRUPT_DISABLE;
-    etor_config.pin_bit_mask = (1ULL<<_etor[0]) | 
-                               (1ULL<<_etor[1]) | 
-                               (1ULL<<_etor[2]) | 
-                               (1ULL<<_etor[3]);
+    etor_config.pin_bit_mask = (1ULL<<_din[0]) | 
+                               (1ULL<<_din[1]) | 
+                               (1ULL<<_din[2]) | 
+                               (1ULL<<_din[3]);
     
     ESP_ERROR_CHECK(ioex_config(_ioex, &etor_config));
 
-    _etorCurrentMode[DIN_1] = NONE_MODE;
-    _etorCurrentMode[DIN_2] = NONE_MODE;
-    _etorCurrentMode[DIN_3] = NONE_MODE;
-    _etorCurrentMode[DIN_4] = NONE_MODE;
+    _dinCurrentMode[DIN_1] = NONE_MODE;
+    _dinCurrentMode[DIN_2] = NONE_MODE;
+    _dinCurrentMode[DIN_3] = NONE_MODE;
+    _dinCurrentMode[DIN_4] = NONE_MODE;
 
     /**
      * @brief DOUT Init
      * 
      */
     // /!\ Set level before setting to output
-    ESP_ERROR_CHECK(ioex_set_level(_ioex, _stor[0], IOEX_LOW));
-    ESP_ERROR_CHECK(ioex_set_level(_ioex, _stor[1], IOEX_LOW));
-    ESP_ERROR_CHECK(ioex_set_level(_ioex, _stor[2], IOEX_LOW));
-    ESP_ERROR_CHECK(ioex_set_level(_ioex, _stor[3], IOEX_LOW));
+    ESP_ERROR_CHECK(ioex_set_level(_ioex, _dout[0], IOEX_LOW));
+    ESP_ERROR_CHECK(ioex_set_level(_ioex, _dout[1], IOEX_LOW));
+    ESP_ERROR_CHECK(ioex_set_level(_ioex, _dout[2], IOEX_LOW));
+    ESP_ERROR_CHECK(ioex_set_level(_ioex, _dout[3], IOEX_LOW));
     
     ioex_config_t stor_config;
     stor_config.mode = IOEX_OUTPUT;
     stor_config.pull_mode = IOEX_FLOATING;
     stor_config.interrupt_type = IOEX_INTERRUPT_DISABLE;
-    stor_config.pin_bit_mask = (1ULL<<_stor[0]) | 
-                               (1ULL<<_stor[1]) | 
-                               (1ULL<<_stor[2]) | 
-                               (1ULL<<_stor[3]);
+    stor_config.pin_bit_mask = (1ULL<<_dout[0]) | 
+                               (1ULL<<_dout[1]) | 
+                               (1ULL<<_dout[2]) | 
+                               (1ULL<<_dout[3]);
     
     ESP_ERROR_CHECK(ioex_config(_ioex, &stor_config));
 
@@ -161,10 +161,10 @@ void CoreStandalone::init()
     stor_sensor_config.mode = IOEX_INPUT;
     stor_sensor_config.pull_mode = IOEX_PULLDOWN;
     stor_sensor_config.interrupt_type = IOEX_INTERRUPT_POSEDGE;
-    stor_sensor_config.pin_bit_mask = (1ULL<<_storSensor[0]) | 
-                                      (1ULL<<_storSensor[0]) | 
-                                      (1ULL<<_storSensor[0]) | 
-                                      (1ULL<<_storSensor[0]);
+    stor_sensor_config.pin_bit_mask = (1ULL<<_doutSensor[0]) | 
+                                      (1ULL<<_doutSensor[0]) | 
+                                      (1ULL<<_doutSensor[0]) | 
+                                      (1ULL<<_doutSensor[0]);
 
     ESP_ERROR_CHECK(ioex_config(_ioex, &stor_sensor_config));
 
