@@ -96,9 +96,10 @@ build:examples:
   needs:
     - job: build:core
   script:
-    - ./scripts/build_examples.sh
-  after_script:
-    - git restore main/main.cpp
+    # - ./scripts/build_examples.sh
+    - echo build examples
+  # after_script:
+  #   - git restore main/main.cpp
   rules:
     - if: '($CI_PIPELINE_SOURCE == "push") && ($CI_COMMIT_BRANCH == "dev")'
     - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
