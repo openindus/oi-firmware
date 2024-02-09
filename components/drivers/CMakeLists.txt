@@ -1,7 +1,6 @@
 set(COMPONENT_SRCS
     "ads866x/ads866x.c"
     "dac8760/dac8760.c"
-    "ledonewire/ledonewire.c"
     "powerSTEP01/PS01_Cmd.c"
     "powerSTEP01/PS01_Hal.c"
     "powerSTEP01/PS01_Param.c"
@@ -22,7 +21,6 @@ set(COMPONENT_SRCS
 
 set(COMPONENT_INCLUDE_DIRS
     "."
-    "ledonewire"
     "ads866x"
     "dac8760"
     "powerSTEP01"

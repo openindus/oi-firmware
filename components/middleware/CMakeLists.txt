@@ -12,6 +12,7 @@ set(COMPONENT_SRCS
     "Usb/UsbConsole.cpp"
     "Usb/UsbSerial.cpp"
     "FlashLoader/FlashLoader.cpp"
+    "Led/Led.cpp"
 )
 
 set(COMPONENT_INCLUDE_DIRS
@@ -22,6 +23,7 @@ set(COMPONENT_INCLUDE_DIRS
     "Motor"
     "Usb"
     "FlashLoader"
+    "Led"
 )
 
 set(COMPONENT_PRIV_REQUIRES
