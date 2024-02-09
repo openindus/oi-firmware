@@ -2,7 +2,7 @@
 #include "Arduino.h"
 
 /* Instanciate */
-OICore core;
+Core core;
 int din_value[4];
 
 void setup(void)
