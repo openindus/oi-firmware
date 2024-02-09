@@ -1,5 +1,5 @@
 /**
- * @file I2C_LM75_TemperatureSensor.cpp
+ * @file I2CTemperatureSensor.cpp
  * @author OpenIndus
  * @brief Example code for I2C communication with LM75 temperature sensor
  * @version 0.1

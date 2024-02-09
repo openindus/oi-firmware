@@ -84,7 +84,7 @@ void System::init(void)
     ConsoleStepper::registerCommand();
     MotorStepperParamCLI::registerCommand();
 #endif
-    UsbConsole::begin();
+    // UsbConsole::begin();
 }
 
 extern "C" void app_main()
