@@ -32,8 +32,8 @@ void ModuleStandalone::init()
 
     /* LED */
     ESP_LOGI(MODULE_TAG, "Init LED");
-    ledonewire_install(MODULE_PIN_LED);
-    ledonewire_on(LED_BLUE);
+    Led::install(MODULE_PIN_LED);
+    Led::on(LED_BLUE);
 
     /* NVS - Board info */
     ESP_LOGI(MODULE_TAG, "Board type      : %d", getBoardType());
@@ -69,7 +69,7 @@ void ModuleStandalone::restart()
  */
 void ModuleStandalone::ledOn(LedColor_t color)
 {
-    ledonewire_on(color);
+    Led::on(color);
 }
 
 /**
@@ -78,7 +78,7 @@ void ModuleStandalone::ledOn(LedColor_t color)
  */
 void ModuleStandalone::ledOff()
 {
-    ledonewire_off();
+    Led::off();
 }
 
 /**
@@ -89,7 +89,7 @@ void ModuleStandalone::ledOff()
  */
 void ModuleStandalone::ledBlink(LedColor_t color, uint32_t period)
 {
-    ledonewire_blink(color, period);
+    Led::blink(color, period);
 }
 
 /**
