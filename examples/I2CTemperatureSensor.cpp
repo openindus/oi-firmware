@@ -1,5 +1,5 @@
 /**
- * @file I2C_LM75_TemperatureSensor.cpp
+ * @file I2CTemperatureSensor.cpp
  * @author OpenIndus
  * @brief Example code for I2C communication with LM75 temperature sensor
  * @version 0.1
@@ -9,9 +9,8 @@
  * 
  */
 
-#include "OpenIndus.h"
-#include "Arduino.h"
-#include "Wire.h"
+#include <Arduino.h>
+#include <Wire.h>
 
 #define LM75_I2C_ADDRESS    0x48
 #define LM75_TEMP_REG       0
@@ -42,7 +41,7 @@ unsigned LM75_getReg(uint8_t reg)
             }
             else
             {
-                printf("Error\n");
+                Serial.println("Error");
                 Result = 0xFFFF;
             }
         }
@@ -67,6 +66,8 @@ float LM75_getTemp()
 
 void setup() 
 {
+    Serial.begin(115200);
+
     /* Initialize I2C */
     Wire.begin();
     
@@ -80,7 +81,9 @@ void loop()
     float temperature = LM75_getTemp();
 
     /* Print result */
-    printf("Temperature from LM75 is: %.1f°C\n", temperature);
+    Serial.print("Temperature from LM75 is: ");
+    Serial.print(temperature);
+    Serial.println("°C");
 
     /* Wait until next read */
     delay(500);
