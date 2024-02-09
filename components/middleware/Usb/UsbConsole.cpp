@@ -27,10 +27,17 @@
 #define PROMPT_STR ""
 #endif
 
+static const char TAG[] = "UsbConsole";
+
 esp_console_repl_t* UsbConsole::_repl = NULL;
 
 void UsbConsole::begin(void)
-{    
+{
+    if (uart_is_driver_installed(CONFIG_ESP_CONSOLE_UART_NUM)) {
+        ESP_LOGW(TAG, "The console cannot be active at the same time as Arduino Serial");
+        return;
+    }
+
     esp_console_repl_config_t repl_config = ESP_CONSOLE_REPL_CONFIG_DEFAULT();
     repl_config.prompt = PROMPT_STR ">";
     repl_config.max_cmdline_length = 1024;
