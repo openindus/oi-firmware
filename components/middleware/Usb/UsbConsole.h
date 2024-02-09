@@ -18,6 +18,7 @@
 #include "esp_err.h"
 #include "esp_log.h"
 #include "esp_console.h"
+#include "driver/uart.h"
 
 class UsbConsole
 {
