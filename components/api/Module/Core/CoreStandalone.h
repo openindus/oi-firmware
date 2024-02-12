@@ -100,6 +100,9 @@ private:
     static const ioex_num_t _doutSensor[4];
     static const ioex_num_t _din[4];
     static const adc1_channel_t _eana[2];
+
+    static void _controlTask(void *pvParameters);
+
 };
 
 #endif
