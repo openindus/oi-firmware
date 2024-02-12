@@ -542,7 +542,8 @@ void CoreStandalone::_controlTask(void *pvParameters) {
             // If error happened
             if (CoreStandalone::digitalReadOverCurrent((DigitalOutputNum_t)i) == 1)
             {
-                CoreStandalone::digitalWrite((DigitalOutputNum_t) i, 0);
+                ESP_LOGE(CORE_TAG, "Overcurrent on DOUT_%u", i+1);
+                ioex_set_level(_ioex, _dout[i], IOEX_LOW);
                 dout_state[i] = 1;
             }
             // Retry after 10 loops
@@ -551,7 +552,7 @@ void CoreStandalone::_controlTask(void *pvParameters) {
                 dout_state[i] = 0;
                 // Set output at user choice (do not set HIGH if user setted this pin LOW during error)
                 xSemaphoreTake(_mutex, portMAX_DELAY);
-                CoreStandalone::digitalWrite((DigitalOutputNum_t) i, _doutLevel[i]);
+                ioex_set_level(_ioex, _dout[i] , (ioex_level_t) _doutLevel[i]);
                 xSemaphoreGive(_mutex);
             }
             // increase error counter to reach 10
@@ -565,6 +566,7 @@ void CoreStandalone::_controlTask(void *pvParameters) {
         // If error happened
         if (ioex_get_level(_ioex, CORE_IOEX_PIN_5V_USER_PG) == 1)
         {
+            ESP_LOGE(CORE_TAG, "Overcurrent on 5V User");
             ioex_set_direction(_ioex, CORE_IOEX_PIN_5V_USER_EN, IOEX_OUTPUT);
             ioex_set_level(_ioex, CORE_IOEX_PIN_5V_USER_EN, IOEX_LOW);
             user_power = 1;
@@ -585,6 +587,7 @@ void CoreStandalone::_controlTask(void *pvParameters) {
         // If error happened
         if (ioex_get_level(_ioex, CORE_IOEX_PIN_VBUS_OC) == 0)
         {
+            ESP_LOGE(CORE_TAG, "Overcurrent on USB Host");
             ioex_set_level(_ioex, CORE_IOEX_PIN_VBUS_EN, IOEX_HIGH);
             usb_power = 1;
         }
