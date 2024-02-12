@@ -828,7 +828,7 @@ int MotorStepperParam::setAdvancedParamWithoutNvs(MotorNum_t motor, AdvancedPara
     case CM_TFAST_TOFF_FAST:
     case CM_TON_MIN:
     case CM_TOFF_MIN:
-        printf("not implemented !\n")
+        ESP_LOGE("MotorStepper", "not implemented !\n")
         errorCode = 2;
         break;
 
