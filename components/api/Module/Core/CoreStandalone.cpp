@@ -526,7 +526,8 @@ uint8_t CoreStandalone::digitalReadOverCurrent(DigitalOutputNum_t dout)
     return ioex_get_level(_ioex, _doutSensor[(uint8_t)dout]);
 }
 
-void CoreStandalone::_controlTask(void *pvParameters) {
+void CoreStandalone::_controlTask(void *pvParameters)
+{
 
     /* Every 500ms check if there is a power error (DOUT, 5V User of 5V Usb)
     If output is in error: desactivate for 5 secondes then retry */
@@ -561,6 +562,8 @@ void CoreStandalone::_controlTask(void *pvParameters) {
                 dout_state[i]++;
             }
         }
+
+#if defined(CONFIG_IDF_TARGET_ESP32S3)
 
         /* Checking if user power is in overcurrent */
         // If error happened
@@ -602,6 +605,8 @@ void CoreStandalone::_controlTask(void *pvParameters) {
         {
             usb_power++;
         }
+
+#endif
 
         vTaskDelay(pdMS_TO_TICKS(500));
     }
