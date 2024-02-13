@@ -50,6 +50,9 @@ ioex_device_t* CoreStandalone::_ioex;
 esp_adc_cal_characteristics_t CoreStandalone::_adc1Characteristics;
 std::map<DigitalInputNum_t, InterruptMode_t> CoreStandalone::_dinCurrentMode;
 
+static uint8_t _doutLevel[4] = {0, 0, 0, 0};
+static SemaphoreHandle_t _mutex;
+
 void CoreStandalone::init()
 {
     ModuleStandalone::init();
@@ -430,10 +433,18 @@ void CoreStandalone::init()
 
 #endif
 
+    _mutex = xSemaphoreCreateMutex();
+    xSemaphoreGive(_mutex);
+
+    ESP_LOGI(CORE_TAG, "Create control task");
+    xTaskCreate(_controlTask, "Control task", 4096, NULL, 1, NULL);
 }
 
 void CoreStandalone::digitalWrite(DigitalOutputNum_t dout, uint8_t level)
 {
+    xSemaphoreTake(_mutex, portMAX_DELAY);
+    _doutLevel[dout] = level;
+    xSemaphoreGive(_mutex);
     ioex_set_level(_ioex, _dout[dout], static_cast<ioex_level_t>(level));
 }
 
@@ -480,7 +491,7 @@ void CoreStandalone::attachInterrupt(DigitalInputNum_t din, void (*callback)(voi
         ioex_set_interrupt_type(_ioex, _din[din], IOEX_INTERRUPT_ANYEDGE);
     }
 
-     _dinCurrentMode[din] = newMode;
+    _dinCurrentMode[din] = newMode;
     ioex_isr_handler_add(_ioex, _din[din], (ioex_isr_t)callback, args, CORE_DIGITAL_INTERRUPT_PRIORITY);
     ioex_interrupt_enable(_ioex, _din[din]);
 }
@@ -513,6 +524,92 @@ void CoreStandalone::detachInterrupt(DigitalInputNum_t din, InterruptMode_t mode
 uint8_t CoreStandalone::digitalReadOverCurrent(DigitalOutputNum_t dout)
 {
     return ioex_get_level(_ioex, _doutSensor[(uint8_t)dout]);
+}
+
+void CoreStandalone::_controlTask(void *pvParameters)
+{
+
+    /* Every 500ms check if there is a power error (DOUT, 5V User of 5V Usb)
+    If output is in error: desactivate for 5 secondes then retry */
+
+    uint8_t dout_state[4] = {0, 0, 0, 0};
+    uint8_t user_power = 0;
+    uint8_t usb_power = 0;
+
+    while (1) {
+
+        /* Checking if DOUT is in overcurrent */
+        for (int i = 0; i <= DOUT_4; i++) {
+            // If error happened
+            if (CoreStandalone::digitalReadOverCurrent((DigitalOutputNum_t)i) == 1)
+            {
+                ESP_LOGE(CORE_TAG, "Overcurrent on DOUT_%u", i+1);
+                ioex_set_level(_ioex, _dout[i], IOEX_LOW);
+                dout_state[i] = 1;
+            }
+            // Retry after 10 loops
+            else if (dout_state[i] == 10)
+            {
+                dout_state[i] = 0;
+                // Set output at user choice (do not set HIGH if user setted this pin LOW during error)
+                xSemaphoreTake(_mutex, portMAX_DELAY);
+                ioex_set_level(_ioex, _dout[i] , (ioex_level_t) _doutLevel[i]);
+                xSemaphoreGive(_mutex);
+            }
+            // increase error counter to reach 10
+            else if (dout_state[i] != 0)
+            {
+                dout_state[i]++;
+            }
+        }
+
+#if defined(CONFIG_IDF_TARGET_ESP32S3)
+
+        /* Checking if user power is in overcurrent */
+        // If error happened
+        if (ioex_get_level(_ioex, CORE_IOEX_PIN_5V_USER_PG) == 1)
+        {
+            ESP_LOGE(CORE_TAG, "Overcurrent on 5V User");
+            ioex_set_direction(_ioex, CORE_IOEX_PIN_5V_USER_EN, IOEX_OUTPUT);
+            ioex_set_level(_ioex, CORE_IOEX_PIN_5V_USER_EN, IOEX_LOW);
+            user_power = 1;
+        }
+        // Retry after 10 loops
+        else if (user_power == 10)
+        {
+            user_power = 0;
+            ioex_set_direction(_ioex, CORE_IOEX_PIN_5V_USER_EN, IOEX_INPUT);
+        }
+        // increase error counter
+        else if (user_power != 0)
+        {
+            user_power++;
+        }
+
+        /* Checking if usb power is in overcurrent */
+        // If error happened
+        if (ioex_get_level(_ioex, CORE_IOEX_PIN_VBUS_OC) == 0)
+        {
+            ESP_LOGE(CORE_TAG, "Overcurrent on USB Host");
+            ioex_set_level(_ioex, CORE_IOEX_PIN_VBUS_EN, IOEX_HIGH);
+            usb_power = 1;
+        }
+        // Retry after 10 loops
+        else if (usb_power == 10) 
+        {
+            usb_power = 0;
+            ioex_set_level(_ioex, CORE_IOEX_PIN_VBUS_EN, IOEX_LOW);
+        }
+        // increase error counter
+        else if (usb_power != 0)
+        {
+            usb_power++;
+        }
+
+#endif
+
+        vTaskDelay(pdMS_TO_TICKS(500));
+    }
 }
 
 #endif

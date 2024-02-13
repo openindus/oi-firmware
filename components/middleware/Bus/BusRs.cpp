@@ -65,6 +65,8 @@ void BusRs::begin(uart_port_t port, gpio_num_t tx_num, gpio_num_t rx_num)
         BUS_RS_FRAME_LENGTH_MAX*2, 10, &_eventQueue, 0));
 
     ESP_ERROR_CHECK(uart_set_pin(_port, tx_num, rx_num, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
+
+    esp_log_level_set(BUS_RS_TAG, ESP_LOG_WARN);
 }
 
 /**
@@ -100,6 +102,9 @@ void BusRs::write(Frame_t* frame, TickType_t timeout)
     }
     free(buffer);
     buffer = NULL;
+    ESP_LOGI(BUS_RS_TAG, "CMD: 0x%02X | ID: 0x%02X | SEQ: 0x%02X | CHKSUM: 0x%02X | DATA:", \
+            frame->command, frame->identifier, frame->seq_num, frame->checksum);
+    ESP_LOG_BUFFER_HEX_LEVEL(BUS_RS_TAG, frame->data, frame->length, ESP_LOG_INFO);
 }
 
 /**
@@ -153,6 +158,9 @@ succeed:
     free(buffer);
     buffer = NULL;
     xSemaphoreGive(_semaphore);
+    ESP_LOGI(BUS_RS_TAG, "CMD: 0x%02X | ID: 0x%02X | SEQ: 0x%02X | CHKSUM: 0x%02X | DATA:", \
+            frame->command, frame->identifier, frame->seq_num, frame->checksum);
+    ESP_LOG_BUFFER_HEX_LEVEL(BUS_RS_TAG, frame->data, frame->length, ESP_LOG_INFO);
     return 0;
 }
 

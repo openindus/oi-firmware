@@ -200,7 +200,8 @@ void ConsoleModule::_registerLed(void)
 /** 'log' */
 
 static struct {
-    struct arg_str *status;
+    struct arg_str *level;
+    struct arg_str *tag;
     struct arg_end *end;
 } logArgs;
 
@@ -212,10 +213,25 @@ static int log(int argc, char **argv)
         return 1;
     }
 
-    if(strcmp(logArgs.status->sval[0], "enable") == 0) {
-        esp_log_level_set("*", esp_log_default_level);
-    } else if (strcmp(logArgs.status->sval[0], "disable") == 0) {
-        esp_log_level_set("*", ESP_LOG_NONE);
+
+    if (logArgs.tag->count == 0) {
+        logArgs.tag->sval[0] = "*";
+    } 
+
+    printf("Setting log %s to %s\n", logArgs.tag->sval[0], logArgs.level->sval[0]);
+
+    if(strcmp(logArgs.level->sval[0], "NONE") == 0) {
+        esp_log_level_set(logArgs.tag->sval[0], ESP_LOG_NONE);
+    } else if (strcmp(logArgs.level->sval[0], "ERROR") == 0) {
+        esp_log_level_set(logArgs.tag->sval[0], ESP_LOG_ERROR);
+    } else if (strcmp(logArgs.level->sval[0], "WARN") == 0) {
+        esp_log_level_set(logArgs.tag->sval[0], ESP_LOG_WARN);
+    } else if (strcmp(logArgs.level->sval[0], "INFO") == 0) {
+        esp_log_level_set(logArgs.tag->sval[0], ESP_LOG_INFO);
+    } else if (strcmp(logArgs.level->sval[0], "DEBUG") == 0) {
+        esp_log_level_set(logArgs.tag->sval[0], ESP_LOG_DEBUG);
+    } else if (strcmp(logArgs.level->sval[0], "VERBOSE") == 0) {
+        esp_log_level_set(logArgs.tag->sval[0], ESP_LOG_VERBOSE);
     } else {
         arg_print_errors(stderr, logArgs.end, argv[0]);
         return 2;
@@ -226,8 +242,9 @@ static int log(int argc, char **argv)
 
 void ConsoleModule::_registerLog(void)
 {
-    logArgs.status = arg_str1(NULL, NULL, "<STATUS>", "[enable, disable]");
-    logArgs.end = arg_end(1);
+    logArgs.level = arg_str1(NULL, NULL, "<LEVEL>", "[NONE, ERROR, WARN, INFO, DEBUG, VERBOSE]");
+    logArgs.tag = arg_str0(NULL, NULL, "<TAG>", "specific tag");
+    logArgs.end = arg_end(2);
 
     const esp_console_cmd_t cmd = {
         .command = "log",

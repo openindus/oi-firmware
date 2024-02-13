@@ -128,7 +128,7 @@ void ModuleMaster::_busTask(void *pvParameters)
     uint16_t id;
     while (1) {
         if (BusCan::read(&frame, &id, portMAX_DELAY) != -1) { 
-            printf("Bus CAN read to %d | command(%d), type(%d), data(%d)\n", 
+            ESP_LOGD(MODULE_TAG, "Bus CAN read to %d | command(%d), type(%d), data(%d)\n", 
                 id, frame.command, frame.type, frame.data);
             switch (frame.command)
             {

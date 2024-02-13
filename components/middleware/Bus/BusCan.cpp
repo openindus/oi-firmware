@@ -50,6 +50,8 @@ void BusCan::begin(gpio_num_t txNum, gpio_num_t rxNum)
     /* Start TWAI driver */
     ESP_LOGI(BUS_TWAI_TAG, "start twai driver");
     ESP_ERROR_CHECK(twai_start());
+
+    esp_log_level_set(BUS_TWAI_TAG, ESP_LOG_WARN);
 }
 
 /**
@@ -96,6 +98,7 @@ error:
     return -1;
 succeed:
     xSemaphoreGive(_mutex);
+    ESP_LOGI(BUS_TWAI_TAG, "CMD: 0x%02X | TYPE: 0x%02X | DATA: 0x%08X", frame->command, frame->type, frame->data);
     return 0;
 }
 
@@ -124,5 +127,6 @@ error:
     return -1;
 succeed:
     xSemaphoreGive(_mutex);
+    ESP_LOGI(BUS_TWAI_TAG, "CMD: 0x%02X | TYPE: 0x%02X | DATA: 0x%08X", frame->command, frame->type, frame->data);
     return 0;
 }
