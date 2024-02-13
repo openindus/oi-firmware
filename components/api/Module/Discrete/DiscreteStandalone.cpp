@@ -47,8 +47,7 @@ gpio_num_t _dinGpio[] = {
 #if defined(CONFIG_IDF_TARGET_ESP32S3)
 adc2_channel_t _ainChannel[] = {
     DISCRETE_CHANNEL_AIN_1,
-    DISCRETE_CHANNEL_AIN_2,
-    DISCRETE_CHANNEL_AIN_3
+    DISCRETE_CHANNEL_AIN_2
 };
 #elif defined(CONFIG_IDF_TARGET_ESP32S2)
 adc1_channel_t _ainChannel[] = {
@@ -58,7 +57,7 @@ adc1_channel_t _ainChannel[] = {
 
 esp_adc_cal_characteristics_t* _ainAdcChar;
 
-DigitalInput* DiscreteStandalone::din = new DigitalInput(_dinGpio, 10); 
+DigitalInput* DiscreteStandalone::din = new DigitalInput(_dinGpio, 10);
 
 void DiscreteStandalone::init()
 {
