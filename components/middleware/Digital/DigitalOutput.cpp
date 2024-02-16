@@ -18,7 +18,7 @@
 static const char DOUT_TAG[] = "DigitalOutput";
 static SemaphoreHandle_t _mutex;
 
-DigitalOutput::DigitalOutput(gpio_num_t *gpio, const adc1_channel_t *adc, int num) 
+DigitalOutput::DigitalOutput(const gpio_num_t *gpio, const adc1_channel_t *adc, int num) 
 {
     _type = DIGITAL_OUTPUT_GPIO;
 
@@ -77,8 +77,7 @@ void DigitalOutput::init()
 
         /* Init DOUT */
         ESP_LOGI(DOUT_TAG, "Init DOUT");
-        gpio_config_t doutConf;
-        doutConf = {
+        gpio_config_t doutConf = {
             .pin_bit_mask = 0,
             .mode = GPIO_MODE_OUTPUT,
             .pull_up_en = GPIO_PULLUP_DISABLE,
@@ -375,11 +374,11 @@ void DigitalOutput::_common_set_level(DigitalOutputNum_t dout, uint8_t level)
     }
  }
  
- int DigitalOutput::_common_get_level(DigitalOutputNum_t dout)
- {
+int DigitalOutput::_common_get_level(DigitalOutputNum_t dout)
+{
     if (_type == DIGITAL_OUTPUT_GPIO) {
         return gpio_get_level(_gpio_num[dout]);
     } else { // DIGITAL_OUTPUT_IOEX
         return ioex_get_level(_ioex, _ioex_num[dout]);
     }
- }
+}

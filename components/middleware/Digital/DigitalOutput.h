@@ -62,7 +62,7 @@ class DigitalOutput
 {
 public:
 
-    DigitalOutput(gpio_num_t *gpio, const adc1_channel_t *adc, int num);
+    DigitalOutput(const gpio_num_t *gpio, const adc1_channel_t *adc, int num);
     DigitalOutput(ioex_device_t *ioex, const ioex_num_t *ioex_num, const ioex_num_t *current_num, int num);
     ~DigitalOutput();
 
@@ -77,7 +77,7 @@ public:
 
 private:
 
-    /* */
+    /* Type of DOUT (gpio or ioex) */
     DigitalOutputType_t _type;
 
     /* Number of DOUT */

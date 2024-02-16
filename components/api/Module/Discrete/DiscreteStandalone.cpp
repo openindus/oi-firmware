@@ -20,7 +20,7 @@
 
 static const char DISCRETE_TAG[] = "Discrete";
 
-gpio_num_t _doutGpio[] = {
+const gpio_num_t _doutGpio[] = {
     DISCRETE_PIN_DOUT_1,
     DISCRETE_PIN_DOUT_2,
     DISCRETE_PIN_DOUT_3,
@@ -31,7 +31,7 @@ gpio_num_t _doutGpio[] = {
     DISCRETE_PIN_DOUT_8
 };
 
-adc1_channel_t _doutAdcChannel[] = {
+const adc1_channel_t _doutAdcChannel[] = {
     DISCRETE_CHANNEL_DOUT_CURRENT_1,
     DISCRETE_CHANNEL_DOUT_CURRENT_2,
     DISCRETE_CHANNEL_DOUT_CURRENT_3,
@@ -42,7 +42,7 @@ adc1_channel_t _doutAdcChannel[] = {
     DISCRETE_CHANNEL_DOUT_CURRENT_8
 };
 
-gpio_num_t _dinGpio[] = {
+const gpio_num_t _dinGpio[] = {
     DISCRETE_PIN_DIN_1,
     DISCRETE_PIN_DIN_2,
     DISCRETE_PIN_DIN_3,
