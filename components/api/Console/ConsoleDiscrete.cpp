@@ -40,7 +40,7 @@ static int dWrite(int argc, char **argv)
         return 1;
     }
 
-    DigitalOutputNum_t dout = (DigitalOutputNum_t)(digitalWriteArgs.dout->ival[0] -1);
+    DigitalOutputNum_t dout = (DigitalOutputNum_t)(digitalWriteArgs.dout->ival[0] - 1);
     uint8_t level = (uint8_t)digitalWriteArgs.level->ival[0];
 
     DiscreteStandalone::digitalWrite(dout, level);

@@ -30,7 +30,7 @@ public:
      * @param dout DOUT to drive.
      * @param level DOUT level, HIGH or LOW.
      */
-    static void digitalWrite(DigitalOutputNum_t dout, uint8_t level);
+    static void digitalWrite(DigitalOutputNum_t doutNum, uint8_t level);
 
     /**
      * @brief Read an input current level. Argument is the DIN to read.
@@ -83,7 +83,7 @@ public:
      * @param dout DOUT channel to read overcurrent status.
      * @return 0 is current is under 4Amps and 1 is current is above 4Amps
      */
-    static uint8_t digitalReadOverCurrent(DigitalOutputNum_t dout);
+    static uint8_t getCurrentLevel(DigitalOutputNum_t doutNum);
 
 // protected:
 
@@ -96,8 +96,8 @@ private:
     static esp_adc_cal_characteristics_t _adc1Characteristics;
     static std::map<DigitalInputNum_t, InterruptMode_t> _dinCurrentMode;
 
-    static const ioex_num_t _dout[4];
-    static const ioex_num_t _doutSensor[4];
+    static DigitalOutput* dout;
+
     static const ioex_num_t _din[4];
     static const adc1_channel_t _eana[2];
 

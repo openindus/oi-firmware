@@ -17,7 +17,7 @@
 #if defined(ARDUINO)
 #include "Arduino.h"
 #endif
-
+#define CONFIG_MODULE_STANDALONE 1
 static const char SYSTEM_TAG[] = "System";
 
 void System::_mainTask(void *pvParameters)

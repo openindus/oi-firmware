@@ -32,7 +32,7 @@ private:
     static void _registerDigitalRead(void);
     static void _registerAnalogRead(void);
     static void _registerAnalogReadMillivolts(void);
-    static void _registerDigitalReadOverCurrent(void);
+    static void _registerGetCurrentLevel(void);
 
 };
 

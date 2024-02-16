@@ -20,14 +20,14 @@
 
 static const char CORE_TAG[] = "Core";
 
-const ioex_num_t CoreStandalone::_dout[4] = {
+const ioex_num_t _doutGpio[4] = {
     CORE_IOEX_PIN_DOUT_1,
     CORE_IOEX_PIN_DOUT_2,
     CORE_IOEX_PIN_DOUT_3,
     CORE_IOEX_PIN_DOUT_4,
 };
 
-const ioex_num_t CoreStandalone::_doutSensor[4] = {
+const ioex_num_t _doutCurrentGpio[4] = {
     CORE_IOEX_PIN_DOUT_CURRENT_1,
     CORE_IOEX_PIN_DOUT_CURRENT_2,
     CORE_IOEX_PIN_DOUT_CURRENT_3,
@@ -47,11 +47,11 @@ const adc1_channel_t CoreStandalone::_eana[2] = {
 };
 
 ioex_device_t* CoreStandalone::_ioex;
+
+DigitalOutput* CoreStandalone::dout = new DigitalOutput(_ioex, _doutGpio, _doutCurrentGpio, 4);
+
 esp_adc_cal_characteristics_t CoreStandalone::_adc1Characteristics;
 std::map<DigitalInputNum_t, InterruptMode_t> CoreStandalone::_dinCurrentMode;
-
-static uint8_t _doutLevel[4] = {0, 0, 0, 0};
-static SemaphoreHandle_t _mutex;
 
 void CoreStandalone::init()
 {
@@ -139,37 +139,7 @@ void CoreStandalone::init()
      * @brief DOUT Init
      * 
      */
-    // /!\ Set level before setting to output
-    ESP_ERROR_CHECK(ioex_set_level(_ioex, _dout[0], IOEX_LOW));
-    ESP_ERROR_CHECK(ioex_set_level(_ioex, _dout[1], IOEX_LOW));
-    ESP_ERROR_CHECK(ioex_set_level(_ioex, _dout[2], IOEX_LOW));
-    ESP_ERROR_CHECK(ioex_set_level(_ioex, _dout[3], IOEX_LOW));
-    
-    ioex_config_t stor_config;
-    stor_config.mode = IOEX_OUTPUT;
-    stor_config.pull_mode = IOEX_FLOATING;
-    stor_config.interrupt_type = IOEX_INTERRUPT_DISABLE;
-    stor_config.pin_bit_mask = (1ULL<<_dout[0]) | 
-                               (1ULL<<_dout[1]) | 
-                               (1ULL<<_dout[2]) | 
-                               (1ULL<<_dout[3]);
-    
-    ESP_ERROR_CHECK(ioex_config(_ioex, &stor_config));
-
-    /**
-     * @brief DOUT Sensor init
-     * 
-     */
-    ioex_config_t stor_sensor_config;        
-    stor_sensor_config.mode = IOEX_INPUT;
-    stor_sensor_config.pull_mode = IOEX_PULLDOWN;
-    stor_sensor_config.interrupt_type = IOEX_INTERRUPT_POSEDGE;
-    stor_sensor_config.pin_bit_mask = (1ULL<<_doutSensor[0]) | 
-                                      (1ULL<<_doutSensor[0]) | 
-                                      (1ULL<<_doutSensor[0]) | 
-                                      (1ULL<<_doutSensor[0]);
-
-    ESP_ERROR_CHECK(ioex_config(_ioex, &stor_sensor_config));
+    dout->init();
 
     /**
      * @brief AIN Init
@@ -219,26 +189,6 @@ void CoreStandalone::init()
 
     ESP_ERROR_CHECK(i2c_param_config(CORE_I2C_PORT_NUM, &i2c_config));
     ESP_ERROR_CHECK(i2c_driver_install(CORE_I2C_PORT_NUM, i2c_config.mode, 0, 0, 0));
-
-    // /**
-    //  * @brief SPI Init --> This SPI is used for SDCard, Ethernet and USBHost: it should be initialized directly by user using Arduino Lib
-    //  * 
-    //  */
-    // ESP_LOGI(CORE_TAG, "Initializes the bus SPI%u", CORE_SPI_HOST+1);
-    // ESP_LOGI(CORE_TAG, "MOSI:  GPIO_NUM_%u | MISO:  GPIO_NUM_%u | CLK:  GPIO_NUM_%u",
-    //     CORE_PIN_SPI_MOSI, CORE_PIN_SPI_MISO, CORE_PIN_SPI_SCK);
-
-    // spi_bus_config_t spi_config;
-    // spi_config.mosi_io_num = CORE_PIN_SPI_MOSI;
-    // spi_config.miso_io_num = CORE_PIN_SPI_MISO;
-    // spi_config.sclk_io_num = CORE_PIN_SPI_SCK;
-    // spi_config.quadwp_io_num = -1;
-    // spi_config.quadhd_io_num = -1;
-    // spi_config.max_transfer_sz = 0;
-    // spi_config.flags = 0;
-    // spi_config.intr_flags = 0;
-
-    // ESP_ERROR_CHECK(spi_bus_initialize(CORE_SPI_HOST, &spi_config, 1));
 
     /**
      * @brief SPI Init
@@ -306,37 +256,7 @@ void CoreStandalone::init()
      * @brief DOUT Init
      * 
      */
-    // /!\ Set level before setting to output
-    ESP_ERROR_CHECK(ioex_set_level(_ioex, _dout[0], IOEX_LOW));
-    ESP_ERROR_CHECK(ioex_set_level(_ioex, _dout[1], IOEX_LOW));
-    ESP_ERROR_CHECK(ioex_set_level(_ioex, _dout[2], IOEX_LOW));
-    ESP_ERROR_CHECK(ioex_set_level(_ioex, _dout[3], IOEX_LOW));
-    
-    ioex_config_t dout_config;
-    dout_config.mode = IOEX_OUTPUT;
-    dout_config.pull_mode = IOEX_FLOATING;
-    dout_config.interrupt_type = IOEX_INTERRUPT_DISABLE;
-    dout_config.pin_bit_mask = (1ULL<<_dout[0]) | 
-                               (1ULL<<_dout[1]) | 
-                               (1ULL<<_dout[2]) | 
-                               (1ULL<<_dout[3]);
-    
-    ESP_ERROR_CHECK(ioex_config(_ioex, &dout_config));
-
-    /**
-     * @brief DOUT Sensor init
-     * 
-     */
-    ioex_config_t dout_sensor_config;        
-    dout_sensor_config.mode = IOEX_INPUT;
-    dout_sensor_config.pull_mode = IOEX_PULLDOWN;
-    dout_sensor_config.interrupt_type = IOEX_INTERRUPT_POSEDGE;
-    dout_sensor_config.pin_bit_mask = (1ULL<<_doutSensor[0]) | 
-                                      (1ULL<<_doutSensor[0]) | 
-                                      (1ULL<<_doutSensor[0]) | 
-                                      (1ULL<<_doutSensor[0]);
-
-    ESP_ERROR_CHECK(ioex_config(_ioex, &dout_sensor_config));
+    dout->init();
 
     /**
      * @brief AIN Init
@@ -433,19 +353,13 @@ void CoreStandalone::init()
 
 #endif
 
-    _mutex = xSemaphoreCreateMutex();
-    xSemaphoreGive(_mutex);
-
     ESP_LOGI(CORE_TAG, "Create control task");
     xTaskCreate(_controlTask, "Control task", 4096, NULL, 1, NULL);
 }
 
-void CoreStandalone::digitalWrite(DigitalOutputNum_t dout, uint8_t level)
+void CoreStandalone::digitalWrite(DigitalOutputNum_t doutNum, uint8_t level)
 {
-    xSemaphoreTake(_mutex, portMAX_DELAY);
-    _doutLevel[dout] = level;
-    xSemaphoreGive(_mutex);
-    ioex_set_level(_ioex, _dout[dout], static_cast<ioex_level_t>(level));
+    dout->digitalWrite(doutNum, level);
 }
 
 int CoreStandalone::digitalRead(DigitalInputNum_t din)
@@ -521,47 +435,22 @@ void CoreStandalone::detachInterrupt(DigitalInputNum_t din, InterruptMode_t mode
     }
 }
 
-uint8_t CoreStandalone::digitalReadOverCurrent(DigitalOutputNum_t dout)
+uint8_t CoreStandalone::getCurrentLevel(DigitalOutputNum_t doutNum)
 {
-    return ioex_get_level(_ioex, _doutSensor[(uint8_t)dout]);
+    return dout->getCurrentLevel(doutNum);
 }
 
 void CoreStandalone::_controlTask(void *pvParameters)
 {
 
-    /* Every 500ms check if there is a power error (DOUT, 5V User of 5V Usb)
+    /* Every 500ms check if there is a power error (5V User or 5V USB)
     If output is in error: desactivate for 5 secondes then retry */
 
-    uint8_t dout_state[4] = {0, 0, 0, 0};
     uint8_t user_power = 0;
     uint8_t usb_power = 0;
 
-    while (1) {
-
-        /* Checking if DOUT is in overcurrent */
-        for (int i = 0; i <= DOUT_4; i++) {
-            // If error happened
-            if (CoreStandalone::digitalReadOverCurrent((DigitalOutputNum_t)i) == 1)
-            {
-                ESP_LOGE(CORE_TAG, "Overcurrent on DOUT_%u", i+1);
-                ioex_set_level(_ioex, _dout[i], IOEX_LOW);
-                dout_state[i] = 1;
-            }
-            // Retry after 10 loops
-            else if (dout_state[i] == 10)
-            {
-                dout_state[i] = 0;
-                // Set output at user choice (do not set HIGH if user setted this pin LOW during error)
-                xSemaphoreTake(_mutex, portMAX_DELAY);
-                ioex_set_level(_ioex, _dout[i] , (ioex_level_t) _doutLevel[i]);
-                xSemaphoreGive(_mutex);
-            }
-            // increase error counter to reach 10
-            else if (dout_state[i] != 0)
-            {
-                dout_state[i]++;
-            }
-        }
+    while(1) 
+    {
 
 #if defined(CONFIG_IDF_TARGET_ESP32S3)
 
