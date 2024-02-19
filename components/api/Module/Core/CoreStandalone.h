@@ -33,6 +33,14 @@ public:
     static void digitalWrite(DigitalOutputNum_t doutNum, uint8_t level);
 
     /**
+     * @brief Toggle an output.
+     * First argument is the DOUT to drive.
+     * 
+     * @param dout DOUT to drive.
+     */
+    static void CoreStandalone::digitalToggle(DigitalOutputNum_t doutNum)
+
+    /**
      * @brief Read an input current level. Argument is the DIN to read.
      * The function return an integer that correspond to the value of the DIN.
      * 

@@ -50,6 +50,7 @@ typedef enum {
     DIGITAL_READ                    = 0x31,
     ATTACH_INTERRUPT                = 0x32,
     DETACH_INTERRUPT                = 0x33,
+    DIGITAL_TOGGLE                  = 0x34,
 
     /* ANALOG [0x40-0x4F] */
     ANALOG_READ                     = 0x40,

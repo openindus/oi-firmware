@@ -20,28 +20,28 @@
 
 static const char CORE_TAG[] = "Core";
 
-const ioex_num_t _doutGpio[4] = {
+const ioex_num_t _doutGpio[] = {
     CORE_IOEX_PIN_DOUT_1,
     CORE_IOEX_PIN_DOUT_2,
     CORE_IOEX_PIN_DOUT_3,
     CORE_IOEX_PIN_DOUT_4,
 };
 
-const ioex_num_t _doutCurrentGpio[4] = {
+const ioex_num_t _doutCurrentGpio[] = {
     CORE_IOEX_PIN_DOUT_CURRENT_1,
     CORE_IOEX_PIN_DOUT_CURRENT_2,
     CORE_IOEX_PIN_DOUT_CURRENT_3,
     CORE_IOEX_PIN_DOUT_CURRENT_4,
 };
 
-const ioex_num_t _dinGpio[4] = {
+const ioex_num_t _dinGpio[] = {
     CORE_IOEX_PIN_DIN_1,
     CORE_IOEX_PIN_DIN_2,
     CORE_IOEX_PIN_DIN_3,
     CORE_IOEX_PIN_DIN_4,
 };
 
-const adc1_channel_t CoreStandalone::_eana[2] = {
+const adc1_channel_t CoreStandalone::_eana[] = {
     CORE_CHANNEL_AIN_1,
     CORE_CHANNEL_AIN_2
 };
@@ -332,6 +332,11 @@ void CoreStandalone::init()
 void CoreStandalone::digitalWrite(DigitalOutputNum_t doutNum, uint8_t level)
 {
     dout->digitalWrite(doutNum, level);
+}
+
+void CoreStandalone::digitalToggle(DigitalOutputNum_t doutNum)
+{
+    dout->digitalToggle(doutNum);
 }
 
 int CoreStandalone::digitalRead(DigitalInputNum_t dinNum)

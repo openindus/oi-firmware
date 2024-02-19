@@ -27,6 +27,7 @@ public:
 
     /* DigitalOutput */
     static void digitalWrite(DigitalOutputNum_t doutNum, uint8_t level);
+    static void digitalToggle(DigitalOutputNum_t doutNum);
     static void analogWrite(DigitalOutputNum_t doutNum, uint8_t duty);
     static float getCurrent(DigitalOutputNum_t doutNum);
 

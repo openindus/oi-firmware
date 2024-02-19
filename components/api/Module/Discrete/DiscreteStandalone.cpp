@@ -98,6 +98,11 @@ void DiscreteStandalone::digitalWrite(DigitalOutputNum_t doutNum, uint8_t level)
     dout->digitalWrite(doutNum, level);
 }
 
+void DiscreteStandalone::digitalToggle(DigitalOutputNum_t doutNum)
+{
+    dout->digitalToggle(doutNum)
+}
+
 int DiscreteStandalone::digitalRead(DigitalInputNum_t dinNum)
 {
     return din->digitalRead(dinNum);
