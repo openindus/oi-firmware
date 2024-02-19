@@ -91,11 +91,11 @@ void DigitalOutput::init()
         
         /* Init DOUT current */
         ESP_LOGI(DOUT_TAG, "Init DOUT current");
-        ESP_ERROR_CHECK(adc1_config_width(ADC_WIDTH_BIT_12));
+        ESP_ERROR_CHECK(adc1_config_width((adc_bits_width_t)ADC_WIDTH_BIT_DEFAULT));
         for (uint8_t i = 0; i < _num; i++) {
             ESP_ERROR_CHECK(adc1_config_channel_atten(_adc_current[i], ADC_ATTEN_DB_11));
         }
-        esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &_adc1Characteristics);
+        esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, (adc_bits_width_t)ADC_WIDTH_BIT_DEFAULT, 1100, &_adc1Characteristics);
     }
     else // DIGITAL_OUTPUT_IOEX
     {
