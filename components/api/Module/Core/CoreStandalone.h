@@ -39,7 +39,7 @@ public:
      * @param din DIN to monitor.
      * @return Value of the DIN input (1 or 0). 
      */
-    static int digitalRead(DigitalInputNum_t din);
+    static int digitalRead(DigitalInputNum_t dinNum);
 
     /**
      * @brief Read the value of AIN.
@@ -64,18 +64,18 @@ public:
      * 
      * @param din DIN to attach interrupt.
      * @param callback function to attach
+     * @param mode mode of interruption, 
      * @param args function arguments
-     * @param mode mode of interruption on rising edge, 
      * falling edge or both (rising edge by default).
      */
-    static void attachInterrupt(DigitalInputNum_t din, void (*callback)(void *), void* args=NULL, InterruptMode_t mode=RISING_MODE);
+    void attachInterrupt(DigitalInputNum_t dinNum, IsrCallback_t callback, InterruptMode_t mode, void* arg);
     
     /**
      * @brief Detach an interrupt to a given DIN.
      * 
      * @param din DIN to detach interrupt.
      */
-    static void detachInterrupt(DigitalInputNum_t din, InterruptMode_t mode);
+    static void detachInterrupt(DigitalInputNum_t dinNum);
 
     /**
      * @brief Read the overcurrent status of a given DOUT. 
@@ -94,11 +94,10 @@ private:
     static ioex_device_t *_ioex;
 
     static esp_adc_cal_characteristics_t _adc1Characteristics;
-    static std::map<DigitalInputNum_t, InterruptMode_t> _dinCurrentMode;
 
     static DigitalOutput* dout;
+    static DigitalInput* din;
 
-    static const ioex_num_t _din[4];
     static const adc1_channel_t _eana[2];
 
     static void _controlTask(void *pvParameters);

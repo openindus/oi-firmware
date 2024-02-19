@@ -34,7 +34,7 @@ const ioex_num_t _doutCurrentGpio[4] = {
     CORE_IOEX_PIN_DOUT_CURRENT_4,
 };
 
-const ioex_num_t CoreStandalone::_din[4] = {
+const ioex_num_t _dinGpio[4] = {
     CORE_IOEX_PIN_DIN_1,
     CORE_IOEX_PIN_DIN_2,
     CORE_IOEX_PIN_DIN_3,
@@ -48,10 +48,10 @@ const adc1_channel_t CoreStandalone::_eana[2] = {
 
 ioex_device_t* CoreStandalone::_ioex;
 
+DigitalInput* CoreStandalone::din = new DigitalInput(_ioex, _dinGpio, 4);
 DigitalOutput* CoreStandalone::dout = new DigitalOutput(_ioex, _doutGpio, _doutCurrentGpio, 4);
 
 esp_adc_cal_characteristics_t CoreStandalone::_adc1Characteristics;
-std::map<DigitalInputNum_t, InterruptMode_t> CoreStandalone::_dinCurrentMode;
 
 void CoreStandalone::init()
 {
@@ -119,21 +119,7 @@ void CoreStandalone::init()
      * @brief DIN Init
      * 
      */
-    ioex_config_t etor_config;
-    etor_config.mode = IOEX_INPUT;
-    etor_config.pull_mode = IOEX_PULLDOWN;
-    etor_config.interrupt_type = IOEX_INTERRUPT_DISABLE;
-    etor_config.pin_bit_mask = (1ULL<<_din[0]) | 
-                               (1ULL<<_din[1]) | 
-                               (1ULL<<_din[2]) | 
-                               (1ULL<<_din[3]);
-    
-    ESP_ERROR_CHECK(ioex_config(_ioex, &etor_config));
-
-    _dinCurrentMode[DIN_1] = NONE_MODE;
-    _dinCurrentMode[DIN_2] = NONE_MODE;
-    _dinCurrentMode[DIN_3] = NONE_MODE;
-    _dinCurrentMode[DIN_4] = NONE_MODE;
+    din->init();
 
     /**
      * @brief DOUT Init
@@ -236,21 +222,7 @@ void CoreStandalone::init()
      * @brief DIN Init
      * 
      */
-    ioex_config_t din_config;
-    din_config.mode = IOEX_INPUT;
-    din_config.pull_mode = IOEX_PULLDOWN;
-    din_config.interrupt_type = IOEX_INTERRUPT_DISABLE;
-    din_config.pin_bit_mask = (1ULL<<_din[0]) | 
-                              (1ULL<<_din[1]) | 
-                              (1ULL<<_din[2]) | 
-                              (1ULL<<_din[3]);
-    
-    ESP_ERROR_CHECK(ioex_config(_ioex, &din_config));
-
-    _dinCurrentMode[DIN_1] = NONE_MODE;
-    _dinCurrentMode[DIN_2] = NONE_MODE;
-    _dinCurrentMode[DIN_3] = NONE_MODE;
-    _dinCurrentMode[DIN_4] = NONE_MODE;
+    din->init();
 
     /**
      * @brief DOUT Init
@@ -362,9 +334,9 @@ void CoreStandalone::digitalWrite(DigitalOutputNum_t doutNum, uint8_t level)
     dout->digitalWrite(doutNum, level);
 }
 
-int CoreStandalone::digitalRead(DigitalInputNum_t din)
+int CoreStandalone::digitalRead(DigitalInputNum_t dinNum)
 {
-    return ioex_get_level(_ioex, _din[din]);
+    return din->digitalRead(dinNum);
 }
 
 int CoreStandalone::analogRead(AnalogInputNum_t ana)
@@ -391,48 +363,14 @@ float CoreStandalone::analogReadMilliVolts(AnalogInputNum_t ana)
     return static_cast<float>(voltage * CORE_ADC_REDUCTION_FACTOR);
 }
 
-void CoreStandalone::attachInterrupt(DigitalInputNum_t din, void (*callback)(void *), void * args, InterruptMode_t mode)
+void CoreStandalone::attachInterrupt(DigitalInputNum_t dinNum, IsrCallback_t callback, InterruptMode_t mode, void* arg)
 {
-    InterruptMode_t newMode = (InterruptMode_t)((int)_dinCurrentMode.at(din) | (int)mode);
-
-    if(newMode == mode)
-    {
-        ioex_set_interrupt_type(_ioex, _din[din], (ioex_interrupt_type_t)(mode));
-    }
-    
-    else if(newMode == CHANGE_MODE)
-    {
-        ioex_set_interrupt_type(_ioex, _din[din], IOEX_INTERRUPT_ANYEDGE);
-    }
-
-    _dinCurrentMode[din] = newMode;
-    ioex_isr_handler_add(_ioex, _din[din], (ioex_isr_t)callback, args, CORE_DIGITAL_INTERRUPT_PRIORITY);
-    ioex_interrupt_enable(_ioex, _din[din]);
+    din->attachInterrupt(dinNum, callback, mode, arg);
 }
 
-void CoreStandalone::detachInterrupt(DigitalInputNum_t din, InterruptMode_t mode)
+void CoreStandalone::detachInterrupt(DigitalInputNum_t dinNum)
 {
-    
-    if(_dinCurrentMode.at(din) == CHANGE_MODE)
-    {
-        if(mode == FALLING_MODE)
-        {
-            ioex_set_interrupt_type(_ioex, _din[din], IOEX_INTERRUPT_POSEDGE);
-            _dinCurrentMode[din] = RISING_MODE;
-        }
-        else if(mode == RISING_MODE)
-        {
-            ioex_set_interrupt_type(_ioex, _din[din], IOEX_INTERRUPT_NEGEDGE);
-            _dinCurrentMode[din] = FALLING_MODE;
-        }
-    }
-
-    else if(_dinCurrentMode.at(din) == mode)
-    {
-        ioex_set_interrupt_type(_ioex, _din[din], IOEX_INTERRUPT_DISABLE);
-        ioex_isr_handler_remove(_ioex, _din[din]);
-        _dinCurrentMode[din] = NONE_MODE;
-    }
+    din->detachInterrupt(dinNum);
 }
 
 uint8_t CoreStandalone::getCurrentLevel(DigitalOutputNum_t doutNum)

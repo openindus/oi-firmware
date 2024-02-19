@@ -65,8 +65,8 @@ DigitalInput::~DigitalInput()
 
 void DigitalInput::init(void)
 {
-    if (_type == DIGITAL_INPUT_GPIO) {
-
+    if (_type == DIGITAL_INPUT_GPIO) 
+    {
         /* Init DIN Gpio */
         ESP_LOGI(DIN_TAG, "Init DIN");
         gpio_config_t dinConf = {
@@ -118,14 +118,31 @@ void DigitalInput::attachInterrupt(DigitalInputNum_t din, IsrCallback_t callback
 {
     _callback[din] = callback;
     _arg[din] = arg;
-    gpio_isr_handler_add(_gpio_num[din], _isr, (void *)din);
-    gpio_set_intr_type(_gpio_num[din], (gpio_int_type_t)mode);
-    gpio_intr_enable(_gpio_num[din]);
+
+    if (_type == DIGITAL_INPUT_GPIO)
+    {
+        gpio_isr_handler_add(_gpio_num[din], _isr, (void *)din);
+        gpio_set_intr_type(_gpio_num[din], (gpio_int_type_t)mode);
+        gpio_intr_enable(_gpio_num[din]);
+    }
+    else // DIGITAL_INPUT_IOEX
+    {
+        ioex_isr_handler_add(_ioex, _ioex_num[din], (ioex_isr_t)callback, (void *)din, 1);
+        ioex_set_interrupt_type(_ioex, _ioex_num[din], (ioex_interrupt_type_t)(mode));
+        ioex_interrupt_enable(_ioex, _ioex_num[din]);
+    }
 }
 
 void DigitalInput::detachInterrupt(DigitalInputNum_t din)
 {
-    gpio_isr_handler_remove(_gpio_num[din]);
+    if (_type == DIGITAL_INPUT_GPIO)
+    {
+        gpio_isr_handler_remove(_gpio_num[din]);
+    }
+    else // DIGITAL_INPUT_IOEX
+    {
+        ioex_isr_handler_remove(_ioex, _ioex_num[din]);
+    }
 }
 
 void IRAM_ATTR DigitalInput::_isr(void* pvParameters)
@@ -139,11 +156,24 @@ void DigitalInput::_task(void* pvParameters)
     DigitalInputNum_t din;
     DigitalInput* dout = (DigitalInput*) pvParameters;
 
-    while(1) {
-        if(xQueueReceive(dout->_event, &din, portMAX_DELAY)) {
-            gpio_intr_disable(dout->_gpio_num[din]);
+    while(1) 
+    {
+        if(xQueueReceive(dout->_event, &din, portMAX_DELAY))
+        {
+            /* Disable interrupt */
+            if (dout->_type == DIGITAL_INPUT_GPIO)
+                gpio_intr_disable(dout->_gpio_num[din]);
+            else // DIGITAL_INPUT_IOEX
+                ioex_interrupt_disable(dout->_ioex, dout->_ioex_num[din]);
+
+            /* Call user function */
             dout->_callback[din](dout->_arg[din]);
-            gpio_intr_enable(dout->_gpio_num[din]);
+
+            /* Re-enable interrupt */
+            if (dout->_type == DIGITAL_INPUT_GPIO)
+                gpio_intr_enable(dout->_gpio_num[din]);
+            else // DIGITAL_INPUT_IOEX
+                ioex_interrupt_enable(dout->_ioex, dout->_ioex_num[din]);
         }
     }
 }
