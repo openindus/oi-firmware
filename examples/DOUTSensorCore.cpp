@@ -1,8 +1,6 @@
 #include "OpenIndus.h"
 #include "Arduino.h"
 
-#include "CorePinout.h"
-
 /* Instanciate */
 Core core;
 
@@ -19,10 +17,10 @@ void loop(void)
 {
     /* Print value in monitor */
     printf("DOUT Sensor 1: %u\t 2: %u\t 3: %u\t 4: %u\n", \
-        core.digitalReadOverCurrent(DOUT_1),\
-        core.digitalReadOverCurrent(DOUT_2),\
-        core.digitalReadOverCurrent(DOUT_3),\
-        core.digitalReadOverCurrent(DOUT_4));
+        core.getCurrentLevel(DOUT_1),\
+        core.getCurrentLevel(DOUT_2),\
+        core.getCurrentLevel(DOUT_3),\
+        core.getCurrentLevel(DOUT_4));
 
     /* Wait for 200ms before reading value again */
     delay(200);

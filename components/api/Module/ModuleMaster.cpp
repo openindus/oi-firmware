@@ -25,6 +25,7 @@ std::vector<uint16_t> ModuleMaster::_ids;
 void ModuleMaster::init(void)
 {
     ESP_LOGI(MODULE_TAG, "Bus init");
+
     /* Bus RS/CAN */
     BusRs::begin(MODULE_RS_NUM_PORT, MODULE_PIN_RS_UART_TX, MODULE_PIN_RS_UART_RX);
     BusCan::begin(MODULE_PIN_CAN_TX, MODULE_PIN_CAN_RX);

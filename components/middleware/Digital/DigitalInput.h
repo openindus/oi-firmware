@@ -21,6 +21,7 @@
 #include "driver/gpio.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
+#include "pcal6524.h"
 
 typedef void (*IsrCallback_t)(void*);
 
@@ -50,14 +51,18 @@ typedef enum {
     CHANGE_MODE
 } InterruptMode_t;
 
+typedef enum {
+    DIGITAL_INPUT_GPIO = 0,
+    DIGITAL_INPUT_IOEX
+} DigitalInputType_t;
+
 class DigitalInput
 {
 public:
 
-    DigitalInput(gpio_num_t gpio[DIN_MAX], int num) {
-        memset(_gpio, GPIO_NUM_NC, DIN_MAX * sizeof(gpio_num_t));
-        memcpy(_gpio, gpio, num * sizeof(gpio_num_t));
-    }
+    DigitalInput(const gpio_num_t *gpio, int num);
+    DigitalInput(ioex_device_t *ioex, const ioex_num_t *ioex_num, int num);
+    ~DigitalInput();
 
     void init(void);
     int digitalRead(DigitalInputNum_t din);
@@ -66,13 +71,28 @@ public:
 
 private:
 
-    static gpio_num_t _gpio[DIN_MAX];
-    static IsrCallback_t _callback[DIN_MAX];
-    static void* _arg[DIN_MAX];
+    /* Type of DOUT (gpio or ioex) */
+    DigitalInputType_t _type;
+
+    /* Number of DOUT */
+    uint8_t _num; 
+    
+    /* GPIO num for DOUT (can be initialized as esp gpio or ioexpander gpio)*/
+    gpio_num_t* _gpio_num;
+    ioex_num_t* _ioex_num;
+
+    IsrCallback_t* _callback;
+    void** _arg;
+
+    /* Stor a local copy of the pointer to an initilized ioex_device_t */
+    ioex_device_t* _ioex;
 
     static xQueueHandle _event;
+    static void IRAM_ATTR _isr(void* pvParameters);
+    static void _task(void* pvParameters);
 
-    static void IRAM_ATTR _isr(void* arg);
-    static void _task(void* arg);
+    /* Utils functions */
+    int _common_get_level(DigitalInputNum_t dout);
+
 
 };

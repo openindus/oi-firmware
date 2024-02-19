@@ -15,10 +15,27 @@
 
 #pragma once
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/semphr.h"
+#include <string.h>
 #include "esp_err.h"
 #include "esp_log.h"
 #include "driver/gpio.h"
 #include "driver/ledc.h"
+#include "driver/adc.h"
+#include "esp_adc_cal.h"
+#include "pcal6524.h"
+
+#define DOUT_SENSOR_ADC_NO_OF_SAMPLES           64U
+#define DOUT_SENSOR_RESISTOR_SENSE_VALUE        1200
+#define DOUT_SENSOR_COEFF_BELOW_1A              1900
+#define DOUT_SENSOR_VOLTAGE_BELOW_1A_mV         0.65f
+#define DOUT_SENSOR_COEFF_BELOW_1_5A            1850
+#define DOUT_SENSOR_VOLTAGE_BELOW_1_5A_mV       1.0f
+#define DOUT_SENSOR_COEFF_BELOW_2A              1800
+#define DOUT_SENSOR_VOLTAGE_BELOW_2A_mV         1.33f
+#define DOUT_SENSOR_COEFF_ABOVE_2A              1750
 
 typedef enum {
     DOUT_1 = 0,
@@ -31,27 +48,58 @@ typedef enum {
     DOUT_6,
     DOUT_7,
     DOUT_8,
-#if !defined(CONFIG_DISCRETE) && !defined(CONFIG_DISCRETE_VE)
-    DOUT_9,
-    DOUT_10,
-#endif
 #endif
 #endif
     DOUT_MAX
 } DigitalOutputNum_t;
 
+typedef enum {
+    DIGITAL_OUTPUT_GPIO = 0,
+    DIGITAL_OUTPUT_IOEX
+} DigitalOutputType_t;
+
 class DigitalOutput
 {
 public:
 
-    static void init(gpio_config_t* config, gpio_num_t* num);
-    static void digitalWrite(DigitalOutputNum_t dout, uint8_t level);
-    static void digitalToggle(DigitalOutputNum_t dout);
-    static void analogWrite(DigitalOutputNum_t dout, uint8_t duty);
-    static void ledcSetup(DigitalOutputNum_t dout, uint32_t freq, ledc_timer_bit_t bit);
-    static void ledcWrite(DigitalOutputNum_t dout, uint32_t duty);
+    DigitalOutput(const gpio_num_t *gpio, const adc1_channel_t *adc, int num);
+    DigitalOutput(ioex_device_t *ioex, const ioex_num_t *ioex_num, const ioex_num_t *current_num, int num);
+    ~DigitalOutput();
+
+    void init();
+    void digitalWrite(DigitalOutputNum_t dout, uint8_t level);
+    void digitalToggle(DigitalOutputNum_t dout);
+    void analogWrite(DigitalOutputNum_t dout, uint8_t duty);
+    void ledcSetup(DigitalOutputNum_t dout, uint32_t freq, ledc_timer_bit_t bit);
+    void ledcWrite(DigitalOutputNum_t dout, uint32_t duty);
+    float getCurrent(DigitalOutputNum_t dout);
+    int getCurrentLevel(DigitalOutputNum_t dout);
 
 private:
 
-    static gpio_num_t* _gpio;
+    /* Type of DOUT (gpio or ioex) */
+    DigitalOutputType_t _type;
+
+    /* Number of DOUT */
+    uint8_t _num; 
+    
+    /* GPIO num for DOUT (can be initialized as esp gpio or ioexpander gpio)*/
+    gpio_num_t* _gpio_num;
+    ioex_num_t* _ioex_num;
+
+    /* ADC Channel for analog current or ioexpander gpio for digital current (HIGH or LOW current)*/
+    adc1_channel_t* _adc_current;
+    ioex_num_t* _ioex_current;
+
+    /* Stor a local copy of the pointer to an initilized ioex_device_t */
+    ioex_device_t* _ioex;
+    esp_adc_cal_characteristics_t _adc1Characteristics;
+    uint8_t* _doutLevel;
+
+    static void _controlTask(void *pvParameters);
+
+    /* Utils functions */
+    void _common_set_level(DigitalOutputNum_t dout, uint8_t level);
+    int _common_get_level(DigitalOutputNum_t dout);
+
 };

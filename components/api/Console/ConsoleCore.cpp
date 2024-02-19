@@ -23,7 +23,7 @@ void ConsoleCore::registerCli(void)
     _registerDigitalRead();
     _registerAnalogRead();
     _registerAnalogReadMillivolts();
-    _registerDigitalReadOverCurrent();
+    _registerGetCurrentLevel();
 }
 
 /** 'digital-write' */
@@ -181,7 +181,7 @@ static struct {
     struct arg_end *end;
 } digitalReadOverCurrentArgs;
 
-static int digitalReadOverCurrent(int argc, char **argv)
+static int getCurrentLevel(int argc, char **argv)
 {
     int nerrors = arg_parse(argc, argv, (void **) &digitalReadOverCurrentArgs);
     if (nerrors != 0) {
@@ -190,20 +190,20 @@ static int digitalReadOverCurrent(int argc, char **argv)
     }
 
     DigitalOutputNum_t dout = (DigitalOutputNum_t)(digitalReadOverCurrentArgs.dout->ival[0] - 1);
-    printf("%u\n", CoreStandalone::digitalReadOverCurrent(dout));
+    printf("%u\n", CoreStandalone::getCurrentLevel(dout));
     return 0;
 }
 
-void ConsoleCore::_registerDigitalReadOverCurrent(void)
+void ConsoleCore::_registerGetCurrentLevel(void)
 {
     digitalReadOverCurrentArgs.dout = arg_int1(NULL, NULL, "<DOUT>", "[1-4]");
     digitalReadOverCurrentArgs.end = arg_end(2);
 
     const esp_console_cmd_t cmd = {
-        .command = "digital-read-overcurrent",
+        .command = "get-current-level",
         .help = "Read the overcurrent status for the given output",
         .hint = NULL,
-        .func = &digitalReadOverCurrent,
+        .func = &getCurrentLevel,
         .argtable = &digitalReadOverCurrentArgs
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));

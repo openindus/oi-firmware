@@ -26,8 +26,10 @@ public:
     static void init(void);
 
     /* DigitalOutput */
-    static void digitalWrite(DigitalOutputNum_t dout, uint8_t level);
-    static void analogWrite(DigitalOutputNum_t dout, uint8_t duty);
+    static void digitalWrite(DigitalOutputNum_t doutNum, uint8_t level);
+    static void digitalToggle(DigitalOutputNum_t doutNum);
+    static void analogWrite(DigitalOutputNum_t doutNum, uint8_t duty);
+    static float getCurrent(DigitalOutputNum_t doutNum);
 
     /* DigitalInput */
     static int digitalRead(DigitalInputNum_t dinNum);
@@ -41,6 +43,7 @@ public:
 private:
 
     static DigitalInput* din;
+    static DigitalOutput* dout;
 
 };
 

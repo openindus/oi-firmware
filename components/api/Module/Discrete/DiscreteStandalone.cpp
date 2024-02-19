@@ -14,13 +14,13 @@
  */
 
 #include "DiscreteStandalone.h"
-#include "DiscreteConfig.h"
+#include "DiscretePinout.h"
 
 #if defined(CONFIG_DISCRETE) || defined(CONFIG_DISCRETE_VE)
 
 static const char DISCRETE_TAG[] = "Discrete";
 
-gpio_num_t _doutNum[] = {
+const gpio_num_t _doutGpio[] = {
     DISCRETE_PIN_DOUT_1,
     DISCRETE_PIN_DOUT_2,
     DISCRETE_PIN_DOUT_3,
@@ -31,7 +31,18 @@ gpio_num_t _doutNum[] = {
     DISCRETE_PIN_DOUT_8
 };
 
-gpio_num_t _dinGpio[] = {
+const adc1_channel_t _doutAdcChannel[] = {
+    DISCRETE_CHANNEL_DOUT_CURRENT_1,
+    DISCRETE_CHANNEL_DOUT_CURRENT_2,
+    DISCRETE_CHANNEL_DOUT_CURRENT_3,
+    DISCRETE_CHANNEL_DOUT_CURRENT_4,
+    DISCRETE_CHANNEL_DOUT_CURRENT_5,
+    DISCRETE_CHANNEL_DOUT_CURRENT_6,
+    DISCRETE_CHANNEL_DOUT_CURRENT_7,
+    DISCRETE_CHANNEL_DOUT_CURRENT_8
+};
+
+const gpio_num_t _dinGpio[] = {
     DISCRETE_PIN_DIN_1,
     DISCRETE_PIN_DIN_2,
     DISCRETE_PIN_DIN_3,
@@ -47,8 +58,7 @@ gpio_num_t _dinGpio[] = {
 #if defined(CONFIG_IDF_TARGET_ESP32S3)
 adc2_channel_t _ainChannel[] = {
     DISCRETE_CHANNEL_AIN_1,
-    DISCRETE_CHANNEL_AIN_2,
-    DISCRETE_CHANNEL_AIN_3
+    DISCRETE_CHANNEL_AIN_2
 };
 #elif defined(CONFIG_IDF_TARGET_ESP32S2)
 adc1_channel_t _ainChannel[] = {
@@ -58,7 +68,8 @@ adc1_channel_t _ainChannel[] = {
 
 esp_adc_cal_characteristics_t* _ainAdcChar;
 
-DigitalInput* DiscreteStandalone::din = new DigitalInput(_dinGpio, 10); 
+DigitalInput* DiscreteStandalone::din = new DigitalInput(_dinGpio, 10);
+DigitalOutput* DiscreteStandalone::dout = new DigitalOutput(_doutGpio, _doutAdcChannel, 8);
 
 void DiscreteStandalone::init()
 {
@@ -66,9 +77,9 @@ void DiscreteStandalone::init()
     ModuleStandalone::init();
 
     /* Init DOUT */
-    gpio_config_t doutConf = DISCRETE_CONFIG_DOUT_DEFAULT();
-    DigitalOutput::init(&doutConf, _doutNum);
+    dout->init();
 
+    /* Init DIN*/
     din->init();
 
     /* Init AIN */
@@ -82,9 +93,14 @@ void DiscreteStandalone::init()
     }
 }
 
-void DiscreteStandalone::digitalWrite(DigitalOutputNum_t dout, uint8_t level)
+void DiscreteStandalone::digitalWrite(DigitalOutputNum_t doutNum, uint8_t level)
 {
-    DigitalOutput::digitalWrite(dout, level);
+    dout->digitalWrite(doutNum, level);
+}
+
+void DiscreteStandalone::digitalToggle(DigitalOutputNum_t doutNum)
+{
+    dout->digitalToggle(doutNum);
 }
 
 int DiscreteStandalone::digitalRead(DigitalInputNum_t dinNum)
@@ -123,9 +139,14 @@ int DiscreteStandalone::analogReadMilliVolts(AnalogInputNum_t ain)
     return -1;
 }
 
-void DiscreteStandalone::analogWrite(DigitalOutputNum_t dout, uint8_t duty)
+void DiscreteStandalone::analogWrite(DigitalOutputNum_t doutNum, uint8_t duty)
 {
-    DigitalOutput::analogWrite(dout, duty);
+    dout->analogWrite(doutNum, duty);
+}
+
+float DiscreteStandalone::getCurrent(DigitalOutputNum_t doutNum)
+{
+    return dout->getCurrent(doutNum);
 }
 
 #endif

@@ -20,38 +20,38 @@
 
 static const char MIXED_TAG[] = "Mixed";
 
-gpio_num_t _dinGpio[] = {
+const gpio_num_t _dinGpio[] = {
     MIXED_PIN_DIN_1,
     MIXED_PIN_DIN_2,
     MIXED_PIN_DIN_3,
     MIXED_PIN_DIN_4
 };
 
-gpio_num_t _doutGpio[] = {
+const gpio_num_t _doutGpio[] = {
     MIXED_PIN_DOUT_1,
     MIXED_PIN_DOUT_2,
     MIXED_PIN_DOUT_3,
     MIXED_PIN_DOUT_4
 };
 
+const adc1_channel_t _doutAdcChannel[] = {
+    MIXED_CHANNEL_DOUT_CURRENT_1,
+    MIXED_CHANNEL_DOUT_CURRENT_2,
+    MIXED_CHANNEL_DOUT_CURRENT_3,
+    MIXED_CHANNEL_DOUT_CURRENT_4
+};
+
 uint32_t _ainToNum[] = {2, 3, 1, 0};
 
 DigitalInput* MixedStandalone::din = new DigitalInput(_dinGpio, 4);
+DigitalOutput* MixedStandalone::dout = new DigitalOutput(_doutGpio, _doutAdcChannel, 4);
 
 void MixedStandalone::init()
 {
     ModuleStandalone::init();
 
     /* Init DOUT */
-    ESP_LOGI(MIXED_TAG, "Init DOUT");
-    gpio_config_t doutConf = {
-        .pin_bit_mask = MIXED_PIN_DOUTS,
-        .mode = GPIO_MODE_OUTPUT,
-        .pull_up_en = GPIO_PULLUP_DISABLE,
-        .pull_down_en = GPIO_PULLDOWN_DISABLE,
-        .intr_type = GPIO_INTR_DISABLE,
-    };
-    gpio_config(&doutConf);
+    dout->init();
 
     /* Init DIN */
     din->init();
@@ -61,16 +61,15 @@ void MixedStandalone::init()
     ESP_LOGI(MIXED_TAG, "MOSI:  GPIO_NUM_%u | MISO:  GPIO_NUM_%u | CLK:  GPIO_NUM_%u",
         MIXED_PIN_SPI_MOSI, MIXED_PIN_SPI_MISO, MIXED_PIN_SPI_SCK);
 
-    spi_bus_config_t spi_config = {
-        .mosi_io_num = MIXED_PIN_SPI_MOSI,
-        .miso_io_num = MIXED_PIN_SPI_MISO,
-        .sclk_io_num = MIXED_PIN_SPI_SCK,
-        .quadwp_io_num = -1,
-        .quadhd_io_num = -1,
-        .max_transfer_sz = 0,
-        .flags = 0,
-        .intr_flags = 0
-    };
+    spi_bus_config_t spi_config;
+    spi_config.mosi_io_num = MIXED_PIN_SPI_MOSI;
+    spi_config.miso_io_num = MIXED_PIN_SPI_MISO;
+    spi_config.sclk_io_num = MIXED_PIN_SPI_SCK;
+    spi_config.quadwp_io_num = -1;
+    spi_config.quadhd_io_num = -1;
+    spi_config.max_transfer_sz = 0;
+    spi_config.flags = 0;
+    spi_config.intr_flags = 0;
 
     ESP_ERROR_CHECK(spi_bus_initialize(MIXED_SPI_HOST, &spi_config, 1));
 
@@ -120,13 +119,14 @@ void MixedStandalone::init()
     gpio_install_isr_service(ESP_INTR_FLAG_LEVEL3);
 }
 
-void MixedStandalone::digitalWrite(DigitalOutputNum_t dout, uint8_t level)
+void MixedStandalone::digitalWrite(DigitalOutputNum_t doutNum, uint8_t level)
 {
-    if (dout < DOUT_MAX) {
-        gpio_set_level(_doutGpio[dout], level);
-    } else {
-        ESP_LOGE(MIXED_TAG, "Invalid DOUT_%d", dout+1);
-    }
+    dout->digitalWrite(doutNum, level);
+}
+
+void MixedStandalone::digitalToggle(DigitalOutputNum_t doutNum)
+{
+    dout->digitalToggle(doutNum);
 }
 
 int MixedStandalone::digitalRead(DigitalInputNum_t dinNum)
@@ -197,6 +197,16 @@ void MixedStandalone::analogWriteCurrentMilliAmps(AnalogOutputNum_t sana, uint32
 void MixedStandalone::analogWriteCurrentMode(AnalogOutputNum_t sana, DacCurrentMode_t mode)
 {
     Dac8760_setCurrentMode(sana, (Dac8760_CurrentMode_t) mode);
+}
+
+void MixedStandalone::analogWrite(DigitalOutputNum_t doutNum, uint8_t duty)
+{
+    dout->analogWrite(doutNum, duty);
+}
+
+float MixedStandalone::getCurrent(DigitalOutputNum_t doutNum)
+{
+    return dout->getCurrent(doutNum);
 }
 
 #endif
