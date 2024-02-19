@@ -38,7 +38,7 @@ public:
      * 
      * @param dout DOUT to drive.
      */
-    static void CoreStandalone::digitalToggle(DigitalOutputNum_t doutNum);
+    static void digitalToggle(DigitalOutputNum_t doutNum);
 
     /**
      * @brief Read an input current level. Argument is the DIN to read.
