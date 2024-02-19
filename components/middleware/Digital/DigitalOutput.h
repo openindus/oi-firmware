@@ -63,7 +63,7 @@ class DigitalOutput
 public:
 
     DigitalOutput(const gpio_num_t *gpio, const adc1_channel_t *adc, int num);
-    DigitalOutput(ioex_device_t *ioex, const ioex_num_t *ioex_num, const ioex_num_t *current_num, int num);
+    DigitalOutput(ioex_device_t **ioex, const ioex_num_t *ioex_num, const ioex_num_t *current_num, int num);
     ~DigitalOutput();
 
     void init();
@@ -92,7 +92,7 @@ private:
     ioex_num_t* _ioex_current;
 
     /* Stor a local copy of the pointer to an initilized ioex_device_t */
-    ioex_device_t* _ioex;
+    ioex_device_t** _ioex;
     esp_adc_cal_characteristics_t _adc1Characteristics;
     uint8_t* _doutLevel;
 

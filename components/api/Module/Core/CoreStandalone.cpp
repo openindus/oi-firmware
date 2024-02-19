@@ -48,8 +48,8 @@ const adc1_channel_t CoreStandalone::_eana[] = {
 
 ioex_device_t* CoreStandalone::_ioex;
 
-DigitalInput* CoreStandalone::din = new DigitalInput(_ioex, _dinGpio, 4);
-DigitalOutput* CoreStandalone::dout = new DigitalOutput(_ioex, _doutGpio, _doutCurrentGpio, 4);
+DigitalInput* CoreStandalone::din = new DigitalInput(&_ioex, _dinGpio, 4);
+DigitalOutput* CoreStandalone::dout = new DigitalOutput(&_ioex, _doutGpio, _doutCurrentGpio, 4);
 
 esp_adc_cal_characteristics_t CoreStandalone::_adc1Characteristics;
 
@@ -398,25 +398,26 @@ void CoreStandalone::_controlTask(void *pvParameters)
 #if defined(CONFIG_IDF_TARGET_ESP32S3)
 
         /* Checking if user power is in overcurrent */
-        // If error happened
-        if (ioex_get_level(_ioex, CORE_IOEX_PIN_5V_USER_PG) == 1)
-        {
-            ESP_LOGE(CORE_TAG, "Overcurrent on 5V User");
-            ioex_set_direction(_ioex, CORE_IOEX_PIN_5V_USER_EN, IOEX_OUTPUT);
-            ioex_set_level(_ioex, CORE_IOEX_PIN_5V_USER_EN, IOEX_LOW);
-            user_power = 1;
-        }
-        // Retry after 10 loops
-        else if (user_power == 10)
-        {
-            user_power = 0;
-            ioex_set_direction(_ioex, CORE_IOEX_PIN_5V_USER_EN, IOEX_INPUT);
-        }
-        // increase error counter
-        else if (user_power != 0)
-        {
-            user_power++;
-        }
+        /* Not implemented on hardwar AE01 --> uncomment with hardware AE02 */
+        // // If error happened
+        // if (ioex_get_level(_ioex, CORE_IOEX_PIN_5V_USER_PG) == 1)
+        // {
+        //     ESP_LOGE(CORE_TAG, "Overcurrent on 5V User");
+        //     ioex_set_direction(_ioex, CORE_IOEX_PIN_5V_USER_EN, IOEX_OUTPUT);
+        //     ioex_set_level(_ioex, CORE_IOEX_PIN_5V_USER_EN, IOEX_LOW);
+        //     user_power = 1;
+        // }
+        // // Retry after 10 loops
+        // else if (user_power == 10)
+        // {
+        //     user_power = 0;
+        //     ioex_set_direction(_ioex, CORE_IOEX_PIN_5V_USER_EN, IOEX_INPUT);
+        // }
+        // // increase error counter
+        // else if (user_power != 0)
+        // {
+        //     user_power++;
+        // }
 
         /* Checking if usb power is in overcurrent */
         // If error happened

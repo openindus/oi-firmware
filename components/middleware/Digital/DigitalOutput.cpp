@@ -37,7 +37,7 @@ DigitalOutput::DigitalOutput(const gpio_num_t *gpio, const adc1_channel_t *adc, 
     _doutLevel = (uint8_t*) calloc(num, sizeof(uint8_t));
 }
 
-DigitalOutput::DigitalOutput(ioex_device_t *ioex, const ioex_num_t *ioex_num, const ioex_num_t *ioex_current, int num)
+DigitalOutput::DigitalOutput(ioex_device_t **ioex, const ioex_num_t *ioex_num, const ioex_num_t *ioex_current, int num)
 {
     _type = DIGITAL_OUTPUT_IOEX;
 
@@ -110,9 +110,9 @@ void DigitalOutput::init()
         for (uint8_t i = 0; i < _num; i++) {
             doutConf.pin_bit_mask |= (1ULL <<_ioex_num[i]);
             // /!\ Set level before setting to output
-            ESP_ERROR_CHECK(ioex_set_level(_ioex, _ioex_num[i], IOEX_LOW));
+            ESP_ERROR_CHECK(ioex_set_level(*_ioex, _ioex_num[i], IOEX_LOW));
         }
-        ESP_ERROR_CHECK(ioex_config(_ioex, &doutConf));
+        ESP_ERROR_CHECK(ioex_config(*_ioex, &doutConf));
 
         ESP_LOGI(DOUT_TAG, "Init DOUT current");
         ioex_config_t doutSensorConf = {
@@ -124,7 +124,7 @@ void DigitalOutput::init()
         for (uint8_t i = 0; i < _num; i++) {
             doutSensorConf.pin_bit_mask |= (1ULL <<_ioex_current[i]);
         }
-        ESP_ERROR_CHECK(ioex_config(_ioex, &doutSensorConf));
+        ESP_ERROR_CHECK(ioex_config(*_ioex, &doutSensorConf));
     }
 
     _mutex = xSemaphoreCreateMutex();
@@ -255,7 +255,7 @@ int DigitalOutput::getCurrentLevel(DigitalOutputNum_t dout)
         ESP_LOGW(DOUT_TAG, "For current sensor with adc reading, call 'getCurrent' function");
         return (getCurrent(dout) > 4.0f)?1:0;
     } else { // DIGITAL_OUTPUT_IOEX
-        return ioex_get_level(_ioex, _ioex_current[dout]);
+        return ioex_get_level(*_ioex, _ioex_current[dout]);
     }
 }
 
@@ -273,8 +273,8 @@ void DigitalOutput::_controlTask(void *pvParameters)
     
     if (dout->_type == DIGITAL_OUTPUT_GPIO) 
     {
-        while (1) {
-
+        while(1)
+        {
             /* Checking if individual DOUT is in overcurrent (> 4A) */
             for (uint8_t i = 0; i < dout->_num; i++) {
                 // Read current
@@ -336,28 +336,32 @@ void DigitalOutput::_controlTask(void *pvParameters)
     }
     else // DIGITAL_OUTPUT_IOEX
     {
-        /* Checking if DOUT is in overcurrent */
-        for (int i = 0; i < dout->_num; i++) {
-            // If error happened
-            if (dout->getCurrentLevel((DigitalOutputNum_t)i) == 1)
+        while(1)
+        {
+            /* Checking if DOUT is in overcurrent */
+            for (int i = 0; i < dout->_num; i++) 
             {
-                ESP_LOGE(DOUT_TAG, "Current on DOUT_%u is too high", i+1);
-                ioex_set_level(dout->_ioex, dout->_ioex_num[i], IOEX_LOW);
-                dout_state[i] = 1;
-            }
-            // Retry after 10 loops
-            else if (dout_state[i] == 10)
-            {
-                dout_state[i] = 0;
-                // Set output at user choice (do not set HIGH if user setted this pin LOW during error)
-                xSemaphoreTake(_mutex, portMAX_DELAY);
-                ioex_set_level(dout->_ioex, dout->_ioex_num[i], (ioex_level_t)dout->_doutLevel[i]);
-                xSemaphoreGive(_mutex);
-            }
-            // increase error counter to reach 10
-            else if (dout_state[i] != 0)
-            {
-                dout_state[i]++;
+                // If error happened
+                if (dout->getCurrentLevel((DigitalOutputNum_t)i) == 1)
+                {
+                    ESP_LOGE(DOUT_TAG, "Current on DOUT_%u is too high", i+1);
+                    ioex_set_level(*(dout->_ioex), dout->_ioex_num[i], IOEX_LOW);
+                    dout_state[i] = 1;
+                }
+                // Retry after 10 loops
+                else if (dout_state[i] == 10)
+                {
+                    dout_state[i] = 0;
+                    // Set output at user choice (do not set HIGH if user setted this pin LOW during error)
+                    xSemaphoreTake(_mutex, portMAX_DELAY);
+                    ioex_set_level(*(dout->_ioex), dout->_ioex_num[i], (ioex_level_t)dout->_doutLevel[i]);
+                    xSemaphoreGive(_mutex);
+                }
+                // increase error counter to reach 10
+                else if (dout_state[i] != 0)
+                {
+                    dout_state[i]++;
+                }
             }
         }
     }
@@ -370,7 +374,7 @@ void DigitalOutput::_common_set_level(DigitalOutputNum_t dout, uint8_t level)
     if (_type == DIGITAL_OUTPUT_GPIO) {
         gpio_set_level(_gpio_num[dout], level);
     } else { // DIGITAL_OUTPUT_IOEX
-        ioex_set_level(_ioex, _ioex_num[dout], (ioex_level_t) level);
+        ioex_set_level(*_ioex, _ioex_num[dout], (ioex_level_t) level);
     }
  }
  
@@ -379,6 +383,6 @@ int DigitalOutput::_common_get_level(DigitalOutputNum_t dout)
     if (_type == DIGITAL_OUTPUT_GPIO) {
         return gpio_get_level(_gpio_num[dout]);
     } else { // DIGITAL_OUTPUT_IOEX
-        return ioex_get_level(_ioex, _ioex_num[dout]);
+        return ioex_get_level(*_ioex, _ioex_num[dout]);
     }
 }
