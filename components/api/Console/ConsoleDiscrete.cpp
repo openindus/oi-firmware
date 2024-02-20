@@ -21,6 +21,7 @@ void ConsoleDiscrete::registerCli(void)
 {
     _registerDigitalWrite();
     _registerDigitalRead();
+    _registerGetCurrent();
     _registerAnalogRead();
 }
 
@@ -97,6 +98,43 @@ void ConsoleDiscrete::_registerDigitalRead(void)
         .hint = NULL,
         .func = &dRead,
         .argtable = &digitalReadArgs
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+}
+
+/** 'get-current' */
+
+static struct {
+    struct arg_int *dout;
+    struct arg_end *end;
+} getCurrentArgs;
+
+static int getCurrent(int argc, char **argv)
+{
+    int nerrors = arg_parse(argc, argv, (void **) &getCurrentArgs);
+    if (nerrors != 0) {
+        arg_print_errors(stderr, getCurrentArgs.end, argv[0]);
+        return 1;
+    }
+
+    DigitalOutputNum_t dout = (DigitalOutputNum_t)(getCurrentArgs.dout->ival[0] - 1);
+
+    printf("%.3f\n", DiscreteStandalone::getCurrent(dout));
+
+    return 0;
+}
+
+void ConsoleDiscrete::_registerGetCurrent(void)
+{
+    getCurrentArgs.dout = arg_int1(NULL, NULL, "<DOUT>", "[1-8]");
+    getCurrentArgs.end = arg_end(2);
+
+    const esp_console_cmd_t cmd = {
+        .command = "get-current",
+        .help = "Get Dout current",
+        .hint = NULL,
+        .func = &getCurrent,
+        .argtable = &getCurrentArgs
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
 }

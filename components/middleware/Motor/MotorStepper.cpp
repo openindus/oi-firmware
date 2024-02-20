@@ -17,7 +17,7 @@
 
 // static const char MOTOR_STEPPER_TAG[] = "MotorStepper";
 
-static gpio_num_t* _gpio;
+static const gpio_num_t* _gpio;
 static float _homingSpeed[MOTOR_MAX];
 static DigitalInputNum_t _limitSwitchDigitalInput[MOTOR_MAX];
 static DigitalInputLogic_t _limitSwitchDigitalInputLogic[MOTOR_MAX];
@@ -28,7 +28,7 @@ static void IRAM_ATTR _limitSwitchIsr(void* arg);
 static void _limitSwitchTask(void* arg);
 static void _homingTask(void* arg);
 
-void MotorStepper::init(PS01_Hal_Config_t* config, PS01_Param_t* param, gpio_num_t* num)
+void MotorStepper::init(PS01_Hal_Config_t* config, PS01_Param_t* param, const gpio_num_t* num)
 {
     /* Gpio */
     _gpio = num;

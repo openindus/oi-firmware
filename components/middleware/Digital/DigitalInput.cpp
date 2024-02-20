@@ -34,7 +34,7 @@ DigitalInput::DigitalInput(const gpio_num_t *gpio, int num)
     _arg = (void**) calloc(num, sizeof(void*));
 }
 
-DigitalInput::DigitalInput(ioex_device_t *ioex, const ioex_num_t *ioex_num, int num) 
+DigitalInput::DigitalInput(ioex_device_t **ioex, const ioex_num_t *ioex_num, int num) 
 {
     _type = DIGITAL_INPUT_IOEX;
 
@@ -84,7 +84,7 @@ void DigitalInput::init(void)
     else // DIGITAL_INPUT_IOEX
     {
         /* Init DIN */
-        ESP_LOGI(DIN_TAG, "Init DOUT");
+        ESP_LOGI(DIN_TAG, "Init DIN");
         ioex_config_t dinConf = {
             .pin_bit_mask = 0,
             .mode = IOEX_INPUT,
@@ -94,14 +94,14 @@ void DigitalInput::init(void)
         for (uint8_t i = 0; i < _num; i++) {
             dinConf.pin_bit_mask |= (1ULL <<_ioex_num[i]);
             // /!\ Set level before setting to output
-            ESP_ERROR_CHECK(ioex_set_level(_ioex, _ioex_num[i], IOEX_LOW));
+            ESP_ERROR_CHECK(ioex_set_level(*_ioex, _ioex_num[i], IOEX_LOW));
         }
-        ESP_ERROR_CHECK(ioex_config(_ioex, &dinConf));
+        ESP_ERROR_CHECK(ioex_config(*_ioex, &dinConf));
     }
 
     _event = xQueueCreate(1, sizeof(uint32_t));
-    ESP_LOGI(DIN_TAG, "Create control task");
-    xTaskCreate(_task, "DIN interrupt task", 2048, NULL, 10, NULL);
+    ESP_LOGI(DIN_TAG, "Create interrupt task");
+    xTaskCreate(_task, "DIN interrupt task", 2048, this, 10, NULL);
 }
 
 int DigitalInput::digitalRead(DigitalInputNum_t din)
@@ -127,9 +127,9 @@ void DigitalInput::attachInterrupt(DigitalInputNum_t din, IsrCallback_t callback
     }
     else // DIGITAL_INPUT_IOEX
     {
-        ioex_isr_handler_add(_ioex, _ioex_num[din], (ioex_isr_t)callback, (void *)din, 1);
-        ioex_set_interrupt_type(_ioex, _ioex_num[din], (ioex_interrupt_type_t)(mode));
-        ioex_interrupt_enable(_ioex, _ioex_num[din]);
+        ioex_isr_handler_add(*_ioex, _ioex_num[din], (ioex_isr_t)callback, (void *)din, 1);
+        ioex_set_interrupt_type(*_ioex, _ioex_num[din], (ioex_interrupt_type_t)(mode));
+        ioex_interrupt_enable(*_ioex, _ioex_num[din]);
     }
 }
 
@@ -141,7 +141,7 @@ void DigitalInput::detachInterrupt(DigitalInputNum_t din)
     }
     else // DIGITAL_INPUT_IOEX
     {
-        ioex_isr_handler_remove(_ioex, _ioex_num[din]);
+        ioex_isr_handler_remove(*_ioex, _ioex_num[din]);
     }
 }
 
@@ -158,22 +158,25 @@ void DigitalInput::_task(void* pvParameters)
 
     while(1) 
     {
-        if(xQueueReceive(dout->_event, &din, portMAX_DELAY))
+        if(xQueueReceive(_event, &din, portMAX_DELAY))
         {
             /* Disable interrupt */
             if (dout->_type == DIGITAL_INPUT_GPIO)
                 gpio_intr_disable(dout->_gpio_num[din]);
             else // DIGITAL_INPUT_IOEX
-                ioex_interrupt_disable(dout->_ioex, dout->_ioex_num[din]);
+                ioex_interrupt_disable(*(dout->_ioex), dout->_ioex_num[din]);
 
             /* Call user function */
             dout->_callback[din](dout->_arg[din]);
-
+            
             /* Re-enable interrupt */
             if (dout->_type == DIGITAL_INPUT_GPIO)
                 gpio_intr_enable(dout->_gpio_num[din]);
             else // DIGITAL_INPUT_IOEX
-                ioex_interrupt_enable(dout->_ioex, dout->_ioex_num[din]);
+                ioex_interrupt_enable(*(dout->_ioex), dout->_ioex_num[din]);
+
+            /* Empty queue to avoid overflow */
+            xQueueReset(_event);
         }
     }
 }
@@ -183,6 +186,6 @@ int DigitalInput::_common_get_level(DigitalInputNum_t din)
     if (_type == DIGITAL_INPUT_GPIO) {
         return gpio_get_level(_gpio_num[din]);
     } else { // DIGITAL_OUTPUT_IOEX
-        return ioex_get_level(_ioex, _ioex_num[din]);
+        return ioex_get_level(*_ioex, _ioex_num[din]);
     }
 }

@@ -30,6 +30,7 @@ private:
 
     static void _registerDigitalWrite(void);
     static void _registerDigitalRead(void);
+    static void _registerGetCurrent(void);
     static void _registerAnalogRead(void);
 
 };

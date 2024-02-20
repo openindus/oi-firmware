@@ -48,8 +48,8 @@ const adc1_channel_t CoreStandalone::_eana[] = {
 
 ioex_device_t* CoreStandalone::_ioex;
 
-DigitalInput* CoreStandalone::din = new DigitalInput(_ioex, _dinGpio, 4);
-DigitalOutput* CoreStandalone::dout = new DigitalOutput(_ioex, _doutGpio, _doutCurrentGpio, 4);
+DigitalInput* CoreStandalone::din = new DigitalInput(&_ioex, _dinGpio, 4);
+DigitalOutput* CoreStandalone::dout = new DigitalOutput(&_ioex, _doutGpio, _doutCurrentGpio, 4);
 
 esp_adc_cal_characteristics_t CoreStandalone::_adc1Characteristics;
 
@@ -399,7 +399,7 @@ void CoreStandalone::_controlTask(void *pvParameters)
 
         /* Checking if user power is in overcurrent */
         // If error happened
-        if (ioex_get_level(_ioex, CORE_IOEX_PIN_5V_USER_PG) == 1)
+        if (ioex_get_level(_ioex, CORE_IOEX_PIN_5V_USER_PG) == 0)
         {
             ESP_LOGE(CORE_TAG, "Overcurrent on 5V User");
             ioex_set_direction(_ioex, CORE_IOEX_PIN_5V_USER_EN, IOEX_OUTPUT);

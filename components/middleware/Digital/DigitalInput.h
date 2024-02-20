@@ -61,7 +61,7 @@ class DigitalInput
 public:
 
     DigitalInput(const gpio_num_t *gpio, int num);
-    DigitalInput(ioex_device_t *ioex, const ioex_num_t *ioex_num, int num);
+    DigitalInput(ioex_device_t **ioex, const ioex_num_t *ioex_num, int num);
     ~DigitalInput();
 
     void init(void);
@@ -85,7 +85,7 @@ private:
     void** _arg;
 
     /* Stor a local copy of the pointer to an initilized ioex_device_t */
-    ioex_device_t* _ioex;
+    ioex_device_t** _ioex;
 
     static xQueueHandle _event;
     static void IRAM_ATTR _isr(void* pvParameters);

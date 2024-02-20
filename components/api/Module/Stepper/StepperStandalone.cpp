@@ -22,7 +22,7 @@
 
 static const char STEPPER_TAG[] = "Stepper";
 
-gpio_num_t _dinGpio[] = {
+const gpio_num_t _dinGpio[] = {
     STEPPER_GPIO_PIN_DIN_1,
     STEPPER_GPIO_PIN_DIN_2,
     STEPPER_GPIO_PIN_DIN_3,

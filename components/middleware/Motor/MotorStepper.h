@@ -46,7 +46,7 @@ class MotorStepper : public Motor
 {
 public:
 
-    static void init(PS01_Hal_Config_t* config, PS01_Param_t* param, gpio_num_t* num);
+    static void init(PS01_Hal_Config_t* config, PS01_Param_t* param, const gpio_num_t* num);
     static void setLimitSwitch(MotorNum_t motor, DigitalInputNum_t din, DigitalInputLogic_t logic);
     static void setStepResolution(MotorNum_t motor, MotorStepResolution_t res);
     static void setAcceleration(MotorNum_t motor, float acc);
