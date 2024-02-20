@@ -18,6 +18,8 @@
 #include "Arduino.h"
 #endif
 
+#define CONFIG_MODULE_STANDALONE
+
 static const char SYSTEM_TAG[] = "System";
 
 void System::_mainTask(void *pvParameters)

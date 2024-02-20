@@ -100,8 +100,8 @@ void DigitalInput::init(void)
     }
 
     _event = xQueueCreate(1, sizeof(uint32_t));
-    ESP_LOGI(DIN_TAG, "Create control task");
-    xTaskCreate(_task, "DIN interrupt task", 2048, NULL, 10, NULL);
+    ESP_LOGI(DIN_TAG, "Create interrupt task");
+    xTaskCreate(_task, "DIN interrupt task", 2048, this, 10, NULL);
 }
 
 int DigitalInput::digitalRead(DigitalInputNum_t din)
@@ -158,7 +158,7 @@ void DigitalInput::_task(void* pvParameters)
 
     while(1) 
     {
-        if(xQueueReceive(dout->_event, &din, portMAX_DELAY))
+        if(xQueueReceive(_event, &din, portMAX_DELAY))
         {
             /* Disable interrupt */
             if (dout->_type == DIGITAL_INPUT_GPIO)
@@ -168,12 +168,15 @@ void DigitalInput::_task(void* pvParameters)
 
             /* Call user function */
             dout->_callback[din](dout->_arg[din]);
-
+            
             /* Re-enable interrupt */
             if (dout->_type == DIGITAL_INPUT_GPIO)
                 gpio_intr_enable(dout->_gpio_num[din]);
             else // DIGITAL_INPUT_IOEX
                 ioex_interrupt_enable(*(dout->_ioex), dout->_ioex_num[din]);
+
+            /* Empty queue to avoid overflow */
+            xQueueReset(_event);
         }
     }
 }

@@ -398,26 +398,25 @@ void CoreStandalone::_controlTask(void *pvParameters)
 #if defined(CONFIG_IDF_TARGET_ESP32S3)
 
         /* Checking if user power is in overcurrent */
-        /* Not implemented on hardwar AE01 --> uncomment with hardware AE02 */
-        // // If error happened
-        // if (ioex_get_level(_ioex, CORE_IOEX_PIN_5V_USER_PG) == 1)
-        // {
-        //     ESP_LOGE(CORE_TAG, "Overcurrent on 5V User");
-        //     ioex_set_direction(_ioex, CORE_IOEX_PIN_5V_USER_EN, IOEX_OUTPUT);
-        //     ioex_set_level(_ioex, CORE_IOEX_PIN_5V_USER_EN, IOEX_LOW);
-        //     user_power = 1;
-        // }
-        // // Retry after 10 loops
-        // else if (user_power == 10)
-        // {
-        //     user_power = 0;
-        //     ioex_set_direction(_ioex, CORE_IOEX_PIN_5V_USER_EN, IOEX_INPUT);
-        // }
-        // // increase error counter
-        // else if (user_power != 0)
-        // {
-        //     user_power++;
-        // }
+        // If error happened
+        if (ioex_get_level(_ioex, CORE_IOEX_PIN_5V_USER_PG) == 0)
+        {
+            ESP_LOGE(CORE_TAG, "Overcurrent on 5V User");
+            ioex_set_direction(_ioex, CORE_IOEX_PIN_5V_USER_EN, IOEX_OUTPUT);
+            ioex_set_level(_ioex, CORE_IOEX_PIN_5V_USER_EN, IOEX_LOW);
+            user_power = 1;
+        }
+        // Retry after 10 loops
+        else if (user_power == 10)
+        {
+            user_power = 0;
+            ioex_set_direction(_ioex, CORE_IOEX_PIN_5V_USER_EN, IOEX_INPUT);
+        }
+        // increase error counter
+        else if (user_power != 0)
+        {
+            user_power++;
+        }
 
         /* Checking if usb power is in overcurrent */
         // If error happened
