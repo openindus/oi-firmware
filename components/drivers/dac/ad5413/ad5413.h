@@ -10,13 +10,21 @@
 
 #include "esp_err.h"
 #include "esp_log.h"
+#include "driver/gpio.h"
+#include "driver/spi_master.h"
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-
+/**
+ * @brief Initialize the device
+ * 
+ * @param host_id SPI host ID
+ * @param cs Chip select (SYNC)
+ */
+void ad5413_init(spi_host_device_t host_id, gpio_num_t cs);
 
 #ifdef __cplusplus
 }
