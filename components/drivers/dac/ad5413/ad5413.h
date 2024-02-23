@@ -24,7 +24,13 @@ extern "C"
  * @param host_id SPI host ID
  * @param cs Chip select (SYNC)
  */
-void ad5413_init(spi_host_device_t host_id, gpio_num_t cs);
+void ad5413_hal_init(spi_host_device_t host_id, gpio_num_t cs);
+
+/**
+ * @brief Write to a register
+ * 
+ */
+void ad5413_hal_writeRegister(void);
 
 #ifdef __cplusplus
 }

@@ -14,9 +14,9 @@ static const char TAG[] = "adc5413";
 
 static spi_device_handle_t s_spi;
 
-void ad5413_init(spi_host_device_t host_id, gpio_num_t cs)
+void ad5413_hal_init(spi_host_device_t host_id, gpio_num_t cs)
 {
-    esp_err_t ret = ESP_OK;
+    esp_err_t err = ESP_OK;
 
     spi_device_interface_config_t dev_cfg = {
         .command_bits = 0,
@@ -36,8 +36,29 @@ void ad5413_init(spi_host_device_t host_id, gpio_num_t cs)
     };
 
     /* Attach the device to the SPI bus */
-    ret |= spi_bus_add_device(host_id, &dev_cfg, &s_spi);
-    if (ret != ESP_OK) {
+    err |= spi_bus_add_device(host_id, &dev_cfg, &s_spi);
+    if (err != ESP_OK) {
         ESP_LOGE(TAG, "Failed to add device");
+    }
+}
+
+void ad5413_hal_writeRegister(void)
+{
+    esp_err_t err = ESP_OK;
+
+    spi_transaction_t trans = {
+        .flags = 0,
+        .cmd = 0,
+        .addr = 0,
+        .length = 8,
+        .rxlength = 8,
+        .user = NULL,
+        .tx_buffer = NULL,
+        .rx_buffer = NULL
+    };
+
+    err |= spi_device_polling_transmit(s_spi, &trans);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to write register");
     }
 }
