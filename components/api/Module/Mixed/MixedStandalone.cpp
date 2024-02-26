@@ -18,7 +18,7 @@
 
 #if defined(OI_MIXED)
 
-static const char MIXED_TAG[] = "Mixed";
+static const char TAG[] = "MixedStandalone";
 
 const gpio_num_t _dinGpio[] = {
     MIXED_PIN_DIN_1,
@@ -56,25 +56,29 @@ void MixedStandalone::init()
     /* Init DIN */
     din->init();
 
-    // /* Init SPI */
-    // ESP_LOGI(MIXED_TAG, "Initializes the bus SPI%u", MIXED_SPI_HOST+1);
-    // ESP_LOGI(MIXED_TAG, "MOSI:  GPIO_NUM_%u | MISO:  GPIO_NUM_%u | CLK:  GPIO_NUM_%u",
-    //     MIXED_PIN_SPI_MOSI, MIXED_PIN_SPI_MISO, MIXED_PIN_SPI_SCK);
+    /* Initialize the SPI bus */
+    spi_bus_config_t busCfg = {
+        .mosi_io_num = MIXED_SPI_PIN_MOSI,
+        .miso_io_num = MIXED_SPI_PIN_MISO,
+        .sclk_io_num = MIXED_SPI_PIN_SCK,
+        .quadwp_io_num = -1,
+        .quadhd_io_num = -1,
+        .data4_io_num = -1,
+        .data5_io_num = -1,
+        .data6_io_num = -1,
+        .data7_io_num = -1,
+        .max_transfer_sz = 32,
+        .flags = 0,
+        .intr_flags = 0
+    };
 
-    // spi_bus_config_t spi_config;
-    // spi_config.mosi_io_num = MIXED_PIN_SPI_MOSI;
-    // spi_config.miso_io_num = MIXED_PIN_SPI_MISO;
-    // spi_config.sclk_io_num = MIXED_PIN_SPI_SCK;
-    // spi_config.quadwp_io_num = -1;
-    // spi_config.quadhd_io_num = -1;
-    // spi_config.max_transfer_sz = 0;
-    // spi_config.flags = 0;
-    // spi_config.intr_flags = 0;
-
-    // ESP_ERROR_CHECK(spi_bus_initialize(MIXED_SPI_HOST, &spi_config, 1));
+    esp_err_t err = spi_bus_initialize(MIXED_SPI_HOST, &busCfg, SPI_DMA_CH_AUTO);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "Init SPI bus error");
+    }
 
     // /* Init AIN */
-    // ESP_LOGI(MIXED_TAG, "initializing AIN");
+    // ESP_LOGI(TAG, "initializing AIN");
     // Ads866x_DeviceConfig_t ads866xDeviceConfig = {
     //     .spi_host = MIXED_SPI_HOST,
     //     .spi_freq = MIXED_SPI_FREQ,
@@ -96,7 +100,7 @@ void MixedStandalone::init()
     // Ads866x_Init();
 
     // /* Init AOUT */
-    // ESP_LOGI(MIXED_TAG, "initializing AOUT");
+    // ESP_LOGI(TAG, "initializing AOUT");
     // Dac8760_DeviceConfig_t dac8760DeviceConfig =  {
     //     .spi_host = MIXED_SPI_HOST,        
     //     .spi_freq = MIXED_SPI_FREQ,
