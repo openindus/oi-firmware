@@ -21,8 +21,8 @@ ad5413_instance_t* ad5413_hal_init(spi_host_device_t spiHost, gpio_num_t cs, uin
     }
 
     spi_device_interface_config_t devCfg = {
-        .command_bits = 3,
-        .address_bits = 5,
+        .command_bits = 0,
+        .address_bits = 0,
         .dummy_bits = 0,
         .mode = 0,
         .duty_cycle_pos = 0,
@@ -55,29 +55,31 @@ error:
 
 void ad5413_hal_writeRegister(ad5413_instance_t* inst, uint8_t regAddr, uint16_t data)
 {
-    esp_err_t err = ESP_OK;
-
     if (inst == NULL) {
         ESP_LOGE(TAG, "NULL instance");
         return;
     }
 
-    uint8_t buffer[2];
-    buffer[0] = (uint8_t)((data & 0xFF00) >> 8);
-    buffer[1] = (uint8_t)(data & 0x00FF);
+    uint8_t buffer[3];
+    buffer[0] = (uint8_t)((~inst->ad1 << 7) | 
+                          (inst->ad1 << 6) | 
+                          (inst->ad0 << 5) | 
+                          (regAddr & 0b00011111));
+    buffer[1] = (uint8_t)((data & 0xFF00) >> 8);
+    buffer[2] = (uint8_t)(data & 0x00FF);
 
     spi_transaction_t trans = {
         .flags = 0,
-        .cmd = (((~inst->ad1 << 2) | (inst->ad1 << 1) | (inst->ad0)) & 0b111),
-        .addr = (regAddr & 0b11111),
-        .length = 16,
+        .cmd = 0,
+        .addr = 0,
+        .length = 24,
         .rxlength = 0,
         .user = NULL,
         .tx_buffer = &buffer,
         .rx_buffer = NULL
     };
 
-    err |= spi_device_polling_transmit(inst->handler, &trans);
+    esp_err_t err = spi_device_polling_transmit(inst->handler, &trans);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Failed to write register");
     }
