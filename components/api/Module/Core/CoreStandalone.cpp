@@ -327,6 +327,9 @@ void CoreStandalone::init()
 
     ESP_LOGI(CORE_TAG, "Create control task");
     xTaskCreate(_controlTask, "Control task", 4096, NULL, 1, NULL);
+
+    /* Init RTC */
+    RTC.init(CORE_I2C_PORT_NUM);
 }
 
 void CoreStandalone::digitalWrite(DigitalOutputNum_t doutNum, uint8_t level)

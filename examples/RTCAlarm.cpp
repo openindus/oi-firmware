@@ -15,7 +15,6 @@ void rtc_alarm(void)
 
 void setup(void)
 {
-    RTC.init();
     RTC.setTime(DateTime(__DATE__, __TIME__));
 
     currTime = RTC.now();
