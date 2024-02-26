@@ -8,7 +8,7 @@
 #include "Netif_LTE.h"
 #include "Cloud.hpp"
 
-#define MOBILE_APN "operator_APN"   // Change this according to your operator
+#define MOBILE_APN "TM"   // Change this according to your operator
 #define SIM_PIN_CODE "0000"         // SIM card PIN code
 
 #define Machine_UUID "your-uuid-here"
