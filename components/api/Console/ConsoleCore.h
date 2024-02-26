@@ -33,6 +33,7 @@ private:
     static void _registerAnalogRead(void);
     static void _registerAnalogReadMillivolts(void);
     static void _registerGetCurrentLevel(void);
+    static void _registerDate(void);
 
 };
 

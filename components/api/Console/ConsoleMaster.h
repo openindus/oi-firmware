@@ -31,6 +31,7 @@ private:
 
     static void _registerProgram(void);
     static void _registerPing(void);
+    static void _registerAutoId(void);
 
 };
 

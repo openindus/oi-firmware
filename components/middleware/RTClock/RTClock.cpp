@@ -19,9 +19,9 @@
 
 ioex_device_t *OIRTC::_ioex;
 
-void OIRTC::init(void)
+void OIRTC::init(i2c_port_t i2c_num)
 {
-    rtc_i2c_set_port(CORE_I2C_PORT_NUM);
+    rtc_i2c_set_port(i2c_num);
 }
 
 time_t OIRTC::time(void)

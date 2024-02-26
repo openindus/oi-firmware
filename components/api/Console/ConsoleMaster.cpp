@@ -21,6 +21,7 @@ void ConsoleMaster::registerCli(void)
 {
     _registerPing();
     _registerProgram();
+    _registerAutoId();
 }
 
 /** 'program' */
@@ -99,5 +100,24 @@ void ConsoleMaster::_registerPing(void)
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
 }
 
+/** 'auto-id' */
+
+static int autoId(int argc, char **argv) 
+{
+    ModuleMaster::autoId();
+    return 0;
+}
+
+void ConsoleMaster::_registerAutoId(void)
+{
+    const esp_console_cmd_t cmd = {
+        .command = "auto-id",
+        .help = "Send a frame to get all slaves IDs",
+        .hint = NULL,
+        .func = &autoId,
+        .argtable = NULL
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+}
 
 #endif

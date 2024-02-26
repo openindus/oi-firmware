@@ -21,10 +21,6 @@
 #include "pcal6524.h"
 #include "m41t62.h"
 
-#if defined(CONFIG_CORE)
-
-#include "CorePinout.h"
-
 class DateTime
 {
 public:
@@ -61,7 +57,7 @@ public:
 
     OIRTC() {}
 
-    void init(void);
+    void init(i2c_port_t i2c_num);
 
     /**
      * @brief Get the current time compute by RTC Clock.
@@ -136,5 +132,3 @@ private:
 #define SECONDS_FROM_1970_TO_2000 946684800
 
 extern OIRTC RTC;
-
-#endif

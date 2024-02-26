@@ -13,6 +13,7 @@ set(COMPONENT_SRCS
     "Usb/UsbSerial.cpp"
     "FlashLoader/FlashLoader.cpp"
     "Led/Led.cpp"
+    "RTClock/RTClock.cpp"
 )
 
 set(COMPONENT_INCLUDE_DIRS
@@ -24,6 +25,7 @@ set(COMPONENT_INCLUDE_DIRS
     "Usb"
     "FlashLoader"
     "Led"
+    "RTClock"
 )
 
 set(COMPONENT_PRIV_REQUIRES

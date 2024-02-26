@@ -24,6 +24,7 @@ void ConsoleCore::registerCli(void)
     _registerAnalogRead();
     _registerAnalogReadMillivolts();
     _registerGetCurrentLevel();
+    _registerDate();
 }
 
 /** 'digital-write' */
@@ -205,6 +206,56 @@ void ConsoleCore::_registerGetCurrentLevel(void)
         .hint = NULL,
         .func = &getCurrentLevel,
         .argtable = &digitalReadOverCurrentArgs
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+}
+
+/** 'date' */
+
+static struct {
+    struct arg_date *date;
+    struct arg_end *end;
+} dateArgs;
+
+static int date(int argc, char **argv) 
+{
+    int nerrors = arg_parse(argc, argv, (void **) &dateArgs);
+    if (nerrors != 0) {
+        arg_print_errors(stderr, dateArgs.end, argv[0]);
+        return 1;
+    }
+
+    if (dateArgs.date->count == 1) {
+        DateTime* setDate =  new DateTime(dateArgs.date->tmval->tm_year + 1900, \
+                                          dateArgs.date->tmval->tm_mon + 1,     \
+                                          dateArgs.date->tmval->tm_mday,        \
+                                          dateArgs.date->tmval->tm_hour,        \
+                                          dateArgs.date->tmval->tm_min,         \
+                                          dateArgs.date->tmval->tm_sec);
+        printf("Setting RTC date to %04u-%02u-%02u %02u:%02u:%02u\n", setDate->year(), setDate->month(), setDate->day(), setDate->hour(), setDate->minute(), setDate->second());
+        RTC.setTime(*setDate);
+    }
+    else {
+        // Get date
+        DateTime currTime;
+        currTime = RTC.now();
+        printf("%04u-%02u-%02u %02u:%02u:%02u\n", currTime.year(), currTime.month(), currTime.day(), currTime.hour(), currTime.minute(), currTime.second());
+    }
+
+    return 0;
+}
+
+void ConsoleCore::_registerDate(void)
+{
+    dateArgs.date = arg_date0("s", "set", "%Y-%m-%d_%H:%M:%S", NULL, NULL);
+    dateArgs.end = arg_end(2);
+
+    const esp_console_cmd_t cmd = {
+        .command = "date",
+        .help = "Get/Set RTC Date",
+        .hint = NULL,
+        .func = &date,
+        .argtable = &dateArgs
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
 }
