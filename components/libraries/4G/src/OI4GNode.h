@@ -14,12 +14,12 @@ static inline bool is_timedout(uint32_t from, uint32_t nr_ms) __attribute__((alw
 static inline bool is_timedout(uint32_t from, uint32_t nr_ms) { return (millis() - from) > nr_ms; }
 
 //#define SARA_ENABLE      (49u) //to define on ESP, which pin will drive the enable? 
-#define SARA_R4XX_TOGGLE (25u)
+#define SARA_R4XX_TOGGLE 21
 #define SARA_VINT        (2u)
-#define RX 35
-#define TX 32
+#define RX 20
+#define TX 19
 
-#define MODEM_STREAM Serial1
+#define MODEM_STREAM Serial2
 //#define SARA_TX_ENABLE   (51u)
 
 #define DEFAULT_READ_MS            5000

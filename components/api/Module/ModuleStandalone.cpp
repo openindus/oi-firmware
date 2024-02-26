@@ -30,6 +30,10 @@ void ModuleStandalone::init()
     /* Init GPIO service */
     ESP_ERROR_CHECK(gpio_install_isr_service(0));
 
+    /* GPIO19 and GPIO20 are USB interface, force reset/config before setting them as GPIO */
+    gpio_reset_pin(GPIO_NUM_19);
+    gpio_reset_pin(GPIO_NUM_20);
+
     /* LED */
     ESP_LOGI(MODULE_TAG, "Init LED");
     Led::install(MODULE_PIN_LED);
