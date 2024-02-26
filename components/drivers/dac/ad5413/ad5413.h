@@ -46,18 +46,40 @@ typedef enum {
 } ad5413_regAddr_t;
 
 /**
+ * @brief Device instance
+ * 
+ */
+typedef struct {
+    spi_device_handle_t handler;
+    uint8_t ad0 : 1;
+    uint8_t ad1 : 1;
+} ad5413_instance_t;
+
+/**
  * @brief Initialize the device
  * 
- * @param host_id SPI host ID
+ * @param spiHost SPI host
  * @param cs Chip select (SYNC)
+ * @param ad0 Address decode 0
+ * @param ad0 Address decode 1
+ * @return ad5413_instance_t* 
  */
-void ad5413_hal_init(spi_host_device_t host_id, gpio_num_t cs);
+ad5413_instance_t* ad5413_hal_init(spi_host_device_t spiHost, gpio_num_t cs, uint8_t ad0, uint8_t ad1);
 
 /**
  * @brief Write to a register
  * 
+ * @param data 
  */
-void ad5413_hal_writeRegister(void);
+
+/**
+ * @brief Write to a register
+ * 
+ * @param inst Device instance
+ * @param regAddr Register address
+ * @param data data to write
+ */
+void ad5413_hal_writeRegister(ad5413_instance_t* inst, uint8_t regAddr, uint16_t data);
 
 #ifdef __cplusplus
 }
