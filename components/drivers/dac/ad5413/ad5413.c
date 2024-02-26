@@ -62,6 +62,10 @@ void ad5413_hal_writeRegister(ad5413_instance_t* inst, uint8_t regAddr, uint16_t
         return;
     }
 
+    uint8_t buffer[2];
+    buffer[0] = (uint8_t)((data & 0xFF00) >> 8);
+    buffer[1] = (uint8_t)(data & 0x00FF);
+
     spi_transaction_t trans = {
         .flags = 0,
         .cmd = (((~inst->ad1 << 2) | (inst->ad1 << 1) | (inst->ad0)) & 0b111),
@@ -69,7 +73,7 @@ void ad5413_hal_writeRegister(ad5413_instance_t* inst, uint8_t regAddr, uint16_t
         .length = 16,
         .rxlength = 0,
         .user = NULL,
-        .tx_buffer = &data,
+        .tx_buffer = &buffer,
         .rx_buffer = NULL
     };
 

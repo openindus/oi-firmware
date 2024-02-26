@@ -61,7 +61,7 @@ typedef struct {
  * @param spiHost SPI host
  * @param cs Chip select (SYNC)
  * @param ad0 Address decode 0
- * @param ad0 Address decode 1
+ * @param ad1 Address decode 1
  * @return ad5413_instance_t* 
  */
 ad5413_instance_t* ad5413_hal_init(spi_host_device_t spiHost, gpio_num_t cs, uint8_t ad0, uint8_t ad1);
