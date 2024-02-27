@@ -10,17 +10,40 @@
 
 static const char TAG[] = "adc5413";
 
-ad5413_instance_t* ad5413_hal_init(spi_host_device_t spiHost, gpio_num_t cs, uint8_t ad0, uint8_t ad1)
+/**
+ * @brief Compute CRC8 checksum.
+ * @param data The data buffer.
+ * @param data_size The size of the data buffer.
+ * @return CRC8 checksum.
+ */
+static uint8_t ad5758_compute_crc8(uint8_t *data, uint8_t data_size)
 {
-    esp_err_t err = ESP_OK;
+	uint8_t i;
+	uint8_t crc = 0;
 
-    ad5413_instance_t* inst = malloc(sizeof(ad5413_instance_t));
-    if (inst == NULL) {
-        ESP_LOGE(TAG, "Failed to allocate memory for the device instance");
-        goto error;
-    }
+	while (data_size) {
+		for (i = 0x80; i != 0; i >>= 1) {
+			if (((crc & 0x80) != 0) != ((*data & i) != 0)) {
+				crc <<= 1;
+				crc ^= 0x07; // x^8 + x^2 + x^1 + 1
+			} else {
+				crc <<= 1;
+			}
+		}
+		data++;
+		data_size--;
+	}
 
-    spi_device_interface_config_t devCfg = {
+	return crc;
+}
+
+/**
+ * @brief Initialize the bus SPI.
+ * 
+ */
+void ad5413_spi_init(spi_host_device_t host_id, int clk_freq, int cs, spi_device_handle_t *handle)
+{
+    spi_device_interface_config_t spi_conf = {
         .command_bits = 0,
         .address_bits = 0,
         .dummy_bits = 0,
@@ -28,7 +51,7 @@ ad5413_instance_t* ad5413_hal_init(spi_host_device_t spiHost, gpio_num_t cs, uin
         .duty_cycle_pos = 0,
         .cs_ena_pretrans = 0,
         .cs_ena_posttrans = 0,
-        .clock_speed_hz = APB_CLK_FREQ / 80, //SPI_MASTER_FREQ_8M,
+        .clock_speed_hz = clk_freq,
         .input_delay_ns = 0,
         .spics_io_num = cs,
         .flags = 0,
@@ -38,49 +61,73 @@ ad5413_instance_t* ad5413_hal_init(spi_host_device_t spiHost, gpio_num_t cs, uin
     };
 
     /* Attach the device to the SPI bus */
-    err |= spi_bus_add_device(spiHost, &devCfg, &inst->handler);
+    esp_err_t err = spi_bus_add_device(host_id, &spi_conf, handle);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Failed to add device");
-        goto error;
     }
-
-    inst->ad0 = ad0;
-    inst->ad1 = ad1;
-    return inst;
-
-error:
-    free(inst);
-    return NULL;
 }
 
-void ad5413_hal_writeRegister(ad5413_instance_t* inst, uint8_t regAddr, uint16_t data)
+/**
+ * @brief Write to the device register.
+ * 
+ * @param dev Device instance.
+ * @param reg_addr Register address.
+ * @param reg_data Register data.
+ */
+void ad5413_spi_write_reg(ad5413_device_t* dev, uint8_t reg_addr, uint16_t reg_data)
 {
-    if (inst == NULL) {
-        ESP_LOGE(TAG, "NULL instance");
+    if (dev == NULL) {
+        ESP_LOGE(TAG, "Ptr NULL");
         return;
     }
 
-    uint8_t buffer[3];
-    buffer[0] = (uint8_t)((~inst->ad1 << 7) | 
-                          (inst->ad1 << 6) | 
-                          (inst->ad0 << 5) | 
-                          (regAddr & 0b00011111));
-    buffer[1] = (uint8_t)((data & 0xFF00) >> 8);
-    buffer[2] = (uint8_t)(data & 0x00FF);
+    uint8_t buf[4];
+    buf[0] = (uint8_t)((dev->slip_bit << 7) | 
+                       (dev->address << 5) | 
+                       (reg_addr & 0x1F));
+    buf[1] = (uint8_t)(reg_data >> 8);
+    buf[2] = (uint8_t)(reg_data & 0xFF);
+    buf[3] = ad5758_compute_crc8(buf, 3);
 
     spi_transaction_t trans = {
         .flags = 0,
         .cmd = 0,
         .addr = 0,
-        .length = 24,
+        .length = 32,
         .rxlength = 0,
         .user = NULL,
-        .tx_buffer = &buffer,
+        .tx_buffer = &buf,
         .rx_buffer = NULL
     };
 
-    esp_err_t err = spi_device_polling_transmit(inst->handler, &trans);
+    esp_err_t err = spi_device_polling_transmit(dev->spi_handler, &trans);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Failed to write register");
     }
+}
+
+/**
+ * @brief Initialize the device.
+ * 
+ * @param conf Device config.
+ * @return ad5413_device_t* device.
+ */
+ad5413_device_t* ad5413_init(ad5413_config_t conf)
+{
+    ad5413_device_t* dev = malloc(sizeof(ad5413_device_t));
+    if (dev == NULL) {
+        ESP_LOGE(TAG, "Failed to allocate memory for the device instance");
+        goto error;
+    }
+
+    ad5413_spi_init(conf.host_id, conf.sclk_freq, conf.sync, &dev->spi_handler);
+
+    dev->slip_bit = ~conf.ad1;
+    dev->address = ((conf.ad1 << 1) | (conf.ad0));
+
+    return dev;
+
+error:
+    free(dev);
+    return NULL;
 }

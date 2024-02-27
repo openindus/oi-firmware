@@ -18,68 +18,47 @@ extern "C"
 {
 #endif
 
-/**
- * @brief Register address map
- * 
- */
-typedef enum {
-    AD5413_REG_ADDR_NOP                         = 0x00,
-    AD5413_REG_ADDR_DAC_INPUT                   = 0x01,
-    AD5413_REG_ADDR_DAC_OUTPUT                  = 0x02,
-    AD5413_REG_ADDR_CLEAR_CODE                  = 0x03,
-    AD5413_REG_ADDR_USER_GAIN                   = 0x04,
-    AD5413_REG_ADDR_USER_OFFSET                 = 0x05,
-    AD5413_REG_ADDR_DAC_CONFIG                  = 0x06,
-    AD5413_REG_ADDR_SW_LDAC                     = 0x07,
-    AD5413_REG_ADDR_KEY                         = 0x08,
-    AD5413_REG_ADDR_GP_CONFIG1                  = 0x09,
-    AD5413_REG_ADDR_GP_CONFIG2                  = 0x0A,
-    AD5413_REG_ADDR_DIGITAL_DIAG_CONFIG         = 0x10,
-    AD5413_REG_ADDR_FAULT_PIN_CONFIG            = 0x12,
-    AD5413_REG_ADDR_TWO_STAGE_READBACK_SELECT   = 0x13,
-    AD5413_REG_ADDR_DIGITAL_DIAG_RESULTS        = 0x14,
-    AD5413_REG_ADDR_ANALOG_DIAG_RESULTS         = 0x15,
-    AD5413_REG_ADDR_STATUS                      = 0x16,
-    AD5413_REG_ADDR_CHIP_ID                     = 0x17,
-    AD5413_REG_ADDR_FREQ_MONITOR                = 0x18,
-    AD5413_REG_ADDR_DEVICE_ID_3                 = 0x1C
-} ad5413_regAddr_t;
+/* AD5413 registers */
+#define AD5413_REG_NOP						    0x00
+#define AD5413_REG_DAC_INPUT					0x01
+#define AD5413_REG_DAC_OUTPUT					0x02
+#define AD5413_REG_CLEAR_CODE					0x03
+#define AD5413_REG_USER_GAIN					0x04
+#define AD5413_REG_USER_OFFSET					0x05
+#define AD5413_REG_DAC_CONFIG					0x06
+#define AD5413_REG_SW_LDAC					    0x07
+#define AD5413_REG_KEY						    0x08
+#define AD5413_REG_GP_CONFIG1					0x09
+#define AD5413_REG_GP_CONFIG2					0x0A
+#define AD5413_REG_DIGITAL_DIAG_CONFIG		    0x10
+#define AD5413_REG_FAULT_PIN_CONFIG				0x12
+#define AD5413_REG_TWO_STAGE_READBACK_SELECT    0x13
+#define AD5413_REG_DIGITAL_DIAG_RESULTS		    0x14
+#define AD5413_REG_ANALOG_DIAG_RESULTS		    0x15
+#define AD5413_REG_STATUS					    0x16
+#define AD5413_REG_CHIP_ID					    0x17
+#define AD5413_REG_FREQ_MONITOR					0x18
+#define AD5413_REG_DEVICE_ID_3					0x1C
 
-/**
- * @brief Device instance
- * 
- */
 typedef struct {
-    spi_device_handle_t handler;
-    uint8_t ad0 : 1;
-    uint8_t ad1 : 1;
-} ad5413_instance_t;
+    spi_host_device_t host_id;  // SPI host Id
+    int sclk_freq;              // Clock frequency
+    gpio_num_t sync;            // SYNC pin (Chip select)
+    uint8_t ad0 : 1;            // Address decode 0
+    uint8_t ad1 : 1;            // Address decode 1
+} ad5413_config_t;
 
-/**
- * @brief Initialize the device
- * 
- * @param spiHost SPI host
- * @param cs Chip select (SYNC)
- * @param ad0 Address decode 0
- * @param ad1 Address decode 1
- * @return ad5413_instance_t* 
- */
-ad5413_instance_t* ad5413_hal_init(spi_host_device_t spiHost, gpio_num_t cs, uint8_t ad0, uint8_t ad1);
+typedef struct {
+    spi_device_handle_t spi_handler;
+    uint8_t slip_bit : 1;
+    uint8_t address : 2;
+} ad5413_device_t;
 
-/**
- * @brief Write to a register
- * 
- * @param data 
- */
+ad5413_device_t* ad5413_init(ad5413_config_t conf);
 
-/**
- * @brief Write to a register
- * 
- * @param inst Device instance
- * @param regAddr Register address
- * @param data data to write
- */
-void ad5413_hal_writeRegister(ad5413_instance_t* inst, uint8_t regAddr, uint16_t data);
+/* Private */
+
+void ad5413_spi_write_reg(ad5413_device_t* dev, uint8_t reg_addr, uint16_t reg_data);
 
 #ifdef __cplusplus
 }
