@@ -12,6 +12,7 @@
 #include "esp_log.h"
 #include "driver/gpio.h"
 #include "driver/spi_master.h"
+#include "freertos/task.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -40,6 +41,11 @@ extern "C"
 #define AD5413_REG_FREQ_MONITOR					0x18
 #define AD5413_REG_DEVICE_ID_3					0x1C
 
+
+/* AD5413_REG_KEY */
+#define AD5413_KEY_CODE_RESET_1				    0x15FA
+#define AD5413_KEY_CODE_RESET_2				    0xAF51
+
 typedef struct {
     spi_host_device_t host_id;  // SPI host Id
     int sclk_freq;              // Clock frequency
@@ -55,10 +61,7 @@ typedef struct {
 } ad5413_device_t;
 
 ad5413_device_t* ad5413_init(ad5413_config_t conf);
-
-/* Private */
-
-void ad5413_spi_write_reg(ad5413_device_t* dev, uint8_t reg_addr, uint16_t reg_data);
+int ad5413_soft_reset(ad5413_device_t* dev);
 
 #ifdef __cplusplus
 }

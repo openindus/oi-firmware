@@ -62,9 +62,8 @@ void ad5413_spi_init(spi_host_device_t host_id, int clk_freq, int cs, spi_device
 
     /* Attach the device to the SPI bus */
     esp_err_t err = spi_bus_add_device(host_id, &spi_conf, handle);
-    if (err != ESP_OK) {
+    if (err != ESP_OK)
         ESP_LOGE(TAG, "Failed to add device");
-    }
 }
 
 /**
@@ -74,12 +73,10 @@ void ad5413_spi_init(spi_host_device_t host_id, int clk_freq, int cs, spi_device
  * @param reg_addr Register address.
  * @param reg_data Register data.
  */
-void ad5413_spi_write_reg(ad5413_device_t* dev, uint8_t reg_addr, uint16_t reg_data)
+static int ad5413_spi_write_reg(ad5413_device_t* dev, uint8_t reg_addr, uint16_t reg_data)
 {
-    if (dev == NULL) {
-        ESP_LOGE(TAG, "Ptr NULL");
-        return;
-    }
+    if (dev == NULL)
+        goto error;
 
     uint8_t buf[4];
     buf[0] = (uint8_t)((dev->slip_bit << 7) | 
@@ -101,9 +98,14 @@ void ad5413_spi_write_reg(ad5413_device_t* dev, uint8_t reg_addr, uint16_t reg_d
     };
 
     esp_err_t err = spi_device_polling_transmit(dev->spi_handler, &trans);
-    if (err != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to write register");
-    }
+    if (err != ESP_OK)
+        goto error;
+
+    return 0;
+
+error:
+    ESP_LOGE(TAG, "Failed to write register");
+    return -1;
 }
 
 /**
@@ -130,4 +132,33 @@ ad5413_device_t* ad5413_init(ad5413_config_t conf)
 error:
     free(dev);
     return NULL;
+}
+
+/**
+ * @brief Initiate a software reset
+ * @param dev - Device instance.
+ * @return 0 in case of success, -1 error.
+ */
+int ad5413_soft_reset(ad5413_device_t* dev)
+{
+	int ret = 0;
+
+	ret = ad5413_spi_write_reg(dev, AD5413_REG_KEY,
+				   AD5413_KEY_CODE_RESET_1);
+	if (ret != 0)
+		goto error;
+
+	ret = ad5413_spi_write_reg(dev, AD5413_REG_KEY,
+				   AD5413_KEY_CODE_RESET_2);
+	if (ret != 0)
+		goto error;
+
+	/* Wait 100 us */
+	vTaskDelay(10 / portTICK_PERIOD_MS);
+
+	return 0;
+
+error:
+	ESP_LOGE(TAG, "%s: Failed.", __func__);
+	return -1;
 }
