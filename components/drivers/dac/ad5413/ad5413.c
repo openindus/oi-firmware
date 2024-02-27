@@ -47,7 +47,7 @@ void ad5413_spi_init(spi_host_device_t host_id, int clk_freq, int cs, spi_device
         .command_bits = 0,
         .address_bits = 0,
         .dummy_bits = 0,
-        .mode = 0,
+        .mode = 1,
         .duty_cycle_pos = 0,
         .cs_ena_pretrans = 0,
         .cs_ena_posttrans = 0,
@@ -136,7 +136,7 @@ error:
 
 /**
  * @brief Initiate a software reset
- * @param dev - Device instance.
+ * @param dev Device instance.
  * @return 0 in case of success, -1 error.
  */
 int ad5413_soft_reset(ad5413_device_t* dev)
@@ -161,4 +161,26 @@ int ad5413_soft_reset(ad5413_device_t* dev)
 error:
 	ESP_LOGE(TAG, "%s: Failed.", __func__);
 	return -1;
+}
+
+/**
+ * @brief Initiate a calibration memory refresh to the shadow registers
+ * @param dev Device instance.
+ * @return 0 in case of success, -1 error.
+ */
+int ad5413_calib_mem_refresh(ad5413_device_t* dev)
+{
+	int ret;
+
+	ret = ad5413_spi_write_reg(dev, AD5413_REG_KEY,
+				   AD5413_KEY_CODE_CALIB_MEM_REFRESH);
+	if (ret != 0) {
+		ESP_LOGE(TAG, "%s: Failed.", __func__);
+		return -1;
+	}
+
+    return 0;
+
+	// /* Wait to allow time for the internal calibrations to complete */
+	// return ad5413_wait_for_refresh_cycle(dev);
 }

@@ -45,6 +45,7 @@ extern "C"
 /* AD5413_REG_KEY */
 #define AD5413_KEY_CODE_RESET_1				    0x15FA
 #define AD5413_KEY_CODE_RESET_2				    0xAF51
+#define AD5413_KEY_CODE_CALIB_MEM_REFRESH		0xFCBA
 
 typedef struct {
     spi_host_device_t host_id;  // SPI host Id
@@ -62,6 +63,7 @@ typedef struct {
 
 ad5413_device_t* ad5413_init(ad5413_config_t conf);
 int ad5413_soft_reset(ad5413_device_t* dev);
+int ad5413_calib_mem_refresh(ad5413_device_t* dev);
 
 #ifdef __cplusplus
 }
