@@ -59,11 +59,13 @@ typedef struct {
     spi_device_handle_t spi_handler;
     uint8_t slip_bit : 1;
     uint8_t address : 2;
+    uint8_t crc_en;
 } ad5413_device_t;
 
 ad5413_device_t* ad5413_init(ad5413_config_t conf);
 int ad5413_soft_reset(ad5413_device_t* dev);
 int ad5413_calib_mem_refresh(ad5413_device_t* dev);
+int ad5413_wait_for_refresh_cycle(ad5413_device_t* dev);
 
 #ifdef __cplusplus
 }
