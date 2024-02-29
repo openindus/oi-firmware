@@ -18,7 +18,11 @@
 #include "Arduino.h"
 #endif
 
-// #define CONFIG_MODULE_STANDALONE
+/* For testing purpose, it is possible to modify MODULEèTYPE without using menuconfig an re-compile everything */
+#warning "These flags are for testing purpose only"
+#undef  CONFIG_MODULE_SLAVE
+#define CONFIG_MODULE_STANDALONE
+#define CONFIG_FORCE_CONSOLE
 
 static const char SYSTEM_TAG[] = "System";
 
@@ -49,44 +53,61 @@ void System::init(void)
     Analogls::init();
 #endif
 
+    /* Register command Line Interface (CLI) commands */
+    ConsoleModule::registerCli();
+#if defined(CONFIG_CORE)
+    ConsoleCore::registerCli();
+#elif defined(CONFIG_DISCRETE) || defined(CONFIG_DISCRETE_VE)
+    ConsoleDiscrete::registerCli();
+#elif defined(CONFIG_MIXED)
+    ConsoleMixed::registerCli();
+#elif defined(CONFIG_STEPPER) || defined(CONFIG_STEPPER_VE)
+    ConsoleStepper::registerCommand();
+    MotorStepperParamCLI::registerCommand();
+#endif
+#if defined(CONFIG_MODULE_MASTER)
+    ConsoleMaster::registerCli();
+#endif
+    UsbConsole::listen(); // start a task which listen for user to input "console"
+
+    /* Set module led to blue */
     MODULE_INITIALIZED();
 
-#if defined(CONFIG_CORE) && defined(CONFIG_AUTO_ID) && !defined(CONFIG_MODULE_STANDALONE)
+    /* Wait for slaves modules to init and give time to user script to enable console */
+#if !defined(CONFIG_MODULE_SLAVE)
     vTaskDelay(500/portTICK_PERIOD_MS);
+#endif
+
+    /* On master module, call autoId */
+#if defined(CONFIG_MODULE_MASTER)
     if (ModuleMaster::autoId()) {
         MODULE_PAIRED();
     }
 #endif
 
+#if defined(CONFIG_MODULE_MASTER) || defined(CONFIG_MODULE_STANDALONE)
     /* Check reset reason */
-#if defined(CONFIG_CORE) || defined(CONFIG_MODULE_STANDALONE)
     esp_reset_reason_t reason = esp_reset_reason();
     if ((reason != ESP_RST_POWERON) && 
         (reason != ESP_RST_SW) && 
         (reason != ESP_RST_UNKNOWN)) {
         ESP_LOGE(SYSTEM_TAG, "Reset reason : %d", reason);
         MODULE_ERROR();
+        UsbConsole::begin(true); // Force console to start, convenient for debugging
     } else {
-        /* Main task */
-        ESP_LOGI(SYSTEM_TAG, "Create main task");
-        xTaskCreate(_mainTask, "Main task", 8192, NULL, 1, NULL);
+        if (!UsbConsole::begin()) { // console will start only if user input "console" during startup
+            /* Start main task if console is not started  */
+            ESP_LOGI(SYSTEM_TAG, "Create main task");
+            vTaskDelay(1);
+            xTaskCreate(_mainTask, "Main task", 8192, NULL, 1, NULL);
+#if defined(CONFIG_FORCE_CONSOLE)
+            UsbConsole::begin(true); // Force console, will failed if Serial.begin() is called in user code
+#endif
+        }
     }
+#else // defined(CONFIG_MODULE_SLAVE)
+    UsbConsole::begin(true); // Force console on slave module
 #endif
-
-    /* Command Line Interface (CLI) */
-    ConsoleModule::registerCli();
-#if defined(CONFIG_CORE)
-    ConsoleCore::registerCli();
-#if !defined(CONFIG_MODULE_STANDALONE)
-    ConsoleMaster::registerCli();
-#endif
-#elif defined(CONFIG_DISCRETE) || defined(CONFIG_DISCRETE_VE)
-    ConsoleDiscrete::registerCli();
-#elif defined(CONFIG_STEPPER) || defined(CONFIG_STEPPER_VE)
-    ConsoleStepper::registerCommand();
-    MotorStepperParamCLI::registerCommand();
-#endif
-    UsbConsole::begin();
 }
 
 extern "C" void app_main()
