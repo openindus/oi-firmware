@@ -29,10 +29,10 @@ static void IRAM_ATTR ad5413_delay_us(uint32_t us)
 }
 
 /**
- * @brief Compute CRC8 checksum.
- * @param data The data buffer.
- * @param data_size The size of the data buffer.
- * @return CRC8 checksum.
+ * @brief Compute CRC8 checksum
+ * @param data The data buffer
+ * @param data_size The size of the data buffer
+ * @return CRC8 checksum
  */
 static uint8_t ad5413_compute_crc8(uint8_t *data, uint8_t data_size)
 {
@@ -56,10 +56,11 @@ static uint8_t ad5413_compute_crc8(uint8_t *data, uint8_t data_size)
 }
 
 /**
- * @brief Initialize the bus SPI.
+ * @brief Initialize the bus SPI
  * 
  */
-static void ad5413_spi_init(spi_host_device_t host_id, int clk_freq, int cs, spi_device_handle_t *handle)
+static void ad5413_spi_init(spi_host_device_t host_id, int clk_freq, int cs, 
+    spi_device_handle_t *handle)
 {
     spi_device_interface_config_t spi_conf = {
         .command_bits = 0,
@@ -78,23 +79,23 @@ static void ad5413_spi_init(spi_host_device_t host_id, int clk_freq, int cs, spi
         .post_cb = NULL
     };
 
-    /* Attach the device to the SPI bus */
     esp_err_t err = spi_bus_add_device(host_id, &spi_conf, handle);
     if (err != ESP_OK)
         ESP_LOGE(TAG, "Failed to add device");
 }
 
 /**
- * @brief Write to the device register.
+ * @brief Write to the device register
  * 
- * @param dev Device instance.
- * @param reg_addr Register address.
- * @param reg_data Register data.
+ * @param dev Device instance
+ * @param reg_addr Register address
+ * @param reg_data Register data
  */
 static int ad5413_spi_write_reg(ad5413_device_t* dev, uint8_t reg_addr, uint16_t reg_data)
 {
-    if (dev == NULL)
+    if (dev == NULL) {
         goto error;
+    }
 
     uint8_t buf[4];
     buf[0] = (uint8_t)((dev->slip_bit << 7) | 
@@ -116,8 +117,9 @@ static int ad5413_spi_write_reg(ad5413_device_t* dev, uint8_t reg_addr, uint16_t
     };
 
     esp_err_t err = spi_device_polling_transmit(dev->spi_handler, &trans);
-    if (err != ESP_OK)
+    if (err != ESP_OK) {
         goto error;
+    }
 
     return 0;
 
@@ -127,16 +129,17 @@ error:
 }
 
 /**
- * @brief Read register from device (Two stage readback).
- * @param dev Device instance.
- * @param reg_addr Register address.
+ * @brief Read register from device (Two stage readback)
+ * @param dev Device instance
+ * @param reg_addr Register address
  * @param reg_data Register data
- * @return 0 on success, -1 on error.
+ * @return int 0 on success, -1 on error
  */
 static int ad5413_spi_read_reg(ad5413_device_t* dev, uint8_t reg_addr, uint16_t *reg_data)
 {
-    if (dev == NULL)
+    if (dev == NULL) {
         goto error;
+    }
 
     esp_err_t err = ESP_OK;
 	uint8_t tx_buf[4], rx_buf[4];
@@ -160,14 +163,16 @@ static int ad5413_spi_read_reg(ad5413_device_t* dev, uint8_t reg_addr, uint16_t 
 	tx_buf[1] = 0x00;
 	tx_buf[2] = reg_addr;
 
-	if (dev->crc_en)
-		tx_buf[3] = ad5413_compute_crc8(tx_buf, 3);
-	else
-		tx_buf[3] = 0x00;
+	if (dev->crc_en) {
+        tx_buf[3] = ad5413_compute_crc8(tx_buf, 3);
+    } else {
+        tx_buf[3] = 0x00;
+    }
 
     err = spi_device_polling_transmit(dev->spi_handler, &trans);
-    if (err != ESP_OK)
+    if (err != ESP_OK) {
         goto error;
+    }
 
     /* Second stage */
 
@@ -177,19 +182,21 @@ static int ad5413_spi_read_reg(ad5413_device_t* dev, uint8_t reg_addr, uint16_t 
 	tx_buf[1] = 0x00;
 	tx_buf[2] = 0x00;
 
-	if (dev->crc_en)
-		tx_buf[3] = ad5413_compute_crc8(tx_buf, 3);
-	else
-		tx_buf[3] = 0x00;
+	if (dev->crc_en) {
+        tx_buf[3] = ad5413_compute_crc8(tx_buf, 3);
+    } else {
+        tx_buf[3] = 0x00;
+    }
 
     trans.rxlength = 32;
     err = spi_device_polling_transmit(dev->spi_handler, &trans);
-    if (err != ESP_OK) 
-            goto error;        
+    if (err != ESP_OK) {
+        goto error;
+    }
 
-	if ((dev->crc_en) && 
-        (ad5413_compute_crc8(rx_buf, 3) != rx_buf[3]))
-		goto error;
+	if ((dev->crc_en) && (ad5413_compute_crc8(rx_buf, 3) != rx_buf[3])) {
+        goto error;
+    }
 
 	*reg_data = (rx_buf[1] << 8) | rx_buf[2];
 
@@ -201,10 +208,10 @@ error:
 }
 
 /**
- * @brief Initialize the device.
+ * @brief Initialize the device
  * 
- * @param conf Device config.
- * @return ad5413_device_t* device.
+ * @param conf Device config
+ * @return ad5413_device_t* device
  */
 ad5413_device_t* ad5413_init(ad5413_config_t conf)
 {
@@ -228,72 +235,233 @@ error:
 }
 
 /**
- * @brief Initiate a software reset
- * @param dev Device instance.
- * @return 0 on success, -1 on error.
+ * @brief Write DAC data to the input register
+ * 
+ * @param dev Device instance
+ * @param data 14-bit DAC input data
+ * Accepted values: 0x00 to 0xFFFF
+ * @return int 0 on success, -1 on error
+ */
+int ad5413_dac_input_write(ad5413_device_t* dev, uint16_t data)
+{
+	int ret = ad5413_spi_write_reg(dev, AD5413_REG_DAC_INPUT, 
+        AD5413_DAC_INPUT_SET(data));
+	if (ret != 0) {
+		ESP_LOGE(TAG, "%s: Failed.", __func__);
+		return -1;
+	}
+
+	return 0;
+}
+
+/**
+ * @brief Read DAC data from the output register
+ * 
+ * @param dev Device instance
+ * @param data 14-bit DAC output data
+ * @return int 0 on success, -1 on error
+ */
+int ad5413_dac_output_read(ad5413_device_t* dev, uint16_t* data)
+{
+    uint16_t reg_data = 0;
+    int ret = ad5413_spi_read_reg(dev, AD5413_REG_DAC_OUTPUT, &reg_data);
+    if (ret != 0) {
+		ESP_LOGE(TAG, "%s: Failed.", __func__);
+		return -1;
+	}
+
+    *data = AD5413_DAC_OUTPUT_GET(reg_data);
+
+    return 0;
+}
+
+/**
+ * @brief Perform a software reset
+ * 
+ * @param dev Device instance
+ * @return int 0 on success, -1 on error
  */
 int ad5413_soft_reset(ad5413_device_t* dev)
 {
 	int ret = 0;
 
-	ret = ad5413_spi_write_reg(dev, AD5413_REG_KEY,
+	ret |= ad5413_spi_write_reg(dev, AD5413_REG_KEY,
 				   AD5413_KEY_CODE_RESET_1);
-	if (ret != 0)
-		goto error;
 
-	ret = ad5413_spi_write_reg(dev, AD5413_REG_KEY,
+	ret |= ad5413_spi_write_reg(dev, AD5413_REG_KEY,
 				   AD5413_KEY_CODE_RESET_2);
-	if (ret != 0)
-		goto error;
+
+	if (ret != 0) {
+		ESP_LOGE(TAG, "%s: Failed.", __func__);
+		return -1;
+	}
 
 	/* Wait 100 us */
 	ad5413_delay_us(100);
 
 	return 0;
-
-error:
-	ESP_LOGE(TAG, "%s: Failed.", __func__);
-	return -1;
 }
 
 /**
- * @brief Initiate a calibration memory refresh to the shadow registers
- * @param dev Device instance.
- * @return 0 on success, -1 on error.
+ * @brief Perform a calibration memory refresh to the shadow registers
+ * 
+ * @param dev Device instance
+ * @return int 0 on success, -1 on error
  */
 int ad5413_calib_mem_refresh(ad5413_device_t* dev)
 {
-	int ret;
-
-	ret = ad5413_spi_write_reg(dev, AD5413_REG_KEY,
+	int ret = ad5413_spi_write_reg(dev, AD5413_REG_KEY,
 				   AD5413_KEY_CODE_CALIB_MEM_REFRESH);
 	if (ret != 0) {
 		ESP_LOGE(TAG, "%s: Failed.", __func__);
 		return -1;
 	}
 
-    return 0;
-
-	/* Wait to allow time for the internal calibrations to complete */
 	return ad5413_wait_for_refresh_cycle(dev);
 }
 
-
 /**
- * @brief Busy wait until CAL_MEM_UNREFRESHED bit in the DIGITAL_DIAG_RESULTS clears
- * @param dev Device instance.
+ * @brief Wait until the CAL_MEM_UNREFRESHED bit in the DIGITAL_DIAG_RESULTS
+ * register returns to 0.
+ * 
+ * @param dev Device instance
  * @return 0 on success
  */
 int ad5413_wait_for_refresh_cycle(ad5413_device_t* dev)
 {
 	uint16_t reg_data;
-	/*
-	 * Wait until the CAL_MEM_UNREFRESHED bit in the DIGITAL_DIAG_RESULTS
-	 * register returns to 0.
-	 */
 	do {
 		ad5413_spi_read_reg(dev, AD5413_REG_DIGITAL_DIAG_RESULTS, &reg_data);
-	} while (reg_data & (1UL << 15));
+	} while (reg_data & AD5413_DIG_DIAG_RESULTS_CAL_MEM_UNREFRESHED_MSK);
 
 	return 0;
+}
+
+/**
+ * @brief Clear the error flags for the on-chip digital diagnostic features
+ * 
+ * @param dev Device instance
+ * @param flag Which flag to clear
+ * @return int 0 on success, -1 on error
+ */
+int ad5413_clear_dig_diag_flag(ad5413_device_t* dev, ad5413_dig_diag_flags_t flag)
+{
+	int ret = 0;
+    uint16_t reg_data;
+
+    ret |= ad5413_spi_read_reg(dev, AD5413_REG_DIGITAL_DIAG_RESULTS, &reg_data);
+
+	reg_data &= ~(1UL << flag);
+	reg_data |= (1UL << flag);
+
+	ad5413_spi_write_reg(dev, AD5413_REG_DIGITAL_DIAG_RESULTS, reg_data);
+
+	if (ret != 0) {
+		ESP_LOGE(TAG, "%s: Failed.", __func__);
+		return -1;
+	}
+
+	return 0;
+}
+
+/**
+ * @brief Enable/disable VIOUT
+ * 
+ * @param dev Device instance
+ * @param enable - enable or disable VIOUT output
+ * Accepted values: 0: disable
+ * 		            1: enable
+ * @return int 0 on success, -1 on error
+ */
+int ad5413_dac_output_en(ad5413_device_t* dev, uint8_t enable)
+{
+	int ret = 0;
+    uint16_t reg_data;
+
+    ret |= ad5413_spi_read_reg(dev, AD5413_REG_DAC_CONFIG, &reg_data);
+
+	reg_data &= ~AD5413_DAC_CONFIG_OUT_EN_MSK;
+	reg_data |= AD5413_DAC_CONFIG_OUT_EN_SET(enable);
+
+	ret |= ad5413_spi_write_reg(dev, AD5413_REG_DAC_CONFIG, reg_data);
+
+	if (ret != 0) {
+		ESP_LOGE(TAG, "%s: Failed.", __func__);
+		return -1;
+	}
+
+	return 0;
+}
+
+/**
+ * @brief Perform a software LDAC command
+ * 
+ * @param dev Device instance
+ * @return int 0 on success, -1 on error
+ */
+int ad5413_soft_ldac_cmd(ad5413_device_t* dev)
+{
+	int ret = ad5413_spi_write_reg(dev, AD5413_REG_SW_LDAC, AD5413_SW_LDAC_COMMAND);
+	if (ret != 0) {
+		ESP_LOGE(TAG, "%s: Failed.", __func__);
+		return -1;
+	}
+
+	return 0;
+}
+
+/**
+ * @brief Enable/disable Enable Internal Buffers
+ * 
+ * @param dev Device instance
+ * @param enable Enable or disable
+ * Accepted values: 0: disable
+ * 		            1: enable
+ * @return int 0 on success, -1 on error
+ */
+int ad5413_internal_buffers_en(ad5413_device_t* dev, uint8_t enable)
+{
+	int ret = 0;
+    uint16_t reg_data;
+
+    ret |= ad5413_spi_read_reg(dev, AD5413_REG_DAC_CONFIG, &reg_data);
+
+	reg_data &= ~AD5413_DAC_CONFIG_INT_EN_MSK;
+	reg_data |= AD5413_DAC_CONFIG_INT_EN_SET(enable);
+
+	ret |= ad5413_spi_write_reg(dev, AD5413_REG_DAC_CONFIG, reg_data);
+
+	if (ret != 0) {
+		ESP_LOGE(TAG, "%s: Failed.", __func__);
+		return -1;
+	}
+
+	return ad5413_wait_for_refresh_cycle(dev);
+}
+
+/**
+ * @brief Select Output Range
+ * 
+ * @param dev Device instance
+ * @param range output range
+ * @return int 0 on success, -1 on error
+ */
+int ad5758_set_output_range(ad5413_device_t* dev, ad5413_output_range_t range)
+{
+	int ret = 0;
+    uint16_t reg_data;
+
+    ret |= ad5413_spi_read_reg(dev, AD5413_REG_DAC_CONFIG, &reg_data);
+
+	reg_data &= ~AD5413_DAC_CONFIG_RANGE_MSK;
+	reg_data |= AD5413_DAC_CONFIG_RANGE_SET(range);
+
+	ret |= ad5413_spi_write_reg(dev, AD5413_REG_DAC_CONFIG, reg_data);
+
+	if (ret != 0) {
+		ESP_LOGE(TAG, "%s: Failed.", __func__);
+		return -1;
+	}
+
+	return ad5413_wait_for_refresh_cycle(dev);
 }

@@ -41,11 +41,65 @@ extern "C"
 #define AD5413_REG_FREQ_MONITOR					0x18
 #define AD5413_REG_DEVICE_ID_3					0x1C
 
+/* AD5413_REG_DAC_INPUT */
+#define AD5413_DAC_INPUT_SET(x)			        ((x & 0x3FFF) << 2)
+
+/* AD5413_REG_DAC_OUTPUT */
+#define AD5413_DAC_OUTPUT_GET(x)			    ((x & 0xFFFC) >> 2)
+
+/* AD5413_REG_DAC_CONFIG */
+#define AD5413_DAC_CONFIG_RANGE_MSK			    (0xF << 0)
+#define AD5413_DAC_CONFIG_RANGE_SET(x)			((x & 0xF) << 0)
+#define AD5413_DAC_CONFIG_OVRNG_EN_MSK			(0x1 << 4)
+#define AD5413_DAC_CONFIG_OVRNG_EN_SET(x)		((x & 0x1) << 4)
+#define AD5413_DAC_CONFIG_INT_EN_MSK			(0x1 << 5)
+#define AD5413_DAC_CONFIG_INT_EN_SET(x)		    ((x & 0x1) << 5)
+#define AD5413_DAC_CONFIG_OUT_EN_MSK			(0x1 << 6)
+#define AD5413_DAC_CONFIG_OUT_EN_SET(x)		    ((x & 0x1) << 6)
+#define AD5413_DAC_CONFIG_RSET_EXT_EN_MSK		(0x1 << 7)
+#define AD5413_DAC_CONFIG_RSET_EXT_EN_SET(x)	((x & 0x1) << 7)
+#define AD5413_DAC_CONFIG_SR_EN_MSK			    (0x1 << 8)
+#define AD5413_DAC_CONFIG_SR_EN_SET(x)			((x & 0x1) << 8)
+#define AD5413_DAC_CONFIG_SR_CLOCK_MSK			(0xF << 9)
+#define AD5413_DAC_CONFIG_SR_CLOCK_SET(x)		((x & 0xF) << 9)
+#define AD5413_DAC_CONFIG_SR_STEP_MSK			(0x7 << 13)
+#define AD5413_DAC_CONFIG_SR_STEP_SET(x)		((x & 0x7) << 13)
+
+/* AD5413_REG_SW_LDAC */
+#define AD5413_SW_LDAC_COMMAND				    0x1DAC
 
 /* AD5413_REG_KEY */
 #define AD5413_KEY_CODE_RESET_1				    0x15FA
 #define AD5413_KEY_CODE_RESET_2				    0xAF51
 #define AD5413_KEY_CODE_CALIB_MEM_REFRESH		0xFCBA
+
+/* AD5413_REG_DIGITAL_DIAG_RESULTS */
+#define AD5413_DIG_DIAG_RESULTS_SPI_CRC_ERR_MSK			        (0x1 << 0)
+#define AD5413_DIG_DIAG_RESULTS_SLIPBIT_ERR_ERR_MSK			    (0x1 << 1)
+#define AD5413_DIG_DIAG_RESULTS_SCLK_COUNT_ERR_ERR_MSK		    (0x1 << 2)
+#define AD5413_DIG_DIAG_RESULTS_INVALID_SPI_ACC_ERR_ERR_MSK     (0x1 << 4)
+#define AD5413_DIG_DIAG_RESULTS_CAL_MEM_CRC_ERR_ERR_MSK		    (0x1 << 5)
+#define AD5413_DIG_DIAG_RESULTS_INV_DAC_CHECK_ERR_ERR_MSK       (0x1 << 6)
+#define AD5413_DIG_DIAG_RESULTS_DAC_LATCH_MON_ERR_ERR_MSK       (0x1 << 8)
+#define AD5413_DIG_DIAG_RESULTS_RES_OCCURRED_MSK		        (0x1 << 13)
+#define AD5413_DIG_DIAG_RESULTS_SLEW_BUSY_MSK			        (0x1 << 14)
+#define AD5413_DIG_DIAG_RESULTS_CAL_MEM_UNREFRESHED_MSK		    (0x1 << 15)
+
+typedef enum {
+	DIG_DIAG_SPI_CRC_ERR = 0,
+	DIG_DIAG_SLIPBIT_ERR = 1,
+	DIG_DIAG_SCLK_COUNT_ERR = 2,
+	DIG_DIAG_INVALID_SPI_ACCESS_ERR = 4,
+	DIG_DIAG_CAL_MEM_CRC_ERR = 5,
+	DIG_DIAG_INVERSE_DAC_CHECK_ERR = 6,
+	DIG_DIAG_DAC_LATCH_MON_ERR = 8,
+	DIG_DIAG_RESET_OCCURRED = 13,
+} ad5413_dig_diag_flags_t;
+
+typedef enum {
+	OUTPUT_RANGE_M10V5_10V5 = 0b0011,
+	OUTPUT_RANGE_0mA_20mA = 0b1001
+} ad5413_output_range_t;
 
 typedef struct {
     spi_host_device_t host_id;  // SPI host Id
@@ -63,9 +117,17 @@ typedef struct {
 } ad5413_device_t;
 
 ad5413_device_t* ad5413_init(ad5413_config_t conf);
+
+int ad5413_dac_input_write(ad5413_device_t* dev, uint16_t data);
+int ad5413_dac_output_read(ad5413_device_t* dev, uint16_t* data);
 int ad5413_soft_reset(ad5413_device_t* dev);
 int ad5413_calib_mem_refresh(ad5413_device_t* dev);
 int ad5413_wait_for_refresh_cycle(ad5413_device_t* dev);
+int ad5413_clear_dig_diag_flag(ad5413_device_t* dev, ad5413_dig_diag_flags_t flag);
+int ad5413_dac_output_en(ad5413_device_t* dev, uint8_t enable);
+int ad5413_soft_ldac_cmd(ad5413_device_t* dev);
+int ad5413_internal_buffers_en(ad5413_device_t* dev, uint8_t enable);
+int ad5758_set_output_range(ad5413_device_t* dev, ad5413_output_range_t range);
 
 #ifdef __cplusplus
 }
