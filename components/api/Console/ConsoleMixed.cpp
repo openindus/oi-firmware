@@ -119,7 +119,7 @@ static int getCurrent(int argc, char **argv)
 
     DigitalOutputNum_t dout = (DigitalOutputNum_t)(getCurrentArgs.dout->ival[0] - 1);
 
-    printf("%.3f\n", DiscreteStandalone::getCurrent(dout));
+    printf("%.3f\n", MixedStandalone::getCurrent(dout));
 
     return 0;
 }
