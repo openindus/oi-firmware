@@ -15,7 +15,7 @@
 
 #include "RTClock.h"
 
-#if defined(CONFIG_CORE)
+#if defined(OI_CORE)
 
 ioex_device_t *OIRTC::_ioex;
 

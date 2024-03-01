@@ -19,7 +19,7 @@
 #include "ModuleStandalone.h"
 #include "ModuleMaster.h"
 
-#if defined(CONFIG_CORE)
+#if defined(MODULE_MASTER)
 
 class ConsoleMaster
 {

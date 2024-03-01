@@ -18,7 +18,7 @@
 #include "Global.h"
 #include "MotorStepperParam.h"
 
-#if defined(CONFIG_STEPPER) || defined(CONFIG_STEPPER_VE)
+#if defined(OI_STEPPER) || defined(OI_STEPPER_VE)
 
 #define REG_EXTENDED 1
 #define REG_ICASE (REG_EXTENDED << 1)

@@ -18,7 +18,7 @@
 #include "ModuleControl.h"
 #include "ModuleMaster.h"
 
-#if !defined(CONFIG_MIXED)
+#if !defined(OI_MIXED)
 
 class MixedControl : public ModuleControl
 {

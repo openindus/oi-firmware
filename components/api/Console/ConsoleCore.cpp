@@ -6,7 +6,7 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file ConsoleDiscrete::h
+ * @file ConsoleCore::h
  * @brief OpenIndus console
  *
  * For more information on OpenIndus:
@@ -15,7 +15,7 @@
 
 #include "ConsoleCore.h"
 
-#if defined(CONFIG_CORE)
+#if defined(OI_CORE)
 
 void ConsoleCore::registerCli(void)
 {

@@ -22,6 +22,7 @@ set(COMPONENT_SRCS
     "Console/ConsoleMaster.cpp"
     "Console/ConsoleCore.cpp"
     "Console/ConsoleDiscrete.cpp"
+    "Console/ConsoleMixed.cpp"
     "Console/ConsoleStepper.cpp"
     "Console/MotorStepperParamCLI.cpp"
     "Module/Brushless/BrushlessStandalone.cpp"

@@ -18,7 +18,7 @@
 #include "ModuleControl.h"
 #include "ModuleMaster.h"
 
-#if !defined(CONFIG_BRUSHLESS)
+#if !defined(OI_BRUSHLESS)
 
 class BrushlessControl : public ModuleControl
 {

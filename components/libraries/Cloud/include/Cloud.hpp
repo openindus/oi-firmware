@@ -67,7 +67,7 @@ class Cloud
         static void mqtt_event_Handler(void *handler_args,esp_event_base_t base,
                                     int32_t event_id, void *event_data);
 
-#if defined(CONFIG_CORE)
+#if defined(OI_CORE)
         /// @brief (Only on Core) Enable cloud status monitoring via the device LED
         void monitorStatus(void);
 #endif

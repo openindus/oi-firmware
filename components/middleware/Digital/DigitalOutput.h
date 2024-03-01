@@ -40,10 +40,10 @@
 typedef enum {
     DOUT_1 = 0,
     DOUT_2,
-#if !defined(CONFIG_BRUSHLESS)
+#if !defined(OI_BRUSHLESS)
     DOUT_3,
     DOUT_4,
-#if !defined(CONFIG_MIXED)
+#if !defined(OI_MIXED)
     DOUT_5,
     DOUT_6,
     DOUT_7,

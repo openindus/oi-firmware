@@ -19,9 +19,9 @@
 #include "StepperSlave.h"
 #include "StepperControl.h"
 
-#if defined(CONFIG_STEPPER) || defined(CONFIG_STEPPER_VE)
+#if defined(OI_STEPPER) || defined(OI_STEPPER_VE)
 
-#if defined(CONFIG_MODULE_STANDALONE)
+#if defined(MODULE_STANDALONE)
 class Stepper : public StepperStandalone {};
 #else 
 class Stepper : public StepperSlave {};

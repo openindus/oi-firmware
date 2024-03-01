@@ -18,7 +18,7 @@
 #include "Global.h"
 #include "ModuleStandalone.h"
 
-#if defined(CONFIG_CORE)
+#if defined(OI_CORE)
 
 class CoreStandalone : public ModuleStandalone
 {

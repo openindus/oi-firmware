@@ -18,12 +18,6 @@
 #include "Arduino.h"
 #endif
 
-/* For testing purpose, it is possible to modify MODULEèTYPE without using menuconfig an re-compile everything */
-#warning "These flags are for testing purpose only"
-#undef  CONFIG_MODULE_SLAVE
-#define CONFIG_MODULE_STANDALONE
-#define CONFIG_FORCE_CONSOLE
-
 static const char SYSTEM_TAG[] = "System";
 
 void System::_mainTask(void *pvParameters)
@@ -37,35 +31,35 @@ void System::_mainTask(void *pvParameters)
 void System::init(void)
 {
     /* Module init */
-#if defined(CONFIG_CORE)
+#if defined(OI_CORE)
     Core::init();
-#elif defined(CONFIG_DISCRETE) || defined(CONFIG_DISCRETE_VE)
+#elif defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)
     Discrete::init();
-#elif defined(CONFIG_STEPPER) || defined(CONFIG_STEPPER_VE)
+#elif defined(OI_STEPPER) || defined(OI_STEPPER_VE)
     Stepper::init();
-#elif defined(CONFIG_MIXED)
+#elif defined(OI_MIXED)
     Mixed::init();
-#elif defined(CONFIG_RELAY_HP) || defined(CONFIG_RELAY_LP)
+#elif defined(OI_RELAY_HP) || defined(OI_RELAY_LP)
     Relay::init();
-#elif defined(CONFIG_BRUSHLESS)
+#elif defined(OI_BRUSHLESS)
     Brushless::init();
-#elif defined(CONFIG_ANALOG_LS)
+#elif defined(OI_ANALOG_LS)
     Analogls::init();
 #endif
 
     /* Register command Line Interface (CLI) commands */
     ConsoleModule::registerCli();
-#if defined(CONFIG_CORE)
+#if defined(OI_CORE)
     ConsoleCore::registerCli();
-#elif defined(CONFIG_DISCRETE) || defined(CONFIG_DISCRETE_VE)
+#elif defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)
     ConsoleDiscrete::registerCli();
-#elif defined(CONFIG_MIXED)
+#elif defined(OI_MIXED)
     ConsoleMixed::registerCli();
-#elif defined(CONFIG_STEPPER) || defined(CONFIG_STEPPER_VE)
+#elif defined(OI_STEPPER) || defined(OI_STEPPER_VE)
     ConsoleStepper::registerCommand();
     MotorStepperParamCLI::registerCommand();
 #endif
-#if defined(CONFIG_MODULE_MASTER)
+#if defined(MODULE_MASTER)
     ConsoleMaster::registerCli();
 #endif
     UsbConsole::listen(); // start a task which listen for user to input "console"
@@ -74,18 +68,18 @@ void System::init(void)
     MODULE_INITIALIZED();
 
     /* Wait for slaves modules to init and give time to user script to enable console */
-#if !defined(CONFIG_MODULE_SLAVE)
+#if !defined(MODULE_SLAVE)
     vTaskDelay(500/portTICK_PERIOD_MS);
 #endif
 
     /* On master module, call autoId */
-#if defined(CONFIG_MODULE_MASTER)
+#if defined(MODULE_MASTER)
     if (ModuleMaster::autoId()) {
         MODULE_PAIRED();
     }
 #endif
 
-#if defined(CONFIG_MODULE_MASTER) || defined(CONFIG_MODULE_STANDALONE)
+#if defined(MODULE_MASTER) || defined(MODULE_STANDALONE)
     /* Check reset reason */
     esp_reset_reason_t reason = esp_reset_reason();
     if ((reason != ESP_RST_POWERON) && 
@@ -105,7 +99,7 @@ void System::init(void)
 #endif
         }
     }
-#else // defined(CONFIG_MODULE_SLAVE)
+#else // defined(MODULE_SLAVE)
     UsbConsole::begin(true); // Force console on slave module
 #endif
 }

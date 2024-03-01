@@ -18,7 +18,7 @@
 #include "StepperConfig.h"
 #include "StepperParam.h"
 
-#if defined(CONFIG_STEPPER) || defined(CONFIG_STEPPER_VE)
+#if defined(OI_STEPPER) || defined(OI_STEPPER_VE)
 
 static const char STEPPER_TAG[] = "Stepper";
 
@@ -27,7 +27,7 @@ const gpio_num_t _dinGpio[] = {
     STEPPER_GPIO_PIN_DIN_2,
     STEPPER_GPIO_PIN_DIN_3,
     STEPPER_GPIO_PIN_DIN_4,
-#if defined(CONFIG_STEPPER_VE)
+#if defined(OI_STEPPER_VE)
     STEPPER_GPIO_PIN_DIN_5,
     STEPPER_GPIO_PIN_DIN_6
 #endif

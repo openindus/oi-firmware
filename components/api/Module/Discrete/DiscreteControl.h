@@ -18,7 +18,7 @@
 #include "ModuleControl.h"
 #include "ModuleMaster.h"
 
-#if !defined(CONFIG_DISCRETE) && !defined(CONFIG_DISCRETE_VE)
+#if !defined(OI_DISCRETE) && !defined(OI_DISCRETE_VE)
 
 class DiscreteControl : public ModuleControl
 {

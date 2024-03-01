@@ -18,7 +18,7 @@ void Cloud::mqtt_event_Handler(void *handler_args, esp_event_base_t base, int32_
 
     switch ((esp_mqtt_event_id_t) event_id) {
         case MQTT_EVENT_CONNECTED:
-#if defined(CONFIG_CORE)
+#if defined(OI_CORE)
             if (cloud->_monitor_status == true)
                 CLOUD_CONNECTED();
 #endif
@@ -29,7 +29,7 @@ void Cloud::mqtt_event_Handler(void *handler_args, esp_event_base_t base, int32_
             cloud->_sendDeviceInfo();
             break;
         case MQTT_EVENT_DISCONNECTED:
-#if defined(CONFIG_CORE)
+#if defined(OI_CORE)
             if (cloud->_monitor_status == true)
                 CLOUD_DISCONNECTED();
 #endif
@@ -127,7 +127,7 @@ void Cloud::_cleanConfig(void)
         esp_mqtt_client_stop(this->_mqtt_client);
         esp_mqtt_client_destroy(this->_mqtt_client);
         this->_mqtt_client = NULL;
-#if defined(CONFIG_CORE)
+#if defined(OI_CORE)
         if (this->_monitor_status == true)
             CLOUD_DISCONNECTED();
 #endif
@@ -289,13 +289,13 @@ void Cloud::_ota_update(void)
     http_conf.crt_bundle_attach = (HTTP_Use_TLS == true) ? esp_crt_bundle_attach : NULL;
     http_conf.username = "CloudOTA";
     http_conf.password = token;
-#if defined(CONFIG_CORE)
+#if defined(OI_CORE)
     CLOUD_OTA();
 #endif
     err = esp_https_ota(&http_conf);
     delete token;
     if (err != ESP_OK) {
-#if defined(CONFIG_CORE)
+#if defined(OI_CORE)
         CLOUD_CONNECTED();
 #endif
         ESP_LOGE(Cloud_LogTag, "OTA: Update failed with code %d: %s", err, esp_err_to_name(err));
@@ -472,7 +472,7 @@ bool Cloud::isPaused(void)
     return (this->_is_paused);
 }
 
-#if defined(CONFIG_CORE)
+#if defined(OI_CORE)
 void Cloud::monitorStatus(void)
 {
     this->_monitor_status = true;

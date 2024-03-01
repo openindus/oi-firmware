@@ -16,7 +16,7 @@
 #include "MotorStepperParamCLI.h"
 #include "argtable3/argtable3.h"
 
-#if defined(CONFIG_STEPPER) || defined(CONFIG_STEPPER_VE)
+#if defined(OI_STEPPER) || defined(OI_STEPPER_VE)
 
 /* declare structures for argtable3 */
 static struct {

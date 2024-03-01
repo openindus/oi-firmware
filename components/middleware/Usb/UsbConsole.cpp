@@ -15,13 +15,13 @@
 
 #include "UsbConsole.h"
 
-#if defined CONFIG_CORE
+#if defined(OI_CORE)
 #define PROMPT_STR "Core"
-#elif defined(CONFIG_DISCRETE) || defined(CONFIG_DISCRETE_VE)
+#elif defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)
 #define PROMPT_STR "Discrete"
-#elif defined(CONFIG_STEPPER) || defined(CONFIG_STEPPER_VE)
+#elif defined(OI_STEPPER) || defined(OI_STEPPER_VE)
 #define PROMPT_STR "Stepper"
-#elif defined(CONFIG_MIXED)
+#elif defined(OI_MIXED)
 #define PROMPT_STR "Mixed"
 #else
 #define PROMPT_STR ""

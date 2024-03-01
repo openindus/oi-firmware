@@ -1,22 +1,5 @@
 menu "OpenIndus Configuration"
 
-    choice MODULE_TYPE
-        bool "OpenIndus module type"
-        default MODULE_SLAVE
-        help
-            Select OpenIndus module type
-
-        config MODULE_SLAVE
-            bool "Slave"
-
-        config MODULE_MASTER
-            bool "Master"
-
-        config MODULE_STANDALONE
-            bool "Standalone"
-
-    endchoice
-
     config FORCE_CONSOLE
         bool "Force console to start with main task. ! Serial.begin() will not work."
         default n

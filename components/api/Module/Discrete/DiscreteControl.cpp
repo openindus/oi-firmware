@@ -15,7 +15,7 @@
 
 #include "DiscreteControl.h"
 
-#if !defined(CONFIG_DISCRETE) && !defined(CONFIG_DISCRETE_VE)
+#if !defined(OI_DISCRETE) && !defined(OI_DISCRETE_VE)
 
 void DiscreteControl::digitalWrite(DigitalOutputNum_t dout, uint8_t level)
 {

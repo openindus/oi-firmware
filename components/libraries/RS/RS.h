@@ -15,7 +15,7 @@
 
 #pragma once
 
-#if defined(CONFIG_CORE)
+#if defined(OI_CORE)
 
 #include <stdint.h>
 #include "sc16is750/sc16is750.h"

@@ -18,7 +18,7 @@
 #include "MixedStandalone.h"
 #include "ModuleSlave.h"
 
-#if defined(CONFIG_MIXED)
+#if defined(OI_MIXED)
 
 class MixedSlave : public MixedStandalone, public ModuleSlave
 {

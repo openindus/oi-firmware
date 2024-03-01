@@ -2,7 +2,7 @@
 #include "AnaloglsStandalone.h"
 #include "AnaloglsPinout.h"
 
-#if defined(CONFIG_ANALOG_LS)
+#if defined(OI_ANALOG_LS)
 
 typedef struct{
     float seebeck_coef;

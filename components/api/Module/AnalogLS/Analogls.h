@@ -19,9 +19,9 @@
 #include "AnaloglsSlave.h"
 #include "AnaloglsControl.h"
 
-#if defined(CONFIG_ANALOG_LS)
+#if defined(OI_ANALOG_LS)
 
-#if defined(CONFIG_MODULE_STANDALONE)
+#if defined(MODULE_STANDALONE)
 class Analogls : public AnaloglsStandalone {};
 #else 
 class Analogls : public AnaloglsSlave {};

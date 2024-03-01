@@ -15,7 +15,7 @@
 
 #pragma once
 
-#if defined(CONFIG_ANALOG_LS)
+#if defined(OI_ANALOG_LS)
 
 /* ADC */
 #define ADC_START   GPIO_NUM_38

@@ -15,7 +15,7 @@
 
 #include "AnaloglsSlave.h"
 
-#if defined (CONFIG_ANALOG_LS)
+#if defined (OI_ANALOG_LS)
 
 
 void AnaloglsSlave::init(void)

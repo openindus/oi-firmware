@@ -17,7 +17,7 @@
 
 #include "ModuleStandalone.h"
 
-#if defined(CONFIG_MIXED)
+#if defined(OI_MIXED)
 
 class MixedStandalone : public ModuleStandalone
 {

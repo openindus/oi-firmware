@@ -15,7 +15,7 @@
 
 #include "StepperSlave.h"
 
-#if defined(CONFIG_STEPPER) || defined(CONFIG_STEPPER_VE)
+#if defined(OI_STEPPER) || defined(OI_STEPPER_VE)
 
 IsrCallback_t StepperSlave::_isrCallback[] = {
     [](void*){event(DIGITAL_INTERRUPT, (int)DIN_1);},

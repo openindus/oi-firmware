@@ -15,7 +15,7 @@
 
 #include "DiscreteSlave.h"
 
-#if defined(CONFIG_DISCRETE) || defined(CONFIG_DISCRETE_VE)
+#if defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)
 
 IsrCallback_t DiscreteSlave::_isrCallback[] = {
     [](void*){event(DIGITAL_INTERRUPT, (int)DIN_1);},

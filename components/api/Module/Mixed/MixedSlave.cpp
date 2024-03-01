@@ -15,7 +15,7 @@
 
 #include "MixedSlave.h"
 
-#if defined(CONFIG_MIXED)
+#if defined(OI_MIXED)
 
 IsrCallback_t MixedSlave::_isrCallback[] = {
     [](void*){event(DIGITAL_INTERRUPT, (int)DIN_1);},

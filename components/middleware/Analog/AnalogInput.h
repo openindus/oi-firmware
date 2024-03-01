@@ -20,10 +20,10 @@
 typedef enum {
     AIN_1 = 0,
     AIN_2,
-#if !defined(CONFIG_DISCRETE) && !defined(CONFIG_DISCRETE_VE)
+#if !defined(OI_DISCRETE) && !defined(OI_DISCRETE_VE)
     AIN_3,
     AIN_4,
-#if !defined(CONFIG_MIXED)
+#if !defined(OI_MIXED)
     AIN_5,
     AIN_6,
     AIN_7,

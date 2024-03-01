@@ -18,9 +18,9 @@
 #include "CoreStandalone.h"
 #include "CoreMaster.h"
 
-#if defined(CONFIG_CORE)
+#if defined(OI_CORE)
 
-#if defined(CONFIG_MODULE_STANDALONE)
+#if defined(MODULE_STANDALONE)
 class Core : public CoreStandalone {};
 #else 
 class Core : public CoreMaster {};

@@ -17,7 +17,7 @@
 
 typedef enum {
     MOTOR_1 = 0,
-#if !defined(CONFIG_STEPPER_VE)
+#if !defined(OI_STEPPER_VE)
     MOTOR_2,
 #endif
     MOTOR_MAX,

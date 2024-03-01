@@ -16,7 +16,7 @@
 #include "BrushlessSlave.h"
 #include "BrushlessConfig.h"
 
-#if defined(CONFIG_BRUSHLESS)
+#if defined(OI_BRUSHLESS)
 
 void BrushlessSlave::init(void)
 {

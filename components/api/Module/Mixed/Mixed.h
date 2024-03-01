@@ -19,9 +19,9 @@
 #include "MixedSlave.h"
 #include "MixedControl.h"
 
-#if defined(CONFIG_MIXED)
+#if defined(OI_MIXED)
 
-#if defined(CONFIG_MODULE_STANDALONE)
+#if defined(MODULE_STANDALONE)
 class Mixed : public MixedStandalone {};
 #else 
 class Mixed : public MixedSlave {};

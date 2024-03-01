@@ -15,7 +15,7 @@
 
 #include "ConsoleStepper.h"
 
-#if defined(CONFIG_STEPPER) || defined(CONFIG_STEPPER_VE)
+#if defined(OI_STEPPER) || defined(OI_STEPPER_VE)
 
 void ConsoleStepper::registerCommand(void)
 {
