@@ -15,7 +15,7 @@
 
 #include "AnaloglsControl.h"
 
-#if !defined(CONFIG_ANALOG_LS)
+#if !defined(OI_ANALOG_LS)
 
 float AnaloglsControl::GetChannelData(analog_channel_t channel, rtd_type_t rtd)
 {

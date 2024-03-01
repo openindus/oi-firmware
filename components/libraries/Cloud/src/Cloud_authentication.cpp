@@ -142,7 +142,7 @@ void cloud_authenticate(Cloud *cloud)
 {
     char *auth_token = NULL;
 
-#if defined(CONFIG_CORE)
+#if defined(OI_CORE)
     if (cloud->_monitor_status == true)
         CLOUD_AUTHENTICATING();
 #endif
@@ -151,7 +151,7 @@ void cloud_authenticate(Cloud *cloud)
         ESP_LOGW(Cloud_LogTag, "Authentication: Authentication failed");
         cloud->_is_authenticated = false;
         cloud->_is_init = false;
-#if defined(CONFIG_CORE)
+#if defined(OI_CORE)
         if (cloud->_monitor_status == true)
             CLOUD_DISCONNECTED();
 #endif

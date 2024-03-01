@@ -3,7 +3,7 @@
 #include "ModuleStandalone.h"
 #include "AnaloglsType.h"
 
-#if defined(CONFIG_ANALOG_LS) 
+#if defined(OI_ANALOG_LS) 
 
 // Set ADC_RESOLUTION between 16 and 24 bits
 #define ADC_RESOLUTION  16

@@ -15,7 +15,7 @@
 
 #include "ConsoleMaster.h"
 
-#if defined(CONFIG_CORE)
+#if defined(MODULE_MASTER)
 
 void ConsoleMaster::registerCli(void)
 {

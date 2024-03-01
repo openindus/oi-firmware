@@ -6,7 +6,7 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file ConsoleMixed::h
+ * @file ConsoleMixed.h
  * @brief OpenIndus console
  *
  * For more information on OpenIndus:
@@ -15,7 +15,7 @@
 
 #include "ConsoleMixed.h"
 
-#if defined(CONFIG_MIXED)
+#if defined(OI_MIXED)
 
 void ConsoleMixed::registerCli(void)
 {
@@ -119,7 +119,7 @@ static int getCurrent(int argc, char **argv)
 
     DigitalOutputNum_t dout = (DigitalOutputNum_t)(getCurrentArgs.dout->ival[0] - 1);
 
-    printf("%.3f\n", DiscreteStandalone::getCurrent(dout));
+    printf("%.3f\n", MixedStandalone::getCurrent(dout));
 
     return 0;
 }
@@ -138,3 +138,5 @@ void ConsoleMixed::_registerGetCurrent(void)
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
 }
+
+#endif

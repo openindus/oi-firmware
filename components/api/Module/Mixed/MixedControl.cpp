@@ -15,7 +15,7 @@
 
 #include "MixedControl.h"
 
-#if !defined(CONFIG_MIXED)
+#if !defined(OI_MIXED)
 
 void MixedControl::digitalWrite(DigitalOutputNum_t dout, uint8_t level)
 {

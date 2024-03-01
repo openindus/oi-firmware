@@ -19,9 +19,9 @@
 #include "RelaySlave.h"
 #include "RelayControl.h"
 
-#if defined(CONFIG_RELAY_HP) || defined(CONFIG_RELAY_LP)
+#if defined(OI_RELAY_HP) || defined(OI_RELAY_LP)
 
-#if defined(CONFIG_MODULE_STANDALONE)
+#if defined(MODULE_STANDALONE)
 class Relay : public RelayStandalone {};
 #else 
 class Relay : public RelaySlave {};

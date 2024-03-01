@@ -16,7 +16,7 @@
 #include "CoreStandalone.h"
 #include "CorePinout.h"
 
-#if defined(CONFIG_CORE)
+#if defined(OI_CORE)
 
 static const char CORE_TAG[] = "Core";
 

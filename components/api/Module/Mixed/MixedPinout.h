@@ -15,7 +15,7 @@
 
 #pragma once
 
-#if defined(CONFIG_MIXED)
+#if defined(OI_MIXED)
 
 /* DIN */
 #define MIXED_PIN_DIN_1                  GPIO_NUM_20

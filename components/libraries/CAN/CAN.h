@@ -15,7 +15,7 @@
 
 #pragma once
 
-#if defined(CONFIG_CORE)
+#if defined(OI_CORE)
 
 #include <stdint.h>
 #include "pcal6524/pcal6524.h"

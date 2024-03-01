@@ -19,7 +19,7 @@
 #include "ModuleMaster.h"
 #include "AnaloglsType.h"
 
-#if !defined(CONFIG_ANALOG_LS)
+#if !defined(OI_ANALOG_LS)
 
 class AnaloglsControl : public ModuleControl
 {

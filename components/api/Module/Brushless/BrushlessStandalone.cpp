@@ -16,7 +16,7 @@
 #include "BrushlessStandalone.h"
 #include "BrushlessConfig.h"
 
-#if defined(CONFIG_BRUSHLESS)
+#if defined(OI_BRUSHLESS)
 
 static const char BRUSHLESS_TAG[] = "Brushless";
 

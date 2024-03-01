@@ -16,7 +16,7 @@
 #include "MixedStandalone.h"
 #include "MixedPinout.h"
 
-#if defined(CONFIG_MIXED)
+#if defined(OI_MIXED)
 
 static const char MIXED_TAG[] = "Mixed";
 

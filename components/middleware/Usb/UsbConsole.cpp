@@ -15,13 +15,13 @@
 
 #include "UsbConsole.h"
 
-#if defined CONFIG_CORE
+#if defined(OI_CORE)
 #define PROMPT_STR "Core"
-#elif defined(CONFIG_DISCRETE) || defined(CONFIG_DISCRETE_VE)
+#elif defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)
 #define PROMPT_STR "Discrete"
-#elif defined(CONFIG_STEPPER) || defined(CONFIG_STEPPER_VE)
+#elif defined(OI_STEPPER) || defined(OI_STEPPER_VE)
 #define PROMPT_STR "Stepper"
-#elif defined(CONFIG_MIXED)
+#elif defined(OI_MIXED)
 #define PROMPT_STR "Mixed"
 #else
 #define PROMPT_STR ""
@@ -31,11 +31,27 @@ static const char TAG[] = "UsbConsole";
 
 esp_console_repl_t* UsbConsole::_repl = NULL;
 
-void UsbConsole::begin(void)
+/* By default do not keep console after init */
+bool UsbConsole::keepFlag = false;
+bool UsbConsole::continueListenTask = true;
+TaskHandle_t UsbConsole::listenTaskHandle = NULL;
+
+void UsbConsole::listen()
 {
-    if (uart_is_driver_installed(CONFIG_ESP_CONSOLE_UART_NUM)) {
-        ESP_LOGW(TAG, "The console cannot be active at the same time as Arduino Serial");
-        return;
+    xTaskCreate(_listenTask, "Listen console task", 2048, NULL, 1, &listenTaskHandle);
+}
+
+bool UsbConsole::begin(bool force)
+{
+    /* stop listen task */
+    continueListenTask = false;
+    while(eTaskGetState(listenTaskHandle) == eReady) {
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+
+    /* If force and keep flag are false, do not start console */
+    if (!force && !keepFlag) {
+        return false;
     }
 
     esp_console_repl_config_t repl_config = ESP_CONSOLE_REPL_CONFIG_DEFAULT();
@@ -52,16 +68,45 @@ void UsbConsole::begin(void)
     printf(" ==================================================\n\n");
 
     esp_console_dev_uart_config_t hw_config = {
-        .channel = CONFIG_ESP_CONSOLE_UART_NUM,
+        .channel = UART_NUM_0,
         .baud_rate = 115200,
         .tx_gpio_num = -1,
         .rx_gpio_num = -1,
     };
     ESP_ERROR_CHECK(esp_console_new_repl_uart(&hw_config, &repl_config, &_repl));
     ESP_ERROR_CHECK(esp_console_start_repl(_repl));
+
+    return true;
 }
 
 void UsbConsole::end(void)
 {
     ESP_ERROR_CHECK(_repl->del(_repl));
+}
+
+void UsbConsole::_listenTask(void *pvParameters)
+{
+    char buff[10];
+    int c;
+    int i = 0;
+
+    while(continueListenTask) {
+        vTaskDelay(10);
+        c = fgetc(stdin);
+        if(c != EOF) {
+            buff[i] = (char) c;
+            if(i == 6) {
+                buff[i+1] = '\0';
+                if(strcmp("console", buff) ==  0) {
+                    keepFlag = true;
+                    ESP_LOGI(TAG, "Activating console");
+                    break;
+                } else {
+                    i = 0;
+                }
+            }
+            i++;
+        }
+    }
+    vTaskDelete(NULL);
 }

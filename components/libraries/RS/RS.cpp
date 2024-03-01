@@ -1,4 +1,4 @@
-#if defined(CONFIG_CORE)
+#if defined(OI_CORE)
 
 #include "RS.h"
 

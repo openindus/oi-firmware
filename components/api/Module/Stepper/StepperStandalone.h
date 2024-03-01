@@ -17,9 +17,9 @@
 
 #include "ModuleStandalone.h"
 
-#if defined(CONFIG_STEPPER) || defined(CONFIG_STEPPER_VE)
+#if defined(OI_STEPPER) || defined(OI_STEPPER_VE)
 
-#if defined(CONFIG_STEPPER)
+#if defined(OI_STEPPER)
 #define STEPPER_DIN_NUM    4
 #define STEPPER_MOTOR_NUM   2
 #else

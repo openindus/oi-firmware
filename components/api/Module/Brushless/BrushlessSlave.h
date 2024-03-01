@@ -18,7 +18,7 @@
 #include "BrushlessStandalone.h"
 #include "ModuleSlave.h"
 
-#if defined(CONFIG_BRUSHLESS)
+#if defined(OI_BRUSHLESS)
 
 class BrushlessSlave : public ModuleSlave
 {

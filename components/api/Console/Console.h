@@ -17,6 +17,7 @@
 
 #include "ConsoleCore.h"
 #include "ConsoleDiscrete.h"
+#include "ConsoleMixed.h"
 #include "ConsoleMaster.h"
 #include "ConsoleModule.h"
 #include "ConsoleStepper.h"

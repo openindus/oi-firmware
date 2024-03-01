@@ -15,7 +15,7 @@
 
 #pragma once
 
-#if defined(CONFIG_STEPPER)
+#if defined(OI_STEPPER)
 
 #define STEPPER_NUMBER_OF_DEVICES        2
 
@@ -52,7 +52,7 @@
 #define STEPPER_PWM_MODE                 LEDC_LOW_SPEED_MODE
 #define STEPPER_PWM_CHANNEL              LEDC_CHANNEL_0
 
-#elif defined(CONFIG_STEPPER_VE)
+#elif defined(OI_STEPPER_VE)
 
 #define STEPPER_NUMBER_OF_DEVICES        1
 

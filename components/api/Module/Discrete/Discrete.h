@@ -19,9 +19,9 @@
 #include "DiscreteSlave.h"
 #include "DiscreteControl.h"
 
-#if defined(CONFIG_DISCRETE) || defined(CONFIG_DISCRETE_VE)
+#if defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)
 
-#if defined(CONFIG_MODULE_STANDALONE)
+#if defined(MODULE_STANDALONE)
 class Discrete : public DiscreteStandalone {};
 #else 
 class Discrete : public DiscreteSlave {};

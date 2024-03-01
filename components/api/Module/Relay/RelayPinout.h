@@ -15,7 +15,7 @@
 
 #pragma once
 
-#if defined(CONFIG_RELAY_LP)
+#if defined(OI_RELAY_LP)
 
 #define RELAY_LP_PHASE_CMD1          GPIO_NUM_38
 #define RELAY_LP_PHASE_CMD2          GPIO_NUM_37
@@ -26,7 +26,7 @@
 
 #define Relay_PIN_CMD_MOSFET          GPIO_NUM_2
 
-#elif defined(CONFIG_RELAY_HP)
+#elif defined(OI_RELAY_HP)
 
 #define RELAY_HP_PHASE_CMD1          GPIO_NUM_13
 #define RELAY_HP_PHASE_CMD2          GPIO_NUM_12

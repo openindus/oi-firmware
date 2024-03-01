@@ -19,12 +19,12 @@
 #include "BrushlessSlave.h"
 #include "BrushlessControl.h"
 
-#if defined(CONFIG_BRUSHLESS)
-#if defined(CONFIG_MODULE_STANDALONE)
+#if defined(OI_BRUSHLESS)
+#if defined(MODULE_STANDALONE)
 class Brushless : public BrushlessStandalone {};
 #else
 class Brushless : public BrushlessSlave {};
 #endif
 #else
- class Brushless : public BrushlessControl {};
+class Brushless : public BrushlessControl {};
 #endif

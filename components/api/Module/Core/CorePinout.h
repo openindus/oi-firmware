@@ -15,7 +15,7 @@
 
 #pragma once
 
-#if defined(CONFIG_CORE)
+#if defined(OI_CORE)
 
 #if defined(CONFIG_IDF_TARGET_ESP32)
 

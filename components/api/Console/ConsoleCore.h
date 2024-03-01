@@ -18,7 +18,7 @@
 #include "Global.h"
 #include "CoreStandalone.h"
 
-#if defined(CONFIG_CORE)
+#if defined(OI_CORE)
 
 class ConsoleCore
 {

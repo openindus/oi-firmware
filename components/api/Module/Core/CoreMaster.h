@@ -19,7 +19,7 @@
 #include "CoreStandalone.h"
 #include "ModuleMaster.h"
 
-#if defined(CONFIG_CORE)
+#if defined(OI_CORE)
 
 class CoreMaster: public CoreStandalone, public ModuleMaster
 {

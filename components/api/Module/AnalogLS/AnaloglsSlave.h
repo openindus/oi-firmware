@@ -18,7 +18,7 @@
 #include "AnaloglsStandalone.h"
 #include "ModuleSlave.h"
 
-#if defined(CONFIG_ANALOG_LS)
+#if defined(OI_ANALOG_LS)
 
 class AnaloglsSlave : public AnaloglsStandalone, public ModuleSlave
 {

@@ -15,7 +15,7 @@
 
 #pragma once
 
-#if defined(CONFIG_DISCRETE)
+#if defined(OI_DISCRETE)
 
 #if defined(CONFIG_IDF_TARGET_ESP32S3)
 
@@ -86,7 +86,7 @@
 #error Unsupported configuration
 #endif
 
-#elif defined(CONFIG_DISCRETE_VE)
+#elif defined(OI_DISCRETE_VE)
 
 #if defined(CONFIG_IDF_TARGET_ESP32S3)
 
