@@ -20,14 +20,15 @@
 
 #if defined(OI_MIXED)
 
-class MixedSlave : public MixedStandalone, public ModuleSlave
+class MixedSlave : public ModuleSlave
 {
 public:
 
-    static void init(void);
+    static int init(void);
     
 private:
 
+    static MixedStandalone* _mixed;
     static IsrCallback_t _isrCallback[4];
 };
 

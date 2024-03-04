@@ -17,10 +17,17 @@
 
 #include "System.h"
 
+#if defined(OI_MIXED) && defined(MODULE_STANDALONE)
+#define OIMixed MixedStandalone
+#elif defined(OI_MIXED) && !defined(MODULE_STANDALONE)
+#define OIMixed MixedSlave
+#else 
+#define OIMixed MixedControl
+#endif
+
 #define OICore      Core
 #define OIDiscrete  Discrete
 #define OIStepper   Stepper
-#define OIMixed     Mixed
 #define OIRelay     Relay
 #define OIBrushless Brushless
 #define OIAnalogls  Analogls

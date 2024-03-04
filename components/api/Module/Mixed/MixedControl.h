@@ -17,30 +17,35 @@
 
 #include "ModuleControl.h"
 #include "ModuleMaster.h"
+#include "Mixed.h"
 
 #if !defined(OI_MIXED)
 
-class MixedControl : public ModuleControl
+class MixedControl : public ModuleControl, public Mixed
 {
 public:
 
     MixedControl(void) : ModuleControl() {}
 
-    void digitalWrite(DigitalOutputNum_t dout, uint8_t level);
-    int digitalRead(DigitalInputNum_t din);
-    void attachInterrupt(DigitalInputNum_t din, IsrCallback_t callback, InterruptMode_t mode=RISING_MODE);
-    void detachInterrupt(DigitalInputNum_t din);
-    int analogRead(AnalogInputNum_t ain);
-    int analogReadMilliVolts(AnalogInputNum_t ain);
-    void analogReadMode(AnalogInputNum_t ain, AdcMode_t mode);
+    /* Digital Output */
+    void digitalWrite(DigitalOutputNum_t num, uint8_t level);
+
+    /* Digital Input */
+    int digitalRead(DigitalInputNum_t num);
+    void attachInterrupt(DigitalInputNum_t num, IsrCallback_t callback, 
+        InterruptMode_t mode=RISING_MODE, void* arg=NULL);
+    void detachInterrupt(DigitalInputNum_t num);
+
+    /* Analog Input */
+    int analogRead(AnalogInputNum_t num);
+    int analogReadMilliVolts(AnalogInputNum_t num);
+    void analogReadMode(AnalogInputNum_t num, AdcMode_t mode);
     void analogReadResolution(AdcResBits_t res);
     void analogReadReference(float ref);
-    void analogWriteVoltage(AnalogOutputNum_t aout, uint32_t value);
-    void analogWriteVoltageMilliVolts(AnalogOutputNum_t aout, uint32_t value);
-    void analogWriteVoltageMode(AnalogOutputNum_t aout, DacVoltageMode_t mode);
-    void analogWriteCurrent(AnalogOutputNum_t aout, uint32_t value);
-    void analogWriteCurrentMilliAmps(AnalogOutputNum_t aout, uint32_t value);
-    void analogWriteCurrentMode(AnalogOutputNum_t aout, DacCurrentMode_t mode);
+
+    /* Analog Output */
+    void analogOutputMode(AnalogOutput_Num_t num, AnalogOutput_Mode_t mode);
+    void analogWrite(AnalogOutput_Num_t num, float value);
 
 private:
 

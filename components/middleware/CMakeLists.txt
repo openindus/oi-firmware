@@ -14,6 +14,7 @@ set(COMPONENT_SRCS
     "FlashLoader/FlashLoader.cpp"
     "Led/Led.cpp"
     "RTClock/RTClock.cpp"
+    "Analog/AnalogOutput.cpp"
 )
 
 set(COMPONENT_INCLUDE_DIRS

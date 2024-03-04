@@ -210,28 +210,30 @@ error:
 /**
  * @brief Initialize the device
  * 
+ * @param dev Device instance
  * @param conf Device config
- * @return ad5413_device_t* device
+ * @return int 
  */
-ad5413_device_t* ad5413_init(ad5413_config_t conf)
+int ad5413_init(ad5413_device_t** dev, ad5413_config_t* conf)
 {
-    ad5413_device_t* dev = malloc(sizeof(ad5413_device_t));
+    ad5413_device_t* device = malloc(sizeof(ad5413_device_t));
     if (dev == NULL) {
         ESP_LOGE(TAG, "Failed to allocate memory for the device instance");
         goto error;
     }
 
-    ad5413_spi_init(conf.host_id, conf.sclk_freq, conf.sync, &dev->spi_handler);
+    ad5413_spi_init(conf->host_id, conf->sclk_freq, conf->sync, &device->spi_handler);
 
-    dev->slip_bit = ~conf.ad1;
-    dev->address = ((conf.ad1 << 1) | (conf.ad0));
-    dev->crc_en = true;
+    device->slip_bit = ~conf->ad1;
+    device->address = ((conf->ad1 << 1) | (conf->ad0));
+    device->crc_en = true;
 
-    return dev;
+    *dev = device;
+    return 0;
 
 error:
     free(dev);
-    return NULL;
+    return -1;
 }
 
 /**

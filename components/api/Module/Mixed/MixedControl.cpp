@@ -17,66 +17,67 @@
 
 #if !defined(OI_MIXED)
 
-void MixedControl::digitalWrite(DigitalOutputNum_t dout, uint8_t level)
+void MixedControl::digitalWrite(DigitalOutputNum_t num, uint8_t level)
 {
     RequestMsg_t msg;
     msg.request = DIGITAL_WRITE;
-    msg.param = (uint16_t)dout;
+    msg.param = (uint16_t)num;
     msg.data = (uint32_t)level;
     request(msg);
 }
 
-int MixedControl::digitalRead(DigitalInputNum_t din)
+int MixedControl::digitalRead(DigitalInputNum_t num)
 {
     RequestMsg_t msg;
     msg.request = DIGITAL_READ;
-    msg.param = (uint16_t)din;
+    msg.param = (uint16_t)num;
     return (int)request(msg);
 }
 
-void MixedControl::attachInterrupt(DigitalInputNum_t din, IsrCallback_t callback, InterruptMode_t mode)
+void MixedControl::attachInterrupt(DigitalInputNum_t num, IsrCallback_t callback, 
+    InterruptMode_t mode, void* arg)
 {
     RequestMsg_t msg;
     msg.request = ATTACH_INTERRUPT;
-    msg.param = (uint16_t)din;
+    msg.param = (uint16_t)num;
     msg.data = (uint32_t)mode;
     request(msg);
-    _isrCallback[din] = callback;
+    _isrCallback[num] = callback;
     uint16_t id = ModuleControl::getId(this);
     ModuleMaster::onEvent(DIGITAL_INTERRUPT, id, [this](uint8_t num) {
         _isrCallback[num](NULL);
     });
 }
 
-void MixedControl::detachInterrupt(DigitalInputNum_t din)
+void MixedControl::detachInterrupt(DigitalInputNum_t num)
 {
     RequestMsg_t msg;
     msg.request = DETACH_INTERRUPT;
-    msg.param = (uint16_t)din;
+    msg.param = (uint16_t)num;
     request(msg);
 }
 
-int MixedControl::analogRead(AnalogInputNum_t ain)
+int MixedControl::analogRead(AnalogInputNum_t num)
 {
     RequestMsg_t msg;
     msg.request = ANALOG_READ;
-    msg.param = (uint16_t)ain;
+    msg.param = (uint16_t)num;
     return request(msg);
 }
 
-int MixedControl::analogReadMilliVolts(AnalogInputNum_t ain)
+int MixedControl::analogReadMilliVolts(AnalogInputNum_t num)
 {
     RequestMsg_t msg;
     msg.request = ANALOG_READ_MILLIVOLTS;
-    msg.param = (uint16_t)ain;
+    msg.param = (uint16_t)num;
     return request(msg);
 }
 
-void MixedControl::analogReadMode(AnalogInputNum_t ain, AdcMode_t mode)
+void MixedControl::analogReadMode(AnalogInputNum_t num, AdcMode_t mode)
 {
     RequestMsg_t msg;
     msg.request = ANALOG_READ_MODE;
-    msg.param = (uint16_t)ain;
+    msg.param = (uint16_t)num;
     msg.data = (uint32_t)mode;
     request(msg);
 }
@@ -97,57 +98,20 @@ void MixedControl::analogReadReference(float ref)
     request(msg);
 }
 
-void MixedControl::analogWriteVoltage(AnalogOutputNum_t aout, uint32_t value)
+void MixedControl::analogOutputMode(AnalogOutput_Num_t num, AnalogOutput_Mode_t mode)
 {
     RequestMsg_t msg;
-    msg.request = ANALOG_WRITE_VOLTAGE;
-    msg.param = (uint16_t)aout;
-    msg.data = (uint32_t)value;
-    request(msg);
-}
-
-void MixedControl::analogWriteVoltageMilliVolts(AnalogOutputNum_t aout, uint32_t value)
-{
-    RequestMsg_t msg;
-    msg.request = ANALOG_WRITE_VOLTAGE_MILLIVOLTS;
-    msg.param = (uint16_t)aout;
-    msg.data = (uint32_t)value;
-    request(msg);
-}
-
-void MixedControl::analogWriteVoltageMode(AnalogOutputNum_t aout, DacVoltageMode_t mode)
-{
-    RequestMsg_t msg;
-    msg.request = ANALOG_WRITE_VOLTAGE_MODE;
-    msg.param = (uint16_t)aout;
+    msg.request = ANALOG_OUTPUT_MODE;
+    msg.param = (uint16_t)num;
     msg.data = (uint32_t)mode;
     request(msg);
 }
 
-void MixedControl::analogWriteCurrent(AnalogOutputNum_t aout, uint32_t value)
+void MixedControl::analogWrite(AnalogOutput_Num_t num, float value)
 {
     RequestMsg_t msg;
-    msg.request = ANALOG_WRITE_CURRENT;
-    msg.param = (uint16_t)aout;
-    msg.data = (uint32_t)value;
-    request(msg);
-}
-
-void MixedControl::analogWriteCurrentMilliAmps(AnalogOutputNum_t aout, uint32_t value)
-{
-    RequestMsg_t msg;
-    msg.request = ANALOG_WRITE_CURRENT_MILLIAMPS;
-    msg.param = (uint16_t)aout;
-    msg.data = (uint32_t)value;
-    request(msg);
-}
-
-void MixedControl::analogWriteCurrentMode(AnalogOutputNum_t aout, DacCurrentMode_t mode)
-{
-    RequestMsg_t msg;
-    msg.request = ANALOG_WRITE_CURRENT_MODE;
-    msg.param = (uint16_t)aout;
-    msg.data = (uint32_t)mode;
+    msg.request = ANALOG_WRITE;
+    memcpy(&msg.data, &value, sizeof(float));
     request(msg);
 }
 

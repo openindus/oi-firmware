@@ -24,48 +24,49 @@ IsrCallback_t MixedSlave::_isrCallback[] = {
     [](void*){event(DIGITAL_INTERRUPT, (int)DIN_4);},
 };
 
-void MixedSlave::init(void)
+MixedStandalone* MixedSlave::_mixed = new MixedStandalone();
+
+int MixedSlave::init(void)
 {
-    MixedStandalone::init();
     ModuleSlave::init();
 
     onRequest(DIGITAL_WRITE, [](RequestMsg_t msg) -> uint32_t {
-        MixedStandalone::digitalWrite((DigitalOutputNum_t)msg.param, (uint8_t)msg.data);
+        _mixed->digitalWrite((DigitalOutputNum_t)msg.param, (uint8_t)msg.data);
         return 0;
     });
 
     onRequest(DIGITAL_READ, [](RequestMsg_t msg) -> uint32_t {
-        return MixedStandalone::digitalRead((DigitalInputNum_t)msg.param);
+        return _mixed->digitalRead((DigitalInputNum_t)msg.param);
     });
 
     onRequest(ATTACH_INTERRUPT, [](RequestMsg_t msg) -> uint32_t {
         DigitalInputNum_t din = (DigitalInputNum_t)msg.param;
         InterruptMode_t mode = (InterruptMode_t)msg.data;
-        MixedStandalone::attachInterrupt(din, _isrCallback[din], mode); 
+        _mixed->attachInterrupt(din, _isrCallback[din], mode); 
         return 0;
     });
 
     onRequest(DETACH_INTERRUPT, [](RequestMsg_t msg) -> uint32_t {
         DigitalInputNum_t din = (DigitalInputNum_t)msg.param;
-        MixedStandalone::detachInterrupt(din);
+        _mixed->detachInterrupt(din);
         return 0;
     });
 
     onRequest(ANALOG_READ, [](RequestMsg_t msg) -> uint32_t {
-        return MixedStandalone::analogRead((AnalogInputNum_t)msg.param);
+        return _mixed->analogRead((AnalogInputNum_t)msg.param);
     });
 
     onRequest(ANALOG_READ_MILLIVOLTS, [](RequestMsg_t msg) -> uint32_t { 
-        return MixedStandalone::analogReadMilliVolts((AnalogInputNum_t)msg.param);
+        return _mixed->analogReadMilliVolts((AnalogInputNum_t)msg.param);
     });
 
     onRequest(ANALOG_READ_MODE, [](RequestMsg_t msg) -> uint32_t { 
-        MixedStandalone::analogReadMode((AnalogInputNum_t)msg.param, (AdcMode_t)msg.data);
+        _mixed->analogReadMode((AnalogInputNum_t)msg.param, (AdcMode_t)msg.data);
         return 0;
     });
 
     onRequest(ANALOG_READ_RESOLUTION, [](RequestMsg_t msg) -> uint32_t { 
-        MixedStandalone::analogReadResolution((AdcResBits_t)msg.data);
+        _mixed->analogReadResolution((AdcResBits_t)msg.data);
         return 0;
     });
 
@@ -73,39 +74,24 @@ void MixedSlave::init(void)
         float value;
         uint32_t data = msg.data;
         memcpy(&value, &data, sizeof(float));
-        MixedStandalone::analogReadReference(value);
+        _mixed->analogReadReference(value);
         return 0;
     });
 
-    onRequest(ANALOG_WRITE_VOLTAGE, [](RequestMsg_t msg) -> uint32_t { 
-        MixedStandalone::analogWriteVoltage((AnalogOutputNum_t)msg.param, msg.data);
+    onRequest(ANALOG_OUTPUT_MODE, [](RequestMsg_t msg) -> uint32_t { 
+        _mixed->analogOutputMode((AnalogOutput_Num_t)msg.param, (AnalogOutput_Mode_t)msg.data);
         return 0;
     });
 
-    onRequest(ANALOG_WRITE_VOLTAGE_MILLIVOLTS, [](RequestMsg_t msg) -> uint32_t { 
-        MixedStandalone::analogWriteVoltageMilliVolts((AnalogOutputNum_t)msg.param, msg.data);
+    onRequest(ANALOG_WRITE, [](RequestMsg_t msg) -> uint32_t { 
+        float value;
+        uint32_t data = msg.data;
+        memcpy(&value, &data, sizeof(float));
+        _mixed->analogWrite((AnalogOutput_Num_t)msg.param, value);
         return 0;
     });
 
-    onRequest(ANALOG_WRITE_VOLTAGE_MODE, [](RequestMsg_t msg) -> uint32_t { 
-        MixedStandalone::analogWriteVoltageMode((AnalogOutputNum_t)msg.param, (DacVoltageMode_t)msg.data);
-        return 0;
-    });
-
-    onRequest(ANALOG_WRITE_CURRENT, [](RequestMsg_t msg) -> uint32_t { 
-        MixedStandalone::analogWriteCurrent((AnalogOutputNum_t)msg.param, msg.data);
-        return 0;
-    });
-
-    onRequest(ANALOG_WRITE_CURRENT_MILLIAMPS, [](RequestMsg_t msg) -> uint32_t { 
-        MixedStandalone::analogWriteCurrentMilliAmps((AnalogOutputNum_t)msg.param, msg.data);
-        return 0;
-    });
-
-    onRequest(ANALOG_WRITE_CURRENT_MODE, [](RequestMsg_t msg) -> uint32_t { 
-        MixedStandalone::analogWriteCurrentMode((AnalogOutputNum_t)msg.param, (DacCurrentMode_t)msg.data);
-        return 0;
-    });
+    return 0;
 }
 
 #endif

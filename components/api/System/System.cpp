@@ -30,6 +30,8 @@ void System::_mainTask(void *pvParameters)
 
 void System::init(void)
 {
+    int err = 0;
+
     /* Module init */
 #if defined(OI_CORE)
     Core::init();
@@ -38,7 +40,9 @@ void System::init(void)
 #elif defined(OI_STEPPER) || defined(OI_STEPPER_VE)
     Stepper::init();
 #elif defined(OI_MIXED)
-    Mixed::init();
+    err |= MixedStandalone::init();
+    err |= MixedSlave::init();
+    err |= MixedCLI::init();
 #elif defined(OI_RELAY_HP) || defined(OI_RELAY_LP)
     Relay::init();
 #elif defined(OI_BRUSHLESS)
@@ -47,14 +51,17 @@ void System::init(void)
     Analogls::init();
 #endif
 
+    if (err != 0) {
+        ESP_LOGE(SYSTEM_TAG, "Failed to initialize module");
+        /** @todo: led blink quickly or something like that */
+    }
+
     /* Register command Line Interface (CLI) commands */
     ConsoleModule::registerCli();
 #if defined(OI_CORE)
     ConsoleCore::registerCli();
 #elif defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)
     ConsoleDiscrete::registerCli();
-#elif defined(OI_MIXED)
-    ConsoleMixed::registerCli();
 #elif defined(OI_STEPPER) || defined(OI_STEPPER_VE)
     ConsoleStepper::registerCommand();
     MotorStepperParamCLI::registerCommand();
