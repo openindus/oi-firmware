@@ -139,7 +139,7 @@ typedef struct{
     uint8_t ads1x4s08_crc;
 }ads1x4s08_data_t;
 
-extern ads1x4s08_data_t data;
+// extern ads1x4s08_data_t data;
 extern ads1x4s08_map_register_t ads1x4s08_mapreg;
 
 typedef enum{
