@@ -19,7 +19,7 @@
 static const char MODULE_TAG[] = "Module";
 
 uint16_t ModuleSlave::_id;
-std::map<Request_t, RequestCallback_t> ModuleSlave::_request;
+std::map<Module_Request_t, Module_RequestCallback_t> ModuleSlave::_request;
 
 void ModuleSlave::init(void)
 {
@@ -47,7 +47,7 @@ void ModuleSlave::init(void)
     xTaskCreate(_busTask, "Bus task", 4096, NULL, 1, NULL);
 }
 
-void ModuleSlave::event(Event_t event, int num)
+void ModuleSlave::event(Module_Event_t event, int num)
 {
     BusCan::Frame_t frame;
     frame.command = MODULE_EVENT;
@@ -56,14 +56,14 @@ void ModuleSlave::event(Event_t event, int num)
     BusCan::write(&frame, _id);
 }
 
-void ModuleSlave::onRequest(Request_t request, RequestCallback_t callback)
+void ModuleSlave::onRequest(Module_Request_t request, Module_RequestCallback_t callback)
 {
     _request.insert({request, callback});
 }
 
-uint32_t ModuleSlave::handleRequest(RequestMsg_t msg)
+uint32_t ModuleSlave::handleRequest(Module_RequestMsg_t msg)
 {
-    if (_request.find((Request_t)msg.request) != _request.end()) {
+    if (_request.find((Module_Request_t)msg.request) != _request.end()) {
         for (auto it=_request.begin(); it!=_request.end(); it++) {
             if (it->first == msg.request) {
                 return (*it).second(msg);
@@ -183,7 +183,7 @@ void ModuleSlave::_busTask(void *pvParameters)
             }
             case MODULE_REQUEST:
             {
-                RequestMsg_t msg;
+                Module_RequestMsg_t msg;
                 memcpy(msg.byte, frame.data, sizeof(msg.byte));
                 if (frame.identifier == _id) {
                     msg.data = handleRequest(msg);

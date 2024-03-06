@@ -17,7 +17,7 @@
 
 #include "Global.h"
 #include "ModuleStandalone.h"
-#include "ModuleCommand.h"
+#include "Module.h"
 #include "ModuleMaster.h"
 
 class ModuleControl
@@ -30,7 +30,7 @@ public:
 
     friend class ModuleMaster;
 
-    uint32_t request(RequestMsg_t msg);
+    uint32_t request(Module_RequestMsg_t msg);
 
     void ledOn(LedColor_t color);
     void ledOff(void);

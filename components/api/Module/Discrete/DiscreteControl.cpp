@@ -19,7 +19,7 @@
 
 void DiscreteControl::digitalWrite(DigitalOutputNum_t dout, uint8_t level)
 {
-    RequestMsg_t msg;
+    Module_RequestMsg_t msg;
     msg.request = DIGITAL_WRITE;
     msg.param = (uint16_t)dout;
     msg.data = (uint32_t)level;
@@ -28,7 +28,7 @@ void DiscreteControl::digitalWrite(DigitalOutputNum_t dout, uint8_t level)
 
 void DiscreteControl::analogWrite(DigitalOutputNum_t dout, uint8_t duty)
 {
-    RequestMsg_t msg;
+    Module_RequestMsg_t msg;
     msg.request = ANALOG_WRITE;
     msg.param = (uint16_t)dout;
     msg.data = (uint32_t)duty;
@@ -37,7 +37,7 @@ void DiscreteControl::analogWrite(DigitalOutputNum_t dout, uint8_t duty)
 
 int DiscreteControl::analogRead(AnalogInputNum_t eana)
 {
-    RequestMsg_t msg;
+    Module_RequestMsg_t msg;
     msg.request = ANALOG_READ;
     msg.param = (uint16_t)eana;
     return request(msg);
@@ -45,7 +45,7 @@ int DiscreteControl::analogRead(AnalogInputNum_t eana)
 
 void DiscreteControl::attachInterrupt(DigitalInputNum_t din, IsrCallback_t callback, InterruptMode_t mode)
 {
-    RequestMsg_t msg;
+    Module_RequestMsg_t msg;
     msg.request = ATTACH_INTERRUPT;
     msg.param = (uint16_t)din;
     msg.data = (uint32_t)mode;
@@ -59,7 +59,7 @@ void DiscreteControl::attachInterrupt(DigitalInputNum_t din, IsrCallback_t callb
 
 void DiscreteControl::detachInterrupt(DigitalInputNum_t din)
 {
-    RequestMsg_t msg;
+    Module_RequestMsg_t msg;
     msg.request = DETACH_INTERRUPT;
     msg.param = (uint16_t)din;
     request(msg);

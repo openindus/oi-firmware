@@ -19,7 +19,7 @@
 
 float AnaloglsControl::GetChannelData(analog_channel_t channel, rtd_type_t rtd)
 {
-    RequestMsg_t msg;
+    Module_RequestMsg_t msg;
     uint32_t data;
     float temp;
     msg.request = ANALOG_GET_CHANNEL_DATA;
@@ -31,7 +31,7 @@ float AnaloglsControl::GetChannelData(analog_channel_t channel, rtd_type_t rtd)
 
 void AnaloglsControl::AddThermocouple(analog_channel_t channel, ads1x4s08_voltage_range_t range, float coef)
 {
-    RequestMsg_t msg;
+    Module_RequestMsg_t msg;
     msg.request = ANALOG_ADD_TC;
     msg.param = (uint16_t)((range << 8) | channel);
     memcpy(&msg.data, &coef, sizeof(uint32_t));
@@ -40,7 +40,7 @@ void AnaloglsControl::AddThermocouple(analog_channel_t channel, ads1x4s08_voltag
 
 void AnaloglsControl::AddLevelDetector(analog_channel_t channel)
 {
-    RequestMsg_t msg;
+    Module_RequestMsg_t msg;
     msg.request = ANALOG_ADD_LEVEL_DETECTOR;
     msg.param = (uint8_t)(channel);
     request(msg);
@@ -48,7 +48,7 @@ void AnaloglsControl::AddLevelDetector(analog_channel_t channel)
 
 void AnaloglsControl::AddRTD(analog_channel_t channel, rtd_type_t type, wire_t nb_wire, ads1x4s08_voltage_range_t range, ads1x4s08_idac_mag_t current, float coef)
 {
-    RequestMsg_t msg;
+    Module_RequestMsg_t msg;
     msg.request = ANALOG_ADD_RTD;
     msg.param = (uint32_t)((channel<<16)|(type<<12)|(nb_wire<<8)|(range << 4) | current);
     memcpy(&msg.data, &coef, sizeof(uint32_t));

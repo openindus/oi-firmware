@@ -29,46 +29,46 @@ void StepperSlave::init(void)
     StepperStandalone::init();
     ModuleSlave::init();
 
-    onRequest(DIGITAL_READ, [](RequestMsg_t msg) -> uint32_t { 
+    onRequest(DIGITAL_READ, [](Module_RequestMsg_t msg) -> uint32_t { 
         DigitalInputNum_t din = (DigitalInputNum_t)msg.param;
         return StepperStandalone::digitalRead(din);
     });
 
-    onRequest(ATTACH_INTERRUPT, [](RequestMsg_t msg) -> uint32_t {
+    onRequest(ATTACH_INTERRUPT, [](Module_RequestMsg_t msg) -> uint32_t {
         DigitalInputNum_t din = (DigitalInputNum_t)msg.param;
         InterruptMode_t mode = (InterruptMode_t)msg.data;
         StepperStandalone::attachInterrupt(din, _isrCallback[din], mode);
         return 0;
     });
 
-    onRequest(DETACH_INTERRUPT, [](RequestMsg_t msg) -> uint32_t {
+    onRequest(DETACH_INTERRUPT, [](Module_RequestMsg_t msg) -> uint32_t {
         DigitalInputNum_t din = (DigitalInputNum_t)msg.param;
         StepperStandalone::detachInterrupt(din);
         return 0;
     });
 
-    onRequest(MOTOR_STOP, [](RequestMsg_t msg) -> uint32_t {
+    onRequest(MOTOR_STOP, [](Module_RequestMsg_t msg) -> uint32_t {
         MotorNum_t motor = (MotorNum_t)(msg.param & 0x0000FF);
         MotorStopMode_t stopMode = (MotorStopMode_t)((msg.param & 0x00FF00) >> 8);
         StepperStandalone::stop(motor, stopMode); 
         return 0;
     });
 
-    onRequest(MOTOR_MOVE_ABSOLUTE, [](RequestMsg_t msg) -> uint32_t {
+    onRequest(MOTOR_MOVE_ABSOLUTE, [](Module_RequestMsg_t msg) -> uint32_t {
         MotorNum_t motor = (MotorNum_t)msg.param;
         uint32_t position = msg.data;
         StepperStandalone::moveAbsolute(motor, position); 
         return 0;
     });
 
-    onRequest(MOTOR_MOVE_RELATIVE, [](RequestMsg_t msg) -> uint32_t {
+    onRequest(MOTOR_MOVE_RELATIVE, [](Module_RequestMsg_t msg) -> uint32_t {
         MotorNum_t motor = (MotorNum_t)msg.param;
         uint32_t position = msg.data;
         StepperStandalone::moveRelative(motor, position); 
         return 0;
     });
 
-    onRequest(MOTOR_RUN, [](RequestMsg_t msg) -> uint32_t {
+    onRequest(MOTOR_RUN, [](Module_RequestMsg_t msg) -> uint32_t {
         MotorNum_t motor = (MotorNum_t)(msg.param & 0x0000FF);
         MotorDirection_t direction = (MotorDirection_t)((msg.param & 0x00FF00) >> 8);
         uint32_t data = msg.data;
@@ -78,12 +78,12 @@ void StepperSlave::init(void)
         return 0;
     });
 
-    onRequest(MOTOR_IS_RUNNING, [](RequestMsg_t msg) -> uint32_t {
+    onRequest(MOTOR_IS_RUNNING, [](Module_RequestMsg_t msg) -> uint32_t {
         MotorNum_t motor = (MotorNum_t)msg.param;
         return (uint32_t)StepperStandalone::isRunning(motor); 
     });
 
-    onRequest(MOTOR_HOMING, [](RequestMsg_t msg) -> uint32_t {
+    onRequest(MOTOR_HOMING, [](Module_RequestMsg_t msg) -> uint32_t {
         MotorNum_t motor = (MotorNum_t)msg.param;
         uint32_t data = msg.data;
         float speed = 0;
@@ -92,7 +92,7 @@ void StepperSlave::init(void)
         return 0;
     });
 
-    onRequest(MOTOR_SET_LIMIT_SWITCH, [](RequestMsg_t msg) -> uint32_t {
+    onRequest(MOTOR_SET_LIMIT_SWITCH, [](Module_RequestMsg_t msg) -> uint32_t {
         MotorNum_t motor = (MotorNum_t)(msg.param & 0x0000FF);
         DigitalInputNum_t din = (DigitalInputNum_t)((msg.param & 0x00FF00) >> 8);
         DigitalInputLogic_t logic = (DigitalInputLogic_t)msg.data;
@@ -100,14 +100,14 @@ void StepperSlave::init(void)
         return 0;
     });
 
-    onRequest(MOTOR_SET_STEP_RESOLUTION, [](RequestMsg_t msg) -> uint32_t {
+    onRequest(MOTOR_SET_STEP_RESOLUTION, [](Module_RequestMsg_t msg) -> uint32_t {
         MotorNum_t motor = (MotorNum_t)msg.param;
         MotorStepResolution_t res = (MotorStepResolution_t)msg.data;
         StepperStandalone::setStepResolution(motor, res); 
         return 0;
     });
 
-    onRequest(MOTOR_SET_MAX_SPEED, [](RequestMsg_t msg) -> uint32_t {
+    onRequest(MOTOR_SET_MAX_SPEED, [](Module_RequestMsg_t msg) -> uint32_t {
         MotorNum_t motor = (MotorNum_t)msg.param;
         uint32_t data = msg.data;
         float speed = 0;
@@ -116,7 +116,7 @@ void StepperSlave::init(void)
         return 0;
     });
 
-    onRequest(MOTOR_SET_MIN_SPEED, [](RequestMsg_t msg) -> uint32_t {
+    onRequest(MOTOR_SET_MIN_SPEED, [](Module_RequestMsg_t msg) -> uint32_t {
         MotorNum_t motor = (MotorNum_t)msg.param;
         uint32_t data = msg.data;
         float speed = 0;
@@ -125,7 +125,7 @@ void StepperSlave::init(void)
         return 0;
     });
 
-    onRequest(MOTOR_SET_FULL_STEP_SPEED, [](RequestMsg_t msg) -> uint32_t {
+    onRequest(MOTOR_SET_FULL_STEP_SPEED, [](Module_RequestMsg_t msg) -> uint32_t {
         MotorNum_t motor = (MotorNum_t)msg.param;
         uint32_t data = msg.data;
         float speed = 0;
@@ -134,7 +134,7 @@ void StepperSlave::init(void)
         return 0;
     });
 
-    onRequest(MOTOR_SET_ACCELERATION, [](RequestMsg_t msg) -> uint32_t {
+    onRequest(MOTOR_SET_ACCELERATION, [](Module_RequestMsg_t msg) -> uint32_t {
         MotorNum_t motor = (MotorNum_t)msg.param;
         uint32_t data = msg.data;
         float acc = 0;
@@ -143,7 +143,7 @@ void StepperSlave::init(void)
         return 0;
     });
 
-    onRequest(MOTOR_SET_DECELERATION, [](RequestMsg_t msg) -> uint32_t {
+    onRequest(MOTOR_SET_DECELERATION, [](Module_RequestMsg_t msg) -> uint32_t {
         MotorNum_t motor = (MotorNum_t)msg.param;
         uint32_t data = msg.data;
         float dec = 0;
@@ -152,7 +152,7 @@ void StepperSlave::init(void)
         return 0;
     });
 
-    onRequest(MOTOR_GET_POSITION, [](RequestMsg_t msg) -> uint32_t {
+    onRequest(MOTOR_GET_POSITION, [](Module_RequestMsg_t msg) -> uint32_t {
         MotorNum_t motor = (MotorNum_t)msg.param;
         int32_t position = StepperStandalone::getPosition(motor); 
         uint32_t data = 0;
@@ -160,7 +160,7 @@ void StepperSlave::init(void)
         return data;
     });
 
-    onRequest(MOTOR_GET_SPEED, [](RequestMsg_t msg) -> uint32_t {
+    onRequest(MOTOR_GET_SPEED, [](Module_RequestMsg_t msg) -> uint32_t {
         MotorNum_t motor = (MotorNum_t)msg.param;
         float speed = StepperStandalone::getSpeed(motor); 
         uint32_t data = 0;
@@ -168,7 +168,7 @@ void StepperSlave::init(void)
         return data;
     });
 
-    onRequest(MOTOR_RESET_HOME_POSITION, [](RequestMsg_t msg) -> uint32_t {
+    onRequest(MOTOR_RESET_HOME_POSITION, [](Module_RequestMsg_t msg) -> uint32_t {
         MotorNum_t motor = (MotorNum_t)msg.param;
         StepperStandalone::resetHomePosition(motor); 
         return 0;

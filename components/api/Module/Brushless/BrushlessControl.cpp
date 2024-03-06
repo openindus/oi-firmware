@@ -19,7 +19,7 @@
 
 void BrushlessControl::setSpeed(uint32_t duty_cycle)
 {
-    RequestMsg_t msg;
+    Module_RequestMsg_t msg;
     msg.request = MOTOR_SET_SPEED;
     msg.data = (uint32_t)duty_cycle;
     request(msg);
@@ -27,7 +27,7 @@ void BrushlessControl::setSpeed(uint32_t duty_cycle)
 
 void BrushlessControl::setBrake(bool brake)
 {
-    RequestMsg_t msg;
+    Module_RequestMsg_t msg;
     msg.request = MOTOR_SET_BRAKE;
     msg.data = (bool)brake;
     request(msg);
@@ -35,7 +35,7 @@ void BrushlessControl::setBrake(bool brake)
 
 void BrushlessControl::setDirection(bool direction)
 {
-    RequestMsg_t msg;
+    Module_RequestMsg_t msg;
     msg.request = MOTOR_SET_DIRECTION;
     msg.data = (bool)direction;
     request(msg);
@@ -45,7 +45,7 @@ float BrushlessControl::getSpeed(void)
 {
     uint32_t data;
     float speed;
-    RequestMsg_t msg;
+    Module_RequestMsg_t msg;
     msg.request = MOTOR_GET_SPEED;
     data = request(msg);
     memcpy(&speed, &data, sizeof(float));
@@ -56,7 +56,7 @@ float BrushlessControl::getSpeedEncoder(void)
 {
     uint32_t data;
     float speed;
-    RequestMsg_t msg;
+    Module_RequestMsg_t msg;
     msg.request = ENCODER_GET_SPEED;
     data = request(msg);
     memcpy(&speed, &data, sizeof(float));
@@ -65,7 +65,7 @@ float BrushlessControl::getSpeedEncoder(void)
 
 bool BrushlessControl::getDirection(void)
 {
-    RequestMsg_t msg;
+    Module_RequestMsg_t msg;
     msg.request = ENCODER_GET_DIRECTION;
     return request(msg);
 }
@@ -74,7 +74,7 @@ float BrushlessControl::getPosition(void)
 {
     uint32_t data;
     float position;
-    RequestMsg_t msg;
+    Module_RequestMsg_t msg;
     msg.request = ENCODER_GET_POSITION;
     data = request(msg);
     memcpy(&position, &data, sizeof(float));

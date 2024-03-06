@@ -19,7 +19,7 @@
 
 static const char MODULE_TAG[] = "Module";
 
-std::map<std::pair<Event_t,uint16_t>, EventCallback_t> ModuleMaster::_event;
+std::map<std::pair<Module_Event_t,uint16_t>, Module_EventCallback_t> ModuleMaster::_event;
 std::vector<uint16_t> ModuleMaster::_ids;
 
 void ModuleMaster::init(void)
@@ -103,7 +103,7 @@ bool ModuleMaster::ping(uint32_t num)
     return (BusRs::requestFrom(&frame, pdMS_TO_TICKS(10)) == 0);
 }
 
-void ModuleMaster::onEvent(Event_t event, uint16_t id, EventCallback_t callback)
+void ModuleMaster::onEvent(Module_Event_t event, uint16_t id, Module_EventCallback_t callback)
 {
     _event.insert({
         std::make_pair(event, id),
@@ -111,7 +111,7 @@ void ModuleMaster::onEvent(Event_t event, uint16_t id, EventCallback_t callback)
     });
 }
 
-void ModuleMaster::handleEvent(Event_t event, uint16_t id, int num)
+void ModuleMaster::handleEvent(Module_Event_t event, uint16_t id, int num)
 {
     if (_event.find(std::make_pair(event, id)) != _event.end()) {
         for (auto it=_event.begin(); it!=_event.end(); it++) {
@@ -136,7 +136,7 @@ void ModuleMaster::_busTask(void *pvParameters)
             switch (frame.command)
             {
             case MODULE_EVENT:
-                handleEvent((Event_t)frame.type, id, (int)frame.data);
+                handleEvent((Module_Event_t)frame.type, id, (int)frame.data);
                 break;
             case MODULE_AUTO_ID:
                 _ids.push_back((uint16_t)id);

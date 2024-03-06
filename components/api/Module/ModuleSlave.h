@@ -17,7 +17,7 @@
 
 #include "Global.h"
 #include "ModuleStandalone.h"
-#include "ModuleCommand.h"
+#include "Module.h"
 
 class ModuleSlave
 {
@@ -25,14 +25,14 @@ public:
 
     static void init(void);
 
-    static void event(Event_t event, int num);
-    static void onRequest(Request_t request, RequestCallback_t callback);
-    static uint32_t handleRequest(RequestMsg_t msg);
+    static void event(Module_Event_t event, int num);
+    static void onRequest(Module_Request_t request, Module_RequestCallback_t callback);
+    static uint32_t handleRequest(Module_RequestMsg_t msg);
 
 private:
 
     static uint16_t _id;
-    static std::map<Request_t, RequestCallback_t> _request;
+    static std::map<Module_Request_t, Module_RequestCallback_t> _request;
 
     static void _busTask(void *pvParameters);
 };

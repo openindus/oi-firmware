@@ -19,7 +19,7 @@
 
 int StepperControl::digitalRead(DigitalInputNum_t din) 
 {
-    RequestMsg_t msg;
+    Module_RequestMsg_t msg;
     msg.request = DIGITAL_READ;
     msg.param = (uint16_t)din;
     return (int)request(msg);
@@ -27,7 +27,7 @@ int StepperControl::digitalRead(DigitalInputNum_t din)
 
 void StepperControl::attachInterrupt(DigitalInputNum_t din, IsrCallback_t callback, InterruptMode_t mode)
 {
-    RequestMsg_t msg;
+    Module_RequestMsg_t msg;
     msg.request = ATTACH_INTERRUPT;
     msg.param = (uint16_t)din;
     msg.data = (uint32_t)mode;
@@ -41,7 +41,7 @@ void StepperControl::attachInterrupt(DigitalInputNum_t din, IsrCallback_t callba
 
 void StepperControl::detachInterrupt(DigitalInputNum_t din)
 {
-    RequestMsg_t msg;
+    Module_RequestMsg_t msg;
     msg.request = DETACH_INTERRUPT;
     msg.param = (uint16_t)din;
     request(msg);
@@ -49,7 +49,7 @@ void StepperControl::detachInterrupt(DigitalInputNum_t din)
 
 void StepperControl::setLimitSwitch(MotorNum_t motor, DigitalInputNum_t din, DigitalInputLogic_t logic)
 {
-    RequestMsg_t msg;
+    Module_RequestMsg_t msg;
     msg.request = MOTOR_SET_LIMIT_SWITCH;
     msg.param = (uint16_t)((din << 8) | motor);
     msg.data = (uint32_t)logic;
@@ -58,7 +58,7 @@ void StepperControl::setLimitSwitch(MotorNum_t motor, DigitalInputNum_t din, Dig
 
 void StepperControl::setStepResolution(MotorNum_t motor, MotorStepResolution_t res)
 {
-    RequestMsg_t msg;
+    Module_RequestMsg_t msg;
     msg.request = MOTOR_SET_STEP_RESOLUTION;
     msg.param = (uint16_t)motor;
     msg.data = (uint32_t)res;
@@ -67,7 +67,7 @@ void StepperControl::setStepResolution(MotorNum_t motor, MotorStepResolution_t r
 
 void StepperControl::setMaxSpeed(MotorNum_t motor, float speed)
 {
-    RequestMsg_t msg;
+    Module_RequestMsg_t msg;
     msg.request = MOTOR_SET_MAX_SPEED;
     msg.param = (uint16_t)motor;
     memcpy(&msg.data, &speed, sizeof(uint32_t));
@@ -76,7 +76,7 @@ void StepperControl::setMaxSpeed(MotorNum_t motor, float speed)
 
 void StepperControl::setMinSpeed(MotorNum_t motor, float speed)
 {
-    RequestMsg_t msg;
+    Module_RequestMsg_t msg;
     msg.request = MOTOR_SET_MIN_SPEED;
     msg.param = (uint16_t)motor;
     memcpy(&msg.data, &speed, sizeof(uint32_t));
@@ -85,7 +85,7 @@ void StepperControl::setMinSpeed(MotorNum_t motor, float speed)
 
 void StepperControl::setFullStepSpeed(MotorNum_t motor, float speed)
 {
-    RequestMsg_t msg;
+    Module_RequestMsg_t msg;
     msg.request = MOTOR_SET_FULL_STEP_SPEED;
     msg.param = (uint16_t)motor;
     memcpy(&msg.data, &speed, sizeof(uint32_t));
@@ -94,7 +94,7 @@ void StepperControl::setFullStepSpeed(MotorNum_t motor, float speed)
 
 void StepperControl::setAcceleration(MotorNum_t motor, float acc)
 {
-    RequestMsg_t msg;
+    Module_RequestMsg_t msg;
     msg.request = MOTOR_SET_ACCELERATION;
     msg.param = (uint16_t)motor;
     memcpy(&msg.data, &acc, sizeof(uint32_t));
@@ -103,7 +103,7 @@ void StepperControl::setAcceleration(MotorNum_t motor, float acc)
 
 void StepperControl::setDeceleration(MotorNum_t motor, float dec)
 {
-    RequestMsg_t msg;
+    Module_RequestMsg_t msg;
     msg.request = MOTOR_SET_DECELERATION;
     msg.param = (uint16_t)motor;
     memcpy(&msg.data, &dec, sizeof(uint32_t));
@@ -114,7 +114,7 @@ int32_t StepperControl::getPosition(MotorNum_t motor)
 {
     uint32_t data;
     int32_t position;
-    RequestMsg_t msg;
+    Module_RequestMsg_t msg;
     msg.request = MOTOR_GET_POSITION;
     msg.param = (uint16_t)motor;
     data = request(msg);
@@ -126,7 +126,7 @@ float StepperControl::getSpeed(MotorNum_t motor)
 {
     uint32_t data;
     float speed;
-    RequestMsg_t msg;
+    Module_RequestMsg_t msg;
     msg.request = MOTOR_GET_SPEED;
     msg.param = (uint16_t)motor;
     data = request(msg);
@@ -136,7 +136,7 @@ float StepperControl::getSpeed(MotorNum_t motor)
 
 void StepperControl::resetHomePosition(MotorNum_t motor)
 {
-    RequestMsg_t msg;
+    Module_RequestMsg_t msg;
     msg.request = MOTOR_RESET_HOME_POSITION;
     msg.param = (uint16_t)motor;
     request(msg);
@@ -144,7 +144,7 @@ void StepperControl::resetHomePosition(MotorNum_t motor)
 
 void StepperControl::stop(MotorNum_t motor, MotorStopMode_t mode)
 {
-    RequestMsg_t msg;
+    Module_RequestMsg_t msg;
     msg.request = MOTOR_STOP;
     msg.param = (uint16_t)motor;
     msg.data = (uint32_t)mode;
@@ -153,7 +153,7 @@ void StepperControl::stop(MotorNum_t motor, MotorStopMode_t mode)
 
 void StepperControl::moveAbsolute(MotorNum_t motor, uint32_t position)
 {
-    RequestMsg_t msg;
+    Module_RequestMsg_t msg;
     msg.request = MOTOR_MOVE_ABSOLUTE;
     msg.param = (uint16_t)motor;
     msg.data = (uint32_t)position;
@@ -162,7 +162,7 @@ void StepperControl::moveAbsolute(MotorNum_t motor, uint32_t position)
 
 void StepperControl::moveRelative(MotorNum_t motor, int32_t position)
 {
-    RequestMsg_t msg;
+    Module_RequestMsg_t msg;
     msg.request = MOTOR_MOVE_RELATIVE;
     msg.param = (uint16_t)motor;
     msg.data = (uint32_t)position;
@@ -171,7 +171,7 @@ void StepperControl::moveRelative(MotorNum_t motor, int32_t position)
 
 void StepperControl::run(MotorNum_t motor, MotorDirection_t direction, float speed)
 {
-    RequestMsg_t msg;
+    Module_RequestMsg_t msg;
     msg.request = MOTOR_RUN;
     msg.param = (uint16_t)((direction << 8) | motor);
     memcpy(&msg.data, &speed, sizeof(uint32_t));
@@ -180,7 +180,7 @@ void StepperControl::run(MotorNum_t motor, MotorDirection_t direction, float spe
 
 bool StepperControl::isRunning(MotorNum_t motor)
 {
-    RequestMsg_t msg;
+    Module_RequestMsg_t msg;
     msg.request = MOTOR_IS_RUNNING;
     msg.param = (uint16_t)motor;
     return (bool)request(msg);
@@ -188,7 +188,7 @@ bool StepperControl::isRunning(MotorNum_t motor)
 
 void StepperControl::homing(MotorNum_t motor, float speed)
 {
-    RequestMsg_t msg;
+    Module_RequestMsg_t msg;
     msg.request = MOTOR_HOMING;
     msg.param = (uint16_t)motor;
     memcpy(&msg.data, &speed, sizeof(uint32_t));

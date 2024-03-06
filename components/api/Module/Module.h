@@ -17,7 +17,7 @@
 
 #include "Global.h"
 
-typedef enum {
+enum Module_Command_e {
     MODULE_RESTART                  = 0x01,
     MODULE_PING                     = 0x02,
     MODULE_AUTO_ID                  = 0x03,
@@ -42,7 +42,7 @@ typedef enum {
     MODULE_EVENT                    = 0x16,
     MODULE_BUS_ID                   = 0x17,
     MODULE_LED_STATE                = 0x18,
-} ModuleCommand_t;
+};
 
 typedef enum {
     /* DIGITAL [0x30-0x3F] */
@@ -93,11 +93,11 @@ typedef enum {
     ENCODER_GET_POSITION            = 0x82,
     ENCODER_GET_SPEED               = 0x83,
     
-} Request_t;
+} Module_Request_t;
 
 typedef enum {
     DIGITAL_INTERRUPT               = 0x00,
-} Event_t;
+} Module_Event_t;
 
 typedef struct {
     union {
@@ -110,7 +110,7 @@ typedef struct {
             uint32_t data;
         };
     };
-} RequestMsg_t;
+} Module_RequestMsg_t;
 
-typedef std::function<uint32_t(RequestMsg_t msg)> RequestCallback_t;
-typedef std::function<void(uint8_t intr)> EventCallback_t;
+typedef std::function<uint32_t(Module_RequestMsg_t msg)> Module_RequestCallback_t;
+typedef std::function<void(uint8_t intr)> Module_EventCallback_t;
