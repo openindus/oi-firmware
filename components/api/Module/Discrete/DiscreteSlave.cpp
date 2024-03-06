@@ -25,8 +25,7 @@ IsrCallback_t DiscreteSlave::_isrCallback[] = {
 };
 
 void DiscreteSlave::init(void)
-{    
-    DiscreteStandalone::init();
+{
     ModuleSlave::init();
     
     onRequest(DIGITAL_WRITE, [](Module_RequestMsg_t msg) -> uint32_t {

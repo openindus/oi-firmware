@@ -6,7 +6,7 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file ConsoleStepper.h
+ * @file StepperCLI.h
  * @brief OpenIndus console
  *
  * For more information on OpenIndus:
@@ -20,11 +20,11 @@
 
 #if defined(OI_STEPPER) || defined(OI_STEPPER_VE)
 
-class ConsoleStepper
+class StepperCLI
 {
 public:
 
-    static void registerCommand(void);
+    static void init(void);
 
 private:
 

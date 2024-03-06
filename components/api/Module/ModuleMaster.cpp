@@ -87,7 +87,7 @@ void ModuleMaster::program(uint32_t num)
 {
     UsbConsole::end(); // Do not perform in the task
     xTaskCreate(&_programmingTask, "Module programming task", 4096, (void*)num, 1, NULL);
-    MODULE_PROGRAMMING();
+    ModuleStandalone::ledBlink(LED_WHITE, 1000); // Programming mode
 }
 
 bool ModuleMaster::ping(uint32_t num) 
@@ -147,7 +147,7 @@ void ModuleMaster::_busTask(void *pvParameters)
                 break;
             }
         } else {
-            MODULE_ERROR();
+            ModuleStandalone::ledBlink(LED_RED, 1000); // Error
         }
     }
 }
@@ -171,7 +171,7 @@ void ModuleMaster::_programmingTask(void *pvParameters)
     frame.length = 4;
     memcpy(frame.data, &num, 4); // Serial number
     if (BusRs::requestFrom(&frame, pdMS_TO_TICKS(100)) < 0) {
-        MODULE_ERROR();
+        ModuleStandalone::ledBlink(LED_RED, 1000); // Error
     } else {
         memcpy(&id, frame.data, 2);
         frame.identifier = id;
@@ -185,14 +185,14 @@ void ModuleMaster::_programmingTask(void *pvParameters)
     frame.ack = true;
     frame.length = 0;
     if (BusRs::requestFrom(&frame, pdMS_TO_TICKS(5000)) < 0) {
-        MODULE_ERROR();
+        ModuleStandalone::ledBlink(LED_RED, 1000); // Error
     }
 
     UsbSerialProtocol::begin();
 
     while (1) {
         if (UsbSerialProtocol::read(&packet) < 0) {
-            MODULE_ERROR();
+            ModuleStandalone::ledBlink(LED_RED, 1000); // Error
         } else {
             switch (packet.command)
             {
@@ -209,7 +209,7 @@ void ModuleMaster::_programmingTask(void *pvParameters)
                     frame.seq_num = sequence;
                     memcpy(frame.data, &packet.data[sequence*1024+16], 1024); // data
                     if (BusRs::requestFrom(&frame, pdMS_TO_TICKS(100)) < 0) {
-                        MODULE_ERROR();
+                        ModuleStandalone::ledBlink(LED_RED, 1000); // Error
                     }
                     sequence++;
                 }
@@ -223,7 +223,7 @@ void ModuleMaster::_programmingTask(void *pvParameters)
                     frame.seq_num = sequence;
                     memcpy(frame.data, &packet.data[sequence*1024+16], packet.size%1024); // data
                     if (BusRs::requestFrom(&frame, pdMS_TO_TICKS(100)) < 0) {
-                        MODULE_ERROR();
+                        ModuleStandalone::ledBlink(LED_RED, 1000); // Error
                     }
                 }                
                 packet.direction = 1;
@@ -251,7 +251,7 @@ void ModuleMaster::_programmingTask(void *pvParameters)
                 frame.length = 4;
                 memcpy(frame.data, packet.data, 4); // addr
                 if (BusRs::requestFrom(&frame, pdMS_TO_TICKS(200)) < 0) {
-                    MODULE_ERROR();
+                    ModuleStandalone::ledBlink(LED_RED, 1000); // Error
                 } else {
                     packet.direction = 1;
                     packet.size = 4;
@@ -270,7 +270,7 @@ void ModuleMaster::_programmingTask(void *pvParameters)
                 frame.length = 4;
                 memcpy(frame.data, &packet.data[4], 4); // flash size
                 if (BusRs::requestFrom(&frame, pdMS_TO_TICKS(500)) < 0) {
-                    MODULE_ERROR();
+                    ModuleStandalone::ledBlink(LED_RED, 1000); // Error
                 } else {
                     packet.direction = 1;
                     packet.size = 18;

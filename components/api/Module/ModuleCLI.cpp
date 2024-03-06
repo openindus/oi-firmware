@@ -6,16 +6,16 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file ConsoleModule.h
+ * @file ModuleCLI.h
  * @brief OpenIndus console
  *
  * For more information on OpenIndus:
  * @see https://openindus.com
  */
 
-#include "ConsoleModule.h"
+#include "ModuleCLI.h"
 
-void ConsoleModule::registerCli(void)
+void ModuleCLI::init(void)
 {
     _registerSetBoardInfo();
     _registerGetBoardInfo();
@@ -35,7 +35,7 @@ static int restart(int argc, char **argv)
     return 0;
 }
 
-void ConsoleModule::_registerRestart(void)
+void ModuleCLI::_registerRestart(void)
 {
     const esp_console_cmd_t cmd = {
         .command = "restart",
@@ -75,7 +75,7 @@ static int setBoardInfo(int argc, char **argv)
     return 0;
 }
 
-void ConsoleModule::_registerSetBoardInfo(void)
+void ModuleCLI::_registerSetBoardInfo(void)
 {
     setBoardInfoArgs.boardType = arg_int0("t", "type", "TYPE", "Board type");
     setBoardInfoArgs.serialNum = arg_int0("n", "serial-num", "NUM", "Serial number");
@@ -127,7 +127,7 @@ static int getBoardInfo(int argc, char **argv)
     return 0;
 }
 
-void ConsoleModule::_registerGetBoardInfo(void)
+void ModuleCLI::_registerGetBoardInfo(void)
 {
     getBoardInfoArgs.boardType = arg_lit0(NULL, "type", "Board type");
     getBoardInfoArgs.serialNum = arg_lit0(NULL, "serial-num","Serial number");
@@ -180,7 +180,7 @@ static int led(int argc, char **argv)
     return 0;
 }
 
-void ConsoleModule::_registerLed(void)
+void ModuleCLI::_registerLed(void)
 {
     ledArgs.state = arg_str1(NULL, NULL, "<STATE>", "[on, off, blink]");
     ledArgs.color = arg_int0(NULL, NULL, "color", "[0: None, 1: red, 2: green, 3: yellow, 4: blue, 5: purple, 6: cyan, 7; white]");
@@ -240,7 +240,7 @@ static int log(int argc, char **argv)
     return 0;
 }
 
-void ConsoleModule::_registerLog(void)
+void ModuleCLI::_registerLog(void)
 {
     logArgs.level = arg_str1(NULL, NULL, "<LEVEL>", "[NONE, ERROR, WARN, INFO, DEBUG, VERBOSE]");
     logArgs.tag = arg_str0(NULL, NULL, "<TAG>", "specific tag");
@@ -264,7 +264,7 @@ static int readId(int argc, char **argv)
     return 0;
 }
 
-void ConsoleModule::_registerReadId(void)
+void ModuleCLI::_registerReadId(void)
 {
     const esp_console_cmd_t cmd = {
         .command = "read-id",
@@ -296,7 +296,7 @@ static int writeSync(int argc, char **argv)
     return 0;
 }
 
-void ConsoleModule::_registerWriteSync(void)
+void ModuleCLI::_registerWriteSync(void)
 {
     writeSyncArgs.level = arg_int1(NULL, NULL, "<LEVEL>", "0 = LOW, 1 = HIGH");
     writeSyncArgs.end = arg_end(1);
@@ -321,7 +321,7 @@ static int readSync(int argc, char **argv)
     return 0;
 }
 
-void ConsoleModule::_registerReadSync(void)
+void ModuleCLI::_registerReadSync(void)
 {
     const esp_console_cmd_t cmd = {
         .command = "read-sync",

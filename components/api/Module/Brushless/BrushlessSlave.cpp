@@ -20,7 +20,6 @@
 
 void BrushlessSlave::init(void)
 {
-    BrushlessStandalone::init();
     ModuleSlave::init();
 
     onRequest(MOTOR_SET_SPEED, [](Module_RequestMsg_t msg) -> uint32_t {

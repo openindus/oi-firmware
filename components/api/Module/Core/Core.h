@@ -15,15 +15,4 @@
 
 #pragma once
 
-#include "CoreStandalone.h"
-#include "CoreMaster.h"
-
-#if defined(OI_CORE)
-
-#if defined(MODULE_STANDALONE)
-class Core : public CoreStandalone {};
-#else 
-class Core : public CoreMaster {};
-#endif
-
-#endif
+#include "Global.h"

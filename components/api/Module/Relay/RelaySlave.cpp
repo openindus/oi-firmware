@@ -19,7 +19,6 @@
 
 void RelaySlave::init(void)
 {
-    RelayStandalone::init();
     ModuleSlave::init();
 
     onRequest(DIGITAL_WRITE, [](Module_RequestMsg_t msg) -> uint32_t {

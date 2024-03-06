@@ -16,22 +16,53 @@
 #pragma once
 
 #include "Global.h"
-#include "ConsoleCore.h"
-#include "ConsoleDiscrete.h"
-#include "ConsoleMaster.h"
-#include "ConsoleModule.h"
-#include "ConsoleStepper.h"
-#include "MotorStepperParamCLI.h"
-#include "Core.h"
-#include "Discrete.h"
-#include "Stepper.h"
+
+/* Module */
+#include "ModuleStandalone.h"
+#include "ModuleSlave.h"
+#include "ModuleControl.h"
+#include "ModuleMaster.h"
+#include "ModuleCLI.h"
+#include "ModuleMasterCLI.h"
+
+/* Core */
+#include "CoreStandalone.h"
+#include "CoreMaster.h"
+#include "CoreCLI.h"
+
+/* Discrete */
+#include "DiscreteStandalone.h"
+#include "DiscreteSlave.h"
+#include "DiscreteControl.h"
+#include "DiscreteCLI.h"
+
+/* Mixed */
 #include "MixedStandalone.h"
 #include "MixedSlave.h"
 #include "MixedControl.h"
 #include "MixedCLI.h"
-#include "Relay.h"
-#include "Brushless.h"
-#include "Analogls.h"
+
+/* Stepper */
+#include "StepperStandalone.h"
+#include "StepperSlave.h"
+#include "StepperControl.h"
+#include "StepperCLI.h"
+#include "StepperParamCLI.h"
+
+/* Relay */
+#include "RelayStandalone.h"
+#include "RelaySlave.h"
+#include "RelayControl.h"
+
+/* Brushless */
+#include "BrushlessStandalone.h"
+#include "BrushlessSlave.h"
+#include "BrushlessControl.h"
+
+/* AnalogLs*/
+#include "AnaloglsStandalone.h"
+#include "AnaloglsSlave.h"
+#include "AnaloglsControl.h"
 
 void setup(void);
 void loop(void);

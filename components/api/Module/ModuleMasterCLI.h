@@ -6,7 +6,7 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file ConsoleMaster.h
+ * @file ModuleMasterCLI.h
  * @brief OpenIndus console
  *
  * For more information on OpenIndus:
@@ -21,11 +21,11 @@
 
 #if defined(MODULE_MASTER)
 
-class ConsoleMaster
+class ModuleMasterCLI
 {
 public:
 
-    static void registerCli(void);
+    static void init(void);
 
 private:
 

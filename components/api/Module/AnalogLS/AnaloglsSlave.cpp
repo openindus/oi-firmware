@@ -20,7 +20,6 @@
 
 void AnaloglsSlave::init(void)
 {
-    AnaloglsStandalone::init();
     ModuleSlave::init();
 
     onRequest(ANALOG_ADD_VOLTMETER,[](Module_RequestMsg_t msg) -> uint32_t {

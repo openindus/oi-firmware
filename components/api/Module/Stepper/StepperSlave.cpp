@@ -26,7 +26,6 @@ IsrCallback_t StepperSlave::_isrCallback[] = {
 
 void StepperSlave::init(void)
 {
-    StepperStandalone::init();
     ModuleSlave::init();
 
     onRequest(DIGITAL_READ, [](Module_RequestMsg_t msg) -> uint32_t { 

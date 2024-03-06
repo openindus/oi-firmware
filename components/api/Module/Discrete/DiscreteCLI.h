@@ -5,8 +5,8 @@
  *
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
- *
- * @file ConsoleCore.h
+ * 
+ * @file DiscreteCLI.h
  * @brief OpenIndus console
  *
  * For more information on OpenIndus:
@@ -16,24 +16,22 @@
 #pragma once
 
 #include "Global.h"
-#include "CoreStandalone.h"
+#include "DiscreteStandalone.h"
 
-#if defined(OI_CORE)
+#if defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)
 
-class ConsoleCore
+class DiscreteCLI
 {
 public:
 
-    static void registerCli(void);
+    static void init(void);
 
 private:
 
     static void _registerDigitalWrite(void);
     static void _registerDigitalRead(void);
+    static void _registerGetCurrent(void);
     static void _registerAnalogRead(void);
-    static void _registerAnalogReadMillivolts(void);
-    static void _registerGetCurrentLevel(void);
-    static void _registerDate(void);
 
 };
 

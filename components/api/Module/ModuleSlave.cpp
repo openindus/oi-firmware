@@ -82,7 +82,7 @@ void ModuleSlave::_busTask(void *pvParameters)
     frame.data = (uint8_t*)malloc(frame.length);
     while (1) {
         if (BusRs::read(&frame, portMAX_DELAY) < 0) {
-            MODULE_ERROR();
+            ModuleStandalone::ledBlink(LED_RED, 1000); // Error
         } else {
             switch (frame.command)
             {
@@ -108,13 +108,13 @@ void ModuleSlave::_busTask(void *pvParameters)
                 BusCan::Frame_t autoIdFrame;
                 autoIdFrame.command = MODULE_AUTO_ID;
                 if (BusCan::write(&autoIdFrame, _id) == -1)
-                    MODULE_ERROR();
+                    ModuleStandalone::ledBlink(LED_RED, 1000); // Error
                 break;
             }            
             case MODULE_FLASH_LOADER_BEGIN:
             {
                 if (frame.identifier == _id) {
-                    MODULE_PROGRAMMING();
+                    ModuleStandalone::ledBlink(LED_WHITE, 1000); // Programming mode
                     FlashLoader::begin();
                     frame.broadcast = false;
                     frame.direction = 0;
@@ -178,7 +178,7 @@ void ModuleSlave::_busTask(void *pvParameters)
             case MODULE_SET_STATUS:
             {
                 /** @todo: set status */
-                MODULE_PAIRED();
+                ModuleStandalone::ledBlink(LED_GREEN, 1000); // Paired
                 break;
             }
             case MODULE_REQUEST:
