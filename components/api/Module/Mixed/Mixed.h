@@ -66,42 +66,42 @@ public:
     virtual void digitalWrite(DigitalOutputNum_t num, uint8_t level) = 0;
 
     /**
-     * @brief Read a voltage measure on analog pins
-     * 
-     * @param[in] num : Analog input
-     * @return int : Adc raw value
-     */
-    virtual int analogRead(AnalogInputNum_t num) = 0;
-
-    /**
-     * @brief Read a voltage measure on analog pins
-     * 
-     * @param[in] num : Analog input
-     * @return int : Measure in specified units
-     */
-    virtual int analogReadMilliVolts(AnalogInputNum_t num) = 0;
-
-    /**
      * @brief Set AdcMode of the current input
      * 
      * @param[in] num : Analog input
      * @param[in] mode : Voltage or current measurement
      */    
-    virtual void analogReadMode(AnalogInputNum_t num, AdcMode_t mode) = 0;
+    virtual void analogInputMode(AnalogInput_Num_t num, AnalogInput_Mode_t mode) = 0;
 
     /**
      * @brief Set adc resolution measurement
      * 
      * @param[in] res : Adc resolution
      */  
-    virtual void analogReadResolution(AdcResBits_t res) = 0;
+    virtual void analogInputResolution(AnalogInput_Resolution_t res) = 0;
 
     /**
      * @brief Set adc internal reference voltage
      * 
      * @param[in] ref reference value
      */ 
-    virtual void analogReadReference(float ref) = 0;
+    virtual void analogInputReference(float ref) = 0;
+
+    /**
+     * @brief Read a voltage measure on analog pins
+     * 
+     * @param[in] num : Analog input
+     * @return int : Adc raw value
+     */
+    virtual int analogRead(AnalogInput_Num_t num) = 0;
+
+    /**
+     * @brief Read a voltage measure on analog pins
+     * 
+     * @param[in] num : Analog input
+     * @return float : Measure in specified units
+     */
+    virtual float analogReadMilliVolts(AnalogInput_Num_t num) = 0;
 
     /**
      * @brief Configure analog output mode

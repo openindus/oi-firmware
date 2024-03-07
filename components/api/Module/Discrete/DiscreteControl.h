@@ -29,7 +29,7 @@ public:
     void digitalWrite(DigitalOutputNum_t dout, uint8_t level);
     void analogWrite(DigitalOutputNum_t dout, uint8_t duty);
     int digitalRead(DigitalInputNum_t din);
-    int analogRead(AnalogInputNum_t eana);
+    int analogRead(AnalogInput_Num_t eana);
     void attachInterrupt(DigitalInputNum_t din, IsrCallback_t callback, InterruptMode_t mode);
     void detachInterrupt(DigitalInputNum_t din);
 

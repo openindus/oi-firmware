@@ -41,15 +41,32 @@ static const adc1_channel_t _doutAdcChannel[] = {
     MIXED_CHANNEL_DOUT_CURRENT_4
 };
 
+static Ads866x_DeviceConfig_t _adcConfig = {
+    .spi_host = MIXED_SPI_HOST,
+    .spi_freq = MIXED_SPI_FREQ,
+    .spi_pin_cs = MIXED_ADC_PIN_CS,
+    .pin_rst = MIXED_ADC_PIN_RST,
+    .pin_mode = {},
+    .adc_analogs_nb = MIXED_ADC_NB,
+    .adc_res = 12,
+    .adc_mode = {1, 1, 1, 1}
+};
+
 static ad5413_config_t _dacConfig[] = {
     {MIXED_SPI_HOST, MIXED_SPI_FREQ, MIXED_DAC_PIN_SYNC_1, 0, 0},
     {MIXED_SPI_HOST, MIXED_SPI_FREQ, MIXED_DAC_PIN_SYNC_2, 1, 1}
 };
 
-uint32_t _ainToNum[] = {2, 3, 1, 0};
-
 DigitalInput* MixedStandalone::_din = new DigitalInput(_dinGpio, 4);
 DigitalOutput* MixedStandalone::_dout = new DigitalOutput(_doutGpio, _doutAdcChannel, 4);
+
+/* Analog inputs instances */
+AnalogInput* MixedStandalone::_ain[4] = {
+    new AnalogInputAds866x(AIN_3),
+    new AnalogInputAds866x(AIN_4),
+    new AnalogInputAds866x(AIN_2),
+    new AnalogInputAds866x(AIN_1),
+};
 
 /* Analog outputs instances */
 AnalogOutput* MixedStandalone::_aout[2] = {
@@ -88,27 +105,8 @@ int MixedStandalone::init(void)
         ESP_LOGE(TAG, "Init SPI bus error");
     }
 
-    // /* Init AIN */
-    // ESP_LOGI(TAG, "initializing AIN");
-    // Ads866x_DeviceConfig_t ads866xDeviceConfig = {
-    //     .spi_host = MIXED_SPI_HOST,
-    //     .spi_freq = MIXED_SPI_FREQ,
-    //     .spi_pin_cs = MIXED_ADC_PIN_CS,
-    //     .pin_rst = MIXED_ADC_PIN_RST,
-    //     .pin_mode = {MIXED_ADC_PIN_MODE_AIN_1, 
-    //                  MIXED_ADC_PIN_MODE_AIN_2,
-    //                  MIXED_ADC_PIN_MODE_AIN_3,
-    //                  MIXED_ADC_PIN_MODE_AIN_4},
-    //     .adc_analogs_nb = MIXED_ADC_NB,
-    //     .adc_res = MIXED_ADC_DEFAULT_RES_BITS,
-    //     .adc_mode = {ADS866X_VOLTAGE_MODE,
-    //                  ADS866X_VOLTAGE_MODE,
-    //                  ADS866X_VOLTAGE_MODE,
-    //                  ADS866X_VOLTAGE_MODE}
-    // };
-
-    // Ads866x_DeviceConfig(&ads866xDeviceConfig);
-    // Ads866x_Init();
+    /* Initialize analog inputs */
+    AnalogInputAds866x::init(&_adcConfig);
 
     /* Initialize analog outputs */
     _aout[0]->init();
@@ -153,29 +151,45 @@ float MixedStandalone::getCurrent(DigitalOutputNum_t num)
     return _dout->getCurrent(num);
 }
 
-int MixedStandalone::analogRead(AnalogInputNum_t num)
+void MixedStandalone::analogInputMode(AnalogInput_Num_t num, AnalogInput_Mode_t mode)
 {
-    return (int)Ads866x_AnalogRead(_ainToNum[num]);
+    if (num < 4) {
+        _ain[num]->setMode(mode);
+    } else {
+        ESP_LOGE(TAG, "Invalid Analog input num");
+    }    
 }
 
-int MixedStandalone::analogReadMilliVolts(AnalogInputNum_t num)
+void MixedStandalone::analogInputResolution(AnalogInput_Resolution_t res)
 {
-    return (int)Ads866x_AnalogReadUnits(_ainToNum[num], ADS866x_UNITS_MILLIVOLTS);
+    _ain[0]->setResolution(res);
 }
 
-void MixedStandalone::analogReadMode(AnalogInputNum_t num, AdcMode_t mode)
+void MixedStandalone::analogInputReference(float ref)
 {
-    Ads866x_setAdcMode(_ainToNum[num], (Ads866x_AdcMode_t)mode);
+    return _ain[0]->setReference(ref);
 }
 
-void MixedStandalone::analogReadResolution(AdcResBits_t res)
+int MixedStandalone::analogRead(AnalogInput_Num_t num)
 {
-    Ads866x_setAdcResolution((Ads866x_AdcResolutionBits_t)res);
+    int value = 0;
+    if (num < 4) {
+        value = _ain[num]->read();
+    } else {
+        ESP_LOGE(TAG, "Invalid Analog input num");
+    }
+    return value;
 }
 
-void MixedStandalone::analogReadReference(float ref)
+float MixedStandalone::analogReadMilliVolts(AnalogInput_Num_t num)
 {
-    Ads866x_setAnalogReference(ref);
+    float value = 0;
+    if (num < 4) {
+        value = _ain[num]->read(AIN_UNIT_MILLIVOLTS);
+    } else {
+        ESP_LOGE(TAG, "Invalid Analog input num");
+    }
+    return value;
 }
 
 void MixedStandalone::analogOutputMode(AnalogOutput_Num_t num, AnalogOutput_Mode_t mode)

@@ -37,8 +37,8 @@ public:
     static void detachInterrupt(DigitalInputNum_t dinNum);
 
     /* AnalogInput */
-    static int analogRead(AnalogInputNum_t eana);
-    static int analogReadMilliVolts(AnalogInputNum_t eana);
+    static int analogRead(AnalogInput_Num_t eana);
+    static int analogReadMilliVolts(AnalogInput_Num_t eana);
 
 private:
 

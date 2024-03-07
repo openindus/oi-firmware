@@ -154,7 +154,7 @@ static int analogRead(int argc, char **argv)
         return 1;
     }
 
-    AnalogInputNum_t ain = (AnalogInputNum_t)(analogReadArgs.ain->ival[0] - 1);
+    AnalogInput_Num_t ain = (AnalogInput_Num_t)(analogReadArgs.ain->ival[0] - 1);
 
     printf("%d\n", DiscreteStandalone::analogRead(ain));
 

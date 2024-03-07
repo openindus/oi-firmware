@@ -347,7 +347,7 @@ int CoreStandalone::digitalRead(DigitalInputNum_t dinNum)
     return din->digitalRead(dinNum);
 }
 
-int CoreStandalone::analogRead(AnalogInputNum_t ain)
+int CoreStandalone::analogRead(AnalogInput_Num_t ain)
 {
     int adc_reading = 0;
 
@@ -361,7 +361,7 @@ int CoreStandalone::analogRead(AnalogInputNum_t ain)
     return adc_reading;
 }
 
-int CoreStandalone::analogReadMilliVolts(AnalogInputNum_t ain)
+int CoreStandalone::analogReadMilliVolts(AnalogInput_Num_t ain)
 {
     int adc_reading = CoreStandalone::analogRead(ain);
 

@@ -37,11 +37,11 @@ public:
     void detachInterrupt(DigitalInputNum_t num);
 
     /* Analog Input */
-    int analogRead(AnalogInputNum_t num);
-    int analogReadMilliVolts(AnalogInputNum_t num);
-    void analogReadMode(AnalogInputNum_t num, AdcMode_t mode);
-    void analogReadResolution(AdcResBits_t res);
-    void analogReadReference(float ref);
+    void analogInputMode(AnalogInput_Num_t num, AnalogInput_Mode_t mode);
+    void analogInputResolution(AnalogInput_Resolution_t res);
+    void analogInputReference(float ref);
+    int analogRead(AnalogInput_Num_t num);
+    float analogReadMilliVolts(AnalogInput_Num_t num);
 
     /* Analog Output */
     void analogOutputMode(AnalogOutput_Num_t num, AnalogOutput_Mode_t mode);

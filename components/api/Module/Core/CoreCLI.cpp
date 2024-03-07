@@ -119,7 +119,7 @@ static int analogRead(int argc, char **argv)
         return 1;
     }
 
-    AnalogInputNum_t ain = (AnalogInputNum_t)(analogReadArgs.ain->ival[0] - 1);
+    AnalogInput_Num_t ain = (AnalogInput_Num_t)(analogReadArgs.ain->ival[0] - 1);
 
     printf("%d\n", CoreStandalone::analogRead(ain));
 
@@ -152,7 +152,7 @@ static int analogReadMilliVolts(int argc, char **argv)
         return 1;
     }
 
-    AnalogInputNum_t ain = (AnalogInputNum_t)(analogReadArgs.ain->ival[0] - 1);
+    AnalogInput_Num_t ain = (AnalogInput_Num_t)(analogReadArgs.ain->ival[0] - 1);
 
     printf("%f\n", CoreStandalone::analogReadMilliVolts(ain));
 

@@ -35,7 +35,7 @@ void DiscreteControl::analogWrite(DigitalOutputNum_t dout, uint8_t duty)
     request(msg);
 }
 
-int DiscreteControl::analogRead(AnalogInputNum_t eana)
+int DiscreteControl::analogRead(AnalogInput_Num_t eana)
 {
     Module_RequestMsg_t msg;
     msg.request = ANALOG_READ;

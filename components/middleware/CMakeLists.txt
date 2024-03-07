@@ -15,6 +15,7 @@ set(COMPONENT_SRCS
     "Led/Led.cpp"
     "RTClock/RTClock.cpp"
     "Analog/AnalogOutput.cpp"
+    "Analog/AnalogInput.cpp"
 )
 
 set(COMPONENT_INCLUDE_DIRS

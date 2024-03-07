@@ -53,20 +53,20 @@ int MixedSlave::init(void)
     });
 
     onRequest(ANALOG_READ, [](Module_RequestMsg_t msg) -> uint32_t {
-        return _mixed->analogRead((AnalogInputNum_t)msg.param);
+        return _mixed->analogRead((AnalogInput_Num_t)msg.param);
     });
 
     onRequest(ANALOG_READ_MILLIVOLTS, [](Module_RequestMsg_t msg) -> uint32_t { 
-        return _mixed->analogReadMilliVolts((AnalogInputNum_t)msg.param);
+        return _mixed->analogReadMilliVolts((AnalogInput_Num_t)msg.param);
     });
 
     onRequest(ANALOG_READ_MODE, [](Module_RequestMsg_t msg) -> uint32_t { 
-        _mixed->analogReadMode((AnalogInputNum_t)msg.param, (AdcMode_t)msg.data);
+        _mixed->analogInputMode((AnalogInput_Num_t)msg.param, (AnalogInput_Mode_t)msg.data);
         return 0;
     });
 
     onRequest(ANALOG_READ_RESOLUTION, [](Module_RequestMsg_t msg) -> uint32_t { 
-        _mixed->analogReadResolution((AdcResBits_t)msg.data);
+        _mixed->analogInputResolution((AnalogInput_Resolution_t)msg.data);
         return 0;
     });
 
@@ -74,7 +74,7 @@ int MixedSlave::init(void)
         float value;
         uint32_t data = msg.data;
         memcpy(&value, &data, sizeof(float));
-        _mixed->analogReadReference(value);
+        _mixed->analogInputReference(value);
         return 0;
     });
 

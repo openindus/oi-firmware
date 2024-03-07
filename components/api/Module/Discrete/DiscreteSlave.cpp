@@ -48,7 +48,7 @@ void DiscreteSlave::init(void)
     });
 
     onRequest(ANALOG_READ, [](Module_RequestMsg_t msg) -> uint32_t {
-        AnalogInputNum_t ain = (AnalogInputNum_t)msg.param;
+        AnalogInput_Num_t ain = (AnalogInput_Num_t)msg.param;
         return DiscreteStandalone::analogRead(ain);
     });
 

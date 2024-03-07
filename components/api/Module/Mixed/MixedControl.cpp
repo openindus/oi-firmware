@@ -57,23 +57,7 @@ void MixedControl::detachInterrupt(DigitalInputNum_t num)
     request(msg);
 }
 
-int MixedControl::analogRead(AnalogInputNum_t num)
-{
-    Module_RequestMsg_t msg;
-    msg.request = ANALOG_READ;
-    msg.param = (uint16_t)num;
-    return request(msg);
-}
-
-int MixedControl::analogReadMilliVolts(AnalogInputNum_t num)
-{
-    Module_RequestMsg_t msg;
-    msg.request = ANALOG_READ_MILLIVOLTS;
-    msg.param = (uint16_t)num;
-    return request(msg);
-}
-
-void MixedControl::analogReadMode(AnalogInputNum_t num, AdcMode_t mode)
+void MixedControl::analogInputMode(AnalogInput_Num_t num, AnalogInput_Mode_t mode)
 {
     Module_RequestMsg_t msg;
     msg.request = ANALOG_READ_MODE;
@@ -82,7 +66,7 @@ void MixedControl::analogReadMode(AnalogInputNum_t num, AdcMode_t mode)
     request(msg);
 }
 
-void MixedControl::analogReadResolution(AdcResBits_t res)
+void MixedControl::analogInputResolution(AnalogInput_Resolution_t res)
 {
     Module_RequestMsg_t msg;
     msg.request = ANALOG_READ_RESOLUTION;
@@ -90,12 +74,28 @@ void MixedControl::analogReadResolution(AdcResBits_t res)
     request(msg);
 }
 
-void MixedControl::analogReadReference(float ref)
+void MixedControl::analogInputReference(float ref)
 {
     Module_RequestMsg_t msg;
     msg.request = ANALOG_READ_REFERENCE;
     memcpy(&msg.data, &ref, sizeof(uint32_t));
     request(msg);
+}
+
+int MixedControl::analogRead(AnalogInput_Num_t num)
+{
+    Module_RequestMsg_t msg;
+    msg.request = ANALOG_READ;
+    msg.param = (uint16_t)num;
+    return request(msg);
+}
+
+float MixedControl::analogReadMilliVolts(AnalogInput_Num_t num)
+{
+    Module_RequestMsg_t msg;
+    msg.request = ANALOG_READ_MILLIVOLTS;
+    msg.param = (uint16_t)num;
+    return request(msg);
 }
 
 void MixedControl::analogOutputMode(AnalogOutput_Num_t num, AnalogOutput_Mode_t mode)
