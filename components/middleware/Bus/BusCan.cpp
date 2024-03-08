@@ -51,7 +51,7 @@ void BusCan::begin(gpio_num_t txNum, gpio_num_t rxNum)
     ESP_LOGI(BUS_TWAI_TAG, "start twai driver");
     ESP_ERROR_CHECK(twai_start());
 
-    esp_log_level_set(BUS_TWAI_TAG, ESP_LOG_WARN);
+    // esp_log_level_set(BUS_TWAI_TAG, ESP_LOG_WARN);
 }
 
 /**
@@ -79,6 +79,7 @@ void BusCan::end(void)
  */
 int BusCan::write(Frame_t* frame, uint16_t id)
 {
+    esp_err_t err;
     twai_message_t msg = {
         .flags = 0,
         .identifier = id,
@@ -87,7 +88,8 @@ int BusCan::write(Frame_t* frame, uint16_t id)
     };
     memcpy(msg.data, frame, 8);
     xSemaphoreTake(_mutex, portMAX_DELAY);
-    if (twai_transmit(&msg, pdMS_TO_TICKS(100)) != ESP_OK) {
+    err = twai_transmit(&msg, pdMS_TO_TICKS(100)); 
+    if (err != ESP_OK) {
         goto error;
     } else {
         goto succeed;
@@ -95,10 +97,11 @@ int BusCan::write(Frame_t* frame, uint16_t id)
 
 error:
     xSemaphoreGive(_mutex);
+    ESP_LOGE(BUS_TWAI_TAG, "Error in twai_transmit: %s", esp_err_to_name(err));
     return -1;
 succeed:
     xSemaphoreGive(_mutex);
-    ESP_LOGI(BUS_TWAI_TAG, "CMD: 0x%02X | TYPE: 0x%02X | DATA: 0x%08X", frame->command, frame->type, frame->data);
+    ESP_LOGI(BUS_TWAI_TAG, "WRITE - CMD: 0x%02X | TYPE: 0x%02X | DATA: 0x%08X", frame->command, frame->type, frame->data);
     return 0;
 }
 
@@ -112,9 +115,11 @@ succeed:
  */
 int BusCan::read(Frame_t* frame, uint16_t* id, TickType_t timeout)
 {
+    esp_err_t err;
     twai_message_t msg;
     xSemaphoreTake(_mutex, portMAX_DELAY);
-    if (twai_receive(&msg, timeout) != ESP_OK) {
+    err = twai_receive(&msg, timeout);
+    if (err != ESP_OK) {
         goto error;
     } else {
         memcpy(frame, msg.data, sizeof(Frame_t));
@@ -124,9 +129,10 @@ int BusCan::read(Frame_t* frame, uint16_t* id, TickType_t timeout)
 
 error:
     xSemaphoreGive(_mutex);
+    ESP_LOGE(BUS_TWAI_TAG, "Error in twai_receive: %s", esp_err_to_name(err));
     return -1;
 succeed:
     xSemaphoreGive(_mutex);
-    ESP_LOGI(BUS_TWAI_TAG, "CMD: 0x%02X | TYPE: 0x%02X | DATA: 0x%08X", frame->command, frame->type, frame->data);
+    ESP_LOGI(BUS_TWAI_TAG, "RECV - CMD: 0x%02X | TYPE: 0x%02X | DATA: 0x%08X", frame->command, frame->type, frame->data);
     return 0;
 }

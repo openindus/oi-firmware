@@ -41,7 +41,7 @@ const ioex_num_t _dinGpio[] = {
     CORE_IOEX_PIN_DIN_4,
 };
 
-const adc1_channel_t CoreStandalone::_eana[] = {
+const adc1_channel_t _ainChannel[] = {
     CORE_CHANNEL_AIN_1,
     CORE_CHANNEL_AIN_2
 };
@@ -133,7 +133,7 @@ void CoreStandalone::init()
      */
     #if CONFIG_IDF_TARGET_ESP32
     ESP_ERROR_CHECK(adc1_config_width(ADC_WIDTH_BIT_12));
-    ESP_ERROR_CHECK(adc1_config_channel_atten(_eana[0], ADC_ATTEN_11db));
+    ESP_ERROR_CHECK(adc1_config_channel_atten(_ainChannel[0], ADC_ATTEN_11db));
     esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_11db, ADC_WIDTH_BIT_12, 1100, &_adc1Characteristics);
     #endif
 
@@ -235,8 +235,8 @@ void CoreStandalone::init()
      * 
      */
     ESP_ERROR_CHECK(adc1_config_width(ADC_WIDTH_BIT_12));
-    for (auto i: _eana) {
-        ESP_ERROR_CHECK(adc1_config_channel_atten(_eana[i], ADC_ATTEN_DB_11));
+    for (auto i: _ainChannel) {
+        ESP_ERROR_CHECK(adc1_config_channel_atten(_ainChannel[i], ADC_ATTEN_DB_11));
     }
     esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &_adc1Characteristics);
 
@@ -347,13 +347,13 @@ int CoreStandalone::digitalRead(DigitalInputNum_t dinNum)
     return din->digitalRead(dinNum);
 }
 
-int CoreStandalone::analogRead(AnalogInputNum_t ana)
+int CoreStandalone::analogRead(AnalogInputNum_t ain)
 {
     int adc_reading = 0;
 
     for (int i = 0; i < CORE_ADC_NO_OF_SAMPLES; i++)
     {
-        adc_reading += adc1_get_raw(_eana[ana]);
+        adc_reading += adc1_get_raw(_ainChannel[ain]);
     }
 
     adc_reading /= CORE_ADC_NO_OF_SAMPLES;
@@ -361,14 +361,14 @@ int CoreStandalone::analogRead(AnalogInputNum_t ana)
     return adc_reading;
 }
 
-float CoreStandalone::analogReadMilliVolts(AnalogInputNum_t ana)
+int CoreStandalone::analogReadMilliVolts(AnalogInputNum_t ain)
 {
-    int adc_reading = CoreStandalone::analogRead(ana);
+    int adc_reading = CoreStandalone::analogRead(ain);
 
     // Convert adc_reading to voltage in mV
     uint32_t voltage = esp_adc_cal_raw_to_voltage(adc_reading, &_adc1Characteristics);
 
-    return static_cast<float>(voltage * CORE_ADC_REDUCTION_FACTOR);
+    return voltage * CORE_ADC_REDUCTION_FACTOR;
 }
 
 void CoreStandalone::attachInterrupt(DigitalInputNum_t dinNum, IsrCallback_t callback, InterruptMode_t mode, void* arg)

@@ -49,6 +49,8 @@ bool ModuleMaster::autoId(void)
 {
     ESP_LOGI(MODULE_TAG, "Auto ID");
     
+    _ids.clear();
+
     BusRs::Frame_t frame;
     frame.command = MODULE_AUTO_ID;
     frame.identifier = 0;
@@ -71,7 +73,7 @@ bool ModuleMaster::autoId(void)
         return true;
     } else {
         ESP_LOGE(MODULE_TAG, "Number of instantiated modules: %d",  ModuleControl::_instances.size());
-        ESP_LOGE(MODULE_TAG, "Number of IDs receved: %d",  _ids.size());
+        ESP_LOGE(MODULE_TAG, "Number of IDs received: %d",  _ids.size());
         return false;
     }
 }
@@ -119,7 +121,7 @@ void ModuleMaster::handleEvent(Event_t event, uint16_t id, int num)
             }
         }
     } else {
-        ESP_LOGW(MODULE_TAG, "Event does not exist: event=0x%02x, id=%d", event, id);
+        ESP_LOGW(MODULE_TAG, "Event does no  t exist: event=0x%02x, id=%d", event, id);
     }
 }
 

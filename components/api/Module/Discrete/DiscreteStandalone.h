@@ -44,6 +44,7 @@ private:
 
     static DigitalInput* din;
     static DigitalOutput* dout;
+    static esp_adc_cal_characteristics_t _adc1Characteristics;
 
 };
 
