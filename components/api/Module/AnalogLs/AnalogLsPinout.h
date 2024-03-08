@@ -10,6 +10,14 @@
 
 #if defined(OI_ANALOG_LS)
 
+/* SPI */
+#define ANALOG_LS_SPI_HOST          SPI2_HOST
+#define ANALOG_LS_SPI_FREQ          SPI_MASTER_FREQ_8M
+#define ANALOG_LS_SPI_PIN_MISO      GPIO_NUM_12
+#define ANALOG_LS_SPI_PIN_MOSI      GPIO_NUM_13
+#define ANALOG_LS_SPI_PIN_SCLK      GPIO_NUM_14
 
+/* ADC */
+#define ANALOG_LS_GPIO_PIN_CS       GPIO_NUM_15
 
 #endif
