@@ -41,22 +41,6 @@ static const adc1_channel_t _doutAdcChannel[] = {
     MIXED_CHANNEL_DOUT_CURRENT_4
 };
 
-static Ads866x_DeviceConfig_t _adcConfig = {
-    .spi_host = MIXED_SPI_HOST,
-    .spi_freq = MIXED_SPI_FREQ,
-    .spi_pin_cs = MIXED_ADC_PIN_CS,
-    .pin_rst = MIXED_ADC_PIN_RST,
-    .pin_mode = {},
-    .adc_analogs_nb = MIXED_ADC_NB,
-    .adc_res = 12,
-    .adc_mode = {1, 1, 1, 1}
-};
-
-static ad5413_config_t _dacConfig[] = {
-    {MIXED_SPI_HOST, MIXED_SPI_FREQ, MIXED_DAC_PIN_SYNC_1, 0, 0},
-    {MIXED_SPI_HOST, MIXED_SPI_FREQ, MIXED_DAC_PIN_SYNC_2, 1, 1}
-};
-
 DigitalInput* MixedStandalone::_din = new DigitalInput(_dinGpio, 4);
 DigitalOutput* MixedStandalone::_dout = new DigitalOutput(_doutGpio, _doutAdcChannel, 4);
 
@@ -70,8 +54,8 @@ AnalogInput* MixedStandalone::_ain[4] = {
 
 /* Analog outputs instances */
 AnalogOutput* MixedStandalone::_aout[2] = {
-    new AnalogOutputAD5413(&_dacConfig[0]),
-    new AnalogOutputAD5413(&_dacConfig[1])
+    new AnalogOutputAD5413(AIN_1),
+    new AnalogOutputAD5413(AIN_2)
 };
 
 int MixedStandalone::init(void)
@@ -85,7 +69,7 @@ int MixedStandalone::init(void)
     _dout->init();
 
     /* Initialize the SPI bus */
-    spi_bus_config_t busCfg = {
+    spi_bus_config_t busConfig = {
         .mosi_io_num = MIXED_SPI_PIN_MOSI,
         .miso_io_num = MIXED_SPI_PIN_MISO,
         .sclk_io_num = MIXED_SPI_PIN_SCK,
@@ -100,17 +84,30 @@ int MixedStandalone::init(void)
         .intr_flags = 0
     };
 
-    esp_err_t err = spi_bus_initialize(MIXED_SPI_HOST, &busCfg, SPI_DMA_CH_AUTO);
+    esp_err_t err = spi_bus_initialize(MIXED_SPI_HOST, &busConfig, SPI_DMA_CH_AUTO);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Init SPI bus error");
     }
 
     /* Initialize analog inputs */
-    AnalogInputAds866x::init(&_adcConfig);
+    Ads866x_DeviceConfig_t adcConfig = {
+        .spi_host = MIXED_SPI_HOST,
+        .spi_freq = MIXED_SPI_FREQ,
+        .spi_pin_cs = MIXED_ADC_PIN_CS,
+        .pin_rst = MIXED_ADC_PIN_RST,
+        .pin_mode = {},
+        .adc_analogs_nb = MIXED_ADC_NB,
+        .adc_res = 12,
+        .adc_mode = {1, 1, 1, 1}
+    };
+    AnalogInputAds866x::init(&adcConfig);
 
     /* Initialize analog outputs */
-    _aout[0]->init();
-    _aout[1]->init();
+    ad5413_config_t dacConfig[] = {
+        {MIXED_SPI_HOST, MIXED_SPI_FREQ, MIXED_DAC_PIN_SYNC_1, 0, 0},
+        {MIXED_SPI_HOST, MIXED_SPI_FREQ, MIXED_DAC_PIN_SYNC_2, 1, 1}
+    };
+    AnalogOutputAD5413::init(dacConfig, 2);
 
     return 0;
 }
