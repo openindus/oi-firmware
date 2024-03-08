@@ -18,6 +18,7 @@ set(COMPONENT_SRCS
     "stds75/stds75.c"
     "cd74hc4052/cd74hc4052.c"
     "dac/ad5413/ad5413.c"
+    "adc/ads114s0x/ads114s0x.c"
 )
 
 set(COMPONENT_INCLUDE_DIRS
@@ -34,6 +35,8 @@ set(COMPONENT_INCLUDE_DIRS
     "cd74hc4052"
     "dac"
     "dac/ad5413"
+    "adc"
+    "adc/ads114s0x"
 )
 
 set(COMPONENT_PRIV_REQUIRES
