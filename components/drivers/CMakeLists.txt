@@ -32,6 +32,7 @@ set(COMPONENT_INCLUDE_DIRS
     "ads1x4s08"
     "stds75"
     "cd74hc4052"
+    "dac"
     "dac/ad5413"
 )
 

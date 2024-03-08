@@ -117,7 +117,7 @@ void DiscreteStandalone::detachInterrupt(DigitalInputNum_t dinNum)
     din->detachInterrupt(dinNum);
 }
 
-int DiscreteStandalone::analogRead(AnalogInputNum_t ain)
+int DiscreteStandalone::analogRead(AnalogInput_Num_t ain)
 {
     int raw = -1;
     if (ain < AIN_MAX) {
@@ -132,7 +132,7 @@ int DiscreteStandalone::analogRead(AnalogInputNum_t ain)
     return raw;
 }
 
-int DiscreteStandalone::analogReadMilliVolts(AnalogInputNum_t ain)
+int DiscreteStandalone::analogReadMilliVolts(AnalogInput_Num_t ain)
 {
     int adc_reading = DiscreteStandalone::analogRead(ain);
 

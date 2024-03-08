@@ -6,7 +6,7 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file ConsoleModule.h
+ * @file ModuleCLI.h
  * @brief OpenIndus console
  *
  * For more information on OpenIndus:
@@ -18,11 +18,11 @@
 #include "Global.h"
 #include "ModuleStandalone.h"
 
-class ConsoleModule
+class ModuleCLI
 {
 public:
 
-    static void registerCli(void);
+    static void init(void);
 
 private:
 

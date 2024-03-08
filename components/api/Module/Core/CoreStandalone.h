@@ -56,7 +56,7 @@ public:
      * @param ain ANA input to monitor.
      * @return int Value of the AIN input.
      */
-    static int analogRead(AnalogInputNum_t ain);
+    static int analogRead(AnalogInput_Num_t ain);
 
     /**
      * @brief Read the value of AIN.
@@ -65,7 +65,7 @@ public:
      * @param ain ANA input to monitor.
      * @return float Value of the AIN input.
      */
-    static int analogReadMilliVolts(AnalogInputNum_t ain);
+    static int analogReadMilliVolts(AnalogInput_Num_t ain);
 
     /**
      * @brief Attach a user callback to the DIN interrupts.

@@ -20,44 +20,56 @@
 
 static const char TAG[] = "MixedStandalone";
 
-const gpio_num_t _dinGpio[] = {
+static const gpio_num_t _dinGpio[] = {
     MIXED_PIN_DIN_1,
     MIXED_PIN_DIN_2,
     MIXED_PIN_DIN_3,
     MIXED_PIN_DIN_4
 };
 
-const gpio_num_t _doutGpio[] = {
+static const gpio_num_t _doutGpio[] = {
     MIXED_PIN_DOUT_1,
     MIXED_PIN_DOUT_2,
     MIXED_PIN_DOUT_3,
     MIXED_PIN_DOUT_4
 };
 
-const adc1_channel_t _doutAdcChannel[] = {
+static const adc1_channel_t _doutAdcChannel[] = {
     MIXED_CHANNEL_DOUT_CURRENT_1,
     MIXED_CHANNEL_DOUT_CURRENT_2,
     MIXED_CHANNEL_DOUT_CURRENT_3,
     MIXED_CHANNEL_DOUT_CURRENT_4
 };
 
-uint32_t _ainToNum[] = {2, 3, 1, 0};
+DigitalInput* MixedStandalone::_din = new DigitalInput(_dinGpio, 4);
+DigitalOutput* MixedStandalone::_dout = new DigitalOutput(_doutGpio, _doutAdcChannel, 4);
 
-DigitalInput* MixedStandalone::din = new DigitalInput(_dinGpio, 4);
-DigitalOutput* MixedStandalone::dout = new DigitalOutput(_doutGpio, _doutAdcChannel, 4);
+/* Analog inputs instances */
+AnalogInput* MixedStandalone::_ain[4] = {
+    new AnalogInputAds866x(AIN_3),
+    new AnalogInputAds866x(AIN_4),
+    new AnalogInputAds866x(AIN_2),
+    new AnalogInputAds866x(AIN_1),
+};
 
-void MixedStandalone::init()
+/* Analog outputs instances */
+AnalogOutput* MixedStandalone::_aout[2] = {
+    new AnalogOutputAD5413(AIN_1),
+    new AnalogOutputAD5413(AIN_2)
+};
+
+int MixedStandalone::init(void)
 {
     ModuleStandalone::init();
 
-    /* Init DOUT */
-    dout->init();
+    /* Initialize digital inputs */
+    _din->init();
 
-    /* Init DIN */
-    din->init();
+    /* Initialize digital outputs */
+    _dout->init();
 
     /* Initialize the SPI bus */
-    spi_bus_config_t busCfg = {
+    spi_bus_config_t busConfig = {
         .mosi_io_num = MIXED_SPI_PIN_MOSI,
         .miso_io_num = MIXED_SPI_PIN_MISO,
         .sclk_io_num = MIXED_SPI_PIN_SCK,
@@ -72,145 +84,127 @@ void MixedStandalone::init()
         .intr_flags = 0
     };
 
-    esp_err_t err = spi_bus_initialize(MIXED_SPI_HOST, &busCfg, SPI_DMA_CH_AUTO);
+    esp_err_t err = spi_bus_initialize(MIXED_SPI_HOST, &busConfig, SPI_DMA_CH_AUTO);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Init SPI bus error");
     }
 
-    // /* Init AIN */
-    // ESP_LOGI(TAG, "initializing AIN");
-    // Ads866x_DeviceConfig_t ads866xDeviceConfig = {
-    //     .spi_host = MIXED_SPI_HOST,
-    //     .spi_freq = MIXED_SPI_FREQ,
-    //     .spi_pin_cs = MIXED_ADC_PIN_CS,
-    //     .pin_rst = MIXED_ADC_PIN_RST,
-    //     .pin_mode = {MIXED_ADC_PIN_MODE_AIN_1, 
-    //                  MIXED_ADC_PIN_MODE_AIN_2,
-    //                  MIXED_ADC_PIN_MODE_AIN_3,
-    //                  MIXED_ADC_PIN_MODE_AIN_4},
-    //     .adc_analogs_nb = MIXED_ADC_NB,
-    //     .adc_res = MIXED_ADC_DEFAULT_RES_BITS,
-    //     .adc_mode = {ADS866X_VOLTAGE_MODE,
-    //                  ADS866X_VOLTAGE_MODE,
-    //                  ADS866X_VOLTAGE_MODE,
-    //                  ADS866X_VOLTAGE_MODE}
-    // };
+    /* Initialize analog inputs */
+    Ads866x_DeviceConfig_t adcConfig = {
+        .spi_host = MIXED_SPI_HOST,
+        .spi_freq = MIXED_SPI_FREQ,
+        .spi_pin_cs = MIXED_ADC_PIN_CS,
+        .pin_rst = MIXED_ADC_PIN_RST,
+        .pin_mode = {},
+        .adc_analogs_nb = MIXED_ADC_NB,
+        .adc_res = 12,
+        .adc_mode = {1, 1, 1, 1}
+    };
+    AnalogInputAds866x::init(&adcConfig);
 
-    // Ads866x_DeviceConfig(&ads866xDeviceConfig);
-    // Ads866x_Init();
+    /* Initialize analog outputs */
+    ad5413_config_t dacConfig[] = {
+        {MIXED_SPI_HOST, MIXED_SPI_FREQ, MIXED_DAC_PIN_SYNC_1, 0, 0},
+        {MIXED_SPI_HOST, MIXED_SPI_FREQ, MIXED_DAC_PIN_SYNC_2, 1, 1}
+    };
+    AnalogOutputAD5413::init(dacConfig, 2);
 
-    // /* Init AOUT */
-    // ESP_LOGI(TAG, "initializing AOUT");
-    // Dac8760_DeviceConfig_t dac8760DeviceConfig =  {
-    //     .spi_host = MIXED_SPI_HOST,        
-    //     .spi_freq = MIXED_SPI_FREQ,
-    //     .spi_pin_cs = {MIXED_DAC_PIN_CS1, MIXED_DAC_PIN_CS2},        
-    //     .nb_devices = MIXED_DAC_NB,
-    //     .conf = {}
-    // };
-    // Dac8760_DeviceConfig(&dac8760DeviceConfig);
-
-    // Dac8760_Init();
-
-    // /* Init pwm for analog write */
-    // ledc_timer_config_t ledc_timer; 
-    // ledc_timer.duty_resolution = LEDC_TIMER_8_BIT;
-    // ledc_timer.freq_hz = 50;
-    // ledc_timer.speed_mode = LEDC_LOW_SPEED_MODE;
-    // ledc_timer.timer_num = LEDC_TIMER_1;
-    // ledc_timer.clk_cfg = LEDC_AUTO_CLK;
-    // ESP_ERROR_CHECK(ledc_timer_config(&ledc_timer));
-    // gpio_install_isr_service(ESP_INTR_FLAG_LEVEL3);
+    return 0;
 }
 
-void MixedStandalone::digitalWrite(DigitalOutputNum_t doutNum, uint8_t level)
+int MixedStandalone::digitalRead(DigitalInputNum_t num)
 {
-    dout->digitalWrite(doutNum, level);
+    return _din->digitalRead(num);
 }
 
-void MixedStandalone::digitalToggle(DigitalOutputNum_t doutNum)
+void MixedStandalone::attachInterrupt(DigitalInputNum_t num, IsrCallback_t callback, 
+    InterruptMode_t mode, void* arg)
 {
-    dout->digitalToggle(doutNum);
+    _din->attachInterrupt(num, callback, mode, arg);
 }
 
-int MixedStandalone::digitalRead(DigitalInputNum_t dinNum)
+void MixedStandalone::detachInterrupt(DigitalInputNum_t num)
 {
-    return din->digitalRead(dinNum);
+    _din->detachInterrupt(num);
 }
 
-void MixedStandalone::attachInterrupt(DigitalInputNum_t dinNum, IsrCallback_t callback, InterruptMode_t mode, void* arg)
+void MixedStandalone::digitalWrite(DigitalOutputNum_t num, uint8_t level)
 {
-    din->attachInterrupt(dinNum, callback, mode, arg);
+    _dout->digitalWrite(num, level);
 }
 
-void MixedStandalone::detachInterrupt(DigitalInputNum_t dinNum)
+void MixedStandalone::digitalToggle(DigitalOutputNum_t num)
 {
-    din->detachInterrupt(dinNum);
+    _dout->digitalToggle(num);
 }
 
-int MixedStandalone::analogRead(AnalogInputNum_t ana)
+void MixedStandalone::analogWrite(DigitalOutputNum_t num, uint8_t duty)
 {
-    return (int)Ads866x_AnalogRead(_ainToNum[ana]);
+    _dout->analogWrite(num, duty);
 }
 
-int MixedStandalone::analogReadMilliVolts(AnalogInputNum_t ana)
+float MixedStandalone::getCurrent(DigitalOutputNum_t num)
 {
-    return (int)Ads866x_AnalogReadUnits(_ainToNum[ana], ADS866x_UNITS_MILLIVOLTS);
+    return _dout->getCurrent(num);
 }
 
-void MixedStandalone::analogReadMode(AnalogInputNum_t ana, AdcMode_t mode)
+void MixedStandalone::analogInputMode(AnalogInput_Num_t num, AnalogInput_Mode_t mode)
 {
-    Ads866x_setAdcMode(_ainToNum[ana], (Ads866x_AdcMode_t)mode);
+    if (num < 4) {
+        _ain[num]->setMode(mode);
+    } else {
+        ESP_LOGE(TAG, "Invalid Analog input num");
+    }    
 }
 
-void MixedStandalone::analogReadResolution(AdcResBits_t res)
+void MixedStandalone::analogInputResolution(AnalogInput_Resolution_t res)
 {
-    Ads866x_setAdcResolution((Ads866x_AdcResolutionBits_t)res);
+    _ain[0]->setResolution(res);
 }
 
-void MixedStandalone::analogReadReference(float ref)
+void MixedStandalone::analogInputReference(float ref)
 {
-    Ads866x_setAnalogReference(ref);
+    return _ain[0]->setReference(ref);
 }
 
-void MixedStandalone::analogWriteVoltage(AnalogOutputNum_t sana, uint32_t value) 
+int MixedStandalone::analogRead(AnalogInput_Num_t num)
 {
-    Dac8760_VoltageWrite(sana, value, DAC8760_UNITS_RAW);
+    int value = 0;
+    if (num < 4) {
+        value = _ain[num]->read();
+    } else {
+        ESP_LOGE(TAG, "Invalid Analog input num");
+    }
+    return value;
 }
 
-void MixedStandalone::analogWriteVoltageMilliVolts(AnalogOutputNum_t sana, uint32_t value)
+float MixedStandalone::analogReadMilliVolts(AnalogInput_Num_t num)
 {
-    Dac8760_VoltageWrite(sana, value, DAC8760_UNITS_MILLIVOLTS);
+    float value = 0;
+    if (num < 4) {
+        value = _ain[num]->read(AIN_UNIT_MILLIVOLTS);
+    } else {
+        ESP_LOGE(TAG, "Invalid Analog input num");
+    }
+    return value;
 }
 
-void MixedStandalone::analogWriteVoltageMode(AnalogOutputNum_t sana, DacVoltageMode_t mode)
+void MixedStandalone::analogOutputMode(AnalogOutput_Num_t num, AnalogOutput_Mode_t mode)
 {
-    Dac8760_setVoltageMode(sana, (Dac8760_VoltageMode_t)mode);
+    if (num < 2) {
+        _aout[num]->setMode(mode);
+    } else {
+        ESP_LOGE(TAG, "Invalid Analog output num");
+    }
 }
 
-void MixedStandalone::analogWriteCurrent(AnalogOutputNum_t sana, uint32_t value)
+void MixedStandalone::analogWrite(AnalogOutput_Num_t num, float value)
 {
-    Dac8760_CurrentWrite(sana, value, DAC8760_UNITS_RAW);
-}
-
-void MixedStandalone::analogWriteCurrentMilliAmps(AnalogOutputNum_t sana, uint32_t value)
-{
-    Dac8760_CurrentWrite(sana, value, DAC8760_UNITS_MILLIAMPS);
-}
-
-void MixedStandalone::analogWriteCurrentMode(AnalogOutputNum_t sana, DacCurrentMode_t mode)
-{
-    Dac8760_setCurrentMode(sana, (Dac8760_CurrentMode_t) mode);
-}
-
-void MixedStandalone::analogWrite(DigitalOutputNum_t doutNum, uint8_t duty)
-{
-    dout->analogWrite(doutNum, duty);
-}
-
-float MixedStandalone::getCurrent(DigitalOutputNum_t doutNum)
-{
-    return dout->getCurrent(doutNum);
+    if (num < 2) {
+        _aout[num]->write(value);
+    } else {
+        ESP_LOGE(TAG, "Invalid Analog output num");
+    }
 }
 
 #endif

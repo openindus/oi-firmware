@@ -6,7 +6,7 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file MotorStepperParamCLI.h
+ * @file StepperParamCLI.h
  * @brief OpenIndus console
  *
  * For more information on OpenIndus:
@@ -100,11 +100,11 @@
 
 #endif
 
-class MotorStepperParamCLI
+class StepperParamCLI
 {
 public:
 
-    static void registerCommand(void);
+    static void init(void);
 
 private:
 

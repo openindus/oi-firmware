@@ -6,18 +6,18 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file ConsoleStepper.h
+ * @file StepperCLI.h
  * @brief OpenIndus console
  *
  * For more information on OpenIndus:
  * @see https://openindus.com
  */
 
-#include "ConsoleStepper.h"
+#include "StepperCLI.h"
 
 #if defined(OI_STEPPER) || defined(OI_STEPPER_VE)
 
-void ConsoleStepper::registerCommand(void)
+void StepperCLI::init(void)
 {
     _registerDigitalRead();
     _registerAttachInterrupt();
@@ -56,7 +56,7 @@ static int dRead(int argc, char **argv)
     return 0;
 }
 
-void ConsoleStepper::_registerDigitalRead(void)
+void StepperCLI::_registerDigitalRead(void)
 {
     digitalReadArgs.din    = arg_int1(NULL, NULL, "DIN", "[1-10]");
     digitalReadArgs.end     = arg_end(2);
@@ -100,7 +100,7 @@ static int attachInterrupt(int argc, char **argv)
     return 0;
 }
 
-void ConsoleStepper::_registerAttachInterrupt(void)
+void StepperCLI::_registerAttachInterrupt(void)
 {
     attachInterruptArgs.din    = arg_int1(NULL, NULL, "DIN", "[1-10]");
     attachInterruptArgs.mode    = arg_int1(NULL, NULL, "MODE", "[1: rising, 2: falling, 3: change]");
@@ -138,7 +138,7 @@ static int detachInterrupt(int argc, char **argv)
     return 0;
 }
 
-void ConsoleStepper::_registerDetachInterrupt(void)
+void StepperCLI::_registerDetachInterrupt(void)
 {
     detachInterruptArgs.din    = arg_int1(NULL, NULL, "DIN", "[1-10]");
     detachInterruptArgs.end     = arg_end(2);
@@ -183,7 +183,7 @@ static int limitSwitch(int argc, char **argv)
     return 0;
 }
 
-void ConsoleStepper::_registerLimitSwitch(void)
+void StepperCLI::_registerLimitSwitch(void)
 {
     limitSwitchArgs.motor   = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
     limitSwitchArgs.din    = arg_int1(NULL, NULL, "DIN", "[1-10]");
@@ -224,7 +224,7 @@ static int stepResolution(int argc, char **argv)
     return 0;
 }
 
-void ConsoleStepper::_registerStepResolution(void)
+void StepperCLI::_registerStepResolution(void)
 {
     stepResolutionArgs.motor    = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
     stepResolutionArgs.res      = arg_int1(NULL, NULL, "RESOLUTION", "[0: Full step, 1: Half step, 2: 1/4 step, 3: 1/8 step, 4: 1/16 step, 5: 1/32 step, 6: 1/64 step, 7: 1/128 step]");
@@ -264,7 +264,7 @@ static int setMaxSpeed(int argc, char **argv)
     return 0;
 }
 
-void ConsoleStepper::_registerSetMaxSpeed(void)
+void StepperCLI::_registerSetMaxSpeed(void)
 {
     setMaxSpeedArgs.motor  = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
     setMaxSpeedArgs.speed  = arg_int1(NULL, NULL, "SPEED", "motor max speed in step/s");
@@ -302,7 +302,7 @@ static int getPosition(int argc, char **argv)
     return 0;
 }
 
-void ConsoleStepper::_registerGetPosition(void)
+void StepperCLI::_registerGetPosition(void)
 {
     getPositionArgs.motor  = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
     getPositionArgs.end    = arg_end(2);
@@ -339,7 +339,7 @@ static int getSpeed(int argc, char **argv)
     return 0;
 }
 
-void ConsoleStepper::_registerGetSpeed(void)
+void StepperCLI::_registerGetSpeed(void)
 {
     getSpeedArgs.motor  = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
     getSpeedArgs.end    = arg_end(2);
@@ -376,7 +376,7 @@ static int stop(int argc, char **argv)
     return 0;
 }
 
-void ConsoleStepper::_registerStop(void)
+void StepperCLI::_registerStop(void)
 {
     stopArgs.motor  = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
     stopArgs.end    = arg_end(2);
@@ -415,7 +415,7 @@ static int moveAbsolute(int argc, char **argv)
     return 0;
 }
 
-void ConsoleStepper::_registerMoveAbsolute(void)
+void StepperCLI::_registerMoveAbsolute(void)
 {
     moveAbsoluteArgs.motor  = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
     moveAbsoluteArgs.pos    = arg_int1(NULL, NULL, "POSITION", "position in step");
@@ -455,7 +455,7 @@ static int moveRelative(int argc, char **argv)
     return 0;
 }
 
-void ConsoleStepper::_registerMoveRelative(void)
+void StepperCLI::_registerMoveRelative(void)
 {
     moveRelativeArgs.motor  = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
     moveRelativeArgs.pos    = arg_int1(NULL, NULL, "POSITION", "position in step");
@@ -497,7 +497,7 @@ static int run(int argc, char **argv)
     return 0;
 }
 
-void ConsoleStepper::_registerRun(void)
+void StepperCLI::_registerRun(void)
 {
     runArgs.motor   = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
     runArgs.dir     = arg_int1(NULL, NULL, "DIRECTION", "[0: Forward, 1: Reverse]");
@@ -538,7 +538,7 @@ static int homing(int argc, char **argv)
     return 0;
 }
 
-void ConsoleStepper::_registerHoming(void)
+void StepperCLI::_registerHoming(void)
 {
     homingArgs.motor    = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
     homingArgs.speed    = arg_int1(NULL, NULL, "SPEED", "speed in step/s");

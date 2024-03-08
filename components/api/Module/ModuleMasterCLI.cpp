@@ -6,18 +6,18 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file ConsoleMaster.h
+ * @file ModuleMasterCLI.h
  * @brief OpenIndus console
  *
  * For more information on OpenIndus:
  * @see https://openindus.com
  */
 
-#include "ConsoleMaster.h"
+#include "ModuleMasterCLI.h"
 
 #if defined(MODULE_MASTER)
 
-void ConsoleMaster::registerCli(void)
+void ModuleMasterCLI::init(void)
 {
     _registerPing();
     _registerProgram();
@@ -44,7 +44,7 @@ static int program(int argc, char **argv)
     return 0;
 }
 
-void ConsoleMaster::_registerProgram(void)
+void ModuleMasterCLI::_registerProgram(void)
 {
     programArgs.sn = arg_int1(NULL, NULL, "<SN>", "Board serial number");
     programArgs.end = arg_end(1);
@@ -86,7 +86,7 @@ static int ping(int argc, char **argv)
     return 0;
 }
 
-void ConsoleMaster::_registerPing(void)
+void ModuleMasterCLI::_registerPing(void)
 {
     pingArgs.sn = arg_int1(NULL, NULL, "<SN>", "Board serial number");
     pingArgs.end = arg_end(1);
@@ -108,7 +108,7 @@ static int autoId(int argc, char **argv)
     return 0;
 }
 
-void ConsoleMaster::_registerAutoId(void)
+void ModuleMasterCLI::_registerAutoId(void)
 {
     const esp_console_cmd_t cmd = {
         .command = "auto-id",

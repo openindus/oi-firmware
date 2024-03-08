@@ -128,7 +128,7 @@ typedef struct {
     uint8_t crc_en;
 } ad5413_device_t;
 
-ad5413_device_t* ad5413_init(ad5413_config_t conf);
+int ad5413_init(ad5413_device_t**, ad5413_config_t* conf);
 
 int ad5413_dac_input_write(ad5413_device_t* dev, uint16_t data);
 int ad5413_dac_output_read(ad5413_device_t* dev, uint16_t* data);

@@ -17,7 +17,7 @@
 
 #include "Global.h"
 
-typedef enum {
+enum Module_Command_e {
     MODULE_RESTART                  = 0x01,
     MODULE_PING                     = 0x02,
     MODULE_AUTO_ID                  = 0x03,
@@ -42,7 +42,7 @@ typedef enum {
     MODULE_EVENT                    = 0x16,
     MODULE_BUS_ID                   = 0x17,
     MODULE_LED_STATE                = 0x18,
-} ModuleCommand_t;
+};
 
 typedef enum {
     /* DIGITAL [0x30-0x3F] */
@@ -58,13 +58,9 @@ typedef enum {
     ANALOG_READ_MODE                = 0x42,
     ANALOG_READ_RESOLUTION          = 0x43,
     ANALOG_READ_REFERENCE           = 0x44,
-    ANALOG_WRITE                    = 0x45,
-    ANALOG_WRITE_VOLTAGE            = 0x46,
-    ANALOG_WRITE_VOLTAGE_MILLIVOLTS = 0x47,
-    ANALOG_WRITE_VOLTAGE_MODE       = 0x48,
-    ANALOG_WRITE_CURRENT            = 0x49, 
-    ANALOG_WRITE_CURRENT_MILLIAMPS  = 0x4A,
-    ANALOG_WRITE_CURRENT_MODE       = 0x4B,
+    ANALOG_OUTPUT_MODE              = 0x45,
+    ANALOG_WRITE                    = 0x46,
+    /** @todo: to modify */
     ANALOG_ADD_VOLTMETER            = 0x4C,
     ANALOG_GET_CHANNEL_DATA         = 0x4D,
     ANALOG_ADD_TC                   = 0x4E,
@@ -97,11 +93,11 @@ typedef enum {
     ENCODER_GET_POSITION            = 0x82,
     ENCODER_GET_SPEED               = 0x83,
     
-} Request_t;
+} Module_Request_t;
 
 typedef enum {
     DIGITAL_INTERRUPT               = 0x00,
-} Event_t;
+} Module_Event_t;
 
 typedef struct {
     union {
@@ -114,7 +110,7 @@ typedef struct {
             uint32_t data;
         };
     };
-} RequestMsg_t;
+} Module_RequestMsg_t;
 
-typedef std::function<uint32_t(RequestMsg_t msg)> RequestCallback_t;
-typedef std::function<void(uint8_t intr)> EventCallback_t;
+typedef std::function<uint32_t(Module_RequestMsg_t msg)> Module_RequestCallback_t;
+typedef std::function<void(uint8_t intr)> Module_EventCallback_t;

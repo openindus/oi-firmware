@@ -1,15 +1,8 @@
 /**
- * Copyright (C) OpenIndus, Inc - All Rights Reserved
- *
- * This file is part of OpenIndus Library.
- *
- * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential
- * 
  * @file AnalogInput.h
- * @brief 
- *
- * For more information on OpenIndus:
+ * @brief Analog Input
+ * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
+ * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
 
@@ -19,30 +12,79 @@
 
 typedef enum {
     AIN_1 = 0,
-    AIN_2,
-#if !defined(OI_DISCRETE) && !defined(OI_DISCRETE_VE)
-    AIN_3,
-    AIN_4,
-#if !defined(OI_MIXED)
-    AIN_5,
-    AIN_6,
-    AIN_7,
-    AIN_8,
-    AIN_9,
-    AIN_10,
-#endif
-#endif
+    AIN_2 = 1,
+    AIN_3 = 2,
+    AIN_4 = 3,
+    AIN_5 = 4,
+    AIN_6 = 5,
+    AIN_7 = 6,
+    AIN_8 = 7,
+    AIN_9 = 8,
+    AIN_10 = 9,
     AIN_MAX
-} AnalogInputNum_t;
+} AnalogInput_Num_t;
 
 typedef enum {
-    ADC_MODE_CURRENT = ADS866X_CURRENT_MODE,
-    ADC_MODE_VOLTAGE = ADS866X_VOLTAGE_MODE
-} AdcMode_t;
+    AIN_MODE_CURRENT = 0,
+    AIN_MODE_VOLTAGE = 1,
+    AIN_MODE_UNDEFINED
+} AnalogInput_Mode_t;
 
-typedef enum
+typedef enum {
+    AIN_RES_10_BITS = 0,
+    AIN_RES_12_BITS = 1,
+    AIN_RES_UNDEFINED
+} AnalogInput_Resolution_t;
+
+typedef enum {
+    AIN_UNIT_RAW = 0,
+    AIN_UNIT_MILLIVOLTS = 1,
+    AIN_UNIT_MILLIAMPS = 2,
+    AIN_UNIT_VOLTS = 3,
+    AIN_UNIT_AMPS = 5,
+    AIN_UNIT_UNDEFINED
+} AnalogInput_Unit_t;
+
+class AnalogInput
 {
-    ADC_RES_10_BITS = ADS866x_ADC_RES_10BITS,
-    ADC_RES_12_BITS = ADS866x_ADC_RES_12BITS
-} AdcResBits_t;
+public:
 
+    AnalogInput(AnalogInput_Num_t num) : 
+        _num(num),
+        _mode(AIN_MODE_UNDEFINED),
+        _res(AIN_RES_UNDEFINED) {}
+
+    virtual int read(void) = 0;
+    virtual float read(AnalogInput_Unit_t unit) = 0;
+    virtual void setMode(AnalogInput_Mode_t mode) = 0;
+    virtual void setResolution(AnalogInput_Resolution_t res) = 0;
+    virtual void setReference(float ref) = 0;
+
+protected:
+
+    AnalogInput_Num_t _num;
+    AnalogInput_Mode_t _mode;
+    AnalogInput_Resolution_t _res;
+    
+};
+
+class AnalogInputAds866x : public AnalogInput
+{
+public:
+
+    AnalogInputAds866x(AnalogInput_Num_t num) :
+        AnalogInput(num) {}
+
+    static int init(Ads866x_DeviceConfig_t* config);
+
+    int read(void);
+    float read(AnalogInput_Unit_t unit);
+    void setMode(AnalogInput_Mode_t mode);
+    void setResolution(AnalogInput_Resolution_t res);
+    void setReference(float ref);
+
+private:
+
+    static bool _deviceInitialized;
+
+};

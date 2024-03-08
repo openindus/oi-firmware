@@ -49,18 +49,17 @@
 #define MIXED_SPI_PIN_SCK               GPIO_NUM_37
 
 /* ADC */
-#define MIXED_ADC_NB                     (4)
-#define MIXED_ADC_DEFAULT_RES_BITS       (12)
-#define MIXED_ADC_PIN_RST                GPIO_NUM_35
-#define MIXED_ADC_PIN_CS                 GPIO_NUM_34
-#define MIXED_ADC_PIN_ALARM              GPIO_NUM_2
+#define MIXED_ADC_NB                    (4)
+#define MIXED_ADC_PIN_RST               GPIO_NUM_35
+#define MIXED_ADC_PIN_CS                GPIO_NUM_34
+#define MIXED_ADC_PIN_ALARM             GPIO_NUM_2
 
 /* DAC */
-#define MIXED_DAC_NB                      (2)
-#define MIXED_DAC_PIN_SYNC_1              GPIO_NUM_4 // CS1
-#define MIXED_DAC_PIN_SYNC_2              GPIO_NUM_17 // CS2
-#define MIXED_DAC_PIN_LDAC_1              GPIO_NUM_6
-#define MIXED_DAC_PIN_LDAC_2              GPIO_NUM_15
+#define MIXED_DAC_NB                    (2)
+#define MIXED_DAC_PIN_SYNC_1            GPIO_NUM_4 // CS1
+#define MIXED_DAC_PIN_SYNC_2            GPIO_NUM_17 // CS2
+#define MIXED_DAC_PIN_LDAC_1            GPIO_NUM_6
+#define MIXED_DAC_PIN_LDAC_2            GPIO_NUM_15
 
 /* DOUT */
 #define MIXED_PIN_DINS ((1ULL<<MIXED_PIN_DIN_1) | \

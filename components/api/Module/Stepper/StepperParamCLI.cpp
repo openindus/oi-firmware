@@ -6,14 +6,14 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file MotorStepperParamCLI.h
+ * @file StepperParamCLI.h
  * @brief OpenIndus console
  *
  * For more information on OpenIndus:
  * @see https://openindus.com
  */
 
-#include "MotorStepperParamCLI.h"
+#include "StepperParamCLI.h"
 #include "argtable3/argtable3.h"
 
 #if defined(OI_STEPPER) || defined(OI_STEPPER_VE)
@@ -40,7 +40,7 @@ static struct {
     struct arg_end *end;
 } getAdvancedParametersArgtable;
 
-void MotorStepperParamCLI::registerCommand(void)
+void StepperParamCLI::init(void)
 {
     _registerDevice();
 }
@@ -669,7 +669,7 @@ static int stepperParser(int argc, char **argv) {
     return exitcode;
 }
 
-void MotorStepperParamCLI::_registerDevice(void)
+void StepperParamCLI::_registerDevice(void)
 {
     const esp_console_cmd_t cmd = {
         .command = "advanced-param",

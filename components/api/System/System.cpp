@@ -18,7 +18,7 @@
 #include "Arduino.h"
 #endif
 
-static const char SYSTEM_TAG[] = "System";
+static const char TAG[] = "System";
 
 void System::_mainTask(void *pvParameters)
 {
@@ -30,42 +30,51 @@ void System::_mainTask(void *pvParameters)
 
 void System::init(void)
 {
+    int err = 0;
+
     /* Module init */
 #if defined(OI_CORE)
-    Core::init();
+    CoreStandalone::init();
+    CoreMaster::init();
+    CoreCLI::init();
 #elif defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)
-    Discrete::init();
+    DiscreteStandalone::init();
+    DiscreteSlave::init();
+    DiscreteCLI::init();
 #elif defined(OI_STEPPER) || defined(OI_STEPPER_VE)
-    Stepper::init();
+    StepperStandalone::init();
+    StepperSlave::init();
+    StepperCLI::init();
+    StepperParamCLI::init();
 #elif defined(OI_MIXED)
-    Mixed::init();
+    err |= MixedStandalone::init();
+    err |= MixedSlave::init();
+    err |= MixedCLI::init();
 #elif defined(OI_RELAY_HP) || defined(OI_RELAY_LP)
-    Relay::init();
+    RelayStandalone::init();
+    RelaySlave::init();
 #elif defined(OI_BRUSHLESS)
-    Brushless::init();
+    BrushlessStandalone::init();
+    BrushlessSlave::init();
 #elif defined(OI_ANALOG_LS)
-    Analogls::init();
+    AnaloglsStandalone::init();
+    AnaloglsSlave::init();
 #endif
-
-    /* Register command Line Interface (CLI) commands */
-    ConsoleModule::registerCli();
-#if defined(OI_CORE)
-    ConsoleCore::registerCli();
-#elif defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)
-    ConsoleDiscrete::registerCli();
-#elif defined(OI_MIXED)
-    ConsoleMixed::registerCli();
-#elif defined(OI_STEPPER) || defined(OI_STEPPER_VE)
-    ConsoleStepper::registerCommand();
-    MotorStepperParamCLI::registerCommand();
-#endif
+    ModuleCLI::init();
 #if defined(MODULE_MASTER)
-    ConsoleMaster::registerCli();
+    ModuleMasterCLI::init();
 #endif
-    UsbConsole::listen(); // start a task which listen for user to input "console"
 
-    /* Set module led to blue */
-    MODULE_INITIALIZED();
+    if (err != 0) {
+        ESP_LOGE(TAG, "Failed to initialize module");
+        ModuleStandalone::ledBlink(LED_RED, 250);
+    }
+
+    /* Start a task which listen for user to input "console" */
+    UsbConsole::listen();
+
+    /* Module Initialized */
+    ModuleStandalone::ledBlink(LED_BLUE, 1000);
 
     /* Wait for slaves modules to init and give time to user script to enable console */
 #if !defined(MODULE_SLAVE)
@@ -75,7 +84,7 @@ void System::init(void)
     /* On master module, call autoId */
 #if defined(MODULE_MASTER)
     if (ModuleMaster::autoId()) {
-        MODULE_PAIRED();
+        ModuleStandalone::ledBlink(LED_GREEN, 1000); // Paired
     }
 #endif
 
@@ -85,13 +94,13 @@ void System::init(void)
     if ((reason != ESP_RST_POWERON) && 
         (reason != ESP_RST_SW) && 
         (reason != ESP_RST_UNKNOWN)) {
-        ESP_LOGE(SYSTEM_TAG, "Reset reason : %d", reason);
-        MODULE_ERROR();
+        ESP_LOGE(TAG, "Reset reason : %d", reason);
+        ModuleStandalone::ledBlink(LED_RED, 1000); // Error
         UsbConsole::begin(true); // Force console to start, convenient for debugging
     } else {
         if (!UsbConsole::begin()) { // console will start only if user input "console" during startup
             /* Start main task if console is not started  */
-            ESP_LOGI(SYSTEM_TAG, "Create main task");
+            ESP_LOGI(TAG, "Create main task");
             vTaskDelay(1);
             xTaskCreate(_mainTask, "Main task", 8192, NULL, 1, NULL);
 #if defined(CONFIG_FORCE_CONSOLE)

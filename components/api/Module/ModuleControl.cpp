@@ -19,7 +19,7 @@ static const char MODULE_TAG[] = "Module";
 
 std::vector<ModuleControl*> ModuleControl::_instances;
 
-uint32_t ModuleControl::request(RequestMsg_t msg)
+uint32_t ModuleControl::request(Module_RequestMsg_t msg)
 {
     BusRs::Frame_t frame;
     frame.command = MODULE_REQUEST;
@@ -33,7 +33,7 @@ uint32_t ModuleControl::request(RequestMsg_t msg)
         ESP_LOGE(MODULE_TAG, "requestFrom error");
         return 0xFFFFFFFF;
     } else {
-        RequestMsg_t newMsg;
+        Module_RequestMsg_t newMsg;
         memcpy(&newMsg, frame.data, sizeof(newMsg));
         return newMsg.data;
     }

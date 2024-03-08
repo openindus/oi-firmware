@@ -6,18 +6,18 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file ConsoleCore::h
+ * @file CoreCLI::h
  * @brief OpenIndus console
  *
  * For more information on OpenIndus:
  * @see https://openindus.com
  */
 
-#include "ConsoleCore.h"
+#include "CoreCLI.h"
 
 #if defined(OI_CORE)
 
-void ConsoleCore::registerCli(void)
+void CoreCLI::init(void)
 {
     _registerDigitalWrite();
     _registerDigitalRead();
@@ -51,7 +51,7 @@ static int dWrite(int argc, char **argv)
     return 0;
 }
 
-void ConsoleCore::_registerDigitalWrite(void)
+void CoreCLI::_registerDigitalWrite(void)
 {
     digitalWriteArgs.dout = arg_int1(NULL, NULL, "<DOUT>", "[1-4]");
     digitalWriteArgs.level = arg_int1(NULL, NULL, "<LEVEL>", "0 = LOW, 1 = HIGH");
@@ -89,7 +89,7 @@ static int dRead(int argc, char **argv)
     return 0;
 }
 
-void ConsoleCore::_registerDigitalRead(void)
+void CoreCLI::_registerDigitalRead(void)
 {
     digitalReadArgs.din = arg_int1(NULL, NULL, "<DIN>", "[1-4]");
     digitalReadArgs.end = arg_end(2);
@@ -119,14 +119,14 @@ static int analogRead(int argc, char **argv)
         return 1;
     }
 
-    AnalogInputNum_t ain = (AnalogInputNum_t)(analogReadArgs.ain->ival[0] - 1);
+    AnalogInput_Num_t ain = (AnalogInput_Num_t)(analogReadArgs.ain->ival[0] - 1);
 
     printf("%d\n", CoreStandalone::analogRead(ain));
 
     return 0;
 }
 
-void ConsoleCore::_registerAnalogRead(void)
+void CoreCLI::_registerAnalogRead(void)
 {
     analogReadArgs.ain = arg_int1(NULL, NULL, "<AIN>", "[1-2]");
     analogReadArgs.end = arg_end(2);
@@ -152,15 +152,14 @@ static int analogReadMilliVolts(int argc, char **argv)
         return 1;
     }
 
-    AnalogInputNum_t ain = (AnalogInputNum_t)(analogReadArgs.ain->ival[0] - 1);
+    AnalogInput_Num_t ain = (AnalogInput_Num_t)(analogReadArgs.ain->ival[0] - 1);
 
-    printf("%f\n", CoreStandalone::analogReadMilliVolts(ain));
-
+    printf("%imV\n", CoreStandalone::analogReadMilliVolts(ain));
 
     return 0;
 }
 
-void ConsoleCore::_registerAnalogReadMillivolts(void)
+void CoreCLI::_registerAnalogReadMillivolts(void)
 {
     analogReadArgs.ain = arg_int1(NULL, NULL, "<AIN>", "[1-2]");
     analogReadArgs.end = arg_end(2);
@@ -195,7 +194,7 @@ static int getCurrentLevel(int argc, char **argv)
     return 0;
 }
 
-void ConsoleCore::_registerGetCurrentLevel(void)
+void CoreCLI::_registerGetCurrentLevel(void)
 {
     digitalReadOverCurrentArgs.dout = arg_int1(NULL, NULL, "<DOUT>", "[1-4]");
     digitalReadOverCurrentArgs.end = arg_end(2);
@@ -245,7 +244,7 @@ static int date(int argc, char **argv)
     return 0;
 }
 
-void ConsoleCore::_registerDate(void)
+void CoreCLI::_registerDate(void)
 {
     dateArgs.date = arg_date0("s", "set", "%Y-%m-%d_%H:%M:%S", NULL, NULL);
     dateArgs.end = arg_end(2);

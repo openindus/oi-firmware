@@ -6,7 +6,7 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file ConsoleMixed.h
+ * @file MixedCLI.h
  * @brief OpenIndus console
  *
  * For more information on OpenIndus:
@@ -20,16 +20,23 @@
 
 #if defined(OI_MIXED)
 
-class ConsoleMixed
+class MixedCLI
 {
 public:
 
-    static void registerCli(void);
+    static int init(void);
 
 private:
 
+    static MixedStandalone* _mixed;
+
+    static int _digitalWrite(int argc, char **argv);
     static void _registerDigitalWrite(void);
+
+    static int _digitalRead(int argc, char **argv);
     static void _registerDigitalRead(void);
+
+    static int _getCurrent(int argc, char **argv);
     static void _registerGetCurrent(void);
 
 };

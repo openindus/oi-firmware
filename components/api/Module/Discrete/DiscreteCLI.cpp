@@ -6,23 +6,24 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file ConsoleDiscrete::h
+ * @file DiscreteCLI::h
  * @brief OpenIndus console
  *
  * For more information on OpenIndus:
  * @see https://openindus.com
  */
 
-#include "ConsoleDiscrete.h"
+#include "DiscreteCLI.h"
 
 #if defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)
 
-void ConsoleDiscrete::registerCli(void)
+void DiscreteCLI::init(void)
 {
     _registerDigitalWrite();
     _registerDigitalRead();
     _registerGetCurrent();
     _registerAnalogRead();
+    _registerAnalogReadMillivolts();
 }
 
 /** 'digital-write' */
@@ -49,7 +50,7 @@ static int dWrite(int argc, char **argv)
     return 0;
 }
 
-void ConsoleDiscrete::_registerDigitalWrite(void)
+void DiscreteCLI::_registerDigitalWrite(void)
 {
     digitalWriteArgs.dout = arg_int1(NULL, NULL, "<DOUT>", "[1-8]");
     digitalWriteArgs.level = arg_int1(NULL, NULL, "<LEVEL>", "0 = LOW, 1 = HIGH");
@@ -87,7 +88,7 @@ static int dRead(int argc, char **argv)
     return 0;
 }
 
-void ConsoleDiscrete::_registerDigitalRead(void)
+void DiscreteCLI::_registerDigitalRead(void)
 {
     digitalReadArgs.din = arg_int1(NULL, NULL, "<DIN>", "[1-10]");
     digitalReadArgs.end = arg_end(2);
@@ -124,7 +125,7 @@ static int getCurrent(int argc, char **argv)
     return 0;
 }
 
-void ConsoleDiscrete::_registerGetCurrent(void)
+void DiscreteCLI::_registerGetCurrent(void)
 {
     getCurrentArgs.dout = arg_int1(NULL, NULL, "<DOUT>", "[1-8]");
     getCurrentArgs.end = arg_end(2);
@@ -154,14 +155,14 @@ static int analogRead(int argc, char **argv)
         return 1;
     }
 
-    AnalogInputNum_t ain = (AnalogInputNum_t)(analogReadArgs.ain->ival[0] - 1);
+    AnalogInput_Num_t ain = (AnalogInput_Num_t)(analogReadArgs.ain->ival[0] - 1);
 
     printf("%d\n", DiscreteStandalone::analogRead(ain));
 
     return 0;
 }
 
-void ConsoleDiscrete::_registerAnalogRead(void)
+void DiscreteCLI::_registerAnalogRead(void)
 {
     analogReadArgs.ain = arg_int1(NULL, NULL, "<AIN>", "[1-3]");
     analogReadArgs.end = arg_end(2);
@@ -171,6 +172,39 @@ void ConsoleDiscrete::_registerAnalogRead(void)
         .help = "Get analog input value (RAW)",
         .hint = NULL,
         .func = &analogRead,
+        .argtable = &analogReadArgs
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+}
+
+/** 'analog-read-millivolts' */
+
+static int analogReadMilliVolts(int argc, char **argv)
+{
+    int nerrors = arg_parse(argc, argv, (void **) &analogReadArgs);
+    if (nerrors != 0) {
+        arg_print_errors(stderr, analogReadArgs.end, argv[0]);
+        return 1;
+    }
+
+    AnalogInput_Num_t ain = (AnalogInput_Num_t)(analogReadArgs.ain->ival[0] - 1);
+
+    printf("%imV\n", DiscreteStandalone::analogReadMilliVolts(ain));
+
+
+    return 0;
+}
+
+void DiscreteCLI::_registerAnalogReadMillivolts(void)
+{
+    analogReadArgs.ain = arg_int1(NULL, NULL, "<AIN>", "[1-2]");
+    analogReadArgs.end = arg_end(2);
+
+    const esp_console_cmd_t cmd = {
+        .command = "analog-read-millivolts",
+        .help = "Get analog input value (MilliVolts)",
+        .hint = NULL,
+        .func = &analogReadMilliVolts,
         .argtable = &analogReadArgs
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
