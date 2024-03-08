@@ -60,7 +60,7 @@ void MixedControl::detachInterrupt(DigitalInputNum_t num)
 void MixedControl::analogInputMode(AnalogInput_Num_t num, AnalogInput_Mode_t mode)
 {
     Module_RequestMsg_t msg;
-    msg.request = ANALOG_READ_MODE;
+    msg.request = ANALOG_INPUT_MODE;
     msg.param = (uint16_t)num;
     msg.data = (uint32_t)mode;
     request(msg);
@@ -69,7 +69,7 @@ void MixedControl::analogInputMode(AnalogInput_Num_t num, AnalogInput_Mode_t mod
 void MixedControl::analogInputResolution(AnalogInput_Resolution_t res)
 {
     Module_RequestMsg_t msg;
-    msg.request = ANALOG_READ_RESOLUTION;
+    msg.request = ANALOG_INPUT_RESOLUTION;
     msg.data = (uint32_t)res;
     request(msg);
 }
@@ -77,7 +77,7 @@ void MixedControl::analogInputResolution(AnalogInput_Resolution_t res)
 void MixedControl::analogInputReference(float ref)
 {
     Module_RequestMsg_t msg;
-    msg.request = ANALOG_READ_REFERENCE;
+    msg.request = ANALOG_INPUT_REFERENCE;
     memcpy(&msg.data, &ref, sizeof(uint32_t));
     request(msg);
 }

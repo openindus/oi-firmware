@@ -56,17 +56,11 @@ typedef enum {
     /* ANALOG [0x40-0x4F] */
     ANALOG_READ                     = 0x40,
     ANALOG_READ_MILLIVOLTS          = 0x41,
-    ANALOG_READ_MODE                = 0x42,
-    ANALOG_READ_RESOLUTION          = 0x43,
-    ANALOG_READ_REFERENCE           = 0x44,
-    ANALOG_OUTPUT_MODE              = 0x45,
-    ANALOG_WRITE                    = 0x46,
-    /** @todo: to modify */
-    ANALOG_ADD_VOLTMETER            = 0x4C,
-    ANALOG_GET_CHANNEL_DATA         = 0x4D,
-    ANALOG_ADD_TC                   = 0x4E,
-    ANALOG_ADD_LEVEL_DETECTOR       = 0x4F,
-    ANALOG_ADD_RTD                  = 0x50,
+    ANALOG_INPUT_MODE               = 0x42,
+    ANALOG_INPUT_RESOLUTION         = 0x43,
+    ANALOG_INPUT_REFERENCE          = 0x44,
+    ANALOG_WRITE                    = 0x45,
+    ANALOG_OUTPUT_MODE              = 0x46,
 
     /* MOTOR [0x60-0x7F] */
     MOTOR_STOP                      = 0x60,

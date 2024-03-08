@@ -17,6 +17,7 @@
 
 #include "ModuleStandalone.h"
 #include "Mixed.h"
+#include "MixedPinout.h"
 
 #if defined(OI_MIXED)
 
