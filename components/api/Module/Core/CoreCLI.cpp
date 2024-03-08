@@ -154,8 +154,7 @@ static int analogReadMilliVolts(int argc, char **argv)
 
     AnalogInput_Num_t ain = (AnalogInput_Num_t)(analogReadArgs.ain->ival[0] - 1);
 
-    printf("%f\n", CoreStandalone::analogReadMilliVolts(ain));
-
+    printf("%imV\n", CoreStandalone::analogReadMilliVolts(ain));
 
     return 0;
 }
