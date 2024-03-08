@@ -71,6 +71,8 @@ esp_adc_cal_characteristics_t* _ainAdcChar;
 DigitalInput* DiscreteStandalone::din = new DigitalInput(_dinGpio, 10);
 DigitalOutput* DiscreteStandalone::dout = new DigitalOutput(_doutGpio, _doutAdcChannel, 8);
 
+esp_adc_cal_characteristics_t DiscreteStandalone::_adc1Characteristics;
+
 void DiscreteStandalone::init()
 {
     ESP_LOGI(DISCRETE_TAG, "Init");
@@ -84,13 +86,10 @@ void DiscreteStandalone::init()
 
     /* Init AIN */
     ESP_LOGI(DISCRETE_TAG, "Init AIN");
-    for (int i=0; i<AIN_MAX; i++) {
-#if defined(CONFIG_IDF_TARGET_ESP32S3)
+    for (auto i: _ainChannel) {
         ESP_ERROR_CHECK(adc2_config_channel_atten(_ainChannel[i], ADC_ATTEN_DB_11));
-// #elif defined(CONFIG_IDF_TARGET_ESP32S2)
-//         ESP_ERROR_CHECK(adc1_config_channel_atten(_ainChannel[i], ADC_ATTEN_DB_11));
-#endif
     }
+    esp_adc_cal_characterize(ADC_UNIT_2, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &_adc1Characteristics);
 }
 
 void DiscreteStandalone::digitalWrite(DigitalOutputNum_t doutNum, uint8_t level)
@@ -135,8 +134,12 @@ int DiscreteStandalone::analogRead(AnalogInputNum_t ain)
 
 int DiscreteStandalone::analogReadMilliVolts(AnalogInputNum_t ain)
 {
-    /** @todo */
-    return -1;
+    int adc_reading = DiscreteStandalone::analogRead(ain);
+
+    // Convert adc_reading to voltage in mV
+    uint32_t voltage = esp_adc_cal_raw_to_voltage(adc_reading, &_adc1Characteristics);
+
+    return voltage * DISCRETE_ADC_REDUCTION_FACTOR;
 }
 
 void DiscreteStandalone::analogWrite(DigitalOutputNum_t doutNum, uint8_t duty)

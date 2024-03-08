@@ -53,19 +53,19 @@ public:
      * @brief Read the value of AIN.
      * The function return the raw value (0-4096) that correspond to the voltage of the ANA.
      *
-     * @param eana ANA input to monitor.
+     * @param ain ANA input to monitor.
      * @return int Value of the AIN input.
      */
-    static int analogRead(AnalogInputNum_t eana);
+    static int analogRead(AnalogInputNum_t ain);
 
     /**
      * @brief Read the value of AIN.
      * The function return a float that correspond to the voltage of the ANA (from 0 to 2.6V).
      *
-     * @param eana ANA input to monitor.
+     * @param ain ANA input to monitor.
      * @return float Value of the AIN input.
      */
-    static float analogReadMilliVolts(AnalogInputNum_t eana);
+    static int analogReadMilliVolts(AnalogInputNum_t ain);
 
     /**
      * @brief Attach a user callback to the DIN interrupts.
@@ -105,8 +105,6 @@ private:
 
     static DigitalOutput* dout;
     static DigitalInput* din;
-
-    static const adc1_channel_t _eana[2];
 
     static void _controlTask(void *pvParameters);
 
