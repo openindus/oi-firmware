@@ -78,3 +78,79 @@ error:
     free(device);
     return -1;
 }
+
+/**
+ * @brief Perform a control or calibration command
+ * 
+ * @param dev Device instance
+ * @param cmd Command
+ * @return int 0=success, -1=error
+ */
+static int ads114s0x_ctrl_calib_cmd(ads114s0x_device_t* dev, uint8_t cmd)
+{
+    if (dev == NULL) {
+        goto error;
+    }
+
+    spi_transaction_t trans = {
+        .flags = 0,
+        .cmd = 0,
+        .addr = 0,
+        .length = 8,
+        .rxlength = 0,
+        .user = NULL,
+        .tx_buffer = &cmd,
+        .rx_buffer = NULL
+    };
+
+    esp_err_t err = spi_device_polling_transmit(dev->spi_handler, &trans);
+    if (err != ESP_OK) {
+        goto error;
+    }
+
+    return 0;
+
+error:
+    ESP_LOGE(TAG, "Failed to perform SPI transaction");
+    return -1;
+}
+
+int ads114s0x_wakeup(ads114s0x_device_t* dev)
+{
+    return ads114s0x_ctrl_calib_cmd(dev, ADS114S0X_CMD_WAKEUP);
+}
+
+int ads114s0x_powerdown(ads114s0x_device_t* dev)
+{
+    return ads114s0x_ctrl_calib_cmd(dev, ADS114S0X_CMD_POWERDOWN);
+}
+
+int ads114s0x_reset(ads114s0x_device_t* dev)
+{
+    return ads114s0x_ctrl_calib_cmd(dev, ADS114S0X_CMD_RESET);
+}
+
+int ads114s0x_start(ads114s0x_device_t* dev)
+{
+    return ads114s0x_ctrl_calib_cmd(dev, ADS114S0X_CMD_START);
+}
+
+int ads114s0x_stop(ads114s0x_device_t* dev)
+{
+    return ads114s0x_ctrl_calib_cmd(dev, ADS114S0X_CMD_STOP);
+}
+
+int ads114s0x_system_offset_calib(ads114s0x_device_t* dev)
+{
+    return ads114s0x_ctrl_calib_cmd(dev, ADS114S0X_CMD_SYOCAL);
+}
+
+int ads114s0x_system_gain_calib(ads114s0x_device_t* dev)
+{
+    return ads114s0x_ctrl_calib_cmd(dev, ADS114S0X_CMD_SYGCAL);
+}
+
+int ads114s0x_self_offset_calib(ads114s0x_device_t* dev)
+{
+    return ads114s0x_ctrl_calib_cmd(dev, ADS114S0X_CMD_SFOCAL);
+}
