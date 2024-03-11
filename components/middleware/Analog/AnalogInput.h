@@ -77,11 +77,11 @@ public:
 
     static int init(Ads866x_DeviceConfig_t* config);
 
-    int read(void);
-    float read(AnalogInput_Unit_t unit);
-    void setMode(AnalogInput_Mode_t mode);
-    void setResolution(AnalogInput_Resolution_t res);
-    void setReference(float ref);
+    int read(void) override;
+    float read(AnalogInput_Unit_t unit) override;
+    void setMode(AnalogInput_Mode_t mode) override;
+    void setResolution(AnalogInput_Resolution_t res) override;
+    void setReference(float ref) override;
 
 private:
 

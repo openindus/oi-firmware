@@ -50,8 +50,8 @@ public:
 
     static int init(ad5413_config_t* config, int nb);
 
-    int setMode(AnalogOutput_Mode_t mode);
-    int write(float value);
+    int setMode(AnalogOutput_Mode_t mode) override;
+    int write(float value) override;
 
 private:
 
