@@ -177,24 +177,44 @@ void CoreStandalone::init()
     ESP_ERROR_CHECK(i2c_driver_install(CORE_I2C_PORT_NUM, i2c_config.mode, 0, 0, 0));
 
     /**
-     * @brief SPI Init
+     * @brief SPI Init - RS User + CAN User
      * 
      */
     ESP_LOGI(CORE_TAG, "Initializes the bus SPI%u", CORE_SPI_USER_HOST+1);
     ESP_LOGI(CORE_TAG, "MOSI:  GPIO_NUM_%u | MISO:  GPIO_NUM_%u | CLK:  GPIO_NUM_%u",
         CORE_PIN_SPI_USER_MOSI, CORE_PIN_SPI_USER_MISO, CORE_PIN_SPI_USER_SCK);
 
+    spi_bus_config_t spi_user_config;
+    spi_user_config.mosi_io_num = CORE_PIN_SPI_USER_MOSI;
+    spi_user_config.miso_io_num = CORE_PIN_SPI_USER_MISO;
+    spi_user_config.sclk_io_num = CORE_PIN_SPI_USER_SCK;
+    spi_user_config.quadwp_io_num = -1;
+    spi_user_config.quadhd_io_num = -1;
+    spi_user_config.max_transfer_sz = 0;
+    spi_user_config.flags = 0;
+    spi_user_config.intr_flags = 0;
+
+    ESP_ERROR_CHECK(spi_bus_initialize(CORE_SPI_USER_HOST, &spi_user_config, SPI_DMA_CH_AUTO));
+
+    /**
+     * @brief SPI Init - SD Card + Ethernet + USB Host
+     * 
+     */
+    ESP_LOGI(CORE_TAG, "Initializes the bus SPI%u", CORE_SPI_HOST+1);
+    ESP_LOGI(CORE_TAG, "MOSI:  GPIO_NUM_%u | MISO:  GPIO_NUM_%u | CLK:  GPIO_NUM_%u",
+        CORE_PIN_SPI_MOSI, CORE_PIN_SPI_MISO, CORE_PIN_SPI_SCK);
+
     spi_bus_config_t spi_config;
-    spi_config.mosi_io_num = CORE_PIN_SPI_USER_MOSI;
-    spi_config.miso_io_num = CORE_PIN_SPI_USER_MISO;
-    spi_config.sclk_io_num = CORE_PIN_SPI_USER_SCK;
+    spi_config.mosi_io_num = CORE_PIN_SPI_MOSI;
+    spi_config.miso_io_num = CORE_PIN_SPI_MISO;
+    spi_config.sclk_io_num = CORE_PIN_SPI_SCK;
     spi_config.quadwp_io_num = -1;
     spi_config.quadhd_io_num = -1;
     spi_config.max_transfer_sz = 0;
     spi_config.flags = 0;
     spi_config.intr_flags = 0;
 
-    ESP_ERROR_CHECK(spi_bus_initialize(CORE_SPI_USER_HOST, &spi_config, SPI_DMA_CH_AUTO));
+    ESP_ERROR_CHECK(spi_bus_initialize(CORE_SPI_HOST, &spi_config, SPI_DMA_CH_AUTO));
 
     /**
      * @brief IO Expander init
