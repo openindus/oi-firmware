@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <string.h>
 #include "esp_err.h"
 #include "esp_log.h"
 #include "driver/gpio.h"
@@ -161,6 +162,11 @@ typedef struct __attribute__((packed)) {
     ads114s0x_reg_gpiocon_t gpiocon;
 } ads114s0x_register_map_t;
 
+typedef enum {
+    ADS114S0X_DEV_ID_ADS114S08 = 0b100, // ADS114S08 (12 channels, 16 bits)
+    ADS114S0X_DEV_ID_ADS114S06 = 0b101 // ADS114S06 (6 channels, 16 bits)
+} ads114s0x_dev_id_t;
+
 /* HAL */
 
 typedef struct {
@@ -179,7 +185,7 @@ typedef struct {
 /* Init */
 int ads114s0x_init(ads114s0x_device_t** dev, ads114s0x_config_t* conf);
 
-/* Control / Calibration */
+/* Control/Calibration */
 int ads114s0x_wakeup(ads114s0x_device_t* dev);
 int ads114s0x_powerdown(ads114s0x_device_t* dev);
 int ads114s0x_reset(ads114s0x_device_t* dev);
@@ -188,6 +194,11 @@ int ads114s0x_stop(ads114s0x_device_t* dev);
 int ads114s0x_system_offset_calib(ads114s0x_device_t* dev);
 int ads114s0x_system_gain_calib(ads114s0x_device_t* dev);
 int ads114s0x_self_offset_calib(ads114s0x_device_t* dev);
+
+/* Read data */
+
+/* Read/Write registers */
+int ads114s0x_get_id(ads114s0x_device_t* dev, ads114s0x_dev_id_t* dev_id);
 
 #ifdef __cplusplus
 }
