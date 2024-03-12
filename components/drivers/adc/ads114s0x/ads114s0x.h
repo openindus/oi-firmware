@@ -50,6 +50,119 @@ extern "C"
 #define ADS114S0X_REG_GPIODAT       0x10
 #define ADS114S0X_REG_GPIOCON       0x11
 
+typedef struct __attribute__((packed)) {
+    uint8_t dev_id : 3;
+    uint8_t reserved : 5;
+} ads114s0x_reg_id_t;
+
+typedef struct __attribute__((packed)) {
+    uint8_t fl_ref_l0 : 1;
+    uint8_t fl_ref_l1 : 1;
+    uint8_t fl_n_railn : 1;
+    uint8_t fl_n_railp : 1;
+    uint8_t fl_p_railn : 1;
+    uint8_t fl_p_railp : 1;
+    uint8_t rdy : 1;
+    uint8_t fl_por : 1;
+} ads114s0x_reg_status_t;
+
+typedef struct __attribute__((packed)) {
+    uint8_t muxn : 4;
+    uint8_t muxp : 4;
+} ads114s0x_reg_inpmux_t;
+
+typedef struct __attribute__((packed)) {
+    uint8_t gain : 3;
+    uint8_t pga_en : 2;
+    uint8_t delay : 3;
+} ads114s0x_reg_pga_t;
+
+typedef struct __attribute__((packed)) {
+    uint8_t dr : 3;
+    uint8_t filter : 1;
+    uint8_t mode : 1;
+    uint8_t clk : 1;
+    uint8_t g_chop : 1;
+} ads114s0x_reg_datarate_t;
+
+typedef struct __attribute__((packed)) {
+    uint8_t refcon : 2;
+    uint8_t refsel : 2;
+    uint8_t refn_buf : 1;
+    uint8_t refp_buf : 1;
+    uint8_t fl_ref_en : 2;
+} ads114s0x_reg_ref_t;
+
+typedef struct __attribute__((packed)) {
+    uint8_t imag : 4;
+    uint8_t unused : 2;
+    uint8_t psw : 1;
+    uint8_t fl_rail_en : 1;
+} ads114s0x_reg_idacmag_t;
+
+typedef struct __attribute__((packed)) {
+    uint8_t i1mux : 4;
+    uint8_t i2mux : 4;
+} ads114s0x_reg_idacmux_t;
+
+typedef struct __attribute__((packed)) {
+    uint8_t vb_ain0 : 1;
+    uint8_t vb_ain1 : 1;
+    uint8_t vb_ain2 : 1;
+    uint8_t vb_ain3 : 1;
+    uint8_t vb_ain4 : 1;
+    uint8_t vb_ain5 : 1;
+    uint8_t vb_ainc : 1;
+    uint8_t vb_level : 1;
+} ads114s0x_reg_vbias_t;
+
+typedef struct __attribute__((packed)) {
+    uint8_t sendstat : 1;
+    uint8_t crc : 1;
+    uint8_t timeout : 1;
+    uint8_t cal_samp : 2;
+    uint8_t sys_mon : 3;
+} ads114s0x_reg_sys_t;
+
+typedef struct __attribute__((packed)) {
+    uint16_t ofc;
+} ads114s0x_reg_ofcal_t;
+
+typedef struct __attribute__((packed)) {
+    uint16_t fsc;
+} ads114s0x_reg_fscal_t;
+
+typedef struct __attribute__((packed)) {
+    uint8_t dat : 4;
+    uint8_t dir : 4;
+} ads114s0x_reg_gpiodat_t;
+
+typedef struct __attribute__((packed)) {
+    uint8_t con : 4;
+    uint8_t unused : 4;
+} ads114s0x_reg_gpiocon_t;
+
+typedef struct __attribute__((packed)) {
+    ads114s0x_reg_id_t id;
+    ads114s0x_reg_status_t status;
+    ads114s0x_reg_inpmux_t inpmux;
+    ads114s0x_reg_pga_t pga;
+    ads114s0x_reg_datarate_t datarate;
+    ads114s0x_reg_ref_t ref;
+    ads114s0x_reg_idacmag_t idacmag;
+    ads114s0x_reg_idacmux_t idacmux;
+    ads114s0x_reg_vbias_t vbias;
+    ads114s0x_reg_sys_t sys;
+    uint8_t reserved1;
+    ads114s0x_reg_ofcal_t ofcal;
+    uint8_t reserved2;
+    ads114s0x_reg_fscal_t fscal;
+    ads114s0x_reg_gpiodat_t gpiodat;
+    ads114s0x_reg_gpiocon_t gpiocon;
+} ads114s0x_register_map_t;
+
+/* HAL */
+
 typedef struct {
     spi_host_device_t host_id;
     int sclk_freq;
