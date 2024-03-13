@@ -24,9 +24,9 @@ class ModuleControl
 {
 public:
 
-    inline ModuleControl(int id) {
+    inline ModuleControl(int sn) {
         _instances.push_back(this);
-        setId(_instances.back(), id);
+        _sn = sn;
     }
 
     friend class ModuleMaster;
@@ -47,11 +47,20 @@ protected:
         return instance->_id;
     }
 
+    inline static void setSN(ModuleControl* instance, int sn) {
+        instance->_sn = sn;
+    }
+
+    inline static int getSN(ModuleControl* instance) {
+        return instance->_sn;
+    }
+
     static std::vector<ModuleControl*> _instances;
 
 private:
 
     uint16_t _id;
+    int _sn;
 
     void _ledState(LedState_t state, LedColor_t color=LED_NONE, uint32_t period=0);
 

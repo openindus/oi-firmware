@@ -67,10 +67,10 @@ bool ModuleMaster::autoId(void)
         sort(_ids.begin(), _ids.end(), std::greater<uint16_t>());
         for (int i=0; i<_ids.size(); i++) {
             // Set the slave id if not already initialized by user in main.cpp
-            if (ModuleControl::getId(ModuleControl::_instances[i]) == 0) {
+            if (ModuleControl::getSN(ModuleControl::_instances[i]) == 0) {
                 ModuleControl::setId(ModuleControl::_instances[i], _ids[i]);
             } else {
-                ModuleControl::setId(ModuleControl::_instances[i], ModuleMaster::getIdFromSN(ModuleControl::getId(ModuleControl::_instances[i])));
+                ModuleControl::setId(ModuleControl::_instances[i], ModuleMaster::getIdFromSN(ModuleControl::getSN(ModuleControl::_instances[i])));
             }
         }
         frame.command = MODULE_SET_STATUS;
