@@ -11,44 +11,6 @@
 static const char TAG[] = "ads114s0x";
 
 /**
- * @brief Initialize the bus SPI
- * 
- * @param host_id SPI host device
- * @param sclk_freq clock frequency
- * @param cs chip select
- * @param handle SPI handler
- * @return int 0=success, -1=error
- */
-static int ads114s0x_spi_init(spi_host_device_t host_id, int sclk_freq, int cs, 
-    spi_device_handle_t *handle)
-{
-    spi_device_interface_config_t spi_conf = {
-        .command_bits = 16,
-        .address_bits = 0,
-        .dummy_bits = 0,
-        .mode = 1,
-        .duty_cycle_pos = 0,
-        .cs_ena_pretrans = 0,
-        .cs_ena_posttrans = 0,
-        .clock_speed_hz = sclk_freq,
-        .input_delay_ns = 0,
-        .spics_io_num = cs,
-        .flags = 0,
-        .queue_size = 1,
-        .pre_cb = NULL,
-        .post_cb = NULL
-    };
-
-    esp_err_t err = spi_bus_add_device(host_id, &spi_conf, handle);
-    if (err != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to add device");
-        return -1;
-    }
-
-    return 0;
-}
-
-/**
  * @brief Initialize the device
  * 
  * @param dev Device instance
@@ -63,11 +25,29 @@ int ads114s0x_init(ads114s0x_device_t** dev, ads114s0x_config_t* conf)
         goto error;
     }
 
-    /** @todo: init SPI and GPIOs */
-    int err = 0;
-    err |= ads114s0x_spi_init(conf->host_id, conf->sclk_freq, conf->cs, &device->spi_handler);
-    if (err != 0) {
-        ESP_LOGE(TAG, "Failed to initialize the SPI");
+    /** @todo: init GPIOs */
+
+    /* SPI init*/
+    spi_device_interface_config_t spi_conf = {
+        .command_bits = 16,
+        .address_bits = 0,
+        .dummy_bits = 0,
+        .mode = 1,
+        .duty_cycle_pos = 0,
+        .cs_ena_pretrans = 0,
+        .cs_ena_posttrans = 0,
+        .clock_speed_hz = conf->sclk_freq,
+        .input_delay_ns = 0,
+        .spics_io_num = conf->cs,
+        .flags = 0,
+        .queue_size = 1,
+        .pre_cb = NULL,
+        .post_cb = NULL
+    };
+
+    esp_err_t err = spi_bus_add_device(conf->host_id, &spi_conf, &device->spi_handler);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to initialize th SPI device");
         goto error;
     }
 
@@ -86,7 +66,7 @@ error:
  * @param cmd Command
  * @return int 0=success, -1=error
  */
-static int ads114s0x_ctrl_calib_cmd(ads114s0x_device_t* dev, uint8_t cmd)
+static int ads114s0x_command(ads114s0x_device_t* dev, uint8_t cmd)
 {
     if (dev == NULL) {
         goto error;
@@ -117,73 +97,98 @@ error:
 
 int ads114s0x_wakeup(ads114s0x_device_t* dev)
 {
-    return ads114s0x_ctrl_calib_cmd(dev, ADS114S0X_CMD_WAKEUP);
+    return ads114s0x_command(dev, ADS114S0X_CMD_WAKEUP);
 }
 
 int ads114s0x_powerdown(ads114s0x_device_t* dev)
 {
-    return ads114s0x_ctrl_calib_cmd(dev, ADS114S0X_CMD_POWERDOWN);
+    return ads114s0x_command(dev, ADS114S0X_CMD_POWERDOWN);
 }
 
 int ads114s0x_reset(ads114s0x_device_t* dev)
 {
-    return ads114s0x_ctrl_calib_cmd(dev, ADS114S0X_CMD_RESET);
+    return ads114s0x_command(dev, ADS114S0X_CMD_RESET);
 }
 
 int ads114s0x_start(ads114s0x_device_t* dev)
 {
-    return ads114s0x_ctrl_calib_cmd(dev, ADS114S0X_CMD_START);
+    return ads114s0x_command(dev, ADS114S0X_CMD_START);
 }
 
 int ads114s0x_stop(ads114s0x_device_t* dev)
 {
-    return ads114s0x_ctrl_calib_cmd(dev, ADS114S0X_CMD_STOP);
+    return ads114s0x_command(dev, ADS114S0X_CMD_STOP);
 }
 
 int ads114s0x_system_offset_calib(ads114s0x_device_t* dev)
 {
-    return ads114s0x_ctrl_calib_cmd(dev, ADS114S0X_CMD_SYOCAL);
+    return ads114s0x_command(dev, ADS114S0X_CMD_SYOCAL);
 }
 
 int ads114s0x_system_gain_calib(ads114s0x_device_t* dev)
 {
-    return ads114s0x_ctrl_calib_cmd(dev, ADS114S0X_CMD_SYGCAL);
+    return ads114s0x_command(dev, ADS114S0X_CMD_SYGCAL);
 }
 
 int ads114s0x_self_offset_calib(ads114s0x_device_t* dev)
 {
-    return ads114s0x_ctrl_calib_cmd(dev, ADS114S0X_CMD_SFOCAL);
+    return ads114s0x_command(dev, ADS114S0X_CMD_SFOCAL);
 }
 
 /**
- * @brief Read data by command
+ * @brief Read data
  * 
  * @param dev Device instance
- * @param cmd Command
+ * @param data ADC data Bytes
  * @return int 0=success, -1=error
  */
-static int ads114s0x_data_read_cmd(ads114s0x_device_t* dev, uint8_t cmd)
+int ads114s0x_read_data(ads114s0x_device_t* dev, uint16_t* data)
 {
+    if (dev == NULL) {
+        goto error;
+    }
+
     /**
-     * @todo
+     * @todo STATUS and CRC bytes are not implemented
      * 
      */
+
+    spi_transaction_t trans = {
+        .flags = 0,
+        .cmd = (uint16_t)(ADS114S0X_CMD_RDATA),
+        .addr = 0,
+        .length = 16,
+        .rxlength = 16,
+        .user = NULL,
+        .tx_buffer = NULL,
+        .rx_buffer = &data
+    };
+
+    esp_err_t err = spi_device_polling_transmit(dev->spi_handler, &trans);
+    if (err != ESP_OK) {
+        goto error;
+    }
+
     return 0;
+
+error:
+    ESP_LOGE(TAG, "Failed to read register");
+    return -1;
 }
 
 /**
- * @brief Read registers
+ * @brief Read register
  * 
  * @param dev Device instance
- * @param reg register values
- * @param start_reg starting registers address
- * @param num number of registers
+ * @param reg_addr Register address
+ * @param reg_data Register data
+ * @param reg_size Register size
  * @return int 0=success, -1=error
  */
-static int ads114s0x_read_register_cmd(ads114s0x_device_t* dev, uint8_t* reg, uint8_t start_reg, size_t num)
+int ads114s0x_read_register(ads114s0x_device_t* dev, uint8_t reg_addr, uint8_t* reg_data, size_t reg_size)
 {
-    size_t len = num * sizeof(uint8_t);
-    uint8_t* buf = (uint8_t*)malloc(num * sizeof(uint8_t));
+    size_t len = reg_size * sizeof(uint8_t);
+    uint8_t* buf = (uint8_t*)malloc(reg_size * sizeof(uint8_t));
 
     if ((dev == NULL) || (buf == NULL)) {
         goto error;
@@ -191,10 +196,10 @@ static int ads114s0x_read_register_cmd(ads114s0x_device_t* dev, uint8_t* reg, ui
 
     spi_transaction_t trans = {
         .flags = 0,
-        .cmd = (uint16_t)(((ADS114S0X_CMD_RREG | (start_reg & 0x1F)) << 8) | ((num - 1) & 0xFF)),
+        .cmd = (uint16_t)(((ADS114S0X_CMD_RREG | (reg_addr & 0x1F)) << 8) | ((reg_size - 1) & 0xFF)),
         .addr = 0,
-        .length = (num * 8),
-        .rxlength = (num * 8),
+        .length = (reg_size * 8),
+        .rxlength = (reg_size * 8),
         .user = NULL,
         .tx_buffer = NULL,
         .rx_buffer = buf
@@ -205,7 +210,7 @@ static int ads114s0x_read_register_cmd(ads114s0x_device_t* dev, uint8_t* reg, ui
         goto error;
     }
 
-    memcpy(reg, buf, len); 
+    memcpy(reg_data, buf, len); 
     free(buf);   
     return 0;
 
@@ -216,19 +221,19 @@ error:
 }
 
 /**
- * @brief Write registers
+ * @brief Write register
  * 
  * @param dev Device instance
- * @param reg register values
- * @param start_reg starting registers address
- * @param num number of registers
+ * @param reg_addr Register address
+ * @param reg_data Register data
+ * @param reg_size Register size
  * @return int 0=success, -1=error
  */
-static int ads114s0x_write_register_cmd(ads114s0x_device_t* dev, uint8_t* reg, uint8_t start_reg, size_t num)
+int ads114s0x_write_register(ads114s0x_device_t* dev, uint8_t reg_addr, uint8_t* reg_data, size_t reg_size)
 {
-    size_t len = num * sizeof(uint8_t);
-    uint8_t* buf = (uint8_t*)malloc(num * sizeof(uint8_t));
-    memcpy(buf, reg, len); 
+    size_t len = reg_size * sizeof(uint8_t);
+    uint8_t* buf = (uint8_t*)malloc(reg_size * sizeof(uint8_t));
+    memcpy(buf, reg_data, len); 
 
     if ((dev == NULL) || (buf == NULL)) {
         goto error;
@@ -236,9 +241,9 @@ static int ads114s0x_write_register_cmd(ads114s0x_device_t* dev, uint8_t* reg, u
 
     spi_transaction_t trans = {
         .flags = 0,
-        .cmd = (uint16_t)(((ADS114S0X_CMD_WREG | (start_reg & 0x1F)) << 8) | ((num - 1) & 0xFF)),
+        .cmd = (uint16_t)(((ADS114S0X_CMD_WREG | (reg_addr & 0x1F)) << 8) | ((reg_size - 1) & 0xFF)),
         .addr = 0,
-        .length = (num * 8),
+        .length = (reg_size * 8),
         .rxlength = 0,
         .user = NULL,
         .tx_buffer = buf,
@@ -257,12 +262,4 @@ error:
     ESP_LOGE(TAG, "Failed to read register");
     free(buf);
     return -1;
-}
-
-int ads114s0x_get_id(ads114s0x_device_t* dev, ads114s0x_dev_id_t* dev_id)
-{
-    ads114s0x_reg_id_t reg_id = {0};
-    int ret = ads114s0x_read_register_cmd(dev, (uint8_t*)&reg_id, ADS114S0X_REG_ID, sizeof(ads114s0x_reg_id_t));
-    *dev_id = (ads114s0x_dev_id_t)reg_id.dev_id;
-    return ret;
 }
