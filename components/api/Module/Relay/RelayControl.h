@@ -25,7 +25,7 @@ class RelayControl : public ModuleControl
 {
 public:
 
-    RelayControl(void) : ModuleControl() {}
+    RelayControl(uint16_t id = 0) : ModuleControl(id) {}
 
     void digitalWrite(Relay_t relay, uint8_t level);
 

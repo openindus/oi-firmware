@@ -24,8 +24,9 @@ class ModuleControl
 {
 public:
 
-    inline ModuleControl(void) {
+    inline ModuleControl(int id) {
         _instances.push_back(this);
+        setId(_instances.back(), id);
     }
 
     friend class ModuleMaster;

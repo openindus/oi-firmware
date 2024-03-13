@@ -24,7 +24,7 @@ class DiscreteControl : public ModuleControl
 {
 public:
 
-    DiscreteControl(void) : ModuleControl() {}
+    DiscreteControl(uint16_t id = 0) : ModuleControl(id) {}
 
     void digitalWrite(DigitalOutputNum_t dout, uint8_t level);
     void analogWrite(DigitalOutputNum_t dout, uint8_t duty);

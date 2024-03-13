@@ -25,7 +25,7 @@ class StepperControl : public ModuleControl
 {
 public:
 
-    StepperControl(void) : ModuleControl() {}
+    StepperControl(uint16_t id = 0) : ModuleControl(id) {}
 
     int digitalRead(DigitalInputNum_t din);
     void attachInterrupt(DigitalInputNum_t din, IsrCallback_t callback, InterruptMode_t mode=RISING_MODE);

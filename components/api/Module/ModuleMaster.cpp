@@ -66,7 +66,12 @@ bool ModuleMaster::autoId(void)
     if (ModuleControl::_instances.size() == _ids.size()) {
         sort(_ids.begin(), _ids.end(), std::greater<uint16_t>());
         for (int i=0; i<_ids.size(); i++) {
-            ModuleControl::setId(ModuleControl::_instances[i], _ids[i]);
+            // Set the slave id if not already initialized by user in main.cpp
+            if (ModuleControl::getId(ModuleControl::_instances[i]) == 0) {
+                ModuleControl::setId(ModuleControl::_instances[i], _ids[i]);
+            } else {
+                ModuleControl::setId(ModuleControl::_instances[i], ModuleMaster::getIdFromSN(ModuleControl::getId(ModuleControl::_instances[i])));
+            }
         }
         frame.command = MODULE_SET_STATUS;
         BusRs::write(&frame);
@@ -121,8 +126,28 @@ void ModuleMaster::handleEvent(Module_Event_t event, uint16_t id, int num)
             }
         }
     } else {
-        ESP_LOGW(MODULE_TAG, "Event does no  t exist: event=0x%02x, id=%d", event, id);
+        ESP_LOGW(MODULE_TAG, "Event does not exist: event=0x%02x, id=%d", event, id);
     }
+}
+
+uint16_t ModuleMaster::getIdFromSN(int num)
+{
+    uint16_t id;
+
+    BusRs::Frame_t frame;
+    frame.command = MODULE_GET_BUS_ID;
+    frame.identifier = 0;
+    frame.broadcast = true;
+    frame.direction = 1;
+    frame.ack = true;
+    frame.length = 4;
+    frame.data = (uint8_t*)malloc(4);
+    memcpy(frame.data, &num, 4); // Serial number
+
+    BusRs::requestFrom(&frame, pdMS_TO_TICKS(100));
+    memcpy(&id, frame.data, 2);
+    free(frame.data);
+    return id;
 }
 
 void ModuleMaster::_busTask(void *pvParameters) 
@@ -163,19 +188,7 @@ void ModuleMaster::_programmingTask(void *pvParameters)
     frame.data = (uint8_t*)malloc(1024);
 
     /* Get bus ID */
-    frame.command = MODULE_BUS_ID;
-    frame.identifier = 0;
-    frame.broadcast = true;
-    frame.direction = 1;
-    frame.ack = true;
-    frame.length = 4;
-    memcpy(frame.data, &num, 4); // Serial number
-    if (BusRs::requestFrom(&frame, pdMS_TO_TICKS(100)) < 0) {
-        ModuleStandalone::ledBlink(LED_RED, 1000); // Error
-    } else {
-        memcpy(&id, frame.data, 2);
-        frame.identifier = id;
-    }
+    id = getIdFromSN(num);
 
     /* FlashLoader begin */
     frame.command = MODULE_FLASH_LOADER_BEGIN;

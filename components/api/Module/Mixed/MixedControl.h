@@ -25,7 +25,7 @@ class MixedControl : public ModuleControl, public Mixed
 {
 public:
 
-    MixedControl(void) : ModuleControl() {}
+    MixedControl(uint16_t id = 0) : ModuleControl(id) {}
 
     /* Digital Output */
     void digitalWrite(DigitalOutputNum_t num, uint8_t level);

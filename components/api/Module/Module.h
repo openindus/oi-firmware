@@ -40,8 +40,10 @@ enum Module_Command_e {
     MODULE_REQUEST                  = 0x14,
     MODULE_RESPONSE                 = 0x15,
     MODULE_EVENT                    = 0x16,
-    MODULE_BUS_ID                   = 0x17,
+    MODULE_GET_BUS_ID               = 0x17,
     MODULE_LED_STATE                = 0x18,
+    MODULE_SET_ID                   = 0x19,
+
 };
 
 typedef enum {
