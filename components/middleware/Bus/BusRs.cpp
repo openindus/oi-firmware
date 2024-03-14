@@ -66,7 +66,10 @@ void BusRs::begin(uart_port_t port, gpio_num_t tx_num, gpio_num_t rx_num)
 
     ESP_ERROR_CHECK(uart_set_pin(_port, tx_num, rx_num, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
 
-    // esp_log_level_set(BUS_RS_TAG, ESP_LOG_WARN);
+#if !defined(DEBUG_BUS)
+    esp_log_level_set(BUS_RS_TAG, ESP_LOG_WARN);
+#endif
+
 }
 
 /**

@@ -51,7 +51,10 @@ void BusCan::begin(gpio_num_t txNum, gpio_num_t rxNum)
     ESP_LOGI(BUS_TWAI_TAG, "start twai driver");
     ESP_ERROR_CHECK(twai_start());
 
-    // esp_log_level_set(BUS_TWAI_TAG, ESP_LOG_WARN);
+#if !defined(DEBUG_BUS)
+    esp_log_level_set(BUS_TWAI_TAG, ESP_LOG_WARN);
+#endif
+
 }
 
 /**
