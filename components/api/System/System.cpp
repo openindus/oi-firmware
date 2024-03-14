@@ -68,29 +68,13 @@ void System::init(void)
     if (err != 0) {
         ESP_LOGE(TAG, "Failed to initialize module");
         ModuleStandalone::ledBlink(LED_RED, 250);
-    }
-
-    /* Start a task which listen for user to input "console" */
-    UsbConsole::listen();
-
-    /* Module Initialized */
-    ModuleStandalone::ledBlink(LED_BLUE, 1000);
-
-    /* Wait for slaves modules to init and give time to user script to enable console */
-#if !defined(MODULE_SLAVE)
-    vTaskDelay(500/portTICK_PERIOD_MS);
-#endif
-
-    /* On master module, call autoId */
-#if defined(MODULE_MASTER)
-    if (ModuleMaster::autoId()) {
-        ModuleStandalone::ledBlink(LED_GREEN, 1000); // Paired
+        UsbConsole::begin(true); // Force console to start, convenient for debugging
+        return;
     } else {
-        ModuleStandalone::ledBlink(LED_RED, 1000); // Paired error
+        /* Module Initialized */
+        ModuleStandalone::ledBlink(LED_BLUE, 1000);
     }
-#endif
 
-#if defined(MODULE_MASTER) || defined(MODULE_STANDALONE)
     /* Check reset reason */
     esp_reset_reason_t reason = esp_reset_reason();
     if ((reason != ESP_RST_POWERON) && 
@@ -99,19 +83,43 @@ void System::init(void)
         ESP_LOGE(TAG, "Reset reason : %d", reason);
         ModuleStandalone::ledBlink(LED_RED, 1000); // Error
         UsbConsole::begin(true); // Force console to start, convenient for debugging
-    } else {
-        if (!UsbConsole::begin()) { // console will start only if user input "console" during startup
-            /* Start main task if console is not started  */
-            ESP_LOGI(TAG, "Create main task");
-            vTaskDelay(1);
-            xTaskCreate(_mainTask, "Main task", 8192, NULL, 1, NULL);
-#if defined(CONFIG_FORCE_CONSOLE)
-            UsbConsole::begin(true); // Force console, will failed if Serial.begin() is called in user code
-#endif
-        }
+        return;
     }
-#else // defined(MODULE_SLAVE)
+
+#if defined(MODULE_SLAVE)
+
     UsbConsole::begin(true); // Force console on slave module
+    return;
+
+#else
+
+    /* Start a task which listen for user to input "console" */
+    UsbConsole::listen();
+    
+    /* Wait for slaves modules to init and give time to user script to enable console */
+    vTaskDelay(500/portTICK_PERIOD_MS);
+
+    /* On master module, call autoId */
+#if defined(MODULE_MASTER)
+    if (ModuleMaster::autoId()) {
+        ModuleStandalone::ledBlink(LED_GREEN, 1000); // Paired
+    } else {
+        ModuleStandalone::ledBlink(LED_RED, 1000); // Paired error
+        UsbConsole::begin(true); // Force console to start, convenient for debugging
+        return;
+    }
+#endif
+
+    if (!UsbConsole::begin()) { // console will start only if user input "console" during startup
+        /* Start main task if console is not started  */
+        ESP_LOGI(TAG, "Create main task");
+        vTaskDelay(1);
+        xTaskCreate(_mainTask, "Main task", 8192, NULL, 1, NULL);
+#if defined(CONFIG_FORCE_CONSOLE)
+        UsbConsole::begin(true); // Force console, will failed if Serial.begin() is called in user code
+#endif
+    }
+    
 #endif
 }
 
