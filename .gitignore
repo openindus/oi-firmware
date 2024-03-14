@@ -1,6 +1,7 @@
 .oi
 .pio
 .vscode
+build
 sdkconfig
 sdkconfig.core
 sdkconfig.discrete
