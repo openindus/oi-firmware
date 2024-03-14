@@ -85,6 +85,8 @@ void System::init(void)
 #if defined(MODULE_MASTER)
     if (ModuleMaster::autoId()) {
         ModuleStandalone::ledBlink(LED_GREEN, 1000); // Paired
+    } else {
+        ModuleStandalone::ledBlink(LED_RED, 1000); // Paired error
     }
 #endif
 

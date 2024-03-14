@@ -48,11 +48,78 @@ void ModuleMaster::init(void)
 bool ModuleMaster::autoId(void)
 {
     ESP_LOGI(MODULE_TAG, "Auto ID");
-    
-    _ids.clear();
 
+    /* Check if IDs are in bus order or by Serial Number */
+    int num_id_auto = 0;
+    int num_id_sn = 0;
+
+    for (int i=0; i<ModuleControl::_instances.size(); i++) {
+        if (ModuleControl::getSN(ModuleControl::_instances[i]) == 0) {
+            num_id_auto++;
+        } else {
+            num_id_sn++;
+        }
+    }
+
+    if ((num_id_auto > 0) && (num_id_sn > 0)) {
+        ESP_LOGE(MODULE_TAG, "Modules must be initialized using the same constructor. You cannot initialize some module without SN and some modules with SN.");
+        ESP_LOGE(MODULE_TAG, "Number of module with SN:%i", num_id_sn);
+        ESP_LOGE(MODULE_TAG, "Number of module without SN:%i", num_id_auto);
+        return false;
+    }
+
+    /* Initialize module with auto id (bus order) */
+    if (num_id_auto) {
+        
+        _ids.clear();
+
+        BusRs::Frame_t frame;
+        frame.command = MODULE_AUTO_ID;
+        frame.identifier = 0;
+        frame.broadcast = true;
+        frame.direction = 1;
+        frame.ack = false;
+        frame.length = 0;
+        BusRs::write(&frame);
+
+        ModuleStandalone::ledOn(LED_YELLOW);
+
+        /* Wait */
+        vTaskDelay(500/portTICK_PERIOD_MS);
+    
+        if (ModuleControl::_instances.size() == _ids.size()) {
+            sort(_ids.begin(), _ids.end(), std::greater<uint16_t>());
+            for (int i=0; i<ModuleControl::_instances.size(); i++) {
+                ModuleControl::setId(ModuleControl::_instances[i], _ids[i]);
+                ModuleControl::_instances[i]->ledOn(LED_YELLOW);
+                vTaskDelay(50/portTICK_PERIOD_MS);
+            }
+        } else {
+            ESP_LOGE(MODULE_TAG, "Number of instantiated modules: %d",  ModuleControl::_instances.size());
+            ESP_LOGE(MODULE_TAG, "Number of IDs received: %d",  _ids.size());
+            return false;
+        }
+    }
+
+    /* Initialize module with SN */
+    else {
+        for (int i=0; i<ModuleControl::_instances.size(); i++) {
+            uint16_t current_id = ModuleMaster::getIdFromSN(ModuleControl::getSN(ModuleControl::_instances[i]));
+            if (current_id != 0) {
+                ModuleControl::setId(ModuleControl::_instances[i], current_id);
+                ModuleControl::_instances[i]->ledOn(LED_YELLOW);
+                vTaskDelay(50/portTICK_PERIOD_MS);
+            } else {
+                ESP_LOGE(MODULE_TAG, "Cannot instanciate module with SN:%i",  ModuleControl::getSN(ModuleControl::_instances[i]));
+                return false;
+            }
+        }
+    }
+
+    /* Success, broadcast message to set all led green */
+    vTaskDelay(50/portTICK_PERIOD_MS);
     BusRs::Frame_t frame;
-    frame.command = MODULE_AUTO_ID;
+    frame.command = MODULE_SET_STATUS;
     frame.identifier = 0;
     frame.broadcast = true;
     frame.direction = 1;
@@ -60,27 +127,7 @@ bool ModuleMaster::autoId(void)
     frame.length = 0;
     BusRs::write(&frame);
 
-    /* Wait */
-    vTaskDelay(1000/portTICK_PERIOD_MS);
-
-    if (ModuleControl::_instances.size() == _ids.size()) {
-        sort(_ids.begin(), _ids.end(), std::greater<uint16_t>());
-        for (int i=0; i<_ids.size(); i++) {
-            // Set the slave id if not already initialized by user in main.cpp
-            if (ModuleControl::getSN(ModuleControl::_instances[i]) == 0) {
-                ModuleControl::setId(ModuleControl::_instances[i], _ids[i]);
-            } else {
-                ModuleControl::setId(ModuleControl::_instances[i], ModuleMaster::getIdFromSN(ModuleControl::getSN(ModuleControl::_instances[i])));
-            }
-        }
-        frame.command = MODULE_SET_STATUS;
-        BusRs::write(&frame);
-        return true;
-    } else {
-        ESP_LOGE(MODULE_TAG, "Number of instantiated modules: %d",  ModuleControl::_instances.size());
-        ESP_LOGE(MODULE_TAG, "Number of IDs received: %d",  _ids.size());
-        return false;
-    }
+    return true;
 }
 
 void autoTest(void)
@@ -132,7 +179,7 @@ void ModuleMaster::handleEvent(Module_Event_t event, uint16_t id, int num)
 
 uint16_t ModuleMaster::getIdFromSN(int num)
 {
-    uint16_t id;
+    uint16_t id = 0;
 
     BusRs::Frame_t frame;
     frame.command = MODULE_GET_BUS_ID;
