@@ -93,7 +93,6 @@ void ModuleStandalone::ledOff()
  */
 void ModuleStandalone::ledBlink(LedColor_t color, uint32_t period)
 {
-    Led::off(); // To avoid asyncronous blink at startup
     Led::blink(color, period);
 }
 

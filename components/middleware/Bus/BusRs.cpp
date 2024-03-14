@@ -66,7 +66,7 @@ void BusRs::begin(uart_port_t port, gpio_num_t tx_num, gpio_num_t rx_num)
 
     ESP_ERROR_CHECK(uart_set_pin(_port, tx_num, rx_num, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
 
-    esp_log_level_set(BUS_RS_TAG, ESP_LOG_WARN);
+    // esp_log_level_set(BUS_RS_TAG, ESP_LOG_WARN);
 }
 
 /**
@@ -102,8 +102,8 @@ void BusRs::write(Frame_t* frame, TickType_t timeout)
     }
     free(buffer);
     buffer = NULL;
-    ESP_LOGI(BUS_RS_TAG, "WRITE - CMD: 0x%02X | ID: 0x%02X | SEQ: 0x%02X | CHKSUM: 0x%02X | DATA:", \
-            frame->command, frame->identifier, frame->seq_num, frame->checksum);
+    ESP_LOGI(BUS_RS_TAG, "WRITE - ID: %u | CMD: 0x%02X | SEQ: 0x%02X | CHKSUM: 0x%02X | DATA:", \
+            frame->identifier, frame->command, frame->seq_num, frame->checksum);
     ESP_LOG_BUFFER_HEX_LEVEL(BUS_RS_TAG, frame->data, frame->length, ESP_LOG_INFO);
 }
 
@@ -158,8 +158,8 @@ succeed:
     free(buffer);
     buffer = NULL;
     xSemaphoreGive(_semaphore);
-    ESP_LOGI(BUS_RS_TAG, "RECV - CMD: 0x%02X | ID: 0x%02X | SEQ: 0x%02X | CHKSUM: 0x%02X | DATA:", \
-            frame->command, frame->identifier, frame->seq_num, frame->checksum);
+    ESP_LOGI(BUS_RS_TAG, "RECV - ID: %u | CMD: 0x%02X | SEQ: 0x%02X | CHKSUM: 0x%02X | DATA:", \
+            frame->identifier, frame->command, frame->seq_num, frame->checksum);
     ESP_LOG_BUFFER_HEX_LEVEL(BUS_RS_TAG, frame->data, frame->length, ESP_LOG_INFO);
     return 0;
 }

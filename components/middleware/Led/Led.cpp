@@ -120,6 +120,7 @@ void Led::blink(LedColor_t color, uint32_t period)
         ESP_LOGV(TAG, "led blink color:0x%02x | period:%u", color, period);
         _control.color = color;
         _control.period = period;
+        _control.blinkStatus = true;
         _control.blink = true;
         xTaskNotify(_taskHandle, 0, eNoAction);
     }
