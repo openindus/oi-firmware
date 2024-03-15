@@ -76,6 +76,23 @@ void AnalogInputAds866x::setMode(AnalogInput_Mode_t mode)
     }
 }
 
+void AnalogInputAds866x::setVoltageRange(AnalogInput_VoltageRange_t range)
+{
+    if (_mode == AIN_MODE_CURRENT) {
+        if (range != AIN_VOLTAGE_RANGE_0_2V56) {
+            ESP_LOGE(TAG,"Range in current mode cannot be modified !");
+        }
+        Ads866x_setChannelRange(_num, AIN_VOLTAGE_RANGE_0_2V56);
+    }
+    else if (range == AIN_VOLTAGE_RANGE_0_10V24 || range == AIN_VOLTAGE_RANGE_0_1V28
+            || range == AIN_VOLTAGE_RANGE_0_2V56 || range == AIN_VOLTAGE_RANGE_0_5V12) {
+        Ads866x_setChannelRange(_num, range);
+    } else {
+        ESP_LOGE(TAG, "Undefined range");
+    }
+}
+
+
 void AnalogInputAds866x::setResolution(AnalogInput_Resolution_t res)
 {
     if (res == AIN_RES_10_BITS) {
@@ -85,9 +102,4 @@ void AnalogInputAds866x::setResolution(AnalogInput_Resolution_t res)
     } else {
         ESP_LOGE(TAG, "Undefined resolution");
     }    
-}
-
-void AnalogInputAds866x::setReference(float ref)
-{
-    Ads866x_setAnalogReference(ref);
 }

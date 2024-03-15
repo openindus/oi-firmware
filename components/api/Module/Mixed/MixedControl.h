@@ -39,12 +39,11 @@ public:
     void detachInterrupt(DigitalInputNum_t num) override;
 
     /* Analog Input */
-    void analogInputMode(AnalogInput_Num_t num, AnalogInput_Mode_t mode) override;
-    void analogInputResolution(AnalogInput_Resolution_t res) override;
-    void analogInputReference(float ref) override;
-    int analogRead(AnalogInput_Num_t num) override;
-    float analogReadMilliVolts(AnalogInput_Num_t num) override;
-    float analogReadMilliAmps(AnalogInput_Num_t num);
+    void analogInputMode(AnalogInput_Num_t num, AnalogInput_Mode_t mode);
+    void analogInputVoltageRange(AnalogInput_Num_t num, AnalogInput_VoltageRange_t range);
+    void analogInputResolution(AnalogInput_Resolution_t res);
+    int analogRead(AnalogInput_Num_t num);
+    float analogReadMilliVolts(AnalogInput_Num_t num);
 
     /* Analog Output */
     void analogOutputMode(AnalogOutput_Num_t num, AnalogOutput_Mode_t mode) override;

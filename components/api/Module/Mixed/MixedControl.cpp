@@ -56,17 +56,27 @@ void MixedControl::analogInputMode(AnalogInput_Num_t num, AnalogInput_Mode_t mod
     ctrlRequest(msgBytes);
 }
 
+void MixedControl::analogInputVoltageRange(AnalogInput_Num_t num, AnalogInput_VoltageRange_t range)
+{
+    ModuleCmd_RequestMsg_t msg;
+    msg.id = REQUEST_ANALOG_INPUT_MODE;
+    msg.param = (uint16_t)num;
+    msg.data = (uint32_t)mode;
+    request(msg);
+}
+
+void MixedControl::analogInputVoltageRange(AnalogInput_Num_t num, AnalogInput_VoltageRange_t range)
+{
+    ModuleCmd_RequestMsg_t msg;
+    msg.id = REQUEST_ANALOG_INPUT_VOLTAGE_RANGE;
+    msg.param = (uint16_t)num;
+    msg.data = (uint32_t)range;
+    request(msg);
+}
+
 void MixedControl::analogInputResolution(AnalogInput_Resolution_t res)
 {
     std::vector<uint8_t> msgBytes = {CONTROL_ANALOG_INPUT_RESOLUTION, (uint8_t)res};
-    ctrlRequest(msgBytes);
-}
-
-void MixedControl::analogInputReference(float ref)
-{
-    std::vector<uint8_t> msgBytes = {CONTROL_ANALOG_INPUT_RESOLUTION};
-    uint8_t* ptr = reinterpret_cast<uint8_t*>(&ref);
-    msgBytes.insert(msgBytes.end(), ptr, ptr + sizeof(float));
     ctrlRequest(msgBytes);
 }
 

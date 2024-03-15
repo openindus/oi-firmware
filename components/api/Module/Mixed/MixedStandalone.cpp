@@ -44,7 +44,7 @@ DigitalInput* MixedStandalone::_din = new DigitalInput(_dinGpio, 4);
 DigitalOutput* MixedStandalone::_dout = new DigitalOutput(_doutGpio, _doutAdcChannel, 4);
 
 /* Analog inputs instances */
-AnalogInput* MixedStandalone::_ain[4] = {
+AnalogInput* MixedStandalone::_ain[MIXED_ADC_NB] = {
     new AnalogInputAds866x(AIN_3),
     new AnalogInputAds866x(AIN_4),
     new AnalogInputAds866x(AIN_2),
@@ -52,7 +52,7 @@ AnalogInput* MixedStandalone::_ain[4] = {
 };
 
 /* Analog outputs instances */
-AnalogOutput* MixedStandalone::_aout[2] = {
+AnalogOutput* MixedStandalone::_aout[MIXED_DAC_NB] = {
     new AnalogOutputAD5413(AIN_1),
     new AnalogOutputAD5413(AIN_2)
 };
@@ -97,7 +97,8 @@ int MixedStandalone::init(void)
         .pin_mode = {},
         .adc_analogs_nb = MIXED_ADC_NB,
         .adc_res = 12,
-        .adc_mode = {1, 1, 1, 1}
+        .adc_mode = {1, 1, 1, 1},
+        .adc_range = {}
     };
     AnalogInputAds866x::init(&adcConfig);
 
@@ -111,6 +112,9 @@ int MixedStandalone::init(void)
     return 0;
 }
 
+
+
+/*******  Digital Inputs *******/
 int MixedStandalone::digitalRead(DigitalInputNum_t num)
 {
     return _din->read(num);
@@ -127,6 +131,7 @@ void MixedStandalone::detachInterrupt(DigitalInputNum_t num)
     _din->detachInterrupt(num);
 }
 
+/*******  Digital Outputs *******/
 void MixedStandalone::digitalWrite(DigitalOutputNum_t num, uint8_t level)
 {
     _dout->write(num, level);
@@ -147,10 +152,20 @@ float MixedStandalone::getCurrent(DigitalOutputNum_t num)
     return _dout->getCurrent(num);
 }
 
+/*******  Analog Inputs *******/
 void MixedStandalone::analogInputMode(AnalogInput_Num_t num, AnalogInput_Mode_t mode)
 {
-    if (num < 4) {
+    if (num < MIXED_ADC_NB) {
         _ain[num]->setMode(mode);
+    } else {
+        ESP_LOGE(TAG, "Invalid Analog input num");
+    }    
+}
+
+void MixedStandalone::analogInputVoltageRange(AnalogInput_Num_t num, AnalogInput_VoltageRange_t range)
+{
+    if (num < MIXED_ADC_NB) {
+        _ain[num]->setVoltageRange(range);
     } else {
         ESP_LOGE(TAG, "Invalid Analog input num");
     }    
@@ -161,15 +176,10 @@ void MixedStandalone::analogInputResolution(AnalogInput_Resolution_t res)
     _ain[0]->setResolution(res);
 }
 
-void MixedStandalone::analogInputReference(float ref)
-{
-    return _ain[0]->setReference(ref);
-}
-
 int MixedStandalone::analogRead(AnalogInput_Num_t num)
 {
     int value = 0;
-    if (num < 4) {
+    if (num < MIXED_ADC_NB) {
         value = _ain[num]->read();
     } else {
         ESP_LOGE(TAG, "Invalid Analog input num");
@@ -180,7 +190,7 @@ int MixedStandalone::analogRead(AnalogInput_Num_t num)
 float MixedStandalone::analogReadMilliVolts(AnalogInput_Num_t num)
 {
     float value = 0;
-    if (num < 4) {
+    if (num < MIXED_ADC_NB) {
         value = _ain[num]->read(AIN_UNIT_MILLIVOLTS);
     } else {
         ESP_LOGE(TAG, "Invalid Analog input num");
@@ -188,9 +198,10 @@ float MixedStandalone::analogReadMilliVolts(AnalogInput_Num_t num)
     return value;
 }
 
+/*******  Analog Outputs *******/
 void MixedStandalone::analogOutputMode(AnalogOutput_Num_t num, AnalogOutput_Mode_t mode)
 {
-    if (num < 2) {
+    if (num < MIXED_DAC_NB) {
         _aout[num]->setMode(mode);
     } else {
         ESP_LOGE(TAG, "Invalid Analog output num");
@@ -199,7 +210,7 @@ void MixedStandalone::analogOutputMode(AnalogOutput_Num_t num, AnalogOutput_Mode
 
 void MixedStandalone::analogWrite(AnalogOutput_Num_t num, float value)
 {
-    if (num < 2) {
+    if (num < MIXED_DAC_NB) {
         _aout[num]->write(value);
     } else {
         ESP_LOGE(TAG, "Invalid Analog output num");

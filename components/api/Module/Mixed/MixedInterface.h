@@ -74,18 +74,20 @@ public:
     virtual void analogInputMode(AnalogInput_Num_t num, AnalogInput_Mode_t mode) = 0;
 
     /**
+     * @brief Set the voltage range of the current input
+     * 
+     * @param[in] num : Analog input
+     * @param[in] range : 0-10.24V, 0-5.12V, 0-2.56V or 0-1.28V
+     */
+    virtual void analogInputVoltageRange(AnalogInput_Num_t num, AnalogInput_VoltageRange_t range) = 0;
+
+    /**
      * @brief Set adc resolution measurement
      * 
      * @param[in] res : Adc resolution
      */  
     virtual void analogInputResolution(AnalogInput_Resolution_t res) = 0;
 
-    /**
-     * @brief Set adc internal reference voltage
-     * 
-     * @param[in] ref reference value
-     */ 
-    virtual void analogInputReference(float ref) = 0;
 
     /**
      * @brief Read a voltage measure on analog pins

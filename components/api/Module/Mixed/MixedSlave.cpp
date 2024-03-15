@@ -68,11 +68,6 @@ int MixedSlave::init(void)
         _mixed->analogInputResolution((AnalogInput_Resolution_t)data[1]);
     });
 
-    addCtrlCallback(CONTROL_ANALOG_INPUT_REFERENCE, [](std::vector<uint8_t>& data) {
-        float* reference = reinterpret_cast<float*>(&data[1]); 
-        _mixed->analogInputReference(*reference);
-    });
-
     addCtrlCallback(CONTROL_ANALOG_OUTPUT_MODE, [](std::vector<uint8_t>& data) {
         _mixed->analogOutputMode((AnalogOutput_Num_t)data[1], (AnalogOutput_Mode_t)data[2]);
     });

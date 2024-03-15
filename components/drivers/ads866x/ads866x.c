@@ -63,11 +63,12 @@ void Ads866x_GpioInit(void)
         // Set Rst pin to HIGH level
         ESP_ERROR_CHECK(gpio_set_level(_deviceConfig->pin_rst, 1));
 
-        /* Set level HIGH for pin mode - Configure analogs in voltage configuration */
+        /* Set level LOW for pin mode - Configure analogs in voltage configuration */
         for (i = 0; i < _deviceConfig->adc_analogs_nb; i++)
         {
             gpio_set_level(_deviceConfig->pin_mode[i], ADS866X_VOLTAGE_MODE);
             _deviceConfig->adc_mode[i] = ADS866X_VOLTAGE_MODE;
+            _deviceConfig->adc_range[i] = ADS866X_R5;       //10.24V
         }
 
         // Set default adc resolution
@@ -222,13 +223,9 @@ void Ads866x_setAdcMode(uint32_t analogNum, Ads866x_AdcMode_t mode)
             _deviceConfig->adc_mode[analogNum] = mode;
             gpio_set_level(_deviceConfig->pin_mode[analogNum], mode);
 
-            if (mode == ADS866X_VOLTAGE_MODE)
+            if (mode == ADS866X_CURRENT_MODE)
             {
-                Ads866x_setChannelRange(analogNum, ADS866X_R5); // Range 0 - 10.24V
-            }
-            else // ADS866X_CURRENT_MODE
-            {
-                Ads866x_setChannelRange(analogNum, ADS866X_R6); // Range 0 - 5.12V
+                Ads866x_setChannelRange(analogNum, ADS866X_R7); // Range 0 - 2.56V
             }
         }
         else

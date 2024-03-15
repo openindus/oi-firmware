@@ -86,15 +86,15 @@
 // SPECIFIC VALUES -------------------------------------------------------------------------------------------
 
 //RANGE SELECTION
-#define ADS866X_R0            0x00   // Input range to -2.5/+2.5         Vref   +/- 10.24V
-#define ADS866X_R1            0x01   // Input range to -1.25/+1.25       Vref   +/-  5.12V
-#define ADS866X_R2            0x02   // Input range to -0.625/+0.625     Vref   +/-  2.56V
-#define ADS866X_R3            0x03   // Input range to -0.3125/+0.3125   Vref   +/-  1.28V
-#define ADS866X_R4            0x0B   // Input range to -0.15625/+0.15625 Vref   +/-  0.64V
-#define ADS866X_R5            0x05   // Input range to +2.5    Vref   10.24V
-#define ADS866X_R6            0x06   // Input range to +1.25   Vref    5.12V
-#define ADS866X_R7            0x07   // Input range to +0.625  Vref    2.56V
-#define ADS866X_R8            0x0F   // Input range to +0.3125 Vref    1.28V
+#define ADS866X_R0            0x00   // Input range of -/+ 2.5*Vref       (-/+ 10.24V if internal reference used)
+#define ADS866X_R1            0x01   // Input range of -/+ 1.25*Vref      (-/+  5.12V if internal reference used)
+#define ADS866X_R2            0x02   // Input range of -/+ 0.625*Vref     (-/+ 2.56V if internal reference used)
+#define ADS866X_R3            0x03   // Input range of -/+ 0.3125*Vref    (-/+ 1.28V if internal reference used)
+#define ADS866X_R4            0x0B   // Input range of -/+ 0.15625*Vref   (-/+ 0.64V if internal reference used)
+#define ADS866X_R5            0x05   // Input range of 0-2.5*Vref         (0-10.24V if internal reference used)
+#define ADS866X_R6            0x06   // Input range of 0-1.25*Vref        (0-5.12V if internal reference used)
+#define ADS866X_R7            0x07   // Input range of 0-0.625*Vref       (0-2.56V if internal reference used)
+#define ADS866X_R8            0x0F   // Input range of 0-0.3125*Vref      (0-1.28V if internal reference used)
 
 // OPERATION MODES
 #define ADS866X_MODE_IDLE       (uint8_t)0
@@ -121,13 +121,14 @@ typedef struct
     uint8_t adc_analogs_nb;
     uint8_t adc_res;
     uint8_t adc_mode[ADS866X_MAX_ANALOGS_NB];
+    uint8_t adc_range[ADS866X_MAX_ANALOGS_NB];
 
 } Ads866x_DeviceConfig_t;
 
 typedef enum
 {
-    ADS866X_CURRENT_MODE = 0,
-    ADS866X_VOLTAGE_MODE = 1
+    ADS866X_VOLTAGE_MODE = 0,
+    ADS866X_CURRENT_MODE = 1
 } Ads866x_AdcMode_t;
 
 typedef enum
