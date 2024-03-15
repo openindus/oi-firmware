@@ -72,7 +72,6 @@
 #include "sc16is750.h"
 #include "mcp25625.h"
 #include "DriversComponents/MCP25625.h"
-#include "ads1x4s08.h"
 #include "stds75.h"
 #include "cd74hc4052.h"
 
