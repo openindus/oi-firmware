@@ -193,7 +193,7 @@ float Ads866x_AnalogReadUnits(uint32_t analogNum, Ads866x_Units_t units)
         }
         else // CURRENT MODE
         {
-            res = Ads866x_ConvertRaw2Volt(adc_raw, ADS866X_R6) / ADS866x_CURRENT_MES_RES_VALUE;
+            res = Ads866x_ConvertRaw2Volt(adc_raw, ADS866X_R7) / ADS866x_CURRENT_MES_RES_VALUE;
             if (units == ADS866x_UNITS_AMPS)
             {
 

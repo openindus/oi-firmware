@@ -23,9 +23,13 @@ int MixedCLI::init(void)
 {
     _registerDigitalWrite();
     _registerDigitalRead();
-    _registerGetCurrent();
+    _registerGetDigitalCurrent();
+    _registerSetAnalogVoltageRange();
+    _registerAnalogReadVoltage();
     return 0;
 }
+
+/******* Digital I/O CLI Commands ********/
 
 static struct {
     struct arg_int *dout;
@@ -103,34 +107,126 @@ void MixedCLI::_registerDigitalRead(void)
 static struct {
     struct arg_int *dout;
     struct arg_end *end;
-} _getCurrentArgs;
+} _getDigitalCurrentArgs;
 
-int MixedCLI::_getCurrent(int argc, char **argv)
+int MixedCLI::_getDigitalCurrent(int argc, char **argv)
 {
-    int nerrors = arg_parse(argc, argv, (void **) &_getCurrentArgs);
+    int nerrors = arg_parse(argc, argv, (void **) &_getDigitalCurrentArgs);
     if (nerrors != 0) {
-        arg_print_errors(stderr, _getCurrentArgs.end, argv[0]);
+        arg_print_errors(stderr, _getDigitalCurrentArgs.end, argv[0]);
         return 1;
     }
 
-    DigitalOutputNum_t dout = (DigitalOutputNum_t)(_getCurrentArgs.dout->ival[0] - 1);
+    DigitalOutputNum_t dout = (DigitalOutputNum_t)(_getDigitalCurrentArgs.dout->ival[0] - 1);
 
     printf("%.3f\n", _mixed->getCurrent(dout));
 
     return 0;
 }
 
-void MixedCLI::_registerGetCurrent(void)
+void MixedCLI::_registerGetDigitalCurrent(void)
 {
-    _getCurrentArgs.dout = arg_int1(NULL, NULL, "<DOUT>", "[1-8]");
-    _getCurrentArgs.end = arg_end(2);
+    _getDigitalCurrentArgs.dout = arg_int1(NULL, NULL, "<DOUT>", "[1-8]");
+    _getDigitalCurrentArgs.end = arg_end(2);
 
     const esp_console_cmd_t cmd = {
-        .command = "get-current",
+        .command = "get-digital-current",
         .help = "Get Dout current",
         .hint = NULL,
-        .func = &_getCurrent,
-        .argtable = &_getCurrentArgs
+        .func = &_getDigitalCurrent,
+        .argtable = &_getDigitalCurrentArgs
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+}
+
+/******* Analog Input CLI Commands ************/
+
+static struct {
+    struct arg_int *ain;
+    struct arg_int *range;
+    struct arg_end *end;
+} _setAnalogVoltageRangeArgs;
+
+int MixedCLI::_setAnalogVoltageRange(int argc, char **argv)
+{
+    int nerrors = arg_parse(argc, argv, (void **) &_setAnalogVoltageRangeArgs);
+    if (nerrors != 0) {
+        arg_print_errors(stderr, _setAnalogVoltageRangeArgs.end, argv[0]);
+        return 1;
+    }
+
+    AnalogInput_Num_t ain = (AnalogInput_Num_t)(_setAnalogVoltageRangeArgs.ain->ival[0] - 1);
+    int range_int = _setAnalogVoltageRangeArgs.range->ival[0];
+    AnalogInput_VoltageRange_t range;
+
+    switch (range_int)
+    {
+    case 2:
+        range = AIN_VOLTAGE_RANGE_0_5V12;
+        break;
+    case 3:
+        range = AIN_VOLTAGE_RANGE_0_2V56;
+        break;
+    case 4:
+        range = AIN_VOLTAGE_RANGE_0_1V28;
+        break;
+    default:
+        range = AIN_VOLTAGE_RANGE_0_10V24;
+        break;
+    }
+
+    _mixed->analogInputVoltageRange(ain, range);
+
+    return 0;
+}
+
+void MixedCLI::_registerSetAnalogVoltageRange(void)
+{
+    _setAnalogVoltageRangeArgs.ain = arg_int1(NULL, NULL, "<AIN>", "[1-4]");
+    _setAnalogVoltageRangeArgs.range = arg_int1(NULL, NULL, "<RANGE>", "1 = 0-10.24V, 2 = 0-5.12V, 3 = 0-2.56V, 4 = 0-1.28V");
+    _setAnalogVoltageRangeArgs.end = arg_end(2);
+
+    const esp_console_cmd_t cmd = {
+        .command = "set-analog-voltage-range",
+        .help = "Set Ain voltage range",
+        .hint = NULL,
+        .func = &_setAnalogVoltageRange,
+        .argtable = &_setAnalogVoltageRangeArgs
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+}
+
+static struct {
+    struct arg_int *ain;
+    struct arg_end *end;
+} _analogReadVoltageArgs;
+
+int MixedCLI::_analogReadVoltage(int argc, char **argv)
+{
+    int nerrors = arg_parse(argc, argv, (void **) &_analogReadVoltageArgs);
+    if (nerrors != 0) {
+        arg_print_errors(stderr, _analogReadVoltageArgs.end, argv[0]);
+        return 1;
+    }
+
+    AnalogInput_Num_t ain = (AnalogInput_Num_t)(_analogReadVoltageArgs.ain->ival[0] - 1);
+
+    printf("%.3f\n", _mixed->analogReadMilliVolts(ain));
+
+    return 0;
+}
+
+void MixedCLI::_registerAnalogReadVoltage(void)
+{
+    _analogReadVoltageArgs.ain = arg_int1(NULL, NULL, "<AIN>", "[1-4]");
+    _analogReadVoltageArgs.end = arg_end(2);
+
+    const esp_console_cmd_t cmd = {
+        .command = "analog-read-voltage",
+        .help = "Read Ain voltage",
+        .hint = NULL,
+        .func = &_analogReadVoltage,
+        .argtable = &_analogReadVoltageArgs
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
 }

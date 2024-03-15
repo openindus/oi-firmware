@@ -92,7 +92,6 @@ void AnalogInputAds866x::setVoltageRange(AnalogInput_VoltageRange_t range)
     }
 }
 
-
 void AnalogInputAds866x::setResolution(AnalogInput_Resolution_t res)
 {
     if (res == AIN_RES_10_BITS) {

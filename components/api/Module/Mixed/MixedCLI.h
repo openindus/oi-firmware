@@ -36,9 +36,14 @@ private:
     static int _digitalRead(int argc, char **argv);
     static void _registerDigitalRead(void);
 
-    static int _getCurrent(int argc, char **argv);
-    static void _registerGetCurrent(void);
+    static int _getDigitalCurrent(int argc, char **argv);
+    static void _registerGetDigitalCurrent(void);
 
+    static int _setAnalogVoltageRange(int argc, char **argv);
+    static void _registerSetAnalogVoltageRange(void);
+
+    static int _analogReadVoltage(int argc, char **argv);
+    static void _registerAnalogReadVoltage(void);
 };
 
 #endif
