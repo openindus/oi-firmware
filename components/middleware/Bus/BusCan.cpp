@@ -51,7 +51,10 @@ void BusCan::begin(gpio_num_t txNum, gpio_num_t rxNum)
     ESP_LOGI(BUS_TWAI_TAG, "start twai driver");
     ESP_ERROR_CHECK(twai_start());
 
+#if !defined(DEBUG_BUS)
     esp_log_level_set(BUS_TWAI_TAG, ESP_LOG_WARN);
+#endif
+
 }
 
 /**
@@ -101,7 +104,7 @@ error:
     return -1;
 succeed:
     xSemaphoreGive(_mutex);
-    ESP_LOGI(BUS_TWAI_TAG, "WRITE - CMD: 0x%02X | TYPE: 0x%02X | DATA: 0x%08X", frame->command, frame->type, frame->data);
+    ESP_LOGI(BUS_TWAI_TAG, "WRITE - ID: %u | CMD: 0x%02X | TYPE: 0x%02X | DATA: 0x%08X", msg.identifier, frame->command, frame->type, frame->data);
     return 0;
 }
 
@@ -133,6 +136,6 @@ error:
     return -1;
 succeed:
     xSemaphoreGive(_mutex);
-    ESP_LOGI(BUS_TWAI_TAG, "RECV - CMD: 0x%02X | TYPE: 0x%02X | DATA: 0x%08X", frame->command, frame->type, frame->data);
+    ESP_LOGI(BUS_TWAI_TAG, "RECV - ID: %u | CMD: 0x%02X | TYPE: 0x%02X | DATA: 0x%08X", msg.identifier, frame->command, frame->type, frame->data);
     return 0;
 }

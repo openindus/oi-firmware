@@ -33,6 +33,8 @@ public:
     static void onEvent(Module_Event_t event, uint16_t id, Module_EventCallback_t callback);
     static void handleEvent(Module_Event_t event, uint16_t id, int num);
 
+    static uint16_t getIdFromSN(int num);
+
 private:
 
     static std::map<std::pair<Module_Event_t,uint16_t>, Module_EventCallback_t> _event;

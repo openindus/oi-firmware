@@ -75,7 +75,7 @@ void Led::install(gpio_num_t gpio_num)
         _control.blink = true;
         _control.blinkStatus = true;
         _control.installed = true;
-        _control.intensity = 255;
+        _control.intensity = 20;
         ESP_LOGV(TAG, "creating led task");
         xTaskCreate(_task, "Led task", 1024, NULL, 10, &_taskHandle);
     }
@@ -120,6 +120,7 @@ void Led::blink(LedColor_t color, uint32_t period)
         ESP_LOGV(TAG, "led blink color:0x%02x | period:%u", color, period);
         _control.color = color;
         _control.period = period;
+        _control.blinkStatus = true;
         _control.blink = true;
         xTaskNotify(_taskHandle, 0, eNoAction);
     }

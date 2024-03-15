@@ -198,7 +198,7 @@ void ModuleSlave::_busTask(void *pvParameters)
                 }
                 break;
             }
-            case MODULE_BUS_ID:
+            case MODULE_GET_BUS_ID:
             {
                 uint16_t id = _id;
                 uint32_t num; // Serial number

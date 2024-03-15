@@ -25,7 +25,7 @@ class AnaloglsControl : public ModuleControl
 {
 public : 
 
-    AnaloglsControl(void) : ModuleControl(){}
+    AnaloglsControl(int sn = 0) : ModuleControl(sn) {}
 
    float GetChannelData(analog_channel_t channel, rtd_type_t rtd);
    void AddThermocouple(analog_channel_t channel, ads1x4s08_voltage_range_t range, float coef);
