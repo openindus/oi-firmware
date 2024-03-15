@@ -14,18 +14,20 @@
             "url": "https://openindus.com"
         }
     ],
-    "frameworks": ["espidf"],
+    "frameworks": ["espidf", "arduino"],
     "platforms": "espressif32",
     "export": {
         "include": [
             "boards",
             "components",
             "examples",
+            "tools",
+            "partitions.csv",
+            "scripts",
             "README.md"
         ],
         "exclude": [
-            "components/bootloader",
-            "components/Libraries"
+            "components/bootloader"
         ]
     },
     "build": {

@@ -14,6 +14,10 @@ def modify_variants():
     print("Patching variant file pins_arduino.h")
     src_file = join(PROJECT_DIR, "boards", "variants", "esp32s3", "pins_arduino.h")
     dst_file = join(FRAMEWORK_DIR, "variants", "esp32s3", "pins_arduino.h")
-    shutil.copy(src_file, dst_file)
-
+    try:
+        shutil.copy(src_file, dst_file)
+    except:
+        src_file = join(PROJECT_DIR, "lib", "OpenIndus", "boards", "variants", "esp32s3", "pins_arduino.h")
+        shutil.copy(src_file, dst_file)
+        
 modify_variants()
