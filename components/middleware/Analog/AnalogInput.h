@@ -87,19 +87,11 @@ public:
 
     static int init(Ads866x_DeviceConfig_t* config);
 
-<<<<<<< HEAD
     int read(void) override;
     float read(AnalogInput_Unit_t unit) override;
     void setMode(AnalogInput_Mode_t mode) override;
+    void setVoltageRange(AnalogInput_VoltageRange_t range) override;
     void setResolution(AnalogInput_Resolution_t res) override;
-    void setReference(float ref) override;
-=======
-    int read(void);
-    float read(AnalogInput_Unit_t unit);
-    void setMode(AnalogInput_Mode_t mode);
-    void setVoltageRange(AnalogInput_VoltageRange_t range);
-    void setResolution(AnalogInput_Resolution_t res);
->>>>>>> 9f15e01 (feat(Mixed) : delete set_reference & add set_voltage_range)
 
 private:
 
