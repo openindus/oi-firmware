@@ -1,8 +1,8 @@
 #include "OpenIndus.h"
 #include "Arduino.h"
 
-OICore core;
-OIBrushless brushless;
+Core core;
+Brushless brushless;
 
 float speed;
 

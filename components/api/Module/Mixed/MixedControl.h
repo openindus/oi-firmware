@@ -17,11 +17,11 @@
 
 #include "ModuleControl.h"
 #include "ModuleMaster.h"
-#include "Mixed.h"
+#include "MixedInterface.h"
 
 #if !defined(OI_MIXED)
 
-class MixedControl : public ModuleControl, public Mixed
+class MixedControl : public ModuleControl, public MixedInterface
 {
 public:
 

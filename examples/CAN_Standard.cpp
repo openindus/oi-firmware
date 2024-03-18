@@ -3,7 +3,7 @@
 
 using namespace OI;
 
-OICore core;
+Core core;
 
 CAN_Message_t rx_msg;
 CAN_Message_t tx_msg;

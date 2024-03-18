@@ -16,12 +16,12 @@
 #pragma once
 
 #include "ModuleStandalone.h"
-#include "Mixed.h"
+#include "MixedInterface.h"
 #include "MixedPinout.h"
 
 #if defined(OI_MIXED)
 
-class MixedStandalone : public ModuleStandalone, public Mixed
+class MixedStandalone : public ModuleStandalone, public MixedInterface
 {
 public:
 

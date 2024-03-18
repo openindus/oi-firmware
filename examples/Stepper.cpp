@@ -1,8 +1,8 @@
 #include "OpenIndus.h"
 #include "Arduino.h"
 
-OICore core;
-OIStepper stepper;
+Core core;
+Stepper stepper;
 
 void printTask(void *pvParameters)
 {

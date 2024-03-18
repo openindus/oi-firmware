@@ -15,4 +15,14 @@
 
 #pragma once
 
-#include "Global.h"
+#include "RelayStandalone.h"
+#include "RelaySlave.h"
+#include "RelayControl.h"
+
+#if (defined(OI_RELAY_HP) || defined(OI_RELAY_LP)) && defined(MODULE_STANDALONE)
+#define Relay RelayStandalone
+#elif (defined(OI_RELAY_HP) || defined(OI_RELAY_LP)) && !defined(MODULE_STANDALONE)
+#define Relay RelaySlave
+#else 
+#define Relay RelayControl
+#endif
