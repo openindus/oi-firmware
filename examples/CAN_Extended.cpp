@@ -1,12 +1,16 @@
 #include "OpenIndus.h"
 #include "Arduino.h"
 
-OI::CAN_Message_t rx_msg;
-OI::CAN_Message_t tx_msg;
+using namespace OI;
+
+OICore core;
+
+CAN_Message_t rx_msg;
+CAN_Message_t tx_msg;
 
 void setup()
 {
-    CAN.begin(1000000, true);
+    core.can.begin(1000000, true);
 
     tx_msg.id = 11111;
     tx_msg.size = 8;
@@ -22,15 +26,15 @@ void setup()
     tx_msg.IDE = true; // Extended ID, not standard
     tx_msg.RTR = false; // No remote request frame
     
-    CAN.write(tx_msg);
-    CAN.setExtendedFilter(0xFFF0, 0xAAA0);
+    core.can.write(tx_msg);
+    core.can.setExtendedFilter(0xFFF0, 0xAAA0);
 }
 
 void loop()
 {
-    if(CAN.available())
+    if(core.can.available())
     {
-        rx_msg = CAN.read();
+        rx_msg = core.can.read();
         printf("NEW MESSAGE // ID : %d, length : %d MSG :  ", rx_msg.id, rx_msg.size);
         for(int i =0; i <rx_msg.size; i++)
         {
