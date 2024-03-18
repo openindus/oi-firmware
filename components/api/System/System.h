@@ -16,14 +16,7 @@
 #pragma once
 
 #include "Global.h"
-
-#include "ModuleStandalone.h"
-#include "ModuleSlave.h"
-#include "ModuleControl.h"
-#include "ModuleMaster.h"
-#include "ModuleCLI.h"
-#include "ModuleMasterCLI.h"
-
+#include "Module.h"
 #include "Core.h"
 #include "Discrete.h"
 #include "Mixed.h"

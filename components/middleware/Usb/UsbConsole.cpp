@@ -44,9 +44,11 @@ void UsbConsole::listen()
 bool UsbConsole::begin(bool force)
 {
     /* stop listen task */
-    continueListenTask = false;
-    while(eTaskGetState(listenTaskHandle) == eReady) {
-        vTaskDelay(pdMS_TO_TICKS(10));
+    if (listenTaskHandle != NULL) {
+        continueListenTask = false;
+        while(eTaskGetState(listenTaskHandle) == eReady) {
+            vTaskDelay(pdMS_TO_TICKS(10));
+        }
     }
 
     /* If force and keep flag are false, do not start console */

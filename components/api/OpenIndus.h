@@ -16,3 +16,11 @@
 #pragma once
 
 #include "System.h"
+
+#define OICore      Core
+#define OIDiscrete  Discrete
+#define OIMixed     Mixed
+#define OIStepper   Stepper
+#define OIRelay     Relay
+#define OIAnalogLs  AnalogLs
+#define OIBrushless Brushless

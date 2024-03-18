@@ -19,7 +19,7 @@
 static const char MODULE_TAG[] = "Module";
 
 uint16_t ModuleSlave::_id;
-std::map<Module_Request_t, Module_RequestCallback_t> ModuleSlave::_request;
+std::map<ModuleCmd_RequestId_t, ModuleCmd_RequestCallback_t> ModuleSlave::_callback;
 
 void ModuleSlave::init(void)
 {
@@ -47,30 +47,30 @@ void ModuleSlave::init(void)
     xTaskCreate(_busTask, "Bus task", 4096, NULL, 1, NULL);
 }
 
-void ModuleSlave::event(Module_Event_t event, int num)
+void ModuleSlave::event(ModuleCmd_EventId_t eventId, int num)
 {
     BusCan::Frame_t frame;
-    frame.command = MODULE_EVENT;
-    frame.type = event;
-    frame.data = num;
+    frame.command = CMD_EVENT;
+    frame.data_byte[0] = (uint8_t)eventId;
+    frame.data_byte[1] = (uint8_t)num;
     BusCan::write(&frame, _id);
 }
 
-void ModuleSlave::onRequest(Module_Request_t request, Module_RequestCallback_t callback)
+void ModuleSlave::onRequest(ModuleCmd_RequestId_t requestId, ModuleCmd_RequestCallback_t callback)
 {
-    _request.insert({request, callback});
+    _callback.insert({requestId, callback});
 }
 
-uint32_t ModuleSlave::handleRequest(Module_RequestMsg_t msg)
+uint32_t ModuleSlave::handleRequest(ModuleCmd_RequestMsg_t msg)
 {
-    if (_request.find((Module_Request_t)msg.request) != _request.end()) {
-        for (auto it=_request.begin(); it!=_request.end(); it++) {
-            if (it->first == msg.request) {
+    if (_callback.find((ModuleCmd_RequestId_t)msg.id) != _callback.end()) {
+        for (auto it=_callback.begin(); it!=_callback.end(); it++) {
+            if (it->first == msg.id) {
                 return (*it).second(msg);
             }
         }
     } else {
-        ESP_LOGW(MODULE_TAG, "Request does not exist: request=0x%02x", msg.request);
+        ESP_LOGW(MODULE_TAG, "Request does not exist: request=0x%02x", msg.id);
     }
     return 0;
 }
@@ -86,12 +86,12 @@ void ModuleSlave::_busTask(void *pvParameters)
         } else {
             switch (frame.command)
             {
-            case MODULE_RESTART:
+            case CMD_RESTART:
             {
                 ModuleStandalone::restart();
                 break;
             }
-            case MODULE_PING:
+            case CMD_PING:
             {
                 uint32_t num; // Serial number
                 memcpy(&num, frame.data, 4);
@@ -103,15 +103,15 @@ void ModuleSlave::_busTask(void *pvParameters)
                 }
                 break;
             }
-            case MODULE_AUTO_ID:
+            case CMD_AUTO_ID:
             {
                 BusCan::Frame_t autoIdFrame;
-                autoIdFrame.command = MODULE_AUTO_ID;
+                autoIdFrame.command = CMD_AUTO_ID;
                 if (BusCan::write(&autoIdFrame, _id) == -1)
                     ModuleStandalone::ledBlink(LED_RED, 1000); // Error
                 break;
             }            
-            case MODULE_FLASH_LOADER_BEGIN:
+            case CMD_FLASH_LOADER_BEGIN:
             {
                 if (frame.identifier == _id) {
                     ModuleStandalone::ledBlink(LED_WHITE, 1000); // Programming mode
@@ -124,7 +124,7 @@ void ModuleSlave::_busTask(void *pvParameters)
                 }
                 break;
             }
-            case MODULE_FLASH_LOADER_WRITE:
+            case CMD_FLASH_LOADER_WRITE:
             {
                 if (frame.identifier == _id) {
                     FlashLoader::write(frame.data, frame.length);
@@ -136,7 +136,7 @@ void ModuleSlave::_busTask(void *pvParameters)
                 }
                 break;
             }
-            case MODULE_FLASH_LOADER_CHECK:
+            case CMD_FLASH_LOADER_CHECK:
             {
                 if (frame.identifier == _id) {
                     uint8_t md5Sum[16];
@@ -152,14 +152,14 @@ void ModuleSlave::_busTask(void *pvParameters)
                 }
                 break;
             }
-            case MODULE_FLASH_LOADER_END:
+            case CMD_FLASH_LOADER_END:
             {
                 if (frame.identifier == _id) {
                     FlashLoader::end();
                 }
                 break;
             }
-            case MODULE_READ_REGISTER:
+            case CMD_READ_REGISTER:
             {
                 if (frame.identifier == _id) {
                     uint32_t addr;
@@ -175,15 +175,9 @@ void ModuleSlave::_busTask(void *pvParameters)
                 }
                 break;
             }
-            case MODULE_SET_STATUS:
+            case CMD_REQUEST:
             {
-                /** @todo: set status */
-                ModuleStandalone::ledBlink(LED_GREEN, 1000); // Paired
-                break;
-            }
-            case MODULE_REQUEST:
-            {
-                Module_RequestMsg_t msg;
+                ModuleCmd_RequestMsg_t msg;
                 memcpy(msg.byte, frame.data, sizeof(msg.byte));
                 if (frame.identifier == _id) {
                     msg.data = handleRequest(msg);
@@ -198,7 +192,7 @@ void ModuleSlave::_busTask(void *pvParameters)
                 }
                 break;
             }
-            case MODULE_GET_BUS_ID:
+            case CMD_GET_ID:
             {
                 uint16_t id = _id;
                 uint32_t num; // Serial number
@@ -213,7 +207,7 @@ void ModuleSlave::_busTask(void *pvParameters)
                 }
                 break;
             }
-            case MODULE_LED_STATE:
+            case CMD_LED_CTRL:
             {
                 LedState_t state;
                 LedColor_t color;
@@ -241,4 +235,9 @@ void ModuleSlave::_busTask(void *pvParameters)
     }
     free(frame.data);
     frame.data = NULL;
+}
+
+void ModuleSlave::_heartbeatTask(void *pvParameters)
+{
+    /** @todo Send heartbeat periodically */
 }

@@ -28,10 +28,12 @@ class BusCan
 public:
 
     typedef struct __attribute__((__packed__)) {
-        uint8_t command;
-        uint8_t type;
-        uint16_t unused;
-        uint32_t data;
+        uint32_t command : 8;
+        uint32_t unused : 24;
+        union {
+            uint32_t data;
+            uint8_t data_byte[4];
+        };
     } Frame_t;
 
     static void begin(gpio_num_t txNum, gpio_num_t rxNum);
