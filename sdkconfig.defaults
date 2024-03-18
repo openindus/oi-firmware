@@ -1,18 +1,13 @@
-# Custom partition table
-CONFIG_PARTITION_TABLE_CUSTOM=y
-CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
-
 # Logs
 CONFIG_LOG_DEFAULT_LEVEL_INFO=y
-CONFIG_LOG_DEFAULT_LEVEL_DEBUG=
-CONFIG_LOG_DEFAULT_LEVEL_VERBOSE=
+
+# Custom partition table
+CONFIG_PARTITION_TABLE_CUSTOM=y
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="boards/partitions.csv"
 
 # Set flash size
 CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y
 CONFIG_PARTITION_TABLE_TWO_OTA=y
-
-# configure esp for not rebooting in loop on error
-CONFIG_ESP_SYSTEM_PANIC_PRINT_HALT=
 
 # Override some defaults to enable Arduino framework
 CONFIG_AUTOSTART_ARDUINO=n

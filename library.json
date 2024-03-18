@@ -21,8 +21,6 @@
             "boards",
             "components",
             "examples",
-            "tools",
-            "partitions.csv",
             "README.md"
         ],
         "exclude": [
