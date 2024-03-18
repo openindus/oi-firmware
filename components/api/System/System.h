@@ -60,9 +60,9 @@
 #include "BrushlessControl.h"
 
 /* AnalogLs*/
-#include "AnaloglsStandalone.h"
-#include "AnaloglsSlave.h"
-#include "AnaloglsControl.h"
+#include "AnalogLsStandalone.h"
+#include "AnalogLsSlave.h"
+#include "AnalogLsControl.h"
 
 void setup(void);
 void loop(void);

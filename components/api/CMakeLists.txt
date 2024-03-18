@@ -28,9 +28,9 @@ set(COMPONENT_SRCS
     "Module/Brushless/BrushlessStandalone.cpp"
     "Module/Brushless/BrushlessSlave.cpp"
     "Module/Brushless/BrushlessControl.cpp"
-    "Module/AnalogLS/AnaloglsStandalone.cpp"
-    "Module/AnalogLS/AnaloglsControl.cpp"
-    "Module/AnalogLS/AnaloglsSlave.cpp"
+    "Module/AnalogLs/AnalogLsStandalone.cpp"
+    "Module/AnalogLs/AnalogLsControl.cpp"
+    "Module/AnalogLs/AnalogLsSlave.cpp"
 )
 
 set(COMPONENT_INCLUDE_DIRS
@@ -43,7 +43,7 @@ set(COMPONENT_INCLUDE_DIRS
     "Module/Mixed"
     "Module/Relay"
     "Module/Brushless"
-    "Module/AnalogLS"
+    "Module/AnalogLs"
 )
 
 set(COMPONENT_PRIV_REQUIRES

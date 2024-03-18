@@ -25,31 +25,33 @@ class MixedControl : public ModuleControl, public Mixed
 {
 public:
 
-    MixedControl(int sn = 0) : ModuleControl(sn) {}
+    MixedControl(int sn = 0) : 
+        ModuleControl(sn),
+        _isrCallback{NULL} {}
 
     /* Digital Output */
-    void digitalWrite(DigitalOutputNum_t num, uint8_t level);
+    void digitalWrite(DigitalOutputNum_t num, uint8_t level) override;
 
     /* Digital Input */
-    int digitalRead(DigitalInputNum_t num);
+    int digitalRead(DigitalInputNum_t num) override;
     void attachInterrupt(DigitalInputNum_t num, IsrCallback_t callback, 
-        InterruptMode_t mode=RISING_MODE, void* arg=NULL);
-    void detachInterrupt(DigitalInputNum_t num);
+        InterruptMode_t mode=RISING_MODE, void* arg=NULL) override;
+    void detachInterrupt(DigitalInputNum_t num) override;
 
     /* Analog Input */
-    void analogInputMode(AnalogInput_Num_t num, AnalogInput_Mode_t mode);
-    void analogInputResolution(AnalogInput_Resolution_t res);
-    void analogInputReference(float ref);
-    int analogRead(AnalogInput_Num_t num);
-    float analogReadMilliVolts(AnalogInput_Num_t num);
+    void analogInputMode(AnalogInput_Num_t num, AnalogInput_Mode_t mode) override;
+    void analogInputResolution(AnalogInput_Resolution_t res) override;
+    void analogInputReference(float ref) override;
+    int analogRead(AnalogInput_Num_t num) override;
+    float analogReadMilliVolts(AnalogInput_Num_t num) override;
 
     /* Analog Output */
-    void analogOutputMode(AnalogOutput_Num_t num, AnalogOutput_Mode_t mode);
-    void analogWrite(AnalogOutput_Num_t num, float value);
+    void analogOutputMode(AnalogOutput_Num_t num, AnalogOutput_Mode_t mode) override;
+    void analogWrite(AnalogOutput_Num_t num, float value) override;
 
 private:
 
-    IsrCallback_t _isrCallback[DIN_MAX];
+    IsrCallback_t _isrCallback[4];
 };
 
 #endif

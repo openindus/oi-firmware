@@ -57,8 +57,8 @@ void System::init(void)
     BrushlessStandalone::init();
     BrushlessSlave::init();
 #elif defined(OI_ANALOG_LS)
-    AnaloglsStandalone::init();
-    AnaloglsSlave::init();
+    err |= AnalogLsStandalone::init();
+    err |= AnalogLsSlave::init();
 #endif
     ModuleCLI::init();
 #if defined(MODULE_MASTER)

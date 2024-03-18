@@ -14,10 +14,10 @@ set(COMPONENT_SRCS
     "mcp25625/DriversComponents/MCP25625.c"
     "mcp25625/DriversComponents/MCP25625_hw.c"
     "mcp25625/DriversComponents/MCP25625_hal.c"
-    "ads1x4s08/ads1x4s08.c"
     "stds75/stds75.c"
     "cd74hc4052/cd74hc4052.c"
     "dac/ad5413/ad5413.c"
+    "adc/ads114s0x/ads114s0x.c"
 )
 
 set(COMPONENT_INCLUDE_DIRS
@@ -29,11 +29,12 @@ set(COMPONENT_INCLUDE_DIRS
     "m41t62"
     "sc16is750"
     "mcp25625"
-    "ads1x4s08"
     "stds75"
     "cd74hc4052"
     "dac"
     "dac/ad5413"
+    "adc"
+    "adc/ads114s0x"
 )
 
 set(COMPONENT_PRIV_REQUIRES

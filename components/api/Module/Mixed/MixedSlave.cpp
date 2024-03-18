@@ -60,17 +60,17 @@ int MixedSlave::init(void)
         return _mixed->analogReadMilliVolts((AnalogInput_Num_t)msg.param);
     });
 
-    onRequest(ANALOG_READ_MODE, [](Module_RequestMsg_t msg) -> uint32_t { 
+    onRequest(ANALOG_INPUT_MODE, [](Module_RequestMsg_t msg) -> uint32_t { 
         _mixed->analogInputMode((AnalogInput_Num_t)msg.param, (AnalogInput_Mode_t)msg.data);
         return 0;
     });
 
-    onRequest(ANALOG_READ_RESOLUTION, [](Module_RequestMsg_t msg) -> uint32_t { 
+    onRequest(ANALOG_INPUT_RESOLUTION, [](Module_RequestMsg_t msg) -> uint32_t { 
         _mixed->analogInputResolution((AnalogInput_Resolution_t)msg.data);
         return 0;
     });
 
-    onRequest(ANALOG_READ_REFERENCE, [](Module_RequestMsg_t msg) -> uint32_t { 
+    onRequest(ANALOG_INPUT_REFERENCE, [](Module_RequestMsg_t msg) -> uint32_t { 
         float value;
         uint32_t data = msg.data;
         memcpy(&value, &data, sizeof(float));
