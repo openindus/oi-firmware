@@ -13,15 +13,13 @@
 #include "esp_log.h"
 #include "driver/gpio.h"
 #include "driver/spi_master.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-typedef struct {
-    spi_device_handle_t spi_handler;
-} ads114s0x_device_t;
 
 typedef struct {
     spi_host_device_t host_id;
@@ -31,6 +29,11 @@ typedef struct {
     gpio_num_t cs;
     gpio_num_t drdy;
 } ads114s0x_config_t;
+
+typedef struct {
+    spi_device_handle_t spi_handler;
+    ads114s0x_config_t* config;
+} ads114s0x_device_t;
 
 /* ADS114S08 Commands */
 #define ADS114S0X_CMD_NOP           0x00
@@ -321,6 +324,11 @@ int ads114s0x_read_data(ads114s0x_device_t* dev, uint16_t* data);
 /* Read/Write registers */
 int ads114s0x_read_register(ads114s0x_device_t* dev, uint8_t reg_addr, uint8_t* reg_data, size_t reg_size);
 int ads114s0x_write_register(ads114s0x_device_t* dev, uint8_t reg_addr, uint8_t* reg_data, size_t reg_size);
+
+/* Hardware */
+int ads114s0x_start_sync(ads114s0x_device_t* dev);
+int ads114s0x_hard_reset(ads114s0x_device_t* dev);
+int ads114s0x_add_data_ready_isr_handler(ads114s0x_device_t* dev, gpio_isr_t isr_handler, void* args);
 
 #ifdef __cplusplus
 }

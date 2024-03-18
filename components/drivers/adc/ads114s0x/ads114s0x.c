@@ -19,15 +19,35 @@ static const char TAG[] = "ads114s0x";
  */
 int ads114s0x_init(ads114s0x_device_t** dev, ads114s0x_config_t* conf)
 {
+    esp_err_t err = ESP_OK;
     ads114s0x_device_t* device = malloc(sizeof(ads114s0x_device_t));
     if (dev == NULL) {
         ESP_LOGE(TAG, "Failed to allocate memory for the device instance");
         goto error;
     }
 
-    /** @todo: init GPIOs */
+    /* GPIO init */
+    gpio_config_t output_conf = {
+        .pin_bit_mask = 
+            (1ULL << conf->start_sync) | 
+            (1ULL << conf->reset),
+        .mode = GPIO_MODE_OUTPUT,
+        .pull_up_en = GPIO_PULLUP_DISABLE,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type = GPIO_INTR_DISABLE,
+    };
+    err |= gpio_config(&output_conf);
 
-    /* SPI init*/
+    gpio_config_t input_conf = {
+        .pin_bit_mask = (1ULL << conf->drdy),
+        .mode = GPIO_MODE_INPUT,
+        .pull_up_en = GPIO_PULLUP_DISABLE,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type = GPIO_INTR_NEGEDGE,
+    };
+    err |= gpio_config(&input_conf);
+
+    /* SPI init */
     spi_device_interface_config_t spi_conf = {
         .command_bits = 16,
         .address_bits = 0,
@@ -44,13 +64,14 @@ int ads114s0x_init(ads114s0x_device_t** dev, ads114s0x_config_t* conf)
         .pre_cb = NULL,
         .post_cb = NULL
     };
+    err |= spi_bus_add_device(conf->host_id, &spi_conf, &device->spi_handler);
 
-    esp_err_t err = spi_bus_add_device(conf->host_id, &spi_conf, &device->spi_handler);
     if (err != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to initialize th SPI device");
+        ESP_LOGE(TAG, "Failed to initialize the device");
         goto error;
     }
 
+    device->config = conf;
     *dev = device;
     return 0;
 
@@ -262,4 +283,60 @@ error:
     ESP_LOGE(TAG, "Failed to read register");
     free(buf);
     return -1;
+}
+
+/**
+ * @brief Perform hardware start/sync
+ * 
+ * @param dev Device instance
+ * @return int 0=success, -1=error
+ */
+int ads114s0x_start_sync(ads114s0x_device_t* dev)
+{
+    esp_err_t err = ESP_OK;
+    err |= gpio_set_level(dev->config->start_sync, 1);
+    vTaskDelay(10 / portTICK_PERIOD_MS);
+    err |= gpio_set_level(dev->config->start_sync, 0);
+    if (err != ESP_OK) {
+        return -1;
+    } else {
+        return 0;
+    }
+}
+
+/**
+ * @brief Perform hardware reset
+ * 
+ * @param dev Device instance
+ * @return int 0=success, -1=error
+ */
+int ads114s0x_hard_reset(ads114s0x_device_t* dev)
+{
+    esp_err_t err = ESP_OK;
+    err |= gpio_set_level(dev->config->start_sync, 0);
+    vTaskDelay(10 / portTICK_PERIOD_MS);
+    err |= gpio_set_level(dev->config->start_sync, 1);
+    if (err != ESP_OK) {
+        return -1;
+    } else {
+        return 0;
+    }
+}
+
+/**
+ * @brief Add ISR handler for DRDY
+ * 
+ * @param dev Device instance
+ * @param isr_handler ISR handler
+ * @param args Arguments
+ * @return int 0=success, -1=error
+ */
+int ads114s0x_add_data_ready_isr_handler(ads114s0x_device_t* dev, gpio_isr_t isr_handler, void* args)
+{
+    esp_err_t err = gpio_isr_handler_add(dev->config->drdy, isr_handler, args);
+    if (err != ESP_OK) {
+        return -1;
+    } else {
+        return 0;
+    }
 }
