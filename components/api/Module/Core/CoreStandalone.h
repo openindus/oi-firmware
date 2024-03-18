@@ -110,4 +110,6 @@ private:
 
 };
 
+extern OI::CAN CAN;
+
 #endif

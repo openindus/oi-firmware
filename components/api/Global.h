@@ -94,3 +94,4 @@
 #include "MotorStepperParam.h"
 #include "Led.h"
 #include "RTClock.h"
+#include "CAN.h"

@@ -16,6 +16,7 @@ set(COMPONENT_SRCS
     "RTClock/RTClock.cpp"
     "Analog/AnalogOutput.cpp"
     "Analog/AnalogInput.cpp"
+    "CAN/CAN.cpp"
 )
 
 set(COMPONENT_INCLUDE_DIRS
@@ -28,6 +29,7 @@ set(COMPONENT_INCLUDE_DIRS
     "FlashLoader"
     "Led"
     "RTClock"
+    "CAN"
 )
 
 set(COMPONENT_PRIV_REQUIRES

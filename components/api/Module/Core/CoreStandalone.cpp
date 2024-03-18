@@ -467,4 +467,6 @@ void CoreStandalone::_controlTask(void *pvParameters)
     }
 }
 
+OI::CAN CAN;
+
 #endif
