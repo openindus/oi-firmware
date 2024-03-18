@@ -15,17 +15,14 @@ namespace OI
      * @note You must use a standard baudrate (50KBPS, 100KBPS, 125KBPS, 250KBPS, 500KBPS, 1000kBPS)
      * 
      * @param baudrate CAN baudrate in bits/s
-     * @param host the spi type you would like to use
-     * @param cs the pin you would like to use
-     * @param interrupt the pin you would like to use
      */
-    void CAN::begin(unsigned long baudrate, bool extended_mode, spi_host_device_t host, gpio_num_t cs, gpio_num_t interrupt)
+    void CAN::begin(unsigned long baudrate, bool extended_mode)
     {
         MCP25625_DeviceConfig_t deviceConfig;
-        deviceConfig.spi_host = host;
-        deviceConfig.spi_pin_cs = cs;
+        deviceConfig.spi_host = _spi_host;
+        deviceConfig.spi_pin_cs = _pin_cs;
         deviceConfig.spi_freq = MCP25625_SPI_FREQ;
-        deviceConfig.spi_pin_int = interrupt;
+        deviceConfig.spi_pin_int = _pin_intr;
         mcp25625_create(&deviceConfig);
         mcp25625_init(OPMODE_NORMAL, (can_baudrate_t)baudrate, (can_id_mode_t)(extended_mode+1));
 

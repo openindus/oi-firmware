@@ -26,10 +26,12 @@ namespace OI
     {
     public:
 
-        void begin(unsigned long baudrate=1000000, bool extended_mode=false, 
-            spi_host_device_t host=SPI2_HOST, 
-            gpio_num_t cs=GPIO_NUM_11, 
-            gpio_num_t interrupt=GPIO_NUM_13);
+        CAN(spi_host_device_t host, gpio_num_t cs, gpio_num_t intr) :
+            _spi_host(host),
+            _pin_cs(cs),
+            _pin_intr(intr) {}
+
+        void begin(unsigned long baudrate=1000000, bool extended_mode=false);
 
         void end(void);
 
@@ -38,6 +40,12 @@ namespace OI
         CAN_Message_t read(void);
         void setStandardFilter(uint16_t mask, uint16_t filter);
         void setExtendedFilter(uint32_t mask, uint32_t filter);
+
+    private:
+
+        spi_host_device_t _spi_host; 
+        gpio_num_t _pin_cs; 
+        gpio_num_t _pin_intr;
 
     };
 }

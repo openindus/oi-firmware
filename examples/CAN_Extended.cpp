@@ -1,8 +1,8 @@
 #include "OpenIndus.h"
 #include "Arduino.h"
 
-CAN_Message_t rx_msg;
-CAN_Message_t tx_msg;
+OI::CAN_Message_t rx_msg;
+OI::CAN_Message_t tx_msg;
 
 void setup()
 {

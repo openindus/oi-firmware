@@ -467,6 +467,6 @@ void CoreStandalone::_controlTask(void *pvParameters)
     }
 }
 
-OI::CAN CAN;
+OI::CAN CAN(CORE_SPI_USER_HOST, CORE_PIN_CAN_SPI_CS, CORE_PIN_CAN_INTERRUPT);
 
 #endif
