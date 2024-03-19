@@ -17,6 +17,7 @@ set(COMPONENT_SRCS
     "Analog/AnalogOutput.cpp"
     "Analog/AnalogInput.cpp"
     "CAN/CAN.cpp"
+    "RS/RS.cpp"
 )
 
 set(COMPONENT_INCLUDE_DIRS
@@ -30,6 +31,7 @@ set(COMPONENT_INCLUDE_DIRS
     "Led"
     "RTClock"
     "CAN"
+    "RS"
 )
 
 set(COMPONENT_PRIV_REQUIRES

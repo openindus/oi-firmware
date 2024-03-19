@@ -1,20 +1,23 @@
 #include "OpenIndus.h"
 #include "Arduino.h"
-#include "RS.h"
+
+using namespace OI;
+
+Core core;
 
 void setup()
 {
-    RS232.begin();
+    core.rs.begin(RS_232);
 }
 
 void loop()
 {
     char data[100];
-    size_t size = RS232.available();
+    size_t size = core.rs.available();
 
     if (size)
     {
-        RS232.read(data, size);
+        core.rs.read(data, size);
         printf("%s\n", data);
     }
     delay(10);

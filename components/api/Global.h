@@ -92,3 +92,4 @@
 #include "Led.h"
 #include "RTClock.h"
 #include "CAN.h"
+#include "RS.h"

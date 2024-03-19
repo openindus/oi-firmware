@@ -1,14 +1,17 @@
 #include "OpenIndus.h"
 #include "Arduino.h"
-#include "RS.h"
+
+using namespace OI;
+
+Core core;
 
 void setup()
 {
-    RS485.begin();
+    core.rs.begin(RS_485);
 }
 
 void loop()
 {
-    RS485.write("Hello OpenIndus\r\n");
+    core.rs.write("Hello OpenIndus\r\n");
     delay(10);
 }

@@ -1,20 +1,23 @@
 #include "OpenIndus.h"
 #include "Arduino.h"
-#include "RS.h"
+
+using namespace OI;
+
+Core core;
 
 void setup()
 {
-    RS485.begin();
+    core.rs.begin(RS_485);
 }
 
 void loop()
 {
     char data[100];
-    size_t size = RS485.available();
+    size_t size = core.rs.available();
 
     if (size)
     {
-        RS485.read(data, size);
+        core.rs.read(data, size);
         printf("%s\n", data);
     }
     delay(10);
