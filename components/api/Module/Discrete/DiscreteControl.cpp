@@ -26,6 +26,14 @@ void DiscreteControl::digitalWrite(DigitalOutputNum_t dout, uint8_t level)
     request(msg);
 }
 
+int DiscreteControl::digitalRead(DigitalInputNum_t din)
+{
+    ModuleCmd_RequestMsg_t msg;
+    msg.id = REQUEST_DIGITAL_READ;
+    msg.param = (uint16_t)din;
+    return (int)request(msg);
+}
+
 void DiscreteControl::analogWrite(DigitalOutputNum_t dout, uint8_t duty)
 {
     ModuleCmd_RequestMsg_t msg;
