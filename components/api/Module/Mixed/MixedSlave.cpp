@@ -31,12 +31,12 @@ int MixedSlave::init(void)
     ModuleSlave::init();
 
     onRequest(REQUEST_DIGITAL_WRITE, [](ModuleCmd_RequestMsg_t msg) -> uint32_t {
-        _mixed->write((DigitalOutputNum_t)msg.param, (uint8_t)msg.data);
+        _mixed->digitalWrite((DigitalOutputNum_t)msg.param, (uint8_t)msg.data);
         return 0;
     });
 
     onRequest(REQUEST_DIGITAL_READ, [](ModuleCmd_RequestMsg_t msg) -> uint32_t {
-        return _mixed->read((DigitalInputNum_t)msg.param);
+        return _mixed->digitalRead((DigitalInputNum_t)msg.param);
     });
 
     onRequest(REQUEST_ATTACH_INTERRUPT, [](ModuleCmd_RequestMsg_t msg) -> uint32_t {
