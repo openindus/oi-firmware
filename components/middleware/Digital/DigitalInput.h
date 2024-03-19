@@ -65,7 +65,9 @@ public:
     ~DigitalInput();
 
     void init(void);
-    int digitalRead(DigitalInputNum_t din);
+    int getLevel(DigitalInputNum_t dout);
+
+    int read(DigitalInputNum_t din);
     void attachInterrupt(DigitalInputNum_t din, IsrCallback_t callback, InterruptMode_t mode, void* arg);
     void detachInterrupt(DigitalInputNum_t din);
 
@@ -90,9 +92,4 @@ private:
     static xQueueHandle _event;
     static void IRAM_ATTR _isr(void* pvParameters);
     static void _task(void* pvParameters);
-
-    /* Utils functions */
-    int _common_get_level(DigitalInputNum_t dout);
-
-
 };

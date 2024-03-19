@@ -44,7 +44,7 @@ int MixedCLI::_digitalWrite(int argc, char **argv)
     DigitalOutputNum_t dout = (DigitalOutputNum_t)(_digitalWriteArgs.dout->ival[0] - 1);
     uint8_t level = (uint8_t)_digitalWriteArgs.level->ival[0];
 
-    _mixed->digitalWrite(dout, level);
+    _mixed->write(dout, level);
 
     return 0;
 }
@@ -80,7 +80,7 @@ int MixedCLI::_digitalRead(int argc, char **argv)
 
     DigitalInputNum_t din = (DigitalInputNum_t)(_digitalReadArgs.din->ival[0] - 1);
 
-    printf("%d\n", _mixed->digitalRead(din));
+    printf("%d\n", _mixed->read(din));
 
     return 0;
 }

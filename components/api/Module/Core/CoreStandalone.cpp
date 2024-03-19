@@ -356,17 +356,17 @@ void CoreStandalone::init()
 
 void CoreStandalone::digitalWrite(DigitalOutputNum_t doutNum, uint8_t level)
 {
-    dout->digitalWrite(doutNum, level);
+    dout->write(doutNum, level);
 }
 
 void CoreStandalone::digitalToggle(DigitalOutputNum_t doutNum)
 {
-    dout->digitalToggle(doutNum);
+    dout->toggle(doutNum);
 }
 
 int CoreStandalone::digitalRead(DigitalInputNum_t dinNum)
 {
-    return din->digitalRead(dinNum);
+    return din->read(dinNum);
 }
 
 int CoreStandalone::analogRead(AnalogInput_Num_t ain)

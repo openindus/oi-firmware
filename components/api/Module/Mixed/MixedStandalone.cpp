@@ -113,7 +113,7 @@ int MixedStandalone::init(void)
 
 int MixedStandalone::digitalRead(DigitalInputNum_t num)
 {
-    return _din->digitalRead(num);
+    return _din->read(num);
 }
 
 void MixedStandalone::attachInterrupt(DigitalInputNum_t num, IsrCallback_t callback, 
@@ -129,17 +129,17 @@ void MixedStandalone::detachInterrupt(DigitalInputNum_t num)
 
 void MixedStandalone::digitalWrite(DigitalOutputNum_t num, uint8_t level)
 {
-    _dout->digitalWrite(num, level);
+    _dout->write(num, level);
 }
 
 void MixedStandalone::digitalToggle(DigitalOutputNum_t num)
 {
-    _dout->digitalToggle(num);
+    _dout->toggle(num);
 }
 
 void MixedStandalone::analogWrite(DigitalOutputNum_t num, uint8_t duty)
 {
-    _dout->analogWrite(num, duty);
+    /** @todo */
 }
 
 float MixedStandalone::getCurrent(DigitalOutputNum_t num)

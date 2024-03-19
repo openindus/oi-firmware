@@ -67,11 +67,17 @@ public:
     ~DigitalOutput();
 
     void init();
-    void digitalWrite(DigitalOutputNum_t dout, uint8_t level);
-    void digitalToggle(DigitalOutputNum_t dout);
-    void analogWrite(DigitalOutputNum_t dout, uint8_t duty);
-    void ledcSetup(DigitalOutputNum_t dout, uint32_t freq, ledc_timer_bit_t bit);
-    void ledcWrite(DigitalOutputNum_t dout, uint32_t duty);
+    void setLevel(DigitalOutputNum_t dout, uint8_t level);
+    void setAll(uint8_t level);
+    int getLevel(DigitalOutputNum_t dout);
+
+    void write(DigitalOutputNum_t dout, uint8_t level);
+    void toggle(DigitalOutputNum_t dout);
+    void blink(DigitalOutputNum_t dout);
+
+    void modePWM(DigitalOutputNum_t dout, uint32_t freq, ledc_timer_bit_t bit);
+    void setDutyCycle(DigitalOutputNum_t dout, uint32_t duty);
+
     float getCurrent(DigitalOutputNum_t dout);
     int getCurrentLevel(DigitalOutputNum_t dout);
 
@@ -97,9 +103,5 @@ private:
     uint8_t* _doutLevel;
 
     static void _controlTask(void *pvParameters);
-
-    /* Utils functions */
-    void _common_set_level(DigitalOutputNum_t dout, uint8_t level);
-    int _common_get_level(DigitalOutputNum_t dout);
 
 };
