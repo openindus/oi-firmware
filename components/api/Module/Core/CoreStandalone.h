@@ -23,6 +23,7 @@
 class CoreStandalone : public ModuleStandalone
 {
 public:
+
     /**
      * @brief Set an output at high or low level.
      * First argument is the DOUT to drive and second argument is the level to set.
@@ -93,14 +94,13 @@ public:
      */
     static uint8_t getCurrentLevel(DigitalOutputNum_t doutNum);
 
-// protected:
-
     static void init(void);
+
+    static OI::CAN can;
 
 private:
 
     static ioex_device_t *_ioex;
-
     static esp_adc_cal_characteristics_t _adc1Characteristics;
 
     static DigitalOutput* dout;

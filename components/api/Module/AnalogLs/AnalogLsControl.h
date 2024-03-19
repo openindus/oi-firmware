@@ -10,11 +10,11 @@
 
 #include "ModuleControl.h"
 #include "ModuleMaster.h"
-#include "AnalogLs.h"
+#include "AnalogLsInterface.h"
 
 #if !defined(OI_ANALOG_LS)
 
-class AnalogLsControl : public ModuleControl, public AnalogLs
+class AnalogLsControl : public ModuleControl, public AnalogLsInterface
 {
 public:
 

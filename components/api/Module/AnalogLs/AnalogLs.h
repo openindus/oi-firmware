@@ -8,12 +8,14 @@
 
 #pragma once
 
-#include "Global.h"
+#include "AnalogLsStandalone.h"
+#include "AnalogLsSlave.h"
+#include "AnalogLsControl.h"
 
-class AnalogLs
-{
-public:
-
-
-
-};
+#if defined(OI_ANALOG_LS) && defined(MODULE_STANDALONE)
+#define Analogls AnaloglsStandalone
+#elif defined(OI_ANALOG_LS) && !defined(MODULE_STANDALONE)
+#define Analogls AnaloglsSlave
+#else 
+#define Analogls AnaloglsControl
+#endif

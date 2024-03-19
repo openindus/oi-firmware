@@ -18,48 +18,48 @@
 #if defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)
 
 IsrCallback_t DiscreteSlave::_isrCallback[] = {
-    [](void*){event(DIGITAL_INTERRUPT, (int)DIN_1);},
-    [](void*){event(DIGITAL_INTERRUPT, (int)DIN_2);},
-    [](void*){event(DIGITAL_INTERRUPT, (int)DIN_3);},
-    [](void*){event(DIGITAL_INTERRUPT, (int)DIN_4);},
+    [](void*){event(EVENT_DIGITAL_INTERRUPT, (int)DIN_1);},
+    [](void*){event(EVENT_DIGITAL_INTERRUPT, (int)DIN_2);},
+    [](void*){event(EVENT_DIGITAL_INTERRUPT, (int)DIN_3);},
+    [](void*){event(EVENT_DIGITAL_INTERRUPT, (int)DIN_4);},
 };
 
 void DiscreteSlave::init(void)
 {
     ModuleSlave::init();
     
-    onRequest(DIGITAL_WRITE, [](Module_RequestMsg_t msg) -> uint32_t {
+    onRequest(REQUEST_DIGITAL_WRITE, [](ModuleCmd_RequestMsg_t msg) -> uint32_t {
         DigitalOutputNum_t dout = (DigitalOutputNum_t)msg.param;
         uint8_t level = (uint8_t)msg.data;
         DiscreteStandalone::digitalWrite(dout, level);
         return 0;
     });
 
-    onRequest(ANALOG_WRITE, [](Module_RequestMsg_t msg) -> uint32_t {
+    onRequest(REQUEST_ANALOG_WRITE, [](ModuleCmd_RequestMsg_t msg) -> uint32_t {
         DigitalOutputNum_t dout = (DigitalOutputNum_t)msg.param;
         uint8_t duty = (uint8_t)msg.data;
         DiscreteStandalone::analogWrite(dout, duty);
         return 0;
     });
 
-    onRequest(DIGITAL_READ, [](Module_RequestMsg_t msg) -> uint32_t {
+    onRequest(REQUEST_DIGITAL_READ, [](ModuleCmd_RequestMsg_t msg) -> uint32_t {
         DigitalInputNum_t din = (DigitalInputNum_t)msg.param;
         return DiscreteStandalone::digitalRead(din);
     });
 
-    onRequest(ANALOG_READ, [](Module_RequestMsg_t msg) -> uint32_t {
+    onRequest(REQUEST_ANALOG_READ, [](ModuleCmd_RequestMsg_t msg) -> uint32_t {
         AnalogInput_Num_t ain = (AnalogInput_Num_t)msg.param;
         return DiscreteStandalone::analogRead(ain);
     });
 
-    onRequest(ATTACH_INTERRUPT, [](Module_RequestMsg_t msg) -> uint32_t {
+    onRequest(REQUEST_ATTACH_INTERRUPT, [](ModuleCmd_RequestMsg_t msg) -> uint32_t {
         DigitalInputNum_t din = (DigitalInputNum_t)msg.param;
         InterruptMode_t mode = (InterruptMode_t)msg.data;
         DiscreteStandalone::attachInterrupt(din, _isrCallback[din], mode);
         return 0;
     });
 
-    onRequest(DETACH_INTERRUPT, [](Module_RequestMsg_t msg) -> uint32_t {
+    onRequest(REQUEST_DETACH_INTERRUPT, [](ModuleCmd_RequestMsg_t msg) -> uint32_t {
         DigitalInputNum_t din = (DigitalInputNum_t)msg.param;
         DiscreteStandalone::detachInterrupt(din);
         return 0;

@@ -19,7 +19,7 @@
 
 static const char MODULE_TAG[] = "Module";
 
-std::map<std::pair<Module_Event_t,uint16_t>, Module_EventCallback_t> ModuleMaster::_event;
+std::map<std::pair<ModuleCmd_EventId_t,uint16_t>, ModuleCmd_EventCallback_t> ModuleMaster::_callback;
 std::vector<uint16_t> ModuleMaster::_ids;
 
 void ModuleMaster::init(void)
@@ -74,7 +74,7 @@ bool ModuleMaster::autoId(void)
         _ids.clear();
 
         BusRs::Frame_t frame;
-        frame.command = MODULE_AUTO_ID;
+        frame.command = CMD_AUTO_ID;
         frame.identifier = 0;
         frame.broadcast = true;
         frame.direction = 1;
@@ -116,17 +116,12 @@ bool ModuleMaster::autoId(void)
         }
     }
 
-    /* Success, broadcast message to set all led green */
     vTaskDelay(50/portTICK_PERIOD_MS);
-    BusRs::Frame_t frame;
-    frame.command = MODULE_SET_STATUS;
-    frame.identifier = 0;
-    frame.broadcast = true;
-    frame.direction = 1;
-    frame.ack = false;
-    frame.length = 0;
-    BusRs::write(&frame);
 
+    /* Success, broadcast message to set all led green */
+    for (int i=0; i<ModuleControl::_instances.size(); i++) {
+        ModuleControl::_instances[i]->ledBlink(LED_GREEN, 1000);
+    }
     return true;
 }
 
@@ -145,7 +140,7 @@ void ModuleMaster::program(uint32_t num)
 bool ModuleMaster::ping(uint32_t num) 
 {
     BusRs::Frame_t frame;
-    frame.command = MODULE_PING;
+    frame.command = CMD_PING;
     frame.identifier = 0;
     frame.broadcast = true;
     frame.direction = 1;
@@ -155,25 +150,25 @@ bool ModuleMaster::ping(uint32_t num)
     return (BusRs::requestFrom(&frame, pdMS_TO_TICKS(10)) == 0);
 }
 
-void ModuleMaster::onEvent(Module_Event_t event, uint16_t id, Module_EventCallback_t callback)
+void ModuleMaster::onEvent(ModuleCmd_EventId_t eventId, uint16_t id, ModuleCmd_EventCallback_t callback)
 {
-    _event.insert({
-        std::make_pair(event, id),
+    _callback.insert({
+        std::make_pair(eventId, id),
         callback
     });
 }
 
-void ModuleMaster::handleEvent(Module_Event_t event, uint16_t id, int num)
+void ModuleMaster::handleEvent(ModuleCmd_EventId_t eventId, uint16_t id, int num)
 {
-    if (_event.find(std::make_pair(event, id)) != _event.end()) {
-        for (auto it=_event.begin(); it!=_event.end(); it++) {
-            if ((it->first.first == event) && 
+    if (_callback.find(std::make_pair(eventId, id)) != _callback.end()) {
+        for (auto it=_callback.begin(); it!=_callback.end(); it++) {
+            if ((it->first.first == eventId) && 
                 (it->first.second == id)) {
                 (*it).second(num);
             }
         }
     } else {
-        ESP_LOGW(MODULE_TAG, "Event does not exist: event=0x%02x, id=%d", event, id);
+        ESP_LOGW(MODULE_TAG, "Event does not exist: event=0x%02x, id=%d", eventId, id);
     }
 }
 
@@ -182,7 +177,7 @@ uint16_t ModuleMaster::getIdFromSN(int num)
     uint16_t id = 0;
 
     BusRs::Frame_t frame;
-    frame.command = MODULE_GET_BUS_ID;
+    frame.command = CMD_GET_ID;
     frame.identifier = 0;
     frame.broadcast = true;
     frame.direction = 1;
@@ -203,14 +198,14 @@ void ModuleMaster::_busTask(void *pvParameters)
     uint16_t id;
     while (1) {
         if (BusCan::read(&frame, &id, portMAX_DELAY) != -1) { 
-            ESP_LOGD(MODULE_TAG, "Bus CAN read to %d | command(%d), type(%d), data(%d)\n", 
-                id, frame.command, frame.type, frame.data);
+            ESP_LOGD(MODULE_TAG, "Bus CAN read to %d | command(%d), data(%d)\n", 
+                id, frame.command, frame.data);
             switch (frame.command)
             {
-            case MODULE_EVENT:
-                handleEvent((Module_Event_t)frame.type, id, (int)frame.data);
+            case CMD_EVENT:
+                handleEvent((ModuleCmd_EventId_t)frame.data_byte[0], id, (int)frame.data_byte[1]);
                 break;
-            case MODULE_AUTO_ID:
+            case CMD_AUTO_ID:
                 _ids.push_back((uint16_t)id);
                 break;
             
@@ -238,7 +233,7 @@ void ModuleMaster::_programmingTask(void *pvParameters)
     id = getIdFromSN(num);
 
     /* FlashLoader begin */
-    frame.command = MODULE_FLASH_LOADER_BEGIN;
+    frame.command = CMD_FLASH_LOADER_BEGIN;
     frame.identifier = id;
     frame.broadcast = false;
     frame.direction = 1;
@@ -260,7 +255,7 @@ void ModuleMaster::_programmingTask(void *pvParameters)
                 sequence = 0;
                 memcpy(&packet.size, &packet.data[0], 4); // data size
                 for (int i=0; i<(packet.size/1024); i++) {
-                    frame.command = MODULE_FLASH_LOADER_WRITE;
+                    frame.command = CMD_FLASH_LOADER_WRITE;
                     frame.identifier = id;
                     frame.broadcast = false;
                     frame.direction = 1;
@@ -274,7 +269,7 @@ void ModuleMaster::_programmingTask(void *pvParameters)
                     sequence++;
                 }
                 if ((packet.size%1024) > 0) {
-                    frame.command = MODULE_FLASH_LOADER_WRITE;
+                    frame.command = CMD_FLASH_LOADER_WRITE;
                     frame.identifier = id;
                     frame.broadcast = false;
                     frame.direction = 1;
@@ -303,7 +298,7 @@ void ModuleMaster::_programmingTask(void *pvParameters)
                 break;
 
             case UsbSerialProtocol::READ_REG:
-                frame.command = MODULE_READ_REGISTER;
+                frame.command = CMD_READ_REGISTER;
                 frame.identifier = id;
                 frame.broadcast = false;
                 frame.direction = 1;
@@ -322,7 +317,7 @@ void ModuleMaster::_programmingTask(void *pvParameters)
                 break;
 
             case UsbSerialProtocol::SPI_FLASH_LOADER_MD5:
-                frame.command = MODULE_FLASH_LOADER_CHECK;
+                frame.command = CMD_FLASH_LOADER_CHECK;
                 frame.identifier = id;
                 frame.broadcast = false;
                 frame.direction = 1;
@@ -341,7 +336,7 @@ void ModuleMaster::_programmingTask(void *pvParameters)
                 break;
 
             case UsbSerialProtocol::FLASH_LOADER_END:
-                frame.command = MODULE_FLASH_LOADER_END;
+                frame.command = CMD_FLASH_LOADER_END;
                 frame.identifier = id;
                 frame.broadcast = false;
                 frame.direction = 1;

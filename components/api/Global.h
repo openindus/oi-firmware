@@ -76,10 +76,7 @@
 #include "cd74hc4052.h"
 
 /* OpenIndus Middleware */
-#include "BusIO.h"
-#include "BusRs.h"
-#include "BusCan.h"
-#include "BusIO.h"
+#include "Bus.h"
 #include "DigitalOutput.h"
 #include "DigitalInput.h"
 #include "AnalogOutput.h"
@@ -94,3 +91,4 @@
 #include "MotorStepperParam.h"
 #include "Led.h"
 #include "RTClock.h"
+#include "CAN.h"

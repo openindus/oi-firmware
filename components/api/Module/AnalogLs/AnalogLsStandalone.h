@@ -9,12 +9,12 @@
 #pragma once
 
 #include "ModuleStandalone.h"
-#include "AnalogLs.h"
+#include "AnalogLsInterface.h"
 #include "AnalogLsPinout.h"
 
 #if defined(OI_ANALOG_LS)
 
-class AnalogLsStandalone : public ModuleStandalone, public AnalogLs
+class AnalogLsStandalone : public ModuleStandalone, public AnalogLsInterface
 {
 public:
 

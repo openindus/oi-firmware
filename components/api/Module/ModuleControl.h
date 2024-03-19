@@ -17,7 +17,7 @@
 
 #include "Global.h"
 #include "ModuleStandalone.h"
-#include "Module.h"
+#include "ModuleCmd.h"
 #include "ModuleMaster.h"
 
 class ModuleControl
@@ -31,7 +31,7 @@ public:
 
     friend class ModuleMaster;
 
-    uint32_t request(Module_RequestMsg_t msg);
+    uint32_t request(ModuleCmd_RequestMsg_t msg);
 
     void ledOn(LedColor_t color);
     void ledOff(void);
@@ -57,10 +57,10 @@ protected:
 
     static std::vector<ModuleControl*> _instances;
 
-private:
-
     uint16_t _id;
     int _sn;
+
+private:
 
     void _ledState(LedState_t state, LedColor_t color=LED_NONE, uint32_t period=0);
 

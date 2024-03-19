@@ -19,10 +19,10 @@ static const char MODULE_TAG[] = "Module";
 
 std::vector<ModuleControl*> ModuleControl::_instances;
 
-uint32_t ModuleControl::request(Module_RequestMsg_t msg)
+uint32_t ModuleControl::request(ModuleCmd_RequestMsg_t msg)
 {
     BusRs::Frame_t frame;
-    frame.command = MODULE_REQUEST;
+    frame.command = CMD_REQUEST;
     frame.identifier = _id;
     frame.broadcast = false;
     frame.direction = 1;
@@ -33,7 +33,7 @@ uint32_t ModuleControl::request(Module_RequestMsg_t msg)
         ESP_LOGE(MODULE_TAG, "requestFrom error");
         return 0xFFFFFFFF;
     } else {
-        Module_RequestMsg_t newMsg;
+        ModuleCmd_RequestMsg_t newMsg;
         memcpy(&newMsg, frame.data, sizeof(newMsg));
         return newMsg.data;
     }
@@ -61,7 +61,7 @@ void ModuleControl::_ledState(LedState_t state, LedColor_t color, uint32_t perio
     payload[1] = (uint8_t)color;
     memcpy(&payload[2], &period, sizeof(uint32_t));
     BusRs::Frame_t frame;
-    frame.command = MODULE_LED_STATE;
+    frame.command = CMD_LED_CTRL;
     frame.identifier = _id;
     frame.broadcast = false;
     frame.direction = 1;

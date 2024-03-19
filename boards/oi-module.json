@@ -1,11 +1,11 @@
 {
-    "name": "OICore",
+    "name": "OIModule",
     "build": {
         "arduino": {
             "ldscript": "esp32s3_out.ld"
         },
         "core": "esp32s3",
-        "partitions": "partitions.csv",
+        "partitions": "boards/partitions.csv",
         "extra_flags": ["-DARDUINO_ESP32S3_DEV",
                         "-DARDUINO_USB_MODE=1",
                         "-DARDUINO_RUNNING_CORE=1",
@@ -18,8 +18,8 @@
         "variant": "esp32s3"
     },
     "frameworks": [
-        "arduino",
-        "espidf"
+        "espidf",
+        "arduino"
     ],
     "upload": {
         "flash_size": "8MB",

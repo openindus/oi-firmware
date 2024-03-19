@@ -104,7 +104,8 @@ error:
     return -1;
 succeed:
     xSemaphoreGive(_mutex);
-    ESP_LOGI(BUS_TWAI_TAG, "WRITE - ID: %u | CMD: 0x%02X | TYPE: 0x%02X | DATA: 0x%08X", msg.identifier, frame->command, frame->type, frame->data);
+    ESP_LOGI(BUS_TWAI_TAG, "WRITE - ID: %u | CMD: 0x%02X | DATA: 0x%08X", 
+        msg.identifier, frame->command, frame->data);
     return 0;
 }
 
@@ -136,6 +137,7 @@ error:
     return -1;
 succeed:
     xSemaphoreGive(_mutex);
-    ESP_LOGI(BUS_TWAI_TAG, "RECV - ID: %u | CMD: 0x%02X | TYPE: 0x%02X | DATA: 0x%08X", msg.identifier, frame->command, frame->type, frame->data);
+    ESP_LOGI(BUS_TWAI_TAG, "RECV - ID: %u | CMD: 0x%02X | DATA: 0x%08X", 
+        msg.identifier, frame->command, frame->data);
     return 0;
 }
