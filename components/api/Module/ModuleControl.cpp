@@ -29,7 +29,8 @@ uint32_t ModuleControl::request(ModuleCmd_RequestMsg_t msg)
     frame.ack = true;
     frame.length = sizeof(msg.byte);
     frame.data = msg.byte;
-    if (BusRs::requestFrom(&frame, pdMS_TO_TICKS(100)) < 0) {
+    BusRs::write(&frame, pdMS_TO_TICKS(100));
+    if (BusRs::read(&frame, pdMS_TO_TICKS(100)) < 0) {
         ESP_LOGE(MODULE_TAG, "requestFrom error");
         return 0xFFFFFFFF;
     } else {

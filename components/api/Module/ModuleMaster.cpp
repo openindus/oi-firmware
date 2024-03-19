@@ -147,7 +147,8 @@ bool ModuleMaster::ping(uint32_t num)
     frame.ack = true;
     frame.length = 4;
     frame.data = (uint8_t*)&num; // Serial number
-    return (BusRs::requestFrom(&frame, pdMS_TO_TICKS(10)) == 0);
+    BusRs::write(&frame, pdMS_TO_TICKS(10));
+    return (BusRs::read(&frame, pdMS_TO_TICKS(10)) == 0);
 }
 
 void ModuleMaster::onEvent(ModuleCmd_EventId_t eventId, uint16_t id, ModuleCmd_EventCallback_t callback)
@@ -186,7 +187,8 @@ uint16_t ModuleMaster::getIdFromSN(int num)
     frame.data = (uint8_t*)malloc(4);
     memcpy(frame.data, &num, 4); // Serial number
 
-    BusRs::requestFrom(&frame, pdMS_TO_TICKS(100));
+    BusRs::write(&frame, pdMS_TO_TICKS(100));
+    BusRs::read(&frame, pdMS_TO_TICKS(100));
     memcpy(&id, frame.data, 2);
     free(frame.data);
     return id;
@@ -239,7 +241,8 @@ void ModuleMaster::_programmingTask(void *pvParameters)
     frame.direction = 1;
     frame.ack = true;
     frame.length = 0;
-    if (BusRs::requestFrom(&frame, pdMS_TO_TICKS(5000)) < 0) {
+    BusRs::write(&frame, pdMS_TO_TICKS(5000));
+    if (BusRs::read(&frame, pdMS_TO_TICKS(5000)) < 0) {
         ModuleStandalone::ledBlink(LED_RED, 1000); // Error
     }
 
@@ -263,7 +266,8 @@ void ModuleMaster::_programmingTask(void *pvParameters)
                     frame.length = 1024;
                     frame.seq_num = sequence;
                     memcpy(frame.data, &packet.data[sequence*1024+16], 1024); // data
-                    if (BusRs::requestFrom(&frame, pdMS_TO_TICKS(100)) < 0) {
+                    BusRs::write(&frame, pdMS_TO_TICKS(100));
+                    if (BusRs::read(&frame, pdMS_TO_TICKS(100)) < 0) {
                         ModuleStandalone::ledBlink(LED_RED, 1000); // Error
                     }
                     sequence++;
@@ -277,7 +281,8 @@ void ModuleMaster::_programmingTask(void *pvParameters)
                     frame.length = packet.size%1024;
                     frame.seq_num = sequence;
                     memcpy(frame.data, &packet.data[sequence*1024+16], packet.size%1024); // data
-                    if (BusRs::requestFrom(&frame, pdMS_TO_TICKS(100)) < 0) {
+                    BusRs::write(&frame, pdMS_TO_TICKS(100));
+                    if (BusRs::read(&frame, pdMS_TO_TICKS(100)) < 0) {
                         ModuleStandalone::ledBlink(LED_RED, 1000); // Error
                     }
                 }                
@@ -305,7 +310,8 @@ void ModuleMaster::_programmingTask(void *pvParameters)
                 frame.ack = true;
                 frame.length = 4;
                 memcpy(frame.data, packet.data, 4); // addr
-                if (BusRs::requestFrom(&frame, pdMS_TO_TICKS(200)) < 0) {
+                BusRs::write(&frame, pdMS_TO_TICKS(200));
+                if (BusRs::read(&frame, pdMS_TO_TICKS(200)) < 0) {
                     ModuleStandalone::ledBlink(LED_RED, 1000); // Error
                 } else {
                     packet.direction = 1;
@@ -324,7 +330,8 @@ void ModuleMaster::_programmingTask(void *pvParameters)
                 frame.ack = true;
                 frame.length = 4;
                 memcpy(frame.data, &packet.data[4], 4); // flash size
-                if (BusRs::requestFrom(&frame, pdMS_TO_TICKS(500)) < 0) {
+                BusRs::write(&frame, pdMS_TO_TICKS(500));
+                if (BusRs::read(&frame, pdMS_TO_TICKS(500)) < 0) {
                     ModuleStandalone::ledBlink(LED_RED, 1000); // Error
                 } else {
                     packet.direction = 1;
