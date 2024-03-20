@@ -99,6 +99,7 @@ void ModuleSlave::_busTask(void *pvParameters)
                     frame.broadcast = false;
                     frame.direction = 0;
                     frame.ack = false;
+                    frame.identifier = _id; // return our id --> the master can get the id from serialNumber
                     BusRs::write(&frame);
                 }
                 break;
@@ -189,21 +190,6 @@ void ModuleSlave::_busTask(void *pvParameters)
                         memcpy(frame.data, msg.byte, frame.length);
                         BusRs::write(&frame);
                     }
-                }
-                break;
-            }
-            case CMD_GET_ID:
-            {
-                uint16_t id = _id;
-                uint32_t num; // Serial number
-                memcpy(&num, frame.data, sizeof(num));
-                if (num ==  ModuleStandalone::getSerialNum()) {
-                    frame.broadcast = false;
-                    frame.direction = 0;
-                    frame.ack = false;
-                    frame.length = sizeof(id);
-                    memcpy(frame.data, &id, sizeof(id));
-                    BusRs::write(&frame);
                 }
                 break;
             }

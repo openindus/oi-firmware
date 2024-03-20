@@ -178,7 +178,7 @@ uint16_t ModuleMaster::getIdFromSN(int num)
     uint16_t id = 0;
 
     BusRs::Frame_t frame;
-    frame.command = CMD_GET_ID;
+    frame.command = CMD_PING;
     frame.identifier = 0;
     frame.broadcast = true;
     frame.direction = 1;
@@ -189,7 +189,7 @@ uint16_t ModuleMaster::getIdFromSN(int num)
 
     BusRs::write(&frame, pdMS_TO_TICKS(100));
     BusRs::read(&frame, pdMS_TO_TICKS(100));
-    memcpy(&id, frame.data, 2);
+    id = frame.identifier;
     free(frame.data);
     return id;
 }

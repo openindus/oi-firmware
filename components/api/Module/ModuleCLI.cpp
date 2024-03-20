@@ -86,7 +86,7 @@ void ModuleCLI::_registerSetBoardInfo(void)
 
     const esp_console_cmd_t cmd = {
         .command = "set-board-info",
-        .help = "WARNING ! This operation can be done nly once ! Set board informations: \"type, serial number and hardware version\"",
+        .help = "WARNING ! This operation can be done only once !\nSet board informations: \"type, serial number and hardware version\"\nExample :\n\tset-board-info -t OICore -n 4 -h AE01",
         .hint = NULL,
         .func = &setBoardInfo,
         .argtable = &setBoardInfoArgs
