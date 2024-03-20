@@ -51,10 +51,9 @@ void ModuleCLI::_registerRestart(void)
 /** 'set-board-info' */
 
 static struct {
-    struct arg_int *boardType;
+    struct arg_str *boardType;
     struct arg_int *serialNum;
     struct arg_str *versionHW;
-    struct arg_str *versionSW;
     struct arg_end *end;
 } setBoardInfoArgs;
 
@@ -66,27 +65,28 @@ static int setBoardInfo(int argc, char **argv)
         return 1;
     }
 
-    if (setBoardInfoArgs.boardType->count > 0) {
-        ModuleStandalone::setBoardType(setBoardInfoArgs.boardType->ival[0]);
-    }
-    if (setBoardInfoArgs.serialNum->count > 0) {
-        ModuleStandalone::setSerialNum(setBoardInfoArgs.serialNum->ival[0]);
-    }
+    char board_type[16];
+    strcpy(board_type, setBoardInfoArgs.boardType->sval[0]);
+    int serial_number = setBoardInfoArgs.serialNum->ival[0];
+    char hardware_version[5];
+    strcpy(hardware_version, setBoardInfoArgs.versionHW->sval[0]);
 
-    return 0;
+    if (ModuleStandalone::setBoardInfo(board_type, serial_number, hardware_version)) {
+        return 0;
+    }
+    return 1;
 }
 
 void ModuleCLI::_registerSetBoardInfo(void)
 {
-    setBoardInfoArgs.boardType = arg_int0("t", "type", "TYPE", "Board type");
-    setBoardInfoArgs.serialNum = arg_int0("n", "serial-num", "NUM", "Serial number");
-    setBoardInfoArgs.versionHW = arg_str0("h", "version-hw", "VERSION", "Hardware version");
-    setBoardInfoArgs.versionSW = arg_str0("s", "version-sw", "VERSION", "Software version");
+    setBoardInfoArgs.boardType = arg_str1("t", "type", "TYPE", "Board type");
+    setBoardInfoArgs.serialNum = arg_int1("n", "serial-num", "NUM", "Serial number");
+    setBoardInfoArgs.versionHW = arg_str1("h", "version-hw", "VERSION", "Hardware version");
     setBoardInfoArgs.end = arg_end(5);
 
     const esp_console_cmd_t cmd = {
         .command = "set-board-info",
-        .help = "Set board informations: \"type, serial number, hardware and software version\"",
+        .help = "WARNING ! This operation can be done nly once ! Set board informations: \"type, serial number and hardware version\"",
         .hint = NULL,
         .func = &setBoardInfo,
         .argtable = &setBoardInfoArgs
@@ -113,16 +113,22 @@ static int getBoardInfo(int argc, char **argv)
     }
 
     if (getBoardInfoArgs.boardType->count > 0) {
-        printf("%d\n", ModuleStandalone::getBoardType());
+        char board_type[16];
+        ModuleStandalone::getBoardType(board_type);
+        printf("%s\n", board_type);
     }
     if (getBoardInfoArgs.serialNum->count > 0) {
         printf("%d\n", ModuleStandalone::getSerialNum());
     }
     if (getBoardInfoArgs.versionHW->count > 0) {
-        printf("AA00\n");
+        char version[5];
+        ModuleStandalone::getHardwareVersion(version);
+        printf("%s\n", version);
     }
     if (getBoardInfoArgs.versionSW->count > 0) {
-        printf("v0.0.0\n");
+        char version[32];
+        ModuleStandalone::getSoftwareVersion(version);
+        printf("%s\n", version);
     }
 
     return 0;
@@ -130,10 +136,10 @@ static int getBoardInfo(int argc, char **argv)
 
 void ModuleCLI::_registerGetBoardInfo(void)
 {
-    getBoardInfoArgs.boardType = arg_lit0(NULL, "type", "Board type");
-    getBoardInfoArgs.serialNum = arg_lit0(NULL, "serial-num","Serial number");
-    getBoardInfoArgs.versionHW = arg_lit0(NULL, "version-hw", "Hardware version");
-    getBoardInfoArgs.versionSW = arg_lit0(NULL, "version-sw", "Software version");
+    getBoardInfoArgs.boardType = arg_lit0("t", "type", "Board type");
+    getBoardInfoArgs.serialNum = arg_lit0("n", "serial-num","Serial number");
+    getBoardInfoArgs.versionHW = arg_lit0("h", "version-hw", "Hardware version");
+    getBoardInfoArgs.versionSW = arg_lit0("s", "version-sw", "Software version");
     getBoardInfoArgs.end = arg_end(2);
 
     const esp_console_cmd_t cmd = {

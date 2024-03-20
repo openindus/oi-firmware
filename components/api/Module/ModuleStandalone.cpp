@@ -18,17 +18,18 @@
 
 static const char MODULE_TAG[] = "Module";
 
-/* NVS Memory */
-#define NVM_NAMESPACE (const char*)"oi"
-#define NVM_KEY_BOARD_TYPE (const char*)"board_type"
-#define NVM_KEY_SERIAL_NUMBER (const char*)"serial_num"
-#define NVM_KEY_VERSION_HARDWARE (const char*)"version_hw"
-#define NVM_KEY_VERSION_SOFTWARE (const char*)"version_sw"
-
 void ModuleStandalone::init()
 {
     /* Init GPIO service */
     ESP_ERROR_CHECK(gpio_install_isr_service(0));
+
+    /* Initialize NVS */ 
+    esp_err_t err = nvs_flash_init_partition(NVS_DEFAULT_PART_NAME);
+    if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+        ESP_ERROR_CHECK(nvs_flash_erase());
+        err = nvs_flash_init();
+    }
+    ESP_ERROR_CHECK(err);
 
     /* GPIO19 and GPIO20 are USB interface, force reset/config before setting them as GPIO */
     gpio_reset_pin(GPIO_NUM_19);
@@ -39,9 +40,14 @@ void ModuleStandalone::init()
     Led::install(MODULE_PIN_LED);
     Led::on(LED_BLUE);
 
-    /* NVS - Board info */
-    ESP_LOGI(MODULE_TAG, "Board type      : %d", getBoardType());
-    ESP_LOGI(MODULE_TAG, "Serial number   : %d", getSerialNum());
+    /* eFuse - Board info */
+    char board_type[16];
+    getBoardType(board_type);
+    ESP_LOGI(MODULE_TAG, "Board type       : %s", board_type);
+    ESP_LOGI(MODULE_TAG, "Serial number    : %d", getSerialNum());
+    char hardware_version[16];
+    getHardwareVersion(hardware_version);
+    ESP_LOGI(MODULE_TAG, "Hardware version : %s", hardware_version);
 
     /* Temperature sensor */
 #if !defined(CONFIG_IDF_TARGET_ESP32)
@@ -110,85 +116,67 @@ float ModuleStandalone::getTemperature(void)
     return tsens_out;
 }
 
-int ModuleStandalone::getBoardType(void)
+void ModuleStandalone::getBoardType(char* board_type)
 {
-    return _getBoardInfoFromNVS(NVM_KEY_BOARD_TYPE);
-}
-
-void ModuleStandalone::setBoardType(int boardType)
-{
-    _setBoardInfoToNVS(NVM_KEY_BOARD_TYPE, boardType);
+    if (esp_efuse_block_is_empty(EFUSE_BLK_KEY0) == false) {
+        Module_eFuse_Info_t data;
+        esp_efuse_read_block(EFUSE_BLK_KEY0, &data, 0, sizeof(Module_eFuse_Info_t)*8);
+        strcpy(board_type, data.board_type);
+    } else {
+        ESP_LOGW(MODULE_TAG, "Board type is not defined !");
+        strcpy(board_type, "undefined");
+    }
+    return;
 }
 
 int ModuleStandalone::getSerialNum(void)
 {
-    return _getBoardInfoFromNVS(NVM_KEY_SERIAL_NUMBER);
-}
-
-void ModuleStandalone::setSerialNum(int serialNum)
-{
-    _setBoardInfoToNVS(NVM_KEY_SERIAL_NUMBER, serialNum);
-}
-
-int32_t ModuleStandalone::_getBoardInfoFromNVS(const char* key)
-{
-    esp_err_t err = 0;
-    nvs_handle_t handle;
-    int32_t value;
-
-    /* Initialize NVS */ 
-    err = nvs_flash_init_partition(NVS_DEFAULT_PART_NAME);
-    if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-        ESP_ERROR_CHECK(nvs_flash_erase());
-        err = nvs_flash_init();
-    }
-    ESP_ERROR_CHECK(err);
-    
-    ESP_LOGD(MODULE_TAG, "Opening Non-Volatile DigitalOutputage (NVS) handle...");
-    err = nvs_open_from_partition(NVS_DEFAULT_PART_NAME, NVM_NAMESPACE, NVS_READWRITE, &handle);
-    if (err != ESP_OK) {
-        ESP_LOGE(MODULE_TAG, "Error (%s) opening NVS handle!", esp_err_to_name(err));
+    if (esp_efuse_block_is_empty(EFUSE_BLK_KEY0) == false) {
+        Module_eFuse_Info_t data;
+        esp_efuse_read_block(EFUSE_BLK_KEY0, &data, 0, sizeof(Module_eFuse_Info_t)*8);
+        return data.serial_number;
     } else {
-        err = nvs_get_i32(handle, key, &value);
-        switch (err) {
-            case ESP_OK:
-                break;
-            case ESP_ERR_NVS_NOT_FOUND:
-                ESP_LOGW(MODULE_TAG,"Undefined board info");
-                break;
-            default :
-                ESP_LOGE(MODULE_TAG,"Error reading nvs memory");
-        }
-        nvs_close(handle);
+        ESP_LOGW(MODULE_TAG, "Serial number is not defined !");
+        return 0;
     }
-    return value;
+    
 }
 
-void ModuleStandalone::_setBoardInfoToNVS(const char* key, int32_t value)
+void ModuleStandalone::getHardwareVersion(char* version)
 {
-    esp_err_t err;
-    nvs_handle_t handle;
-    
-    err = nvs_flash_init_partition(NVS_DEFAULT_PART_NAME);
-    if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-        ESP_ERROR_CHECK(nvs_flash_erase());
-        err = nvs_flash_init();
-    }
-    ESP_ERROR_CHECK(err);
-
-    ESP_LOGD(MODULE_TAG, "Opening Non-Volatile DigitalOutputage (NVS) handle...");
-    err = nvs_open_from_partition(NVS_DEFAULT_PART_NAME, NVM_NAMESPACE, NVS_READWRITE, &handle);
-    if (err != ESP_OK) {
-        ESP_LOGE(MODULE_TAG, "Error (%s) opening NVS handle!", esp_err_to_name(err));
+    if (esp_efuse_block_is_empty(EFUSE_BLK_KEY0) == false) {
+        Module_eFuse_Info_t data;
+        esp_efuse_read_block(EFUSE_BLK_KEY0, &data, 0, sizeof(Module_eFuse_Info_t)*8);
+        strcpy(version, data.hardware_version);
     } else {
-        err = nvs_set_i32(handle, key, value);
-        if (err != ESP_OK) {
-            ESP_LOGE(MODULE_TAG, "Fail to write in memory");
-        } else {
-            err = nvs_commit(handle);
-            if (err != ESP_OK)
-                ESP_LOGE(MODULE_TAG, "Fail commit nvs memory");
-        }
-        nvs_close(handle);
+        ESP_LOGW(MODULE_TAG, "Hardware version is not defined !");
+        strcpy(version, "undefined");
     }
+    return;
+}
+
+void ModuleStandalone::getSoftwareVersion(char* version)
+{
+    const esp_app_desc_t* app_info = esp_ota_get_app_description();
+    strcpy(version,app_info->version);
+    return;
+}
+
+bool ModuleStandalone::setBoardInfo(char* board_type, int serial_num, char* hardware_version)
+{
+    ESP_LOGW(MODULE_TAG, "This operation can be done only once !");
+
+    Module_eFuse_Info_t data;
+    memset(&data, 0, sizeof(Module_eFuse_Info_t));
+    strcpy(data.board_type, board_type);
+    data.serial_number = serial_num;
+    strcpy(data.hardware_version, hardware_version);
+
+    esp_err_t err = esp_efuse_write_key(EFUSE_BLK_KEY0, ESP_EFUSE_KEY_PURPOSE_USER, &data, sizeof(Module_eFuse_Info_t));
+    
+    if (err != ESP_OK) {
+        ESP_LOGE(MODULE_TAG, "Error in eFuse write: %s", esp_err_to_name(err));
+        return false;
+    }
+    return true;
 }
