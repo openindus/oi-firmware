@@ -104,14 +104,34 @@ void ModuleSlave::_busTask(void *pvParameters)
                 }
                 break;
             }
-            case CMD_AUTO_ID:
+            case CMD_DISCOVER:
             {
-                BusCan::Frame_t autoIdFrame;
-                autoIdFrame.command = CMD_AUTO_ID;
-                if (BusCan::write(&autoIdFrame, _id) == -1)
+                BusCan::Frame_t discoverFrame;
+                discoverFrame.command = CMD_DISCOVER;
+                discoverFrame.data = ModuleStandalone::getSerialNum();
+                if (BusCan::write(&discoverFrame, _id) == -1)
                     ModuleStandalone::ledBlink(LED_RED, 1000); // Error
                 break;
-            }            
+            }
+            case CMD_GET_BOARD_INFO:
+            {
+                if (frame.identifier == _id) {
+                    Module_Info_t board_info;
+                    char software_version[32]; // version can be 32 bytes
+                    ModuleStandalone::getBoardType(board_info.efuse.board_type);
+                    board_info.efuse.serial_number = ModuleStandalone::getSerialNum();
+                    ModuleStandalone::getHardwareVersion(board_info.efuse.hardware_version);
+                    ModuleStandalone::getSoftwareVersion(board_info.software_version);
+                    memcpy(frame.data, &board_info, sizeof(Module_Info_t));
+                    frame.length = sizeof(Module_Info_t);
+                    frame.broadcast = false;
+                    frame.direction = 0;
+                    frame.ack = false;
+                    frame.identifier = _id;
+                    BusRs::write(&frame);
+                }
+                break;
+            }
             case CMD_FLASH_LOADER_BEGIN:
             {
                 if (frame.identifier == _id) {

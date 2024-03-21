@@ -24,6 +24,11 @@ typedef struct {
     char hardware_version[12];
 } Module_eFuse_Info_t;
 
+typedef struct {
+    Module_eFuse_Info_t efuse;
+    char software_version[32];
+} Module_Info_t;
+
 class ModuleStandalone
 {
 public:
