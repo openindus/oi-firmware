@@ -20,8 +20,7 @@
 static const char MODULE_TAG[] = "Module";
 
 std::map<std::pair<ModuleCmd_EventId_t,uint16_t>, ModuleCmd_EventCallback_t> ModuleMaster::_callback;
-std::vector<uint16_t> ModuleMaster::_ids;
-std::vector<int> ModuleMaster::_sns;
+std::map<uint16_t,int> ModuleMaster::_ids;
 
 void ModuleMaster::init(void)
 {
@@ -89,9 +88,12 @@ bool ModuleMaster::autoId(void)
         vTaskDelay(500/portTICK_PERIOD_MS);
     
         if (ModuleControl::_instances.size() == _ids.size()) {
-            sort(_ids.begin(), _ids.end(), std::greater<uint16_t>());
+            // sort(_ids.begin(), _ids.end(), std::greater<uint16_t>());
+            std::map<uint16_t, int>::iterator it = _ids.begin();
             for (int i=0; i<ModuleControl::_instances.size(); i++) {
-                ModuleControl::setId(ModuleControl::_instances[i], _ids[i]);
+                ModuleControl::setId(ModuleControl::_instances[i], it->first);
+                ModuleControl::setSN(ModuleControl::_instances[i], it->second);
+                ++it;
                 ModuleControl::_instances[i]->ledOn(LED_YELLOW);
                 vTaskDelay(50/portTICK_PERIOD_MS);
             }
@@ -213,10 +215,34 @@ void ModuleMaster::getBoardInfo(int num, Module_Info_t board_info)
     frame.ack = true;
     frame.length = 0;
     frame.data = (uint8_t*)malloc(sizeof(Module_Info_t));
-    BusRs::requestFrom(&frame, pdMS_TO_TICKS(100));
+    BusRs::write(&frame, pdMS_TO_TICKS(100));
+    BusRs::read(&frame, pdMS_TO_TICKS(100));
     memcpy(&board_info, frame.data, sizeof(Module_Info_t));
     free(frame.data);
     return;
+}
+
+std::map<uint16_t,int> ModuleMaster::discoverSlaves()
+{
+    // Delete previous id list
+    _ids.clear();
+
+    BusRs::Frame_t frame;
+    frame.command = CMD_DISCOVER;
+    frame.identifier = 0;
+    frame.broadcast = true;
+    frame.direction = 1;
+    frame.ack = false;
+    frame.length = 0;
+    BusRs::write(&frame);
+
+    // Wait for slaves to answer
+    vTaskDelay(pdMS_TO_TICKS(500));
+
+    // Sort slaves in bus oder
+    // sort(_ids.begin(), _ids.end(), std::greater<uint16_t>());
+
+    return _ids;
 }
 
 void ModuleMaster::_busTask(void *pvParameters) 
@@ -233,8 +259,7 @@ void ModuleMaster::_busTask(void *pvParameters)
                 handleEvent((ModuleCmd_EventId_t)frame.data_byte[0], id, (int)frame.data_byte[1]);
                 break;
             case CMD_DISCOVER:
-                _ids.push_back((uint16_t)id);
-                _sns.push_back((int)(frame.data));
+                _ids.insert(std::pair<int, int>(id, (int)frame.data));
                 break;
             
             default:

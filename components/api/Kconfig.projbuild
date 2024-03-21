@@ -1,9 +1,5 @@
 menu "OpenIndus Configuration"
 
-    config FORCE_CONSOLE
-        bool "Force console to start with main task. ! Serial.begin() will not work."
-        default n
-
     choice STEPPER_DRIVER
         bool "Stepper driver"
         default POWERSTEP01

@@ -35,6 +35,7 @@ public:
 
     static uint16_t getIdFromSN(int num);
     static void getBoardInfo(int num, Module_Info_t board_info);
+    static std::map<uint16_t,int> discoverSlaves();
 
 
 private:

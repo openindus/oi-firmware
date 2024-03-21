@@ -22,6 +22,8 @@ void ModuleMasterCLI::init(void)
     _registerPing();
     _registerProgram();
     _registerAutoId();
+    _registerDiscoverSlaves();
+    _registerGetSlaveInfo();
 }
 
 /** 'program' */
@@ -59,7 +61,6 @@ void ModuleMasterCLI::_registerProgram(void)
 }
 
 /** 'ping' */
-
 static struct {
     struct arg_int *sn;
     struct arg_end *end;
@@ -116,6 +117,73 @@ void ModuleMasterCLI::_registerAutoId(void)
         .hint = NULL,
         .func = &autoId,
         .argtable = NULL
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+}
+
+
+/** 'discover-slaves' */
+
+static int discoverSlaves(int argc, char **argv) 
+{
+    
+    std::map<uint16_t,int> _ids = ModuleMaster::discoverSlaves();
+    printf("{");
+    for (auto const& entry: _ids)
+    {
+        printf("[%i,%i],", entry.first, entry.second);
+    }
+    printf("}\n");
+    return 0;
+}
+
+void ModuleMasterCLI::_registerDiscoverSlaves(void)
+{
+    const esp_console_cmd_t cmd = {
+        .command = "discover-slaves",
+        .help = "Discover all slaves on Bus and return information as json table: {[id1,sn1],[id2,sn2],[id3,sn3],...}",
+        .hint = NULL,
+        .func = &discoverSlaves,
+        .argtable = NULL
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+}
+
+/** 'get-slave-info' */
+
+static struct {
+    struct arg_int *sn;
+    struct arg_end *end;
+} pingArgs;
+
+static int getSlaveInfo(int argc, char **argv)
+{
+    uint32_t sn;
+    int64_t t, t0;
+    int nerrors = arg_parse(argc, argv, (void **) &pingArgs);
+    if (nerrors != 0) {
+        arg_print_errors(stderr, pingArgs.end, argv[0]);
+        return 1;
+    }
+    sn = (uint32_t)pingArgs.sn->ival[0];
+
+    Module_Info_t boardInfo;
+    ModuleMaster::getSlaveInfo(sn, &boardInfo);
+    
+    
+    return 0;
+}
+
+void ModuleMasterCLI::_registerGetSlaveInfo(void)
+{
+    pingArgs.sn = arg_int1(NULL, NULL, "<SN>", "Board serial number");
+    pingArgs.end = arg_end(1);
+    const esp_console_cmd_t cmd = {
+        .command = "get-slave-info",
+        .help = "Get info from a slave board",
+        .hint = NULL,
+        .func = &getSlaveInfo,
+        .argtable = &pingArgs
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
 }

@@ -32,6 +32,8 @@ private:
     static void _registerProgram(void);
     static void _registerPing(void);
     static void _registerAutoId(void);
+    static void _registerDiscoverSlaves(void);
+    static void _registerGetSlaveInfo(void);
 
 };
 
