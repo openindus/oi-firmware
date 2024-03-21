@@ -168,19 +168,6 @@ succeed:
 }
 
 /**
- * @brief Request RS frame
- * 
- * @param frame 
- * @param timeout 
- * @return int 
- */
-int BusRs::requestFrom(Frame_t* frame, TickType_t timeout)
-{
-    write(frame, timeout);
-    return read(frame, timeout);
-}
-
-/**
  * @brief Calculates the checksum of a RS frame
  * 
  * @param frame 

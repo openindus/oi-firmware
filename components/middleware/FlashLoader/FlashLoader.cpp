@@ -86,6 +86,7 @@ void FlashLoader::check(uint8_t md5Sum[16], size_t progSize)
         progSize -= n;
     }
     MD5Final(md5Sum, &context);
+    free(buffer);
 }
 
 void FlashLoader::end(void)

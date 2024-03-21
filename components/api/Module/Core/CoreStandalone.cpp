@@ -53,6 +53,7 @@ DigitalInput* CoreStandalone::din = new DigitalInput(&_ioex, _dinGpio, 4);
 DigitalOutput* CoreStandalone::dout = new DigitalOutput(&_ioex, _doutGpio, _doutCurrentGpio, 4);
 
 OI::CAN CoreStandalone::can(CORE_SPI_USER_HOST, CORE_PIN_CAN_SPI_CS, CORE_PIN_CAN_INTERRUPT);
+OI::RS CoreStandalone::rs(CORE_SPI_USER_HOST, CORE_PIN_RS_SPI_CS, CORE_PIN_RS_INTERRUPT);
 
 void CoreStandalone::init()
 {
@@ -355,17 +356,17 @@ void CoreStandalone::init()
 
 void CoreStandalone::digitalWrite(DigitalOutputNum_t doutNum, uint8_t level)
 {
-    dout->digitalWrite(doutNum, level);
+    dout->write(doutNum, level);
 }
 
 void CoreStandalone::digitalToggle(DigitalOutputNum_t doutNum)
 {
-    dout->digitalToggle(doutNum);
+    dout->toggle(doutNum);
 }
 
 int CoreStandalone::digitalRead(DigitalInputNum_t dinNum)
 {
-    return din->digitalRead(dinNum);
+    return din->read(dinNum);
 }
 
 int CoreStandalone::analogRead(AnalogInput_Num_t ain)

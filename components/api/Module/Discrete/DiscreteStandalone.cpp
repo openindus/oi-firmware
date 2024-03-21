@@ -94,17 +94,17 @@ void DiscreteStandalone::init()
 
 void DiscreteStandalone::digitalWrite(DigitalOutputNum_t doutNum, uint8_t level)
 {
-    dout->digitalWrite(doutNum, level);
+    dout->write(doutNum, level);
 }
 
 void DiscreteStandalone::digitalToggle(DigitalOutputNum_t doutNum)
 {
-    dout->digitalToggle(doutNum);
+    dout->toggle(doutNum);
 }
 
 int DiscreteStandalone::digitalRead(DigitalInputNum_t dinNum)
 {
-    return din->digitalRead(dinNum);
+    return din->read(dinNum);
 }
 
 void DiscreteStandalone::attachInterrupt(DigitalInputNum_t dinNum, IsrCallback_t callback, InterruptMode_t mode, void* arg)
@@ -144,7 +144,7 @@ int DiscreteStandalone::analogReadMilliVolts(AnalogInput_Num_t ain)
 
 void DiscreteStandalone::analogWrite(DigitalOutputNum_t doutNum, uint8_t duty)
 {
-    dout->analogWrite(doutNum, duty);
+    /** @todo */
 }
 
 float DiscreteStandalone::getCurrent(DigitalOutputNum_t doutNum)

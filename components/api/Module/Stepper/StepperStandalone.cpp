@@ -56,7 +56,7 @@ void StepperStandalone::init()
 
 int StepperStandalone::digitalRead(DigitalInputNum_t dinNum)
 {
-    return din->digitalRead(dinNum);
+    return din->read(dinNum);
 }
 
 void StepperStandalone::attachInterrupt(DigitalInputNum_t dinNum, IsrCallback_t callback, InterruptMode_t mode, void* arg)

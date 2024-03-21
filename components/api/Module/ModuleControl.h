@@ -62,6 +62,6 @@ protected:
 
 private:
 
-    void _ledState(LedState_t state, LedColor_t color=LED_NONE, uint32_t period=0);
+    void _ledCtrl(LedState_t state, LedColor_t color=LED_NONE, uint32_t period=0);
 
 };

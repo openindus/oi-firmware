@@ -25,6 +25,7 @@ void ModuleCLI::init(void)
     _registerReadId();
     _registerWriteSync();
     _registerReadSync();
+    _registerBusPower();
 }
 
 /** 'restart' */
@@ -313,11 +314,9 @@ void ModuleCLI::_registerWriteSync(void)
 
 /** 'read-sync' */
 
-
 static int readSync(int argc, char **argv) 
 {
     printf("%u\n", BusIO::readSync());
-
     return 0;
 }
 
@@ -329,6 +328,47 @@ void ModuleCLI::_registerReadSync(void)
         .hint = NULL,
         .func = &readSync,
         .argtable = NULL
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+}
+
+/** 'bus-power on/off' */
+
+static struct {
+    struct arg_str *state;
+    struct arg_end *end;
+} busPowerArgs;
+
+static int busPower(int argc, char **argv) 
+{
+    int nerrors = arg_parse(argc, argv, (void **) &busPowerArgs);
+    if (nerrors != 0) {
+        arg_print_errors(stderr, busPowerArgs.end, argv[0]);
+        return 1;
+    }
+
+    if(strcmp(busPowerArgs.state->sval[0], "on") == 0) {
+        BusIO::powerOn();
+    } else if (strcmp(busPowerArgs.state->sval[0], "off") == 0) {
+        BusIO::powerOff();
+    } else {
+        arg_print_errors(stderr, busPowerArgs.end, argv[0]);
+        return 2;
+    }
+    return 0;
+}
+
+void ModuleCLI::_registerBusPower(void)
+{
+    busPowerArgs.state = arg_str1(NULL, NULL, "<STATE>", "[on/off]");
+    busPowerArgs.end = arg_end(2);
+
+    const esp_console_cmd_t cmd = {
+        .command = "bus-power",
+        .help = "Bus power on/off",
+        .hint = NULL,
+        .func = &busPower,
+        .argtable = &busPowerArgs
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
 }

@@ -29,7 +29,8 @@ uint32_t ModuleControl::request(ModuleCmd_RequestMsg_t msg)
     frame.ack = true;
     frame.length = sizeof(msg.byte);
     frame.data = msg.byte;
-    if (BusRs::requestFrom(&frame, pdMS_TO_TICKS(100)) < 0) {
+    BusRs::write(&frame, pdMS_TO_TICKS(100));
+    if (BusRs::read(&frame, pdMS_TO_TICKS(100)) < 0) {
         ESP_LOGE(MODULE_TAG, "requestFrom error");
         return 0xFFFFFFFF;
     } else {
@@ -41,20 +42,20 @@ uint32_t ModuleControl::request(ModuleCmd_RequestMsg_t msg)
 
 void ModuleControl::ledOn(LedColor_t color)
 {
-    _ledState(LED_ON, color, 0);
+    _ledCtrl(LED_ON, color, 0);
 }
 
 void ModuleControl::ledOff(void)
 {
-    _ledState(LED_OFF, LED_NONE, 0);
+    _ledCtrl(LED_OFF, LED_NONE, 0);
 }
 
 void ModuleControl::ledBlink(LedColor_t color, uint32_t period)
 {
-    _ledState(LED_BLINK, color, period);
+    _ledCtrl(LED_BLINK, color, period);
 }
 
-void ModuleControl::_ledState(LedState_t state, LedColor_t color, uint32_t period)
+void ModuleControl::_ledCtrl(LedState_t state, LedColor_t color, uint32_t period)
 {
     uint8_t payload[6];
     payload[0] = (uint8_t)state;

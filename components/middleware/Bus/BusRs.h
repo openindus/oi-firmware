@@ -50,7 +50,6 @@ public:
     static void end(void);
     static void write(Frame_t* frame, TickType_t timeout=0);
     static int read(Frame_t* frame, TickType_t timeout=portMAX_DELAY);
-    static int requestFrom(Frame_t* frame, TickType_t timeout=portMAX_DELAY);
 
 private:
 

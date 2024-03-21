@@ -34,4 +34,5 @@ private:
     static void _registerReadId(void);
     static void _registerWriteSync(void);
     static void _registerReadSync(void);
+    static void _registerBusPower(void);
 };

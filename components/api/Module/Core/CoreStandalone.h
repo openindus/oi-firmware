@@ -97,6 +97,7 @@ public:
     static void init(void);
 
     static OI::CAN can;
+    static OI::RS rs;
 
 private:
 
