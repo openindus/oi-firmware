@@ -97,7 +97,7 @@ void System::init(void)
     UsbConsole::listen();
     
     /* Wait for slaves modules to init and give time to user script to enable console */
-    vTaskDelay(500/portTICK_PERIOD_MS);
+    vTaskDelay(200/portTICK_PERIOD_MS);
 
     /* On master module, call autoId */
 #if defined(MODULE_MASTER)

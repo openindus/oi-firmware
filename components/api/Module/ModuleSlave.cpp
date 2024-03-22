@@ -93,7 +93,7 @@ void ModuleSlave::_busTask(void *pvParameters)
             }
             case CMD_PING:
             {
-                uint32_t num; // Serial number
+                int num; // Serial number
                 memcpy(&num, frame.data, 4);
                 if (num ==  ModuleStandalone::getSerialNum()) {
                     frame.broadcast = false;
@@ -117,7 +117,6 @@ void ModuleSlave::_busTask(void *pvParameters)
             {
                 if (frame.identifier == _id) {
                     Module_Info_t board_info;
-                    char software_version[32]; // version can be 32 bytes
                     ModuleStandalone::getBoardType(board_info.efuse.board_type);
                     board_info.efuse.serial_number = ModuleStandalone::getSerialNum();
                     ModuleStandalone::getHardwareVersion(board_info.efuse.hardware_version);

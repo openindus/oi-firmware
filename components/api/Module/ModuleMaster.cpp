@@ -20,7 +20,7 @@
 static const char MODULE_TAG[] = "Module";
 
 std::map<std::pair<ModuleCmd_EventId_t,uint16_t>, ModuleCmd_EventCallback_t> ModuleMaster::_callback;
-std::map<uint16_t,int> ModuleMaster::_ids;
+std::map<uint16_t,int,std::greater<uint16_t>> ModuleMaster::_ids;
 
 void ModuleMaster::init(void)
 {
@@ -85,10 +85,9 @@ bool ModuleMaster::autoId(void)
         ModuleStandalone::ledOn(LED_YELLOW);
 
         /* Wait */
-        vTaskDelay(500/portTICK_PERIOD_MS);
+        vTaskDelay(200/portTICK_PERIOD_MS);
     
         if (ModuleControl::_instances.size() == _ids.size()) {
-            // sort(_ids.begin(), _ids.end(), std::greater<uint16_t>());
             std::map<uint16_t, int>::iterator it = _ids.begin();
             for (int i=0; i<ModuleControl::_instances.size(); i++) {
                 ModuleControl::setId(ModuleControl::_instances[i], it->first);
@@ -133,14 +132,14 @@ void autoTest(void)
     /** @todo: auto test when starting the module */
 }
 
-void ModuleMaster::program(uint32_t num)
+void ModuleMaster::program(int num)
 {
     UsbConsole::end(); // Do not perform in the task
     xTaskCreate(&_programmingTask, "Module programming task", 4096, (void*)num, 1, NULL);
     ModuleStandalone::ledBlink(LED_WHITE, 1000); // Programming mode
 }
 
-bool ModuleMaster::ping(uint32_t num) 
+bool ModuleMaster::ping(int num) 
 {
     BusRs::Frame_t frame;
     frame.command = CMD_PING;
@@ -189,7 +188,6 @@ uint16_t ModuleMaster::getIdFromSN(int num)
     frame.length = 4;
     frame.data = (uint8_t*)malloc(4);
     memcpy(frame.data, &num, 4); // Serial number
-
     BusRs::write(&frame, pdMS_TO_TICKS(100));
     BusRs::read(&frame, pdMS_TO_TICKS(100));
     id = frame.identifier;
@@ -197,7 +195,7 @@ uint16_t ModuleMaster::getIdFromSN(int num)
     return id;
 }
 
-void ModuleMaster::getBoardInfo(int num, Module_Info_t board_info)
+void ModuleMaster::getBoardInfo(int num, Module_Info_t* board_info)
 {
     uint16_t id = 0;
     
@@ -217,12 +215,12 @@ void ModuleMaster::getBoardInfo(int num, Module_Info_t board_info)
     frame.data = (uint8_t*)malloc(sizeof(Module_Info_t));
     BusRs::write(&frame, pdMS_TO_TICKS(100));
     BusRs::read(&frame, pdMS_TO_TICKS(100));
-    memcpy(&board_info, frame.data, sizeof(Module_Info_t));
+    memcpy(board_info, frame.data, sizeof(Module_Info_t));
     free(frame.data);
     return;
 }
 
-std::map<uint16_t,int> ModuleMaster::discoverSlaves()
+std::map<uint16_t,int,std::greater<uint16_t>> ModuleMaster::discoverSlaves()
 {
     // Delete previous id list
     _ids.clear();
@@ -237,10 +235,7 @@ std::map<uint16_t,int> ModuleMaster::discoverSlaves()
     BusRs::write(&frame);
 
     // Wait for slaves to answer
-    vTaskDelay(pdMS_TO_TICKS(500));
-
-    // Sort slaves in bus oder
-    // sort(_ids.begin(), _ids.end(), std::greater<uint16_t>());
+    vTaskDelay(pdMS_TO_TICKS(200));
 
     return _ids;
 }
