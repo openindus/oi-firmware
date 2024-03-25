@@ -17,6 +17,18 @@
 
 #include "Global.h"
 
+/* Struct can fill an eFuse block of 32 bytes */
+typedef struct {
+    char board_type[16];
+    int serial_number;
+    char hardware_version[12];
+} Module_eFuse_Info_t;
+
+typedef struct {
+    Module_eFuse_Info_t efuse;
+    char software_version[32];
+} Module_Info_t;
+
 class ModuleStandalone
 {
 public:
@@ -28,10 +40,12 @@ public:
     static void ledOff(void);
     static void ledBlink(LedColor_t color, uint32_t period);
     static float getTemperature(void);
-    static int getBoardType(void);
-    static void setBoardType(int boardType);
+    static void getBoardType(char* board_type);
     static int getSerialNum(void);
-    static void setSerialNum(int serialNum);
+    static void getHardwareVersion(char* version);
+    static void getSoftwareVersion(char* version);
+    static bool setBoardInfo(char* board_type, int serial_num, char* hardware_version);
+
 
 private:
 

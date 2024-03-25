@@ -97,7 +97,7 @@ void System::init(void)
     UsbConsole::listen();
     
     /* Wait for slaves modules to init and give time to user script to enable console */
-    vTaskDelay(500/portTICK_PERIOD_MS);
+    vTaskDelay(200/portTICK_PERIOD_MS);
 
     /* On master module, call autoId */
 #if defined(MODULE_MASTER)
@@ -115,7 +115,7 @@ void System::init(void)
         ESP_LOGI(TAG, "Create main task");
         vTaskDelay(1);
         xTaskCreate(_mainTask, "Main task", 8192, NULL, 1, NULL);
-#if defined(CONFIG_FORCE_CONSOLE)
+#if defined(FORCE_CONSOLE)
         UsbConsole::begin(true); // Force console, will failed if Serial.begin() is called in user code
 #endif
     }

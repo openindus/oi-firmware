@@ -20,7 +20,7 @@
 static const char MODULE_TAG[] = "Module";
 
 std::map<std::pair<ModuleCmd_EventId_t,uint16_t>, ModuleCmd_EventCallback_t> ModuleMaster::_callback;
-std::vector<uint16_t> ModuleMaster::_ids;
+std::map<uint16_t,int,std::greater<uint16_t>> ModuleMaster::_ids;
 
 void ModuleMaster::init(void)
 {
@@ -74,7 +74,7 @@ bool ModuleMaster::autoId(void)
         _ids.clear();
 
         BusRs::Frame_t frame;
-        frame.command = CMD_AUTO_ID;
+        frame.command = CMD_DISCOVER;
         frame.identifier = 0;
         frame.broadcast = true;
         frame.direction = 1;
@@ -85,12 +85,14 @@ bool ModuleMaster::autoId(void)
         ModuleStandalone::ledOn(LED_YELLOW);
 
         /* Wait */
-        vTaskDelay(500/portTICK_PERIOD_MS);
+        vTaskDelay(200/portTICK_PERIOD_MS);
     
         if (ModuleControl::_instances.size() == _ids.size()) {
-            sort(_ids.begin(), _ids.end(), std::greater<uint16_t>());
+            std::map<uint16_t, int>::iterator it = _ids.begin();
             for (int i=0; i<ModuleControl::_instances.size(); i++) {
-                ModuleControl::setId(ModuleControl::_instances[i], _ids[i]);
+                ModuleControl::setId(ModuleControl::_instances[i], it->first);
+                ModuleControl::setSN(ModuleControl::_instances[i], it->second);
+                ++it;
                 ModuleControl::_instances[i]->ledOn(LED_YELLOW);
                 vTaskDelay(50/portTICK_PERIOD_MS);
             }
@@ -130,14 +132,14 @@ void autoTest(void)
     /** @todo: auto test when starting the module */
 }
 
-void ModuleMaster::program(uint32_t num)
+void ModuleMaster::program(int num)
 {
     UsbConsole::end(); // Do not perform in the task
     xTaskCreate(&_programmingTask, "Module programming task", 4096, (void*)num, 1, NULL);
     ModuleStandalone::ledBlink(LED_WHITE, 1000); // Programming mode
 }
 
-bool ModuleMaster::ping(uint32_t num) 
+bool ModuleMaster::ping(int num) 
 {
     BusRs::Frame_t frame;
     frame.command = CMD_PING;
@@ -178,7 +180,7 @@ uint16_t ModuleMaster::getIdFromSN(int num)
     uint16_t id = 0;
 
     BusRs::Frame_t frame;
-    frame.command = CMD_GET_ID;
+    frame.command = CMD_PING;
     frame.identifier = 0;
     frame.broadcast = true;
     frame.direction = 1;
@@ -186,12 +188,56 @@ uint16_t ModuleMaster::getIdFromSN(int num)
     frame.length = 4;
     frame.data = (uint8_t*)malloc(4);
     memcpy(frame.data, &num, 4); // Serial number
-
     BusRs::write(&frame, pdMS_TO_TICKS(100));
     BusRs::read(&frame, pdMS_TO_TICKS(100));
-    memcpy(&id, frame.data, 2);
+    id = frame.identifier;
     free(frame.data);
     return id;
+}
+
+void ModuleMaster::getBoardInfo(int num, Module_Info_t* board_info)
+{
+    uint16_t id = 0;
+    
+    id = ModuleMaster::getIdFromSN(num);
+    if (id == 0) {
+        ModuleStandalone::ledBlink(LED_RED, 1000); // Error
+        return;
+    }
+
+    BusRs::Frame_t frame;
+    frame.command = CMD_GET_BOARD_INFO;
+    frame.identifier = id;
+    frame.broadcast = false;
+    frame.direction = 1;
+    frame.ack = true;
+    frame.length = 0;
+    frame.data = (uint8_t*)malloc(sizeof(Module_Info_t));
+    BusRs::write(&frame, pdMS_TO_TICKS(100));
+    BusRs::read(&frame, pdMS_TO_TICKS(100));
+    memcpy(board_info, frame.data, sizeof(Module_Info_t));
+    free(frame.data);
+    return;
+}
+
+std::map<uint16_t,int,std::greater<uint16_t>> ModuleMaster::discoverSlaves()
+{
+    // Delete previous id list
+    _ids.clear();
+
+    BusRs::Frame_t frame;
+    frame.command = CMD_DISCOVER;
+    frame.identifier = 0;
+    frame.broadcast = true;
+    frame.direction = 1;
+    frame.ack = false;
+    frame.length = 0;
+    BusRs::write(&frame);
+
+    // Wait for slaves to answer
+    vTaskDelay(pdMS_TO_TICKS(200));
+
+    return _ids;
 }
 
 void ModuleMaster::_busTask(void *pvParameters) 
@@ -207,8 +253,8 @@ void ModuleMaster::_busTask(void *pvParameters)
             case CMD_EVENT:
                 handleEvent((ModuleCmd_EventId_t)frame.data_byte[0], id, (int)frame.data_byte[1]);
                 break;
-            case CMD_AUTO_ID:
-                _ids.push_back((uint16_t)id);
+            case CMD_DISCOVER:
+                _ids.insert(std::pair<int, int>(id, (int)frame.data));
                 break;
             
             default:
@@ -244,6 +290,7 @@ void ModuleMaster::_programmingTask(void *pvParameters)
     BusRs::write(&frame, pdMS_TO_TICKS(5000));
     if (BusRs::read(&frame, pdMS_TO_TICKS(5000)) < 0) {
         ModuleStandalone::ledBlink(LED_RED, 1000); // Error
+        return;
     }
 
     UsbSerialProtocol::begin();

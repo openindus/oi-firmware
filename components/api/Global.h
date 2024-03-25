@@ -37,6 +37,8 @@
 #include "esp_vfs_fat.h"
 #include "esp_ota_ops.h"
 #include "esp_task_wdt.h"
+#include "esp_ota_ops.h"
+#include "esp_efuse.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/event_groups.h"
 #include "freertos/queue.h"
