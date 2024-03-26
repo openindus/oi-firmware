@@ -38,7 +38,7 @@ void UsbSerial::begin(int baudrate)
 
     ESP_ERROR_CHECK(uart_driver_install(UART_NUM_0, 1024, 1024, 20, &_eventQueue, 0));
     ESP_ERROR_CHECK(uart_param_config(UART_NUM_0, &uart_config));
-    ESP_ERROR_CHECK(uart_set_pin(UART_NUM_0, GPIO_NUM_1, GPIO_NUM_3, 
+    ESP_ERROR_CHECK(uart_set_pin(UART_NUM_0, GPIO_NUM_43, GPIO_NUM_44, 
         UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
 }
 

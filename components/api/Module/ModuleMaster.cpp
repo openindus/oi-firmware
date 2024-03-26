@@ -290,7 +290,7 @@ void ModuleMaster::_programmingTask(void *pvParameters)
     BusRs::write(&frame, pdMS_TO_TICKS(5000));
     if (BusRs::read(&frame, pdMS_TO_TICKS(5000)) < 0) {
         ModuleStandalone::ledBlink(LED_RED, 1000); // Error
-        return;
+        goto end;
     }
 
     UsbSerialProtocol::begin();
@@ -316,6 +316,7 @@ void ModuleMaster::_programmingTask(void *pvParameters)
                     BusRs::write(&frame, pdMS_TO_TICKS(100));
                     if (BusRs::read(&frame, pdMS_TO_TICKS(100)) < 0) {
                         ModuleStandalone::ledBlink(LED_RED, 1000); // Error
+                        goto end;
                     }
                     sequence++;
                 }
@@ -331,6 +332,7 @@ void ModuleMaster::_programmingTask(void *pvParameters)
                     BusRs::write(&frame, pdMS_TO_TICKS(100));
                     if (BusRs::read(&frame, pdMS_TO_TICKS(100)) < 0) {
                         ModuleStandalone::ledBlink(LED_RED, 1000); // Error
+                        goto end;
                     }
                 }                
                 packet.direction = 1;
@@ -360,6 +362,7 @@ void ModuleMaster::_programmingTask(void *pvParameters)
                 BusRs::write(&frame, pdMS_TO_TICKS(200));
                 if (BusRs::read(&frame, pdMS_TO_TICKS(200)) < 0) {
                     ModuleStandalone::ledBlink(LED_RED, 1000); // Error
+                    goto end;
                 } else {
                     packet.direction = 1;
                     packet.size = 4;
@@ -378,8 +381,9 @@ void ModuleMaster::_programmingTask(void *pvParameters)
                 frame.length = 4;
                 memcpy(frame.data, &packet.data[4], 4); // flash size
                 BusRs::write(&frame, pdMS_TO_TICKS(500));
-                if (BusRs::read(&frame, pdMS_TO_TICKS(500)) < 0) {
+                if (BusRs::read(&frame, pdMS_TO_TICKS(3000)) < 0) {
                     ModuleStandalone::ledBlink(LED_RED, 1000); // Error
+                    goto end;
                 } else {
                     packet.direction = 1;
                     packet.size = 18;
@@ -414,6 +418,8 @@ void ModuleMaster::_programmingTask(void *pvParameters)
             }
         }
     }
+
+end:
     free(packet.data);
     packet.data = NULL;
     free(frame.data);
