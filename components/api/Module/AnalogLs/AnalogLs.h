@@ -13,9 +13,9 @@
 #include "AnalogLsControl.h"
 
 #if defined(OI_ANALOG_LS) && defined(MODULE_STANDALONE)
-#define Analogls AnaloglsStandalone
+#define AnalogLs AnalogLsStandalone
 #elif defined(OI_ANALOG_LS) && !defined(MODULE_STANDALONE)
-#define Analogls AnaloglsSlave
+#define AnalogLs AnalogLsSlave
 #else 
-#define Analogls AnaloglsControl
+#define AnalogLs AnalogLsControl
 #endif

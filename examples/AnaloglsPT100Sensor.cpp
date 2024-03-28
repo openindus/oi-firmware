@@ -1,7 +1,7 @@
 #include "OpenIndus.h"
 #include "Arduino.h"
 
-Analogls analogls;
+AnalogLs analogls;
 
 void setup(void)
 {
