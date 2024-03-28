@@ -116,11 +116,7 @@ deploy:
     - job: build:relayhp
     # - job: build:relaylp
     # - job: build:brushless
-<<<<<<< HEAD
     # - job: build:analogls
-=======
-    - job: build:analogls
->>>>>>> 7ec1ab3 (feat: update Gitlab CI)
   script:
     - lftp $OVH_URI -e "mirror --reverse --verbose -R ./.oi/bin/ ./www/oi-content/bin/; quit" -u $OVH_USERNAME,$OVH_PASSWORD
   only:

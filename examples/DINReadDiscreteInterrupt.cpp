@@ -22,7 +22,7 @@ void setup(void)
         /* Read value and Print value */
         Serial.printf("DIN_%i: %i | ", i+1, discrete.digitalRead((DigitalInputNum_t)i));
         /* Attach interrupt*/
-        discrete.attachInterrupt((DigitalInputNum_t)i, _callback, RISING_MODE, &(din[i]));
+        discrete.attachInterrupt((DigitalInputNum_t)i, _callback, RISING_MODE);
     }
 }
 

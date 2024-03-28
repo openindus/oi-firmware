@@ -4,7 +4,7 @@
 void setup(void)
 {
     Serial.begin(115200);
-    Serial.printf("Hello World !\n");
+    Serial.print("Hello World !\n");
 }
 
 void loop(void)
