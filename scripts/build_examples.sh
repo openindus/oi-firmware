@@ -2,9 +2,7 @@
 
 for f in examples/*.cpp
 do
-    echo "********************"
-    echo "build $f"
-    echo "********************"
+    echo "Build $f"
     cat $f > main/main.cpp
-    pio run -e core
+    pio run -e core || { echo "Error: Build failed for $f"; exit 1; }
 done
