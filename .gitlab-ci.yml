@@ -18,18 +18,16 @@ setup:
     - pip install -U platformio
     - pio platform update
   rules:
-    - if: '($CI_PIPELINE_SOURCE == "push") && ($CI_COMMIT_BRANCH == "dev")'
-    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
-    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && 
+      ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")'
 
 .build:
   stage: build
   needs:
     - job: setup
   rules:
-    - if: '($CI_PIPELINE_SOURCE == "push") && ($CI_COMMIT_BRANCH == "dev")'
-    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
-    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && 
+      ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")'
 
 build:core:
   extends: .build
@@ -90,9 +88,8 @@ build:examples:
   after_script:
     - git restore main/main.cpp
   rules:
-    - if: '($CI_PIPELINE_SOURCE == "push") && ($CI_COMMIT_BRANCH == "dev")'
-    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
-    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && 
+      ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")'
 
 pkg:library:
   stage: pkg:library
@@ -104,9 +101,8 @@ pkg:library:
   script:
     - pio pkg pack --output=".oi/lib/"
   rules:
-    - if: '($CI_PIPELINE_SOURCE == "push") && ($CI_COMMIT_BRANCH == "dev")'
-    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
-    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && 
+      ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")'
 
 deploy:
   stage: deploy
@@ -120,7 +116,11 @@ deploy:
     - job: build:relayhp
     # - job: build:relaylp
     # - job: build:brushless
+<<<<<<< HEAD
     # - job: build:analogls
+=======
+    - job: build:analogls
+>>>>>>> 7ec1ab3 (feat: update Gitlab CI)
   script:
     - lftp $OVH_URI -e "mirror --reverse --verbose -R ./.oi/bin/ ./www/oi-content/bin/; quit" -u $OVH_USERNAME,$OVH_PASSWORD
   only:
