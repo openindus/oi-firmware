@@ -10,6 +10,8 @@ CAN_Message_t tx_msg;
 
 void setup()
 {
+    Serial.begin(115200);
+
     core.can.begin(1000000, true);
 
     tx_msg.id = 11111;
@@ -35,12 +37,12 @@ void loop()
     if(core.can.available())
     {
         rx_msg = core.can.read();
-        printf("NEW MESSAGE // ID : %d, length : %d MSG :  ", rx_msg.id, rx_msg.size);
+        Serial.print("NEW MESSAGE // ID : %d, length : %d MSG :  ", rx_msg.id, rx_msg.size);
         for(int i =0; i <rx_msg.size; i++)
         {
-            printf("%x", rx_msg.msg[i]);
+            Serial.print("%x", rx_msg.msg[i]);
         }
-        printf(" // \n");
+        Serial.printf(" // \n");
         
     }
     delay(100);

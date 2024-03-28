@@ -6,6 +6,8 @@ Core core;
 
 void setup(void)
 {
+    Serial.begin(115200);
+
     /* Set DOUT 1 to high */
     core.digitalWrite(DOUT_1, 1);
     core.digitalWrite(DOUT_2, 1);
@@ -16,7 +18,7 @@ void setup(void)
 void loop(void)
 {
     /* Print value in monitor */
-    printf("DOUT Sensor 1: %u\t 2: %u\t 3: %u\t 4: %u\n", \
+    Serial.printf("DOUT Sensor 1: %u\t 2: %u\t 3: %u\t 4: %u\n", \
         core.getCurrentLevel(DOUT_1),\
         core.getCurrentLevel(DOUT_2),\
         core.getCurrentLevel(DOUT_3),\

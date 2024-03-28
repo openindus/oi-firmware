@@ -35,9 +35,10 @@ float get_frequency(void) {
     return freq;
 }
 
-void app_main(void)
+void setup(void)
 {
-    printf("Hello world!\n");
+    Serial.begin(115200);
+    Serial.printf("Hello world!\n");
 
     pcnt_unit_config_t flow_pcnt_config = {
         .high_limit = 32767,
@@ -69,10 +70,10 @@ void app_main(void)
     flow_timer = esp_timer_get_time();
 
     ESP_ERROR_CHECK_WITHOUT_ABORT(pcnt_unit_start(flow_pcnt_unit));
+}
 
-    while(1)
-    {
-        printf("Freq: %fHz\n", get_frequency());
-        vTaskDelay(50);
-    }
+void loop(void) 
+{
+    Serial.printf("Freq: %fHz\n", get_frequency());
+    vTaskDelay(50);
 }

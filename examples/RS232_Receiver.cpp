@@ -7,6 +7,7 @@ Core core;
 
 void setup()
 {
+    Serial.begin(115200);
     core.rs.begin(RS_232);
 }
 
@@ -18,7 +19,7 @@ void loop()
     if (size)
     {
         core.rs.read(data, size);
-        printf("%s\n", data);
+        Serial.printf("%s\n", data);
     }
     delay(10);
 }

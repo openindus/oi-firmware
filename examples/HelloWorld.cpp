@@ -3,7 +3,8 @@
 
 void setup(void)
 {
-    printf("Hello World !\n");
+    Serial.begin(115200);
+    Serial.printf("Hello World !\n");
 }
 
 void loop(void)
