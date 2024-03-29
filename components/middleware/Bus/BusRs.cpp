@@ -16,7 +16,7 @@
 #include "BusRs.h"
 
 #define BUS_RS_SYNC_BYTE 0xAA
-#define BUS_RS_HEADER_LENGTH 10
+#define BUS_RS_HEADER_LENGTH 7
 #define BUS_RS_DATA_LENGTH_MAX 1024
 #define BUS_RS_FRAME_LENGTH_MAX (BUS_RS_HEADER_LENGTH + BUS_RS_DATA_LENGTH_MAX)
 
@@ -105,8 +105,8 @@ void BusRs::write(Frame_t* frame, TickType_t timeout)
     }
     free(buffer);
     buffer = NULL;
-    ESP_LOGI(BUS_RS_TAG, "WRITE - ID: %u | CMD: 0x%02X | SEQ: 0x%02X | CHKSUM: 0x%02X | DATA:", \
-            frame->identifier, frame->command, frame->seq_num, frame->checksum);
+    ESP_LOGI(BUS_RS_TAG, "WRITE - ID: %u | CMD: 0x%02X | CHKSUM: 0x%02X | DATA:", \
+            frame->id, frame->command, frame->checksum);
     ESP_LOG_BUFFER_HEX_LEVEL(BUS_RS_TAG, frame->data, frame->length, ESP_LOG_INFO);
 }
 
@@ -161,8 +161,8 @@ succeed:
     free(buffer);
     buffer = NULL;
     xSemaphoreGive(_semaphore);
-    ESP_LOGI(BUS_RS_TAG, "RECV - ID: %u | CMD: 0x%02X | SEQ: 0x%02X | CHKSUM: 0x%02X | DATA:", \
-            frame->identifier, frame->command, frame->seq_num, frame->checksum);
+    ESP_LOGI(BUS_RS_TAG, "RECV - ID: %u | CMD: 0x%02X | CHKSUM: 0x%02X | DATA:", \
+            frame->id, frame->command, frame->checksum);
     ESP_LOG_BUFFER_HEX_LEVEL(BUS_RS_TAG, frame->data, frame->length, ESP_LOG_INFO);
     return 0;
 }
@@ -177,13 +177,10 @@ uint8_t BusRs::_calculateChecksum(Frame_t *frame)
 {
     uint8_t checksum = 0xFE;
     checksum ^= frame->command; 
-    checksum ^= (frame->identifier >> 8);
-    checksum ^= (frame->identifier & 0xFF);
     checksum ^= (frame->flags >> 8);
     checksum ^= (frame->flags & 0xFF);
     checksum ^= (frame->length >> 8);
     checksum ^= (frame->length & 0xFF);
-    checksum ^= frame->seq_num;
     for (int i=0; i<frame->length; i++) {
         checksum ^= frame->data[i];
     }

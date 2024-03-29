@@ -28,20 +28,17 @@ public:
     typedef struct __attribute__((__packed__)) {
         uint8_t sync;
         uint8_t command;
-        uint16_t identifier;
         union {
             struct { 
-                uint16_t broadcast  : 1;
-                uint16_t direction  : 1;
-                uint16_t ack        : 1;
-                uint16_t status     : 1;
-                uint16_t error      : 8;
-                uint16_t reserved   : 4;
+                uint16_t id         : 11;   // 0 --> Broadcast ID
+                uint16_t dir        : 1;    // 1 --> Master to Slave | 0 --> Slave to Master
+                uint16_t ack        : 1;    // ack needed (must return a NOP command)
+                uint16_t error      : 1;    // Error
+                uint16_t reserved   : 2;
             };
             uint16_t flags;
         };
-        uint16_t length;
-        uint8_t seq_num;
+        uint16_t length; // data length
         uint8_t checksum;
         uint8_t* data;
     } Frame_t;

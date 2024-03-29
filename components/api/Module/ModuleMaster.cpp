@@ -75,9 +75,8 @@ bool ModuleMaster::autoId(void)
 
         BusRs::Frame_t frame;
         frame.command = CMD_DISCOVER;
-        frame.identifier = 0;
-        frame.broadcast = true;
-        frame.direction = 1;
+        frame.id = 0;
+        frame.dir = 1;
         frame.ack = false;
         frame.length = 0;
         BusRs::write(&frame);
@@ -143,9 +142,8 @@ bool ModuleMaster::ping(int num)
 {
     BusRs::Frame_t frame;
     frame.command = CMD_PING;
-    frame.identifier = 0;
-    frame.broadcast = true;
-    frame.direction = 1;
+    frame.id = 0;
+    frame.dir = 1;
     frame.ack = true;
     frame.length = 4;
     frame.data = (uint8_t*)&num; // Serial number
@@ -181,16 +179,15 @@ uint16_t ModuleMaster::getIdFromSN(int num)
 
     BusRs::Frame_t frame;
     frame.command = CMD_PING;
-    frame.identifier = 0;
-    frame.broadcast = true;
-    frame.direction = 1;
+    frame.id = 0;
+    frame.dir = 1;
     frame.ack = true;
     frame.length = 4;
     frame.data = (uint8_t*)malloc(4);
     memcpy(frame.data, &num, 4); // Serial number
     BusRs::write(&frame, pdMS_TO_TICKS(100));
     BusRs::read(&frame, pdMS_TO_TICKS(100));
-    id = frame.identifier;
+    id = frame.id;
     free(frame.data);
     return id;
 }
@@ -207,9 +204,8 @@ void ModuleMaster::getBoardInfo(int num, Module_Info_t* board_info)
 
     BusRs::Frame_t frame;
     frame.command = CMD_GET_BOARD_INFO;
-    frame.identifier = id;
-    frame.broadcast = false;
-    frame.direction = 1;
+    frame.id = id;
+    frame.dir = 1;
     frame.ack = true;
     frame.length = 0;
     frame.data = (uint8_t*)malloc(sizeof(Module_Info_t));
@@ -227,9 +223,8 @@ std::map<uint16_t,int,std::greater<uint16_t>> ModuleMaster::discoverSlaves()
 
     BusRs::Frame_t frame;
     frame.command = CMD_DISCOVER;
-    frame.identifier = 0;
-    frame.broadcast = true;
-    frame.direction = 1;
+    frame.id = 0;
+    frame.dir = 1;
     frame.ack = false;
     frame.length = 0;
     BusRs::write(&frame);
@@ -282,9 +277,8 @@ void ModuleMaster::_programmingTask(void *pvParameters)
 
     /* FlashLoader begin */
     frame.command = CMD_FLASH_LOADER_BEGIN;
-    frame.identifier = id;
-    frame.broadcast = false;
-    frame.direction = 1;
+    frame.id = id;
+    frame.dir = 1;
     frame.ack = true;
     frame.length = 0;
     BusRs::write(&frame, pdMS_TO_TICKS(5000));
@@ -306,12 +300,10 @@ void ModuleMaster::_programmingTask(void *pvParameters)
                 memcpy(&packet.size, &packet.data[0], 4); // data size
                 for (int i=0; i<(packet.size/1024); i++) {
                     frame.command = CMD_FLASH_LOADER_WRITE;
-                    frame.identifier = id;
-                    frame.broadcast = false;
-                    frame.direction = 1;
+                    frame.id = id;
+                    frame.dir = 1;
                     frame.ack = true;
                     frame.length = 1024;
-                    frame.seq_num = sequence;
                     memcpy(frame.data, &packet.data[sequence*1024+16], 1024); // data
                     BusRs::write(&frame, pdMS_TO_TICKS(100));
                     if (BusRs::read(&frame, pdMS_TO_TICKS(100)) < 0) {
@@ -322,12 +314,10 @@ void ModuleMaster::_programmingTask(void *pvParameters)
                 }
                 if ((packet.size%1024) > 0) {
                     frame.command = CMD_FLASH_LOADER_WRITE;
-                    frame.identifier = id;
-                    frame.broadcast = false;
-                    frame.direction = 1;
+                    frame.id = id;
+                    frame.dir = 1;
                     frame.ack = true;
                     frame.length = packet.size%1024;
-                    frame.seq_num = sequence;
                     memcpy(frame.data, &packet.data[sequence*1024+16], packet.size%1024); // data
                     BusRs::write(&frame, pdMS_TO_TICKS(100));
                     if (BusRs::read(&frame, pdMS_TO_TICKS(100)) < 0) {
@@ -353,9 +343,8 @@ void ModuleMaster::_programmingTask(void *pvParameters)
 
             case UsbSerialProtocol::READ_REG:
                 frame.command = CMD_READ_REGISTER;
-                frame.identifier = id;
-                frame.broadcast = false;
-                frame.direction = 1;
+                frame.id = id;
+                frame.dir = 1;
                 frame.ack = true;
                 frame.length = 4;
                 memcpy(frame.data, packet.data, 4); // addr
@@ -374,9 +363,8 @@ void ModuleMaster::_programmingTask(void *pvParameters)
 
             case UsbSerialProtocol::SPI_FLASH_LOADER_MD5:
                 frame.command = CMD_FLASH_LOADER_CHECK;
-                frame.identifier = id;
-                frame.broadcast = false;
-                frame.direction = 1;
+                frame.id = id;
+                frame.dir = 1;
                 frame.ack = true;
                 frame.length = 4;
                 memcpy(frame.data, &packet.data[4], 4); // flash size
@@ -403,9 +391,8 @@ void ModuleMaster::_programmingTask(void *pvParameters)
 
             case UsbSerialProtocol::FLASH_LOADER_END:
                 frame.command = CMD_FLASH_LOADER_END;
-                frame.identifier = id;
-                frame.broadcast = false;
-                frame.direction = 1;
+                frame.id = id;
+                frame.dir = 1;
                 frame.ack = 0;
                 frame.length = 0;
                 BusRs::write(&frame);

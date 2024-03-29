@@ -23,9 +23,8 @@ uint32_t ModuleControl::request(ModuleCmd_RequestMsg_t msg)
 {
     BusRs::Frame_t frame;
     frame.command = CMD_REQUEST;
-    frame.identifier = _id;
-    frame.broadcast = false;
-    frame.direction = 1;
+    frame.id = _id;
+    frame.dir = 1;
     frame.ack = true;
     frame.length = sizeof(msg.byte);
     frame.data = msg.byte;
@@ -63,9 +62,8 @@ void ModuleControl::_ledCtrl(LedState_t state, LedColor_t color, uint32_t period
     memcpy(&payload[2], &period, sizeof(uint32_t));
     BusRs::Frame_t frame;
     frame.command = CMD_LED_CTRL;
-    frame.identifier = _id;
-    frame.broadcast = false;
-    frame.direction = 1;
+    frame.id = _id;
+    frame.dir = 1;
     frame.ack = false;
     frame.length = 6;
     frame.data = payload;

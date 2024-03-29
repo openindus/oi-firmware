@@ -96,10 +96,9 @@ void ModuleSlave::_busTask(void *pvParameters)
                 int num; // Serial number
                 memcpy(&num, frame.data, 4);
                 if (num ==  ModuleStandalone::getSerialNum()) {
-                    frame.broadcast = false;
-                    frame.direction = 0;
+                    frame.dir = 0;
                     frame.ack = false;
-                    frame.identifier = _id; // return our id --> the master can get the id from serialNumber
+                    frame.id = _id; // return our id --> the master can get the id from serialNumber
                     BusRs::write(&frame);
                 }
                 break;
@@ -115,7 +114,7 @@ void ModuleSlave::_busTask(void *pvParameters)
             }
             case CMD_GET_BOARD_INFO:
             {
-                if (frame.identifier == _id) {
+                if (frame.id == _id) {
                     Module_Info_t board_info;
                     ModuleStandalone::getBoardType(board_info.efuse.board_type);
                     board_info.efuse.serial_number = ModuleStandalone::getSerialNum();
@@ -123,21 +122,19 @@ void ModuleSlave::_busTask(void *pvParameters)
                     ModuleStandalone::getSoftwareVersion(board_info.software_version);
                     memcpy(frame.data, &board_info, sizeof(Module_Info_t));
                     frame.length = sizeof(Module_Info_t);
-                    frame.broadcast = false;
-                    frame.direction = 0;
+                    frame.dir = 0;
                     frame.ack = false;
-                    frame.identifier = _id;
+                    frame.id = _id;
                     BusRs::write(&frame);
                 }
                 break;
             }
             case CMD_FLASH_LOADER_BEGIN:
             {
-                if (frame.identifier == _id) {
+                if (frame.id == _id) {
                     ModuleStandalone::ledBlink(LED_WHITE, 1000); // Programming mode
                     FlashLoader::begin();
-                    frame.broadcast = false;
-                    frame.direction = 0;
+                    frame.dir = 0;
                     frame.ack = false;
                     frame.length = 0;
                     BusRs::write(&frame);
@@ -146,10 +143,9 @@ void ModuleSlave::_busTask(void *pvParameters)
             }
             case CMD_FLASH_LOADER_WRITE:
             {
-                if (frame.identifier == _id) {
+                if (frame.id == _id) {
                     FlashLoader::write(frame.data, frame.length);
-                    frame.broadcast = false;
-                    frame.direction = 0;
+                    frame.dir = 0;
                     frame.ack = false;
                     frame.length = 0;
                     BusRs::write(&frame);
@@ -158,13 +154,12 @@ void ModuleSlave::_busTask(void *pvParameters)
             }
             case CMD_FLASH_LOADER_CHECK:
             {
-                if (frame.identifier == _id) {
+                if (frame.id == _id) {
                     uint8_t md5Sum[16];
                     size_t progSize;
                     memcpy(&progSize, frame.data, sizeof(progSize));
                     FlashLoader::check(md5Sum, progSize);
-                    frame.broadcast = false;
-                    frame.direction = 0;
+                    frame.dir = 0;
                     frame.ack = false;
                     frame.length = 16;
                     memcpy(frame.data, md5Sum, 16);
@@ -174,20 +169,19 @@ void ModuleSlave::_busTask(void *pvParameters)
             }
             case CMD_FLASH_LOADER_END:
             {
-                if (frame.identifier == _id) {
+                if (frame.id == _id) {
                     FlashLoader::end();
                 }
                 break;
             }
             case CMD_READ_REGISTER:
             {
-                if (frame.identifier == _id) {
+                if (frame.id == _id) {
                     uint32_t addr;
                     memcpy(&addr, frame.data, sizeof(addr));
                     volatile uint32_t* reg = (volatile  uint32_t*)addr;
                     uint32_t value = *reg;
-                    frame.broadcast = false;
-                    frame.direction = 0;
+                    frame.dir = 0;
                     frame.ack = false;
                     frame.length = sizeof(value);
                     memcpy(frame.data, &value, sizeof(value));
@@ -199,11 +193,10 @@ void ModuleSlave::_busTask(void *pvParameters)
             {
                 ModuleCmd_RequestMsg_t msg;
                 memcpy(msg.byte, frame.data, sizeof(msg.byte));
-                if (frame.identifier == _id) {
+                if (frame.id == _id) {
                     msg.data = handleRequest(msg);
                     if (frame.ack == true) {
-                        frame.broadcast = false;
-                        frame.direction = 0;
+                        frame.dir = 0;
                         frame.ack = false;
                         frame.length = sizeof(msg.byte);
                         memcpy(frame.data, msg.byte, frame.length);
@@ -217,7 +210,7 @@ void ModuleSlave::_busTask(void *pvParameters)
                 LedState_t state;
                 LedColor_t color;
                 uint32_t period;
-                if (frame.identifier == _id) {
+                if (frame.id == _id) {
                     state = (LedState_t)frame.data[0];
                     color = (LedColor_t)frame.data[1];
                     memcpy(&period, &frame.data[2], sizeof(uint32_t));
