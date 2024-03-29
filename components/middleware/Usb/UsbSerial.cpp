@@ -38,8 +38,14 @@ void UsbSerial::begin(int baudrate)
 
     ESP_ERROR_CHECK(uart_driver_install(UART_NUM_0, 1024, 1024, 20, &_eventQueue, 0));
     ESP_ERROR_CHECK(uart_param_config(UART_NUM_0, &uart_config));
-    ESP_ERROR_CHECK(uart_set_pin(UART_NUM_0, GPIO_NUM_1, GPIO_NUM_3, 
+    ESP_ERROR_CHECK(uart_set_pin(UART_NUM_0, GPIO_NUM_43, GPIO_NUM_44, 
         UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
+}
+
+void UsbSerial::setBaudrate(int baudrate)
+{
+    uart_wait_tx_done(UART_NUM_0, pdMS_TO_TICKS(5));
+    uart_set_baudrate(UART_NUM_0, baudrate);
 }
 
 void UsbSerial::read(void* buf, uint32_t length, TickType_t timeout)
@@ -60,6 +66,11 @@ void UsbSerial::flush(void)
 void UsbSerialProtocol::begin(int baudrate)
 {
     UsbSerial::begin(baudrate);
+}
+
+void UsbSerialProtocol::setBaudrate(int baudrate)
+{
+    UsbSerial::setBaudrate(baudrate);
 }
 
 void _slipDataUnframing(uint8_t* buffer, size_t* length)
