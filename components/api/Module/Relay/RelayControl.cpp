@@ -19,11 +19,8 @@
 
 void RelayControl::digitalWrite(Relay_t relay, uint8_t level)
 {
-    ModuleCmd_RequestMsg_t msg;
-    msg.id = REQUEST_DIGITAL_WRITE;
-    msg.param = (uint16_t)relay;
-    msg.data = (uint32_t)level;
-    request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_DIGITAL_WRITE, (uint8_t)relay, level};
+    ctrlRequest(msgBytes);
 }
 
 #endif

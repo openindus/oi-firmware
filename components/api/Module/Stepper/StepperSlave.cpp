@@ -18,159 +18,127 @@
 #if defined(OI_STEPPER) || defined(OI_STEPPER_VE)
 
 IsrCallback_t StepperSlave::_isrCallback[] = {
-    [](void*){event(EVENT_DIGITAL_INTERRUPT, (int)DIN_1);},
-    [](void*){event(EVENT_DIGITAL_INTERRUPT, (int)DIN_2);},
-    [](void*){event(EVENT_DIGITAL_INTERRUPT, (int)DIN_3);},
-    [](void*){event(EVENT_DIGITAL_INTERRUPT, (int)DIN_4);},
+    [](void*){sendEvent({EVENT_DIGITAL_INTERRUPT, DIN_1});},
+    [](void*){sendEvent({EVENT_DIGITAL_INTERRUPT, DIN_2});},
+    [](void*){sendEvent({EVENT_DIGITAL_INTERRUPT, DIN_3});},
+    [](void*){sendEvent({EVENT_DIGITAL_INTERRUPT, DIN_4});},
 };
 
 void StepperSlave::init(void)
 {
     ModuleSlave::init();
 
-    onRequest(REQUEST_DIGITAL_READ, [](ModuleCmd_RequestMsg_t msg) -> uint32_t { 
-        DigitalInputNum_t din = (DigitalInputNum_t)msg.param;
-        return StepperStandalone::digitalRead(din);
+    addCtrlCallback(CONTROL_DIGITAL_READ, [](std::vector<uint8_t>& data) { 
+        int level = StepperStandalone::digitalRead((DigitalInputNum_t)data[1]);
+        data.push_back(static_cast<uint8_t>(level));
     });
 
-    onRequest(REQUEST_ATTACH_INTERRUPT, [](ModuleCmd_RequestMsg_t msg) -> uint32_t {
-        DigitalInputNum_t din = (DigitalInputNum_t)msg.param;
-        InterruptMode_t mode = (InterruptMode_t)msg.data;
-        StepperStandalone::attachInterrupt(din, _isrCallback[din], mode);
-        return 0;
+    addCtrlCallback(CONTROL_ATTACH_INTERRUPT, [](std::vector<uint8_t>& data) { 
+        StepperStandalone::attachInterrupt((DigitalInputNum_t)data[1], 
+            _isrCallback[data[1]], (InterruptMode_t)data[2]);
     });
 
-    onRequest(REQUEST_DETACH_INTERRUPT, [](ModuleCmd_RequestMsg_t msg) -> uint32_t {
-        DigitalInputNum_t din = (DigitalInputNum_t)msg.param;
-        StepperStandalone::detachInterrupt(din);
-        return 0;
+    addCtrlCallback(CONTROL_DETACH_INTERRUPT, [](std::vector<uint8_t>& data) { 
+        StepperStandalone::detachInterrupt((DigitalInputNum_t)data[1]);
     });
 
-    onRequest(REQUEST_MOTOR_STOP, [](ModuleCmd_RequestMsg_t msg) -> uint32_t {
-        MotorNum_t motor = (MotorNum_t)(msg.param & 0x0000FF);
-        MotorStopMode_t stopMode = (MotorStopMode_t)((msg.param & 0x00FF00) >> 8);
+    addCtrlCallback(CONTROL_MOTOR_STOP, [](std::vector<uint8_t>& data) { 
+        MotorNum_t motor = static_cast<MotorNum_t>(data[1]);
+        MotorStopMode_t stopMode = static_cast<MotorStopMode_t>(data[2]);
         StepperStandalone::stop(motor, stopMode); 
-        return 0;
     });
 
-    onRequest(REQUEST_MOTOR_MOVE_ABSOLUTE, [](ModuleCmd_RequestMsg_t msg) -> uint32_t {
-        MotorNum_t motor = (MotorNum_t)msg.param;
-        uint32_t position = msg.data;
-        StepperStandalone::moveAbsolute(motor, position); 
-        return 0;
+    addCtrlCallback(CONTROL_MOTOR_MOVE_ABSOLUTE, [](std::vector<uint8_t>& data) {
+        MotorNum_t motor = static_cast<MotorNum_t>(data[1]);
+        uint32_t* position = reinterpret_cast<uint32_t*>(&data[2]);
+        StepperStandalone::moveAbsolute(motor, *position); 
     });
 
-    onRequest(REQUEST_MOTOR_MOVE_RELATIVE, [](ModuleCmd_RequestMsg_t msg) -> uint32_t {
-        MotorNum_t motor = (MotorNum_t)msg.param;
-        uint32_t position = msg.data;
-        StepperStandalone::moveRelative(motor, position); 
-        return 0;
+    addCtrlCallback(CONTROL_MOTOR_MOVE_RELATIVE, [](std::vector<uint8_t>& data) {
+        MotorNum_t motor = static_cast<MotorNum_t>(data[1]);
+        uint32_t* position = reinterpret_cast<uint32_t*>(&data[2]);
+        StepperStandalone::moveRelative(motor, *position); 
     });
 
-    onRequest(REQUEST_MOTOR_RUN, [](ModuleCmd_RequestMsg_t msg) -> uint32_t {
-        MotorNum_t motor = (MotorNum_t)(msg.param & 0x0000FF);
-        MotorDirection_t direction = (MotorDirection_t)((msg.param & 0x00FF00) >> 8);
-        uint32_t data = msg.data;
-        float speed = 0;
-        memcpy(&speed, &data, sizeof(float));
-        StepperStandalone::run(motor, direction, speed); 
-        return 0;
+    addCtrlCallback(CONTROL_MOTOR_RUN, [](std::vector<uint8_t>& data) {
+        MotorNum_t motor = static_cast<MotorNum_t>(data[1]);
+        MotorDirection_t direction = static_cast<MotorDirection_t>(data[2]);
+        uint32_t* speed = reinterpret_cast<uint32_t*>(&data[3]);
+        StepperStandalone::run(motor, direction, *speed); 
     });
 
-    onRequest(REQUEST_MOTOR_IS_RUNNING, [](ModuleCmd_RequestMsg_t msg) -> uint32_t {
-        MotorNum_t motor = (MotorNum_t)msg.param;
-        return (uint32_t)StepperStandalone::isRunning(motor); 
+    addCtrlCallback(CONTROL_MOTOR_IS_RUNNING, [](std::vector<uint8_t>& data) {
+        MotorNum_t motor = static_cast<MotorNum_t>(data[1]);
+        bool isRunning = StepperStandalone::isRunning(motor); 
+        data.push_back(static_cast<uint8_t>(isRunning));
     });
 
-    onRequest(REQUEST_MOTOR_HOMING, [](ModuleCmd_RequestMsg_t msg) -> uint32_t {
-        MotorNum_t motor = (MotorNum_t)msg.param;
-        uint32_t data = msg.data;
-        float speed = 0;
-        memcpy(&speed, &data, sizeof(float));
-        StepperStandalone::homing(motor, speed); 
-        return 0;
+    addCtrlCallback(CONTROL_MOTOR_HOMING, [](std::vector<uint8_t>& data) {
+        MotorNum_t motor = static_cast<MotorNum_t>(data[1]);
+        uint32_t* speed = reinterpret_cast<uint32_t*>(&data[2]);
+        StepperStandalone::homing(motor, *speed); 
     });
 
-    onRequest(REQUEST_MOTOR_SET_LIMIT_SWITCH, [](ModuleCmd_RequestMsg_t msg) -> uint32_t {
-        MotorNum_t motor = (MotorNum_t)(msg.param & 0x0000FF);
-        DigitalInputNum_t din = (DigitalInputNum_t)((msg.param & 0x00FF00) >> 8);
-        DigitalInputLogic_t logic = (DigitalInputLogic_t)msg.data;
+    addCtrlCallback(CONTROL_MOTOR_SET_LIMIT_SWITCH, [](std::vector<uint8_t>& data) {
+        MotorNum_t motor = static_cast<MotorNum_t>(data[1]);
+        DigitalInputNum_t din = static_cast<DigitalInputNum_t>(data[2]);
+        DigitalInputLogic_t logic = static_cast<DigitalInputLogic_t>(data[3]);
         StepperStandalone::setLimitSwitch(motor, din, logic);
-        return 0;
     });
 
-    onRequest(REQUEST_MOTOR_SET_STEP_RESOLUTION, [](ModuleCmd_RequestMsg_t msg) -> uint32_t {
-        MotorNum_t motor = (MotorNum_t)msg.param;
-        MotorStepResolution_t res = (MotorStepResolution_t)msg.data;
+    addCtrlCallback(CONTROL_MOTOR_SET_STEP_RESOLUTION, [](std::vector<uint8_t>& data) {
+        MotorNum_t motor = static_cast<MotorNum_t>(data[1]);
+        MotorStepResolution_t res = static_cast<MotorStepResolution_t>(data[2]);
         StepperStandalone::setStepResolution(motor, res); 
-        return 0;
     });
 
-    onRequest(REQUEST_MOTOR_SET_MAX_SPEED, [](ModuleCmd_RequestMsg_t msg) -> uint32_t {
-        MotorNum_t motor = (MotorNum_t)msg.param;
-        uint32_t data = msg.data;
-        float speed = 0;
-        memcpy(&speed, &data, sizeof(float));
-        StepperStandalone::setMaxSpeed(motor, speed); 
-        return 0;
+    addCtrlCallback(CONTROL_MOTOR_SET_MAX_SPEED, [](std::vector<uint8_t>& data) {
+        MotorNum_t motor = static_cast<MotorNum_t>(data[1]);
+        float* speed = reinterpret_cast<float*>(&data[2]);
+        StepperStandalone::setMaxSpeed(motor, *speed); 
     });
 
-    onRequest(REQUEST_MOTOR_SET_MIN_SPEED, [](ModuleCmd_RequestMsg_t msg) -> uint32_t {
-        MotorNum_t motor = (MotorNum_t)msg.param;
-        uint32_t data = msg.data;
-        float speed = 0;
-        memcpy(&speed, &data, sizeof(float));
-        StepperStandalone::setMinSpeed(motor, speed); 
-        return 0;
+    addCtrlCallback(CONTROL_MOTOR_SET_MIN_SPEED, [](std::vector<uint8_t>& data) {
+        MotorNum_t motor = static_cast<MotorNum_t>(data[1]);
+        float* speed = reinterpret_cast<float*>(&data[2]);
+        StepperStandalone::setMinSpeed(motor, *speed); 
     });
 
-    onRequest(REQUEST_MOTOR_SET_FULL_STEP_SPEED, [](ModuleCmd_RequestMsg_t msg) -> uint32_t {
-        MotorNum_t motor = (MotorNum_t)msg.param;
-        uint32_t data = msg.data;
-        float speed = 0;
-        memcpy(&speed, &data, sizeof(float));
-        StepperStandalone::setFullStepSpeed(motor, speed); 
-        return 0;
+    addCtrlCallback(CONTROL_MOTOR_SET_FULL_STEP_SPEED, [](std::vector<uint8_t>& data) {
+        MotorNum_t motor = static_cast<MotorNum_t>(data[1]);
+        float* speed = reinterpret_cast<float*>(&data[2]);
+        StepperStandalone::setFullStepSpeed(motor, *speed); 
     });
 
-    onRequest(REQUEST_MOTOR_SET_ACCELERATION, [](ModuleCmd_RequestMsg_t msg) -> uint32_t {
-        MotorNum_t motor = (MotorNum_t)msg.param;
-        uint32_t data = msg.data;
-        float acc = 0;
-        memcpy(&acc, &data, sizeof(float));
-        StepperStandalone::setAcceleration(motor, acc); 
-        return 0;
+    addCtrlCallback(CONTROL_MOTOR_SET_ACCELERATION, [](std::vector<uint8_t>& data) {
+        MotorNum_t motor = static_cast<MotorNum_t>(data[1]);
+        float* acc = reinterpret_cast<float*>(&data[2]);
+        StepperStandalone::setAcceleration(motor, *acc); 
     });
 
-    onRequest(REQUEST_MOTOR_SET_DECELERATION, [](ModuleCmd_RequestMsg_t msg) -> uint32_t {
-        MotorNum_t motor = (MotorNum_t)msg.param;
-        uint32_t data = msg.data;
-        float dec = 0;
-        memcpy(&dec, &data, sizeof(float));
-        StepperStandalone::setDeceleration(motor, dec); 
-        return 0;
+    addCtrlCallback(CONTROL_MOTOR_SET_DECELERATION, [](std::vector<uint8_t>& data) {
+        MotorNum_t motor = static_cast<MotorNum_t>(data[1]);
+        float* dec = reinterpret_cast<float*>(&data[2]);
+        StepperStandalone::setDeceleration(motor, *dec); 
     });
 
-    onRequest(REQUEST_MOTOR_GET_POSITION, [](ModuleCmd_RequestMsg_t msg) -> uint32_t {
-        MotorNum_t motor = (MotorNum_t)msg.param;
+    addCtrlCallback(CONTROL_MOTOR_GET_POSITION, [](std::vector<uint8_t>& data) {
+        MotorNum_t motor = static_cast<MotorNum_t>(data[1]);
         int32_t position = StepperStandalone::getPosition(motor); 
-        uint32_t data = 0;
-        memcpy(&data, &position, sizeof(uint32_t));
-        return data;
+        uint8_t* ptr = reinterpret_cast<uint8_t*>(&position);
+        data.insert(data.end(), ptr, ptr + sizeof(int32_t));
     });
 
-    onRequest(REQUEST_MOTOR_GET_SPEED, [](ModuleCmd_RequestMsg_t msg) -> uint32_t {
-        MotorNum_t motor = (MotorNum_t)msg.param;
+    addCtrlCallback(CONTROL_MOTOR_GET_SPEED, [](std::vector<uint8_t>& data) {
+        MotorNum_t motor = static_cast<MotorNum_t>(data[1]);
         float speed = StepperStandalone::getSpeed(motor); 
-        uint32_t data = 0;
-        memcpy(&data, &speed, sizeof(uint32_t));
-        return data;
+        uint8_t* ptr = reinterpret_cast<uint8_t*>(&speed);
+        data.insert(data.end(), ptr, ptr + sizeof(float));
     });
 
-    onRequest(REQUEST_MOTOR_RESET_HOME_POSITION, [](ModuleCmd_RequestMsg_t msg) -> uint32_t {
-        MotorNum_t motor = (MotorNum_t)msg.param;
+    addCtrlCallback(CONTROL_MOTOR_RESET_HOME_POSITION, [](std::vector<uint8_t>& data) {
+        MotorNum_t motor = static_cast<MotorNum_t>(data[1]);
         StepperStandalone::resetHomePosition(motor); 
-        return 0;
     });
 }
 

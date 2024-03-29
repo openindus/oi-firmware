@@ -9,5 +9,5 @@
 #pragma once
 
 #include "BusIO.h"
-#include "BusCan.h"
-#include "BusRs.h"
+#include "BusCAN.h"
+#include "BusRS.h"

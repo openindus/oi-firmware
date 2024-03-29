@@ -19,58 +19,48 @@
 
 void DiscreteControl::digitalWrite(DigitalOutputNum_t dout, uint8_t level)
 {
-    ModuleCmd_RequestMsg_t msg;
-    msg.id = REQUEST_DIGITAL_WRITE;
-    msg.param = (uint16_t)dout;
-    msg.data = (uint32_t)level;
-    request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_DIGITAL_WRITE, (uint8_t)dout, level};
+    ctrlRequest(msgBytes);
 }
 
 int DiscreteControl::digitalRead(DigitalInputNum_t din)
 {
-    ModuleCmd_RequestMsg_t msg;
-    msg.id = REQUEST_DIGITAL_READ;
-    msg.param = (uint16_t)din;
-    return (int)request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_DIGITAL_READ, (uint8_t)din};
+    ctrlRequest(msgBytes);
+    return static_cast<int>(msgBytes[2]);
 }
 
 void DiscreteControl::analogWrite(DigitalOutputNum_t dout, uint8_t duty)
 {
-    ModuleCmd_RequestMsg_t msg;
-    msg.id = REQUEST_ANALOG_WRITE;
-    msg.param = (uint16_t)dout;
-    msg.data = (uint32_t)duty;
-    request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_ANALOG_WRITE, (uint8_t)dout, duty};
+    ctrlRequest(msgBytes);
 }
 
 int DiscreteControl::analogRead(AnalogInput_Num_t eana)
 {
-    ModuleCmd_RequestMsg_t msg;
-    msg.id = REQUEST_ANALOG_READ;
-    msg.param = (uint16_t)eana;
-    return request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_ANALOG_READ, (uint8_t)eana};
+    ctrlRequest(msgBytes);
+    int* ret = reinterpret_cast<int*>(&msgBytes[2]);
+    return *ret;
 }
 
 void DiscreteControl::attachInterrupt(DigitalInputNum_t din, IsrCallback_t callback, InterruptMode_t mode)
 {
-    ModuleCmd_RequestMsg_t msg;
-    msg.id = REQUEST_ATTACH_INTERRUPT;
-    msg.param = (uint16_t)din;
-    msg.data = (uint32_t)mode;
-    request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_ATTACH_INTERRUPT, (uint8_t)din, (uint8_t)mode};
     _isrCallback[din] = callback;
-    uint16_t id = ModuleControl::getId(this);
-    ModuleMaster::onEvent(EVENT_DIGITAL_INTERRUPT, id, [this](uint8_t num) {
-        _isrCallback[num](NULL);
-    });
+    ctrlRequest(msgBytes);
+    
+    addEventCallback(
+        EVENT_DIGITAL_INTERRUPT, 
+        _id, 
+        [this](uint8_t num) { _isrCallback[num](NULL); }
+    );
 }
 
 void DiscreteControl::detachInterrupt(DigitalInputNum_t din)
 {
-    ModuleCmd_RequestMsg_t msg;
-    msg.id = REQUEST_DETACH_INTERRUPT;
-    msg.param = (uint16_t)din;
-    request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_DETACH_INTERRUPT, (uint8_t)din};
+    ctrlRequest(msgBytes);
 }
 
 #endif

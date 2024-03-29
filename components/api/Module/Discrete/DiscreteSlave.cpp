@@ -18,52 +18,47 @@
 #if defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)
 
 IsrCallback_t DiscreteSlave::_isrCallback[] = {
-    [](void*){event(EVENT_DIGITAL_INTERRUPT, (int)DIN_1);},
-    [](void*){event(EVENT_DIGITAL_INTERRUPT, (int)DIN_2);},
-    [](void*){event(EVENT_DIGITAL_INTERRUPT, (int)DIN_3);},
-    [](void*){event(EVENT_DIGITAL_INTERRUPT, (int)DIN_4);},
+    [](void*){ModuleSlave::sendEvent({EVENT_DIGITAL_INTERRUPT, DIN_1});},
+    [](void*){ModuleSlave::sendEvent({EVENT_DIGITAL_INTERRUPT, DIN_2});},
+    [](void*){ModuleSlave::sendEvent({EVENT_DIGITAL_INTERRUPT, DIN_3});},
+    [](void*){ModuleSlave::sendEvent({EVENT_DIGITAL_INTERRUPT, DIN_4});},
 };
 
-void DiscreteSlave::init(void)
+DiscreteStandalone* DiscreteSlave::_discrete = new DiscreteStandalone();
+
+int DiscreteSlave::init(void)
 {
     ModuleSlave::init();
-    
-    onRequest(REQUEST_DIGITAL_WRITE, [](ModuleCmd_RequestMsg_t msg) -> uint32_t {
-        DigitalOutputNum_t dout = (DigitalOutputNum_t)msg.param;
-        uint8_t level = (uint8_t)msg.data;
-        DiscreteStandalone::digitalWrite(dout, level);
-        return 0;
+
+    addCtrlCallback(CONTROL_DIGITAL_WRITE, [](std::vector<uint8_t>& data) { 
+        _discrete->digitalWrite((DigitalOutputNum_t)data[1], data[2]);
     });
 
-    onRequest(REQUEST_ANALOG_WRITE, [](ModuleCmd_RequestMsg_t msg) -> uint32_t {
-        DigitalOutputNum_t dout = (DigitalOutputNum_t)msg.param;
-        uint8_t duty = (uint8_t)msg.data;
-        DiscreteStandalone::analogWrite(dout, duty);
-        return 0;
+    addCtrlCallback(CONTROL_DIGITAL_READ, [](std::vector<uint8_t>& data) { 
+        int level = _discrete->digitalRead((DigitalInputNum_t)data[1]);
+        data.push_back(static_cast<uint8_t>(level));
     });
 
-    onRequest(REQUEST_DIGITAL_READ, [](ModuleCmd_RequestMsg_t msg) -> uint32_t {
-        DigitalInputNum_t din = (DigitalInputNum_t)msg.param;
-        return DiscreteStandalone::digitalRead(din);
+    addCtrlCallback(CONTROL_ANALOG_READ, [](std::vector<uint8_t>& data) { 
+        int value = _discrete->analogRead((AnalogInput_Num_t)data[1]);
+        uint8_t *ptr = reinterpret_cast<uint8_t*>(&value);
+        data.insert(data.end(), ptr, ptr + sizeof(int));
     });
 
-    onRequest(REQUEST_ANALOG_READ, [](ModuleCmd_RequestMsg_t msg) -> uint32_t {
-        AnalogInput_Num_t ain = (AnalogInput_Num_t)msg.param;
-        return DiscreteStandalone::analogRead(ain);
+    addCtrlCallback(CONTROL_ANALOG_WRITE, [](std::vector<uint8_t>& data) { 
+        _discrete->analogWrite((DigitalOutputNum_t)data[1], data[2]);
     });
 
-    onRequest(REQUEST_ATTACH_INTERRUPT, [](ModuleCmd_RequestMsg_t msg) -> uint32_t {
-        DigitalInputNum_t din = (DigitalInputNum_t)msg.param;
-        InterruptMode_t mode = (InterruptMode_t)msg.data;
-        DiscreteStandalone::attachInterrupt(din, _isrCallback[din], mode);
-        return 0;
+    addCtrlCallback(CONTROL_ATTACH_INTERRUPT, [](std::vector<uint8_t>& data) { 
+        _discrete->attachInterrupt((DigitalInputNum_t)data[1], 
+            _isrCallback[data[1]], (InterruptMode_t)data[2]);
     });
 
-    onRequest(REQUEST_DETACH_INTERRUPT, [](ModuleCmd_RequestMsg_t msg) -> uint32_t {
-        DigitalInputNum_t din = (DigitalInputNum_t)msg.param;
-        DiscreteStandalone::detachInterrupt(din);
-        return 0;
+    addCtrlCallback(CONTROL_DETACH_INTERRUPT, [](std::vector<uint8_t>& data) { 
+        _discrete->detachInterrupt((DigitalInputNum_t)data[1]);
     });
+
+    return 0;
 }
 
 #endif

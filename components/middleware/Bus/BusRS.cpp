@@ -6,26 +6,26 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file BusRs.c
+ * @file BusRS.c
  * @brief this class control the bus
  *
  * For more information on OpenIndus:
  * @see https://openindus.com
  */
 
-#include "BusRs.h"
+#include "BusRS.h"
 
 #define BUS_RS_SYNC_BYTE 0xAA
 #define BUS_RS_HEADER_LENGTH 7
 #define BUS_RS_DATA_LENGTH_MAX 1024
 #define BUS_RS_FRAME_LENGTH_MAX (BUS_RS_HEADER_LENGTH + BUS_RS_DATA_LENGTH_MAX)
 
-static const char BUS_RS_TAG[] = "Bus RS";
+static const char TAG[] = "BusRS";
 
-uart_port_t BusRs::_port;
-QueueHandle_t BusRs::_eventQueue;
-SemaphoreHandle_t BusRs::_mutex;
-SemaphoreHandle_t BusRs::_semaphore;
+uart_port_t BusRS::_port;
+QueueHandle_t BusRS::_eventQueue;
+SemaphoreHandle_t BusRS::_mutex;
+SemaphoreHandle_t BusRS::_semaphore;
 
 /**
  * @brief initialization of RS communication
@@ -34,7 +34,7 @@ SemaphoreHandle_t BusRs::_semaphore;
  * @param tx_num Tx gpio num
  * @param rx_num Rx gpio Num
  */
-void BusRs::begin(uart_port_t port, gpio_num_t tx_num, gpio_num_t rx_num)
+void BusRS::begin(uart_port_t port, gpio_num_t tx_num, gpio_num_t rx_num)
 {
     _port = port;
 
@@ -44,7 +44,7 @@ void BusRs::begin(uart_port_t port, gpio_num_t tx_num, gpio_num_t rx_num)
     _semaphore = xSemaphoreCreateMutex();
     xSemaphoreGive(_semaphore);
 
-    ESP_LOGI(BUS_RS_TAG, "Configure uart parameters");
+    ESP_LOGI(TAG, "Configure uart parameters");
     uart_config_t uart_config = {
         .baud_rate = 921600UL,
         .data_bits = UART_DATA_8_BITS,
@@ -57,7 +57,7 @@ void BusRs::begin(uart_port_t port, gpio_num_t tx_num, gpio_num_t rx_num)
     ESP_ERROR_CHECK(uart_param_config( _port, &uart_config));
 
     /* install UART driver, and get the queue */
-    ESP_LOGI(BUS_RS_TAG, "Install uart driver");
+    ESP_LOGI(TAG, "Install uart driver");
     if (uart_is_driver_installed(_port)) {
         uart_driver_delete(_port);
     }
@@ -67,7 +67,7 @@ void BusRs::begin(uart_port_t port, gpio_num_t tx_num, gpio_num_t rx_num)
     ESP_ERROR_CHECK(uart_set_pin(_port, tx_num, rx_num, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
 
 #if !defined(DEBUG_BUS)
-    esp_log_level_set(BUS_RS_TAG, ESP_LOG_WARN);
+    esp_log_level_set(TAG, ESP_LOG_WARN);
 #endif
 
 }
@@ -75,9 +75,9 @@ void BusRs::begin(uart_port_t port, gpio_num_t tx_num, gpio_num_t rx_num)
 /**
  * @brief deinitialization of RS communication
  */
-void BusRs::end(void)
+void BusRS::end(void)
 {
-    ESP_LOGI(BUS_RS_TAG, "Uninstall uart driver");
+    ESP_LOGI(TAG, "Uninstall uart driver");
     ESP_ERROR_CHECK(uart_driver_delete(_port));
 }
 
@@ -86,7 +86,7 @@ void BusRs::end(void)
  * 
  * @param frame 
  */
-void BusRs::write(Frame_t* frame, TickType_t timeout)
+void BusRS::write(Frame_t* frame, TickType_t timeout)
 {
     uint8_t* buffer = (uint8_t*)malloc(BUS_RS_FRAME_LENGTH_MAX);
     size_t length;
@@ -105,9 +105,9 @@ void BusRs::write(Frame_t* frame, TickType_t timeout)
     }
     free(buffer);
     buffer = NULL;
-    ESP_LOGI(BUS_RS_TAG, "WRITE - ID: %u | CMD: 0x%02X | CHKSUM: 0x%02X | DATA:", \
-            frame->id, frame->command, frame->checksum);
-    ESP_LOG_BUFFER_HEX_LEVEL(BUS_RS_TAG, frame->data, frame->length, ESP_LOG_INFO);
+    ESP_LOGI(TAG, "WRITE - ID: %u | CMD: 0x%02X | CHKSUM: 0x%02X | DATA:", \
+        frame->id, frame->cmd, frame->checksum);
+    ESP_LOG_BUFFER_HEX_LEVEL(TAG, frame->data, frame->length, ESP_LOG_INFO);
 }
 
 /**
@@ -115,7 +115,7 @@ void BusRs::write(Frame_t* frame, TickType_t timeout)
  * 
  * @param frame 
  */
-int BusRs::read(Frame_t* frame, TickType_t timeout)
+int BusRS::read(Frame_t* frame, TickType_t timeout)
 {
     uart_event_t event;
     uint8_t* buffer = (uint8_t*)malloc(BUS_RS_FRAME_LENGTH_MAX);
@@ -124,10 +124,19 @@ int BusRs::read(Frame_t* frame, TickType_t timeout)
         if (xQueueReceive(_eventQueue, (void*)&event, timeout) == pdTRUE) {
             if (event.type == UART_DATA) {
                 uart_read_bytes(_port, buffer, event.size, timeout);
-                if (buffer[0] == BUS_RS_SYNC_BYTE && event.size >= BUS_RS_HEADER_LENGTH && index == 0) {
-                    memcpy(frame, buffer, BUS_RS_HEADER_LENGTH);
-                    memcpy(frame->data, &buffer[BUS_RS_HEADER_LENGTH], event.size - BUS_RS_HEADER_LENGTH);
-                    index += (event.size - BUS_RS_HEADER_LENGTH);
+                if (index == 0) { // Start frame
+                    if (event.size >= BUS_RS_HEADER_LENGTH) { // Get header frame
+                        memcpy(frame, buffer, BUS_RS_HEADER_LENGTH);
+                        memcpy(frame->data, &buffer[BUS_RS_HEADER_LENGTH], event.size - BUS_RS_HEADER_LENGTH);
+                        index += (event.size - BUS_RS_HEADER_LENGTH);
+                        if ((frame->sync != BUS_RS_SYNC_BYTE) || 
+                            (frame->length > BUS_RS_DATA_LENGTH_MAX)) { // Check header frame
+                                ESP_LOGE(TAG, "Invalid header frame");
+                                goto error;
+                        }
+                    } else {
+                        // Ignore data
+                    }
                 } else {
                     memcpy(&frame->data[index], buffer, event.size);
                     index += event.size;
@@ -135,20 +144,20 @@ int BusRs::read(Frame_t* frame, TickType_t timeout)
                 if (index >= frame->length || index > BUS_RS_FRAME_LENGTH_MAX) {
                     xSemaphoreGive(_semaphore);
                     if (_verifyChecksum(frame)) {
-                        goto succeed;
+                        goto success;
                     } else {
-                        ESP_LOGE(BUS_RS_TAG, "Invalid checksum");
+                        ESP_LOGE(TAG, "Invalid checksum");
                         goto error;
                     }
                 }
             } else {
                 uart_flush_input(_port);
                 xQueueReset(_eventQueue);
-                ESP_LOGE(BUS_RS_TAG, "Event type error: %d", event.type);
+                ESP_LOGE(TAG, "Event type error: %d", event.type);
                 goto error;
             }
         } else {
-            ESP_LOGE(BUS_RS_TAG, "Timeout error");
+            ESP_LOGE(TAG, "Timeout error");
             goto error;
         }
     }
@@ -157,13 +166,13 @@ error:
     buffer = NULL;
     xSemaphoreGive(_semaphore);
     return -1;
-succeed:
+success:
     free(buffer);
     buffer = NULL;
     xSemaphoreGive(_semaphore);
-    ESP_LOGI(BUS_RS_TAG, "RECV - ID: %u | CMD: 0x%02X | CHKSUM: 0x%02X | DATA:", \
-            frame->id, frame->command, frame->checksum);
-    ESP_LOG_BUFFER_HEX_LEVEL(BUS_RS_TAG, frame->data, frame->length, ESP_LOG_INFO);
+    ESP_LOGI(TAG, "READ - ID: %u | CMD: 0x%02X | CHKSUM: 0x%02X | DATA:", \
+        frame->id, frame->cmd, frame->checksum);
+    ESP_LOG_BUFFER_HEX_LEVEL(TAG, frame->data, frame->length, ESP_LOG_INFO);
     return 0;
 }
 
@@ -171,12 +180,12 @@ succeed:
  * @brief Calculates the checksum of a RS frame
  * 
  * @param frame 
- * @return uint8_t 
+ * @return uint8_t checksum
  */
-uint8_t BusRs::_calculateChecksum(Frame_t *frame)
+uint8_t BusRS::_calculateChecksum(Frame_t *frame)
 {
     uint8_t checksum = 0xFE;
-    checksum ^= frame->command; 
+    checksum ^= frame->cmd; 
     checksum ^= (frame->flags >> 8);
     checksum ^= (frame->flags & 0xFF);
     checksum ^= (frame->length >> 8);
@@ -194,7 +203,7 @@ uint8_t BusRs::_calculateChecksum(Frame_t *frame)
  * @return true 
  * @return false 
  */
-bool BusRs::_verifyChecksum(Frame_t *frame)
+bool BusRS::_verifyChecksum(Frame_t *frame)
 {
     uint8_t checksum = _calculateChecksum(frame);
     return (frame->checksum == checksum);

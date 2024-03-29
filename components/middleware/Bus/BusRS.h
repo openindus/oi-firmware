@@ -6,7 +6,7 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file BusRs.h
+ * @file BusRS.h
  * @brief this class control the bus
  *
  * For more information on OpenIndus:
@@ -21,18 +21,18 @@
 #include "driver/gpio.h"
 #include "driver/uart.h"
 
-class BusRs
+class BusRS
 {
 public:
 
     typedef struct __attribute__((__packed__)) {
         uint8_t sync;
-        uint8_t command;
+        uint8_t cmd;
         union {
             struct { 
                 uint16_t id         : 11;   // 0 --> Broadcast ID
                 uint16_t dir        : 1;    // 1 --> Master to Slave | 0 --> Slave to Master
-                uint16_t ack        : 1;    // ack needed (must return a NOP command)
+                uint16_t ack        : 1;    // ack needed
                 uint16_t error      : 1;    // Error
                 uint16_t reserved   : 2;
             };

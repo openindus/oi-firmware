@@ -1,7 +1,7 @@
 set(COMPONENT_SRCS
     "Bus/BusIO.cpp"
-    "Bus/BusRs.cpp"
-    "Bus/BusCan.cpp"
+    "Bus/BusRS.cpp"
+    "Bus/BusCAN.cpp"
     "Encoder/Encoder.cpp"
     "Digital/DigitalInput.cpp"
     "Digital/DigitalOutput.cpp"

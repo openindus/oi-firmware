@@ -17,7 +17,7 @@
 
 #include "Global.h"
 
-/* Struct can fill an eFuse block of 32 bytes */
+/* Struct can fill an eFuse block of 32 msgBytes */
 typedef struct {
     char board_type[16];
     int serial_number;
