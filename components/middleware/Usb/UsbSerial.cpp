@@ -42,6 +42,12 @@ void UsbSerial::begin(int baudrate)
         UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
 }
 
+void UsbSerial::setBaudrate(int baudrate)
+{
+    uart_wait_tx_done(UART_NUM_0, pdMS_TO_TICKS(5));
+    uart_set_baudrate(UART_NUM_0, baudrate);
+}
+
 void UsbSerial::read(void* buf, uint32_t length, TickType_t timeout)
 {
     uart_read_bytes(UART_NUM_0, buf, length, timeout);
@@ -60,6 +66,11 @@ void UsbSerial::flush(void)
 void UsbSerialProtocol::begin(int baudrate)
 {
     UsbSerial::begin(baudrate);
+}
+
+void UsbSerialProtocol::setBaudrate(int baudrate)
+{
+    UsbSerial::setBaudrate(baudrate);
 }
 
 void _slipDataUnframing(uint8_t* buffer, size_t* length)

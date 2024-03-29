@@ -293,7 +293,7 @@ void ModuleMaster::_programmingTask(void *pvParameters)
         goto end;
     }
 
-    UsbSerialProtocol::begin();
+    UsbSerialProtocol::begin(115200);
 
     while (1) {
         if (UsbSerialProtocol::read(&packet) < 0) {
@@ -391,6 +391,14 @@ void ModuleMaster::_programmingTask(void *pvParameters)
                     memset(&packet.data[16], 0x00, 2);
                     UsbSerialProtocol::write(&packet);
                 }
+                break;
+            
+            case UsbSerialProtocol::CHANGE_BAUDRATE:
+                packet.direction = 1;
+                packet.size = 4;
+                memset(packet.data, 0x00, 4);
+                UsbSerialProtocol::write(&packet);
+                UsbSerialProtocol::setBaudrate(921600);
                 break;
 
             case UsbSerialProtocol::FLASH_LOADER_END:
