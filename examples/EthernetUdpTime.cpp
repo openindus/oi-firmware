@@ -43,7 +43,7 @@ void sendNTPpacket(const char * address);
 
 void setup() {
 
-  Ethernet.init(18);  // OI-Core pin Ethernet CS is GPIO_NUM_18
+  Ethernet.init(ETHERNET_SS);  // OI-Core pin Ethernet CS is GPIO_NUM_18
 
   // Open serial communications and wait for port to open:
   Serial.begin(115200);
