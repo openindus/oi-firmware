@@ -54,11 +54,17 @@ typedef enum {
     DIGITAL_OUTPUT_IOEX
 } DigitalOutputType_t;
 
+typedef struct {
+    adc_unit_t adc_num;
+    adc_channel_t channel;
+} AdcNumChannel_t;
+
 class DigitalOutput
 {
 public:
 
-    DigitalOutput(const gpio_num_t *gpio, const adc1_channel_t *adc, int num);
+    DigitalOutput(const gpio_num_t *gpio, const AdcNumChannel_t *adc, int num);
+    DigitalOutput(const gpio_num_t *gpio, const adc_channel_t *adc, int num);
     DigitalOutput(ioex_device_t **ioex, const ioex_num_t *ioex_num, const ioex_num_t *current_num, int num);
     ~DigitalOutput();
 
@@ -90,12 +96,13 @@ private:
     ioex_num_t* _ioex_num;
 
     /* ADC Channel for analog current or ioexpander gpio for digital current (HIGH or LOW current)*/
-    adc1_channel_t* _adc_current;
+    AdcNumChannel_t* _adc_current;
     ioex_num_t* _ioex_current;
 
     /* Stor a local copy of the pointer to an initilized ioex_device_t */
     ioex_device_t** _ioex;
     esp_adc_cal_characteristics_t _adc1Characteristics;
+    esp_adc_cal_characteristics_t _adc2Characteristics;
     uint8_t* _doutLevel;
 
     static void _controlTask(void *pvParameters);

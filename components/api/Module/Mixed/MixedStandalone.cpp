@@ -33,7 +33,7 @@ static const gpio_num_t _doutGpio[] = {
     MIXED_PIN_DOUT_4
 };
 
-static const adc1_channel_t _doutAdcChannel[] = {
+static const AdcNumChannel_t _doutAdcNumChannel[] = {
     MIXED_CHANNEL_DOUT_CURRENT_1,
     MIXED_CHANNEL_DOUT_CURRENT_2,
     MIXED_CHANNEL_DOUT_CURRENT_3,
@@ -41,20 +41,20 @@ static const adc1_channel_t _doutAdcChannel[] = {
 };
 
 DigitalInput* MixedStandalone::_din = new DigitalInput(_dinGpio, 4);
-DigitalOutput* MixedStandalone::_dout = new DigitalOutput(_doutGpio, _doutAdcChannel, 4);
+DigitalOutput* MixedStandalone::_dout = new DigitalOutput(_doutGpio, _doutAdcNumChannel, 4);
 
 /* Analog inputs instances */
 AnalogInput* MixedStandalone::_ain[MIXED_ADC_NB] = {
+    new AnalogInputAds866x(AIN_1),
+    new AnalogInputAds866x(AIN_2),
     new AnalogInputAds866x(AIN_3),
     new AnalogInputAds866x(AIN_4),
-    new AnalogInputAds866x(AIN_2),
-    new AnalogInputAds866x(AIN_1),
 };
 
 /* Analog outputs instances */
 AnalogOutput* MixedStandalone::_aout[MIXED_DAC_NB] = {
-    new AnalogOutputAD5413(AIN_1),
-    new AnalogOutputAD5413(AIN_2)
+    new AnalogOutputAD5413(AOUT_1),
+    new AnalogOutputAD5413(AOUT_2)
 };
 
 int MixedStandalone::init(void)

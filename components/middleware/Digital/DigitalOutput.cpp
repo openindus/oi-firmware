@@ -18,7 +18,7 @@
 static const char DOUT_TAG[] = "DigitalOutput";
 static SemaphoreHandle_t _mutex;
 
-DigitalOutput::DigitalOutput(const gpio_num_t *gpio, const adc1_channel_t *adc, int num) 
+DigitalOutput::DigitalOutput(const gpio_num_t *gpio, const AdcNumChannel_t *adc, int num) 
 {
     _type = DIGITAL_OUTPUT_GPIO;
 
@@ -30,8 +30,30 @@ DigitalOutput::DigitalOutput(const gpio_num_t *gpio, const adc1_channel_t *adc, 
     memcpy(_gpio_num, gpio, num * sizeof(gpio_num_t));
     
     /* Init memory and copy adc channels in _adc_current table */
-    _adc_current = (adc1_channel_t*) calloc(num, sizeof(adc1_channel_t));
-    memcpy(_adc_current, adc, num * sizeof(adc1_channel_t));
+    _adc_current = (AdcNumChannel_t*) calloc(num, sizeof(AdcNumChannel_t));
+    memcpy(_adc_current, adc, num * sizeof(AdcNumChannel_t));
+
+    /* Init memory of _doutLevel */
+    _doutLevel = (uint8_t*) calloc(num, sizeof(uint8_t));
+}
+
+DigitalOutput::DigitalOutput(const gpio_num_t *gpio, const adc_channel_t *adc, int num) 
+{
+    _type = DIGITAL_OUTPUT_GPIO;
+
+    /* Save number of DOUT */
+    _num = num;
+    
+    /* Init memory and copy gpio numbers in _gpio_num table */
+    _gpio_num = (gpio_num_t*) calloc(num, sizeof(gpio_num_t));
+    memcpy(_gpio_num, gpio, num * sizeof(gpio_num_t));
+    
+    /* Init memory and copy adc channels in _adc_current table */
+    _adc_current = (AdcNumChannel_t*) calloc(num, sizeof(AdcNumChannel_t));
+    for (int i = 0; i < num; i++) {
+        _adc_current[i].adc_num = ADC_UNIT_1;
+        _adc_current[i].channel = adc[i];
+    }
 
     /* Init memory of _doutLevel */
     _doutLevel = (uint8_t*) calloc(num, sizeof(uint8_t));
@@ -92,9 +114,22 @@ void DigitalOutput::init()
         ESP_LOGI(DOUT_TAG, "Init DOUT current");
         ESP_ERROR_CHECK(adc1_config_width((adc_bits_width_t)ADC_WIDTH_BIT_DEFAULT));
         for (uint8_t i = 0; i < _num; i++) {
-            ESP_ERROR_CHECK(adc1_config_channel_atten(_adc_current[i], ADC_ATTEN_DB_11));
+            if (_adc_current[i].adc_num == ADC_UNIT_1) {
+                ESP_ERROR_CHECK(adc1_config_channel_atten((adc1_channel_t)_adc_current[i].channel, ADC_ATTEN_DB_11));
+            } else if (_adc_current[i].adc_num == ADC_UNIT_2) {
+                ESP_ERROR_CHECK(adc2_config_channel_atten((adc2_channel_t)_adc_current[i].channel, ADC_ATTEN_DB_11));
+            } else {
+                ESP_LOGE(DOUT_TAG, "Invalid ADC channel");
+            }
         }
+
         esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, (adc_bits_width_t)ADC_WIDTH_BIT_DEFAULT, 1100, &_adc1Characteristics);
+        for (uint8_t i = 0; i < _num; i++) {
+            if (_adc_current[i].adc_num == ADC_UNIT_2) {
+                esp_adc_cal_characterize(ADC_UNIT_2, ADC_ATTEN_DB_11, (adc_bits_width_t)ADC_WIDTH_BIT_DEFAULT, 1100, &_adc2Characteristics);
+                break;
+            }
+        }
     } else { // DIGITAL_OUTPUT_IOEX
         /* Init DOUT */
         ESP_LOGI(DOUT_TAG, "Init DOUT");
@@ -237,15 +272,28 @@ float DigitalOutput::getCurrent(DigitalOutputNum_t dout)
     if (dout < _num) {   
         if (_type == DIGITAL_OUTPUT_GPIO) {
             int adc_reading = 0;
+            float voltage = 0.0f;
 
             for (int i = 0; i < DOUT_SENSOR_ADC_NO_OF_SAMPLES; i++) {
-                adc_reading += adc1_get_raw(_adc_current[dout]);
+                if (_adc_current[dout].adc_num == ADC_UNIT_1) {
+                    adc_reading += adc1_get_raw((adc1_channel_t)_adc_current[dout].channel);
+                } else if (_adc_current[dout].adc_num == ADC_UNIT_2) {
+                    adc2_get_raw((adc2_channel_t)_adc_current[dout].channel, (adc_bits_width_t)ADC_WIDTH_BIT_DEFAULT, &adc_reading);                    
+                } else {
+                    ESP_LOGE(DOUT_TAG, "Invalid ADC channel");
+                }
             }
 
             adc_reading /= DOUT_SENSOR_ADC_NO_OF_SAMPLES;
 
             // Convert adc_reading to voltage in mV
-            float voltage = static_cast<float> (esp_adc_cal_raw_to_voltage(adc_reading, &_adc1Characteristics));
+            if (_adc_current[dout].adc_num == ADC_UNIT_1) {
+                voltage = static_cast<float> (esp_adc_cal_raw_to_voltage(adc_reading, &_adc1Characteristics));
+            } else if (_adc_current[dout].adc_num == ADC_UNIT_2) {
+                voltage = static_cast<float> (esp_adc_cal_raw_to_voltage(adc_reading, &_adc2Characteristics));
+            } else {
+                ESP_LOGE(DOUT_TAG, "Invalid ADC channel");
+            }
             voltage /= 1000; // mV to V
             float sense_current = voltage / DOUT_SENSOR_RESISTOR_SENSE_VALUE; // I = U/R
             float current = 0.0f;
