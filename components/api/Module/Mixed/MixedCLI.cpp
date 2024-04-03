@@ -23,7 +23,7 @@ int MixedCLI::init(void)
 {
     _registerDigitalWrite();
     _registerDigitalRead();
-    _registerGetDigitalCurrent();
+    _registerGetCurrent();
     _registerSetAnalogVoltageRange();
     _registerAnalogReadVoltage();
     return 0;
@@ -55,7 +55,7 @@ int MixedCLI::_digitalWrite(int argc, char **argv)
 
 void MixedCLI::_registerDigitalWrite(void)
 {
-    _digitalWriteArgs.dout = arg_int1(NULL, NULL, "<DOUT>", "[1-8]");
+    _digitalWriteArgs.dout = arg_int1(NULL, NULL, "<DOUT>", "[1-4]");
     _digitalWriteArgs.level = arg_int1(NULL, NULL, "<LEVEL>", "0 = LOW, 1 = HIGH");
     _digitalWriteArgs.end = arg_end(2);
 
@@ -91,7 +91,7 @@ int MixedCLI::_digitalRead(int argc, char **argv)
 
 void MixedCLI::_registerDigitalRead(void)
 {
-    _digitalReadArgs.din = arg_int1(NULL, NULL, "<DIN>", "[1-10]");
+    _digitalReadArgs.din = arg_int1(NULL, NULL, "<DIN>", "[1-4]");
     _digitalReadArgs.end = arg_end(2);
 
     const esp_console_cmd_t cmd = {
@@ -107,34 +107,34 @@ void MixedCLI::_registerDigitalRead(void)
 static struct {
     struct arg_int *dout;
     struct arg_end *end;
-} _getDigitalCurrentArgs;
+} _getCurrentArgs;
 
-int MixedCLI::_getDigitalCurrent(int argc, char **argv)
+int MixedCLI::_getCurrent(int argc, char **argv)
 {
-    int nerrors = arg_parse(argc, argv, (void **) &_getDigitalCurrentArgs);
+    int nerrors = arg_parse(argc, argv, (void **) &_getCurrentArgs);
     if (nerrors != 0) {
-        arg_print_errors(stderr, _getDigitalCurrentArgs.end, argv[0]);
+        arg_print_errors(stderr, _getCurrentArgs.end, argv[0]);
         return 1;
     }
 
-    DigitalOutputNum_t dout = (DigitalOutputNum_t)(_getDigitalCurrentArgs.dout->ival[0] - 1);
+    DigitalOutputNum_t dout = (DigitalOutputNum_t)(_getCurrentArgs.dout->ival[0] - 1);
 
     printf("%.3f\n", _mixed->getCurrent(dout));
 
     return 0;
 }
 
-void MixedCLI::_registerGetDigitalCurrent(void)
+void MixedCLI::_registerGetCurrent(void)
 {
-    _getDigitalCurrentArgs.dout = arg_int1(NULL, NULL, "<DOUT>", "[1-8]");
-    _getDigitalCurrentArgs.end = arg_end(2);
+    _getCurrentArgs.dout = arg_int1(NULL, NULL, "<DOUT>", "[1-4]");
+    _getCurrentArgs.end = arg_end(2);
 
     const esp_console_cmd_t cmd = {
-        .command = "get-digital-current",
+        .command = "get-current",
         .help = "Get Dout current",
         .hint = NULL,
-        .func = &_getDigitalCurrent,
-        .argtable = &_getDigitalCurrentArgs
+        .func = &_getCurrent,
+        .argtable = &_getCurrentArgs
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
 }

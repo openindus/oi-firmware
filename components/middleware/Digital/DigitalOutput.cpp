@@ -165,7 +165,6 @@ void DigitalOutput::init()
     /* Create control task for overcurrent */
     ESP_LOGI(DOUT_TAG, "Create control task");
     xTaskCreate(_controlTask, "Control task", 4096, this, 1, NULL);
-
 }
 
 void DigitalOutput::setLevel(DigitalOutputNum_t dout, uint8_t level)
@@ -271,17 +270,20 @@ float DigitalOutput::getCurrent(DigitalOutputNum_t dout)
 {
     if (dout < _num) {   
         if (_type == DIGITAL_OUTPUT_GPIO) {
+            int current_reading = 0;
             int adc_reading = 0;
             float voltage = 0.0f;
 
             for (int i = 0; i < DOUT_SENSOR_ADC_NO_OF_SAMPLES; i++) {
                 if (_adc_current[dout].adc_num == ADC_UNIT_1) {
-                    adc_reading += adc1_get_raw((adc1_channel_t)_adc_current[dout].channel);
+                    current_reading = adc1_get_raw((adc1_channel_t)_adc_current[dout].channel);
                 } else if (_adc_current[dout].adc_num == ADC_UNIT_2) {
-                    adc2_get_raw((adc2_channel_t)_adc_current[dout].channel, (adc_bits_width_t)ADC_WIDTH_BIT_DEFAULT, &adc_reading);                    
+                    adc2_get_raw((adc2_channel_t)_adc_current[dout].channel, (adc_bits_width_t)ADC_WIDTH_BIT_DEFAULT, &current_reading);                    
                 } else {
+                    current_reading = 0;
                     ESP_LOGE(DOUT_TAG, "Invalid ADC channel");
                 }
+                adc_reading += current_reading;
             }
 
             adc_reading /= DOUT_SENSOR_ADC_NO_OF_SAMPLES;
@@ -294,6 +296,7 @@ float DigitalOutput::getCurrent(DigitalOutputNum_t dout)
             } else {
                 ESP_LOGE(DOUT_TAG, "Invalid ADC channel");
             }
+
             voltage /= 1000; // mV to V
             float sense_current = voltage / DOUT_SENSOR_RESISTOR_SENSE_VALUE; // I = U/R
             float current = 0.0f;

@@ -54,7 +54,7 @@ AnalogInput* MixedStandalone::_ain[MIXED_ADC_NB] = {
 /* Analog outputs instances */
 AnalogOutput* MixedStandalone::_aout[MIXED_DAC_NB] = {
     new AnalogOutputAD5413(AOUT_1),
-    new AnalogOutputAD5413(AOUT_2)
+    new AnalogOutputAD5413(AOUT_2)  
 };
 
 int MixedStandalone::init(void)
