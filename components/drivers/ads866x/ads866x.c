@@ -16,6 +16,11 @@ void Ads866x_DeviceConfig(Ads866x_DeviceConfig_t *config)
     ESP_LOGI(ADS866x_TAG, "Configure Ads866x device");
 
     _deviceConfig = config;
+    for (int i = 0; i < _deviceConfig->adc_analogs_nb; i++) {
+        _deviceConfig->adc_mode[i] = ADS866X_VOLTAGE_MODE;
+        _deviceConfig->adc_range[i] = ADS866X_R5;       //10.24V
+    }
+    _deviceConfig->adc_res = ADS866x_RESOLUTION_BITS;
     _deviceConfigured = true;
 }
 
@@ -48,9 +53,8 @@ void Ads866x_GpioInit(void)
         /* Configure Rst, mode pins */
         cfg.pin_bit_mask = (1ULL << _deviceConfig->pin_rst);
 
-        for(i = 0; i < _deviceConfig->adc_analogs_nb; i++)
-        {
-            cfg.pin_bit_mask |= (1ULL << _deviceConfig->pin_mode[i]);
+        for(i = 0; i < _deviceConfig->adc_analogs_nb; i++) {
+            cfg.pin_bit_mask |= (1ULL << _deviceConfig->pin_adc_mode[i]);
         }
 
         cfg.mode = GPIO_MODE_OUTPUT;
@@ -64,15 +68,9 @@ void Ads866x_GpioInit(void)
         ESP_ERROR_CHECK(gpio_set_level(_deviceConfig->pin_rst, 1));
 
         /* Set level LOW for pin mode - Configure analogs in voltage configuration */
-        for (i = 0; i < _deviceConfig->adc_analogs_nb; i++)
-        {
-            gpio_set_level(_deviceConfig->pin_mode[i], ADS866X_VOLTAGE_MODE);
-            _deviceConfig->adc_mode[i] = ADS866X_VOLTAGE_MODE;
-            _deviceConfig->adc_range[i] = ADS866X_R5;       //10.24V
+        for (i = 0; i < _deviceConfig->adc_analogs_nb; i++) {
+            gpio_set_level(_deviceConfig->pin_adc_mode[i], ADS866X_VOLTAGE_MODE);
         }
-
-        // Set default adc resolution
-        _deviceConfig->adc_res = ADS866x_RESOLUTION_BITS;
 
         _gpioInitialized = true;
     }
@@ -85,13 +83,11 @@ void Ads866x_GpioInit(void)
 
 void Ads8866x_SpiInit(void)
 {
-    if (_spiInitialized == false)
-    {
+    if (_spiInitialized == false) {
 
         ESP_LOGV(ADS866x_TAG, "Initializes the SPI used by Ads866x");
 
-        if (_deviceConfigured == true)
-        {
+        if (_deviceConfigured == true) {
             assert(_deviceConfig != NULL);
 
             spi_device_interface_config_t devConfig = {
@@ -114,9 +110,7 @@ void Ads8866x_SpiInit(void)
             ESP_ERROR_CHECK(spi_bus_add_device(_deviceConfig->spi_host, &devConfig, &_spiHandler));
 
             _spiInitialized = true;
-        }
-        else
-        {
+        } else {
             ESP_LOGE(ADS866x_TAG, "Device is not configured !!!");
         }
     }
@@ -127,10 +121,8 @@ uint32_t Ads866x_AnalogRead(uint32_t analogNum)
 {
     uint32_t res = 0;
 
-    if (_deviceConfigured)
-    {
-        if (analogNum < _deviceConfig->adc_analogs_nb)
-        {
+    if (_deviceConfigured) {
+        if (analogNum < _deviceConfig->adc_analogs_nb) {
             // Active channel
             Ads866x_setChannelSPD(1 << analogNum);
             // Change mode of Ads866x
@@ -145,14 +137,10 @@ uint32_t Ads866x_AnalogRead(uint32_t analogNum)
             {
                 res = (res >> 2);
             }
-        }
-        else
-        {
+        } else {
             ESP_LOGE(ADS866x_TAG, "Invalid analog index. Must be < %d", _deviceConfig->adc_analogs_nb);            
         }
-    }
-    else
-    {
+    } else {
         ESP_LOGE(ADS866x_TAG, "Device is not configured !!!");
     }
     return res;
@@ -221,7 +209,7 @@ void Ads866x_setAdcMode(uint32_t analogNum, Ads866x_AdcMode_t mode)
         if (analogNum < _deviceConfig->adc_analogs_nb)
         {
             _deviceConfig->adc_mode[analogNum] = mode;
-            gpio_set_level(_deviceConfig->pin_mode[analogNum], mode);
+            gpio_set_level(_deviceConfig->pin_adc_mode[analogNum], mode);
 
             if (mode == ADS866X_CURRENT_MODE)
             {

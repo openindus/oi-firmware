@@ -91,14 +91,3 @@ void AnalogInputAds866x::setVoltageRange(AnalogInput_VoltageRange_t range)
         ESP_LOGE(TAG, "Undefined range");
     }
 }
-
-void AnalogInputAds866x::setResolution(AnalogInput_Resolution_t res)
-{
-    if (res == AIN_RES_10_BITS) {
-        Ads866x_setAdcResolution(ADS866x_ADC_RES_10BITS);
-    } else if (res == AIN_RES_12_BITS) {
-        Ads866x_setAdcResolution(ADS866x_ADC_RES_12BITS);
-    } else {
-        ESP_LOGE(TAG, "Undefined resolution");
-    }    
-}

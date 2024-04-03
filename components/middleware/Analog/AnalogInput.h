@@ -39,12 +39,6 @@ typedef enum {
 } AnalogInput_VoltageRange_t;
 
 typedef enum {
-    AIN_RES_10_BITS = 0,    //TODO: delete, only 12bits allowed
-    AIN_RES_12_BITS = 1,
-    AIN_RES_UNDEFINED
-} AnalogInput_Resolution_t;
-
-typedef enum {
     AIN_UNIT_RAW = 0,
     AIN_UNIT_MILLIVOLTS = 1,
     AIN_UNIT_MILLIAMPS = 2,
@@ -60,22 +54,18 @@ public:
     AnalogInput(AnalogInput_Num_t num) : 
         _num(num),
         _mode(AIN_MODE_UNDEFINED),
-        _voltage_range(AIN_VOLTAGE_RANGE_UNDEFINED),
-        _res(AIN_RES_UNDEFINED) {}
+        _voltage_range(AIN_VOLTAGE_RANGE_UNDEFINED) {}
 
     virtual int read(void) = 0;
     virtual float read(AnalogInput_Unit_t unit) = 0;
     virtual void setMode(AnalogInput_Mode_t mode) = 0;
     virtual void setVoltageRange(AnalogInput_VoltageRange_t range) = 0;
-    virtual void setResolution(AnalogInput_Resolution_t res) = 0;
 
 protected:
 
     AnalogInput_Num_t _num;
     AnalogInput_Mode_t _mode;
     AnalogInput_VoltageRange_t _voltage_range;
-    AnalogInput_Resolution_t _res;
-    
 };
 
 class AnalogInputAds866x : public AnalogInput
@@ -91,10 +81,8 @@ public:
     float read(AnalogInput_Unit_t unit) override;
     void setMode(AnalogInput_Mode_t mode) override;
     void setVoltageRange(AnalogInput_VoltageRange_t range) override;
-    void setResolution(AnalogInput_Resolution_t res) override;
 
 private:
 
     static bool _deviceInitialized;
-
 };

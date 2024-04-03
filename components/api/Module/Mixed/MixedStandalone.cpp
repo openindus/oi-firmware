@@ -94,11 +94,11 @@ int MixedStandalone::init(void)
         .spi_freq = MIXED_SPI_FREQ,
         .spi_pin_cs = MIXED_ADC_PIN_CS,
         .pin_rst = MIXED_ADC_PIN_RST,
-        .pin_mode = {},
+        .pin_adc_mode = {MIXED_PIN_EANA_CMD_1, MIXED_PIN_EANA_CMD_2, MIXED_PIN_EANA_CMD_3, MIXED_PIN_EANA_CMD_4},
         .adc_analogs_nb = MIXED_ADC_NB,
-        .adc_res = 12,
-        .adc_mode = {1, 1, 1, 1},
-        .adc_range = {}
+        .adc_res = 0,
+        .adc_mode = {AIN_MODE_VOLTAGE, AIN_MODE_VOLTAGE, AIN_MODE_VOLTAGE, AIN_MODE_VOLTAGE},
+        .adc_range = {AIN_VOLTAGE_RANGE_0_10V24, AIN_VOLTAGE_RANGE_0_10V24, AIN_VOLTAGE_RANGE_0_10V24, AIN_VOLTAGE_RANGE_0_10V24},
     };
     AnalogInputAds866x::init(&adcConfig);
 
@@ -152,7 +152,7 @@ float MixedStandalone::getCurrent(DigitalOutputNum_t num)
     return _dout->getCurrent(num);
 }
 
-/*******  Analog Inputs *******/
+/*******  Analog Inputs  *******/
 void MixedStandalone::analogInputMode(AnalogInput_Num_t num, AnalogInput_Mode_t mode)
 {
     if (num < MIXED_ADC_NB) {
@@ -171,10 +171,6 @@ void MixedStandalone::analogInputVoltageRange(AnalogInput_Num_t num, AnalogInput
     }    
 }
 
-void MixedStandalone::analogInputResolution(AnalogInput_Resolution_t res)
-{
-    _ain[0]->setResolution(res);
-}
 
 int MixedStandalone::analogRead(AnalogInput_Num_t num)
 {
@@ -198,7 +194,7 @@ float MixedStandalone::analogReadMilliVolts(AnalogInput_Num_t num)
     return value;
 }
 
-/*******  Analog Outputs *******/
+/*******  Analog Outputs  *******/
 void MixedStandalone::analogOutputMode(AnalogOutput_Num_t num, AnalogOutput_Mode_t mode)
 {
     if (num < MIXED_DAC_NB) {

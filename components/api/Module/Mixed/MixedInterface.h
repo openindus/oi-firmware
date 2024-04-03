@@ -82,14 +82,6 @@ public:
     virtual void analogInputVoltageRange(AnalogInput_Num_t num, AnalogInput_VoltageRange_t range) = 0;
 
     /**
-     * @brief Set adc resolution measurement
-     * 
-     * @param[in] res : Adc resolution
-     */  
-    virtual void analogInputResolution(AnalogInput_Resolution_t res) = 0;
-
-
-    /**
      * @brief Read a voltage measure on analog pins
      * 
      * @param[in] num : Analog input

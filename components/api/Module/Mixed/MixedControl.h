@@ -41,7 +41,6 @@ public:
     /* Analog Input */
     void analogInputMode(AnalogInput_Num_t num, AnalogInput_Mode_t mode);
     void analogInputVoltageRange(AnalogInput_Num_t num, AnalogInput_VoltageRange_t range);
-    void analogInputResolution(AnalogInput_Resolution_t res);
     int analogRead(AnalogInput_Num_t num);
     float analogReadMilliVolts(AnalogInput_Num_t num);
 

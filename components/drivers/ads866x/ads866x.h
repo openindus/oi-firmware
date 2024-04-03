@@ -115,7 +115,7 @@ typedef struct
 
     /* Pin Config */
     gpio_num_t pin_rst;
-    gpio_num_t pin_mode[ADS866X_MAX_ANALOGS_NB];
+    gpio_num_t pin_adc_mode[ADS866X_MAX_ANALOGS_NB];
 
     /* ADC Config */
     uint8_t adc_analogs_nb;

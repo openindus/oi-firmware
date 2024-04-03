@@ -74,12 +74,6 @@ void MixedControl::analogInputVoltageRange(AnalogInput_Num_t num, AnalogInput_Vo
     request(msg);
 }
 
-void MixedControl::analogInputResolution(AnalogInput_Resolution_t res)
-{
-    std::vector<uint8_t> msgBytes = {CONTROL_ANALOG_INPUT_RESOLUTION, (uint8_t)res};
-    ctrlRequest(msgBytes);
-}
-
 int MixedControl::analogRead(AnalogInput_Num_t num)
 {
     std::vector<uint8_t> msgBytes = {CONTROL_ANALOG_READ, (uint8_t)num};
