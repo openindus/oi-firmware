@@ -123,8 +123,6 @@ typedef struct
 
     /* ADC Config */
     uint8_t adc_channel_nb;
-    uint8_t adc_range[ADS866X_MAX_CHANNELS_NB];
-
 } ads866x_config_t;
 
 
@@ -422,14 +420,14 @@ uint16_t ads866x_spi_write_command_register(uint8_t reg);
  * @param[in] raw : raw value to convert
  * @retval Converted value in volt
  */
-float ads866x_convert_raw_2_volt(uint16_t raw, , uint8_t range);
+float ads866x_convert_raw_2_volt(uint16_t raw, uint8_t range);
 
 /**
  * @brief Convert a voltage value to raw value according to configured input voltage range
  * @param[in] voltage : voltage value to convert
  * @retval Converted value in raw format (12 bits adc resolution)
  */
-uint16_t ads866x_convert_volt_2_raw(float voltage, , uint8_t range);
+uint16_t ads866x_convert_volt_2_raw(float voltage, uint8_t range);
 
 #ifdef __cplusplus
 }

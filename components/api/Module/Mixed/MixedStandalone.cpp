@@ -89,13 +89,17 @@ int MixedStandalone::init(void)
     }
 
     /* Initialize analog inputs */
-    Ads866x_DeviceConfig_t adcConfig = {
+    AnalogInputAds866xConfig_t adcSPIConfig = {
         .spi_host = MIXED_SPI_HOST,
         .spi_freq = MIXED_SPI_FREQ,
         .spi_pin_cs = MIXED_ADC_PIN_CS,
         .pin_rst = MIXED_ADC_PIN_RST,
-        .pin_adc_mode = {MIXED_PIN_EANA_CMD_1, MIXED_PIN_EANA_CMD_2, MIXED_PIN_EANA_CMD_3, MIXED_PIN_EANA_CMD_4},
+        .pin_alarm = MIXED_ADC_PIN_ALARM,
         .adc_analogs_nb = MIXED_ADC_NB,
+    }
+
+    AnalogInputAds866xConfig_t adcConfig = {
+        .modePin = {MIXED_PIN_EANA_CMD_1, MIXED_PIN_EANA_CMD_2, MIXED_PIN_EANA_CMD_3, MIXED_PIN_EANA_CMD_4},
         .adc_res = 0,
         .adc_mode = {AIN_MODE_VOLTAGE, AIN_MODE_VOLTAGE, AIN_MODE_VOLTAGE, AIN_MODE_VOLTAGE},
         .adc_range = {AIN_VOLTAGE_RANGE_0_10V24, AIN_VOLTAGE_RANGE_0_10V24, AIN_VOLTAGE_RANGE_0_10V24, AIN_VOLTAGE_RANGE_0_10V24},

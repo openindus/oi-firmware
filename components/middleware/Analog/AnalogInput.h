@@ -8,19 +8,15 @@
 
 #pragma once
 
-#include "ads866x/ads866x.h"
+#include "ads866x.h"
+
+#define AIN_CURRENT_MODE_RES_VALUE (float)100.0
 
 typedef enum {
     AIN_1 = 0,
     AIN_2 = 1,
     AIN_3 = 2,
     AIN_4 = 3,
-    AIN_5 = 4,
-    AIN_6 = 5,
-    AIN_7 = 6,
-    AIN_8 = 7,
-    AIN_9 = 8,
-    AIN_10 = 9,
     AIN_MAX
 } AnalogInput_Num_t;
 
@@ -31,21 +27,28 @@ typedef enum {
 } AnalogInput_Mode_t;
 
 typedef enum {
-    AIN_VOLTAGE_RANGE_0_10V24 = ADS866X_R5,
-    AIN_VOLTAGE_RANGE_0_5V12 = ADS866X_R6,
-    AIN_VOLTAGE_RANGE_0_2V56 = ADS866X_R7,
-    AIN_VOLTAGE_RANGE_0_1V28 = ADS866X_R8,
+    AIN_VOLTAGE_RANGE_0_10V24 = ADS866X_VOLTAGE_RANGE_5,
+    AIN_VOLTAGE_RANGE_0_5V12 = ADS866X_VOLTAGE_RANGE_6,
+    AIN_VOLTAGE_RANGE_0_2V56 = ADS866X_VOLTAGE_RANGE_7,
+    AIN_VOLTAGE_RANGE_0_1V28 = ADS866X_VOLTAGE_RANGE_8,
     AIN_VOLTAGE_RANGE_UNDEFINED
 } AnalogInput_VoltageRange_t;
 
 typedef enum {
     AIN_UNIT_RAW = 0,
-    AIN_UNIT_MILLIVOLTS = 1,
-    AIN_UNIT_MILLIAMPS = 2,
-    AIN_UNIT_VOLTS = 3,
-    AIN_UNIT_AMPS = 5,
+    AIN_UNIT_MILLIVOLT = 1,
+    AIN_UNIT_MILLIAMP = 2,
+    AIN_UNIT_VOLT = 3,
+    AIN_UNIT_AMP = 4,
     AIN_UNIT_UNDEFINED
 } AnalogInput_Unit_t;
+
+typedef struct {
+    AnalogInput_Mode_t mode;
+    gpio_num_t modePin;
+    AnalogInput_VoltageRange_t voltageRange;
+} AnalogInputAds866xConfig_t;
+
 
 class AnalogInput
 {
@@ -53,18 +56,14 @@ public:
 
     AnalogInput(AnalogInput_Num_t num) : 
         _num(num),
-        _mode(AIN_MODE_UNDEFINED),
         _voltage_range(AIN_VOLTAGE_RANGE_UNDEFINED) {}
 
     virtual int read(void) = 0;
-    virtual float read(AnalogInput_Unit_t unit) = 0;
-    virtual void setMode(AnalogInput_Mode_t mode) = 0;
     virtual void setVoltageRange(AnalogInput_VoltageRange_t range) = 0;
 
 protected:
 
     AnalogInput_Num_t _num;
-    AnalogInput_Mode_t _mode;
     AnalogInput_VoltageRange_t _voltage_range;
 };
 
@@ -73,16 +72,21 @@ class AnalogInputAds866x : public AnalogInput
 public:
 
     AnalogInputAds866x(AnalogInput_Num_t num) :
-        AnalogInput(num) {}
+        AnalogInput(num),
+        _modePin(GPIO_NUM_NC),
+        _mode(AIN_MODE_UNDEFINED) {}
 
-    static int init(Ads866x_DeviceConfig_t* config);
+    static int init(AnalogInputAds866xConfig_t* config);
 
     int read(void) override;
-    float read(AnalogInput_Unit_t unit) override;
-    void setMode(AnalogInput_Mode_t mode) override;
+    float readUnit(AnalogInput_Unit_t unit);
+    void setMode(AnalogInput_Mode_t mode);
     void setVoltageRange(AnalogInput_VoltageRange_t range) override;
 
 private:
+
+    static gpio_num_t _modePin;
+    static AnalogInput_Mode_t _mode;
 
     static bool _deviceInitialized;
 };
