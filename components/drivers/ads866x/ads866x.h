@@ -21,27 +21,31 @@
 #include "driver/gpio.h"
 #include "freertos/task.h"
 
-#define ADS8664_ANALOG_REFERENCE (float)4.096
-#define ADS866x_RESOLUTION_BITS  (uint8_t)12
-#define ADS866X_MAX_ANALOGS_NB   (uint8_t)8
-#define ADS866x_CURRENT_MES_RES_VALUE (float)100.0
-// COMMAND REGISTER MAP --------------------------------------------------------------------------------------------
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
+#define ADS8664_VOLTAGE_REFERENCE (float)4.096
+#define ADS866x_RESOLUTION_BITS  (uint8_t)12
+#define ADS866X_MAX_CHANNELS_NB   (uint8_t)8
+
+// COMMAND REGISTER MAP --------------------------------------------------------------------------------------------
 #define ADS866X_CMD_NO_OP     0x00  // Continue operation in previous mode
 #define ADS866X_CMD_STDBY     0x82  // Device is placed into standby mode
 #define ADS866X_CMD_PWR_DN    0x83  // Device is powered down
 #define ADS866X_CMD_RST       0x85  // Program register is reset to default
 #define ADS866X_CMD_AUTO_RST  0xA0  // Auto mode enabled following a reset
-#define ADS866X_CMD_MAN_Ch_0  0xC0  // Channel 0 input is selected
-#define ADS866X_CMD_MAN_Ch_1  0xC4  // Channel 1 input is selected
-#define ADS866X_CMD_MAN_Ch_2  0xC8  // Channel 2 input is selected
-#define ADS866X_CMD_MAN_Ch_3  0xCC  // Channel 3 input is selected
+#define ADS866X_CMD_MAN_CH_0  0xC0  // Channel 0 input is selected
+#define ADS866X_CMD_MAN_CH_1  0xC4  // Channel 1 input is selected
+#define ADS866X_CMD_MAN_CH_2  0xC8  // Channel 2 input is selected
+#define ADS866X_CMD_MAN_CH_3  0xCC  // Channel 3 input is selected
 
 // ADS8668 Only (8 Channels)
-#define ADS866X_CMD_MAN_Ch_4  0xD0  // Channel 4 input is selected
-#define ADS866X_CMD_MAN_Ch_5  0xD4  // Channel 5 input is selected
-#define ADS866X_CMD_MAN_Ch_6  0xD8  // Channel 6 input is selected
-#define ADS866X_CMD_MAN_Ch_7  0xDC  // Channel 7 input is selected
+#define ADS866X_CMD_MAN_CH_4  0xD0  // Channel 4 input is selected
+#define ADS866X_CMD_MAN_CH_5  0xD4  // Channel 5 input is selected
+#define ADS866X_CMD_MAN_CH_6  0xD8  // Channel 6 input is selected
+#define ADS866X_CMD_MAN_CH_7  0xDC  // Channel 7 input is selected
 
 #define MAN_AUX   0xE0  // AUX channel input is selected
 
@@ -56,14 +60,14 @@
 // bit 7-6 for daisy chain ID, bit 4 for ALARM feature, bit 2-0 SDO data format bits
 
 // RANGE SELECT REGISTERS
-#define RG_Ch_0       0x05   // Channel 0 Input Range: default 0x00 - bit 3-0 to select range
-#define RG_Ch_1       0x06   // Channel 1 Input Range: default 0x00 - bit 3-0 to select range
-#define RG_Ch_2       0x07   // Channel 2 Input Range: default 0x00 - bit 3-0 to select range
-#define RG_Ch_3       0x08   // Channel 3 Input Range: default 0x00 - bit 3-0 to select range
-#define RG_Ch_4       0x09   // Channel 4 Input Range: default 0x00 - bit 3-0 to select range
-#define RG_Ch_5       0x0A   // Channel 5 Input Range: default 0x00 - bit 3-0 to select range
-#define RG_Ch_6       0x0B   // Channel 6 Input Range: default 0x00 - bit 3-0 to select range
-#define RG_Ch_7       0x0C   // Channel 7 Input Range: default 0x00 - bit 3-0 to select range
+#define RG_CH_0       0x05   // Channel 0 Input Range: default 0x00 - bit 3-0 to select range
+#define RG_CH_1       0x06   // Channel 1 Input Range: default 0x00 - bit 3-0 to select range
+#define RG_CH_2       0x07   // Channel 2 Input Range: default 0x00 - bit 3-0 to select range
+#define RG_CH_3       0x08   // Channel 3 Input Range: default 0x00 - bit 3-0 to select range
+#define RG_CH_4       0x09   // Channel 4 Input Range: default 0x00 - bit 3-0 to select range
+#define RG_CH_5       0x0A   // Channel 5 Input Range: default 0x00 - bit 3-0 to select range
+#define RG_CH_6       0x0B   // Channel 6 Input Range: default 0x00 - bit 3-0 to select range
+#define RG_CH_7       0x0C   // Channel 7 Input Range: default 0x00 - bit 3-0 to select range
 
 // ALARM FLAG REGISTERS (Read-only)
 #define ALARM_OVERVIEW          0x10 // ALARM Overview Tripped Flag
@@ -86,15 +90,15 @@
 // SPECIFIC VALUES -------------------------------------------------------------------------------------------
 
 //RANGE SELECTION
-#define ADS866X_R0            0x00   // Input range of -/+ 2.5*Vref       (-/+ 10.24V if internal reference used)
-#define ADS866X_R1            0x01   // Input range of -/+ 1.25*Vref      (-/+  5.12V if internal reference used)
-#define ADS866X_R2            0x02   // Input range of -/+ 0.625*Vref     (-/+ 2.56V if internal reference used)
-#define ADS866X_R3            0x03   // Input range of -/+ 0.3125*Vref    (-/+ 1.28V if internal reference used)
-#define ADS866X_R4            0x0B   // Input range of -/+ 0.15625*Vref   (-/+ 0.64V if internal reference used)
-#define ADS866X_R5            0x05   // Input range of 0-2.5*Vref         (0-10.24V if internal reference used)
-#define ADS866X_R6            0x06   // Input range of 0-1.25*Vref        (0-5.12V if internal reference used)
-#define ADS866X_R7            0x07   // Input range of 0-0.625*Vref       (0-2.56V if internal reference used)
-#define ADS866X_R8            0x0F   // Input range of 0-0.3125*Vref      (0-1.28V if internal reference used)
+#define ADS866X_VOLTAGE_RANGE_0            0x00   // Input range of -/+ 2.5*Vref       (-/+ 10.24V if internal reference used)
+#define ADS866X_VOLTAGE_RANGE_1            0x01   // Input range of -/+ 1.25*Vref      (-/+  5.12V if internal reference used)
+#define ADS866X_VOLTAGE_RANGE_2            0x02   // Input range of -/+ 0.625*Vref     (-/+ 2.56V if internal reference used)
+#define ADS866X_VOLTAGE_RANGE_3            0x03   // Input range of -/+ 0.3125*Vref    (-/+ 1.28V if internal reference used)
+#define ADS866X_VOLTAGE_RANGE_4            0x0B   // Input range of -/+ 0.15625*Vref   (-/+ 0.64V if internal reference used)
+#define ADS866X_VOLTAGE_RANGE_5            0x05   // Input range of 0-2.5*Vref         (0-10.24V if internal reference used)
+#define ADS866X_VOLTAGE_RANGE_6            0x06   // Input range of 0-1.25*Vref        (0-5.12V if internal reference used)
+#define ADS866X_VOLTAGE_RANGE_7            0x07   // Input range of 0-0.625*Vref       (0-2.56V if internal reference used)
+#define ADS866X_VOLTAGE_RANGE_8            0x0F   // Input range of 0-0.3125*Vref      (0-1.28V if internal reference used)
 
 // OPERATION MODES
 #define ADS866X_MODE_IDLE       (uint8_t)0
@@ -108,390 +112,324 @@
 
 typedef struct 
 {
-    /* SPI Conf */
+    /* SPI Config */
     spi_host_device_t spi_host;    
     int spi_freq;
     int spi_pin_cs;
 
     /* Pin Config */
     gpio_num_t pin_rst;
-    gpio_num_t pin_adc_mode[ADS866X_MAX_ANALOGS_NB];
+    gpio_num_t pin_alarm;
 
     /* ADC Config */
-    uint8_t adc_analogs_nb;
-    uint8_t adc_res;
-    uint8_t adc_mode[ADS866X_MAX_ANALOGS_NB];
-    uint8_t adc_range[ADS866X_MAX_ANALOGS_NB];
+    uint8_t adc_channel_nb;
+    uint8_t adc_range[ADS866X_MAX_CHANNELS_NB];
 
-} Ads866x_DeviceConfig_t;
+} ads866x_config_t;
 
-typedef enum
-{
-    ADS866X_VOLTAGE_MODE = 0,
-    ADS866X_CURRENT_MODE = 1
-} Ads866x_AdcMode_t;
-
-typedef enum
-{
-    ADS866x_ADC_RES_10BITS = 10,
-    ADS866x_ADC_RES_12BITS = 12
-} Ads866x_AdcResolutionBits_t;
-
-typedef enum
-{
-    ADS866x_UNITS_RAW,
-    ADS866x_UNITS_MILLIVOLTS,
-    ADS866x_UNITS_MILLIAMPS,
-    ADS866x_UNITS_VOLTS,
-    ADS866x_UNITS_AMPS,
-} Ads866x_Units_t;
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-/**
- * @brief Configure Ads866x device
- * @param config SPI and GPIOs configuration
- * @retval void
- */
-void Ads866x_DeviceConfig(Ads866x_DeviceConfig_t *config);
 
 /**
  * @brief Initializes ads866x driver
- * @retval None
+ * @param[in] config : Device configuration
+ * @retval 0
  */
-uint8_t Ads866x_Init(void);
-
-/**
- * @brief Initializes gpios used by Ads866x
- * @retval None
- */
-void Ads866x_GpioInit(void);
-
-/**
- * @brief Initializes ads866x spi device
- * @retval None
- */
-void Ads8866x_SpiInit(void);
+uint8_t ads866x_init(ads866x_config_t *config);
 
 /**
  * @brief Read adc raw value of corresponding analog
- * @param[in] analogNum : index of the analog
+ * @param[in] channel : Channel to read
  * @retval Measured raw value
  */
-uint32_t Ads866x_AnalogRead(uint32_t analogNum);
+uint16_t ads866x_analog_read(uint8_t channel);
+
 
 /**
- * @brief Read adc value of corresponding analog in specified units
- * @param[in] analogNum : index of the analog
- * @param[in] units : desired unit of the result
- * @retval float Measured value
+ * @brief Retval analog voltage reference of ads866x
+ * @retval float (value in V)
  */
-float Ads866x_AnalogReadUnits(uint32_t analogNum, Ads866x_Units_t units);
+float ads866x_get_voltage_reference(void);
 
 /**
- * @brief Configure analog in voltage or current mode
- * @param[in] analogNum : index of the analog to configure
- * @param[in] mode : Current mode (0) or Voltage mode (1)
- * @retval None
+ * @brief Set analog voltage reference of ads866x
+ * @param[in] ref : value to set in V
  */
-void Ads866x_setAdcMode(uint32_t analogNum, Ads866x_AdcMode_t mode);
-
-/**
- * @brief Set Adc resolution
- * @param[in] analogRes : adc resolution (10, 12) bits
- * @retval None
- */
-void Ads866x_setAdcResolution(Ads866x_AdcResolutionBits_t analogRes);
-
-/**
- * @brief Get Adc resolution
- * @retval Current adc resolution 
- */
-uint8_t Ads866x_getAdcResolution(void);
-
-/**
- * @brief retvals analog voltage reference of Ads866x
- * @retval float
- */
-float Ads866x_getAnalogReference(void);
-
-/**
- * @brief Sets analog voltage reference of Ads866x
- * @param[in] analogReference : value to set
- */
-void Ads866x_setAnalogReference(float analogReference);
+void ads866x_set_voltage_reference(float ref);
 
 /**
  * @brief Continue previous operation
  * @retval uint16_t
  */
-uint16_t Ads866x_NoOp(void);
+uint16_t ads866x_noOp(void);
 
 /**
  * @brief Reset device and registers to their default value
  * @retval uint16_t
  */
-uint16_t Ads866x_Reset(void);
+uint16_t ads866x_reset(void);
 
 /**
- * @brief Set the devince in standby mode
+ * @brief Set the device in standby mode
  * @retval uint16_t
  */
-uint16_t Ad866x_Standby(void);
+uint16_t ad866x_standby(void);
 
 /**
  * @brief Software power down - Registers are not reset to their default values
  * @retval uint16_t
  */
-uint16_t Ads866x_PowerDown(void);
+uint16_t ads866x_power_down(void);
 
 /**
- * @brief Set ADC in auto_rst mode. Enables to read a sequence channels in ascending order
+ * @brief Set ADC in auto_reset mode. Enables to read a sequence channels in ascending order
  * @retval uint16_t
  */
-uint16_t Ads866x_AutoRst(void);
+uint16_t ads866x_auto_reset(void);
 
 /**
  * @brief Place ADC in Manual Mode to scan from the channel in parameter
- * @param[in] channelNum : Number of the channel to select
+ * @param[in] channel : Number of the channel to select
  * @retval uint16_t
  */
-uint16_t Ads866x_ManualChannelSelect(uint8_t channelNum);
+uint16_t ads866x_manual_channel_select(uint8_t channel);
 
 /**
- * @brief Set the AUTO_SEQ_EN register used to selec channels in Auto_RSt mode
+ * @brief Set the AUTO_SEQ_EN register used to selec channels in auto_reset mode
  * @param[in] channels_on : vector of bits to select channels to enable
  */
-void Ads866x_setChannelSequence(uint8_t channels_on);
+void ads866x_set_channel_sequence(uint8_t channels_on);
 
 /**
- * @brief Set the Channel Power Down register used to not include channels in Auto_Rst mode
- * @param[in] channels_on : vector of bits to select channels to disable
+ * @brief Set the Channel Power Down register used to not include channels in auto_reset mode
+ * @param[in] channels_off : vector of bits to select channels to disable
  */
-void Ads866x_setChannelPowerDown(uint8_t channels_off);
+void ads866x_set_channel_power_down(uint8_t channels_off);
 
 /**
- * @brief Configure both AUTO_SEQ_EN and Channel power down registers for Auto_RST mode
- * @param[in] channels_on : vector of bits to select channels to enable
+ * @brief Configure both AUTO_SEQ_EN and Channel power down registers for auto_reset mode
+ * @param[in] channels : vector of bits to select channels to enable
  */
-void Ads866x_setChannelSPD(uint8_t channels);
+void ads866x_set_channel_SPD(uint8_t channels);
 
 /**
- * @brief retvals the value of the AUTO_SEQ_EN Register
+ * @brief Retval the value of the AUTO_SEQ_EN Register
  */
-uint8_t Ads866x_getChannelSequence(void);
+uint8_t ads866x_get_channel_sequence(void);
 
 /**
- * @brief retvals the value of the power down register
+ * @brief Retval the value of the power down register
  */
-uint8_t Ads866x_getChannelPowerDown(void);
+uint8_t ads866x_get_channel_power_down(void);
 
 /**
- * @brief retvals device id (Feature Select Register)
+ * @brief Retval device id (Feature Select Register)
  */
-uint8_t Ads866x_GetDeviceId(void);
+uint8_t ads866x_get_device_id(void);
 
 /**
  * @brief Set device id used for daisy chain (Feature Select Register)
  * @param[in] id : value of id. Must be an integer between [0;3]
  */
-void Ads866x_SetDeviceId(uint16_t id);
+void ads866x_set_device_id(uint8_t id);
 
 /**
- * @brief retvals the status of alarm (4th bit of Feature Select Register)
+ * @brief Retval the status of alarm (4th bit of Feature Select Register)
  * @retval 1 if alarm is enabled, 0 otherwise
  */
-bool Ads866x_getAlarm(void);
+bool ads866x_get_alarm(void);
 
 /**
  * @brief Configure alarm (Bit 4 of Feature Select Register)
  * @param[in] alarm : 1 (Enable), 0 (Disable)
  */
-void Ads866x_setAlarm(bool alarm);
+void ads866x_set_alarm(bool alarm);
 
 /**
- * @brief retvals the SDO Format bits [0:2] contained in Feature Select Register
+ * @brief Retval the SDO Format bits [0:2] contained in Feature Select Register
  * @retval uint8_t (SDO Format data bits)
  */
-uint8_t Ads866x_getSdo(void);
+uint8_t ads866x_get_sdo(void);
 
 /**
  * @brief Configure SDO Format (Feature Select Register)
- * @param[in] sdo format
+ * @param[in] sdo : format
  *            Accepted values : 0, 1, 2, 3
  * Cf Datasheet for further information
  */
-void Ads866x_setSdo(uint8_t sdo);
+void ads866x_set_sdo(uint8_t sdo);
 
 /**
- * @brief retvals the value of Feature Select Register
- * @retvals uint8_t
+ * @brief Retval the value of Feature Select Register
+ * @retval uint8_t
  */
-uint8_t Ads866x_getFeatureSelect(void);
+uint8_t ads866x_get_feature_select(void);
+
 
 /******** Input range configuration ****************/
 
 /**
- * @brief retvals the configured input range for channel in parameter
- * @retvals uint8_t
- * 
- * 0000 = Input range is set to ±2.5 x VREF
- * 0001 = Input range is set to ±1.25 x VREF
- * 0010 = Input range is set to ±0.625 x VREF
- * 0011 = Input range is set to ±0.3125 x VREF
- * 1011 = Input range is set to ±0.15625 x VREF
- * 0101 = Input range is set to 0 to 2.5 x VREF
- * 0110 = Input range is set to 0 to 1.25 x VREF
- * 0111 = Input range is set to 0 to 0.625 x VREF
- * 1111 = Input range is set to 0 to 0.3125 x VREF
+ * @brief Retrieve the configured input voltage range for a specified channel.
+ * @param[in] channel : The number of the channel.
+ * @return uint8_t The voltage range of the channel.
+ *
+ * The possible voltage ranges are:
+ * - 0000: Input range is set to ±2.5 x VREF
+ * - 0001: Input range is set to ±1.25 x VREF
+ * - 0010: Input range is set to ±0.625 x VREF
+ * - 0011: Input range is set to ±0.3125 x VREF
+ * - 1011: Input range is set to ±0.15625 x VREF
+ * - 0101: Input range is set to 0 to 2.5 x VREF
+ * - 0110: Input range is set to 0 to 1.25 x VREF
+ * - 0111: Input range is set to 0 to 0.625 x VREF
+ * - 1111: Input range is set to 0 to 0.3125 x VREF
  */
-uint8_t Ads866x_getChannelRange(uint8_t channel);
+uint8_t ads866x_get_channel_voltage_range(uint8_t channel);
 
 /**
  * @brief Configure input range for the specified channel
  * @param[in] channel : Channel to configure
- * @param[in] range : Range input for the channel
+ * @param[in] range : Voltage range input for the channel
  */
-void Ads866x_setChannelRange(uint8_t channel, uint8_t range);
+void ads866x_set_channel_voltage_range(uint8_t channel, uint8_t range);
 
 /**
- * @brief Configure input range for all channels
+ * @brief Configure voltage input range for all channels
  */
-void Ads866x_setGlobalRange(uint8_t range);
+void ads866x_set_global_voltage_range(uint8_t range);
+
 
 /************* Alarm Active and Tripped flags ************/
 
 /**
- * @brief retvals the logical OR of high and low tripped alarm flags for all eight channels
+ * @brief Retval the logical OR of high and low tripped alarm flags for all eight channels
  * Bit n = Tripped Alarm Flag for Channel n
  */
-uint8_t Ads866x_getAlarmOverview();
+uint8_t ads866x_get_alarm_overview();
 
 /**
- * @brief retvals alarm tripped flag Low and High for register Ch0-Ch3
- * @retvals uint8_t
+ * @brief Retval alarm tripped flag Low and High for register Ch0-Ch3
+ * @retval uint8_t
  */
-uint8_t Ads866x_getFirstTrippedFlag();
+uint8_t ads866x_get_first_tripped_flag();
 
 /**
- * @brief retvals alarm tripped flag Low and High for register Ch4-Ch7
- * @retvals uint8_t
+ * @brief Retval alarm tripped flag Low and High for register Ch4-Ch7
+ * @retval uint8_t
  */
-uint8_t Ads866x_getSecondTrippedFlag();
+uint8_t ads866x_get_second_tripped_flag();
 
 /**
- * @brief retvals alarm tripped flag Low and High for register Ch0-Ch7
- * @retvals uint16_t
+ * @brief Retval alarm tripped flag Low and High for register Ch0-Ch7
+ * @retval uint16_t
  */
-uint16_t Ads866x_getTrippedFlags();
+uint16_t ads866x_get_all_tripped_flags();
 
 /**
- * @brief retvals alarm active flag Low and High for register Ch0-Ch3
- * @retvals uint8_t
+ * @brief Retval alarm active flag Low and High for register Ch0-Ch3
+ * @retval uint8_t
  */
-uint8_t Ads866x_getFirstActiveFlag();
+uint8_t ads866x_get_first_active_flag();
 
 /**
- * @brief retvals alarm active flag Low and High for register Ch0-Ch7
- * @retvals uint8_t
+ * @brief Retval alarm active flag Low and High for register Ch4-Ch7
+ * @retval uint8_t
  */
-uint8_t Ads866x_getSecondActiveFlag();
+uint8_t ads866x_get_second_active_flag();
 
 /**
- * @brief retvals alarm active flag Low and High for register Ch0-Ch7
- * @retvals uint16_t
+ * @brief Retval alarm active flag Low and High for register Ch0-Ch7
+ * @retval uint16_t
  */
-uint16_t Ads866x_getActiveFlags();
+uint16_t ads866x_get_all_active_flags();
 
 /**
- * @brief retvals the configured hysteresis for corresponding channel
- * @param[in] channel : num of the channel
- * @retvals uint8_t : Hysteresis is coded on 4 LSB bits
+ * @brief Retval the configured hysteresis for corresponding channel
+ * @param[in] channel : Corresponding channel
+ * @retval uint8_t : Hysteresis is coded on 4 LSB bits
  */
-uint8_t Ads866x_getChannelHysteresis(uint8_t channel);
+uint8_t ads866x_get_channel_hysteresis(uint8_t channel);
 
 /**
- * @brief retvals the configured low threshold for corresponding channel
- * @param[in] channel : num of the channel
- * @retvals uint8_t : Low Threshold is coded on 12 LSB bits
+ * @brief Retval the configured low threshold for corresponding channel
+ * @param[in] channel : Corresponding channel
+ * @retval uint8_t : Low Threshold is coded on 12 LSB bits
  */
-uint16_t Ads866x_getChanneLowThreshold(uint8_t channel);
+uint16_t ads866x_get_channel_low_threshold(uint8_t channel);
 
 /**
- * @brief retvals the configured high threshold for corresponding channel
- * @param[in] channel : num of the channel
- * @retvals uint8_t : High Threshold is coded on 12 LSB bits
+ * @brief Retval the configured high threshold for corresponding channel
+ * @param[in] channel : Corresponding channel
+ * @retval uint8_t : High Threshold is coded on 12 LSB bits
  */
-uint16_t Ads866x_getChanneHighThreshold(uint8_t channel);
+uint16_t ads866x_get_channel_high_threshold(uint8_t channel);
 
 /**
  * @brief Set channel hysteresis
- * @param[in] channel : num of the channel
+ * @param[in] channel : Corresponding channel
  * @param[in] hysteresis : value of hysteresis (4bits)
  */
-void Ads866x_setChannelHysteresis(uint8_t channel, uint8_t hysteresis);
+void ads866x_set_channel_hysteresis(uint8_t channel, uint8_t hysteresis);
 
 /**
  * @brief Set channel low threshold
- * @param[in] channel : num of the channel
+ * @param[in] channel : channel of the channel
  * @param[in] hysteresis : value of low threshold (12bits)
  */
-void Ads866x_setChannelLowThreshold(uint8_t channel, uint16_t threshold);
+void ads866x_set_channel_low_threshold(uint8_t channel, uint16_t threshold);
 
 /**
  * @brief Set channel high threshold
- * @param[in] channel : num of the channel
+ * @param[in] channel : channel of the channel
  * @param[in] hysteresis : value of high threshold (12bits)
  */
-void Ads866x_setChannelHighThreshold(uint8_t channel, uint16_t threshold);
+void ads866x_set_channel_high_threshold(uint8_t channel, uint16_t threshold);
 
 /**
  * @brief Read the device mode (Previous command)
- * @retvals uint8_t
+ * @retval uint8_t
  */
-uint8_t Ads866x_getCommandReadBack(void);
+uint8_t ads866x_get_command_readback(void);
+
 
 /************* SPI Read/Write Functions *****************/
+
 /**
  * @brief Spi write register function
- * @param reg : Register to write
- * @param value : Value to be writted 
+ * @param[in] reg : Register to write
+ * @param[in] value : Value to be writted 
  * @retval esp_err_t 
  */
-esp_err_t Ads866x_SpiWriteRegister(uint8_t reg, uint8_t value);
+esp_err_t ads866x_spi_write_register(uint8_t reg, uint8_t value);
 
 /**
  * @brief Spi read register function
- * @param reg : Register to be read
+ * @param[in] reg : Register to be read
  * @retval Value of the specified register
  */
-uint8_t Ads866x_SpiReadRegister(uint8_t reg);
+uint8_t ads866x_spi_read_register(uint8_t reg);
 
 /**
  * @brief Spi write command register
- * @param reg : Register to write
+ * @param[in] reg : Register to write
  * @retval Value of the register
  */
-uint16_t Ads866x_SpiWriteCmdRegister(uint8_t reg);
+uint16_t ads866x_spi_write_command_register(uint8_t reg);
+
+
+/************* Convertions Functions *****************/
 
 /**
- * @brief Convert a raw value to volt according to configured input range
- * @param[in] rawValue : raw value to convert
- * @param[in] inputRange : inputRange configuration used for conversion
+ * @brief Convert a raw value to volt according to configured input voltage range
+ * @param[in] raw : raw value to convert
  * @retval Converted value in volt
  */
-float Ads866x_ConvertRaw2Volt(uint16_t rawValue, uint8_t inputRange);
+float ads866x_convert_raw_2_volt(uint16_t raw, , uint8_t range);
 
 /**
- * @brief Convert a voltage value to raw value according to configured input range
- * @param[in] voltageValue : voltage value to convert
- * @param[in] inputRange : inputRange configuration used for conversion
+ * @brief Convert a voltage value to raw value according to configured input voltage range
+ * @param[in] voltage : voltage value to convert
  * @retval Converted value in raw format (12 bits adc resolution)
  */
-uint16_t Ads866x_ConvertVolt2Raw(float voltageValue, uint8_t inputRange);
+uint16_t ads866x_convert_volt_2_raw(float voltage, , uint8_t range);
 
 #ifdef __cplusplus
 }
