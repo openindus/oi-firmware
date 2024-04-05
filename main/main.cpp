@@ -3,7 +3,7 @@
 
 void setup(void)
 {
-    printf("Hello World !\n");
+    printf("Hello OpenIndus !\n");
 }
 
 void loop(void)

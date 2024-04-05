@@ -19,180 +19,147 @@
 
 int StepperControl::digitalRead(DigitalInputNum_t din) 
 {
-    ModuleCmd_RequestMsg_t msg;
-    msg.id = REQUEST_DIGITAL_READ;
-    msg.param = (uint16_t)din;
-    return (int)request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_DIGITAL_READ, (uint8_t)din};
+    ctrlRequest(msgBytes);
+    return static_cast<int>(msgBytes[2]);
 }
 
 void StepperControl::attachInterrupt(DigitalInputNum_t din, IsrCallback_t callback, InterruptMode_t mode)
 {
-    ModuleCmd_RequestMsg_t msg;
-    msg.id = REQUEST_ATTACH_INTERRUPT;
-    msg.param = (uint16_t)din;
-    msg.data = (uint32_t)mode;
-    request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_ATTACH_INTERRUPT, (uint8_t)din, (uint8_t)mode};
     _isrCallback[din] = callback;
-    uint16_t id = ModuleControl::getId(this);
-    ModuleMaster::onEvent(EVENT_DIGITAL_INTERRUPT, id, [this](uint8_t num) {
-        _isrCallback[num](NULL);
-    });
+    ctrlRequest(msgBytes);
+    
+    addEventCallback(
+        EVENT_DIGITAL_INTERRUPT, 
+        _id, 
+        [this](uint8_t num) { _isrCallback[num](NULL); }
+    );
 }
 
 void StepperControl::detachInterrupt(DigitalInputNum_t din)
 {
-    ModuleCmd_RequestMsg_t msg;
-    msg.id = REQUEST_DETACH_INTERRUPT;
-    msg.param = (uint16_t)din;
-    request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_DETACH_INTERRUPT, (uint8_t)din};
+    ctrlRequest(msgBytes);
 }
 
 void StepperControl::setLimitSwitch(MotorNum_t motor, DigitalInputNum_t din, DigitalInputLogic_t logic)
 {
-    ModuleCmd_RequestMsg_t msg;
-    msg.id = REQUEST_MOTOR_SET_LIMIT_SWITCH;
-    msg.param = (uint16_t)((din << 8) | motor);
-    msg.data = (uint32_t)logic;
-    request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_MOTOR_SET_LIMIT_SWITCH, (uint8_t)motor, (uint8_t)din, (uint8_t)logic};
+    ctrlRequest(msgBytes);
 }
 
 void StepperControl::setStepResolution(MotorNum_t motor, MotorStepResolution_t res)
 {
-    ModuleCmd_RequestMsg_t msg;
-    msg.id = REQUEST_MOTOR_SET_STEP_RESOLUTION;
-    msg.param = (uint16_t)motor;
-    msg.data = (uint32_t)res;
-    request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_MOTOR_SET_STEP_RESOLUTION, (uint8_t)motor, (uint8_t)res};
+    ctrlRequest(msgBytes);
 }
 
 void StepperControl::setMaxSpeed(MotorNum_t motor, float speed)
 {
-    ModuleCmd_RequestMsg_t msg;
-    msg.id = REQUEST_MOTOR_SET_MAX_SPEED;
-    msg.param = (uint16_t)motor;
-    memcpy(&msg.data, &speed, sizeof(uint32_t));
-    request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_MOTOR_SET_MAX_SPEED, (uint8_t)motor};
+    uint8_t *ptr = reinterpret_cast<uint8_t*>(&speed);
+    msgBytes.insert(msgBytes.end(), ptr, ptr + sizeof(float));
+    ctrlRequest(msgBytes);
 }
 
 void StepperControl::setMinSpeed(MotorNum_t motor, float speed)
 {
-    ModuleCmd_RequestMsg_t msg;
-    msg.id = REQUEST_MOTOR_SET_MIN_SPEED;
-    msg.param = (uint16_t)motor;
-    memcpy(&msg.data, &speed, sizeof(uint32_t));
-    request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_MOTOR_SET_MIN_SPEED, (uint8_t)motor};
+    uint8_t *ptr = reinterpret_cast<uint8_t*>(&speed);
+    msgBytes.insert(msgBytes.end(), ptr, ptr + sizeof(float));
+    ctrlRequest(msgBytes);
 }
 
 void StepperControl::setFullStepSpeed(MotorNum_t motor, float speed)
 {
-    ModuleCmd_RequestMsg_t msg;
-    msg.id = REQUEST_MOTOR_SET_FULL_STEP_SPEED;
-    msg.param = (uint16_t)motor;
-    memcpy(&msg.data, &speed, sizeof(uint32_t));
-    request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_MOTOR_SET_FULL_STEP_SPEED, (uint8_t)motor};
+    uint8_t *ptr = reinterpret_cast<uint8_t*>(&speed);
+    msgBytes.insert(msgBytes.end(), ptr, ptr + sizeof(float));
+    ctrlRequest(msgBytes);
 }
 
 void StepperControl::setAcceleration(MotorNum_t motor, float acc)
 {
-    ModuleCmd_RequestMsg_t msg;
-    msg.id = REQUEST_MOTOR_SET_ACCELERATION;
-    msg.param = (uint16_t)motor;
-    memcpy(&msg.data, &acc, sizeof(uint32_t));
-    request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_MOTOR_SET_ACCELERATION, (uint8_t)motor};
+    uint8_t *ptr = reinterpret_cast<uint8_t*>(&acc);
+    msgBytes.insert(msgBytes.end(), ptr, ptr + sizeof(float));
+    ctrlRequest(msgBytes);
 }
 
 void StepperControl::setDeceleration(MotorNum_t motor, float dec)
 {
-    ModuleCmd_RequestMsg_t msg;
-    msg.id = REQUEST_MOTOR_SET_DECELERATION;
-    msg.param = (uint16_t)motor;
-    memcpy(&msg.data, &dec, sizeof(uint32_t));
-    request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_MOTOR_SET_ACCELERATION, (uint8_t)motor};
+    uint8_t *ptr = reinterpret_cast<uint8_t*>(&dec);
+    msgBytes.insert(msgBytes.end(), ptr, ptr + sizeof(float));
+    ctrlRequest(msgBytes);
 }
 
 int32_t StepperControl::getPosition(MotorNum_t motor)
 {
-    uint32_t data;
-    int32_t position;
-    ModuleCmd_RequestMsg_t msg;
-    msg.id = REQUEST_MOTOR_GET_POSITION;
-    msg.param = (uint16_t)motor;
-    data = request(msg);
-    memcpy(&position, &data, sizeof(int32_t));
-    return position;
+    std::vector<uint8_t> msgBytes = {CONTROL_MOTOR_GET_POSITION, (uint8_t)motor};
+    ctrlRequest(msgBytes);
+    int32_t* position = reinterpret_cast<int32_t*>(&msgBytes[2]);
+    return *position;
 }
 
 float StepperControl::getSpeed(MotorNum_t motor)
 {
-    uint32_t data;
-    float speed;
-    ModuleCmd_RequestMsg_t msg;
-    msg.id = REQUEST_MOTOR_GET_SPEED;
-    msg.param = (uint16_t)motor;
-    data = request(msg);
-    memcpy(&speed, &data, sizeof(float));
-    return speed;
+    std::vector<uint8_t> msgBytes = {CONTROL_MOTOR_GET_SPEED, (uint8_t)motor};
+    ctrlRequest(msgBytes);
+    float* speed = reinterpret_cast<float*>(&msgBytes[2]);
+    return *speed;
 }
 
 void StepperControl::resetHomePosition(MotorNum_t motor)
 {
-    ModuleCmd_RequestMsg_t msg;
-    msg.id = REQUEST_MOTOR_RESET_HOME_POSITION;
-    msg.param = (uint16_t)motor;
-    request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_MOTOR_RESET_HOME_POSITION, (uint8_t)motor};
+    ctrlRequest(msgBytes);
 }
 
 void StepperControl::stop(MotorNum_t motor, MotorStopMode_t mode)
 {
-    ModuleCmd_RequestMsg_t msg;
-    msg.id = REQUEST_MOTOR_STOP;
-    msg.param = (uint16_t)motor;
-    msg.data = (uint32_t)mode;
-    request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_MOTOR_STOP, (uint8_t)motor, (uint8_t)mode};
+    ctrlRequest(msgBytes);
 }
 
 void StepperControl::moveAbsolute(MotorNum_t motor, uint32_t position)
 {
-    ModuleCmd_RequestMsg_t msg;
-    msg.id = REQUEST_MOTOR_MOVE_ABSOLUTE;
-    msg.param = (uint16_t)motor;
-    msg.data = (uint32_t)position;
-    request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_MOTOR_MOVE_ABSOLUTE, (uint8_t)motor};
+    uint8_t* ptr = reinterpret_cast<uint8_t*>(&position);
+    msgBytes.insert(msgBytes.end(), ptr, ptr + sizeof(uint32_t));
+    ctrlRequest(msgBytes);
 }
 
 void StepperControl::moveRelative(MotorNum_t motor, int32_t position)
 {
-    ModuleCmd_RequestMsg_t msg;
-    msg.id = REQUEST_MOTOR_MOVE_RELATIVE;
-    msg.param = (uint16_t)motor;
-    msg.data = (uint32_t)position;
-    request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_MOTOR_MOVE_RELATIVE, (uint8_t)motor};
+    uint8_t* ptr = reinterpret_cast<uint8_t*>(&position);
+    msgBytes.insert(msgBytes.end(), ptr, ptr + sizeof(int32_t));
+    ctrlRequest(msgBytes);
 }
 
 void StepperControl::run(MotorNum_t motor, MotorDirection_t direction, float speed)
 {
-    ModuleCmd_RequestMsg_t msg;
-    msg.id = REQUEST_MOTOR_RUN;
-    msg.param = (uint16_t)((direction << 8) | motor);
-    memcpy(&msg.data, &speed, sizeof(uint32_t));
-    request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_MOTOR_RUN, (uint8_t)motor, (uint8_t)direction};
+    uint8_t* ptr = reinterpret_cast<uint8_t*>(&speed);
+    msgBytes.insert(msgBytes.end(), ptr, ptr + sizeof(float));
+    ctrlRequest(msgBytes);
 }
 
 bool StepperControl::isRunning(MotorNum_t motor)
 {
-    ModuleCmd_RequestMsg_t msg;
-    msg.id = REQUEST_MOTOR_IS_RUNNING;
-    msg.param = (uint16_t)motor;
-    return (bool)request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_MOTOR_IS_RUNNING, (uint8_t)motor};
+    ctrlRequest(msgBytes);
+    return static_cast<bool>(msgBytes[2]);
 }
 
 void StepperControl::homing(MotorNum_t motor, float speed)
 {
-    ModuleCmd_RequestMsg_t msg;
-    msg.id = REQUEST_MOTOR_HOMING;
-    msg.param = (uint16_t)motor;
-    memcpy(&msg.data, &speed, sizeof(uint32_t));
-    request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_MOTOR_HOMING, (uint8_t)motor};
+    uint8_t* ptr = reinterpret_cast<uint8_t*>(&speed);
+    msgBytes.insert(msgBytes.end(), ptr, ptr + sizeof(float));
+    ctrlRequest(msgBytes);
 }
 
 #endif

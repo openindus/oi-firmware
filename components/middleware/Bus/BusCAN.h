@@ -6,7 +6,7 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file BusCan.h
+ * @file BusCAN.h
  * @brief this class control the bus
  *
  * For more information on OpenIndus:
@@ -23,23 +23,19 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
 
-class BusCan
+class BusCAN
 {
 public:
 
     typedef struct __attribute__((__packed__)) {
-        uint32_t command : 8;
-        uint32_t unused : 24;
-        union {
-            uint32_t data;
-            uint8_t data_byte[4];
-        };
+        uint8_t cmd;
+        uint8_t data[7];
     } Frame_t;
 
     static void begin(gpio_num_t txNum, gpio_num_t rxNum);
     static void end(void);
-    static int write(Frame_t* frame, uint16_t id);
-    static int read(Frame_t* frame, uint16_t* id, TickType_t timeout);
+    static int write(Frame_t* frame, uint16_t id, uint8_t length = 8);
+    static int read(Frame_t* frame, uint16_t* id, uint8_t* length, TickType_t timeout = portMAX_DELAY);
 
 private:
 

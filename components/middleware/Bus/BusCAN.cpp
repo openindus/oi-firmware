@@ -6,28 +6,28 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file BusCan.c
+ * @file BusCAN.c
  * @brief this class control the bus
  *
  * For more information on OpenIndus:
  * @see https://openindus.com
  */
 
-#include "BusCan.h"
+#include "BusCAN.h"
 
-static const char BUS_TWAI_TAG[] = "Bus TWAI";
+static const char TAG[] = "BusCAN";
 
-SemaphoreHandle_t BusCan::_mutex;
+SemaphoreHandle_t BusCAN::_mutex;
 
 /**
  * @brief initialization of CAN communication
  * 
- * @param txNum 
- * @param rxNum 
+ * @param txNum pin
+ * @param rxNum pin
  */
-void BusCan::begin(gpio_num_t txNum, gpio_num_t rxNum)
+void BusCAN::begin(gpio_num_t txNum, gpio_num_t rxNum)
 {
-    ESP_LOGV(BUS_TWAI_TAG, "init");
+    ESP_LOGV(TAG, "init");
 
     _mutex = xSemaphoreCreateMutex();
     xSemaphoreGive(_mutex);
@@ -44,15 +44,15 @@ void BusCan::begin(gpio_num_t txNum, gpio_num_t rxNum)
     twai_filter_config_t f_config = TWAI_FILTER_CONFIG_ACCEPT_ALL();
 
     /* install TWAI driver */
-    ESP_LOGI(BUS_TWAI_TAG, "install twai driver");
+    ESP_LOGI(TAG, "install twai driver");
     ESP_ERROR_CHECK(twai_driver_install(&g_config, &t_config, &f_config));
 
     /* Start TWAI driver */
-    ESP_LOGI(BUS_TWAI_TAG, "start twai driver");
+    ESP_LOGI(TAG, "start twai driver");
     ESP_ERROR_CHECK(twai_start());
 
 #if !defined(DEBUG_BUS)
-    esp_log_level_set(BUS_TWAI_TAG, ESP_LOG_WARN);
+    esp_log_level_set(TAG, ESP_LOG_WARN);
 #endif
 
 }
@@ -60,16 +60,16 @@ void BusCan::begin(gpio_num_t txNum, gpio_num_t rxNum)
 /**
  * @brief deinitialization of CAN communication
  */
-void BusCan::end(void)
+void BusCAN::end(void)
 {
-    ESP_LOGV(BUS_TWAI_TAG, "deinit");
+    ESP_LOGV(TAG, "deinit");
 
     /* Stop TWAI driver */
-    ESP_LOGI(BUS_TWAI_TAG, "stop twai driver");
+    ESP_LOGI(TAG, "stop twai driver");
     ESP_ERROR_CHECK(twai_stop());
 
     /* uninstall twai driver */
-    ESP_LOGI(BUS_TWAI_TAG, "stop twai driver");
+    ESP_LOGI(TAG, "stop twai driver");
     ESP_ERROR_CHECK(twai_driver_uninstall());
 }
 
@@ -77,35 +77,36 @@ void BusCan::end(void)
  * @brief Write message on the CAN bus
  * 
  * @param frame 
- * @param id 
- * @return int 
+ * @param id identifier
+ * @param length data length
+ * @return error: -1, succed: 0
  */
-int BusCan::write(Frame_t* frame, uint16_t id)
+int BusCAN::write(Frame_t* frame, uint16_t id, uint8_t length)
 {
     esp_err_t err;
     twai_message_t msg = {
         .flags = 0,
         .identifier = id,
-        .data_length_code = 8,
+        .data_length_code = length,
         .data = {}
     };
-    memcpy(msg.data, frame, 8);
+    memcpy(msg.data, frame, length);
     xSemaphoreTake(_mutex, portMAX_DELAY);
     err = twai_transmit(&msg, pdMS_TO_TICKS(100)); 
     if (err != ESP_OK) {
         goto error;
     } else {
-        goto succeed;
+        goto success;
     }
 
 error:
     xSemaphoreGive(_mutex);
-    ESP_LOGE(BUS_TWAI_TAG, "Error in twai_transmit: %s", esp_err_to_name(err));
+    ESP_LOGE(TAG, "Error in twai_transmit: %s", esp_err_to_name(err));
     return -1;
-succeed:
+success:
     xSemaphoreGive(_mutex);
-    ESP_LOGI(BUS_TWAI_TAG, "WRITE - ID: %u | CMD: 0x%02X | DATA: 0x%08X", 
-        msg.identifier, frame->command, frame->data);
+    ESP_LOGI(TAG, "WRITE - ID: %u | DATA:", msg.identifier);
+    ESP_LOG_BUFFER_HEX_LEVEL(TAG, msg.data, msg.data_length_code, ESP_LOG_INFO);
     return 0;
 }
 
@@ -113,11 +114,12 @@ succeed:
  * @brief Read CAN message 
  * 
  * @param frame
- * @param id 
+ * @param id identifier
+ * @param length data length
  * @param timeout 
- * @return int 
+ * @return error: -1, succed: 0
  */
-int BusCan::read(Frame_t* frame, uint16_t* id, TickType_t timeout)
+int BusCAN::read(Frame_t* frame, uint16_t* id, uint8_t* length, TickType_t timeout)
 {
     esp_err_t err;
     twai_message_t msg;
@@ -127,17 +129,18 @@ int BusCan::read(Frame_t* frame, uint16_t* id, TickType_t timeout)
         goto error;
     } else {
         memcpy(frame, msg.data, sizeof(Frame_t));
-        *id = (uint16_t)msg.identifier;
-        goto succeed;
+        *id = msg.identifier;
+        *length = msg.data_length_code;
+        goto success;
     }    
 
 error:
     xSemaphoreGive(_mutex);
-    ESP_LOGE(BUS_TWAI_TAG, "Error in twai_receive: %s", esp_err_to_name(err));
+    ESP_LOGE(TAG, "Error in twai_receive: %s", esp_err_to_name(err));
     return -1;
-succeed:
+success:
     xSemaphoreGive(_mutex);
-    ESP_LOGI(BUS_TWAI_TAG, "RECV - ID: %u | CMD: 0x%02X | DATA: 0x%08X", 
-        msg.identifier, frame->command, frame->data);
+    ESP_LOGI(TAG, "READ - ID: %u | DATA:", msg.identifier);
+    ESP_LOG_BUFFER_HEX_LEVEL(TAG, msg.data, msg.data_length_code, ESP_LOG_INFO);
     return 0;
 }

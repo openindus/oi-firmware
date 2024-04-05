@@ -15,7 +15,7 @@
 
 #include "BusIO.h"
 
-static const char BUS_IO_TAG[] = "Bus IO";
+static const char BUS_IO_TAG[] = "BusIO";
 
 esp_adc_cal_characteristics_t* BusIO::_adcCharsId;
 BusIO::Config_t* BusIO::_config;

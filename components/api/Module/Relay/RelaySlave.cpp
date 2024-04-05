@@ -21,9 +21,8 @@ void RelaySlave::init(void)
 {
     ModuleSlave::init();
 
-    onRequest(REQUEST_DIGITAL_WRITE, [](ModuleCmd_RequestMsg_t msg) -> uint32_t {
-        RelayStandalone::digitalWrite((Relay_t)msg.param, (uint8_t)msg.data);
-        return 0;
+    addCtrlCallback(CONTROL_DIGITAL_WRITE, [](std::vector<uint8_t>& data) { 
+        RelayStandalone::digitalWrite((Relay_t)data[1], data[2]);
     });
 }
 
