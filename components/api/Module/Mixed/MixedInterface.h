@@ -66,6 +66,14 @@ public:
     virtual void digitalWrite(DigitalOutputNum_t num, uint8_t level) = 0;
 
     /**
+     * @brief Get the current of a digital output
+     * 
+     * @param num DOUT to drive
+     * @return float : current in A
+    **/
+    virtual float getCurrent(DigitalOutputNum_t num) = 0;
+
+    /**
      * @brief Set AdcMode of the current input
      * 
      * @param[in] num : Analog input
@@ -85,7 +93,7 @@ public:
      * @brief Set the voltage range of the current input
      * 
      * @param[in] num : Analog input
-     * @param[in] range : voltage range (0-10.24V, 0-5.12V, 0-2.56V or 0-1.28V)
+     * @param[in] range : voltage range (5: 0-10.24V, 6: 0-5.12V, 7: 0-2.56V or 8: 0-1.28V)
      */
     virtual void analogInputVoltageRange(AnalogInput_Num_t num, AnalogInput_VoltageRange_t range) = 0;
 
@@ -93,7 +101,7 @@ public:
      * @brief 
      * 
      * @param[in] num : Analog input
-     * @return uint8_t : range (0-10.24V, 0-5.12V, 0-2.56V or 0-1.28V)
+     * @return uint8_t : range (5: 0-10.24V, 6: 0-5.12V, 7: 0-2.56V or 8: 0-1.28V)
     **/
     virtual uint8_t analogInputGetVoltageRange(AnalogInput_Num_t num) = 0;
 
@@ -104,7 +112,7 @@ public:
      * @return int : Adc raw value
      */
     virtual int analogRead(AnalogInput_Num_t num) = 0;
-
+  
     /**
      * @brief Read a voltage measure on analog pin
      * 

@@ -202,7 +202,7 @@ void AnalogInputAds866x::setVoltageRange(AnalogInput_VoltageRange_t range)
 
 uint8_t AnalogInputAds866x::getVoltageRange(void)
 {
-    return (uint8_t)_voltage_range;
+    return ads866x_get_channel_voltage_range(_num);
 }
 
 gpio_num_t AnalogInputAds866x::getModePin(void)

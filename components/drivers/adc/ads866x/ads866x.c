@@ -252,24 +252,71 @@ uint8_t ads866x_get_feature_select(void)
 uint8_t ads866x_get_channel_voltage_range(uint8_t channel)
 {
     uint8_t reg = 0;
+    uint8_t ads866x_range = 0;
+    uint8_t range = 0;
 
     if (channel >= s_config->adc_channel_nb) {
         ESP_LOGE(ADS866x_TAG,"Invalid channel number");
         return -1;
     }
     reg = RG_CH_0 + channel;
+    ads866x_range = ads866x_spi_read_register(reg);
+    
+    switch (ads866x_range) {
+        case ADS866X_VOLTAGE_RANGE_0:
+        case ADS866X_VOLTAGE_RANGE_1:
+        case ADS866X_VOLTAGE_RANGE_2:
+        case ADS866X_VOLTAGE_RANGE_3:
+        case ADS866X_VOLTAGE_RANGE_5:
+        case ADS866X_VOLTAGE_RANGE_6:
+        case ADS866X_VOLTAGE_RANGE_7:
+            range = ads866x_range;
+            break;
+        case ADS866X_VOLTAGE_RANGE_4:
+            range = 4;
+            break;
+        case ADS866X_VOLTAGE_RANGE_8:
+            range = 8;
+            break;
+        default:
+            ESP_LOGE(ADS866x_TAG, "Invalid range");
+            break;
+    }
 
-    return ads866x_spi_read_register(reg);
+    return range;
 }
 
 void ads866x_set_channel_voltage_range(uint8_t channel, uint8_t range)
 {
     uint8_t reg = 0;
+    uint8_t ads866x_range = 0;
     if (channel >= s_config->adc_channel_nb) {
-        ESP_LOGE(ADS866x_TAG,"Invalid channel number");
+        ESP_LOGE(ADS866x_TAG, "Invalid channel number");
     }
+
+    switch (range) {
+        case 0:
+        case 1:
+        case 2:
+        case 3:
+        case 5:
+        case 6:
+        case 7:
+            ads866x_range = range;
+            break;
+        case 4:
+            ads866x_range = ADS866X_VOLTAGE_RANGE_4;
+            break;
+        case 8:
+            ads866x_range = ADS866X_VOLTAGE_RANGE_8;
+            break;
+        default:
+            ESP_LOGE(ADS866x_TAG, "Invalid range");
+            break;
+    }
+       
     reg = RG_CH_0 + channel;
-    ads866x_spi_write_register(reg, (range & 0x0F));
+    ads866x_spi_write_register(reg, (ads866x_range & 0x0F));
 }
 
 void ads866x_set_global_voltage_range(uint8_t range)

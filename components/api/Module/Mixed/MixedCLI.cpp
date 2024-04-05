@@ -161,13 +161,13 @@ int MixedCLI::_setAnalogVoltageRange(int argc, char **argv)
 
     switch (range_int)
     {
-    case 2:
+    case 6:
         range = AIN_VOLTAGE_RANGE_0_5V12;
         break;
-    case 3:
+    case 7:
         range = AIN_VOLTAGE_RANGE_0_2V56;
         break;
-    case 4:
+    case 8:
         range = AIN_VOLTAGE_RANGE_0_1V28;
         break;
     default:
@@ -183,7 +183,7 @@ int MixedCLI::_setAnalogVoltageRange(int argc, char **argv)
 void MixedCLI::_registerSetAnalogVoltageRange(void)
 {
     _setAnalogVoltageRangeArgs.ain = arg_int1(NULL, NULL, "<AIN>", "[1-4]");
-    _setAnalogVoltageRangeArgs.range = arg_int1(NULL, NULL, "<RANGE>", "1 = 0-10.24V, 2 = 0-5.12V, 3 = 0-2.56V, 4 = 0-1.28V");
+    _setAnalogVoltageRangeArgs.range = arg_int1(NULL, NULL, "<RANGE>", "5 = 0-10.24V, 6 = 0-5.12V, 7 = 0-2.56V, 8 = 0-1.28V");
     _setAnalogVoltageRangeArgs.end = arg_end(2);
 
     const esp_console_cmd_t cmd = {
