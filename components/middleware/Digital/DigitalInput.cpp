@@ -23,7 +23,7 @@ DigitalInput::DigitalInput(const gpio_num_t *gpio, int num)
 {
     _type = DIGITAL_INPUT_GPIO;
 
-    /* Save number of DOUT */
+    /* Save number of DIN */
     _num = num;
     
     /* Init memory and copy gpio numbers in _gpio_num table */

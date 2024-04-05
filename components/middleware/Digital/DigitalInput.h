@@ -65,7 +65,7 @@ public:
     ~DigitalInput();
 
     void init(void);
-    int getLevel(DigitalInputNum_t dout);
+    int getLevel(DigitalInputNum_t din);
 
     int read(DigitalInputNum_t din);
     void attachInterrupt(DigitalInputNum_t din, IsrCallback_t callback, InterruptMode_t mode, void* arg);
@@ -73,13 +73,13 @@ public:
 
 private:
 
-    /* Type of DOUT (gpio or ioex) */
+    /* Type of DIN (gpio or ioex) */
     DigitalInputType_t _type;
 
-    /* Number of DOUT */
+    /* Number of DIN */
     uint8_t _num; 
     
-    /* GPIO num for DOUT (can be initialized as esp gpio or ioexpander gpio)*/
+    /* GPIO num for DIN (can be initialized as esp gpio or ioexpander gpio)*/
     gpio_num_t* _gpio_num;
     ioex_num_t* _ioex_num;
 

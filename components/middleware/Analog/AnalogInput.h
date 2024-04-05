@@ -43,49 +43,53 @@ typedef enum {
     AIN_UNIT_UNDEFINED
 } AnalogInput_Unit_t;
 
-typedef struct {
-    AnalogInput_Mode_t mode[AIN_MAX];
-    gpio_num_t modePin[AIN_MAX];
-    AnalogInput_VoltageRange_t voltageRange[AIN_MAX];
-    ads866x_config_t* ads866xConfig;
-} AnalogInputAds866xConfig_t;
+typedef enum {
+    ANALOG_INPUT_ADS866X = 0,
+    ANALOG_INPUT_MAX
+} AnalogInputType_t;
 
-
-class AnalogInput
+class AnalogInputAds866x 
 {
 public:
 
-    AnalogInput(AnalogInput_Num_t num) : _num(num) {}
+    AnalogInputAds866x(uint8_t num, gpio_num_t cmdGpio, AnalogInput_VoltageRange_t range, AnalogInput_Mode_t mode);
 
-    virtual int read(void) = 0;
-    virtual void setVoltageRange(AnalogInput_VoltageRange_t range) = 0;
-    virtual uint8_t getVoltageRange(void) = 0;
-
-protected:
-
-    AnalogInput_Num_t _num;
-    static AnalogInput_VoltageRange_t _voltage_range[AIN_MAX];
-};
-
-class AnalogInputAds866x : public AnalogInput
-{
-public:
-
-    AnalogInputAds866x(AnalogInput_Num_t num) : AnalogInput(num) {}
-
-    static int init(AnalogInputAds866xConfig_t* config);
-
-    int read(void) override;
+    int read(void);
     float read(AnalogInput_Unit_t unit);
     void setMode(AnalogInput_Mode_t mode);
     uint8_t getMode(void);
-    void setVoltageRange(AnalogInput_VoltageRange_t range) override;
-    uint8_t getVoltageRange(void) override;
+    void setVoltageRange(AnalogInput_VoltageRange_t range);
+    uint8_t getVoltageRange(void);
+    gpio_num_t getModePin();
+
+protected:
+
+    int _num;
+    gpio_num_t _modePin;
+    AnalogInput_Mode_t _mode;
+    AnalogInput_VoltageRange_t _voltage_range;
+};
+
+class AnalogInputs
+{
+public:
+
+    AnalogInputs(const gpio_num_t* cmdGpio, uint8_t nb, ads866x_config_t *ads866xConfig, AnalogInput_VoltageRange_t range, AnalogInput_Mode_t mode);
+
+    int init(void);
+
+    int read(AnalogInput_Num_t num);
+    float read(AnalogInput_Num_t num, AnalogInput_Unit_t unit);
+    void setMode(AnalogInput_Num_t num, AnalogInput_Mode_t mode);
+    uint8_t getMode(AnalogInput_Num_t num);
+    void setVoltageRange(AnalogInput_Num_t num, AnalogInput_VoltageRange_t range);
+    uint8_t getVoltageRange(AnalogInput_Num_t num);
 
 private:
 
-    static gpio_num_t _modePin[AIN_MAX];
-    static AnalogInput_Mode_t _mode[AIN_MAX];
+    uint8_t _nb;
+    AnalogInputType_t _type;
 
-    static bool _deviceInitialized;
+    AnalogInputAds866x* _ains[AIN_MAX];
+    ads866x_config_t* _ads866xConfig;
 };

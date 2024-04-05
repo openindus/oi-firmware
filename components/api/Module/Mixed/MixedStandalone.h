@@ -58,7 +58,7 @@ private:
 
     static DigitalInput* _din;
     static DigitalOutput* _dout;
-    static AnalogInput* _ain[4];
+    static AnalogInputs* _ains;
     static AnalogOutput* _aout[2];
 
 };

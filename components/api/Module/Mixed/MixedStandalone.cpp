@@ -40,21 +40,32 @@ static const AdcNumChannel_t _doutAdcNumChannel[] = {
     MIXED_CHANNEL_DOUT_CURRENT_4
 };
 
+static const gpio_num_t _ainCmdGpio[] = {
+    MIXED_PIN_EANA_CMD_1,
+    MIXED_PIN_EANA_CMD_2,
+    MIXED_PIN_EANA_CMD_3,
+    MIXED_PIN_EANA_CMD_4
+};
+
+static ads866x_config_t adcSPIConfig = {
+    .spi_host = MIXED_SPI_HOST,
+    .spi_freq = MIXED_SPI_FREQ,
+    .spi_pin_cs = MIXED_ADC_PIN_CS,
+    .pin_rst = MIXED_ADC_PIN_RST,
+    .pin_alarm = MIXED_ADC_PIN_ALARM,
+    .adc_channel_nb = MIXED_ADC_NB
+};
+
 DigitalInput* MixedStandalone::_din = new DigitalInput(_dinGpio, 4);
 DigitalOutput* MixedStandalone::_dout = new DigitalOutput(_doutGpio, _doutAdcNumChannel, 4);
 
 /* Analog inputs instances */
-AnalogInput* MixedStandalone::_ain[MIXED_ADC_NB] = {
-    new AnalogInputAds866x(AIN_1),
-    new AnalogInputAds866x(AIN_2),
-    new AnalogInputAds866x(AIN_3),
-    new AnalogInputAds866x(AIN_4),
-};
+AnalogInputs* MixedStandalone::_ains = new AnalogInputs(_ainCmdGpio, 4, &adcSPIConfig, AIN_VOLTAGE_RANGE_0_10V24, AIN_MODE_VOLTAGE);
 
 /* Analog outputs instances */
 AnalogOutput* MixedStandalone::_aout[MIXED_DAC_NB] = {
     new AnalogOutputAD5413(AOUT_1),
-    new AnalogOutputAD5413(AOUT_2)  
+    new AnalogOutputAD5413(AOUT_2)
 };
 
 int MixedStandalone::init(void)
@@ -89,22 +100,7 @@ int MixedStandalone::init(void)
     }
 
     /* Initialize analog inputs */
-    ads866x_config_t adcSPIConfig = {
-        .spi_host = MIXED_SPI_HOST,
-        .spi_freq = MIXED_SPI_FREQ,
-        .spi_pin_cs = MIXED_ADC_PIN_CS,
-        .pin_rst = MIXED_ADC_PIN_RST,
-        .pin_alarm = MIXED_ADC_PIN_ALARM,
-        .adc_channel_nb = MIXED_ADC_NB
-    };
-
-    AnalogInputAds866xConfig_t adcConfig = {
-        .mode = {AIN_MODE_VOLTAGE, AIN_MODE_VOLTAGE, AIN_MODE_VOLTAGE, AIN_MODE_VOLTAGE},
-        .modePin = {MIXED_PIN_EANA_CMD_1, MIXED_PIN_EANA_CMD_2, MIXED_PIN_EANA_CMD_3, MIXED_PIN_EANA_CMD_4},
-        .voltageRange = {AIN_VOLTAGE_RANGE_0_10V24, AIN_VOLTAGE_RANGE_0_10V24, AIN_VOLTAGE_RANGE_0_10V24, AIN_VOLTAGE_RANGE_0_10V24},
-        .ads866xConfig = &adcSPIConfig
-    };
-    AnalogInputAds866x::init(&adcConfig);
+    _ains->init();
 
     /* Initialize analog outputs */
     ad5413_config_t dacConfig[] = {
@@ -159,53 +155,47 @@ float MixedStandalone::getCurrent(DigitalOutputNum_t num)
 /*******  Analog Inputs  *******/
 void MixedStandalone::analogInputMode(AnalogInput_Num_t num, AnalogInput_Mode_t mode)
 {
-    AnalogInputAds866x* ain = (AnalogInputAds866x*)_ain[num];
-    ain->setMode(mode);   
+    _ains->setMode(num, mode);   
 }
 
 uint8_t MixedStandalone::analogInputGetMode(AnalogInput_Num_t num)
 {
-    AnalogInputAds866x* ain = (AnalogInputAds866x*)_ain[num];
-    return ain->getMode();
+    return _ains->getMode(num);
 }
 
 void MixedStandalone::analogInputVoltageRange(AnalogInput_Num_t num, AnalogInput_VoltageRange_t range)
 {
-    _ain[num]->setVoltageRange(range);
+    _ains->setVoltageRange(num, range);
 }
 
 uint8_t MixedStandalone::analogInputGetVoltageRange(AnalogInput_Num_t num)
 {
-    return _ain[num]->getVoltageRange();
+    return _ains->getVoltageRange(num);
 }
 
 int MixedStandalone::analogRead(AnalogInput_Num_t num)
 {
-    return _ain[num]->read();
+    return _ains->read(num);
 }
 
 float MixedStandalone::analogReadVolt(AnalogInput_Num_t num)
 {
-    AnalogInputAds866x* ain = (AnalogInputAds866x*)_ain[num];
-    return ain->read(AIN_UNIT_VOLT);
+    return _ains->read(num, AIN_UNIT_VOLT);
 }
 
 float MixedStandalone::analogReadMilliVolt(AnalogInput_Num_t num)
 {
-    AnalogInputAds866x* ain = (AnalogInputAds866x*)_ain[num];
-    return ain->read(AIN_UNIT_MILLIVOLT);
+    return _ains->read(num, AIN_UNIT_MILLIVOLT);
 }
 
 float MixedStandalone::analogReadAmp(AnalogInput_Num_t num)
 {
-    AnalogInputAds866x* ain = (AnalogInputAds866x*)_ain[num];
-    return ain->read(AIN_UNIT_AMP);
+    return _ains->read(num, AIN_UNIT_AMP);
 }
 
 float MixedStandalone::analogReadMilliAmp(AnalogInput_Num_t num)
 {
-    AnalogInputAds866x* ain = (AnalogInputAds866x*)_ain[num];
-    return ain->read(AIN_UNIT_MILLIAMP);
+    return _ains->read(num, AIN_UNIT_MILLIAMP);
 }
 
 
