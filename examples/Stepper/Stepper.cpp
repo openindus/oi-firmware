@@ -4,7 +4,7 @@
 Core core;
 Stepper stepper;
 
-void printTask(void *pvParameters)
+void printTask(void*)
 {
     while (1)
     {    
@@ -13,9 +13,10 @@ void printTask(void *pvParameters)
     }
 }
 
-void setup() 
+void setup(void) 
 {
     Serial.begin(115200);
+
     /* Print task */
     xTaskCreatePinnedToCore(printTask, "Task to print parameters", 10000, NULL, 1, NULL, 0);
 
@@ -51,7 +52,7 @@ void setup()
     Serial.printf("position: %d\n", stepper.getPosition(MOTOR_1));
 }
 
-void loop() 
+void loop(void) 
 {
     delay(1000);
 }

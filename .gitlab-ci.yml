@@ -85,12 +85,11 @@ build:examples:
     - job: build:core
   script:
     - |
-      for f in examples/*.cpp; do
+      find examples/ -name "*.cpp" | while read -r f; do
         echo "Build $f"
         cat $f > main/main.cpp
         pio run -e core || { echo "Error: Build failed for $f"; exit 1; }
       done
-
   after_script:
     - git restore main/main.cpp
   rules:
@@ -106,6 +105,9 @@ pkg:library:
     - mkdir .oi/lib/
   script:
     - pio pkg pack --output=".oi/lib/"
+  artifacts:
+    paths:
+      - .oi/lib/
   rules:
     - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && 
       ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")'
