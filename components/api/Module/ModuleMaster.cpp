@@ -221,25 +221,31 @@ void ModuleMaster::_busTask(void *pvParameters)
         if (BusCAN::read(&frame, &id, &length) != -1) { 
             switch (frame.cmd)
             {
-            case CMD_EVENT:
-                if (ModuleControl::getEventCallbacks().find(std::make_pair(frame.data[0], id)) != ModuleControl::getEventCallbacks().end()) {
-                    for (auto it=ModuleControl::getEventCallbacks().begin(); it!=ModuleControl::getEventCallbacks().end(); it++) {
-                        if ((it->first.first == frame.data[0]) && 
-                            (it->first.second == id)) {
-                            (*it).second(frame.data[1]);
+                case CMD_EVENT:
+                {
+                    if (ModuleControl::getEventCallbacks().find(std::make_pair(frame.data[0], id)) != ModuleControl::getEventCallbacks().end()) {
+                        for (auto it=ModuleControl::getEventCallbacks().begin(); it!=ModuleControl::getEventCallbacks().end(); it++) {
+                            if ((it->first.first == frame.data[0]) && 
+                                (it->first.second == id)) {
+                                (*it).second(frame.data[1]);
+                            }
                         }
-                    }
-                } else {
-                    ESP_LOGW(MODULE_TAG, "Command does not exist: command: 0x%02x, id: %d", frame.data[0], id);
-                }                
-                break;
-            case CMD_DISCOVER:
-                _ids.insert(std::pair<int, int>(id, (int)frame.data));
-                break;
-            
-            default:
-                ESP_LOGW(MODULE_TAG, "Receive undefined command");
-                break;
+                    } else {
+                        ESP_LOGW(MODULE_TAG, "Command does not exist: command: 0x%02x, id: %d", frame.data[0], id);
+                    }                
+                    break;
+                }
+                case CMD_DISCOVER:
+                {
+                    int* sn = reinterpret_cast<int*>(frame.data);
+                    _ids.insert(std::pair<int, int>(id, *sn));
+                    break;
+                }
+                default:
+                {
+                    ESP_LOGW(MODULE_TAG, "Receive undefined command");
+                    break;
+                }
             }
         } else {
             ModuleStandalone::ledBlink(LED_RED, 1000); // Error

@@ -94,8 +94,8 @@ void ModuleSlave::_busTask(void *pvParameters)
                 BusCAN::Frame_t discoverFrame;
                 discoverFrame.cmd = CMD_DISCOVER;
                 int sn = ModuleStandalone::getSerialNum();
-                memcpy(frame.data, &sn, sizeof(int));
-                if (BusCAN::write(&discoverFrame, _id) == -1)
+                memcpy(discoverFrame.data, &sn, sizeof(int));
+                if (BusCAN::write(&discoverFrame, _id, sizeof(int)+1) == -1)
                     ModuleStandalone::ledBlink(LED_RED, 1000); // Error
                 break;
             }

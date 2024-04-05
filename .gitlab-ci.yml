@@ -81,16 +81,6 @@ build:relayhp:
 #   script:
 #     - pio run -e analogls 
 
-build:core-s1:
-  extends: .build
-  script:
-    - pio run -e core-s1 
-
-build:stepperve-s2:
-  extends: .build
-  script:
-    - pio run -e stepperve-s2 
-
 build:examples:
   stage: build:examples
   needs:
@@ -132,8 +122,6 @@ deploy:
     # - job: build:relaylp
     # - job: build:brushless
     # - job: build:analogls
-    - job: build:core-s1
-    - job: build:stepperve-s2
   script:
     - lftp $OVH_URI -e "mirror --reverse --verbose -R ./.oi/bin/ ./www/oi-content/bin/; quit" -u $OVH_USERNAME,$OVH_PASSWORD
   only:
