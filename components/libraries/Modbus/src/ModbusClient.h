@@ -25,6 +25,7 @@ extern "C" {
 }
 
 #include <Arduino.h>
+#undef DEC /** @todo Rename DEC in OpenIndus library */
 
 #define COILS             0
 #define DISCRETE_INPUTS   1

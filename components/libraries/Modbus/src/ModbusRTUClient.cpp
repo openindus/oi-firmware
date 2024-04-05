@@ -31,17 +31,10 @@ ModbusRTUClientClass::ModbusRTUClientClass() :
 {
 }
 
-#ifdef ARDUINO_RS485
-ModbusRTUClientClass::ModbusRTUClientClass(RS485Class& rs485) :
+ModbusRTUClientClass::ModbusRTUClientClass(OI::RS& rs485) :
   ModbusClient(1000),  _rs485(&rs485)
 {
 }
-#else
-ModbusRTUClientClass::ModbusRTUClientClass(OIRS& rs485) :
-  ModbusClient(1000),  _rs485(&rs485)
-{
-}
-#endif
 
 ModbusRTUClientClass::~ModbusRTUClientClass()
 {
@@ -58,18 +51,10 @@ int ModbusRTUClientClass::begin(unsigned long baudrate, uint32_t config)
   return 1;
 }
 
-#ifdef ARDUINO_RS485
-int ModbusRTUClientClass::begin(RS485Class& rs485, unsigned long baudrate, uint32_t config)
+int ModbusRTUClientClass::begin(OI::RS& rs485, unsigned long baudrate, uint32_t config)
 {
   _rs485 = &rs485;
   return begin(baudrate, config);
 }
-#else
-int ModbusRTUClientClass::begin(OIRS& rs485, unsigned long baudrate, uint32_t config)
-{
-  _rs485 = &rs485;
-  return begin(baudrate, config);
-}
-#endif
 
 ModbusRTUClientClass ModbusRTUClient;

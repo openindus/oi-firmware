@@ -74,10 +74,10 @@ build:relayhp:
 #   script:
 #     - pio run -e brushless 
 
-# build:analogls:
-#   extends: .build
-#   script:
-#     - pio run -e analogls 
+build:analogls:
+  extends: .build
+  script:
+    - pio run -e analogls 
 
 build:examples:
   stage: build:examples
@@ -116,7 +116,7 @@ deploy:
     - job: build:relayhp
     # - job: build:relaylp
     # - job: build:brushless
-    # - job: build:analogls
+    - job: build:analogls
   script:
     - lftp $OVH_URI -e "mirror --reverse --verbose -R ./.oi/bin/ ./www/oi-content/bin/; quit" -u $OVH_USERNAME,$OVH_PASSWORD
   only:
