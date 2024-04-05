@@ -74,15 +74,31 @@ public:
     virtual void analogInputMode(AnalogInput_Num_t num, AnalogInput_Mode_t mode) = 0;
 
     /**
+     * @brief 
+     * 
+     * @param[in] num 
+     * @return uint8_t : mode (0: voltage, 1: current)
+    **/
+    virtual uint8_t analogInputGetMode(AnalogInput_Num_t num) = 0;
+
+    /**
      * @brief Set the voltage range of the current input
      * 
      * @param[in] num : Analog input
-     * @param[in] range : 0-10.24V, 0-5.12V, 0-2.56V or 0-1.28V
+     * @param[in] range : voltage range (0-10.24V, 0-5.12V, 0-2.56V or 0-1.28V)
      */
     virtual void analogInputVoltageRange(AnalogInput_Num_t num, AnalogInput_VoltageRange_t range) = 0;
 
     /**
-     * @brief Read a voltage measure on analog pins
+     * @brief 
+     * 
+     * @param[in] num : Analog input
+     * @return uint8_t : range (0-10.24V, 0-5.12V, 0-2.56V or 0-1.28V)
+    **/
+    virtual uint8_t analogInputGetVoltageRange(AnalogInput_Num_t num) = 0;
+
+    /**
+     * @brief Read a voltage measure on analog pin
      * 
      * @param[in] num : Analog input
      * @return int : Adc raw value
@@ -90,20 +106,42 @@ public:
     virtual int analogRead(AnalogInput_Num_t num) = 0;
 
     /**
-     * @brief Read a voltage measure on analog pins
+     * @brief Read a voltage measure on analog pin
      * 
      * @param[in] num : Analog input
-     * @return float : Measure in specified units
+     * @return float : Measure in V
      */
-    virtual float analogReadMilliVolts(AnalogInput_Num_t num) = 0;
+    virtual float analogReadVolt(AnalogInput_Num_t num) = 0;
+
+    /**
+     * @brief Read a voltage measure on analog pin
+     * 
+     * @param[in] num : Analog input
+     * @return float : Measure in mV
+     */
+    virtual float analogReadMilliVolt(AnalogInput_Num_t num) = 0;
+
+    /**
+     * @brief Read a current measure on analog pin
+     * 
+     * @param[in] num : Analog input
+     * @return float : Measure in A
+     */
+    virtual float analogReadAmp(AnalogInput_Num_t num) = 0;
+
+    /**
+     * @brief Read a current measure on analog pin
+     * 
+     * @param[in] num : Analog input
+     * @return float : Measure in mA
+     */
+    virtual float analogReadMilliAmp(AnalogInput_Num_t num) = 0;
 
     /**
      * @brief Configure analog output mode
      * 
      * @param num Analog output num
-     * @param mode mode: 
-     * MODE_M10V5_10V5
-     * MODE_0mA_20mA
+     * @param mode mode: (+/- 10.5V, 0-20mA)
      */
     virtual void analogOutputMode(AnalogOutput_Num_t num, AnalogOutput_Mode_t mode) = 0;
 

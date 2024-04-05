@@ -104,7 +104,7 @@ uint16_t ads866x_analog_read(uint8_t channel)
     if (s_device_configured) {
         if (channel < s_config->adc_channel_nb) {
             // Active channel
-            Ads866x_setChannelSPD(1 << channel);
+            ads866x_set_channel_SPD(1 << channel);
             // Change mode of Ads866x
             ads866x_auto_reset();
 

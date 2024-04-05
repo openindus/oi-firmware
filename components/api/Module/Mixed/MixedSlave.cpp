@@ -48,16 +48,12 @@ int MixedSlave::init(void)
         _mixed->detachInterrupt((DigitalInputNum_t)data[1]);
     });
 
-    addCtrlCallback(CONTROL_ANALOG_READ, [](std::vector<uint8_t>& data) {
-        int value = _mixed->analogRead((AnalogInput_Num_t)data[1]);
-        uint8_t* ptr = reinterpret_cast<uint8_t*>(&value);
-        data.insert(data.end(), ptr, ptr + sizeof(int));
+    onRequest(REQUEST_ANALOG_READ, [](ModuleCmd_RequestMsg_t msg) -> uint32_t {
+        return _mixed->analogRead((AnalogInput_Num_t)msg.param);
     });
 
-    addCtrlCallback(CONTROL_ANALOG_READ_MILLIVOLTS, [](std::vector<uint8_t>& data) {
-        float_t value = _mixed->analogReadMilliVolts((AnalogInput_Num_t)data[1]);
-        uint8_t* ptr = reinterpret_cast<uint8_t*>(&value);
-        data.insert(data.end(), ptr, ptr + sizeof(float));
+    onRequest(REQUEST_ANALOG_READ_MILLIVOLT, [](ModuleCmd_RequestMsg_t msg) -> uint32_t { 
+        return _mixed->analogReadMilliVolt((AnalogInput_Num_t)msg.param);
     });
 
     addCtrlCallback(CONTROL_ANALOG_INPUT_MODE, [](std::vector<uint8_t>& data) {

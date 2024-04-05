@@ -84,15 +84,10 @@ int MixedControl::analogRead(AnalogInput_Num_t num)
 
 float MixedControl::analogReadMilliVolts(AnalogInput_Num_t num)
 {
-    std::vector<uint8_t> msgBytes = {CONTROL_ANALOG_READ_MILLIVOLTS, (uint8_t)num};
-    ctrlRequest(msgBytes);
-    float* ret = reinterpret_cast<float*>(&msgBytes[2]);
-    return *ret;
-}
-
-float MixedControl::analogReadMilliAmps(AnalogInput_Num_t num)
-{
-    return 0.0;
+    ModuleCmd_RequestMsg_t msg;
+    msg.id = REQUEST_ANALOG_READ_MILLIVOLT;
+    msg.param = (uint16_t)num;
+    return request(msg);
 }
 
 void MixedControl::analogOutputMode(AnalogOutput_Num_t num, AnalogOutput_Mode_t mode)

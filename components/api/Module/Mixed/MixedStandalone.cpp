@@ -89,20 +89,20 @@ int MixedStandalone::init(void)
     }
 
     /* Initialize analog inputs */
-    AnalogInputAds866xConfig_t adcSPIConfig = {
+    ads866x_config_t adcSPIConfig = {
         .spi_host = MIXED_SPI_HOST,
         .spi_freq = MIXED_SPI_FREQ,
         .spi_pin_cs = MIXED_ADC_PIN_CS,
         .pin_rst = MIXED_ADC_PIN_RST,
         .pin_alarm = MIXED_ADC_PIN_ALARM,
-        .adc_analogs_nb = MIXED_ADC_NB,
-    }
+        .adc_channel_nb = MIXED_ADC_NB
+    };
 
     AnalogInputAds866xConfig_t adcConfig = {
+        .mode = {AIN_MODE_VOLTAGE, AIN_MODE_VOLTAGE, AIN_MODE_VOLTAGE, AIN_MODE_VOLTAGE},
         .modePin = {MIXED_PIN_EANA_CMD_1, MIXED_PIN_EANA_CMD_2, MIXED_PIN_EANA_CMD_3, MIXED_PIN_EANA_CMD_4},
-        .adc_res = 0,
-        .adc_mode = {AIN_MODE_VOLTAGE, AIN_MODE_VOLTAGE, AIN_MODE_VOLTAGE, AIN_MODE_VOLTAGE},
-        .adc_range = {AIN_VOLTAGE_RANGE_0_10V24, AIN_VOLTAGE_RANGE_0_10V24, AIN_VOLTAGE_RANGE_0_10V24, AIN_VOLTAGE_RANGE_0_10V24},
+        .voltageRange = {AIN_VOLTAGE_RANGE_0_10V24, AIN_VOLTAGE_RANGE_0_10V24, AIN_VOLTAGE_RANGE_0_10V24, AIN_VOLTAGE_RANGE_0_10V24},
+        .ads866xConfig = &adcSPIConfig
     };
     AnalogInputAds866x::init(&adcConfig);
 
@@ -159,44 +159,55 @@ float MixedStandalone::getCurrent(DigitalOutputNum_t num)
 /*******  Analog Inputs  *******/
 void MixedStandalone::analogInputMode(AnalogInput_Num_t num, AnalogInput_Mode_t mode)
 {
-    if (num < MIXED_ADC_NB) {
-        _ain[num]->setMode(mode);
-    } else {
-        ESP_LOGE(TAG, "Invalid Analog input num");
-    }    
+    AnalogInputAds866x* ain = (AnalogInputAds866x*)_ain[num];
+    ain->setMode(mode);   
+}
+
+uint8_t MixedStandalone::analogInputGetMode(AnalogInput_Num_t num)
+{
+    AnalogInputAds866x* ain = (AnalogInputAds866x*)_ain[num];
+    return ain->getMode();
 }
 
 void MixedStandalone::analogInputVoltageRange(AnalogInput_Num_t num, AnalogInput_VoltageRange_t range)
 {
-    if (num < MIXED_ADC_NB) {
-        _ain[num]->setVoltageRange(range);
-    } else {
-        ESP_LOGE(TAG, "Invalid Analog input num");
-    }    
+    _ain[num]->setVoltageRange(range);
 }
 
+uint8_t MixedStandalone::analogInputGetVoltageRange(AnalogInput_Num_t num)
+{
+    return _ain[num]->getVoltageRange();
+}
 
 int MixedStandalone::analogRead(AnalogInput_Num_t num)
 {
-    int value = 0;
-    if (num < MIXED_ADC_NB) {
-        value = _ain[num]->read();
-    } else {
-        ESP_LOGE(TAG, "Invalid Analog input num");
-    }
-    return value;
+    return _ain[num]->read();
 }
 
-float MixedStandalone::analogReadMilliVolts(AnalogInput_Num_t num)
+float MixedStandalone::analogReadVolt(AnalogInput_Num_t num)
 {
-    float value = 0;
-    if (num < MIXED_ADC_NB) {
-        value = _ain[num]->read(AIN_UNIT_MILLIVOLTS);
-    } else {
-        ESP_LOGE(TAG, "Invalid Analog input num");
-    }
-    return value;
+    AnalogInputAds866x* ain = (AnalogInputAds866x*)_ain[num];
+    return ain->read(AIN_UNIT_VOLT);
 }
+
+float MixedStandalone::analogReadMilliVolt(AnalogInput_Num_t num)
+{
+    AnalogInputAds866x* ain = (AnalogInputAds866x*)_ain[num];
+    return ain->read(AIN_UNIT_MILLIVOLT);
+}
+
+float MixedStandalone::analogReadAmp(AnalogInput_Num_t num)
+{
+    AnalogInputAds866x* ain = (AnalogInputAds866x*)_ain[num];
+    return ain->read(AIN_UNIT_AMP);
+}
+
+float MixedStandalone::analogReadMilliAmp(AnalogInput_Num_t num)
+{
+    AnalogInputAds866x* ain = (AnalogInputAds866x*)_ain[num];
+    return ain->read(AIN_UNIT_MILLIAMP);
+}
+
 
 /*******  Analog Outputs  *******/
 void MixedStandalone::analogOutputMode(AnalogOutput_Num_t num, AnalogOutput_Mode_t mode)

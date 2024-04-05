@@ -211,7 +211,7 @@ int MixedCLI::_analogReadVoltage(int argc, char **argv)
 
     AnalogInput_Num_t ain = (AnalogInput_Num_t)(_analogReadVoltageArgs.ain->ival[0] - 1);
 
-    printf("%.3f\n", _mixed->analogReadMilliVolts(ain));
+    printf("%.3f\n", _mixed->analogReadMilliVolt(ain));
 
     return 0;
 }
