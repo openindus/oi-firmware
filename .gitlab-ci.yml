@@ -64,10 +64,10 @@ build:relayhp:
   script:
     - pio run -e relayhp 
 
-# build:relaylp:
-#   extends: .build
-#   script:
-#     - pio run -e relaylp 
+build:relaylp:
+  extends: .build
+  script:
+    - pio run -e relaylp 
 
 # build:brushless:
 #   extends: .build
@@ -84,7 +84,13 @@ build:examples:
   needs:
     - job: build:core
   script:
-    - ./scripts/build_examples.sh
+    - |
+      for f in examples/*.cpp; do
+        echo "Build $f"
+        cat $f > main/main.cpp
+        pio run -e core || { echo "Error: Build failed for $f"; exit 1; }
+      done
+
   after_script:
     - git restore main/main.cpp
   rules:
@@ -114,7 +120,7 @@ deploy:
     # - job: build:stepperve
     - job: build:mixed
     - job: build:relayhp
-    # - job: build:relaylp
+    - job: build:relaylp
     # - job: build:brushless
     - job: build:analogls
   script:
