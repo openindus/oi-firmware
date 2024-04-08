@@ -127,7 +127,7 @@ typedef struct
 
 
 /**
- * @brief Initializes ads866x driver
+ * @brief Initialize ads866x driver
  * @param[in] config : Device configuration
  * @retval 0
  */

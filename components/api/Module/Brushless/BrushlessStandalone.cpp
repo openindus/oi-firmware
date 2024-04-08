@@ -46,9 +46,9 @@ void BrushlessStandalone::init(void)
 
     /* Init DOUT */
     gpio_config_t doutConf = BRUSHLESS_CONFIG_DOUT_DEFAULT();
-    DigitalOutput::init(&doutConf, _doutNum);
+    DigitalOutputs::init(&doutConf, _doutNum);
 
-    DigitalOutput::digitalWrite(DOUT_1,1);
+    DigitalOutputs::digitalWrite(DOUT_1,1);
     vTaskDelay(50 / portTICK_PERIOD_MS);
 }
 

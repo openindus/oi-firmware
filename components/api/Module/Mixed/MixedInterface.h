@@ -16,9 +16,9 @@
 #pragma once
 
 #include "Global.h"
-#include "DigitalInput.h"
-#include "DigitalOutput.h"
-#include "AnalogInput.h"
+#include "DigitalInputs.h"
+#include "DigitalOutputs.h"
+#include "AnalogInputs.h"
 #include "AnalogOutput.h"
 
 class MixedInterface

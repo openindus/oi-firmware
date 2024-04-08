@@ -1,49 +1,37 @@
 /**
- * @file AnalogInput.cpp
+ * @file AnalogInputs.cpp
  * @brief Analog Input
  * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
  * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
 
-#include "AnalogInput.h"
+#include "AnalogInputs.h"
 
 static const char TAG[] = "AnalogInputs";
 
-AnalogInputs::AnalogInputs(const gpio_num_t* cmdGpio, uint8_t nb, ads866x_config_t *ads866xConfig, AnalogInput_VoltageRange_t range, AnalogInput_Mode_t mode)
+AnalogInputs::AnalogInputs(const gpio_num_t* cmdGpio, uint8_t nb)
 {
     for (size_t i = 0; i < nb; i++) {
-        _ains[i] = new AnalogInputAds866x(i, cmdGpio[i], range, mode);
+        _ains[i] = new AnalogInputAds866x(i, cmdGpio[i]);
     }
     _nb = nb;
     _type = ANALOG_INPUT_ADS866X;
-    _ads866xConfig = ads866xConfig;
 }
 
-int AnalogInputs::init(void) {
+int AnalogInputs::init(ads866x_config_t *ads866xConfig, AnalogInput_VoltageRange_t range, AnalogInput_Mode_t mode) {
     ESP_LOGI(TAG, "Initialize Analog Inputs");
 
     if (_type == ANALOG_INPUT_ADS866X) {
-        if (_ads866xConfig == NULL) {
+        if (ads866xConfig == NULL) {
             ESP_LOGE(TAG, "No configuration");
             return -1;
         }
 
-        /** Set mosfet state according to the chosen mode */
-        for (size_t i = 0; i < _nb; i++)
-        {        
-            if (_ains[i]->getMode() != AIN_MODE_VOLTAGE || _ains[i]->getMode() != AIN_MODE_CURRENT) {
-                ESP_LOGE(TAG, "Invalid mode");
-                return -1;
-            } else {
-                gpio_set_level(_ains[i]->getModePin(), _ains[i]->getMode());
-            }
-        }
-
-        ads866x_init(_ads866xConfig);
+        ads866x_init(ads866xConfig);
 
         for (size_t i = 0; i < _nb; i++) {
-            _ains[i]->setVoltageRange((AnalogInput_VoltageRange_t)_ains[i]->getVoltageRange());
+            _ains[i]->init(range, mode);
         }
         return 0;
     }
@@ -99,26 +87,32 @@ uint8_t AnalogInputs::getVoltageRange(AnalogInput_Num_t num)
 
 /******************* Analog Input Ads866x **********************/
 
-AnalogInputAds866x::AnalogInputAds866x(uint8_t num, gpio_num_t cmdGpio, AnalogInput_VoltageRange_t range, AnalogInput_Mode_t mode)
+AnalogInputAds866x::AnalogInputAds866x(uint8_t num, gpio_num_t cmdGpio)
 {
     if (num >= AIN_MAX) {
         ESP_LOGE(TAG, "Invalid Analog Input Number");
     } else {
         _num = num;
     }
-    if (mode != AIN_MODE_VOLTAGE || mode != AIN_MODE_CURRENT) {
-        ESP_LOGE(TAG, "Invalid mode");
-    } else {
-        _mode = mode;
-    }
-    if (range >= AIN_VOLTAGE_RANGE_UNDEFINED) {
-        ESP_LOGE(TAG, "Invalid Voltage Range");
-    } else {
-        _voltage_range = range;
-    }
     _modePin = cmdGpio;
 }
 
+void AnalogInputAds866x::init(AnalogInput_VoltageRange_t range, AnalogInput_Mode_t mode)
+{
+    gpio_config_t cfg;
+        
+    /* Configure Cmd pin */
+    cfg.pin_bit_mask = (1ULL << _modePin);
+    cfg.mode = GPIO_MODE_OUTPUT;
+    cfg.pull_up_en = GPIO_PULLUP_DISABLE;
+    cfg.pull_down_en = GPIO_PULLDOWN_DISABLE;
+    cfg.intr_type = GPIO_INTR_DISABLE;
+
+    ESP_ERROR_CHECK(gpio_config(&cfg));
+    
+    setMode(mode);
+    setVoltageRange(range);
+}
 
 int AnalogInputAds866x::read(void)
 {
@@ -168,7 +162,7 @@ float AnalogInputAds866x::read(AnalogInput_Unit_t unit)
 
 void AnalogInputAds866x::setMode(AnalogInput_Mode_t mode)
 {
-    if (_mode != AIN_MODE_VOLTAGE || _mode != AIN_MODE_CURRENT) {
+    if (mode != AIN_MODE_VOLTAGE && mode != AIN_MODE_CURRENT) {
             ESP_LOGE(TAG, "Invalid mode");
     } else {
         _mode = mode;
@@ -191,12 +185,12 @@ void AnalogInputAds866x::setVoltageRange(AnalogInput_VoltageRange_t range)
             ads866x_set_channel_voltage_range(_num, _voltage_range);
         }
     }
-    else if (range == AIN_VOLTAGE_RANGE_0_10V24 || range == AIN_VOLTAGE_RANGE_0_5V12
-            || range == AIN_VOLTAGE_RANGE_0_2V56 || range == AIN_VOLTAGE_RANGE_0_1V28) {
+    else if (_mode == AIN_MODE_VOLTAGE && (range == AIN_VOLTAGE_RANGE_0_10V24 || range == AIN_VOLTAGE_RANGE_0_5V12
+            || range == AIN_VOLTAGE_RANGE_0_2V56 || range == AIN_VOLTAGE_RANGE_0_1V28)) {
         _voltage_range = range;
         ads866x_set_channel_voltage_range(_num, _voltage_range);
     } else {
-        ESP_LOGE(TAG, "Undefined range");
+        ESP_LOGE(TAG, "Undefined range or mode %d", _mode);
     }
 }
 

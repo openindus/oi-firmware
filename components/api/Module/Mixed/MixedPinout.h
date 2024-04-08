@@ -39,7 +39,7 @@
 #define MIXED_PIN_EANA_CMD_1            GPIO_NUM_16
 #define MIXED_PIN_EANA_CMD_2            GPIO_NUM_18
 #define MIXED_PIN_EANA_CMD_3            GPIO_NUM_20
-#define MIXED_PIN_EANA_CMD_4            GPIO_NUM_21
+#define MIXED_PIN_EANA_CMD_4            GPIO_NUM_26
 
 /* SPI */
 #define MIXED_SPI_HOST                  SPI2_HOST

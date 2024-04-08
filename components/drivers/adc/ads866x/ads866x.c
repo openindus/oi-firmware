@@ -19,7 +19,7 @@ static void ads866x_gpio_init(void)
     if (s_device_configured == true) {
         gpio_config_t cfg;
             
-        ESP_LOGI(ADS866x_TAG, "Initializes Ads866x GPIOs");
+        ESP_LOGI(ADS866x_TAG, "Initialize Ads866x GPIOs");
 
         /* Configure Rst pin */
         cfg.pin_bit_mask = (1ULL << s_config->pin_rst);
@@ -51,7 +51,7 @@ static void ads866x_gpio_init(void)
 static void ads866x_spi_init(void)
 {
     if (s_spi_initialized == false) {
-        ESP_LOGI(ADS866x_TAG, "Initializes the Ads866x device on the SPI bus");
+        ESP_LOGI(ADS866x_TAG, "Initialize the Ads866x device on the SPI bus");
 
         if (s_device_configured == true) {
             assert(s_config != NULL);

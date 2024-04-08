@@ -56,8 +56,8 @@ public:
 
 private:
 
-    static DigitalInput* _din;
-    static DigitalOutput* _dout;
+    static DigitalInputs* _dins;
+    static DigitalOutputs* _douts;
     static AnalogInputs* _ains;
     static AnalogOutput* _aout[2];
 

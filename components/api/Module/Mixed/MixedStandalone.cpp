@@ -56,11 +56,11 @@ static ads866x_config_t adcSPIConfig = {
     .adc_channel_nb = MIXED_ADC_NB
 };
 
-DigitalInput* MixedStandalone::_din = new DigitalInput(_dinGpio, 4);
-DigitalOutput* MixedStandalone::_dout = new DigitalOutput(_doutGpio, _doutAdcNumChannel, 4);
+DigitalInputs* MixedStandalone::_dins = new DigitalInputs(_dinGpio, 4);
+DigitalOutputs* MixedStandalone::_douts = new DigitalOutputs(_doutGpio, _doutAdcNumChannel, 4);
 
 /* Analog inputs instances */
-AnalogInputs* MixedStandalone::_ains = new AnalogInputs(_ainCmdGpio, 4, &adcSPIConfig, AIN_VOLTAGE_RANGE_0_10V24, AIN_MODE_VOLTAGE);
+AnalogInputs* MixedStandalone::_ains = new AnalogInputs(_ainCmdGpio, 4);
 
 /* Analog outputs instances */
 AnalogOutput* MixedStandalone::_aout[MIXED_DAC_NB] = {
@@ -73,10 +73,10 @@ int MixedStandalone::init(void)
     ModuleStandalone::init();
 
     /* Initialize digital inputs */
-    _din->init();
+    _dins->init();
 
     /* Initialize digital outputs */
-    _dout->init();
+    _douts->init();
 
     /* Initialize the SPI bus */
     spi_bus_config_t busConfig = {
@@ -100,7 +100,7 @@ int MixedStandalone::init(void)
     }
 
     /* Initialize analog inputs */
-    _ains->init();
+    _ains->init(&adcSPIConfig, AIN_VOLTAGE_RANGE_0_10V24, AIN_MODE_VOLTAGE);
 
     /* Initialize analog outputs */
     ad5413_config_t dacConfig[] = {
@@ -117,29 +117,29 @@ int MixedStandalone::init(void)
 /*******  Digital Inputs *******/
 int MixedStandalone::digitalRead(DigitalInputNum_t num)
 {
-    return _din->read(num);
+    return _dins->read(num);
 }
 
 void MixedStandalone::attachInterrupt(DigitalInputNum_t num, IsrCallback_t callback, 
     InterruptMode_t mode, void* arg)
 {
-    _din->attachInterrupt(num, callback, mode, arg);
+    _dins->attachInterrupt(num, callback, mode, arg);
 }
 
 void MixedStandalone::detachInterrupt(DigitalInputNum_t num)
 {
-    _din->detachInterrupt(num);
+    _dins->detachInterrupt(num);
 }
 
 /*******  Digital Outputs *******/
 void MixedStandalone::digitalWrite(DigitalOutputNum_t num, uint8_t level)
 {
-    _dout->write(num, level);
+    _douts->write(num, level);
 }
 
 void MixedStandalone::digitalToggle(DigitalOutputNum_t num)
 {
-    _dout->toggle(num);
+    _douts->toggle(num);
 }
 
 void MixedStandalone::analogWrite(DigitalOutputNum_t num, uint8_t duty)
@@ -149,7 +149,7 @@ void MixedStandalone::analogWrite(DigitalOutputNum_t num, uint8_t duty)
 
 float MixedStandalone::getCurrent(DigitalOutputNum_t num)
 {
-    return _dout->getCurrent(num);
+    return _douts->getCurrent(num);
 }
 
 /*******  Analog Inputs  *******/

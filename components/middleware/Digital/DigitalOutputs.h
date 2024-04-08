@@ -6,7 +6,7 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file DigitalOutput.h
+ * @file DigitalOutputs.h
  * @brief Functions for DOUT
  *
  * For more information on OpenIndus:
@@ -59,14 +59,14 @@ typedef struct {
     adc_channel_t channel;
 } AdcNumChannel_t;
 
-class DigitalOutput
+class DigitalOutputs
 {
 public:
 
-    DigitalOutput(const gpio_num_t *gpio, const AdcNumChannel_t *adc, int num);
-    DigitalOutput(const gpio_num_t *gpio, const adc_channel_t *adc, int num);
-    DigitalOutput(ioex_device_t **ioex, const ioex_num_t *ioex_num, const ioex_num_t *current_num, int num);
-    ~DigitalOutput();
+    DigitalOutputs(const gpio_num_t *gpio, const AdcNumChannel_t *adc, int num);
+    DigitalOutputs(const gpio_num_t *gpio, const adc_channel_t *adc, int num);
+    DigitalOutputs(ioex_device_t **ioex, const ioex_num_t *ioex_num, const ioex_num_t *current_num, int num);
+    ~DigitalOutputs();
 
     void init();
     void setLevel(DigitalOutputNum_t dout, uint8_t level);

@@ -49,8 +49,8 @@ const adc1_channel_t _ainChannel[] = {
 ioex_device_t* CoreStandalone::_ioex;
 esp_adc_cal_characteristics_t CoreStandalone::_adc1Characteristics;
 
-DigitalInput* CoreStandalone::din = new DigitalInput(&_ioex, _dinGpio, 4);
-DigitalOutput* CoreStandalone::dout = new DigitalOutput(&_ioex, _doutGpio, _doutCurrentGpio, 4);
+DigitalInputs* CoreStandalone::din = new DigitalInputs(&_ioex, _dinGpio, 4);
+DigitalOutputs* CoreStandalone::dout = new DigitalOutputs(&_ioex, _doutGpio, _doutCurrentGpio, 4);
 
 OI::CAN CoreStandalone::can(CORE_SPI_USER_HOST, CORE_PIN_CAN_SPI_CS, CORE_PIN_CAN_INTERRUPT);
 OI::RS CoreStandalone::rs(CORE_SPI_USER_HOST, CORE_PIN_RS_SPI_CS, CORE_PIN_RS_INTERRUPT);

@@ -6,19 +6,19 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file DigitalOutput.c
+ * @file DigitalOutputs.c
  * @brief Functions for DOUT
  *
  * For more information on OpenIndus:
  * @see https://openindus.com
  */
 
-#include "DigitalOutput.h"
+#include "DigitalOutputs.h"
 
-static const char DOUT_TAG[] = "DigitalOutput";
+static const char DOUT_TAG[] = "DigitalOutputs";
 static SemaphoreHandle_t _mutex;
 
-DigitalOutput::DigitalOutput(const gpio_num_t *gpio, const AdcNumChannel_t *adc, int num) 
+DigitalOutputs::DigitalOutputs(const gpio_num_t *gpio, const AdcNumChannel_t *adc, int num) 
 {
     _type = DIGITAL_OUTPUT_GPIO;
 
@@ -37,7 +37,7 @@ DigitalOutput::DigitalOutput(const gpio_num_t *gpio, const AdcNumChannel_t *adc,
     _doutLevel = (uint8_t*) calloc(num, sizeof(uint8_t));
 }
 
-DigitalOutput::DigitalOutput(const gpio_num_t *gpio, const adc_channel_t *adc, int num) 
+DigitalOutputs::DigitalOutputs(const gpio_num_t *gpio, const adc_channel_t *adc, int num) 
 {
     _type = DIGITAL_OUTPUT_GPIO;
 
@@ -59,7 +59,7 @@ DigitalOutput::DigitalOutput(const gpio_num_t *gpio, const adc_channel_t *adc, i
     _doutLevel = (uint8_t*) calloc(num, sizeof(uint8_t));
 }
 
-DigitalOutput::DigitalOutput(ioex_device_t **ioex, const ioex_num_t *ioex_num, const ioex_num_t *ioex_current, int num)
+DigitalOutputs::DigitalOutputs(ioex_device_t **ioex, const ioex_num_t *ioex_num, const ioex_num_t *ioex_current, int num)
 {
     _type = DIGITAL_OUTPUT_IOEX;
 
@@ -81,7 +81,7 @@ DigitalOutput::DigitalOutput(ioex_device_t **ioex, const ioex_num_t *ioex_num, c
     _doutLevel = (uint8_t*) calloc(num, sizeof(uint8_t));
 }
 
-DigitalOutput::~DigitalOutput()
+DigitalOutputs::~DigitalOutputs()
 {
     if (_type == DIGITAL_OUTPUT_GPIO) {
         free(_gpio_num);
@@ -93,7 +93,7 @@ DigitalOutput::~DigitalOutput()
     free(_doutLevel);
 }
 
-void DigitalOutput::init()
+void DigitalOutputs::init()
 {
     if (_type == DIGITAL_OUTPUT_GPIO) {
         /* Init DOUT */
@@ -167,7 +167,7 @@ void DigitalOutput::init()
     xTaskCreate(_controlTask, "Control task", 4096, this, 1, NULL);
 }
 
-void DigitalOutput::setLevel(DigitalOutputNum_t dout, uint8_t level)
+void DigitalOutputs::setLevel(DigitalOutputNum_t dout, uint8_t level)
 {
     if (_type == DIGITAL_OUTPUT_GPIO) {
         gpio_set_level(_gpio_num[dout], level);
@@ -176,12 +176,12 @@ void DigitalOutput::setLevel(DigitalOutputNum_t dout, uint8_t level)
     }
 }
 
-void DigitalOutput::setAll(uint8_t level)
+void DigitalOutputs::setAll(uint8_t level)
 {
     /** @todo */
 }
 
-int DigitalOutput::getLevel(DigitalOutputNum_t dout)
+int DigitalOutputs::getLevel(DigitalOutputNum_t dout)
 {
     if (_type == DIGITAL_OUTPUT_GPIO) {
         return gpio_get_level(_gpio_num[dout]);
@@ -190,7 +190,7 @@ int DigitalOutput::getLevel(DigitalOutputNum_t dout)
     }
 }
 
-void DigitalOutput::write(DigitalOutputNum_t dout, uint8_t level)
+void DigitalOutputs::write(DigitalOutputNum_t dout, uint8_t level)
 {
     if (dout < _num) {
         // Store level 
@@ -204,7 +204,7 @@ void DigitalOutput::write(DigitalOutputNum_t dout, uint8_t level)
     }
 }
 
-void DigitalOutput::toggle(DigitalOutputNum_t dout)
+void DigitalOutputs::toggle(DigitalOutputNum_t dout)
 {
     int level;
     if (dout < _num) {
@@ -226,7 +226,7 @@ void blink(DigitalOutputNum_t dout)
     /** @todo */
 }
 
-void DigitalOutput::modePWM(DigitalOutputNum_t dout, uint32_t freq, ledc_timer_bit_t bit)
+void DigitalOutputs::modePWM(DigitalOutputNum_t dout, uint32_t freq, ledc_timer_bit_t bit)
 {
     if (dout < DOUT_MAX) {
         ledc_timer_config_t ledcTimer = {
@@ -256,7 +256,7 @@ void DigitalOutput::modePWM(DigitalOutputNum_t dout, uint32_t freq, ledc_timer_b
     }
 }
 
-void DigitalOutput::setDutyCycle(DigitalOutputNum_t dout, uint32_t duty)
+void DigitalOutputs::setDutyCycle(DigitalOutputNum_t dout, uint32_t duty)
 {
     if (dout < _num) {
         ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, duty);
@@ -266,7 +266,7 @@ void DigitalOutput::setDutyCycle(DigitalOutputNum_t dout, uint32_t duty)
     }
 }
 
-float DigitalOutput::getCurrent(DigitalOutputNum_t dout)
+float DigitalOutputs::getCurrent(DigitalOutputNum_t dout)
 {
     if (dout < _num) {   
         if (_type == DIGITAL_OUTPUT_GPIO) {
@@ -322,7 +322,7 @@ float DigitalOutput::getCurrent(DigitalOutputNum_t dout)
     }
 }
 
-int DigitalOutput::getCurrentLevel(DigitalOutputNum_t dout)
+int DigitalOutputs::getCurrentLevel(DigitalOutputNum_t dout)
 {
     if (dout < _num) {
         if (_type == DIGITAL_OUTPUT_GPIO) {
@@ -337,12 +337,12 @@ int DigitalOutput::getCurrentLevel(DigitalOutputNum_t dout)
     }
 }
 
-void DigitalOutput::_controlTask(void *pvParameters)
+void DigitalOutputs::_controlTask(void *pvParameters)
 {
     /* Every 500ms check if there is a power error on DOUT or
     If output is in error: desactivate for 5 secondes then retry */
 
-    DigitalOutput* dout = (DigitalOutput*) pvParameters;
+    DigitalOutputs* dout = (DigitalOutputs*) pvParameters;
     uint8_t* dout_state;
     dout_state = (uint8_t*) calloc(dout->_num, sizeof(uint8_t));
     float currentSum = 0;

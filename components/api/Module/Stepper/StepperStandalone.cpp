@@ -33,7 +33,7 @@ const gpio_num_t _dinGpio[] = {
 #endif
 };
 
-DigitalInput* StepperStandalone::din = new DigitalInput(_dinGpio, STEPPER_DIN_NUM);
+DigitalInputs* StepperStandalone::din = new DigitalInputs(_dinGpio, STEPPER_DIN_NUM);
 
 void StepperStandalone::init()
 {

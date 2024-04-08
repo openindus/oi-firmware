@@ -68,8 +68,8 @@ adc1_channel_t _ainChannel[] = {
 
 esp_adc_cal_characteristics_t* _ainAdcChar;
 
-DigitalInput* DiscreteStandalone::din = new DigitalInput(_dinGpio, 10);
-DigitalOutput* DiscreteStandalone::dout = new DigitalOutput(_doutGpio, _doutAdcChannel, 8);
+DigitalInputs* DiscreteStandalone::din = new DigitalInputs(_dinGpio, 10);
+DigitalOutputs* DiscreteStandalone::dout = new DigitalOutputs(_doutGpio, _doutAdcChannel, 8);
 
 esp_adc_cal_characteristics_t DiscreteStandalone::_adc1Characteristics;
 

@@ -1,5 +1,5 @@
 /**
- * @file AnalogInput.h
+ * @file AnalogInputs.h
  * @brief Analog Input
  * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
  * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
@@ -52,7 +52,9 @@ class AnalogInputAds866x
 {
 public:
 
-    AnalogInputAds866x(uint8_t num, gpio_num_t cmdGpio, AnalogInput_VoltageRange_t range, AnalogInput_Mode_t mode);
+    AnalogInputAds866x(uint8_t num, gpio_num_t cmdGpio);
+
+    void init(AnalogInput_VoltageRange_t range, AnalogInput_Mode_t mode);
 
     int read(void);
     float read(AnalogInput_Unit_t unit);
@@ -62,7 +64,7 @@ public:
     uint8_t getVoltageRange(void);
     gpio_num_t getModePin();
 
-protected:
+private:
 
     int _num;
     gpio_num_t _modePin;
@@ -74,9 +76,9 @@ class AnalogInputs
 {
 public:
 
-    AnalogInputs(const gpio_num_t* cmdGpio, uint8_t nb, ads866x_config_t *ads866xConfig, AnalogInput_VoltageRange_t range, AnalogInput_Mode_t mode);
+    AnalogInputs(const gpio_num_t* cmdGpio, uint8_t nb);
 
-    int init(void);
+    int init(ads866x_config_t *ads866xConfig, AnalogInput_VoltageRange_t range, AnalogInput_Mode_t mode);
 
     int read(AnalogInput_Num_t num);
     float read(AnalogInput_Num_t num, AnalogInput_Unit_t unit);
@@ -91,5 +93,4 @@ private:
     AnalogInputType_t _type;
 
     AnalogInputAds866x* _ains[AIN_MAX];
-    ads866x_config_t* _ads866xConfig;
 };

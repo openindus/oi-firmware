@@ -16,7 +16,7 @@
 #pragma once
 
 #include "Motor.h"
-#include "DigitalInput.h"
+#include "DigitalInputs.h"
 #include "powerSTEP01/PS01.h"
 
 typedef enum {

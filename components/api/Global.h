@@ -79,10 +79,10 @@
 
 /* OpenIndus Middleware */
 #include "Bus.h"
-#include "DigitalOutput.h"
-#include "DigitalInput.h"
+#include "DigitalOutputs.h"
+#include "DigitalInputs.h"
 #include "AnalogOutput.h"
-#include "AnalogInput.h"
+#include "AnalogInputs.h"
 #include "Motor.h"
 #include "MotorStepper.h"
 #include "UsbConsole.h"

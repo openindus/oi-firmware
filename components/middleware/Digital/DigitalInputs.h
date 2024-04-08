@@ -6,7 +6,7 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file DigitalInput.h
+ * @file DigitalInputs.h
  * @brief Functions for discrete module
  *
  * For more information on OpenIndus:
@@ -56,13 +56,13 @@ typedef enum {
     DIGITAL_INPUT_IOEX
 } DigitalInputType_t;
 
-class DigitalInput
+class DigitalInputs
 {
 public:
 
-    DigitalInput(const gpio_num_t *gpio, int num);
-    DigitalInput(ioex_device_t **ioex, const ioex_num_t *ioex_num, int num);
-    ~DigitalInput();
+    DigitalInputs(const gpio_num_t *gpio, int num);
+    DigitalInputs(ioex_device_t **ioex, const ioex_num_t *ioex_num, int num);
+    ~DigitalInputs();
 
     void init(void);
     int getLevel(DigitalInputNum_t din);

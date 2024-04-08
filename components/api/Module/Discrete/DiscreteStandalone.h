@@ -25,25 +25,25 @@ public:
 
     static void init(void);
 
-    /* DigitalOutput */
+    /* DigitalOutputs */
     static void digitalWrite(DigitalOutputNum_t doutNum, uint8_t level);
     static void digitalToggle(DigitalOutputNum_t doutNum);
     static void analogWrite(DigitalOutputNum_t doutNum, uint8_t duty);
     static float getCurrent(DigitalOutputNum_t doutNum);
 
-    /* DigitalInput */
+    /* DigitalInputs */
     static int digitalRead(DigitalInputNum_t dinNum);
     static void attachInterrupt(DigitalInputNum_t dinNum, IsrCallback_t callback, InterruptMode_t mode=RISING_MODE, void* arg=NULL);
     static void detachInterrupt(DigitalInputNum_t dinNum);
 
-    /* AnalogInput */
+    /* AnalogInputs */
     static int analogRead(AnalogInput_Num_t eana);
     static int analogReadMilliVolts(AnalogInput_Num_t eana);
 
 private:
 
-    static DigitalInput* din;
-    static DigitalOutput* dout;
+    static DigitalInputs* din;
+    static DigitalOutputs* dout;
     static esp_adc_cal_characteristics_t _adc1Characteristics;
 
 };

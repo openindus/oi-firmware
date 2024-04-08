@@ -31,7 +31,7 @@ class StepperStandalone : public ModuleStandalone
 {
 public:
 
-    /* DigitalInput */
+    /* DigitalInputs */
     static int digitalRead(DigitalInputNum_t dinNum);
     static void attachInterrupt(DigitalInputNum_t dinNum, IsrCallback_t callback, InterruptMode_t mode=RISING_MODE, void* arg=NULL);
     static void detachInterrupt(DigitalInputNum_t dinNum);
@@ -60,7 +60,7 @@ public:
 
 private:
 
-    static DigitalInput* din;
+    static DigitalInputs* din;
     static Motor* motor;
 
 };
