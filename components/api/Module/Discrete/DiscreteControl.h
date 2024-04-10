@@ -32,6 +32,7 @@ public:
     int analogRead(AnalogInput_Num_t eana);
     void attachInterrupt(DigitalInputNum_t din, IsrCallback_t callback, InterruptMode_t mode);
     void detachInterrupt(DigitalInputNum_t din);
+    float getCurrent(DigitalOutputNum_t dout);
 
 private:
 

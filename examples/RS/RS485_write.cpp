@@ -3,9 +3,7 @@
 
 using namespace OI;
 
-Core core;
-
-int counter = 0;
+OICore core;
 
 void setup(void)
 {
@@ -17,12 +15,8 @@ void setup(void)
 
 void loop(void)
 {
-    /* Read */
-    if (core.rs.available()) {
-        Serial.printf("%d\n", core.rs.read());
-    }
+    static int counter = 0;
 
-    /* Write */
     if (core.rs.availableForWrite()) {
         core.rs.write(counter);
         counter++;

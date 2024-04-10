@@ -1,7 +1,7 @@
 #include "OpenIndus.h"
 #include "Arduino.h"
 
-#ifdef MODULE_OI_CORE
+#ifdef OI_CORE
 OICore core;
 #endif
 OIMixed mixed;
@@ -16,7 +16,7 @@ void setup(void)
 
 void loop(void)
 {
-    // float value = mixed.analogReadCurrent(AIN_1);
-    // Serial.printf("Value of analog input 1: %f\n", value);
+    float value = mixed.analogReadMilliAmps(AIN_1);
+    Serial.printf("Value of analog input 1: %f\n", value);
     delay(1000);
 }

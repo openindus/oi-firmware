@@ -86,6 +86,11 @@ float MixedControl::analogReadMilliVolts(AnalogInput_Num_t num)
     return *ret;
 }
 
+float MixedControl::analogReadMilliAmps(AnalogInput_Num_t num)
+{
+    return 0.0;
+}
+
 void MixedControl::analogOutputMode(AnalogOutput_Num_t num, AnalogOutput_Mode_t mode)
 {
     std::vector<uint8_t> msgBytes = {CONTROL_ANALOG_OUTPUT_MODE, (uint8_t)num, (uint8_t)mode};

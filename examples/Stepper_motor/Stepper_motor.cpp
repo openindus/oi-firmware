@@ -1,14 +1,13 @@
 #include "OpenIndus.h"
 #include "Arduino.h"
 
-Core core;
-Stepper stepper;
+OIStepper stepper;
 
 void printTask(void*)
 {
-    while (1)
-    {    
-        Serial.printf("position: %d | speed: %f\n", stepper.getPosition(MOTOR_1), stepper.getSpeed(MOTOR_1));
+    while (1) {    
+        Serial.printf("position: %d | speed: %f\n", 
+            stepper.getPosition(MOTOR_1), stepper.getSpeed(MOTOR_1));
         delay(100);
     }
 }
