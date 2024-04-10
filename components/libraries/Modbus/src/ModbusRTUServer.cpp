@@ -30,17 +30,9 @@ ModbusRTUServerClass::ModbusRTUServerClass()
 {
 }
 
-#ifdef ARDUINO_RS485
-ModbusRTUServerClass::ModbusRTUServerClass(RS485Class& rs485) : _rs485(&rs485)
+ModbusRTUServerClass::ModbusRTUServerClass(OI::RS& rs485) : _rs485(&rs485)
 {
 }
-#else
-ModbusRTUServerClass::ModbusRTUServerClass(OIRS& rs485) : _rs485(&rs485)
-{
-}
-#endif
-
-
 
 ModbusRTUServerClass::~ModbusRTUServerClass()
 {
@@ -59,19 +51,11 @@ int ModbusRTUServerClass::begin(int id, unsigned long baudrate, uint32_t config)
   return 1;
 }
 
-#ifdef ARDUINO_RS485
-int ModbusRTUServerClass::begin(RS485Class& rs485, int id, unsigned long baudrate, uint32_t config)
+int ModbusRTUServerClass::begin(OI::RS& rs485, int id, unsigned long baudrate, uint32_t config)
 {
   _rs485 = &rs485;
   return begin(id, baudrate, config);
 }
-#else
-int ModbusRTUServerClass::begin(OIRS& rs485, int id, unsigned long baudrate, uint32_t config)
-{
-  _rs485 = &rs485;
-  return begin(id, baudrate, config);
-}
-#endif
 
 void ModbusRTUServerClass::poll()
 {

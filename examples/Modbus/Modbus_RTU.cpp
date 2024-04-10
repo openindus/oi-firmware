@@ -5,7 +5,7 @@
 void setup()
 {
     Serial.begin(115200);
-    Serial.println("Modbus Temperature Humidity Sensor");
+    Serial.println("Modbus Temperature & Humidity Sensor");
 
     /* Start the Modbus RTU client */
     if (!ModbusRTUClient.begin(9600))

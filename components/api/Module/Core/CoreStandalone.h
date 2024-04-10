@@ -77,7 +77,7 @@ public:
      * @param args function arguments
      * falling edge or both (rising edge by default).
      */
-    void attachInterrupt(DigitalInputNum_t dinNum, IsrCallback_t callback, InterruptMode_t mode, void* arg);
+    void attachInterrupt(DigitalInputNum_t dinNum, IsrCallback_t callback, InterruptMode_t mode=RISING_MODE, void* arg=NULL);
     
     /**
      * @brief Detach an interrupt to a given DIN.

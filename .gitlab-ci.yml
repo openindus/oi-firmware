@@ -18,18 +18,16 @@ setup:
     - pip install -U platformio
     - pio platform update
   rules:
-    - if: '($CI_PIPELINE_SOURCE == "push") && ($CI_COMMIT_BRANCH == "dev")'
-    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
-    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && 
+      ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")'
 
 .build:
   stage: build
   needs:
     - job: setup
   rules:
-    - if: '($CI_PIPELINE_SOURCE == "push") && ($CI_COMMIT_BRANCH == "dev")'
-    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
-    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && 
+      ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")'
 
 build:core:
   extends: .build
@@ -66,34 +64,37 @@ build:relayhp:
   script:
     - pio run -e relayhp 
 
-# build:relaylp:
-#   extends: .build
-#   script:
-#     - pio run -e relaylp 
+build:relaylp:
+  extends: .build
+  script:
+    - pio run -e relaylp 
 
 # build:brushless:
 #   extends: .build
 #   script:
 #     - pio run -e brushless 
 
-# build:analogls:
-#   extends: .build
-#   script:
-#     - pio run -e analogls 
+build:analogls:
+  extends: .build
+  script:
+    - pio run -e analogls 
 
 build:examples:
   stage: build:examples
   needs:
     - job: build:core
   script:
-    # - ./scripts/build_examples.sh
-    - echo build examples
-  # after_script:
-  #   - git restore main/main.cpp
+    - |
+      find examples/ -name "*.cpp" | while read -r f; do
+        echo "Build $f"
+        cat $f > main/main.cpp
+        pio run -e core || { echo "Error: Build failed for $f"; exit 1; }
+      done
+  after_script:
+    - git restore main/main.cpp
   rules:
-    - if: '($CI_PIPELINE_SOURCE == "push") && ($CI_COMMIT_BRANCH == "dev")'
-    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
-    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && 
+      ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")'
 
 pkg:library:
   stage: pkg:library
@@ -104,10 +105,12 @@ pkg:library:
     - mkdir .oi/lib/
   script:
     - pio pkg pack --output=".oi/lib/"
+  artifacts:
+    paths:
+      - .oi/lib/
   rules:
-    - if: '($CI_PIPELINE_SOURCE == "push") && ($CI_COMMIT_BRANCH == "dev")'
-    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
-    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && 
+      ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")'
 
 deploy:
   stage: deploy
@@ -119,9 +122,9 @@ deploy:
     # - job: build:stepperve
     - job: build:mixed
     - job: build:relayhp
-    # - job: build:relaylp
+    - job: build:relaylp
     # - job: build:brushless
-    # - job: build:analogls
+    - job: build:analogls
   script:
     - lftp $OVH_URI -e "mirror --reverse --verbose -R ./.oi/bin/ ./www/oi-content/bin/; quit" -u $OVH_USERNAME,$OVH_PASSWORD
   only:

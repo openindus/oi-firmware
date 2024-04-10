@@ -4,6 +4,7 @@
     Firmware Doc: https://openindus.com/oi-content/doc/index.html
 */
 
+#include "OpenIndus.h"
 #include "Arduino.h"
 #include "Netif_Wifi.h"
 #include "Cloud.hpp"

@@ -6,7 +6,7 @@
     #define CLOUD_CONNECTED() ModuleStandalone::ledOn(LED_GREEN)
     #define CLOUD_OTA() ModuleStandalone::ledOn(LED_BLUE)
     #define CLOUD_AUTHENTICATING() ModuleStandalone::ledBlink(LED_GREEN, 500)
-    #define CLOUD_DISCONNECTED() MODULE_PAIRED()
+    #define CLOUD_DISCONNECTED() 
 #endif
 
 #define Cloud_LogTag "Cloud"

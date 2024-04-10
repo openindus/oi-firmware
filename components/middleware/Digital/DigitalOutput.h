@@ -40,16 +40,12 @@
 typedef enum {
     DOUT_1 = 0,
     DOUT_2,
-#if !defined(OI_BRUSHLESS)
     DOUT_3,
     DOUT_4,
-#if !defined(OI_MIXED)
     DOUT_5,
     DOUT_6,
     DOUT_7,
     DOUT_8,
-#endif
-#endif
     DOUT_MAX
 } DigitalOutputNum_t;
 

@@ -21,20 +21,12 @@
 #define _MODBUS_RTU_CLIENT_H_INCLUDED
 
 #include "ModbusClient.h"
-#ifdef ARDUINO_RS485
-#include <ArduinoRS485.h>
-#else
-#include "RS.h"
-#endif
+#include "OpenIndus.h"
 
 class ModbusRTUClientClass : public ModbusClient {
 public:
   ModbusRTUClientClass();
-  #ifdef ARDUINO_RS485
-  ModbusRTUClientClass(RS485Class& rs485);
-  #else
-  ModbusRTUClientClass(OIRS& rs485);
-  #endif
+  ModbusRTUClientClass(OI::RS& rs485);
   virtual ~ModbusRTUClientClass();
 
   /**
@@ -46,18 +38,10 @@ public:
    * Return 1 on success, 0 on failure
    */
   int begin(unsigned long baudrate, uint32_t config = SERIAL_8N1);
-  #ifdef ARDUINO_RS485
-  int begin(RS485Class& rs485, unsigned long baudrate, uint32_t config = SERIAL_8N1);
-  #else
-  int begin(OIRS& rs485, unsigned long baudrate, uint32_t config = SERIAL_8N1);
-  #endif
+  int begin(OI::RS& rs485, unsigned long baudrate, uint32_t config = SERIAL_8N1);
 
 private:
-  #ifdef ARDUINO_RS485
-  RS485Class* _rs485 = &RS485;
-  #else
-  OIRS* _rs485 = &RS485;
-  #endif
+  OI::RS* _rs485 = &CoreStandalone::rs;
 
 };
 
