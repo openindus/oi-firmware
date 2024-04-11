@@ -44,6 +44,7 @@ public:
     void analogInputReference(float ref) override;
     int analogRead(AnalogInput_Num_t num) override;
     float analogReadMilliVolts(AnalogInput_Num_t num) override;
+    float analogReadMilliAmps(AnalogInput_Num_t num);
 
     /* Analog Output */
     void analogOutputMode(AnalogOutput_Num_t num, AnalogOutput_Mode_t mode) override;

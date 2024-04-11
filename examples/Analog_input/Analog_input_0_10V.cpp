@@ -1,7 +1,7 @@
 #include "OpenIndus.h"
 #include "Arduino.h"
 
-#ifdef MODULE_OI_CORE
+#ifdef OI_CORE
 OICore core;
 #endif
 OIMixed mixed;
@@ -12,8 +12,6 @@ void setup(void)
 
     /* Configure Analog input 1 in voltage mode */
     mixed.analogInputMode(AIN_1, AIN_MODE_VOLTAGE);
-    mixed.analogInputResolution(AIN_RES_12_BITS);
-    // mixed.analogInputReference(3.3);
 }
 
 void loop(void)

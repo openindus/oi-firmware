@@ -63,4 +63,9 @@ void DiscreteControl::detachInterrupt(DigitalInputNum_t din)
     ctrlRequest(msgBytes);
 }
 
+float DiscreteControl::getCurrent(DigitalOutputNum_t dout)
+{
+    return 0.0;
+}
+
 #endif
