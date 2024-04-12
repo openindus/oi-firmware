@@ -2,6 +2,8 @@
 
 ## Get started
 
+[See our online documentation](https://openindus.com/oi-content/doc/index.html)
+
 ### Configuration
 
 ```
