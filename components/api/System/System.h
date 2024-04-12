@@ -16,14 +16,14 @@
 #pragma once
 
 #include "Global.h"
-#include "Console.h"
+#include "Module.h"
 #include "Core.h"
 #include "Discrete.h"
-#include "Stepper.h"
 #include "Mixed.h"
+#include "Stepper.h"
 #include "Relay.h"
+#include "AnalogLs.h"
 #include "Brushless.h"
-#include "Analogls.h"
 
 void setup(void);
 void loop(void);

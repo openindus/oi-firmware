@@ -15,140 +15,94 @@
 
 #include "MixedControl.h"
 
-#if !defined(CONFIG_MIXED)
+#if !defined(OI_MIXED)
 
-void MixedControl::digitalWrite(DigitalOutputNum_t stor, uint8_t level)
+void MixedControl::digitalWrite(DigitalOutputNum_t num, uint8_t level)
 {
-    RequestMsg_t msg;
-    msg.cmd = CMD_DIGITAL_WRITE;
-    msg.param = (uint16_t)stor;
-    msg.data = (uint32_t)level;
-    request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_DIGITAL_WRITE, (uint8_t)num, (uint8_t)level};
+    ctrlRequest(msgBytes);
 }
 
-int MixedControl::digitalRead(DigitalInputNum_t etor)
+int MixedControl::digitalRead(DigitalInputNum_t num)
 {
-    RequestMsg_t msg;
-    msg.cmd = CMD_DIGITAL_READ;
-    msg.param = (uint16_t)etor;
-    return (int)request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_DIGITAL_READ, (uint8_t)num};
+    ctrlRequest(msgBytes);
+    return static_cast<int>(msgBytes[2]);
 }
 
-void MixedControl::attachInterrupt(DigitalInputNum_t etor, IsrCallback_t callback, InterruptMode_t mode)
+void MixedControl::attachInterrupt(DigitalInputNum_t num, IsrCallback_t callback, 
+    InterruptMode_t mode, void* arg)
 {
-    RequestMsg_t msg;
-    msg.cmd = CMD_ATTACH_INTERRUPT;
-    msg.param = (uint16_t)etor;
-    msg.data = (uint32_t)mode;
-    request(msg);
-    _isrCallback[etor] = callback;
-    uint16_t id = ModuleControl::getId(this);
-    ModuleMaster::onEvent(DIGITAL_INTERRUPT, id, [this](uint8_t num) {
-        _isrCallback[num](NULL);
-    });
+    std::vector<uint8_t> msgBytes = {CONTROL_ATTACH_INTERRUPT, (uint8_t)num, (uint8_t)mode};
+    _isrCallback[num] = callback;
+    ctrlRequest(msgBytes);
+    
+    addEventCallback(
+        EVENT_DIGITAL_INTERRUPT, 
+        _id, 
+        [this](uint8_t num) { _isrCallback[num](NULL); }
+    );
 }
 
-void MixedControl::detachInterrupt(DigitalInputNum_t etor)
+void MixedControl::detachInterrupt(DigitalInputNum_t num)
 {
-    RequestMsg_t msg;
-    msg.cmd = CMD_DETACH_INTERRUPT;
-    msg.param = (uint16_t)etor;
-    request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_DETACH_INTERRUPT, (uint8_t)num};
+    ctrlRequest(msgBytes);
 }
 
-int MixedControl::analogRead(AnalogInputNum_t ana)
+void MixedControl::analogInputMode(AnalogInput_Num_t num, AnalogInput_Mode_t mode)
 {
-    RequestMsg_t msg;
-    msg.cmd = CMD_ANALOG_READ;
-    msg.param = (uint16_t)ana;
-    return request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_ANALOG_INPUT_MODE, (uint8_t)num, (uint8_t)mode};
+    ctrlRequest(msgBytes);
 }
 
-int MixedControl::analogReadMilliVolts(AnalogInputNum_t ana)
+void MixedControl::analogInputResolution(AnalogInput_Resolution_t res)
 {
-    RequestMsg_t msg;
-    msg.cmd = CMD_ANALOG_READ_MILLIVOLTS;
-    msg.param = (uint16_t)ana;
-    return request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_ANALOG_INPUT_RESOLUTION, (uint8_t)res};
+    ctrlRequest(msgBytes);
 }
 
-void MixedControl::analogReadMode(AnalogInputNum_t ana, AdcMode_t mode)
+void MixedControl::analogInputReference(float ref)
 {
-    RequestMsg_t msg;
-    msg.cmd = CMD_ANALOG_READ_MODE;
-    msg.param = (uint16_t)ana;
-    msg.data = (uint32_t)mode;
-    request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_ANALOG_INPUT_RESOLUTION};
+    uint8_t* ptr = reinterpret_cast<uint8_t*>(&ref);
+    msgBytes.insert(msgBytes.end(), ptr, ptr + sizeof(float));
+    ctrlRequest(msgBytes);
 }
 
-void MixedControl::analogReadResolution(AdcResBits_t res)
+int MixedControl::analogRead(AnalogInput_Num_t num)
 {
-    RequestMsg_t msg;
-    msg.cmd = CMD_ANALOG_READ_RESOLUTION;
-    msg.data = (uint32_t)res;
-    request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_ANALOG_READ, (uint8_t)num};
+    ctrlRequest(msgBytes);
+    int* ret = reinterpret_cast<int*>(&msgBytes[2]);
+    return *ret;
 }
 
-void MixedControl::analogReadReference(float ref)
+float MixedControl::analogReadMilliVolts(AnalogInput_Num_t num)
 {
-    RequestMsg_t msg;
-    msg.cmd = CMD_ANALOG_READ_REFERENCE;
-    memcpy(&msg.data, &ref, sizeof(uint32_t));
-    request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_ANALOG_READ_MILLIVOLTS, (uint8_t)num};
+    ctrlRequest(msgBytes);
+    float* ret = reinterpret_cast<float*>(&msgBytes[2]);
+    return *ret;
 }
 
-void MixedControl::analogWriteVoltage(AnalogOutputNum_t sana, uint32_t value)
+float MixedControl::analogReadMilliAmps(AnalogInput_Num_t num)
 {
-    RequestMsg_t msg;
-    msg.cmd = CMD_ANALOG_WRITE_VOLTAGE;
-    msg.param = (uint16_t)sana;
-    msg.data = (uint32_t)value;
-    request(msg);
+    return 0.0;
 }
 
-void MixedControl::analogWriteVoltageMilliVolts(AnalogOutputNum_t sana, uint32_t value)
+void MixedControl::analogOutputMode(AnalogOutput_Num_t num, AnalogOutput_Mode_t mode)
 {
-    RequestMsg_t msg;
-    msg.cmd = CMD_ANALOG_WRITE_VOLTAGE_MILLIVOLTS;
-    msg.param = (uint16_t)sana;
-    msg.data = (uint32_t)value;
-    request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_ANALOG_OUTPUT_MODE, (uint8_t)num, (uint8_t)mode};
+    ctrlRequest(msgBytes);
 }
 
-void MixedControl::analogWriteVoltageMode(AnalogOutputNum_t sana, DacVoltageMode_t mode)
+void MixedControl::analogWrite(AnalogOutput_Num_t num, float value)
 {
-    RequestMsg_t msg;
-    msg.cmd = CMD_ANALOG_WRITE_VOLTAGE_MODE;
-    msg.param = (uint16_t)sana;
-    msg.data = (uint32_t)mode;
-    request(msg);
-}
-
-void MixedControl::analogWriteCurrent(AnalogOutputNum_t sana, uint32_t value)
-{
-    RequestMsg_t msg;
-    msg.cmd = CMD_ANALOG_WRITE_CURRENT;
-    msg.param = (uint16_t)sana;
-    msg.data = (uint32_t)value;
-    request(msg);
-}
-
-void MixedControl::analogWriteCurrentMilliAmps(AnalogOutputNum_t sana, uint32_t value)
-{
-    RequestMsg_t msg;
-    msg.cmd = CMD_ANALOG_WRITE_CURRENT_MILLIAMPS;
-    msg.param = (uint16_t)sana;
-    msg.data = (uint32_t)value;
-    request(msg);
-}
-
-void MixedControl::analogWriteCurrentMode(AnalogOutputNum_t sana, DacCurrentMode_t mode)
-{
-    RequestMsg_t msg;
-    msg.cmd = CMD_ANALOG_WRITE_CURRENT_MODE;
-    msg.param = (uint16_t)sana;
-    msg.data = (uint32_t)mode;
-    request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_ANALOG_WRITE};
+    uint8_t* ptr = reinterpret_cast<uint8_t*>(&value);
+    msgBytes.insert(msgBytes.end(), ptr, ptr + sizeof(float));
+    ctrlRequest(msgBytes);
 }
 
 #endif

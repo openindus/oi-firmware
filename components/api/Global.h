@@ -37,6 +37,8 @@
 #include "esp_vfs_fat.h"
 #include "esp_ota_ops.h"
 #include "esp_task_wdt.h"
+#include "esp_ota_ops.h"
+#include "esp_efuse.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/event_groups.h"
 #include "freertos/queue.h"
@@ -63,7 +65,6 @@
 #include "esp_intr_alloc.h"
 
 /* OpenIndus Drivers */
-#include "ledonewire.h"
 #include "ads866x.h"
 #include "dac8760.h"
 #include "PS01.h"
@@ -73,15 +74,11 @@
 #include "sc16is750.h"
 #include "mcp25625.h"
 #include "DriversComponents/MCP25625.h"
-#include "ads1x4s08.h"
 #include "stds75.h"
 #include "cd74hc4052.h"
 
 /* OpenIndus Middleware */
-#include "BusIO.h"
-#include "BusRs.h"
-#include "BusCan.h"
-#include "BusIO.h"
+#include "Bus.h"
 #include "DigitalOutput.h"
 #include "DigitalInput.h"
 #include "AnalogOutput.h"
@@ -93,3 +90,8 @@
 #include "FlashLoader.h"
 #include "Encoder.h"
 #include "MotorBLDC.h"
+#include "MotorStepperParam.h"
+#include "Led.h"
+#include "RTClock.h"
+#include "CAN.h"
+#include "RS.h"

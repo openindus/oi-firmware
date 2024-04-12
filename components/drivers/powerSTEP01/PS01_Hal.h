@@ -18,7 +18,7 @@
 #include "PS01_Global.h"
 #include "PS01_Register.h"
 
-#if defined(CONFIG_STEPPER)
+#if defined(OI_STEPPER)
 #define POWERSTEP01_NUMBER_OF_DEVICES 2
 #else
 #define POWERSTEP01_NUMBER_OF_DEVICES 1

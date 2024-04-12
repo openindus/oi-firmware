@@ -15,70 +15,57 @@
 
 #include "BrushlessControl.h"
 
-#if !defined(CONFIG_BRUSHLESS)
+#if !defined(OI_BRUSHLESS)
 
 void BrushlessControl::setSpeed(uint32_t duty_cycle)
 {
-    RequestMsg_t msg;
-    msg.cmd = CMD_MOTOR_SET_SPEED;
-    msg.data = (uint32_t)duty_cycle;
-    request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_MOTOR_SET_SPEED};
+    uint8_t* ptr = reinterpret_cast<uint8_t*>(&duty_cycle);
+    msgBytes.insert(msgBytes.end(), ptr, ptr + sizeof(uint32_t));
+    ctrlRequest(msgBytes);
 }
 
 void BrushlessControl::setBrake(bool brake)
 {
-    RequestMsg_t msg;
-    msg.cmd = CMD_MOTOR_SET_BRAKE;
-    msg.data = (bool)brake;
-    request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_MOTOR_SET_BRAKE, (uint8_t)brake};
+    ctrlRequest(msgBytes);
 }
 
 void BrushlessControl::setDirection(bool direction)
 {
-    RequestMsg_t msg;
-    msg.cmd = CMD_MOTOR_SET_DIRECTION;
-    msg.data = (bool)direction;
-    request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_MOTOR_SET_DIRECTION, (uint8_t)direction};
+    ctrlRequest(msgBytes);
 }
 
 float BrushlessControl::getSpeed(void)
 {
-    uint32_t data;
-    float speed;
-    RequestMsg_t msg;
-    msg.cmd = CMD_MOTOR_GET_SPEED;
-    data = request(msg);
-    memcpy(&speed, &data, sizeof(float));
-    return speed;
+    std::vector<uint8_t> msgBytes = {CONTROL_MOTOR_GET_SPEED};
+    ctrlRequest(msgBytes);
+    float* ret = reinterpret_cast<float*>(&msgBytes[2]);
+    return *ret;
 }
 
 float BrushlessControl::getSpeedEncoder(void)
 {
-    uint32_t data;
-    float speed;
-    RequestMsg_t msg;
-    msg.cmd = CMD_ENCODER_GET_SPEED;
-    data = request(msg);
-    memcpy(&speed, &data, sizeof(float));
-    return speed;
+    std::vector<uint8_t> msgBytes = {CONTROL_ENCODER_GET_SPEED};
+    ctrlRequest(msgBytes);
+    float* ret = reinterpret_cast<float*>(&msgBytes[2]);
+    return *ret;
 }
 
 bool BrushlessControl::getDirection(void)
 {
-    RequestMsg_t msg;
-    msg.cmd = CMD_ENCODER_GET_DIRECTION;
-    return request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_MOTOR_GET_SPEED};
+    ctrlRequest(msgBytes);
+    return static_cast<bool>(&msgBytes[2]);
 }
 
 float BrushlessControl::getPosition(void)
 {
-    uint32_t data;
-    float position;
-    RequestMsg_t msg;
-    msg.cmd = CMD_ENCODER_GET_POSITION;
-    data = request(msg);
-    memcpy(&position, &data, sizeof(float));
-    return position;
+    std::vector<uint8_t> msgBytes = {CONTROL_ENCODER_GET_POSITION};
+    ctrlRequest(msgBytes);
+    float* ret = reinterpret_cast<float*>(&msgBytes[2]);
+    return *ret;
 }
 
 #endif

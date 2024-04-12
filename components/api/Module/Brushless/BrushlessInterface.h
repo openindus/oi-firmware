@@ -7,7 +7,7 @@
  * Proprietary and confidential
  * 
  * @file BrushlessInterface.h
- * @brief Functions for brushless module
+ * @brief Functions for Brushless module
  *
  * For more information on OpenIndus:
  * @see https://openindus.com

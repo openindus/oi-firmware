@@ -15,97 +15,74 @@
 
 #include "MixedSlave.h"
 
-#if defined(CONFIG_MIXED)
+#if defined(OI_MIXED)
 
 IsrCallback_t MixedSlave::_isrCallback[] = {
-    [](void*){event(DIGITAL_INTERRUPT, (int)DIN_1);},
-    [](void*){event(DIGITAL_INTERRUPT, (int)DIN_2);},
-    [](void*){event(DIGITAL_INTERRUPT, (int)DIN_3);},
-    [](void*){event(DIGITAL_INTERRUPT, (int)DIN_4);},
+    [](void*){sendEvent({EVENT_DIGITAL_INTERRUPT, DIN_1});},
+    [](void*){sendEvent({EVENT_DIGITAL_INTERRUPT, DIN_2});},
+    [](void*){sendEvent({EVENT_DIGITAL_INTERRUPT, DIN_3});},
+    [](void*){sendEvent({EVENT_DIGITAL_INTERRUPT, DIN_4});},
 };
 
-void MixedSlave::init(void)
+MixedStandalone* MixedSlave::_mixed = new MixedStandalone();
+
+int MixedSlave::init(void)
 {
-    MixedStandalone::init();
     ModuleSlave::init();
 
-    onRequest(CMD_DIGITAL_WRITE, [](RequestMsg_t msg) -> uint32_t { 
-        MixedStandalone::digitalWrite((DigitalOutputNum_t)msg.param, (uint8_t)msg.data); 
-        return 0;
+    addCtrlCallback(CONTROL_DIGITAL_WRITE, [](std::vector<uint8_t>& data) {
+        _mixed->digitalWrite((DigitalOutputNum_t)data[1], data[2]);
     });
 
-    onRequest(CMD_DIGITAL_READ, [](RequestMsg_t msg) -> uint32_t {
-        return MixedStandalone::digitalRead((DigitalInputNum_t)msg.param);
+    addCtrlCallback(CONTROL_DIGITAL_READ, [](std::vector<uint8_t>& data) { 
+        int level = _mixed->digitalRead((DigitalInputNum_t)data[1]);
+        data.push_back(static_cast<uint8_t>(level));
     });
 
-    onRequest(CMD_ATTACH_INTERRUPT, [](RequestMsg_t msg) -> uint32_t {
-        DigitalInputNum_t etor = (DigitalInputNum_t)msg.param;
-        InterruptMode_t mode = (InterruptMode_t)msg.data;
-        MixedStandalone::attachInterrupt(etor, _isrCallback[etor], mode); 
-        return 0;
+    addCtrlCallback(CONTROL_ATTACH_INTERRUPT, [](std::vector<uint8_t>& data) { 
+        _mixed->attachInterrupt((DigitalInputNum_t)data[1], 
+            _isrCallback[data[1]], (InterruptMode_t)data[2]);
     });
 
-    onRequest(CMD_DETACH_INTERRUPT, [](RequestMsg_t msg) -> uint32_t {
-        DigitalInputNum_t etor = (DigitalInputNum_t)msg.param;
-        MixedStandalone::detachInterrupt(etor); 
-        return 0;
+    addCtrlCallback(CONTROL_DETACH_INTERRUPT, [](std::vector<uint8_t>& data) { 
+        _mixed->detachInterrupt((DigitalInputNum_t)data[1]);
     });
 
-    onRequest(CMD_ANALOG_READ, [](RequestMsg_t msg) -> uint32_t { 
-        return MixedStandalone::analogRead((AnalogInputNum_t)msg.param);
+    addCtrlCallback(CONTROL_ANALOG_READ, [](std::vector<uint8_t>& data) {
+        int value = _mixed->analogRead((AnalogInput_Num_t)data[1]);
+        uint8_t* ptr = reinterpret_cast<uint8_t*>(&value);
+        data.insert(data.end(), ptr, ptr + sizeof(int));
     });
 
-    onRequest(CMD_ANALOG_READ_MILLIVOLTS, [](RequestMsg_t msg) -> uint32_t { 
-        return MixedStandalone::analogReadMilliVolts((AnalogInputNum_t)msg.param);
+    addCtrlCallback(CONTROL_ANALOG_READ_MILLIVOLTS, [](std::vector<uint8_t>& data) {
+        float_t value = _mixed->analogReadMilliVolts((AnalogInput_Num_t)data[1]);
+        uint8_t* ptr = reinterpret_cast<uint8_t*>(&value);
+        data.insert(data.end(), ptr, ptr + sizeof(float));
     });
 
-    onRequest(CMD_ANALOG_READ_MODE, [](RequestMsg_t msg) -> uint32_t { 
-        MixedStandalone::analogReadMode((AnalogInputNum_t)msg.param, (AdcMode_t)msg.data);
-        return 0;
+    addCtrlCallback(CONTROL_ANALOG_INPUT_MODE, [](std::vector<uint8_t>& data) {
+        _mixed->analogInputMode((AnalogInput_Num_t)data[1], (AnalogInput_Mode_t)data[2]);
     });
 
-    onRequest(CMD_ANALOG_READ_RESOLUTION, [](RequestMsg_t msg) -> uint32_t { 
-        MixedStandalone::analogReadResolution((AdcResBits_t)msg.data);
-        return 0;
+    addCtrlCallback(CONTROL_ANALOG_INPUT_RESOLUTION, [](std::vector<uint8_t>& data) {
+        _mixed->analogInputResolution((AnalogInput_Resolution_t)data[1]);
     });
 
-    onRequest(CMD_ANALOG_READ_REFERENCE, [](RequestMsg_t msg) -> uint32_t { 
-        float value;
-        uint32_t data = msg.data;
-        memcpy(&value, &data, sizeof(float));
-        MixedStandalone::analogReadReference(value);
-        return 0;
+    addCtrlCallback(CONTROL_ANALOG_INPUT_REFERENCE, [](std::vector<uint8_t>& data) {
+        float* reference = reinterpret_cast<float*>(&data[1]); 
+        _mixed->analogInputReference(*reference);
     });
 
-    onRequest(CMD_ANALOG_WRITE_VOLTAGE, [](RequestMsg_t msg) -> uint32_t { 
-        MixedStandalone::analogWriteVoltage((AnalogOutputNum_t)msg.param, msg.data);
-        return 0;
+    addCtrlCallback(CONTROL_ANALOG_OUTPUT_MODE, [](std::vector<uint8_t>& data) {
+        _mixed->analogOutputMode((AnalogOutput_Num_t)data[1], (AnalogOutput_Mode_t)data[2]);
     });
 
-    onRequest(CMD_ANALOG_WRITE_VOLTAGE_MILLIVOLTS, [](RequestMsg_t msg) -> uint32_t { 
-        MixedStandalone::analogWriteVoltageMilliVolts((AnalogOutputNum_t)msg.param, msg.data);
-        return 0;
+    addCtrlCallback(CONTROL_ANALOG_WRITE, [](std::vector<uint8_t>& data) {
+        float* value = reinterpret_cast<float*>(&data[2]);
+        _mixed->analogWrite((AnalogOutput_Num_t)data[1], *value);
     });
 
-    onRequest(CMD_ANALOG_WRITE_VOLTAGE_MODE, [](RequestMsg_t msg) -> uint32_t { 
-        MixedStandalone::analogWriteVoltageMode((AnalogOutputNum_t)msg.param, (DacVoltageMode_t)msg.data);
-        return 0;
-    });
-
-    onRequest(CMD_ANALOG_WRITE_CURRENT, [](RequestMsg_t msg) -> uint32_t { 
-        MixedStandalone::analogWriteCurrent((AnalogOutputNum_t)msg.param, msg.data);
-        return 0;
-    });
-
-    onRequest(CMD_ANALOG_WRITE_CURRENT_MILLIAMPS, [](RequestMsg_t msg) -> uint32_t { 
-        MixedStandalone::analogWriteCurrentMilliAmps((AnalogOutputNum_t)msg.param, msg.data);
-        return 0;
-    });
-
-    onRequest(CMD_ANALOG_WRITE_CURRENT_MODE, [](RequestMsg_t msg) -> uint32_t { 
-        MixedStandalone::analogWriteCurrentMode((AnalogOutputNum_t)msg.param, (DacCurrentMode_t)msg.data);
-        return 0;
-    });
+    return 0;
 }
 
 #endif

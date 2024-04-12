@@ -16,54 +16,48 @@
 #include "BrushlessSlave.h"
 #include "BrushlessConfig.h"
 
-#if defined(CONFIG_BRUSHLESS)
+#if defined(OI_BRUSHLESS)
 
 void BrushlessSlave::init(void)
 {
-    BrushlessStandalone::init();
     ModuleSlave::init();
 
-    onRequest(CMD_MOTOR_SET_SPEED, [](RequestMsg_t msg) -> uint32_t {
-        uint32_t duty_cycle = (uint32_t)msg.data;
-        BrushlessStandalone::setSpeed(duty_cycle);
-        return 0;
+    addCtrlCallback(CONTROL_MOTOR_SET_SPEED, [](std::vector<uint8_t>& data) {
+        uint32_t* duty_cycle = reinterpret_cast<uint32_t*>(&data[2]);
+        BrushlessStandalone::setSpeed(*duty_cycle);
     });
 
-    onRequest(CMD_MOTOR_SET_BRAKE, [](RequestMsg_t msg) -> uint32_t {
-        bool brake = (bool)msg.data;
+    addCtrlCallback(CONTROL_MOTOR_SET_BRAKE, [](std::vector<uint8_t>& data) {
+        bool brake = static_cast<bool>(data[2]);
         BrushlessStandalone::setBrake(brake);
-        return 0;
     });
 
-    onRequest(CMD_MOTOR_SET_DIRECTION, [](RequestMsg_t msg) -> uint32_t {
-        bool direction = (bool)msg.data;
+    addCtrlCallback(CONTROL_MOTOR_SET_DIRECTION, [](std::vector<uint8_t>& data) {
+        bool direction = static_cast<bool>(data[2]);
         BrushlessStandalone::setDirection(direction);
-        return 0;
     });
 
-    onRequest(CMD_MOTOR_GET_SPEED, [](RequestMsg_t msg) -> uint32_t {
+    addCtrlCallback(CONTROL_MOTOR_GET_SPEED, [](std::vector<uint8_t>& data) {
         float speed = BrushlessStandalone::getSpeed(); 
-        uint32_t data = 0;
-        memcpy(&data, &speed, sizeof(uint32_t));
-        return data;  
+        uint8_t* ptr = reinterpret_cast<uint8_t*>(&speed);
+        data.insert(data.end(), ptr, ptr + sizeof(float));
     });
 
-    onRequest(CMD_ENCODER_GET_SPEED, [](RequestMsg_t msg) -> uint32_t {
+    addCtrlCallback(CONTROL_ENCODER_GET_SPEED, [](std::vector<uint8_t>& data) {
         float speed = BrushlessStandalone::getSpeedEncoder(); 
-        uint32_t data = 0;
-        memcpy(&data, &speed, sizeof(uint32_t));
-        return data;   
+        uint8_t* ptr = reinterpret_cast<uint8_t*>(&speed);
+        data.insert(data.end(), ptr, ptr + sizeof(float)); 
     });
 
-    onRequest(CMD_ENCODER_GET_DIRECTION, [](RequestMsg_t msg) -> uint32_t {
-        return BrushlessStandalone::getDirection();  
+    addCtrlCallback(CONTROL_ENCODER_GET_DIRECTION, [](std::vector<uint8_t>& data) {
+        bool direction = BrushlessStandalone::getDirection();
+        data.push_back(static_cast<uint8_t>(direction));
     });
 
-    onRequest(CMD_ENCODER_GET_POSITION, [](RequestMsg_t msg) -> uint32_t {
+    addCtrlCallback(CONTROL_ENCODER_GET_POSITION, [](std::vector<uint8_t>& data) {
         float position = BrushlessStandalone::getPosition(); 
-        uint32_t data = 0;
-        memcpy(&data, &position, sizeof(uint32_t));
-        return data;  
+        uint8_t* ptr = reinterpret_cast<uint8_t*>(&position);
+        data.insert(data.end(), ptr, ptr + sizeof(float));
     });
 }
 

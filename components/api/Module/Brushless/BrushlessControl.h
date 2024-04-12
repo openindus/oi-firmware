@@ -18,13 +18,13 @@
 #include "ModuleControl.h"
 #include "ModuleMaster.h"
 
-#if !defined(CONFIG_BRUSHLESS)
+#if !defined(OI_BRUSHLESS)
 
 class BrushlessControl : public ModuleControl
 {
 public:
 
-    BrushlessControl(void) : ModuleControl() {}
+    BrushlessControl(int sn = 0) : ModuleControl(sn) {}
     void setSpeed(uint32_t duty_cycle);
     void setBrake(bool brake);
     void setDirection(bool direction);

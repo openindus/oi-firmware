@@ -18,18 +18,18 @@
 #include "DiscreteStandalone.h"
 #include "ModuleSlave.h"
 
-#if defined(CONFIG_DISCRETE) || defined(CONFIG_DISCRETE_VE)
+#if defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)
 
-class DiscreteSlave : public DiscreteStandalone, public ModuleSlave
+class DiscreteSlave : public ModuleSlave
 {
 public:
 
-    static void init(void);
-
+    static int init(void);
+    
 private:
 
+    static DiscreteStandalone* _discrete;
     static IsrCallback_t _isrCallback[4];
-
 };
 
 #endif

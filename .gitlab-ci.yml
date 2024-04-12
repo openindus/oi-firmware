@@ -4,8 +4,7 @@ stages:
   - setup
   - build
   - build:examples
-  - pkg:library
-  - deploy
+  - pkg
 
 cache:
   paths:
@@ -18,18 +17,16 @@ setup:
     - pip install -U platformio
     - pio platform update
   rules:
-    - if: '($CI_PIPELINE_SOURCE == "push") && ($CI_COMMIT_BRANCH == "dev")'
-    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
-    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && 
+      ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")'
 
 .build:
   stage: build
   needs:
     - job: setup
   rules:
-    - if: '($CI_PIPELINE_SOURCE == "push") && ($CI_COMMIT_BRANCH == "dev")'
-    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
-    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && 
+      ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")'
 
 build:core:
   extends: .build
@@ -41,20 +38,20 @@ build:discrete:
   script:
     - pio run -e discrete 
 
-build:discreteve:
-  extends: .build
-  script:
-    - pio run -e discreteve 
+# build:discreteve:
+#   extends: .build
+#   script:
+#     - pio run -e discreteve 
 
 build:stepper:
   extends: .build
   script:
     - pio run -e stepper 
 
-build:stepperve:
-  extends: .build
-  script:
-    - pio run -e stepperve 
+# build:stepperve:
+#   extends: .build
+#   script:
+#     - pio run -e stepperve 
 
 build:mixed:
   extends: .build
@@ -71,46 +68,35 @@ build:relaylp:
   script:
     - pio run -e relaylp 
 
-build:brushless:
-  extends: .build
-  script:
-    - pio run -e brushless 
+# build:brushless:
+#   extends: .build
+#   script:
+#     - pio run -e brushless 
 
 build:analogls:
   extends: .build
   script:
     - pio run -e analogls 
 
-build:core-s1:
-  extends: .build
-  script:
-    - pio run -e core-s1 
-
-build:discrete-s2:
-  extends: .build
-  script:
-    - pio run -e discrete-s2 
-
-build:stepperve-s2:
-  extends: .build
-  script:
-    - pio run -e stepperve-s2 
-
 build:examples:
   stage: build:examples
   needs:
     - job: build:core
   script:
-    - ./scripts/build_examples.sh
+    - |
+      find examples/ -name "*.cpp" | while read -r f; do
+        echo "Build $f"
+        cat $f > main/main.cpp
+        pio run -e core || { echo "Error: Build failed for $f"; exit 1; }
+      done
   after_script:
     - git restore main/main.cpp
   rules:
-    - if: '($CI_PIPELINE_SOURCE == "push") && ($CI_COMMIT_BRANCH == "dev")'
-    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
-    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && 
+      ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")'
 
 pkg:library:
-  stage: pkg:library
+  stage: pkg
   needs:
     - job: build:examples
   before_script:
@@ -118,30 +104,31 @@ pkg:library:
     - mkdir .oi/lib/
   script:
     - pio pkg pack --output=".oi/lib/"
+  artifacts:
+    paths:
+      - .oi/lib/
   rules:
-    - if: '($CI_PIPELINE_SOURCE == "push") && ($CI_COMMIT_BRANCH == "dev")'
-    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" || "dev")'
-    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && 
+      ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")'
 
-deploy:
-  stage: deploy
+pkg:bin:
+  stage: pkg
   needs:
     - job: build:core
     - job: build:discrete
-    - job: build:discreteve
+    # - job: build:discreteve
     - job: build:stepper
-    - job: build:stepperve
+    # - job: build:stepperve
     - job: build:mixed
     - job: build:relayhp
     - job: build:relaylp
-    - job: build:brushless
+    # - job: build:brushless
     - job: build:analogls
-    - job: build:core-s1
-    - job: build:discrete-s2
-    - job: build:stepperve-s2
   script:
-    - lftp $OVH_URI -e "mirror --reverse --verbose -R ./.oi/bin/ ./www/oi-content/bin/; quit" -u $OVH_USERNAME,$OVH_PASSWORD
-  only:
-    - tags
-  except:
-    - branches
+    - echo "pkb bin"
+  artifacts:
+    paths:
+      - .oi/bin/
+  rules:
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && 
+      ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")'

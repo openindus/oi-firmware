@@ -14,13 +14,13 @@
  */
 
 #include "DiscreteStandalone.h"
-#include "DiscreteConfig.h"
+#include "DiscretePinout.h"
 
-#if defined(CONFIG_DISCRETE) || defined(CONFIG_DISCRETE_VE)
+#if defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)
 
 static const char DISCRETE_TAG[] = "Discrete";
 
-gpio_num_t _storNum[] = {
+const gpio_num_t _doutGpio[] = {
     DISCRETE_PIN_DOUT_1,
     DISCRETE_PIN_DOUT_2,
     DISCRETE_PIN_DOUT_3,
@@ -31,7 +31,18 @@ gpio_num_t _storNum[] = {
     DISCRETE_PIN_DOUT_8
 };
 
-gpio_num_t _etorGpio[] = {
+const adc1_channel_t _doutAdcChannel[] = {
+    DISCRETE_CHANNEL_DOUT_CURRENT_1,
+    DISCRETE_CHANNEL_DOUT_CURRENT_2,
+    DISCRETE_CHANNEL_DOUT_CURRENT_3,
+    DISCRETE_CHANNEL_DOUT_CURRENT_4,
+    DISCRETE_CHANNEL_DOUT_CURRENT_5,
+    DISCRETE_CHANNEL_DOUT_CURRENT_6,
+    DISCRETE_CHANNEL_DOUT_CURRENT_7,
+    DISCRETE_CHANNEL_DOUT_CURRENT_8
+};
+
+const gpio_num_t _dinGpio[] = {
     DISCRETE_PIN_DIN_1,
     DISCRETE_PIN_DIN_2,
     DISCRETE_PIN_DIN_3,
@@ -45,20 +56,22 @@ gpio_num_t _etorGpio[] = {
 };
 
 #if defined(CONFIG_IDF_TARGET_ESP32S3)
-adc2_channel_t _eanaChannel[] = {
+adc2_channel_t _ainChannel[] = {
     DISCRETE_CHANNEL_AIN_1,
-    DISCRETE_CHANNEL_AIN_2,
-    DISCRETE_CHANNEL_AIN_3
+    DISCRETE_CHANNEL_AIN_2
 };
 #elif defined(CONFIG_IDF_TARGET_ESP32S2)
-adc1_channel_t _eanaChannel[] = {
+adc1_channel_t _ainChannel[] = {
     DISCRETE_CHANNEL_AIN_1
 };
 #endif
 
-esp_adc_cal_characteristics_t* _eanaAdcChar;
+esp_adc_cal_characteristics_t* _ainAdcChar;
 
-DigitalInput* DiscreteStandalone::etor = new DigitalInput(_etorGpio, 10); 
+DigitalInput* DiscreteStandalone::din = new DigitalInput(_dinGpio, 10);
+DigitalOutput* DiscreteStandalone::dout = new DigitalOutput(_doutGpio, _doutAdcChannel, 8);
+
+esp_adc_cal_characteristics_t DiscreteStandalone::_adc1Characteristics;
 
 void DiscreteStandalone::init()
 {
@@ -66,66 +79,77 @@ void DiscreteStandalone::init()
     ModuleStandalone::init();
 
     /* Init DOUT */
-    gpio_config_t storConf = DISCRETE_CONFIG_DOUT_DEFAULT();
-    DigitalOutput::init(&storConf, _storNum);
+    dout->init();
 
-    etor->init();
+    /* Init DIN*/
+    din->init();
 
     /* Init AIN */
     ESP_LOGI(DISCRETE_TAG, "Init AIN");
-    for (int i=0; i<AIN_MAX; i++) {
-#if defined(CONFIG_IDF_TARGET_ESP32S3)
-        ESP_ERROR_CHECK(adc2_config_channel_atten(_eanaChannel[i], ADC_ATTEN_DB_11));
-// #elif defined(CONFIG_IDF_TARGET_ESP32S2)
-//         ESP_ERROR_CHECK(adc1_config_channel_atten(_eanaChannel[i], ADC_ATTEN_DB_11));
-#endif
+    for (auto i: _ainChannel) {
+        ESP_ERROR_CHECK(adc2_config_channel_atten(_ainChannel[i], ADC_ATTEN_DB_11));
     }
+    esp_adc_cal_characterize(ADC_UNIT_2, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &_adc1Characteristics);
 }
 
-void DiscreteStandalone::digitalWrite(DigitalOutputNum_t stor, uint8_t level) 
+void DiscreteStandalone::digitalWrite(DigitalOutputNum_t doutNum, uint8_t level)
 {
-    DigitalOutput::digitalWrite(stor, level);
+    dout->write(doutNum, level);
 }
 
-int DiscreteStandalone::digitalRead(DigitalInputNum_t etorNum)
+void DiscreteStandalone::digitalToggle(DigitalOutputNum_t doutNum)
 {
-    return etor->digitalRead(etorNum);
+    dout->toggle(doutNum);
 }
 
-void DiscreteStandalone::attachInterrupt(DigitalInputNum_t etorNum, IsrCallback_t callback, InterruptMode_t mode, void* arg) 
+int DiscreteStandalone::digitalRead(DigitalInputNum_t dinNum)
 {
-    etor->attachInterrupt(etorNum, callback, mode, arg);
+    return din->read(dinNum);
 }
 
-void DiscreteStandalone::detachInterrupt(DigitalInputNum_t etorNum)
+void DiscreteStandalone::attachInterrupt(DigitalInputNum_t dinNum, IsrCallback_t callback, InterruptMode_t mode, void* arg)
 {
-    etor->detachInterrupt(etorNum);
+    din->attachInterrupt(dinNum, callback, mode, arg);
 }
 
-int DiscreteStandalone::analogRead(AnalogInputNum_t eana) 
+void DiscreteStandalone::detachInterrupt(DigitalInputNum_t dinNum)
+{
+    din->detachInterrupt(dinNum);
+}
+
+int DiscreteStandalone::analogRead(AnalogInput_Num_t ain)
 {
     int raw = -1;
-    if (eana < AIN_MAX) {
+    if (ain < AIN_MAX) {
 #if defined(CONFIG_IDF_TARGET_ESP32S3)
-        adc2_get_raw(_eanaChannel[eana], (adc_bits_width_t)(ADC_WIDTH_MAX-1), &raw);
+        adc2_get_raw(_ainChannel[ain], (adc_bits_width_t)(ADC_WIDTH_MAX-1), &raw);
 #elif defined(CONFIG_IDF_TARGET_ESP32S2)
-        raw = adc1_get_raw(_eanaChannel[eana]);
+        raw = adc1_get_raw(_ainChannel[ain]);
 #endif
     } else {
-        ESP_LOGE(DISCRETE_TAG, "Invalid AIN_%d", eana+1);
+        ESP_LOGE(DISCRETE_TAG, "Invalid AIN_%d", ain+1);
     }
     return raw;
 }
 
-int DiscreteStandalone::analogReadMilliVolts(AnalogInputNum_t eana)
+int DiscreteStandalone::analogReadMilliVolts(AnalogInput_Num_t ain)
 {
-    /** @todo */
-    return -1;
+    int adc_reading = DiscreteStandalone::analogRead(ain);
+
+    // Convert adc_reading to voltage in mV
+    uint32_t voltage = esp_adc_cal_raw_to_voltage(adc_reading, &_adc1Characteristics);
+
+    return voltage * DISCRETE_ADC_REDUCTION_FACTOR;
 }
 
-void DiscreteStandalone::analogWrite(DigitalOutputNum_t stor, uint8_t duty) 
+void DiscreteStandalone::analogWrite(DigitalOutputNum_t doutNum, uint8_t duty)
 {
-    DigitalOutput::analogWrite(stor, duty);
+    /** @todo */
+}
+
+float DiscreteStandalone::getCurrent(DigitalOutputNum_t doutNum)
+{
+    return dout->getCurrent(doutNum);
 }
 
 #endif

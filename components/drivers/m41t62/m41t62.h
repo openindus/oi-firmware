@@ -24,8 +24,6 @@ extern "C" {
 #include "driver/i2c.h"
 #include "STM32DriversComponents/M41T62.h"
 
-#define RTC_I2C_PORT_NUM (i2c_port_t) I2C_NUM_0
-
 typedef void (*rtc_isr_t)(void *);
 
 extern rtc_isr_t rtc_user_handler;
@@ -79,6 +77,12 @@ esp_err_t rtc_i2c_write(i2c_port_t i2c_port, uint8_t address, uint8_t reg, uint8
  * @param arg Optional argument
  */
 void rtc_isr_handler(void* arg);
+
+/**
+ * @brief Internal interrupt handler for RTC
+ * @param arg Optional argument
+ */
+void rtc_i2c_set_port(i2c_port_t i2c_port);
 
 #ifdef __cplusplus
 }

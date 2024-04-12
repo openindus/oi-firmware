@@ -17,7 +17,7 @@
 
 #include "StepperPinout.h"
 
-#if defined(CONFIG_STEPPER)
+#if defined(OI_STEPPER)
 
 #define STEPPER_CONFIG_MOTOR_DEFAULT()                          \
 {                                                               \
@@ -50,7 +50,7 @@
     .intr_type = GPIO_INTR_ANYEDGE,                             \
 }
 
-#elif defined(CONFIG_STEPPER_VE)
+#elif defined(OI_STEPPER_VE)
 
 #define STEPPER_CONFIG_MOTOR_DEFAULT()                          \
 {                                                               \

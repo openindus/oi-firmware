@@ -25,40 +25,40 @@ public:
      * @brief Read an input current level. Argument is the DIN to read.
      * The function return an integer that correspond to the value of the DIN.
      * 
-     * @param etorNum DIN to monitor.
+     * @param dinNum DIN to monitor.
      * @return Value of the DIN input (1 or 0). 
      */
-    virtual int digitalRead(DigitalInputNum_t etorNum) = 0;
+    virtual int digitalRead(DigitalInputNum_t dinNum) = 0;
 
     /**
      * @brief Attach a user callback to the DIN interrupts. 
      * First argument is the DIN to attach interrupt, the second argument is the interrupt handler, 
      * third argument is the interrupt mode.
      * 
-     * @param etorNum DIN to attach interrupt.
+     * @param dinNum DIN to attach interrupt.
      * @param handler Handler to execute when an interrupt occurs.
      * @param mode Interrupt mode (RISING, FALLING or CHANGE)
      */
-    virtual void attachInterrupt(DigitalInputNum_t etorNum, IsrCallback_t callback, InterruptMode_t mode=RISING_MODE, void* arg=NULL) = 0;
+    virtual void attachInterrupt(DigitalInputNum_t dinNum, IsrCallback_t callback, InterruptMode_t mode=RISING_MODE, void* arg=NULL) = 0;
     
     /**
      * @brief Detach interrupt of a given DIN. 
      * First argument is the DIN to detach interrupt, the second argument is the interrupt mode, 
      * third argument is the id of the module that attached the interrupt.
      * 
-     * @param etorNum DIN to detach interrupt.
+     * @param dinNum DIN to detach interrupt.
      * @param mode Mode of the interrupt to detach (RISING, FALLING or CHANGE).
      */
-    virtual void detachInterrupt(DigitalInputNum_t etorNum) = 0;
+    virtual void detachInterrupt(DigitalInputNum_t dinNum) = 0;
 
     /**
      * @brief Configure limit switch to perform homing
      * 
      * @param motor 
-     * @param etorNum 
+     * @param dinNum
      * @param logic 
      */
-    virtual void setLimitSwitch(MotorNum_t motor, DigitalInputNum_t etorNum, DigitalInputLogic_t logic=ACTIVE_HIGH) = 0;
+    virtual void setLimitSwitch(MotorNum_t motor, DigitalInputNum_t dinNum, DigitalInputLogic_t logic=ACTIVE_HIGH) = 0;
 
     /**
      * @brief Set the Step Resolution
@@ -135,10 +135,13 @@ public:
     virtual void run(MotorNum_t motor, MotorDirection_t direction, float speed) = 0;
 
     /**
-     * @brief Wait while motor is runnig
+     * @brief Check if motor is running
      * 
+     * @param motor 
+     * @return true 
+     * @return false 
      */
-    virtual void waitWhileMotorIsRunning(MotorNum_t motor) = 0;
+    virtual bool isRunning(MotorNum_t motor) = 0;
 
     /**
      * @brief Run task to perform homing

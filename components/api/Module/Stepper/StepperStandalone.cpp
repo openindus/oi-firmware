@@ -18,22 +18,22 @@
 #include "StepperConfig.h"
 #include "StepperParam.h"
 
-#if defined(CONFIG_STEPPER) || defined(CONFIG_STEPPER_VE)
+#if defined(OI_STEPPER) || defined(OI_STEPPER_VE)
 
 static const char STEPPER_TAG[] = "Stepper";
 
-gpio_num_t _etorGpio[] = { 
+const gpio_num_t _dinGpio[] = {
     STEPPER_GPIO_PIN_DIN_1,
     STEPPER_GPIO_PIN_DIN_2,
     STEPPER_GPIO_PIN_DIN_3,
     STEPPER_GPIO_PIN_DIN_4,
-#if defined(CONFIG_STEPPER_VE)
+#if defined(OI_STEPPER_VE)
     STEPPER_GPIO_PIN_DIN_5,
     STEPPER_GPIO_PIN_DIN_6
 #endif
 };
 
-DigitalInput* StepperStandalone::etor = new DigitalInput(_etorGpio, STEPPER_DIN_NUM);
+DigitalInput* StepperStandalone::din = new DigitalInput(_dinGpio, STEPPER_DIN_NUM);
 
 void StepperStandalone::init()
 {
@@ -42,33 +42,36 @@ void StepperStandalone::init()
     ESP_LOGI(STEPPER_TAG, "Init");
 
     /* Init DIN */
-    etor->init();
+    din->init();
 
     /* Init Motor stepper */
     ESP_LOGI(STEPPER_TAG, "Init Motor stepper");
     PS01_Hal_Config_t ps01Conf = STEPPER_CONFIG_MOTOR_DEFAULT();
     PS01_Param_t ps01Param = STEPPER_PARAM_MOTOR_DEFAULT();
-    MotorStepper::init(&ps01Conf, &ps01Param, _etorGpio);
+    MotorStepper::init(&ps01Conf, &ps01Param, _dinGpio);
+
+    /* Init Motor stepper NVS param */
+    MotorStepperParam::initNVSParam();
 }
 
-int StepperStandalone::digitalRead(DigitalInputNum_t etorNum)
+int StepperStandalone::digitalRead(DigitalInputNum_t dinNum)
 {
-    return etor->digitalRead(etorNum);
+    return din->read(dinNum);
 }
 
-void StepperStandalone::attachInterrupt(DigitalInputNum_t etorNum, IsrCallback_t callback, InterruptMode_t mode, void* arg) 
+void StepperStandalone::attachInterrupt(DigitalInputNum_t dinNum, IsrCallback_t callback, InterruptMode_t mode, void* arg)
 {
-    etor->attachInterrupt(etorNum, callback, mode, arg);
+    din->attachInterrupt(dinNum, callback, mode, arg);
 }
 
-void StepperStandalone::detachInterrupt(DigitalInputNum_t etorNum)
+void StepperStandalone::detachInterrupt(DigitalInputNum_t dinNum)
 {
-    etor->detachInterrupt(etorNum);
+    din->detachInterrupt(dinNum);
 }
 
-void StepperStandalone::setLimitSwitch(MotorNum_t motor, DigitalInputNum_t etorNum, DigitalInputLogic_t logic)
+void StepperStandalone::setLimitSwitch(MotorNum_t motor, DigitalInputNum_t dinNum, DigitalInputLogic_t logic)
 {
-    MotorStepper::setLimitSwitch(motor, etorNum, logic);
+    MotorStepper::setLimitSwitch(motor, dinNum, logic);
 }
 
 void StepperStandalone::setStepResolution(MotorNum_t motor, MotorStepResolution_t res)
@@ -76,15 +79,29 @@ void StepperStandalone::setStepResolution(MotorNum_t motor, MotorStepResolution_
     MotorStepper::setStepResolution(motor, res);
 }
 
-void StepperStandalone::setSpeed(MotorNum_t motor, float speed)
+void StepperStandalone::setMaxSpeed(MotorNum_t motor, float speed)
 {
-    float acc = speed * 2.0;
-    float dec = speed * 2.0;
-    MotorStepper::setAcceleration(motor, acc);
-    MotorStepper::setDeceleration(motor, dec);
     MotorStepper::setMaxSpeed(motor, speed);
-    MotorStepper::setMinSpeed(motor, 0);
+}
+
+void StepperStandalone::setMinSpeed(MotorNum_t motor, float speed)
+{
+    MotorStepper::setMinSpeed(motor, speed);
+}
+
+void StepperStandalone::setFullStepSpeed(MotorNum_t motor, float speed)
+{
     MotorStepper::setFullStepSpeed(motor, speed);
+}
+
+void StepperStandalone::setAcceleration(MotorNum_t motor, float acc)
+{
+    MotorStepper::setAcceleration(motor, acc);
+}
+
+void StepperStandalone::setDeceleration(MotorNum_t motor, float dec)
+{
+    MotorStepper::setDeceleration(motor, dec);
 }
 
 int32_t StepperStandalone::getPosition(MotorNum_t motor)
@@ -122,9 +139,9 @@ void StepperStandalone::run(MotorNum_t motor, MotorDirection_t direction, float 
     MotorStepper::run(motor, direction, speed);
 }
 
-void StepperStandalone::waitWhileMotorIsRunning(MotorNum_t motor)
+bool StepperStandalone::isRunning(MotorNum_t motor)
 {
-    MotorStepper::waitWhileMotorIsRunning(motor);
+    return MotorStepper::isRunning(motor);
 }
 
 void StepperStandalone::homing(MotorNum_t motor, float speed)

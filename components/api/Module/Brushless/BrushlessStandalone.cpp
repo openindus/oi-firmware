@@ -16,16 +16,16 @@
 #include "BrushlessStandalone.h"
 #include "BrushlessConfig.h"
 
-#if defined(CONFIG_BRUSHLESS)
+#if defined(OI_BRUSHLESS)
 
 static const char BRUSHLESS_TAG[] = "Brushless";
 
-gpio_num_t _storNum[] = {
+gpio_num_t _doutNum[] = {
     BRUSHLESS_PIN_DOUT_1,
     BRUSHLESS_PIN_DOUT_2
 };
 
-gpio_num_t _etorNum[] = {
+gpio_num_t _dinNum[] = {
     BRUSHLESS_PIN_DIN_1,
     BRUSHLESS_PIN_DIN_2
 };
@@ -45,8 +45,8 @@ void BrushlessStandalone::init(void)
     vTaskDelay(10 / portTICK_PERIOD_MS);
 
     /* Init DOUT */
-    gpio_config_t storConf = BRUSHLESS_CONFIG_DOUT_DEFAULT();
-    DigitalOutput::init(&storConf, _storNum);
+    gpio_config_t doutConf = BRUSHLESS_CONFIG_DOUT_DEFAULT();
+    DigitalOutput::init(&doutConf, _doutNum);
 
     DigitalOutput::digitalWrite(DOUT_1,1);
     vTaskDelay(50 / portTICK_PERIOD_MS);

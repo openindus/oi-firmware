@@ -19,24 +19,26 @@
 
 static const char MODULE_TAG[] = "Module";
 
-std::map<std::pair<EventType_t,uint16_t>, EventCallback_t> ModuleMaster::_event;
-std::vector<uint16_t> ModuleMaster::_ids;
+std::map<uint16_t,int,std::greater<uint16_t>> ModuleMaster::_ids;
 
 void ModuleMaster::init(void)
 {
     ESP_LOGI(MODULE_TAG, "Bus init");
+
     /* Bus RS/CAN */
-    BusRs::begin(MODULE_RS_NUM_PORT, MODULE_PIN_RS_UART_TX, MODULE_PIN_RS_UART_RX);
-    BusCan::begin(MODULE_PIN_CAN_TX, MODULE_PIN_CAN_RX);
+    BusRS::begin(MODULE_RS_NUM_PORT, MODULE_PIN_RS_UART_TX, MODULE_PIN_RS_UART_RX);
+    BusCAN::begin(MODULE_PIN_CAN_TX, MODULE_PIN_CAN_RX);
 
     /* Bus IO */
     BusIO::Config_t config = {
         .adcChannelId = MODULE_OI_ID_ADC_CHANNEL,
         .adcWidthId = MODULE_OI_ID_ADC_WIDTH,
         .gpioNumSync = MODULE_PIN_OI_GPIO,
+        .gpioModeSync = GPIO_MODE_INPUT_OUTPUT,
         .gpioNumPower = MODULE_PIN_CMD_MOSFET_ALIM,
     };
     BusIO::init(&config);
+    BusIO::writeSync(0);
 
     ESP_LOGI(MODULE_TAG, "Create bus task");
     xTaskCreate(_busTask, "Bus task", 4096, NULL, 1, NULL);
@@ -45,32 +47,82 @@ void ModuleMaster::init(void)
 bool ModuleMaster::autoId(void)
 {
     ESP_LOGI(MODULE_TAG, "Auto ID");
-    
-    BusRs::Frame_t frame;
-    frame.command = MODULE_AUTO_ID;
-    frame.identifier = 0;
-    frame.broadcast = true;
-    frame.direction = 1;
-    frame.ack = false;
-    frame.length = 0;
-    BusRs::write(&frame);
 
-    /* Wait */
-    vTaskDelay(1000/portTICK_PERIOD_MS);
+    /* Check if IDs are in bus order or by Serial Number */
+    int num_id_auto = 0;
+    int num_id_sn = 0;
 
-    if (ModuleControl::_instances.size() == _ids.size()) {
-        sort(_ids.begin(), _ids.end(), std::greater<uint16_t>());
-        for (int i=0; i<_ids.size(); i++) {
-            ModuleControl::setId(ModuleControl::_instances[i], _ids[i]);
+    for (int i=0; i<ModuleControl::getAllInstances().size(); i++) {
+        if (ModuleControl::getSN(ModuleControl::getAllInstances()[i]) == 0) {
+            num_id_auto++;
+        } else {
+            num_id_sn++;
         }
-        frame.command = MODULE_SET_STATUS;
-        BusRs::write(&frame);
-        return true;
-    } else {
-        ESP_LOGE(MODULE_TAG, "Number of instantiated modules: %d",  ModuleControl::_instances.size());
-        ESP_LOGE(MODULE_TAG, "Number of IDs receved: %d",  _ids.size());
+    }
+
+    if ((num_id_auto > 0) && (num_id_sn > 0)) {
+        ESP_LOGE(MODULE_TAG, "Modules must be initialized using the same constructor. You cannot initialize some module without SN and some modules with SN.");
+        ESP_LOGE(MODULE_TAG, "Number of module with SN:%i", num_id_sn);
+        ESP_LOGE(MODULE_TAG, "Number of module without SN:%i", num_id_auto);
         return false;
     }
+
+    /* Initialize module with auto id (bus order) */
+    if (num_id_auto) {
+        
+        _ids.clear();
+
+        BusRS::Frame_t frame;
+        frame.cmd = CMD_DISCOVER;
+        frame.id = 0;
+        frame.dir = 1;
+        frame.ack = false;
+        frame.length = 0;
+        BusRS::write(&frame);
+
+        ModuleStandalone::ledOn(LED_YELLOW);
+
+        /* Wait */
+        vTaskDelay(200/portTICK_PERIOD_MS);
+    
+        if (ModuleControl::getAllInstances().size() == _ids.size()) {
+            std::map<uint16_t, int>::iterator it = _ids.begin();
+            for (int i=0; i<ModuleControl::getAllInstances().size(); i++) {
+                ModuleControl::setId(ModuleControl::getAllInstances()[i], it->first);
+                ModuleControl::setSN(ModuleControl::getAllInstances()[i], it->second);
+                ++it;
+                ModuleControl::getAllInstances()[i]->ledOn(LED_YELLOW);
+                vTaskDelay(50/portTICK_PERIOD_MS);
+            }
+        } else {
+            ESP_LOGE(MODULE_TAG, "Number of instantiated modules: %d",  ModuleControl::getAllInstances().size());
+            ESP_LOGE(MODULE_TAG, "Number of IDs received: %d",  _ids.size());
+            return false;
+        }
+    }
+
+    /* Initialize module with SN */
+    else {
+        for (int i=0; i<ModuleControl::getAllInstances().size(); i++) {
+            uint16_t current_id = ModuleMaster::getIdFromSN(ModuleControl::getSN(ModuleControl::getAllInstances()[i]));
+            if (current_id != 0) {
+                ModuleControl::setId(ModuleControl::getAllInstances()[i], current_id);
+                ModuleControl::getAllInstances()[i]->ledOn(LED_YELLOW);
+                vTaskDelay(50/portTICK_PERIOD_MS);
+            } else {
+                ESP_LOGE(MODULE_TAG, "Cannot instanciate module with SN:%i",  ModuleControl::getSN(ModuleControl::getAllInstances()[i]));
+                return false;
+            }
+        }
+    }
+
+    vTaskDelay(50/portTICK_PERIOD_MS);
+
+    /* Success, broadcast message to set all led green */
+    for (int i=0; i<ModuleControl::getAllInstances().size(); i++) {
+        ModuleControl::getAllInstances()[i]->ledBlink(LED_GREEN, 1000);
+    }
+    return true;
 }
 
 void autoTest(void)
@@ -78,71 +130,125 @@ void autoTest(void)
     /** @todo: auto test when starting the module */
 }
 
-void ModuleMaster::program(uint32_t num)
+void ModuleMaster::program(int num)
 {
     UsbConsole::end(); // Do not perform in the task
     xTaskCreate(&_programmingTask, "Module programming task", 4096, (void*)num, 1, NULL);
-    MODULE_PROGRAMMING();
+    ModuleStandalone::ledBlink(LED_WHITE, 1000); // Programming mode
 }
 
-bool ModuleMaster::ping(uint32_t num) 
+bool ModuleMaster::ping(int num) 
 {
-    BusRs::Frame_t frame;
-    frame.command = MODULE_PING;
-    frame.identifier = 0;
-    frame.broadcast = true;
-    frame.direction = 1;
+    BusRS::Frame_t frame;
+    frame.cmd = CMD_PING;
+    frame.id = 0;
+    frame.dir = 1;
     frame.ack = true;
     frame.length = 4;
     frame.data = (uint8_t*)&num; // Serial number
-    return (BusRs::requestFrom(&frame, pdMS_TO_TICKS(10)) == 0);
+    BusRS::write(&frame, pdMS_TO_TICKS(10));
+    return (BusRS::read(&frame, pdMS_TO_TICKS(10)) == 0);
 }
 
-void ModuleMaster::onEvent(EventType_t type, uint16_t id, EventCallback_t event)
+uint16_t ModuleMaster::getIdFromSN(int num)
 {
-    _event.insert({
-        std::make_pair(type, id),
-        event
-    });
+    uint16_t id = 0;
+
+    BusRS::Frame_t frame;
+    frame.cmd = CMD_PING;
+    frame.id = 0;
+    frame.dir = 1;
+    frame.ack = true;
+    frame.length = 4;
+    frame.data = (uint8_t*)malloc(4);
+    memcpy(frame.data, &num, 4); // Serial number
+    BusRS::write(&frame, pdMS_TO_TICKS(100));
+    BusRS::read(&frame, pdMS_TO_TICKS(100));
+    id = frame.id;
+    free(frame.data);
+    return id;
 }
 
-void ModuleMaster::handleEvent(EventType_t type, uint16_t id, int num)
+void ModuleMaster::getBoardInfo(int num, Module_Info_t* board_info)
 {
-    if (_event.find(std::make_pair(type, id)) != _event.end()) {
-        for (auto it=_event.begin(); it!=_event.end(); it++) {
-            if ((it->first.first == type) && 
-                (it->first.second == id)) {
-                (*it).second(num);
-            }
-        }
-    } else {
-        ESP_LOGW(MODULE_TAG, "Interrupt does not exist: intr=0x%02x, id=%d", type, id);
+    uint16_t id = 0;
+    
+    id = ModuleMaster::getIdFromSN(num);
+    if (id == 0) {
+        ModuleStandalone::ledBlink(LED_RED, 1000); // Error
+        return;
     }
+
+    BusRS::Frame_t frame;
+    frame.cmd = CMD_GET_BOARD_INFO;
+    frame.id = id;
+    frame.dir = 1;
+    frame.ack = true;
+    frame.length = 0;
+    frame.data = (uint8_t*)malloc(sizeof(Module_Info_t));
+    BusRS::write(&frame, pdMS_TO_TICKS(100));
+    BusRS::read(&frame, pdMS_TO_TICKS(100));
+    memcpy(board_info, frame.data, sizeof(Module_Info_t));
+    free(frame.data);
+    return;
+}
+
+std::map<uint16_t,int,std::greater<uint16_t>> ModuleMaster::discoverSlaves(void)
+{
+    // Delete previous id list
+    _ids.clear();
+
+    BusRS::Frame_t frame;
+    frame.cmd = CMD_DISCOVER;
+    frame.id = 0;
+    frame.dir = 1;
+    frame.ack = false;
+    frame.length = 0;
+    BusRS::write(&frame);
+
+    // Wait for slaves to answer
+    vTaskDelay(pdMS_TO_TICKS(200));
+
+    return _ids;
 }
 
 void ModuleMaster::_busTask(void *pvParameters) 
 {
-    BusCan::Frame_t frame;
+    BusCAN::Frame_t frame;
     uint16_t id;
+    uint8_t length;
     while (1) {
-        if (BusCan::read(&frame, &id, portMAX_DELAY) != -1) { 
-            printf("Bus CAN read to %d | cmd(%d), type(%d), id(%d), data(%d)\n", 
-                id, frame.command, frame.type, frame.identifier, frame.data);
-            switch (frame.command)
+        if (BusCAN::read(&frame, &id, &length) != -1) { 
+            switch (frame.cmd)
             {
-            case MODULE_EVENT:
-                handleEvent((EventType_t)frame.type, frame.identifier, (int)frame.data);
-                break;
-            case MODULE_AUTO_ID:
-                _ids.push_back((uint16_t)frame.identifier);
-                break;
-            
-            default:
-                ESP_LOGW(MODULE_TAG, "Receive undefined command");
-                break;
+                case CMD_EVENT:
+                {
+                    if (ModuleControl::getEventCallbacks().find(std::make_pair(frame.data[0], id)) != ModuleControl::getEventCallbacks().end()) {
+                        for (auto it=ModuleControl::getEventCallbacks().begin(); it!=ModuleControl::getEventCallbacks().end(); it++) {
+                            if ((it->first.first == frame.data[0]) && 
+                                (it->first.second == id)) {
+                                (*it).second(frame.data[1]);
+                            }
+                        }
+                    } else {
+                        ESP_LOGW(MODULE_TAG, "Command does not exist: command: 0x%02x, id: %d", frame.data[0], id);
+                    }                
+                    break;
+                }
+                case CMD_DISCOVER:
+                {
+                    int* sn = reinterpret_cast<int*>(frame.data);
+                    _ids.insert(std::pair<int, int>(id, *sn));
+                    break;
+                }
+                default:
+                {
+                    ESP_LOGW(MODULE_TAG, "Receive undefined command");
+                    break;
+                }
             }
         } else {
-            MODULE_ERROR();
+            ModuleStandalone::ledBlink(LED_RED, 1000); // Error
         }
     }
 }
@@ -154,40 +260,29 @@ void ModuleMaster::_programmingTask(void *pvParameters)
     int sequence = 0;
     UsbSerialProtocol::Packet_t packet;
     packet.data = (uint8_t*)malloc(16400);
-    BusRs::Frame_t frame;
+    BusRS::Frame_t frame;
     frame.data = (uint8_t*)malloc(1024);
 
     /* Get bus ID */
-    frame.command = MODULE_BUS_ID;
-    frame.identifier = 0;
-    frame.broadcast = true;
-    frame.direction = 1;
-    frame.ack = true;
-    frame.length = 4;
-    memcpy(frame.data, &num, 4); // Serial number
-    if (BusRs::requestFrom(&frame, pdMS_TO_TICKS(100)) < 0) {
-        MODULE_ERROR();
-    } else {
-        memcpy(&id, frame.data, 2);
-        frame.identifier = id;
-    }
+    id = getIdFromSN(num);
 
     /* FlashLoader begin */
-    frame.command = MODULE_FLASH_LOADER_BEGIN;
-    frame.identifier = id;
-    frame.broadcast = false;
-    frame.direction = 1;
+    frame.cmd = CMD_FLASH_LOADER_BEGIN;
+    frame.id = id;
+    frame.dir = 1;
     frame.ack = true;
     frame.length = 0;
-    if (BusRs::requestFrom(&frame, pdMS_TO_TICKS(5000)) < 0) {
-        MODULE_ERROR();
+    BusRS::write(&frame, pdMS_TO_TICKS(5000));
+    if (BusRS::read(&frame, pdMS_TO_TICKS(5000)) < 0) {
+        ModuleStandalone::ledBlink(LED_RED, 1000); // Error
+        goto end;
     }
 
-    UsbSerialProtocol::begin();
+    UsbSerialProtocol::begin(115200);
 
     while (1) {
         if (UsbSerialProtocol::read(&packet) < 0) {
-            MODULE_ERROR();
+            ModuleStandalone::ledBlink(LED_RED, 1000); // Error
         } else {
             switch (packet.command)
             {
@@ -195,30 +290,30 @@ void ModuleMaster::_programmingTask(void *pvParameters)
                 sequence = 0;
                 memcpy(&packet.size, &packet.data[0], 4); // data size
                 for (int i=0; i<(packet.size/1024); i++) {
-                    frame.command = MODULE_FLASH_LOADER_WRITE;
-                    frame.identifier = id;
-                    frame.broadcast = false;
-                    frame.direction = 1;
+                    frame.cmd = CMD_FLASH_LOADER_WRITE;
+                    frame.id = id;
+                    frame.dir = 1;
                     frame.ack = true;
                     frame.length = 1024;
-                    frame.seq_num = sequence;
                     memcpy(frame.data, &packet.data[sequence*1024+16], 1024); // data
-                    if (BusRs::requestFrom(&frame, pdMS_TO_TICKS(100)) < 0) {
-                        MODULE_ERROR();
+                    BusRS::write(&frame, pdMS_TO_TICKS(100));
+                    if (BusRS::read(&frame, pdMS_TO_TICKS(100)) < 0) {
+                        ModuleStandalone::ledBlink(LED_RED, 1000); // Error
+                        goto end;
                     }
                     sequence++;
                 }
                 if ((packet.size%1024) > 0) {
-                    frame.command = MODULE_FLASH_LOADER_WRITE;
-                    frame.identifier = id;
-                    frame.broadcast = false;
-                    frame.direction = 1;
+                    frame.cmd = CMD_FLASH_LOADER_WRITE;
+                    frame.id = id;
+                    frame.dir = 1;
                     frame.ack = true;
                     frame.length = packet.size%1024;
-                    frame.seq_num = sequence;
                     memcpy(frame.data, &packet.data[sequence*1024+16], packet.size%1024); // data
-                    if (BusRs::requestFrom(&frame, pdMS_TO_TICKS(100)) < 0) {
-                        MODULE_ERROR();
+                    BusRS::write(&frame, pdMS_TO_TICKS(100));
+                    if (BusRS::read(&frame, pdMS_TO_TICKS(100)) < 0) {
+                        ModuleStandalone::ledBlink(LED_RED, 1000); // Error
+                        goto end;
                     }
                 }                
                 packet.direction = 1;
@@ -238,15 +333,16 @@ void ModuleMaster::_programmingTask(void *pvParameters)
                 break;
 
             case UsbSerialProtocol::READ_REG:
-                frame.command = MODULE_READ_REGISTER;
-                frame.identifier = id;
-                frame.broadcast = false;
-                frame.direction = 1;
+                frame.cmd = CMD_READ_REGISTER;
+                frame.id = id;
+                frame.dir = 1;
                 frame.ack = true;
                 frame.length = 4;
                 memcpy(frame.data, packet.data, 4); // addr
-                if (BusRs::requestFrom(&frame, pdMS_TO_TICKS(200)) < 0) {
-                    MODULE_ERROR();
+                BusRS::write(&frame, pdMS_TO_TICKS(200));
+                if (BusRS::read(&frame, pdMS_TO_TICKS(200)) < 0) {
+                    ModuleStandalone::ledBlink(LED_RED, 1000); // Error
+                    goto end;
                 } else {
                     packet.direction = 1;
                     packet.size = 4;
@@ -257,15 +353,16 @@ void ModuleMaster::_programmingTask(void *pvParameters)
                 break;
 
             case UsbSerialProtocol::SPI_FLASH_LOADER_MD5:
-                frame.command = MODULE_FLASH_LOADER_CHECK;
-                frame.identifier = id;
-                frame.broadcast = false;
-                frame.direction = 1;
+                frame.cmd = CMD_FLASH_LOADER_CHECK;
+                frame.id = id;
+                frame.dir = 1;
                 frame.ack = true;
                 frame.length = 4;
                 memcpy(frame.data, &packet.data[4], 4); // flash size
-                if (BusRs::requestFrom(&frame, pdMS_TO_TICKS(500)) < 0) {
-                    MODULE_ERROR();
+                BusRS::write(&frame, pdMS_TO_TICKS(500));
+                if (BusRS::read(&frame, pdMS_TO_TICKS(3000)) < 0) {
+                    ModuleStandalone::ledBlink(LED_RED, 1000); // Error
+                    goto end;
                 } else {
                     packet.direction = 1;
                     packet.size = 18;
@@ -274,15 +371,22 @@ void ModuleMaster::_programmingTask(void *pvParameters)
                     UsbSerialProtocol::write(&packet);
                 }
                 break;
+            
+            case UsbSerialProtocol::CHANGE_BAUDRATE:
+                packet.direction = 1;
+                packet.size = 4;
+                memset(packet.data, 0x00, 4);
+                UsbSerialProtocol::write(&packet);
+                UsbSerialProtocol::setBaudrate(921600);
+                break;
 
             case UsbSerialProtocol::FLASH_LOADER_END:
-                frame.command = MODULE_FLASH_LOADER_END;
-                frame.identifier = id;
-                frame.broadcast = false;
-                frame.direction = 1;
+                frame.cmd = CMD_FLASH_LOADER_END;
+                frame.id = id;
+                frame.dir = 1;
                 frame.ack = 0;
                 frame.length = 0;
-                BusRs::write(&frame);
+                BusRS::write(&frame);
                 packet.direction = 1;
                 packet.size = 4;
                 memset(packet.data, 0x00, 4);
@@ -300,6 +404,8 @@ void ModuleMaster::_programmingTask(void *pvParameters)
             }
         }
     }
+
+end:
     free(packet.data);
     packet.data = NULL;
     free(frame.data);

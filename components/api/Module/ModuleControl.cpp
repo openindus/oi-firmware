@@ -17,57 +17,84 @@
 
 static const char MODULE_TAG[] = "Module";
 
+std::map<std::pair<uint8_t, uint16_t>, std::function<void(uint8_t)>> ModuleControl::_eventCallbacks;
 std::vector<ModuleControl*> ModuleControl::_instances;
 
-uint32_t ModuleControl::request(RequestMsg_t msg)
+/**
+ * @brief 
+ * 
+ * @param color 
+ */
+void ModuleControl::ledOn(LedColor_t color)
 {
-    BusRs::Frame_t frame;
-    frame.command = MODULE_REQUEST;
-    frame.identifier = _id;
-    frame.broadcast = false;
-    frame.direction = 1;
+    _ledStatus(LED_ON, color, 0);
+}
+
+/**
+ * @brief 
+ * 
+ */
+void ModuleControl::ledOff(void)
+{
+    _ledStatus(LED_OFF, LED_NONE, 0);
+}
+
+/**
+ * @brief 
+ * 
+ * @param color 
+ * @param period 
+ */
+void ModuleControl::ledBlink(LedColor_t color, uint32_t period)
+{
+    _ledStatus(LED_BLINK, color, period);
+}
+
+/**
+ * @brief Request a control command
+ * 
+ * @param byte Byte array
+ * @return -1: error, 0 success
+ */
+int ModuleControl::ctrlRequest(std::vector<uint8_t>& msgBytes)
+{
+    BusRS::Frame_t frame;
+    frame.cmd = CMD_CONTROL;
+    frame.id = _id;
+    frame.dir = 1;
     frame.ack = true;
-    frame.length = sizeof(msg.byte);
-    frame.data = msg.byte;
-    if (BusRs::requestFrom(&frame, pdMS_TO_TICKS(100)) < 0) {
-        ESP_LOGE(MODULE_TAG, "requestFrom error");
-        return 0xFFFFFFFF;
+    frame.length = msgBytes.size();
+    frame.data = msgBytes.data();
+    BusRS::write(&frame, pdMS_TO_TICKS(100));
+    if (BusRS::read(&frame, pdMS_TO_TICKS(100)) < 0) {
+        ESP_LOGE(MODULE_TAG, "control error");
+        return -1;
     } else {
-        RequestMsg_t newMsg;
-        memcpy(&newMsg, frame.data, sizeof(newMsg));
-        return newMsg.data;
+        msgBytes.assign(frame.data, frame.data + frame.length);
+        return 0;
     }
 }
 
-void ModuleControl::ledOn(LedColor_t color)
-{
-    _ledState(LED_ON, color, 0);
-}
-
-void ModuleControl::ledOff(void)
-{
-    _ledState(LED_OFF, LED_NONE, 0);
-}
-
-void ModuleControl::ledBlink(LedColor_t color, uint32_t period)
-{
-    _ledState(LED_BLINK, color, period);
-}
-
-void ModuleControl::_ledState(LedState_t state, LedColor_t color, uint32_t period)
+/**
+ * @brief Send command to change led status
+ * 
+ * @param state Led state (On, Off, Blink)
+ * @param color Led color
+ * @param period Period in ms
+ */
+void ModuleControl::_ledStatus(LedState_t state, LedColor_t color, uint32_t period)
 {
     uint8_t payload[6];
     payload[0] = (uint8_t)state;
     payload[1] = (uint8_t)color;
     memcpy(&payload[2], &period, sizeof(uint32_t));
-    BusRs::Frame_t frame;
-    frame.command = MODULE_LED_STATE;
-    frame.identifier = _id;
-    frame.broadcast = false;
-    frame.direction = 1;
+    BusRS::Frame_t frame;
+    frame.cmd = CMD_LED_STATUS;
+    frame.id = _id;
+    frame.dir = 1;
     frame.ack = false;
     frame.length = 6;
     frame.data = payload;
-    BusRs::write(&frame, pdMS_TO_TICKS(100));
+    BusRS::write(&frame, pdMS_TO_TICKS(100));
     vTaskDelay(10 / portTICK_PERIOD_MS);
 }

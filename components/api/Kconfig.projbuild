@@ -1,44 +1,5 @@
 menu "OpenIndus Configuration"
 
-    config MODULE_STANDALONE
-        bool "Module standalone"
-        default n
-
-    config MODULE
-        bool "Configure module"
-        default n
-
-    choice MODULE_TYPE
-        bool "OpenIndus module type"
-        depends on MODULE
-        default CORE
-        help
-            Select OpenIndus module
-
-        config BRUSHLESS
-            bool "Brushless"
-        config CORE
-            bool "Core"
-        config DISCRETE
-            bool "Discrete"
-        config DISCRETE_VE
-            bool "DiscreteVertical"
-        config STEPPER
-            bool "Stepper"
-        config STEPPER_VE
-            bool "StepperVertical"
-        config MIXED
-            bool "Mixed"
-        config RELAY_HP
-            bool "RelayHP"
-        config RELAY_LP
-            bool "RelayLP"
-    endchoice
-
-    config AUTO_ID
-        bool "Configure ID automatically"
-        default y
-
     choice STEPPER_DRIVER
         bool "Stepper driver"
         default POWERSTEP01

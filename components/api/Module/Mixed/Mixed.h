@@ -18,16 +18,12 @@
 #include "MixedStandalone.h"
 #include "MixedSlave.h"
 #include "MixedControl.h"
+#include "MixedCLI.h"
 
-#if defined(CONFIG_MIXED)
-
-#if defined(CONFIG_MODULE_STANDALONE)
-class Mixed : public MixedStandalone {};
+#if defined(OI_MIXED) && defined(MODULE_STANDALONE)
+#define Mixed MixedStandalone
+#elif defined(OI_MIXED) && !defined(MODULE_STANDALONE)
+#define Mixed MixedSlave
 #else 
-class Mixed : public MixedSlave {};
-#endif
-
-#else
-class Mixed : public MixedControl {};
-
+#define Mixed MixedControl
 #endif

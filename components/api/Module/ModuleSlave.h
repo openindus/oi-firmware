@@ -17,7 +17,7 @@
 
 #include "Global.h"
 #include "ModuleStandalone.h"
-#include "ModuleCommand.h"
+#include "Command.h"
 
 class ModuleSlave
 {
@@ -25,14 +25,20 @@ public:
 
     static void init(void);
 
-    static void event(EventType_t type, int num);
-    static void onRequest(RequestCmd_t cmd, RequestCallback_t request);
-    static uint32_t handleRequest(RequestMsg_t msg);
+    static void sendEvent(std::vector<uint8_t> msgBytes);
+
+    inline static void addCtrlCallback(uint8_t ctrl, std::function<void(std::vector<uint8_t>&)> callback) {
+        _ctrlCallbacks.insert({ctrl, callback});
+    }
+
+protected:
+
+    static uint16_t _id;
 
 private:
 
-    static uint16_t _id;
-    static std::map<RequestCmd_t, RequestCallback_t> _request;
+    static std::map<uint8_t, std::function<void(std::vector<uint8_t>&)>> _ctrlCallbacks;
 
     static void _busTask(void *pvParameters);
+    static void _heartbeatTask(void *pvParameters);
 };

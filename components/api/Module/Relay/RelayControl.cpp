@@ -15,15 +15,12 @@
 
 #include "RelayControl.h"
 
-#if !defined(CONFIG_RELAY_HP) & !defined(CONFIG_RELAY_LP)
+#if !defined(OI_RELAY_HP) & !defined(OI_RELAY_LP)
 
 void RelayControl::digitalWrite(Relay_t relay, uint8_t level)
 {
-    RequestMsg_t msg;
-    msg.cmd = CMD_DIGITAL_WRITE;
-    msg.param = (uint16_t)relay;
-    msg.data = (uint32_t)level;
-    request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_DIGITAL_WRITE, (uint8_t)relay, level};
+    ctrlRequest(msgBytes);
 }
 
 #endif

@@ -17,34 +17,42 @@
 
 #include "ModuleControl.h"
 #include "ModuleMaster.h"
+#include "MixedInterface.h"
 
-#if !defined(CONFIG_MIXED)
+#if !defined(OI_MIXED)
 
-class MixedControl : public ModuleControl
+class MixedControl : public ModuleControl, public MixedInterface
 {
 public:
 
-    MixedControl(void) : ModuleControl() {}
+    MixedControl(int sn = 0) : 
+        ModuleControl(sn),
+        _isrCallback{NULL} {}
 
-    void digitalWrite(DigitalOutputNum_t stor, uint8_t level);
-    int digitalRead(DigitalInputNum_t etor);
-    void attachInterrupt(DigitalInputNum_t etor, IsrCallback_t callback, InterruptMode_t mode=RISING_MODE);
-    void detachInterrupt(DigitalInputNum_t etor);
-    int analogRead(AnalogInputNum_t ana);
-    int analogReadMilliVolts(AnalogInputNum_t ana);
-    void analogReadMode(AnalogInputNum_t ana, AdcMode_t mode);
-    void analogReadResolution(AdcResBits_t res);
-    void analogReadReference(float ref);
-    void analogWriteVoltage(AnalogOutputNum_t sana, uint32_t value);
-    void analogWriteVoltageMilliVolts(AnalogOutputNum_t sana, uint32_t value);
-    void analogWriteVoltageMode(AnalogOutputNum_t sana, DacVoltageMode_t mode);
-    void analogWriteCurrent(AnalogOutputNum_t sana, uint32_t value);
-    void analogWriteCurrentMilliAmps(AnalogOutputNum_t sana, uint32_t value);
-    void analogWriteCurrentMode(AnalogOutputNum_t sana, DacCurrentMode_t mode);
+    /* Digital Output */
+    void digitalWrite(DigitalOutputNum_t num, uint8_t level) override;
+
+    /* Digital Input */
+    int digitalRead(DigitalInputNum_t num) override;
+    void attachInterrupt(DigitalInputNum_t num, IsrCallback_t callback, 
+        InterruptMode_t mode=RISING_MODE, void* arg=NULL) override;
+    void detachInterrupt(DigitalInputNum_t num) override;
+
+    /* Analog Input */
+    void analogInputMode(AnalogInput_Num_t num, AnalogInput_Mode_t mode) override;
+    void analogInputResolution(AnalogInput_Resolution_t res) override;
+    void analogInputReference(float ref) override;
+    int analogRead(AnalogInput_Num_t num) override;
+    float analogReadMilliVolts(AnalogInput_Num_t num) override;
+    float analogReadMilliAmps(AnalogInput_Num_t num);
+
+    /* Analog Output */
+    void analogOutputMode(AnalogOutput_Num_t num, AnalogOutput_Mode_t mode) override;
+    void analogWrite(AnalogOutput_Num_t num, float value) override;
 
 private:
 
-    IsrCallback_t _isrCallback[DIN_MAX];
+    IsrCallback_t _isrCallback[4];
 };
 
 #endif

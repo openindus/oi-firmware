@@ -22,14 +22,14 @@ typedef enum {
     RELAY_2,
     RELAY_3,
     RELAY_4,
-#if !defined(CONFIG_RELAY_HP)
+#if !defined(OI_RELAY_HP)
     RELAY_5,
     RELAY_6,
 #endif
     RELAY_MAX
 } Relay_t;
 
-#if defined(CONFIG_RELAY_HP) || defined(CONFIG_RELAY_LP)
+#if defined(OI_RELAY_HP) || defined(OI_RELAY_LP)
 
 class RelayStandalone : public ModuleStandalone
 {

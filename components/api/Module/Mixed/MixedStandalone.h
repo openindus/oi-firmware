@@ -16,41 +16,46 @@
 #pragma once
 
 #include "ModuleStandalone.h"
+#include "MixedInterface.h"
+#include "MixedPinout.h"
 
-#if defined(CONFIG_MIXED)
+#if defined(OI_MIXED)
 
-class MixedStandalone : public ModuleStandalone
+class MixedStandalone : public ModuleStandalone, public MixedInterface
 {
 public:
 
-    static void init(void);
+    static int init(void);
 
-    /* DigitalOutput */
-    static void digitalWrite(DigitalOutputNum_t stor, uint8_t level);
+    /* Digital Input */
+    int digitalRead(DigitalInputNum_t num);
+    void attachInterrupt(DigitalInputNum_t num, IsrCallback_t callback, 
+        InterruptMode_t mode=RISING_MODE, void* arg=NULL);
+    void detachInterrupt(DigitalInputNum_t num);
 
-    /* DigitalInput */
-    static int digitalRead(DigitalInputNum_t etorNum);
-    static void attachInterrupt(DigitalInputNum_t etorNum, IsrCallback_t callback, InterruptMode_t mode=RISING_MODE, void* arg=NULL);
-    static void detachInterrupt(DigitalInputNum_t etorNum);
+    /* Digital Output */
+    void digitalWrite(DigitalOutputNum_t num, uint8_t level);
+    void digitalToggle(DigitalOutputNum_t num);
+    void analogWrite(DigitalOutputNum_t num, uint8_t duty);
+    float getCurrent(DigitalOutputNum_t num);
 
-    /* AnalogInput */
-    static int analogRead(AnalogInputNum_t ana);
-    static int analogReadMilliVolts(AnalogInputNum_t ana);
-    static void analogReadMode(AnalogInputNum_t ana, AdcMode_t mode);
-    static void analogReadResolution(AdcResBits_t res);
-    static void analogReadReference(float ref);
+    /* Analog Input */
+    void analogInputMode(AnalogInput_Num_t num, AnalogInput_Mode_t mode);
+    void analogInputResolution(AnalogInput_Resolution_t res);
+    void analogInputReference(float ref);
+    int analogRead(AnalogInput_Num_t num);
+    float analogReadMilliVolts(AnalogInput_Num_t num);
 
-    /* AnalogOutput */
-    static void analogWriteVoltage(AnalogOutputNum_t sana, uint32_t value);
-    static void analogWriteVoltageMilliVolts(AnalogOutputNum_t sana, uint32_t value);
-    static void analogWriteVoltageMode(AnalogOutputNum_t sana, DacVoltageMode_t mode);
-    static void analogWriteCurrent(AnalogOutputNum_t sana, uint32_t value);
-    static void analogWriteCurrentMilliAmps(AnalogOutputNum_t sana, uint32_t value);
-    static void analogWriteCurrentMode(AnalogOutputNum_t sana, DacCurrentMode_t mode);
+    /* Analog Output */
+    void analogOutputMode(AnalogOutput_Num_t num, AnalogOutput_Mode_t mode);
+    void analogWrite(AnalogOutput_Num_t num, float value);
 
 private:
 
-    static DigitalInput* etor;
+    static DigitalInput* _din;
+    static DigitalOutput* _dout;
+    static AnalogInput* _ain[4];
+    static AnalogOutput* _aout[2];
 
 };
 

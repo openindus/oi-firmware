@@ -17,9 +17,9 @@
 
 #include "ModuleStandalone.h"
 
-#if defined(CONFIG_STEPPER) || defined(CONFIG_STEPPER_VE)
+#if defined(OI_STEPPER) || defined(OI_STEPPER_VE)
 
-#if defined(CONFIG_STEPPER)
+#if defined(OI_STEPPER)
 #define STEPPER_DIN_NUM    4
 #define STEPPER_MOTOR_NUM   2
 #else
@@ -32,14 +32,18 @@ class StepperStandalone : public ModuleStandalone
 public:
 
     /* DigitalInput */
-    static int digitalRead(DigitalInputNum_t etorNum);
-    static void attachInterrupt(DigitalInputNum_t etorNum, IsrCallback_t callback, InterruptMode_t mode=RISING_MODE, void* arg=NULL);
-    static void detachInterrupt(DigitalInputNum_t etorNum);
+    static int digitalRead(DigitalInputNum_t dinNum);
+    static void attachInterrupt(DigitalInputNum_t dinNum, IsrCallback_t callback, InterruptMode_t mode=RISING_MODE, void* arg=NULL);
+    static void detachInterrupt(DigitalInputNum_t dinNum);
 
     /* Motor */
-    static void setLimitSwitch(MotorNum_t motor, DigitalInputNum_t etorNum, DigitalInputLogic_t logic=ACTIVE_HIGH);
+    static void setLimitSwitch(MotorNum_t motor, DigitalInputNum_t dinNum, DigitalInputLogic_t logic=ACTIVE_HIGH);
     static void setStepResolution(MotorNum_t motor, MotorStepResolution_t res);
-    static void setSpeed(MotorNum_t motor, float speed);
+    static void setMaxSpeed(MotorNum_t motor, float speed);
+    static void setMinSpeed(MotorNum_t motor, float speed);
+    static void setFullStepSpeed(MotorNum_t motor, float speed);
+    static void setAcceleration(MotorNum_t motor, float acc);
+    static void setDeceleration(MotorNum_t motor, float dec);
     static int32_t getPosition(MotorNum_t motor);
     static float getSpeed(MotorNum_t motor);
     static void resetHomePosition(MotorNum_t motor);
@@ -47,7 +51,7 @@ public:
     static void moveAbsolute(MotorNum_t motor, uint32_t position, bool microStep=true);
     static void moveRelative(MotorNum_t motor, int32_t position, bool microStep=true);
     static void run(MotorNum_t motor, MotorDirection_t direction, float speed);
-    static void waitWhileMotorIsRunning(MotorNum_t motor);
+    static bool isRunning(MotorNum_t motor);
     static void homing(MotorNum_t motor, float speed);
 
 // protected:
@@ -56,7 +60,7 @@ public:
 
 private:
 
-    static DigitalInput* etor;
+    static DigitalInput* din;
     static Motor* motor;
 
 };

@@ -19,8 +19,8 @@
 
 #define OICore      Core
 #define OIDiscrete  Discrete
-#define OIStepper   Stepper
 #define OIMixed     Mixed
+#define OIStepper   Stepper
 #define OIRelay     Relay
+#define OIAnalogLs  AnalogLs
 #define OIBrushless Brushless
-#define OIAnalogls  Analogls

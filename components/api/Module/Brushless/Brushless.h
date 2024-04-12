@@ -6,7 +6,7 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file Brushless.h
+ * @file BrushlessInterface.h
  * @brief Functions for Brushless module
  *
  * For more information on OpenIndus:
@@ -19,12 +19,10 @@
 #include "BrushlessSlave.h"
 #include "BrushlessControl.h"
 
-#if defined(CONFIG_BRUSHLESS)
-#if defined(CONFIG_MODULE_STANDALONE)
-class Brushless : public BrushlessStandalone {};
-#else
-class Brushless : public BrushlessSlave {};
-#endif
-#else
- class Brushless : public BrushlessControl {};
+#if defined(OI_BRUSHLESS) && defined(MODULE_STANDALONE)
+#define Brushless BrushlessStandalone
+#elif defined(OI_BRUSHLESS) && !defined(MODULE_STANDALONE)
+#define Brushless BrushlessSlave
+#else 
+#define Brushless BrushlessControl
 #endif

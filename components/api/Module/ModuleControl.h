@@ -17,26 +17,24 @@
 
 #include "Global.h"
 #include "ModuleStandalone.h"
-#include "ModuleCommand.h"
+#include "Command.h"
 #include "ModuleMaster.h"
 
 class ModuleControl
 {
 public:
 
-    inline ModuleControl(void) {
+    inline ModuleControl(int sn) : _id(0xFFFF), _sn(sn) {
         _instances.push_back(this);
     }
-
-    friend class ModuleMaster;
-
-    uint32_t request(RequestMsg_t msg);
 
     void ledOn(LedColor_t color);
     void ledOff(void);
     void ledBlink(LedColor_t color, uint32_t period);
 
-protected:
+    // friend class ModuleMaster;
+
+    int ctrlRequest(std::vector<uint8_t>& msgBytes);
 
     inline static void setId(ModuleControl* instance, uint16_t id) {
         instance->_id = id;
@@ -46,12 +44,36 @@ protected:
         return instance->_id;
     }
 
-    static std::vector<ModuleControl*> _instances;
+    inline static void setSN(ModuleControl* instance, int sn) {
+        instance->_sn = sn;
+    }
+
+    inline static int getSN(ModuleControl* instance) {
+        return instance->_sn;
+    }
+
+    inline static void addEventCallback(uint8_t event, uint16_t id, std::function<void(uint8_t)>callback) {
+        _eventCallbacks.insert({std::make_pair(event, id), callback});
+    }
+
+    inline static std::vector<ModuleControl*> getAllInstances(void) {
+        return _instances;
+    }
+
+    inline static std::map<std::pair<uint8_t,uint16_t>, std::function<void(uint8_t)>> getEventCallbacks(void) {
+        return _eventCallbacks;
+    }
+
+protected:
+
+    uint16_t _id; // Board id
+    int _sn; // Serial number
 
 private:
 
-    uint16_t _id;
+    static std::vector<ModuleControl*> _instances;
+    static std::map<std::pair<uint8_t,uint16_t>, std::function<void(uint8_t)>> _eventCallbacks;
 
-    void _ledState(LedState_t state, LedColor_t color=LED_NONE, uint32_t period=0);
+    void _ledStatus(LedState_t state, LedColor_t color=LED_NONE, uint32_t period=0);
 
 };

@@ -6,12 +6,8 @@
  */
 
 #ifdef ARDUINO
-#ifdef ARDUINO_RS485
-#include <ArduinoRS485.h>
-#else
-#include "RS.h"
+#include "OpenIndus.h"
 #include "Arduino.h"
-#endif
 
 #ifndef DEBUG
 #define printf(...) {}
@@ -332,17 +328,9 @@ static ssize_t _modbus_rtu_send(modbus_t *ctx, const uint8_t *req, int req_lengt
 
     ssize_t size;
 
-    #ifdef ARDUINO_RS485
-    ctx_rtu->rs485->noReceive();
-    ctx_rtu->rs485->beginTransmission();
-    size = ctx_rtu->rs485->write(req, req_length);
-    ctx_rtu->rs485->endTransmission();
-    ctx_rtu->rs485->receive();
-    #else
     uint8_t _req[req_length];
     memcpy(_req, req, req_length);
     size = ctx_rtu->rs485->write(_req, (size_t)req_length);
-    #endif
 
     return size;
 #else
@@ -407,11 +395,7 @@ static ssize_t _modbus_rtu_recv(modbus_t *ctx, uint8_t *rsp, int rsp_length)
 #elif defined(ARDUINO)
     modbus_rtu_t *ctx_rtu = (modbus_rtu_t*)ctx->backend_data;
     
-    #ifdef ARDUINO_RS485    
-    return ctx_rtu->rs485->readBytes(rsp, rsp_length);
-    #else
     return ctx_rtu->rs485->read(rsp, rsp_length);
-    #endif
 #else
     return read(ctx->s, rsp, rsp_length);
 #endif
@@ -669,12 +653,7 @@ static int _modbus_rtu_connect(modbus_t *ctx)
         return -1;
     }
 #elif defined(ARDUINO)
-    #ifdef ARDUINO_RS485
-    ctx_rtu->rs485->begin(ctx_rtu->baud, ctx_rtu->config);
-    ctx_rtu->rs485->receive();
-    #else
-    ctx_rtu->rs485->begin(ctx_rtu->baud);
-    #endif
+    ctx_rtu->rs485->begin(OI::RS_485, ctx_rtu->baud);
 #else
     /* The O_NOCTTY flag tells UNIX that this program doesn't want
        to be the "controlling terminal" for that port. If you
@@ -1228,9 +1207,6 @@ static void _modbus_rtu_close(modbus_t *ctx)
     }
 #elif defined(ARDUINO)
     (void)ctx_rtu;
-    #ifdef ARDUINO_RS485
-    ctx_rtu->rs485->noReceive();
-    #endif
     ctx_rtu->rs485->end();
 #else
     if (ctx->s != -1) {
@@ -1350,11 +1326,7 @@ const modbus_backend_t _modbus_rtu_backend = {
 };
 
 #ifdef ARDUINO
-#ifdef ARDUINO_RS485
-modbus_t* modbus_new_rtu(RS485Class *rs485, unsigned long baud, uint16_t config)
-#else
-modbus_t* modbus_new_rtu(OIRS *rs485, unsigned long baud, uint16_t config)
-#endif
+modbus_t* modbus_new_rtu(OI::RS *rs485, unsigned long baud, uint16_t config)
 #else
 modbus_t* modbus_new_rtu(const char *device,
                          int baud, char parity, int data_bit,

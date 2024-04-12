@@ -17,7 +17,7 @@
 
 #include "ModuleStandalone.h"
 
-#if defined(CONFIG_BRUSHLESS)
+#if defined(OI_BRUSHLESS)
 
 class BrushlessStandalone : public ModuleStandalone
 {

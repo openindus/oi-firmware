@@ -18,16 +18,13 @@
 #include "StepperStandalone.h"
 #include "StepperSlave.h"
 #include "StepperControl.h"
+#include "StepperCLI.h"
+#include "StepperParamCLI.h"
 
-#if defined(CONFIG_STEPPER) || defined(CONFIG_STEPPER_VE)
-
-#if defined(CONFIG_MODULE_STANDALONE)
-class Stepper : public StepperStandalone {};
+#if (defined(OI_STEPPER) || defined(OI_STEPPER_VE)) && defined(MODULE_STANDALONE)
+#define Stepper StepperStandalone
+#elif (defined(OI_STEPPER) || defined(OI_STEPPER_VE)) && !defined(MODULE_STANDALONE)
+#define Stepper StepperSlave
 #else 
-class Stepper : public StepperSlave {};
-#endif
-
-#else
-class Stepper : public StepperControl {};
-
+#define Stepper StepperControl
 #endif

@@ -27,6 +27,7 @@ class UsbSerial
 public:
 
     static void begin(int baudrate=115200);
+    static void setBaudrate(int baudrate);
     static void read(void* buf, uint32_t length, TickType_t timeout=portMAX_DELAY);
     static void write(const void* src, size_t size);
     static void flush(void);
@@ -74,6 +75,7 @@ public:
     } Packet_t;
 
     static void begin(int baudrate=115200);
+    static void setBaudrate(int baudrate);
     static int read(Packet_t* packet, TickType_t timeout=portMAX_DELAY);
     static void write(Packet_t* packet);
 

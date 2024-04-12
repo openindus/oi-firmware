@@ -17,13 +17,10 @@
 
 #include "CoreStandalone.h"
 #include "CoreMaster.h"
+#include "CoreCLI.h"
 
-#if defined(CONFIG_CORE)
-
-#if defined(CONFIG_MODULE_STANDALONE)
-class Core : public CoreStandalone {};
+#if defined(OI_CORE) && defined(MODULE_STANDALONE)
+#define Core CoreStandalone
 #else 
-class Core : public CoreMaster {};
-#endif
-
+#define Core CoreMaster
 #endif

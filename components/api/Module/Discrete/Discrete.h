@@ -18,16 +18,12 @@
 #include "DiscreteStandalone.h"
 #include "DiscreteSlave.h"
 #include "DiscreteControl.h"
+#include "DiscreteCLI.h"
 
-#if defined(CONFIG_DISCRETE) || defined(CONFIG_DISCRETE_VE)
-
-#if defined(CONFIG_MODULE_STANDALONE)
-class Discrete : public DiscreteStandalone {};
+#if (defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)) && defined(MODULE_STANDALONE)
+#define Discrete DiscreteStandalone
+#elif (defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)) && !defined(MODULE_STANDALONE)
+#define Discrete DiscreteSlave
 #else 
-class Discrete : public DiscreteSlave {};
-#endif
-
-#else
-class Discrete : public DiscreteControl {};
-
+#define Discrete DiscreteControl
 #endif
