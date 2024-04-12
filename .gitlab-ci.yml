@@ -4,8 +4,7 @@ stages:
   - setup
   - build
   - build:examples
-  - pkg:library
-  - deploy
+  - pkg
 
 cache:
   paths:
@@ -97,7 +96,7 @@ build:examples:
       ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")'
 
 pkg:library:
-  stage: pkg:library
+  stage: pkg
   needs:
     - job: build:examples
   before_script:
@@ -112,8 +111,8 @@ pkg:library:
     - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && 
       ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")'
 
-deploy:
-  stage: deploy
+pkg:bin:
+  stage: pkg
   needs:
     - job: build:core
     - job: build:discrete
@@ -126,8 +125,10 @@ deploy:
     # - job: build:brushless
     - job: build:analogls
   script:
-    - lftp $OVH_URI -e "mirror --reverse --verbose -R ./.oi/bin/ ./www/oi-content/bin/; quit" -u $OVH_USERNAME,$OVH_PASSWORD
-  only:
-    - tags
-  except:
-    - branches
+    - echo "pkb bin"
+  artifacts:
+    paths:
+      - .oi/bin/
+  rules:
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && 
+      ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")'

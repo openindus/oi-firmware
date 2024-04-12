@@ -1,6 +1,6 @@
 {
     "name": "OpenIndus",
-    "version": "1.0.0", 
+    "version": "1.1.0", 
     "keywords": "OpenIndus",
     "description": "OpenIndus Library",
     "repository": {
@@ -9,7 +9,7 @@
     },
     "authors": [
         {
-            "name": "OpenIndus Team",
+            "name": "OpenIndus",
             "email": "contact@openindus.com",
             "url": "https://openindus.com"
         }
