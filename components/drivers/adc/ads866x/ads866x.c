@@ -63,7 +63,7 @@ static void ads866x_spi_init(void)
                 .mode = 1,
                 .duty_cycle_pos = 0,
                 .cs_ena_pretrans = 0,
-                .cs_ena_posttrans = 2,
+                .cs_ena_posttrans = 0,
                 .clock_speed_hz = s_config->spi_freq,
                 .input_delay_ns = 0,
                 .spics_io_num = s_config->spi_pin_cs,
@@ -194,12 +194,12 @@ void ads866x_set_channel_SPD(uint8_t channels)
 
 uint8_t ads866x_get_channel_sequence(void)
 {
-    return ads866x_spi_read_register(AUTO_SEQ_EN);
+    return ads866x_spi_read_program_register(AUTO_SEQ_EN);
 }
 
 uint8_t ads866x_get_channel_power_down(void)
 {
-    return ads866x_spi_read_register(CH_PWR_DN);
+    return ads866x_spi_read_program_register(CH_PWR_DN);
 }
 
 
@@ -246,7 +246,7 @@ void ads866x_set_sdo(uint8_t sdo)
 
 uint8_t ads866x_get_feature_select(void)
 {
-    return ads866x_spi_read_register(FT_SEL);
+    return ads866x_spi_read_program_register(FT_SEL);
 }
 
 uint8_t ads866x_get_channel_voltage_range(uint8_t channel)
@@ -260,7 +260,7 @@ uint8_t ads866x_get_channel_voltage_range(uint8_t channel)
         return -1;
     }
     reg = RG_CH_0 + channel;
-    ads866x_range = ads866x_spi_read_register(reg);
+    ads866x_range = ads866x_spi_read_program_register(reg);
     
     switch (ads866x_range) {
         case ADS866X_VOLTAGE_RANGE_0:
@@ -331,41 +331,41 @@ void ads866x_set_global_voltage_range(uint8_t range)
 
 uint8_t ads866x_get_alarm_overview()
 {
-    return ads866x_spi_read_register(ALARM_OVERVIEW);
+    return ads866x_spi_read_program_register(ALARM_OVERVIEW);
 }
 
 uint8_t ads866x_get_first_tripped_flag()
 {
-    return ads866x_spi_read_register(ALARM_CH0_TRIPPED_FLAG);
+    return ads866x_spi_read_program_register(ALARM_CH0_TRIPPED_FLAG);
 }
 
 uint8_t ads866x_get_second_tripped_flag()
 {
-    return ads866x_spi_read_register(ALARM_CH4_TRIPPED_FLAG);
+    return ads866x_spi_read_program_register(ALARM_CH4_TRIPPED_FLAG);
 }
 
 uint16_t ads866x_get_all_tripped_flags()
 {
-    uint8_t MSB = ads866x_spi_read_register(ALARM_CH0_TRIPPED_FLAG);
-    uint8_t LSB = ads866x_spi_read_register(ALARM_CH4_TRIPPED_FLAG);
+    uint8_t MSB = ads866x_spi_read_program_register(ALARM_CH0_TRIPPED_FLAG);
+    uint8_t LSB = ads866x_spi_read_program_register(ALARM_CH4_TRIPPED_FLAG);
 
     return (MSB << 8) | LSB;
 }
 
 uint8_t ads866x_get_first_active_flag()
 {
-    return ads866x_spi_read_register(ALARM_CH0_ACTIVE_FLAG);
+    return ads866x_spi_read_program_register(ALARM_CH0_ACTIVE_FLAG);
 }
 
 uint8_t ads866x_get_second_active_flag()
 {
-    return ads866x_spi_read_register(ALARM_CH4_ACTIVE_FLAG);
+    return ads866x_spi_read_program_register(ALARM_CH4_ACTIVE_FLAG);
 }
 
 uint16_t ads866x_get_all_active_flags()
 {
-    uint8_t MSB = ads866x_spi_read_register(ALARM_CH0_ACTIVE_FLAG);
-    uint8_t LSB = ads866x_spi_read_register(ALARM_CH4_ACTIVE_FLAG);
+    uint8_t MSB = ads866x_spi_read_program_register(ALARM_CH0_ACTIVE_FLAG);
+    uint8_t LSB = ads866x_spi_read_program_register(ALARM_CH4_ACTIVE_FLAG);
 
     return (MSB << 8) | LSB;    
 }
@@ -378,7 +378,7 @@ uint8_t ads866x_get_channel_hysteresis(uint8_t channel)
         return -1;
     }
     reg = CH0_HYST + (5*channel);
-    return ads866x_spi_read_register(reg);
+    return ads866x_spi_read_program_register(reg);
 }
 
 uint16_t ads866x_get_channel_low_threshold(uint8_t channel)
@@ -392,8 +392,8 @@ uint16_t ads866x_get_channel_low_threshold(uint8_t channel)
         return -1;
     }
     reg = CH0_LT_MSB + (5*channel);
-    MSB = ads866x_spi_read_register(reg);
-    LSB = ads866x_spi_read_register(reg+1);
+    MSB = ads866x_spi_read_program_register(reg);
+    LSB = ads866x_spi_read_program_register(reg+1);
 
     return (MSB << 8) | LSB;
 }
@@ -409,8 +409,8 @@ uint16_t ads866x_get_channel_high_threshold(uint8_t channel)
         return -1;
     }
     reg = CH0_HT_MSB + (5*channel);
-    MSB = ads866x_spi_read_register(reg);
-    LSB = ads866x_spi_read_register(reg+1);
+    MSB = ads866x_spi_read_program_register(reg);
+    LSB = ads866x_spi_read_program_register(reg+1);
 
     return (MSB << 8) | LSB;
 }
@@ -449,7 +449,7 @@ void ads866x_set_channel_high_threshold(uint8_t channel, uint16_t threshold)
 
 uint8_t ads866x_get_command_readback(void)
 {
-    return ads866x_spi_read_register(CMD_READBACK);
+    return ads866x_spi_read_program_register(CMD_READBACK);
 }
 
 
@@ -467,7 +467,7 @@ esp_err_t ads866x_spi_write_register(uint8_t reg, uint8_t value)
             .length = 24,
             .rxlength = 0,
             .user = NULL,
-            .tx_buffer = txBuffer,
+            .tx_buffer = &txBuffer,
             .rx_buffer = NULL
         };
 
@@ -480,20 +480,20 @@ esp_err_t ads866x_spi_write_register(uint8_t reg, uint8_t value)
     return 0;
 }
 
-uint8_t ads866x_spi_read_register(uint8_t reg)
+uint8_t ads866x_spi_read_program_register(uint8_t reg)
 {
-    uint8_t txBuffer[2] = {((reg << 1) | 0x00), 0x00};
-    uint8_t rxBuffer;
+    uint8_t txBuffer[3] = {((reg << 1) | 0x00), 0x00, 0x00};
+    uint8_t rxBuffer[3];
 
     if (s_spi_initialized == true) {
         spi_transaction_t trans = {
             .flags = 0,
             .cmd = 0,
             .addr = 0,
-            .length = 16,
-            .rxlength = 0,
+            .length = 24,
+            .rxlength = 24,
             .user = NULL,
-            .tx_buffer = txBuffer,
+            .tx_buffer = &txBuffer,
             .rx_buffer = &rxBuffer
         };
 
@@ -503,7 +503,7 @@ uint8_t ads866x_spi_read_register(uint8_t reg)
     } else {
         ESP_LOGE(ADS866x_TAG, "SPI is not initialized !!!");
     }
-    return rxBuffer;
+    return rxBuffer[2];
 }
 
 uint16_t ads866x_spi_write_command_register(uint8_t reg)
@@ -517,7 +517,7 @@ uint16_t ads866x_spi_write_command_register(uint8_t reg)
             .cmd = 0,
             .addr = 0,
             .length = 16,
-            .rxlength = 0,
+            .rxlength = 16,
             .user = NULL,
             .tx_buffer = txBuffer,
             .rx_buffer = rxBuffer

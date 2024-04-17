@@ -403,7 +403,7 @@ esp_err_t ads866x_spi_write_register(uint8_t reg, uint8_t value);
  * @param[in] reg : Register to be read
  * @retval Value of the specified register
  */
-uint8_t ads866x_spi_read_register(uint8_t reg);
+uint8_t ads866x_spi_read_program_register(uint8_t reg);
 
 /**
  * @brief Spi write command register

@@ -99,15 +99,15 @@ int MixedStandalone::init(void)
         ESP_LOGE(TAG, "Init SPI bus error");
     }
 
-    /* Initialize analog inputs */
-    _ains->init(&adcSPIConfig, AIN_VOLTAGE_RANGE_0_10V24, AIN_MODE_VOLTAGE);
-
     /* Initialize analog outputs */
     ad5413_config_t dacConfig[] = {
-        {MIXED_SPI_HOST, MIXED_SPI_FREQ, MIXED_DAC_PIN_SYNC_1, 0, 0},
-        {MIXED_SPI_HOST, MIXED_SPI_FREQ, MIXED_DAC_PIN_SYNC_2, 1, 1}
+        {MIXED_SPI_HOST, MIXED_SPI_FREQ, MIXED_DAC_PIN_SYNC_1, MIXED_DAC_PIN_LDAC_1, 0, 0},
+        {MIXED_SPI_HOST, MIXED_SPI_FREQ, MIXED_DAC_PIN_SYNC_2, MIXED_DAC_PIN_LDAC_2, 1, 1}
     };
     AnalogOutputAD5413::init(dacConfig, 2);
+
+    /* Initialize analog inputs */
+    _ains->init(&adcSPIConfig, AIN_VOLTAGE_RANGE_0_10V24, AIN_MODE_VOLTAGE);
 
     return 0;
 }
