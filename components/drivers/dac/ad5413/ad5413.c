@@ -222,7 +222,18 @@ int ad5413_init(ad5413_device_t** dev, ad5413_config_t* conf)
         goto error;
     }
 
-    ad5413_spi_init(conf->host_id, conf->sclk_freq, conf->sync, &device->spi_handler);
+    ad5413_spi_init(conf->host_id, conf->sclk_freq, conf->sync_pin, &device->spi_handler);
+
+    /* Configure LDAC pin */
+    gpio_config_t gpio_conf = {
+        .pin_bit_mask = (1ULL << conf->ldac_pin),
+        .mode = GPIO_MODE_OUTPUT,
+        .pull_up_en = GPIO_PULLUP_DISABLE,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,  //An internal pull-down resistor is present into the DAC
+        .intr_type = GPIO_INTR_DISABLE
+    };
+
+    ESP_ERROR_CHECK(gpio_config(&gpio_conf));
 
     device->slip_bit = ~conf->ad1;
     device->address = ((conf->ad1 << 1) | (conf->ad0));
