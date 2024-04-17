@@ -58,20 +58,8 @@ void MixedControl::analogInputMode(AnalogInput_Num_t num, AnalogInput_Mode_t mod
 
 void MixedControl::analogInputVoltageRange(AnalogInput_Num_t num, AnalogInput_VoltageRange_t range)
 {
-    ModuleCmd_RequestMsg_t msg;
-    msg.id = REQUEST_ANALOG_INPUT_MODE;
-    msg.param = (uint16_t)num;
-    msg.data = (uint32_t)mode;
-    request(msg);
-}
-
-void MixedControl::analogInputVoltageRange(AnalogInput_Num_t num, AnalogInput_VoltageRange_t range)
-{
-    ModuleCmd_RequestMsg_t msg;
-    msg.id = REQUEST_ANALOG_INPUT_VOLTAGE_RANGE;
-    msg.param = (uint16_t)num;
-    msg.data = (uint32_t)range;
-    request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_ANALOG_INPUT_VOLTAGE_RANGE, (uint8_t)num, (uint8_t)range};
+    ctrlRequest(msgBytes);
 }
 
 int MixedControl::analogRead(AnalogInput_Num_t num)
@@ -84,10 +72,10 @@ int MixedControl::analogRead(AnalogInput_Num_t num)
 
 float MixedControl::analogReadMilliVolts(AnalogInput_Num_t num)
 {
-    ModuleCmd_RequestMsg_t msg;
-    msg.id = REQUEST_ANALOG_READ_MILLIVOLT;
-    msg.param = (uint16_t)num;
-    return request(msg);
+    std::vector<uint8_t> msgBytes = {CONTROL_ANALOG_READ_MILLIVOLTS, (uint8_t)num};
+    ctrlRequest(msgBytes);
+    float* ret = reinterpret_cast<float*>(&msgBytes[2]);
+    return *ret;
 }
 
 void MixedControl::analogOutputMode(AnalogOutput_Num_t num, AnalogOutput_Mode_t mode)

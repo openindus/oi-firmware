@@ -39,13 +39,16 @@ enum Command_Control_e {
     CONTROL_BLINK_OUTPUT                    = 0x05,
 
     /* ANALOG */
-    CONTROL_ANALOG_READ                     = 0x20,
-    CONTROL_ANALOG_READ_MILLIVOLTS          = 0x21,
-    CONTROL_ANALOG_INPUT_MODE               = 0x22,
-    CONTROL_ANALOG_INPUT_RESOLUTION         = 0x23,
-    CONTROL_ANALOG_INPUT_REFERENCE          = 0x24,
-    CONTROL_ANALOG_WRITE                    = 0x25,
-    CONTROL_ANALOG_OUTPUT_MODE              = 0x26,
+    CONTROL_ANALOG_INPUT_MODE               = 0x20,
+    CONTROL_ANALOG_INPUT_VOLTAGE_RANGE      = 0x21,
+    CONTROL_ANALOG_READ                     = 0x22,
+    CONTROL_ANALOG_READ_VOLT                = 0x23,
+    CONTROL_ANALOG_READ_MILLIVOLT           = 0x24,
+    CONTROL_ANALOG_READ_AMP                 = 0x25,
+    CONTROL_ANALOG_READ_MILLIAMP            = 0x26,
+
+    CONTROL_ANALOG_OUTPUT_MODE              = 0x27,
+    CONTROL_ANALOG_WRITE                    = 0x28,
 
     /* MOTOR */
     CONTROL_MOTOR_STOP                      = 0x40,

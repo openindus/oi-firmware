@@ -48,16 +48,32 @@ int MixedSlave::init(void)
         _mixed->detachInterrupt((DigitalInputNum_t)data[1]);
     });
 
-    onRequest(REQUEST_ANALOG_READ, [](ModuleCmd_RequestMsg_t msg) -> uint32_t {
-        return _mixed->analogRead((AnalogInput_Num_t)msg.param);
-    });
-
-    onRequest(REQUEST_ANALOG_READ_MILLIVOLT, [](ModuleCmd_RequestMsg_t msg) -> uint32_t { 
-        return _mixed->analogReadMilliVolt((AnalogInput_Num_t)msg.param);
-    });
-
     addCtrlCallback(CONTROL_ANALOG_INPUT_MODE, [](std::vector<uint8_t>& data) {
         _mixed->analogInputMode((AnalogInput_Num_t)data[1], (AnalogInput_Mode_t)data[2]);
+    });
+
+    addCtrlCallback(CONTROL_ANALOG_INPUT_VOLTAGE_RANGE, [](std::vector<uint8_t>& data) {
+        _mixed->analogInputVoltageRange((AnalogInput_Num_t)data[1], (AnalogInput_VoltageRange_t)data[2]);
+    });
+
+    addCtrlCallback(CONTROL_ANALOG_READ, [](std::vector<uint8_t>& data) {
+        _mixed->analogRead((AnalogInput_Num_t)data[1]);
+    });
+
+    addCtrlCallback(CONTROL_ANALOG_READ_VOLT, [](std::vector<uint8_t>& data) {
+        _mixed->analogReadVolt((AnalogInput_Num_t)data[1]);
+    });
+
+    addCtrlCallback(CONTROL_ANALOG_READ_MILLIVOLT, [](std::vector<uint8_t>& data) {
+        _mixed->analogReadMilliVolt((AnalogInput_Num_t)data[1]);
+    });
+
+    addCtrlCallback(CONTROL_ANALOG_READ_AMP, [](std::vector<uint8_t>& data) {
+        _mixed->analogReadAmp((AnalogInput_Num_t)data[1]);
+    });
+
+    addCtrlCallback(CONTROL_ANALOG_READ_MILLIAMP, [](std::vector<uint8_t>& data) {
+        _mixed->analogReadMilliAmp((AnalogInput_Num_t)data[1]);
     });
 
     addCtrlCallback(CONTROL_ANALOG_OUTPUT_MODE, [](std::vector<uint8_t>& data) {
