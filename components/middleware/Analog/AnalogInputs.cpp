@@ -121,18 +121,17 @@ int AnalogInputAds866x::read(void)
 
 float AnalogInputAds866x::read(AnalogInput_Unit_t unit)
 {
-    uint16_t value = ads866x_analog_read(_num);
+    float value = ads866x_analog_read(_num);
     float voltage = ads866x_convert_raw_2_volt(value, _voltage_range);
 
     switch (unit) {
         case AIN_UNIT_RAW:
-            ESP_LOGE(TAG, "To read into Raw unit, use the read() function");    //TODO: à tester
             break;
         case AIN_UNIT_VOLT:
             value = voltage;
             break;
         case AIN_UNIT_MILLIVOLT:
-            value = voltage / 1000.0f;
+            value = voltage * 1000.0f;
             break;
 
         case AIN_UNIT_MILLIAMP:
@@ -140,7 +139,7 @@ float AnalogInputAds866x::read(AnalogInput_Unit_t unit)
                 ESP_LOGE(TAG, "To read into MilliAmps, you should be into Current Mode");
                 value = -1;
             } else {
-                value = voltage / (1000.0f * AIN_CURRENT_MODE_RES_VALUE);
+                value = voltage * 1000 / AIN_CURRENT_MODE_RES_VALUE;
             }
             break;
 

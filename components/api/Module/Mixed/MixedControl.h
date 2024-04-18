@@ -42,7 +42,10 @@ public:
     void analogInputMode(AnalogInput_Num_t num, AnalogInput_Mode_t mode);
     void analogInputVoltageRange(AnalogInput_Num_t num, AnalogInput_VoltageRange_t range);
     int analogRead(AnalogInput_Num_t num);
-    float analogReadMilliVolts(AnalogInput_Num_t num);
+    float analogReadVolt(AnalogInput_Num_t num);
+    float analogReadMilliVolt(AnalogInput_Num_t num);
+    float analogReadAmp(AnalogInput_Num_t num);
+    float analogReadMilliAmp(AnalogInput_Num_t num);
 
     /* Analog Output */
     void analogOutputMode(AnalogOutput_Num_t num, AnalogOutput_Mode_t mode) override;

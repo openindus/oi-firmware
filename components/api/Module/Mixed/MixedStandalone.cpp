@@ -105,13 +105,14 @@ int MixedStandalone::init(void)
         {MIXED_SPI_HOST, MIXED_SPI_FREQ, MIXED_DAC_PIN_SYNC_2, MIXED_DAC_PIN_LDAC_2, 1, 1}
     };
     AnalogOutputAD5413::init(dacConfig, 2);
+    _aout[0]->setMode(AOUT_MODE_M10V5_10V5);
+    _aout[1]->setMode(AOUT_MODE_M10V5_10V5);
 
     /* Initialize analog inputs */
     _ains->init(&adcSPIConfig, AIN_VOLTAGE_RANGE_0_10V24, AIN_MODE_VOLTAGE);
 
     return 0;
 }
-
 
 
 /*******  Digital Inputs *******/

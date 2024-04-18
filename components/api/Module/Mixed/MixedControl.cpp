@@ -70,9 +70,33 @@ int MixedControl::analogRead(AnalogInput_Num_t num)
     return *ret;
 }
 
-float MixedControl::analogReadMilliVolts(AnalogInput_Num_t num)
+float MixedControl::analogReadVolt(AnalogInput_Num_t num)
 {
-    std::vector<uint8_t> msgBytes = {CONTROL_ANALOG_READ_MILLIVOLTS, (uint8_t)num};
+    std::vector<uint8_t> msgBytes = {CONTROL_ANALOG_READ_VOLT, (uint8_t)num};
+    ctrlRequest(msgBytes);
+    float* ret = reinterpret_cast<float*>(&msgBytes[2]);
+    return *ret;
+}
+
+float MixedControl::analogReadMilliVolt(AnalogInput_Num_t num)
+{
+    std::vector<uint8_t> msgBytes = {CONTROL_ANALOG_READ_MILLIVOLT, (uint8_t)num};
+    ctrlRequest(msgBytes);
+    float* ret = reinterpret_cast<float*>(&msgBytes[2]);
+    return *ret;
+}
+
+float MixedControl::analogReadAmp(AnalogInput_Num_t num)
+{
+    std::vector<uint8_t> msgBytes = {CONTROL_ANALOG_READ_AMP, (uint8_t)num};
+    ctrlRequest(msgBytes);
+    float* ret = reinterpret_cast<float*>(&msgBytes[2]);
+    return *ret;
+}
+
+float MixedControl::analogReadMilliAmp(AnalogInput_Num_t num)
+{
+    std::vector<uint8_t> msgBytes = {CONTROL_ANALOG_READ_MILLIAMP, (uint8_t)num};
     ctrlRequest(msgBytes);
     float* ret = reinterpret_cast<float*>(&msgBytes[2]);
     return *ret;

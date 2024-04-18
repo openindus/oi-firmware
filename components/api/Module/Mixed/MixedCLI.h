@@ -39,11 +39,20 @@ private:
     static int _getCurrent(int argc, char **argv);
     static void _registerGetCurrent(void);
 
-    static int _setAnalogVoltageRange(int argc, char **argv);
-    static void _registerSetAnalogVoltageRange(void);
+    static int _setAnalogInputMode(int argc, char **argv);
+    static void _registerSetAnalogInputMode(void);
 
-    static int _analogReadVoltage(int argc, char **argv);
-    static void _registerAnalogReadVoltage(void);
+    static int _setAnalogInputVoltageRange(int argc, char **argv);
+    static void _registerSetAnalogInputVoltageRange(void);
+
+    static int _analogInputRead(int argc, char **argv);
+    static void _registerAnalogInputRead(void);
+
+    static int _setAnalogOutputMode(int argc, char **argv);
+    static void _registerSetAnalogOutputMode(void);
+
+    static int _analogOutputWrite(int argc, char **argv);
+    static void _registerAnalogOutputWrite(void);
 };
 
 #endif
