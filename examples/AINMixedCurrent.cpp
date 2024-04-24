@@ -14,27 +14,26 @@ void setup(void)
     mixed.analogInputMode(AIN_2, AIN_MODE_CURRENT);
     mixed.analogInputMode(AIN_3, AIN_MODE_CURRENT);
     mixed.analogInputMode(AIN_4, AIN_MODE_CURRENT);
-    mixed.analogInputResolution(AIN_RES_12_BITS);
 }
 
 void loop(void) 
 {
-    value = mixed.analogReadMilliAmps(AIN_1);
+    value = mixed.analogReadMilliAmp(AIN_1);
     Serial.print("AIN_1 :");
     Serial.print(value);
     Serial.println("mA");
 
-    value = mixed.analogReadMilliAmps(AIN_2);
+    value = mixed.analogReadMilliAmp(AIN_2);
     Serial.print("AIN_2 :");
     Serial.print(value);
     Serial.println("mA");
 
-    value = mixed.analogReadMilliAmps(AIN_3);
+    value = mixed.analogReadMilliAmp(AIN_3);
     Serial.print("AIN_3 :");
     Serial.print(value);
     Serial.println("mA");
 
-    value = mixed.analogReadMilliAmps(AIN_4);
+    value = mixed.analogReadMilliAmp(AIN_4);
     Serial.print("AIN_4 :");
     Serial.print(value);
     Serial.println("m1");
