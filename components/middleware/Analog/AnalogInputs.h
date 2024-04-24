@@ -8,9 +8,17 @@
 
 #pragma once
 
+#include <string.h>
 #include "ads866x.h"
+#include "driver/adc.h"
+#include "esp_adc_cal.h"
+#include "esp_efuse.h"
 
-#define AIN_CURRENT_MODE_RES_VALUE (float)100.0
+#define AIN_CURRENT_MODE_RES_VALUE   100.0f
+
+#define ESP_ADC_NO_OF_SAMPLES        128U
+#define ESP_ADC_DEFAULT_COEFF_A      11.6965f
+#define ESP_ADC_DEFAULT_COEFF_B      0.0f
 
 typedef enum {
     AIN_1 = 0,
@@ -45,8 +53,14 @@ typedef enum {
 
 typedef enum {
     ANALOG_INPUT_ADS866X = 0,
+    ANALOG_INPUT_ESP32S3,
     ANALOG_INPUT_MAX
 } AnalogInputType_t;
+
+typedef struct {
+    float ain_coeff_a;
+    float ain_coeff_b;
+} AnalogInput_eFuse_Coeff_t;
 
 class AnalogInputAds866x 
 {
@@ -72,13 +86,36 @@ private:
     AnalogInput_VoltageRange_t _voltage_range;
 };
 
+class AnalogInputEsp32s3
+{
+public:
+
+    AnalogInputEsp32s3(uint8_t num, adc1_channel_t channel);
+
+    void init();
+    int raw();
+    int read();
+    
+    void getCoeff();
+    int applyCoeff(int voltage);
+
+private:
+
+    int _num;
+    adc1_channel_t _channel;
+    esp_adc_cal_characteristics_t _adc_characteristic;
+    AnalogInput_eFuse_Coeff_t _coeff;
+};
+
 class AnalogInputs
 {
 public:
 
     AnalogInputs(const gpio_num_t* cmdGpio, uint8_t nb);
+    AnalogInputs(const adc1_channel_t* channel, uint8_t nb);
 
     int init(ads866x_config_t *ads866xConfig, AnalogInput_VoltageRange_t range, AnalogInput_Mode_t mode);
+    int init();
 
     int read(AnalogInput_Num_t num);
     float read(AnalogInput_Num_t num, AnalogInput_Unit_t unit);
@@ -86,6 +123,7 @@ public:
     uint8_t getMode(AnalogInput_Num_t num);
     void setVoltageRange(AnalogInput_Num_t num, AnalogInput_VoltageRange_t range);
     uint8_t getVoltageRange(AnalogInput_Num_t num);
+    int setCoeff(float* a, float* b);
 
 private:
 
@@ -93,4 +131,5 @@ private:
     AnalogInputType_t _type;
 
     AnalogInputAds866x* _ains[AIN_MAX];
+    AnalogInputEsp32s3* _ains_esp[AIN_MAX];
 };

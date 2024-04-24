@@ -47,10 +47,10 @@ const adc1_channel_t _ainChannel[] = {
 };
 
 ioex_device_t* CoreStandalone::_ioex;
-esp_adc_cal_characteristics_t CoreStandalone::_adc1Characteristics;
 
 DigitalInputs* CoreStandalone::din = new DigitalInputs(&_ioex, _dinGpio, 4);
 DigitalOutputs* CoreStandalone::dout = new DigitalOutputs(&_ioex, _doutGpio, _doutCurrentGpio, 4);
+AnalogInputs* CoreStandalone::ain = new AnalogInputs(_ainChannel, 2);
 
 OI::CAN CoreStandalone::can(CORE_SPI_USER_HOST, CORE_PIN_CAN_SPI_CS, CORE_PIN_CAN_INTERRUPT);
 OI::RS CoreStandalone::rs(CORE_SPI_USER_HOST, CORE_PIN_RS_SPI_CS, CORE_PIN_RS_INTERRUPT);
@@ -256,11 +256,7 @@ void CoreStandalone::init()
      * @brief AIN Init
      * 
      */
-    ESP_ERROR_CHECK(adc1_config_width(ADC_WIDTH_BIT_12));
-    for (auto i: _ainChannel) {
-        ESP_ERROR_CHECK(adc1_config_channel_atten(_ainChannel[i], ADC_ATTEN_DB_11));
-    }
-    esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &_adc1Characteristics);
+    ain->init();
 
     /**
      * @brief CAN EXT init
@@ -369,30 +365,6 @@ int CoreStandalone::digitalRead(DigitalInputNum_t dinNum)
     return din->read(dinNum);
 }
 
-int CoreStandalone::analogRead(AnalogInput_Num_t ain)
-{
-    int adc_reading = 0;
-
-    for (int i = 0; i < CORE_ADC_NO_OF_SAMPLES; i++)
-    {
-        adc_reading += adc1_get_raw(_ainChannel[ain]);
-    }
-
-    adc_reading /= CORE_ADC_NO_OF_SAMPLES;
-
-    return adc_reading;
-}
-
-int CoreStandalone::analogReadMilliVolt(AnalogInput_Num_t ain)
-{
-    int adc_reading = CoreStandalone::analogRead(ain);
-
-    // Convert adc_reading to voltage in mV
-    uint32_t voltage = esp_adc_cal_raw_to_voltage(adc_reading, &_adc1Characteristics);
-
-    return voltage * CORE_ADC_REDUCTION_FACTOR;
-}
-
 void CoreStandalone::attachInterrupt(DigitalInputNum_t dinNum, IsrCallback_t callback, InterruptMode_t mode, void* arg)
 {
     din->attachInterrupt(dinNum, callback, mode, arg);
@@ -423,25 +395,25 @@ void CoreStandalone::_controlTask(void *pvParameters)
 #if defined(CONFIG_IDF_TARGET_ESP32S3)
 
         /* Checking if user power is in overcurrent */
-        // If error happened
-        if (ioex_get_level(_ioex, CORE_IOEX_PIN_5V_USER_PG) == 0)
-        {
-            ESP_LOGE(CORE_TAG, "Overcurrent on 5V User");
-            ioex_set_direction(_ioex, CORE_IOEX_PIN_5V_USER_EN, IOEX_OUTPUT);
-            ioex_set_level(_ioex, CORE_IOEX_PIN_5V_USER_EN, IOEX_LOW);
-            user_power = 1;
-        }
-        // Retry after 10 loops
-        else if (user_power == 10)
-        {
-            user_power = 0;
-            ioex_set_direction(_ioex, CORE_IOEX_PIN_5V_USER_EN, IOEX_INPUT);
-        }
-        // increase error counter
-        else if (user_power != 0)
-        {
-            user_power++;
-        }
+        // // If error happened
+        // if (ioex_get_level(_ioex, CORE_IOEX_PIN_5V_USER_PG) == 0)
+        // {
+        //     ESP_LOGE(CORE_TAG, "Overcurrent on 5V User");
+        //     ioex_set_direction(_ioex, CORE_IOEX_PIN_5V_USER_EN, IOEX_OUTPUT);
+        //     ioex_set_level(_ioex, CORE_IOEX_PIN_5V_USER_EN, IOEX_LOW);
+        //     user_power = 1;
+        // }
+        // // Retry after 10 loops
+        // else if (user_power == 10)
+        // {
+        //     user_power = 0;
+        //     ioex_set_direction(_ioex, CORE_IOEX_PIN_5V_USER_EN, IOEX_INPUT);
+        // }
+        // // increase error counter
+        // else if (user_power != 0)
+        // {
+        //     user_power++;
+        // }
 
         /* Checking if usb power is in overcurrent */
         // If error happened

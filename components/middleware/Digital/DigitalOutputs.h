@@ -99,7 +99,7 @@ private:
     AdcNumChannel_t* _adc_current;
     ioex_num_t* _ioex_current;
 
-    /* Stor a local copy of the pointer to an initilized ioex_device_t */
+    /* Store a local copy of the pointer to an initalized ioex_device_t */
     ioex_device_t** _ioex;
     esp_adc_cal_characteristics_t _adc1Characteristics;
     esp_adc_cal_characteristics_t _adc2Characteristics;

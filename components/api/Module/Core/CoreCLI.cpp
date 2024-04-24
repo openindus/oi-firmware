@@ -104,13 +104,14 @@ void CoreCLI::_registerDigitalRead(void)
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
 }
 
-/** 'analog-read' */
+/** 'analog-read-millivolts' */
 
 static struct {
     struct arg_int *ain;
     struct arg_end *end;
 } analogReadArgs;
 
+<<<<<<< HEAD
 static int analogRead(int argc, char **argv)
 {
     int nerrors = arg_parse(argc, argv, (void **) &analogReadArgs);
@@ -145,6 +146,9 @@ void CoreCLI::_registerAnalogRead(void)
 /** 'analog-read-millivolts' */
 
 static int analogReadMilliVolt(int argc, char **argv)
+=======
+static int analogReadMilliVolts(int argc, char **argv)
+>>>>>>> e458d01... do not merge this commit as it git status!
 {
     int nerrors = arg_parse(argc, argv, (void **) &analogReadArgs);
     if (nerrors != 0) {

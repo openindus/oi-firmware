@@ -19,7 +19,17 @@ AnalogInputs::AnalogInputs(const gpio_num_t* cmdGpio, uint8_t nb)
     _type = ANALOG_INPUT_ADS866X;
 }
 
-int AnalogInputs::init(ads866x_config_t *ads866xConfig, AnalogInput_VoltageRange_t range, AnalogInput_Mode_t mode) {
+AnalogInputs::AnalogInputs(const adc1_channel_t* channel, uint8_t nb)
+{
+    for (size_t i = 0; i < nb; i++) {
+        _ains_esp[i] = new AnalogInputEsp32s3(i, channel[i]);
+    }
+    _nb = nb;
+    _type = ANALOG_INPUT_ESP32S3;
+}
+
+int AnalogInputs::init(ads866x_config_t *ads866xConfig, AnalogInput_VoltageRange_t range, AnalogInput_Mode_t mode) 
+{
     ESP_LOGI(TAG, "Initialize Analog Inputs");
 
     if (_type == ANALOG_INPUT_ADS866X) {
@@ -38,10 +48,27 @@ int AnalogInputs::init(ads866x_config_t *ads866xConfig, AnalogInput_VoltageRange
     return -1;
 }
 
+int AnalogInputs::init() 
+{
+    ESP_LOGI(TAG, "Initialize Analog Inputs");
+
+    if (_type == ANALOG_INPUT_ESP32S3) {
+
+        for (size_t i = 0; i < _nb; i++) {
+            _ains_esp[i]->init();
+        }
+        return 0;
+    }
+    return -1;
+}
+
 int AnalogInputs::read(AnalogInput_Num_t num)
 {
     if (_type == ANALOG_INPUT_ADS866X) {
         return _ains[num]->read();
+    } 
+    else if (_type == ANALOG_INPUT_ESP32S3) {
+        return _ains_esp[num]->read();
     }
     return -1;
 }
@@ -82,6 +109,53 @@ uint8_t AnalogInputs::getVoltageRange(AnalogInput_Num_t num)
         return _ains[num]->getVoltageRange();
     }
     return 0;
+}
+
+int AnalogInputs::setCoeff(float* a, float* b)
+{
+    if (_type == ANALOG_INPUT_ESP32S3) {
+
+        ESP_LOGW(TAG, "This operation can be done only once !");
+
+        uint8_t* data;
+        data = (uint8_t*)malloc((uint8_t)sizeof(AnalogInput_eFuse_Coeff_t)*_nb);
+
+        for (int i = 0; i < _nb; i++) {
+
+            // Fill data with coeffs
+            if ((abs(a[i]) < 100.0f) && (abs(b[i]) < 1000.0f)) {
+                ESP_LOGI(TAG, "Setting AIN_%i coeffs: a=%f b=%f", i+1, a[i], b[i]);
+                AnalogInput_eFuse_Coeff_t coeff;
+                coeff.ain_coeff_a = a[i];
+                coeff.ain_coeff_b = b[i];
+                memcpy(data+(sizeof(AnalogInput_eFuse_Coeff_t)*i), &coeff, sizeof(AnalogInput_eFuse_Coeff_t));
+            } 
+            else {
+                ESP_LOGE(TAG, "Invalid coefficients for AnalogInputs");
+                free(data);
+                return -1;
+            }
+            
+        }
+
+        // Write coeff into eFuse
+        esp_err_t err = esp_efuse_write_block(EFUSE_BLK_KEY1, &data, 0, sizeof(AnalogInput_eFuse_Coeff_t)*8);
+        
+        free(data);
+
+        if (err != ESP_OK) {
+            ESP_LOGE(TAG, "Error in eFuse write: %s", esp_err_to_name(err));
+            return -1;
+        }
+
+        // Read coeff
+        for (int i=0; i < _nb; i++) {
+            _ains_esp[i]->getCoeff();
+        }
+
+        return 0;
+    }
+    return -1;
 }
 
 
@@ -201,4 +275,66 @@ uint8_t AnalogInputAds866x::getVoltageRange(void)
 gpio_num_t AnalogInputAds866x::getModePin(void)
 {
     return _modePin;
+}
+
+/******************* Analog Input Esp32s3 **********************/
+
+AnalogInputEsp32s3::AnalogInputEsp32s3(uint8_t num, adc1_channel_t channel)
+{
+    _num = num;
+    _channel = channel;
+}
+
+void AnalogInputEsp32s3::init()
+{
+    adc1_config_width(ADC_WIDTH_BIT_12);
+    adc1_config_channel_atten(_channel, ADC_ATTEN_DB_11);
+    esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &_adc_characteristic);
+    getCoeff();
+}
+
+int AnalogInputEsp32s3::raw()
+{
+    return adc1_get_raw(_channel);
+}
+
+int AnalogInputEsp32s3::read()
+{
+    uint32_t voltage = 0;
+
+    // Making the mean with voltage and not adc_reading to be more precise
+    for (int i = 0; i < ESP_ADC_NO_OF_SAMPLES; i++)
+    {
+        voltage += esp_adc_cal_raw_to_voltage(raw(), &_adc_characteristic);
+    }
+
+    voltage /= ESP_ADC_NO_OF_SAMPLES;
+
+    return applyCoeff(voltage);
+}
+
+void AnalogInputEsp32s3::getCoeff()
+{
+    if (esp_efuse_block_is_empty(EFUSE_BLK_KEY1) == false) {
+        // getting coeff in eFuse
+        esp_efuse_read_block(EFUSE_BLK_KEY1, &_coeff, sizeof(AnalogInput_eFuse_Coeff_t)*8*_num, sizeof(AnalogInput_eFuse_Coeff_t)*8);
+        // Checking if coeff are valid
+        if ((abs(_coeff.ain_coeff_a) < 100.0f) && (abs(_coeff.ain_coeff_b) < 1000.0f)) {
+            ESP_LOGI(TAG, "Reading AIN_%i coeffs: a=%f b=%f", _num+1, _coeff.ain_coeff_a, _coeff.ain_coeff_b);
+            return;
+        }
+    } 
+    
+    _coeff.ain_coeff_a = ESP_ADC_DEFAULT_COEFF_A;
+    _coeff.ain_coeff_b = ESP_ADC_DEFAULT_COEFF_B;
+
+    ESP_LOGI(TAG, "Reading default AIN_%i coeffs: a=%f b=%f", _num+1, _coeff.ain_coeff_a, _coeff.ain_coeff_b);
+    
+    return;
+}
+
+int AnalogInputEsp32s3::applyCoeff(int voltage)
+{
+    getCoeff();
+    return voltage * _coeff.ain_coeff_a  + _coeff.ain_coeff_b;
 }

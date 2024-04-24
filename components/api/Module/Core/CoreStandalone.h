@@ -51,24 +51,6 @@ public:
     static int digitalRead(DigitalInputNum_t dinNum);
 
     /**
-     * @brief Read the value of AIN.
-     * The function return the raw value (0-4096) that correspond to the voltage of the ANA.
-     *
-     * @param ain ANA input to monitor.
-     * @return int Value of the AIN input.
-     */
-    static int analogRead(AnalogInput_Num_t ain);
-
-    /**
-     * @brief Read the value of AIN.
-     * The function return a float that correspond to the voltage of the ANA (from 0 to 2.6V).
-     *
-     * @param ain ANA input to monitor.
-     * @return float Value of the AIN input.
-     */
-    static int analogReadMilliVolt(AnalogInput_Num_t ain);
-
-    /**
      * @brief Attach a user callback to the DIN interrupts.
      * 
      * @param din DIN to attach interrupt.
@@ -102,10 +84,10 @@ public:
 private:
 
     static ioex_device_t *_ioex;
-    static esp_adc_cal_characteristics_t _adc1Characteristics;
 
     static DigitalOutputs* dout;
     static DigitalInputs* din;
+    static AnalogInputs* ain;
 
     static void _controlTask(void *pvParameters);
 

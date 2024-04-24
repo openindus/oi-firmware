@@ -224,9 +224,6 @@
 #define CORE_I2C_RTC_ADDRESS          0xD0
 #define CORE_DEFAULT_I2C_SPEED        100000
 
-#define CORE_ADC_NO_OF_SAMPLES        64U
-#define CORE_ADC_REDUCTION_FACTOR     11.6965f
-
 #endif
 
 #endif
