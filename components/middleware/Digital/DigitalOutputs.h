@@ -64,7 +64,7 @@ class DigitalOutputs
 public:
 
     DigitalOutputs(const gpio_num_t *gpio, const AdcNumChannel_t *adc, int num);
-    DigitalOutputs(const gpio_num_t *gpio, const adc_channel_t *adc, int num);
+    DigitalOutputs(const gpio_num_t *gpio, const adc1_channel_t *adc, int num);
     DigitalOutputs(ioex_device_t **ioex, const ioex_num_t *ioex_num, const ioex_num_t *current_num, int num);
     ~DigitalOutputs();
 

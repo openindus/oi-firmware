@@ -37,7 +37,7 @@ DigitalOutputs::DigitalOutputs(const gpio_num_t *gpio, const AdcNumChannel_t *ad
     _doutLevel = (uint8_t*) calloc(num, sizeof(uint8_t));
 }
 
-DigitalOutputs::DigitalOutputs(const gpio_num_t *gpio, const adc_channel_t *adc, int num) 
+DigitalOutputs::DigitalOutputs(const gpio_num_t *gpio, const adc1_channel_t *adc, int num) 
 {
     _type = DIGITAL_OUTPUT_GPIO;
 
@@ -52,7 +52,7 @@ DigitalOutputs::DigitalOutputs(const gpio_num_t *gpio, const adc_channel_t *adc,
     _adc_current = (AdcNumChannel_t*) calloc(num, sizeof(AdcNumChannel_t));
     for (int i = 0; i < num; i++) {
         _adc_current[i].adc_num = ADC_UNIT_1;
-        _adc_current[i].channel = adc[i];
+        _adc_current[i].channel = (adc_channel_t)adc[i];
     }
 
     /* Init memory of _doutLevel */
