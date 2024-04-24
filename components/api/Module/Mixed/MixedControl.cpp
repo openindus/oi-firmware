@@ -23,6 +23,14 @@ void MixedControl::digitalWrite(DigitalOutputNum_t num, uint8_t level)
     ctrlRequest(msgBytes);
 }
 
+float MixedControl::getCurrent(DigitalOutputNum_t num)
+{
+    std::vector<uint8_t> msgBytes = {CONTROL_GET_CURRENT, (uint8_t)num};
+    ctrlRequest(msgBytes);
+    float* current = reinterpret_cast<float*>(&msgBytes[2]);
+    return *current;
+}
+
 int MixedControl::digitalRead(DigitalInputNum_t num)
 {
     std::vector<uint8_t> msgBytes = {CONTROL_DIGITAL_READ, (uint8_t)num};
@@ -56,10 +64,24 @@ void MixedControl::analogInputMode(AnalogInput_Num_t num, AnalogInput_Mode_t mod
     ctrlRequest(msgBytes);
 }
 
+uint8_t MixedControl::analogInputGetMode(AnalogInput_Num_t num)
+{
+    std::vector<uint8_t> msgBytes = {CONTROL_ANALOG_INPUT_GET_MODE, (uint8_t)num};
+    ctrlRequest(msgBytes);
+    return msgBytes[2];
+}
+
 void MixedControl::analogInputVoltageRange(AnalogInput_Num_t num, AnalogInput_VoltageRange_t range)
 {
     std::vector<uint8_t> msgBytes = {CONTROL_ANALOG_INPUT_VOLTAGE_RANGE, (uint8_t)num, (uint8_t)range};
     ctrlRequest(msgBytes);
+}
+
+uint8_t MixedControl::analogInputGetVoltageRange(AnalogInput_Num_t num)
+{
+    std::vector<uint8_t> msgBytes = {CONTROL_ANALOG_INPUT_GET_VOLTAGE_RANGE, (uint8_t)num};
+    ctrlRequest(msgBytes);
+    return msgBytes[2];
 }
 
 int MixedControl::analogRead(AnalogInput_Num_t num)
