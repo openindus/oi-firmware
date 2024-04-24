@@ -16,7 +16,7 @@ void setup(void)
 
 void loop(void)
 {
-    float value = mixed.analogReadMilliAmps(AIN_1);
+    float value = mixed.analogReadMilliAmp(AIN_1);
     Serial.printf("Value of analog input 1: %f\n", value);
     delay(1000);
 }
