@@ -32,20 +32,26 @@
 enum Command_Control_e {
     /* DIGITAL */
     CONTROL_DIGITAL_WRITE                   = 0x00,
-    CONTROL_DIGITAL_READ                    = 0x01,
-    CONTROL_ATTACH_INTERRUPT                = 0x02,
-    CONTROL_DETACH_INTERRUPT                = 0x03,
-    CONTROL_TOGGLE_OUTPUT                   = 0x04,
-    CONTROL_BLINK_OUTPUT                    = 0x05,
+    CONTROL_GET_CURRENT                     = 0x01,
+    CONTROL_DIGITAL_READ                    = 0x02,
+    CONTROL_ATTACH_INTERRUPT                = 0x03,
+    CONTROL_DETACH_INTERRUPT                = 0x04,
+    CONTROL_TOGGLE_OUTPUT                   = 0x05,
+    CONTROL_BLINK_OUTPUT                    = 0x06,
 
     /* ANALOG */
-    CONTROL_ANALOG_READ                     = 0x20,
-    CONTROL_ANALOG_READ_MILLIVOLTS          = 0x21,
-    CONTROL_ANALOG_INPUT_MODE               = 0x22,
-    CONTROL_ANALOG_INPUT_RESOLUTION         = 0x23,
-    CONTROL_ANALOG_INPUT_REFERENCE          = 0x24,
-    CONTROL_ANALOG_WRITE                    = 0x25,
-    CONTROL_ANALOG_OUTPUT_MODE              = 0x26,
+    CONTROL_ANALOG_INPUT_MODE               = 0x20,
+    CONTROL_ANALOG_INPUT_GET_MODE           = 0x21,
+    CONTROL_ANALOG_INPUT_VOLTAGE_RANGE      = 0x22,
+    CONTROL_ANALOG_INPUT_GET_VOLTAGE_RANGE  = 0x23,
+    CONTROL_ANALOG_READ                     = 0x24,
+    CONTROL_ANALOG_READ_VOLT                = 0x25,
+    CONTROL_ANALOG_READ_MILLIVOLT           = 0x26,
+    CONTROL_ANALOG_READ_AMP                 = 0x27,
+    CONTROL_ANALOG_READ_MILLIAMP            = 0x28,
+
+    CONTROL_ANALOG_OUTPUT_MODE              = 0x29,
+    CONTROL_ANALOG_WRITE                    = 0x30,
 
     /* MOTOR */
     CONTROL_MOTOR_STOP                      = 0x40,

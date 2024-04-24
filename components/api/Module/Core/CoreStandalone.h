@@ -104,8 +104,8 @@ private:
     static ioex_device_t *_ioex;
     static esp_adc_cal_characteristics_t _adc1Characteristics;
 
-    static DigitalOutput* dout;
-    static DigitalInput* din;
+    static DigitalOutputs* dout;
+    static DigitalInputs* din;
 
     static void _controlTask(void *pvParameters);
 

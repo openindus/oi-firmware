@@ -116,7 +116,8 @@ typedef enum {
 typedef struct {
     spi_host_device_t host_id;  // SPI host Id
     int sclk_freq;              // Clock frequency
-    gpio_num_t sync;            // SYNC pin (Chip select)
+    gpio_num_t sync_pin;            // SYNC pin (Chip select)
+	gpio_num_t ldac_pin;			// LDAC pin
     uint8_t ad0 : 1;            // Address decode 0
     uint8_t ad1 : 1;            // Address decode 1
 } ad5413_config_t;

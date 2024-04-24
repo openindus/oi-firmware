@@ -16,9 +16,9 @@
 #pragma once
 
 #include "Global.h"
-#include "DigitalInput.h"
-#include "DigitalOutput.h"
-#include "AnalogInput.h"
+#include "DigitalInputs.h"
+#include "DigitalOutputs.h"
+#include "AnalogInputs.h"
 #include "AnalogOutput.h"
 
 class MixedInterface
@@ -66,6 +66,14 @@ public:
     virtual void digitalWrite(DigitalOutputNum_t num, uint8_t level) = 0;
 
     /**
+     * @brief Get the current of a digital output
+     * 
+     * @param num DOUT to drive
+     * @return float : current in A
+    **/
+    virtual float getCurrent(DigitalOutputNum_t num) = 0;
+
+    /**
      * @brief Set AdcMode of the current input
      * 
      * @param[in] num : Analog input
@@ -74,42 +82,74 @@ public:
     virtual void analogInputMode(AnalogInput_Num_t num, AnalogInput_Mode_t mode) = 0;
 
     /**
-     * @brief Set adc resolution measurement
+     * @brief 
      * 
-     * @param[in] res : Adc resolution
-     */  
-    virtual void analogInputResolution(AnalogInput_Resolution_t res) = 0;
+     * @param[in] num 
+     * @return uint8_t : mode (0: voltage, 1: current)
+    **/
+    virtual uint8_t analogInputGetMode(AnalogInput_Num_t num) = 0;
 
     /**
-     * @brief Set adc internal reference voltage
+     * @brief Set the voltage range of the current input
      * 
-     * @param[in] ref reference value
-     */ 
-    virtual void analogInputReference(float ref) = 0;
+     * @param[in] num : Analog input
+     * @param[in] range : voltage range (5: 0-10.24V, 6: 0-5.12V, 7: 0-2.56V or 8: 0-1.28V)
+     */
+    virtual void analogInputVoltageRange(AnalogInput_Num_t num, AnalogInput_VoltageRange_t range) = 0;
 
     /**
-     * @brief Read a voltage measure on analog pins
+     * @brief 
+     * 
+     * @param[in] num : Analog input
+     * @return uint8_t : range (5: 0-10.24V, 6: 0-5.12V, 7: 0-2.56V or 8: 0-1.28V)
+    **/
+    virtual uint8_t analogInputGetVoltageRange(AnalogInput_Num_t num) = 0;
+
+    /**
+     * @brief Read a voltage measure on analog pin
      * 
      * @param[in] num : Analog input
      * @return int : Adc raw value
      */
     virtual int analogRead(AnalogInput_Num_t num) = 0;
-
+  
     /**
-     * @brief Read a voltage measure on analog pins
+     * @brief Read a voltage measure on analog pin
      * 
      * @param[in] num : Analog input
-     * @return float : Measure in specified units
+     * @return float : Measure in V
      */
-    virtual float analogReadMilliVolts(AnalogInput_Num_t num) = 0;
+    virtual float analogReadVolt(AnalogInput_Num_t num) = 0;
+
+    /**
+     * @brief Read a voltage measure on analog pin
+     * 
+     * @param[in] num : Analog input
+     * @return float : Measure in mV
+     */
+    virtual float analogReadMilliVolt(AnalogInput_Num_t num) = 0;
+
+    /**
+     * @brief Read a current measure on analog pin
+     * 
+     * @param[in] num : Analog input
+     * @return float : Measure in A
+     */
+    virtual float analogReadAmp(AnalogInput_Num_t num) = 0;
+
+    /**
+     * @brief Read a current measure on analog pin
+     * 
+     * @param[in] num : Analog input
+     * @return float : Measure in mA
+     */
+    virtual float analogReadMilliAmp(AnalogInput_Num_t num) = 0;
 
     /**
      * @brief Configure analog output mode
      * 
      * @param num Analog output num
-     * @param mode mode: 
-     * MODE_M10V5_10V5
-     * MODE_0mA_20mA
+     * @param mode mode: (+/- 10.5V, 0-20mA)
      */
     virtual void analogOutputMode(AnalogOutput_Num_t num, AnalogOutput_Mode_t mode) = 0;
 

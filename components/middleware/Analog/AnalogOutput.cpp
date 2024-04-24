@@ -31,7 +31,7 @@ int AnalogOutputAD5413::init(ad5413_config_t* config, int nb)
     for (int i = 0; i < nb; i++) {
         if (config != NULL) {
 
-            ESP_LOGI(TAG, "Initialized device%d", i);
+            ESP_LOGI(TAG, "Initialized device %d", i);
 
             /* Initialized the device */
             ret |= ad5413_init(&_device[i], &config[i]);

@@ -6,24 +6,24 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file DigitalInput.c
+ * @file DigitalInputs.c
  * @brief Functions for din
  *
  * For more information on OpenIndus:
  * @see https://openindus.com
  */
 
-#include "DigitalInput.h"
+#include "DigitalInputs.h"
 
-static const char DIN_TAG[] = "DigitalInput";
+static const char DIN_TAG[] = "DigitalInputs";
 
-xQueueHandle DigitalInput::_event;
+xQueueHandle DigitalInputs::_event;
 
-DigitalInput::DigitalInput(const gpio_num_t *gpio, int num) 
+DigitalInputs::DigitalInputs(const gpio_num_t *gpio, int num) 
 {
     _type = DIGITAL_INPUT_GPIO;
 
-    /* Save number of DOUT */
+    /* Save number of DIN */
     _num = num;
     
     /* Init memory and copy gpio numbers in _gpio_num table */
@@ -34,7 +34,7 @@ DigitalInput::DigitalInput(const gpio_num_t *gpio, int num)
     _arg = (void**) calloc(num, sizeof(void*));
 }
 
-DigitalInput::DigitalInput(ioex_device_t **ioex, const ioex_num_t *ioex_num, int num) 
+DigitalInputs::DigitalInputs(ioex_device_t **ioex, const ioex_num_t *ioex_num, int num) 
 {
     _type = DIGITAL_INPUT_IOEX;
 
@@ -52,7 +52,7 @@ DigitalInput::DigitalInput(ioex_device_t **ioex, const ioex_num_t *ioex_num, int
     _arg = (void**) calloc(num, sizeof(void*));
 }
 
-DigitalInput::~DigitalInput()
+DigitalInputs::~DigitalInputs()
 {
     if (_type == DIGITAL_INPUT_GPIO) {  
         free(_gpio_num);
@@ -63,7 +63,7 @@ DigitalInput::~DigitalInput()
     free(_arg);
 }
 
-void DigitalInput::init(void)
+void DigitalInputs::init(void)
 {
     if (_type == DIGITAL_INPUT_GPIO) {
         /* Init DIN Gpio */
@@ -101,7 +101,7 @@ void DigitalInput::init(void)
     xTaskCreate(_task, "DIN interrupt task", 2048, this, 10, NULL);
 }
 
-int DigitalInput::getLevel(DigitalInputNum_t din)
+int DigitalInputs::getLevel(DigitalInputNum_t din)
 {
     if (_type == DIGITAL_INPUT_GPIO) {
         return gpio_get_level(_gpio_num[din]);
@@ -110,7 +110,7 @@ int DigitalInput::getLevel(DigitalInputNum_t din)
     }
 }
 
-int DigitalInput::read(DigitalInputNum_t din)
+int DigitalInputs::read(DigitalInputNum_t din)
 {
     if (din < DIN_MAX) {
         return getLevel(din);
@@ -120,7 +120,7 @@ int DigitalInput::read(DigitalInputNum_t din)
     }
 }
 
-void DigitalInput::attachInterrupt(DigitalInputNum_t din, IsrCallback_t callback, InterruptMode_t mode, void* arg)
+void DigitalInputs::attachInterrupt(DigitalInputNum_t din, IsrCallback_t callback, InterruptMode_t mode, void* arg)
 {
     _callback[din] = callback;
     _arg[din] = arg;
@@ -136,7 +136,7 @@ void DigitalInput::attachInterrupt(DigitalInputNum_t din, IsrCallback_t callback
     }
 }
 
-void DigitalInput::detachInterrupt(DigitalInputNum_t din)
+void DigitalInputs::detachInterrupt(DigitalInputNum_t din)
 {
     if (_type == DIGITAL_INPUT_GPIO) {
         gpio_isr_handler_remove(_gpio_num[din]);
@@ -145,16 +145,16 @@ void DigitalInput::detachInterrupt(DigitalInputNum_t din)
     }
 }
 
-void IRAM_ATTR DigitalInput::_isr(void* pvParameters)
+void IRAM_ATTR DigitalInputs::_isr(void* pvParameters)
 {
     uint32_t din = (uint32_t)pvParameters;
     xQueueSendFromISR(_event, &din, NULL);
 }
 
-void DigitalInput::_task(void* pvParameters)
+void DigitalInputs::_task(void* pvParameters)
 {
     DigitalInputNum_t din;
-    DigitalInput* dout = (DigitalInput*) pvParameters;
+    DigitalInputs* dout = (DigitalInputs*) pvParameters;
 
     while(1) {
         if(xQueueReceive(_event, &din, portMAX_DELAY)) {

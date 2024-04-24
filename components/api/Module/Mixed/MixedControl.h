@@ -31,6 +31,7 @@ public:
 
     /* Digital Output */
     void digitalWrite(DigitalOutputNum_t num, uint8_t level) override;
+    float getCurrent(DigitalOutputNum_t num) override;
 
     /* Digital Input */
     int digitalRead(DigitalInputNum_t num) override;
@@ -40,11 +41,14 @@ public:
 
     /* Analog Input */
     void analogInputMode(AnalogInput_Num_t num, AnalogInput_Mode_t mode) override;
-    void analogInputResolution(AnalogInput_Resolution_t res) override;
-    void analogInputReference(float ref) override;
+    uint8_t analogInputGetMode(AnalogInput_Num_t num) override;
+    void analogInputVoltageRange(AnalogInput_Num_t num, AnalogInput_VoltageRange_t range) override;
+    uint8_t analogInputGetVoltageRange(AnalogInput_Num_t num) override;
     int analogRead(AnalogInput_Num_t num) override;
-    float analogReadMilliVolts(AnalogInput_Num_t num) override;
-    float analogReadMilliAmps(AnalogInput_Num_t num);
+    float analogReadVolt(AnalogInput_Num_t num) override;
+    float analogReadMilliVolt(AnalogInput_Num_t num) override;
+    float analogReadAmp(AnalogInput_Num_t num) override;
+    float analogReadMilliAmp(AnalogInput_Num_t num) override;
 
     /* Analog Output */
     void analogOutputMode(AnalogOutput_Num_t num, AnalogOutput_Mode_t mode) override;

@@ -1,5 +1,4 @@
 set(COMPONENT_SRCS
-    "ads866x/ads866x.c"
     "dac8760/dac8760.c"
     "powerSTEP01/PS01_Cmd.c"
     "powerSTEP01/PS01_Hal.c"
@@ -18,11 +17,11 @@ set(COMPONENT_SRCS
     "cd74hc4052/cd74hc4052.c"
     "dac/ad5413/ad5413.c"
     "adc/ads114s0x/ads114s0x.c"
+    "adc/ads866x/ads866x.c"
 )
 
 set(COMPONENT_INCLUDE_DIRS
     "."
-    "ads866x"
     "dac8760"
     "powerSTEP01"
     "pcal6524"
@@ -34,6 +33,7 @@ set(COMPONENT_INCLUDE_DIRS
     "dac"
     "dac/ad5413"
     "adc"
+    "adc/ads866x"
     "adc/ads114s0x"
 )
 

@@ -41,10 +41,14 @@ public:
 
     /* Analog Input */
     void analogInputMode(AnalogInput_Num_t num, AnalogInput_Mode_t mode);
-    void analogInputResolution(AnalogInput_Resolution_t res);
-    void analogInputReference(float ref);
+    uint8_t analogInputGetMode(AnalogInput_Num_t num);
+    void analogInputVoltageRange(AnalogInput_Num_t num, AnalogInput_VoltageRange_t range);
+    uint8_t analogInputGetVoltageRange(AnalogInput_Num_t num);
     int analogRead(AnalogInput_Num_t num);
-    float analogReadMilliVolts(AnalogInput_Num_t num);
+    float analogReadVolt(AnalogInput_Num_t num);
+    float analogReadMilliVolt(AnalogInput_Num_t num);
+    float analogReadAmp(AnalogInput_Num_t num);
+    float analogReadMilliAmp(AnalogInput_Num_t num);
 
     /* Analog Output */
     void analogOutputMode(AnalogOutput_Num_t num, AnalogOutput_Mode_t mode);
@@ -52,9 +56,9 @@ public:
 
 private:
 
-    static DigitalInput* _din;
-    static DigitalOutput* _dout;
-    static AnalogInput* _ain[4];
+    static DigitalInputs* _dins;
+    static DigitalOutputs* _douts;
+    static AnalogInputs* _ains;
     static AnalogOutput* _aout[2];
 
 };
