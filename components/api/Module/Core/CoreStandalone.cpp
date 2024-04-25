@@ -365,6 +365,11 @@ int CoreStandalone::digitalRead(DigitalInputNum_t dinNum)
     return din->read(dinNum);
 }
 
+int CoreStandalone::setAnalogCoeffs(float* coeff_a, float* coeff_b)
+{
+    return ain->setCoeffs(coeff_a, coeff_b);
+}
+
 void CoreStandalone::attachInterrupt(DigitalInputNum_t dinNum, IsrCallback_t callback, InterruptMode_t mode, void* arg)
 {
     din->attachInterrupt(dinNum, callback, mode, arg);

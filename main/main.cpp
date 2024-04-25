@@ -10,7 +10,7 @@ void setup(void)
     float a[2] = {11.797, 11.797};
     float b[2] = {278.94, 278.94};
 
-    core.setAnalogCoeff(a, b);
+    core.setAnalogCoeffs(a, b);
 }
 
 void loop(void)

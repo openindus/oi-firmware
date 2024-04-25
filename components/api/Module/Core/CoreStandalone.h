@@ -72,7 +72,7 @@ public:
      * @brief Read the overcurrent status of a given DOUT. 
      * 
      * @param dout DOUT channel to read overcurrent status.
-     * @return 0 is current is under 4Amps and 1 is current is above 4Amps
+     * @return 0 if current is under 4Amps and 1 if current is above 4Amps
      */
     static uint8_t digitalGetOverCurrentStatus(DigitalOutputNum_t doutNum);
 

@@ -92,12 +92,12 @@ public:
 
     AnalogInputEsp32s3(uint8_t num, adc1_channel_t channel);
 
-    void init();
-    int raw();
-    int read();
+    void init(void);
+    int read(void);
+    float read(AnalogInput_Unit_t unit);
     
-    void getCoeff();
-    int applyCoeff(int voltage);
+    void getCoeffs();
+    float applyCoeffs(float voltage);
 
 private:
 
@@ -123,7 +123,7 @@ public:
     uint8_t getMode(AnalogInput_Num_t num);
     void setVoltageRange(AnalogInput_Num_t num, AnalogInput_VoltageRange_t range);
     uint8_t getVoltageRange(AnalogInput_Num_t num);
-    int setCoeff(float* a, float* b);
+    int setCoeffs(float* a, float* b);
 
 private:
 

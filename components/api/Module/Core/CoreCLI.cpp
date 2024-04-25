@@ -21,9 +21,8 @@ void CoreCLI::init(void)
 {
     _registerDigitalWrite();
     _registerDigitalRead();
-    _registerAnalogRead();
-    _registerAnalogReadMilliVolt();
     _registerDigitalGetOverCurrentStatus();
+    _registerAnalogInputRead();
     _registerDate();
 }
 
@@ -104,13 +103,15 @@ void CoreCLI::_registerDigitalRead(void)
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
 }
 
-/** 'analog-read-millivolts' */
+/** 'analog-read' */
 
 static struct {
     struct arg_int *ain;
+    struct arg_int *unit;
     struct arg_end *end;
-} analogReadArgs;
+} _analogReadInputReadArgs;
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 static int analogRead(int argc, char **argv)
 {
@@ -149,33 +150,66 @@ static int analogReadMilliVolt(int argc, char **argv)
 =======
 static int analogReadMilliVolts(int argc, char **argv)
 >>>>>>> e458d01... do not merge this commit as it git status!
+=======
+int analogInputRead(int argc, char **argv)
+>>>>>>> a0c9710... updated api for analog read OICore
 {
-    int nerrors = arg_parse(argc, argv, (void **) &analogReadArgs);
+    int nerrors = arg_parse(argc, argv, (void **) &_analogReadInputReadArgs);
     if (nerrors != 0) {
-        arg_print_errors(stderr, analogReadArgs.end, argv[0]);
+        arg_print_errors(stderr, _analogReadInputReadArgs.end, argv[0]);
         return 1;
     }
 
-    AnalogInput_Num_t ain = (AnalogInput_Num_t)(analogReadArgs.ain->ival[0] - 1);
+    AnalogInput_Num_t ain = (AnalogInput_Num_t)(_analogReadInputReadArgs.ain->ival[0] - 1);
+    AnalogInput_Unit_t unit = AIN_UNIT_MILLIVOLT;
+    if (_analogReadInputReadArgs.unit->count == 1) {
+        unit = (AnalogInput_Unit_t)(_analogReadInputReadArgs.unit->ival[0]);
+    }
 
+<<<<<<< HEAD
     printf("%imV\n", CoreStandalone::analogReadMilliVolt(ain));
+=======
+    switch (unit)
+    {
+    case AIN_UNIT_RAW:
+        printf("%i\n", CoreStandalone::analogRead(ain));
+        break;
+    case AIN_UNIT_VOLT:
+        printf("%.3f\n", CoreStandalone::analogReadVolt(ain));
+        break;
+    case AIN_UNIT_MILLIVOLT:
+    default:
+        printf("%.1f\n", CoreStandalone::analogReadMilliVolt(ain));
+        break;
+    }
+>>>>>>> a0c9710... updated api for analog read OICore
 
     return 0;
 }
 
+<<<<<<< HEAD
 void CoreCLI::_registerAnalogReadMilliVolt(void)
+=======
+void CoreCLI::_registerAnalogInputRead(void)
+>>>>>>> a0c9710... updated api for analog read OICore
 {
-    analogReadArgs.ain = arg_int1(NULL, NULL, "<AIN>", "[1-2]");
-    analogReadArgs.end = arg_end(2);
+    _analogReadInputReadArgs.ain = arg_int1(NULL, NULL, "<AIN>", "[1-4]");
+    _analogReadInputReadArgs.unit = arg_int0(NULL, NULL, "<UNIT>", "0 = Raw, 1 = mV, 3 = V");
+    _analogReadInputReadArgs.end = arg_end(2);
 
-    const esp_console_cmd_t cmd = {
-        .command = "analog-read-millivolts",
-        .help = "Get analog input value (MilliVolts)",
+    const esp_console_cmd_t read_cmd = {
+        .command = "analog-read",
+        .help = "Read Ain voltage or current in desired unit (default to mV)",
         .hint = NULL,
+<<<<<<< HEAD
         .func = &analogReadMilliVolt,
         .argtable = &analogReadArgs
+=======
+        .func = &analogInputRead,
+        .argtable = &_analogReadInputReadArgs
+>>>>>>> a0c9710... updated api for analog read OICore
     };
-    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+    ESP_ERROR_CHECK(esp_console_cmd_register(&read_cmd));
 }
 
 /** 'digital-read-overcurrent' */
@@ -185,7 +219,11 @@ static struct {
     struct arg_end *end;
 } digitalReadOverCurrentArgs;
 
+<<<<<<< HEAD
 static int digitalGetOverCurrentStatus(int argc, char **argv)
+=======
+static int getOvercurrentCurrentStatus(int argc, char **argv)
+>>>>>>> a0c9710... updated api for analog read OICore
 {
     int nerrors = arg_parse(argc, argv, (void **) &digitalReadOverCurrentArgs);
     if (nerrors != 0) {
@@ -194,20 +232,32 @@ static int digitalGetOverCurrentStatus(int argc, char **argv)
     }
 
     DigitalOutputNum_t dout = (DigitalOutputNum_t)(digitalReadOverCurrentArgs.dout->ival[0] - 1);
+<<<<<<< HEAD
     printf("%u\n", CoreStandalone::digitalGetOverCurrentStatus(dout));
     return 0;
 }
 
 void CoreCLI::_registerDigitalGetOverCurrentStatus(void)
+=======
+    printf("%u\n", CoreStandalone::getOvercurrentCurrentStatus(dout));
+    return 0;
+}
+
+void CoreCLI::_registerGetOvercurrentCurrentStatus(void)
+>>>>>>> a0c9710... updated api for analog read OICore
 {
     digitalReadOverCurrentArgs.dout = arg_int1(NULL, NULL, "<DOUT>", "[1-4]");
     digitalReadOverCurrentArgs.end = arg_end(2);
 
     const esp_console_cmd_t cmd = {
-        .command = "get-current-level",
+        .command = "get-current-status",
         .help = "Read the overcurrent status for the given output",
         .hint = NULL,
+<<<<<<< HEAD
         .func = &digitalGetOverCurrentStatus,
+=======
+        .func = &getOvercurrentCurrentStatus,
+>>>>>>> a0c9710... updated api for analog read OICore
         .argtable = &digitalReadOverCurrentArgs
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
