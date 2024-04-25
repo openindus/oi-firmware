@@ -44,6 +44,8 @@ int AnalogInputs::init(ads866x_config_t *ads866xConfig, AnalogInput_VoltageRange
             _ains[i]->init(range, mode);
         }
         return 0;
+    } else {
+        ESP_LOGE(TAG, "Function not available for this type of input");
     }
     return -1;
 }
@@ -58,6 +60,8 @@ int AnalogInputs::init()
             _ains_esp[i]->init();
         }
         return 0;
+    } else {
+        ESP_LOGE(TAG, "Function not available for this type of input");
     }
     return -1;
 }
@@ -70,6 +74,8 @@ int AnalogInputs::read(AnalogInput_Num_t num)
         } 
         else if (_type == ANALOG_INPUT_ESP32S3) {
             return _ains_esp[num]->read();
+        } else {
+            ESP_LOGE(TAG, "Function not available for this type of input");
         }
     } else {
         ESP_LOGE(TAG, "INVALID INPUT AIN_%i", num+1);
@@ -82,8 +88,10 @@ float AnalogInputs::read(AnalogInput_Num_t num, AnalogInput_Unit_t unit)
     if (num < _nb) {
         if (_type == ANALOG_INPUT_ADS866X) {
             return _ains[num]->read(unit);
-        } else {
+        } else if (_type == ANALOG_INPUT_ESP32S3) {
             return _ains_esp[num]->read(unit);
+        } else {
+            ESP_LOGE(TAG, "Function not available for this type of input");
         }
     } else {
         ESP_LOGE(TAG, "INVALID INPUT AIN_%i", num+1);
@@ -97,8 +105,8 @@ void AnalogInputs::setMode(AnalogInput_Num_t num, AnalogInput_Mode_t mode)
         if (_type == ANALOG_INPUT_ADS866X) {
             _ains[num]->setMode(mode);
         } else {
-            ESP_LOGE(TAG, "Function not available for AIN_%i", num+1);
-        }
+            ESP_LOGE(TAG, "Function not available for this type of input");
+        }        
     } else {
         ESP_LOGE(TAG, "INVALID INPUT AIN_%i", num+1);
     }
@@ -110,8 +118,8 @@ uint8_t AnalogInputs::getMode(AnalogInput_Num_t num)
         if (_type == ANALOG_INPUT_ADS866X) {
             return _ains[num]->getMode();
         } else {
-            ESP_LOGE(TAG, "Function not available for AIN_%i", num+1);
-        }
+            ESP_LOGE(TAG, "Function not available for this type of input");
+        }   
     } else {
         ESP_LOGE(TAG, "INVALID INPUT AIN_%i", num+1);
     }
@@ -124,8 +132,8 @@ void AnalogInputs::setVoltageRange(AnalogInput_Num_t num, AnalogInput_VoltageRan
         if (_type == ANALOG_INPUT_ADS866X) {
             _ains[num]->setVoltageRange(range);
         } else {
-            ESP_LOGE(TAG, "Function not available for AIN_%i", num+1);
-        }
+            ESP_LOGE(TAG, "Function not available for this type of input");
+        }   
     } else {
         ESP_LOGE(TAG, "INVALID INPUT AIN_%i", num+1);
     }
@@ -137,8 +145,8 @@ uint8_t AnalogInputs::getVoltageRange(AnalogInput_Num_t num)
         if (_type == ANALOG_INPUT_ADS866X) {
             return _ains[num]->getVoltageRange();
         } else {
-            ESP_LOGE(TAG, "Function not available for AIN_%i", num+1);
-        }
+            ESP_LOGE(TAG, "Function not available for this type of input");
+        }   
     } else {
         ESP_LOGE(TAG, "INVALID INPUT AIN_%i", num+1);
     }
@@ -181,7 +189,9 @@ int AnalogInputs::setCoeffs(float* a, float* b)
         }
 
         return 0;
-    }
+    } else {
+        ESP_LOGE(TAG, "Function not available for this type of input");
+    }   
     return -1;
 }
 

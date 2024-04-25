@@ -22,8 +22,7 @@ void DiscreteCLI::init(void)
     _registerDigitalWrite();
     _registerDigitalRead();
     _registerDigitalGetCurrent();
-    _registerAnalogRead();
-    _registerAnalogReadMilliVolt();
+    _registerAnalogInputRead();
 }
 
 /** 'digital-write' */
@@ -144,70 +143,98 @@ void DiscreteCLI::_registerDigitalGetCurrent(void)
 
 static struct {
     struct arg_int *ain;
+    struct arg_int *unit;
     struct arg_end *end;
-} analogReadArgs;
+} _analogReadInputReadArgs;
 
-static int analogRead(int argc, char **argv)
+int analogInputRead(int argc, char **argv)
 {
-    int nerrors = arg_parse(argc, argv, (void **) &analogReadArgs);
+    int nerrors = arg_parse(argc, argv, (void **) &_analogReadInputReadArgs);
     if (nerrors != 0) {
-        arg_print_errors(stderr, analogReadArgs.end, argv[0]);
+        arg_print_errors(stderr, _analogReadInputReadArgs.end, argv[0]);
         return 1;
     }
 
-    AnalogInput_Num_t ain = (AnalogInput_Num_t)(analogReadArgs.ain->ival[0] - 1);
+    AnalogInput_Num_t ain = (AnalogInput_Num_t)(_analogReadInputReadArgs.ain->ival[0] - 1);
+    AnalogInput_Unit_t unit = AIN_UNIT_MILLIVOLT;
+    if (_analogReadInputReadArgs.unit->count == 1) {
+        unit = (AnalogInput_Unit_t)(_analogReadInputReadArgs.unit->ival[0]);
+    }
 
-    printf("%d\n", DiscreteStandalone::analogRead(ain));
+    switch (unit)
+    {
+    case AIN_UNIT_RAW:
+        printf("%i\n", DiscreteStandalone::analogRead(ain));
+        break;
+    case AIN_UNIT_VOLT:
+        printf("%.3f\n", DiscreteStandalone::analogReadVolt(ain));
+        break;
+    case AIN_UNIT_MILLIVOLT:
+    default:
+        printf("%.1f\n", DiscreteStandalone::analogReadMilliVolt(ain));
+        break;
+    }
 
     return 0;
 }
 
-void DiscreteCLI::_registerAnalogRead(void)
+void DiscreteCLI::_registerAnalogInputRead(void)
 {
-    analogReadArgs.ain = arg_int1(NULL, NULL, "<AIN>", "[1-3]");
-    analogReadArgs.end = arg_end(2);
+    _analogReadInputReadArgs.ain = arg_int1(NULL, NULL, "<AIN>", "[1-4]");
+    _analogReadInputReadArgs.unit = arg_int0(NULL, NULL, "<UNIT>", "0 = Raw, 1 = mV, 3 = V");
+    _analogReadInputReadArgs.end = arg_end(2);
 
-    const esp_console_cmd_t cmd = {
+    const esp_console_cmd_t read_cmd = {
         .command = "analog-read",
-        .help = "Get analog input value (RAW)",
+        .help = "Read Ain voltage or current in desired unit (default to mV)",
         .hint = NULL,
-        .func = &analogRead,
-        .argtable = &analogReadArgs
+        .func = &analogInputRead,
+        .argtable = &_analogReadInputReadArgs
     };
-    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+    ESP_ERROR_CHECK(esp_console_cmd_register(&read_cmd));
 }
 
-/** 'analog-read-millivolts' */
 
-static int analogReadMilliVolt(int argc, char **argv)
+/** 'set-analog-coeffs' */
+
+static struct {
+    struct arg_dbl *a1;
+    struct arg_dbl *a2;
+    struct arg_dbl *b1;
+    struct arg_dbl *b2;
+    struct arg_end *end;
+} _setAnalogCoeffsArgs;
+
+int setAnalogCoeffs(int argc, char **argv)
 {
-    int nerrors = arg_parse(argc, argv, (void **) &analogReadArgs);
+    int nerrors = arg_parse(argc, argv, (void **) &_setAnalogCoeffsArgs);
     if (nerrors != 0) {
-        arg_print_errors(stderr, analogReadArgs.end, argv[0]);
+        arg_print_errors(stderr, _setAnalogCoeffsArgs.end, argv[0]);
         return 1;
     }
 
-    AnalogInput_Num_t ain = (AnalogInput_Num_t)(analogReadArgs.ain->ival[0] - 1);
+    float a[2] = {(float)_setAnalogCoeffsArgs.a1->dval[0], (float)_setAnalogCoeffsArgs.a2->dval[0]};
+    float b[2] = {(float)_setAnalogCoeffsArgs.b1->dval[0], (float)_setAnalogCoeffsArgs.b2->dval[0]};
 
-    printf("%imV\n", DiscreteStandalone::analogReadMilliVolt(ain));
-
-
-    return 0;
+    return DiscreteStandalone::setAnalogCoeffs(a, b);
 }
 
-void DiscreteCLI::_registerAnalogReadMilliVolt(void)
+void DiscreteCLI::_registerSetAnalogCoeffs(void)
 {
-    analogReadArgs.ain = arg_int1(NULL, NULL, "<AIN>", "[1-2]");
-    analogReadArgs.end = arg_end(2);
+    _setAnalogCoeffsArgs.a1 = arg_dbl1(NULL, "a1", "<A1>", "[-100;100]");
+    _setAnalogCoeffsArgs.a1 = arg_dbl1(NULL, "a2", "<A2>", "[-100;100]");    
+    _setAnalogCoeffsArgs.a1 = arg_dbl1(NULL, "b1", "<B1>", "[-1000;1000]");
+    _setAnalogCoeffsArgs.a1 = arg_dbl1(NULL, "b2", "<B2>", "[-1000;1000]");
+    _setAnalogCoeffsArgs.end = arg_end(4);
 
-    const esp_console_cmd_t cmd = {
-        .command = "analog-read-millivolts",
-        .help = "Get analog input value (MilliVolts)",
+    const esp_console_cmd_t read_cmd = {
+        .command = "set-analog-coeffs",
+        .help = "Set Ain coefficients",
         .hint = NULL,
-        .func = &analogReadMilliVolt,
-        .argtable = &analogReadArgs
+        .func = &setAnalogCoeffs,
+        .argtable = &_setAnalogCoeffsArgs
     };
-    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+    ESP_ERROR_CHECK(esp_console_cmd_register(&read_cmd));
 }
 
 #endif

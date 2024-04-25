@@ -59,27 +59,31 @@ public:
     virtual void detachInterrupt(DigitalInputNum_t din) = 0;
 
     /**
-     * @brief Read a voltage measure
-     * @param[in] ain : Analog input
-     * @return int : Measure in raw
+     * @brief Read the value of AIN.
+     * The function return a float that correspond to the raw value of the ANA in millivolts (from 0 to 3100mV).
+     * The returned value correspond to the raw internal voltage and not the output voltage. 
+     * It is better to use analogReadVolts or analogReadMillivolts.
+     * @param ain ANA input.
+     * @return int Value of the AIN input.
      */
-    virtual int analogRead(AnalogInput_Num_t ain) = 0;
+    virtual int analogRead(AnalogInput_Num_t ainNum) = 0;
 
     /**
-     * @brief Read a voltage measure
-     * 
-     * @param ain Analog input
-     * @return int Measure in millivolts
+     * @brief Read the value of AIN.
+     * The function return a float that correspond to the voltage of the ANA (from 0 to 30V).
+     *
+     * @param ain ANA input.
+     * @return float Value of the AIN input.
      */
-    virtual int analogReadMilliVolt(AnalogInput_Num_t ain) = 0;
+    virtual float analogReadVolt(AnalogInput_Num_t ainNum) = 0;
 
     /**
-     * @brief Set a PWM output at a given duty cycle. 
-     * First argument is the DOUT to drive and second argument is the duty cycle to set (from 0 to 255).
-     * 
-     * @param dout DOUT to drive.
-     * @param duty Value of the duty cycle (from 0 to 255).
+     * @brief Read the value of AIN.
+     * The function return a float that correspond to the voltage of the ANA (from 0 to 30000mV).
+     *
+     * @param ain ANA input.
+     * @return float Value of the AIN input.
      */
-    virtual void analogWrite(DigitalOutputNum_t dout, uint8_t duty) = 0;
+    virtual float analogReadMilliVolt(AnalogInput_Num_t ainNum) = 0;
 
 };

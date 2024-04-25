@@ -32,7 +32,12 @@ private:
     static void _registerDigitalRead(void);
     static void _registerDigitalGetOverCurrentStatus(void);
     static void _registerAnalogInputRead(void);
+<<<<<<< HEAD
     static void _registerSetAnalogCoeff(void);
+=======
+    static void _registerSetAnalogCoeffs(void);
+    static void _registerGetOverCurrentStatus(void);
+>>>>>>> cddb34a... add function to set coeffs from console
     static void _registerDate(void);
 
 };

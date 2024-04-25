@@ -23,6 +23,11 @@ void CoreCLI::init(void)
     _registerDigitalRead();
     _registerDigitalGetOverCurrentStatus();
     _registerAnalogInputRead();
+<<<<<<< HEAD
+=======
+    _registerSetAnalogCoeffs();
+    _registerGetOverCurrentStatus();
+>>>>>>> cddb34a... add function to set coeffs from console
     _registerDate();
 }
 
@@ -212,6 +217,48 @@ void CoreCLI::_registerAnalogInputRead(void)
     ESP_ERROR_CHECK(esp_console_cmd_register(&read_cmd));
 }
 
+/** 'set-analog-coeffs' */
+
+static struct {
+    struct arg_dbl *a1;
+    struct arg_dbl *a2;
+    struct arg_dbl *b1;
+    struct arg_dbl *b2;
+    struct arg_end *end;
+} _setAnalogCoeffsArgs;
+
+int setAnalogCoeffs(int argc, char **argv)
+{
+    int nerrors = arg_parse(argc, argv, (void **) &_setAnalogCoeffsArgs);
+    if (nerrors != 0) {
+        arg_print_errors(stderr, _setAnalogCoeffsArgs.end, argv[0]);
+        return 1;
+    }
+
+    float a[2] = {(float)_setAnalogCoeffsArgs.a1->dval[0], (float)_setAnalogCoeffsArgs.a2->dval[0]};
+    float b[2] = {(float)_setAnalogCoeffsArgs.b1->dval[0], (float)_setAnalogCoeffsArgs.b2->dval[0]};
+
+    return CoreStandalone::setAnalogCoeffs(a, b);
+}
+
+void CoreCLI::_registerSetAnalogCoeffs(void)
+{
+    _setAnalogCoeffsArgs.a1 = arg_dbl1(NULL, "a1", "<A1>", "[-100;100]");
+    _setAnalogCoeffsArgs.a1 = arg_dbl1(NULL, "a2", "<A2>", "[-100;100]");    
+    _setAnalogCoeffsArgs.a1 = arg_dbl1(NULL, "b1", "<B1>", "[-1000;1000]");
+    _setAnalogCoeffsArgs.a1 = arg_dbl1(NULL, "b2", "<B2>", "[-1000;1000]");
+    _setAnalogCoeffsArgs.end = arg_end(4);
+
+    const esp_console_cmd_t read_cmd = {
+        .command = "set-analog-coeffs",
+        .help = "Set Ain coefficients",
+        .hint = NULL,
+        .func = &setAnalogCoeffs,
+        .argtable = &_setAnalogCoeffsArgs
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&read_cmd));
+}
+
 /** 'digital-read-overcurrent' */
 
 static struct {
@@ -220,10 +267,14 @@ static struct {
 } digitalReadOverCurrentArgs;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 static int digitalGetOverCurrentStatus(int argc, char **argv)
 =======
 static int getOvercurrentCurrentStatus(int argc, char **argv)
 >>>>>>> a0c9710... updated api for analog read OICore
+=======
+static int getOverCurrentStatus(int argc, char **argv)
+>>>>>>> cddb34a... add function to set coeffs from console
 {
     int nerrors = arg_parse(argc, argv, (void **) &digitalReadOverCurrentArgs);
     if (nerrors != 0) {
@@ -232,6 +283,7 @@ static int getOvercurrentCurrentStatus(int argc, char **argv)
     }
 
     DigitalOutputNum_t dout = (DigitalOutputNum_t)(digitalReadOverCurrentArgs.dout->ival[0] - 1);
+<<<<<<< HEAD
 <<<<<<< HEAD
     printf("%u\n", CoreStandalone::digitalGetOverCurrentStatus(dout));
     return 0;
@@ -245,6 +297,13 @@ void CoreCLI::_registerDigitalGetOverCurrentStatus(void)
 
 void CoreCLI::_registerGetOvercurrentCurrentStatus(void)
 >>>>>>> a0c9710... updated api for analog read OICore
+=======
+    printf("%u\n", CoreStandalone::getOverCurrentStatus(dout));
+    return 0;
+}
+
+void CoreCLI::_registerGetOverCurrentStatus(void)
+>>>>>>> cddb34a... add function to set coeffs from console
 {
     digitalReadOverCurrentArgs.dout = arg_int1(NULL, NULL, "<DOUT>", "[1-4]");
     digitalReadOverCurrentArgs.end = arg_end(2);
@@ -254,10 +313,14 @@ void CoreCLI::_registerGetOvercurrentCurrentStatus(void)
         .help = "Read the overcurrent status for the given output",
         .hint = NULL,
 <<<<<<< HEAD
+<<<<<<< HEAD
         .func = &digitalGetOverCurrentStatus,
 =======
         .func = &getOvercurrentCurrentStatus,
 >>>>>>> a0c9710... updated api for analog read OICore
+=======
+        .func = &getOverCurrentStatus,
+>>>>>>> cddb34a... add function to set coeffs from console
         .argtable = &digitalReadOverCurrentArgs
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));

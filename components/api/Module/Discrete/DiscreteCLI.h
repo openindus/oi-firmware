@@ -31,8 +31,8 @@ private:
     static void _registerDigitalWrite(void);
     static void _registerDigitalRead(void);
     static void _registerDigitalGetCurrent(void);
-    static void _registerAnalogRead(void);
-    static void _registerAnalogReadMilliVolt(void);
+    static void _registerAnalogInputRead(void);
+    static void _registerSetAnalogCoeffs(void);
 
 };
 

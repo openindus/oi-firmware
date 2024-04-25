@@ -380,9 +380,15 @@ void CoreStandalone::detachInterrupt(DigitalInputNum_t dinNum)
     din->detachInterrupt(dinNum);
 }
 
+<<<<<<< HEAD
 uint8_t CoreStandalone::digitalGetOverCurrentStatus(DigitalOutputNum_t doutNum)
 {
     return dout->digitalGetOverCurrentStatus(doutNum);
+=======
+uint8_t CoreStandalone::getOverCurrentStatus(DigitalOutputNum_t doutNum)
+{
+    return dout->getOverCurrentStatus(doutNum);
+>>>>>>> cddb34a... add function to set coeffs from console
 }
 
 void CoreStandalone::_controlTask(void *pvParameters)
