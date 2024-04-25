@@ -222,9 +222,9 @@ int setAnalogCoeffs(int argc, char **argv)
 void DiscreteCLI::_registerSetAnalogCoeffs(void)
 {
     _setAnalogCoeffsArgs.a1 = arg_dbl1(NULL, "a1", "<A1>", "[-100;100]");
-    _setAnalogCoeffsArgs.a1 = arg_dbl1(NULL, "a2", "<A2>", "[-100;100]");    
-    _setAnalogCoeffsArgs.a1 = arg_dbl1(NULL, "b1", "<B1>", "[-1000;1000]");
-    _setAnalogCoeffsArgs.a1 = arg_dbl1(NULL, "b2", "<B2>", "[-1000;1000]");
+    _setAnalogCoeffsArgs.a2 = arg_dbl1(NULL, "a2", "<A2>", "[-100;100]");    
+    _setAnalogCoeffsArgs.b1 = arg_dbl1(NULL, "b1", "<B1>", "[-1000;1000]");
+    _setAnalogCoeffsArgs.b2 = arg_dbl1(NULL, "b2", "<B2>", "[-1000;1000]");
     _setAnalogCoeffsArgs.end = arg_end(4);
 
     const esp_console_cmd_t read_cmd = {
