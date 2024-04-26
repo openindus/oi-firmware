@@ -28,7 +28,6 @@ public:
     
 private:
 
-    static DiscreteStandalone* _discrete;
     static IsrCallback_t _isrCallback[4];
 };
 

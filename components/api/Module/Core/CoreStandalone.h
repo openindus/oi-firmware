@@ -20,7 +20,7 @@
 
 #if defined(OI_CORE)
 
-class CoreStandalone : public ModuleStandalone
+class CoreStandalone : public ModuleStandalone, public AnalogInputs
 {
 public:
 
@@ -91,7 +91,6 @@ private:
 
     static DigitalOutputs* dout;
     static DigitalInputs* din;
-    static AnalogInputs* ain;
 
     static void _controlTask(void *pvParameters);
 

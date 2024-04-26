@@ -10,6 +10,11 @@
 
 static const char TAG[] = "AnalogInputs";
 
+uint8_t AnalogInputs::_nb;
+AnalogInputType_t AnalogInputs::_type;
+AnalogInputAds866x* AnalogInputs::_ains[AIN_MAX];
+AnalogInputEsp32s3* AnalogInputs::_ains_esp[AIN_MAX];
+
 AnalogInputs::AnalogInputs(const gpio_num_t* cmdGpio, uint8_t nb)
 {
     for (size_t i = 0; i < nb; i++) {
@@ -17,15 +22,6 @@ AnalogInputs::AnalogInputs(const gpio_num_t* cmdGpio, uint8_t nb)
     }
     _nb = nb;
     _type = ANALOG_INPUT_ADS866X;
-}
-
-AnalogInputs::AnalogInputs(const adc1_channel_t* channel, uint8_t nb)
-{
-    for (size_t i = 0; i < nb; i++) {
-        _ains_esp[i] = new AnalogInputEsp32s3(i, channel[i]);
-    }
-    _nb = nb;
-    _type = ANALOG_INPUT_ESP32S3;
 }
 
 int AnalogInputs::init(ads866x_config_t *ads866xConfig, AnalogInput_VoltageRange_t range, AnalogInput_Mode_t mode) 
@@ -50,18 +46,34 @@ int AnalogInputs::init(ads866x_config_t *ads866xConfig, AnalogInput_VoltageRange
     return -1;
 }
 
-int AnalogInputs::init() 
+int AnalogInputs::init(const adc_channel_t* channel, adc_unit_t adc_unit, uint8_t nb) 
 {
     ESP_LOGI(TAG, "Initialize Analog Inputs");
 
-    if (_type == ANALOG_INPUT_ESP32S3) {
+    for (size_t i = 0; i < nb; i++) {
+        _ains_esp[i] = new AnalogInputEsp32s3(i, channel[i], adc_unit);
+        _ains_esp[i]->init();
+    }
+    _nb = nb;
+    _type = ANALOG_INPUT_ESP32S3;
 
-        for (size_t i = 0; i < _nb; i++) {
-            _ains_esp[i]->init();
+    return 0;
+
+}
+
+int AnalogInputs::analogRead(AnalogInput_Num_t num)
+{
+    if (num < _nb) {
+        if (_type == ANALOG_INPUT_ADS866X) {
+            return _ains[num]->read();
+        } 
+        else if (_type == ANALOG_INPUT_ESP32S3) {
+            return _ains_esp[num]->read();
+        } else {
+            ESP_LOGE(TAG, "Function not available for this type of input");
         }
-        return 0;
     } else {
-        ESP_LOGE(TAG, "Function not available for this type of input");
+        ESP_LOGE(TAG, "INVALID INPUT AIN_%i", num+1);
     }
     return -1;
 }
@@ -81,6 +93,17 @@ int AnalogInputs::read(AnalogInput_Num_t num)
         ESP_LOGE(TAG, "INVALID INPUT AIN_%i", num+1);
     }
     return -1;
+}
+
+
+float AnalogInputs::analogReadVolt(AnalogInput_Num_t num)
+{
+    return read(num, AIN_UNIT_VOLT);
+}
+
+float AnalogInputs::analogReadMilliVolt(AnalogInput_Num_t num)
+{
+    return read(num, AIN_UNIT_MILLIVOLT);
 }
 
 float AnalogInputs::read(AnalogInput_Num_t num, AnalogInput_Unit_t unit)
@@ -153,7 +176,7 @@ uint8_t AnalogInputs::getVoltageRange(AnalogInput_Num_t num)
     return 0;
 }
 
-int AnalogInputs::setCoeffs(float* a, float* b)
+int AnalogInputs::setAnalogCoeffs(float* a, float* b)
 {
     if (_type == ANALOG_INPUT_ESP32S3) {
 
@@ -316,23 +339,45 @@ gpio_num_t AnalogInputAds866x::getModePin(void)
 
 /******************* Analog Input Esp32s3 **********************/
 
-AnalogInputEsp32s3::AnalogInputEsp32s3(uint8_t num, adc1_channel_t channel)
+AnalogInputEsp32s3::AnalogInputEsp32s3(uint8_t num, adc_channel_t channel, adc_unit_t adc_unit)
 {
     _num = num;
     _channel = channel;
+    _adc_unit = adc_unit;
 }
 
 void AnalogInputEsp32s3::init()
 {
-    adc1_config_width(ADC_WIDTH_BIT_12);
-    adc1_config_channel_atten(_channel, ADC_ATTEN_DB_11);
-    esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &_adc_characteristic);
+    if (_adc_unit == ADC_UNIT_1) {
+        adc1_config_width(ADC_WIDTH_BIT_12);
+        adc1_config_channel_atten((adc1_channel_t)_channel, ADC_ATTEN_DB_11);
+        esp_adc_cal_characterize(_adc_unit, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &_adc_characteristic);
+    } 
+    else if (_adc_unit == ADC_UNIT_2) {
+        adc1_config_channel_atten((adc1_channel_t)_channel, ADC_ATTEN_DB_11);
+        esp_adc_cal_characterize(_adc_unit, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &_adc_characteristic);
+    } 
+    else {
+        ESP_LOGE(TAG, "Wrong ADC unit !");
+    }
+
     getCoeffs();
 }
 
 int AnalogInputEsp32s3::read(void)
 {
-    return adc1_get_raw(_channel);
+    if (_adc_unit == ADC_UNIT_1) {
+        return adc1_get_raw((adc1_channel_t)_channel);
+    } 
+    else if (_adc_unit == ADC_UNIT_2) {
+        int raw = -1;
+        adc2_get_raw((adc2_channel_t)_channel, ADC_WIDTH_12Bit, &raw);
+        return raw;
+    } 
+    else {
+        ESP_LOGE(TAG, "Wrong ADC unit !");
+        return -1;
+    }
 }
 
 float AnalogInputEsp32s3::read(AnalogInput_Unit_t unit)

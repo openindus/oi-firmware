@@ -41,7 +41,7 @@ const ioex_num_t _dinGpio[] = {
     CORE_IOEX_PIN_DIN_4,
 };
 
-const adc1_channel_t _ainChannel[] = {
+const adc_channel_t _ainChannel[] = {
     CORE_CHANNEL_AIN_1,
     CORE_CHANNEL_AIN_2
 };
@@ -50,7 +50,6 @@ ioex_device_t* CoreStandalone::_ioex;
 
 DigitalInputs* CoreStandalone::din = new DigitalInputs(&_ioex, _dinGpio, 4);
 DigitalOutputs* CoreStandalone::dout = new DigitalOutputs(&_ioex, _doutGpio, _doutCurrentGpio, 4);
-AnalogInputs* CoreStandalone::ain = new AnalogInputs(_ainChannel, 2);
 
 OI::CAN CoreStandalone::can(CORE_SPI_USER_HOST, CORE_PIN_CAN_SPI_CS, CORE_PIN_CAN_INTERRUPT);
 OI::RS CoreStandalone::rs(CORE_SPI_USER_HOST, CORE_PIN_RS_SPI_CS, CORE_PIN_RS_INTERRUPT);
@@ -256,7 +255,7 @@ void CoreStandalone::init()
      * @brief AIN Init
      * 
      */
-    ain->init();
+    AnalogInputs::init(_ainChannel, CORE_ADC_UNIT_AIN, 2);
 
     /**
      * @brief CAN EXT init
@@ -365,11 +364,14 @@ int CoreStandalone::digitalRead(DigitalInputNum_t dinNum)
     return din->read(dinNum);
 }
 
+<<<<<<< HEAD
 int CoreStandalone::setAnalogCoeffs(float* coeff_a, float* coeff_b)
 {
     return ain->setCoeffs(coeff_a, coeff_b);
 }
 
+=======
+>>>>>>> 5f0f9f9... start to add analoginput as mother class of modules !
 void CoreStandalone::attachInterrupt(DigitalInputNum_t dinNum, IsrCallback_t callback, InterruptMode_t mode, void* arg)
 {
     din->attachInterrupt(dinNum, callback, mode, arg);

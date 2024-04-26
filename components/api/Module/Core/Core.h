@@ -21,6 +21,6 @@
 
 #if defined(OI_CORE) && defined(MODULE_STANDALONE)
 #define Core CoreStandalone
-#else 
+#elif defined(OI_CORE) && !defined(MODULE_STANDALONE)
 #define Core CoreMaster
 #endif

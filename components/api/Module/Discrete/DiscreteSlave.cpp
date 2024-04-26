@@ -24,14 +24,13 @@ IsrCallback_t DiscreteSlave::_isrCallback[] = {
     [](void*){ModuleSlave::sendEvent({EVENT_DIGITAL_INTERRUPT, DIN_4});},
 };
 
-DiscreteStandalone* DiscreteSlave::_discrete = new DiscreteStandalone();
 
 int DiscreteSlave::init(void)
 {
     ModuleSlave::init();
 
     addCtrlCallback(CONTROL_DIGITAL_WRITE, [](std::vector<uint8_t>& data) { 
-        _discrete->digitalWrite((DigitalOutputNum_t)data[1], data[2]);
+        DiscreteStandalone::digitalWrite((DigitalOutputNum_t)data[1], data[2]);
     });
 
     addCtrlCallback(CONTROL_DIGITAL_PWM, [](std::vector<uint8_t>& data) { 
@@ -39,23 +38,23 @@ int DiscreteSlave::init(void)
     });
 
     addCtrlCallback(CONTROL_DIGITAL_READ, [](std::vector<uint8_t>& data) { 
-        int level = _discrete->digitalRead((DigitalInputNum_t)data[1]);
+        int level = DiscreteStandalone::digitalRead((DigitalInputNum_t)data[1]);
         data.push_back(static_cast<uint8_t>(level));
     });
 
     addCtrlCallback(CONTROL_ANALOG_READ, [](std::vector<uint8_t>& data) { 
-        int value = _discrete->analogRead((AnalogInput_Num_t)data[1]);
+        int value = DiscreteStandalone::analogRead((AnalogInput_Num_t)data[1]);
         uint8_t *ptr = reinterpret_cast<uint8_t*>(&value);
         data.insert(data.end(), ptr, ptr + sizeof(int));
     });
 
     addCtrlCallback(CONTROL_ATTACH_INTERRUPT, [](std::vector<uint8_t>& data) { 
-        _discrete->attachInterrupt((DigitalInputNum_t)data[1], 
+        DiscreteStandalone::attachInterrupt((DigitalInputNum_t)data[1], 
             _isrCallback[data[1]], (InterruptMode_t)data[2]);
     });
 
     addCtrlCallback(CONTROL_DETACH_INTERRUPT, [](std::vector<uint8_t>& data) { 
-        _discrete->detachInterrupt((DigitalInputNum_t)data[1]);
+        DiscreteStandalone::detachInterrupt((DigitalInputNum_t)data[1]);
     });
 
     return 0;

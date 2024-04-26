@@ -180,8 +180,9 @@
 #define CORE_PIN_DIGITAL_INTERRUPT      GPIO_NUM_4
 
 /* AIN */
-#define CORE_CHANNEL_AIN_1              ADC1_GPIO1_CHANNEL
-#define CORE_CHANNEL_AIN_2              ADC1_GPIO2_CHANNEL
+#define CORE_ADC_UNIT_AIN               ADC_UNIT_1
+#define CORE_CHANNEL_AIN_1              ADC_CHANNEL_0
+#define CORE_CHANNEL_AIN_2              ADC_CHANNEL_1
 
 /* DOUT */
 #define CORE_IOEX_PIN_DOUT_1           IOEX_NUM_0

@@ -19,7 +19,7 @@
 
 #if defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)
 
-class DiscreteStandalone : public ModuleStandalone
+class DiscreteStandalone : public ModuleStandalone, public AnalogInputs
 {
 public:
 
@@ -37,16 +37,15 @@ public:
     static void detachInterrupt(DigitalInputNum_t dinNum);
 
     /* AnalogInputs */
-    static int analogRead(AnalogInput_Num_t ainNum);
-    static float analogReadVolt(AnalogInput_Num_t ainNum);
-    static float analogReadMilliVolt(AnalogInput_Num_t ainNum);
-    static int setAnalogCoeffs(float* coeff_a, float* coeff_b);
+    // static int analogRead(AnalogInput_Num_t ainNum);
+    // static float analogReadVolt(AnalogInput_Num_t ainNum);
+    // static float analogReadMilliVolt(AnalogInput_Num_t ainNum);
+    // static int setAnalogCoeffs(float* coeff_a, float* coeff_b);
 
 private:
 
     static DigitalInputs* din;
     static DigitalOutputs* dout;
-    static esp_adc_cal_characteristics_t _adc1Characteristics;
 
 };
 

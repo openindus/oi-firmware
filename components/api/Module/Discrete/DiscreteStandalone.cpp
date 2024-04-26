@@ -55,28 +55,18 @@ const gpio_num_t _dinGpio[] = {
     DISCRETE_PIN_DIN_10
 };
 
-#if defined(CONFIG_IDF_TARGET_ESP32S3)
-adc2_channel_t _ainChannel[] = {
+adc_channel_t _ainChannel[] = {
     DISCRETE_CHANNEL_AIN_1,
     DISCRETE_CHANNEL_AIN_2
 };
-#elif defined(CONFIG_IDF_TARGET_ESP32S2)
-adc1_channel_t _ainChannel[] = {
-    DISCRETE_CHANNEL_AIN_1
-};
-#endif
-
-esp_adc_cal_characteristics_t* _ainAdcChar;
 
 DigitalInputs* DiscreteStandalone::din = new DigitalInputs(_dinGpio, 10);
 DigitalOutputs* DiscreteStandalone::dout = new DigitalOutputs(_doutGpio, _doutAdcChannel, 8);
-AnalogInputs* DiscreteStandalone::ain = new AnalogInputs(_ainChannel, 2);
-
-esp_adc_cal_characteristics_t DiscreteStandalone::_adc1Characteristics;
 
 void DiscreteStandalone::init()
 {
     ESP_LOGI(DISCRETE_TAG, "Init");
+
     ModuleStandalone::init();
 
     /**
@@ -95,7 +85,7 @@ void DiscreteStandalone::init()
      * @brief AIN Init
      * 
      */
-    ain->init();
+    AnalogInputs::init(_ainChannel, DISCRETE_ADC_UNIT_AIN, 2);
 }
 
 void DiscreteStandalone::digitalWrite(DigitalOutputNum_t doutNum, uint8_t level)

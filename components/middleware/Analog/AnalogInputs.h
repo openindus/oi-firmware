@@ -90,7 +90,7 @@ class AnalogInputEsp32s3
 {
 public:
 
-    AnalogInputEsp32s3(uint8_t num, adc1_channel_t channel);
+    AnalogInputEsp32s3(uint8_t num, adc_channel_t channel, adc_unit_t adc_unit);
 
     void init(void);
     int read(void);
@@ -102,7 +102,8 @@ public:
 private:
 
     int _num;
-    adc1_channel_t _channel;
+    adc_channel_t _channel;
+    adc_unit_t _adc_unit;
     esp_adc_cal_characteristics_t _adc_characteristic;
     AnalogInput_eFuse_Coeff_t _coeff;
 };
@@ -112,24 +113,55 @@ class AnalogInputs
 public:
 
     AnalogInputs(const gpio_num_t* cmdGpio, uint8_t nb);
-    AnalogInputs(const adc1_channel_t* channel, uint8_t nb);
 
-    int init(ads866x_config_t *ads866xConfig, AnalogInput_VoltageRange_t range, AnalogInput_Mode_t mode);
-    int init();
+    static int init(ads866x_config_t *ads866xConfig, AnalogInput_VoltageRange_t range, AnalogInput_Mode_t mode);
+    static int init(const adc_channel_t* channel, adc_unit_t adc_unit, uint8_t nb);
 
+    /**
+     * @brief Read the value of AIN.
+     * The function return an integer that correspond to the raw value of the ANA.
+     * On OICore and OIDiscrete, the returned value correspond to the raw internal voltage and not raw value. 
+     * It is better to use analogReadVolts or analogReadMillivolts.
+     * @param ain ANA input.
+     * @return int Value of the AIN input.
+     */
+    static int analogRead(AnalogInput_Num_t num);
+    
+    /**
+     * @brief Read the value of AIN.
+     * The function return a float that correspond to the voltage of the ANA (from 0 to 30V).
+     *
+     * @param ain ANA input.
+     * @return float Value of the AIN input.
+     */
+    static float analogReadVolt(AnalogInput_Num_t num);
+    
+    /**
+     * @brief Read the value of AIN.
+     * The function return a float that correspond to the voltage of the ANA (from 0 to 30000mV).
+     *
+     * @param ain ANA input.
+     * @return float Value of the AIN input.
+     */
+    static float analogReadMilliVolt(AnalogInput_Num_t num);
+    
+    static int setAnalogCoeffs(float* a, float* b);
+
+    // To delete
     int read(AnalogInput_Num_t num);
-    float read(AnalogInput_Num_t num, AnalogInput_Unit_t unit);
     void setMode(AnalogInput_Num_t num, AnalogInput_Mode_t mode);
     uint8_t getMode(AnalogInput_Num_t num);
     void setVoltageRange(AnalogInput_Num_t num, AnalogInput_VoltageRange_t range);
     uint8_t getVoltageRange(AnalogInput_Num_t num);
-    int setCoeffs(float* a, float* b);
+    
+     // keep this one in private
+    static float read(AnalogInput_Num_t num, AnalogInput_Unit_t unit);
 
 private:
 
-    uint8_t _nb;
-    AnalogInputType_t _type;
+    static uint8_t _nb;
+    static AnalogInputType_t _type;
 
-    AnalogInputAds866x* _ains[AIN_MAX];
-    AnalogInputEsp32s3* _ains_esp[AIN_MAX];
+    static AnalogInputAds866x* _ains[AIN_MAX];
+    static AnalogInputEsp32s3* _ains_esp[AIN_MAX];
 };
