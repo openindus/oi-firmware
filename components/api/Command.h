@@ -32,12 +32,14 @@
 enum Command_Control_e {
     /* DIGITAL */
     CONTROL_DIGITAL_WRITE                   = 0x00,
-    CONTROL_GET_CURRENT                     = 0x01,
-    CONTROL_DIGITAL_READ                    = 0x02,
-    CONTROL_ATTACH_INTERRUPT                = 0x03,
-    CONTROL_DETACH_INTERRUPT                = 0x04,
-    CONTROL_TOGGLE_OUTPUT                   = 0x05,
-    CONTROL_BLINK_OUTPUT                    = 0x06,
+    CONTROL_DIGITAL_TOGGLE                  = 0x01,
+    CONTROL_DIGITAL_BLINK                   = 0x02,
+    CONTROL_DIGITAL_PWM                     = 0x03,
+    CONTROL_DIGITAL_GET_CURRENT             = 0x04,
+    CONTROL_DIGITAL_GET_OVERCURRENT         = 0x05,
+    CONTROL_DIGITAL_READ                    = 0x06,
+    CONTROL_ATTACH_INTERRUPT                = 0x07,
+    CONTROL_DETACH_INTERRUPT                = 0x08,
 
     /* ANALOG */
     CONTROL_ANALOG_INPUT_MODE               = 0x20,
@@ -51,9 +53,9 @@ enum Command_Control_e {
     CONTROL_ANALOG_READ_MILLIAMP            = 0x28,
 
     CONTROL_ANALOG_OUTPUT_MODE              = 0x29,
-    CONTROL_ANALOG_WRITE                    = 0x30,
+    CONTROL_ANALOG_WRITE                    = 0x2A,
 
-    /* MOTOR */
+    /* STEPPER MOTOR */
     CONTROL_MOTOR_STOP                      = 0x40,
     CONTROL_MOTOR_MOVE_ABSOLUTE             = 0x41,
     CONTROL_MOTOR_MOVE_RELATIVE             = 0x42,
@@ -70,6 +72,8 @@ enum Command_Control_e {
     CONTROL_MOTOR_SET_FULL_STEP_SPEED       = 0x4D,
     CONTROL_MOTOR_SET_ACCELERATION          = 0x4E,
     CONTROL_MOTOR_SET_DECELERATION          = 0x4F,
+
+    /* BRUSHLESS MOTOR */
     CONTROL_MOTOR_SET_SPEED                 = 0x50,
     CONTROL_MOTOR_SET_BRAKE                 = 0x51,
     CONTROL_MOTOR_SET_DIRECTION             = 0x52,

@@ -36,8 +36,8 @@ private:
     static int _digitalRead(int argc, char **argv);
     static void _registerDigitalRead(void);
 
-    static int _getCurrent(int argc, char **argv);
-    static void _registerGetCurrent(void);
+    static int _digitalGetCurrent(int argc, char **argv);
+    static void _registerDigitalGetCurrent(void);
 
     static int _setAnalogInputMode(int argc, char **argv);
     static void _registerSetAnalogInputMode(void);

@@ -28,8 +28,8 @@ public:
     /* DigitalOutputs */
     static void digitalWrite(DigitalOutputNum_t doutNum, uint8_t level);
     static void digitalToggle(DigitalOutputNum_t doutNum);
-    static void analogWrite(DigitalOutputNum_t doutNum, uint8_t duty);
-    static float getCurrent(DigitalOutputNum_t doutNum);
+    static void digitalPWM(DigitalOutputNum_t doutNum, uint8_t duty);
+    static float digitalGetCurrent(DigitalOutputNum_t doutNum);
 
     /* DigitalInputs */
     static int digitalRead(DigitalInputNum_t dinNum);
@@ -38,7 +38,7 @@ public:
 
     /* AnalogInputs */
     static int analogRead(AnalogInput_Num_t eana);
-    static int analogReadMilliVolts(AnalogInput_Num_t eana);
+    static int analogReadMilliVolt(AnalogInput_Num_t eana);
 
 private:
 

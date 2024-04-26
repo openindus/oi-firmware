@@ -34,10 +34,10 @@ int MixedSlave::init(void)
         _mixed->digitalWrite((DigitalOutputNum_t)data[1], data[2]);
     });
 
-    addCtrlCallback(CONTROL_GET_CURRENT, [](std::vector<uint8_t>& data) {
-        int current = _mixed->getCurrent((DigitalOutputNum_t)data[1]);
+    addCtrlCallback(CONTROL_DIGITAL_GET_CURRENT, [](std::vector<uint8_t>& data) {
+        float current = _mixed->digitalGetCurrent((DigitalOutputNum_t)data[1]);
         uint8_t* ptr = reinterpret_cast<uint8_t*>(&current);
-        data.insert(data.end(), ptr, ptr + sizeof(int));
+        data.insert(data.end(), ptr, ptr + sizeof(float));
     });
 
     addCtrlCallback(CONTROL_DIGITAL_READ, [](std::vector<uint8_t>& data) { 

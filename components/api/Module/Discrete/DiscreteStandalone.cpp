@@ -132,7 +132,7 @@ int DiscreteStandalone::analogRead(AnalogInput_Num_t ain)
     return raw;
 }
 
-int DiscreteStandalone::analogReadMilliVolts(AnalogInput_Num_t ain)
+int DiscreteStandalone::analogReadMilliVolt(AnalogInput_Num_t ain)
 {
     int adc_reading = DiscreteStandalone::analogRead(ain);
 
@@ -142,14 +142,14 @@ int DiscreteStandalone::analogReadMilliVolts(AnalogInput_Num_t ain)
     return voltage * DISCRETE_ADC_REDUCTION_FACTOR;
 }
 
-void DiscreteStandalone::analogWrite(DigitalOutputNum_t doutNum, uint8_t duty)
+void DiscreteStandalone::digitalPWM(DigitalOutputNum_t doutNum, uint8_t duty)
 {
     /** @todo */
 }
 
-float DiscreteStandalone::getCurrent(DigitalOutputNum_t doutNum)
+float DiscreteStandalone::digitalGetCurrent(DigitalOutputNum_t doutNum)
 {
-    return dout->getCurrent(doutNum);
+    return dout->digitalGetCurrent(doutNum);
 }
 
 #endif

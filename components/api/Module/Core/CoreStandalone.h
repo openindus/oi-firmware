@@ -66,7 +66,7 @@ public:
      * @param ain ANA input to monitor.
      * @return float Value of the AIN input.
      */
-    static int analogReadMilliVolts(AnalogInput_Num_t ain);
+    static int analogReadMilliVolt(AnalogInput_Num_t ain);
 
     /**
      * @brief Attach a user callback to the DIN interrupts.
@@ -92,9 +92,9 @@ public:
      * @param dout DOUT channel to read overcurrent status.
      * @return 0 is current is under 4Amps and 1 is current is above 4Amps
      */
-    static uint8_t getCurrentLevel(DigitalOutputNum_t doutNum);
+    static uint8_t digitalGetOverCurrentStatus(DigitalOutputNum_t doutNum);
 
-    static void init(void);
+    static void init(void);  
 
     static OI::CAN can;
     static OI::RS rs;

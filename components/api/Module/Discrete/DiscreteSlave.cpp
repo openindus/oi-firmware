@@ -34,6 +34,10 @@ int DiscreteSlave::init(void)
         _discrete->digitalWrite((DigitalOutputNum_t)data[1], data[2]);
     });
 
+    addCtrlCallback(CONTROL_DIGITAL_PWM, [](std::vector<uint8_t>& data) { 
+        _discrete->digitalPWM((DigitalOutputNum_t)data[1], data[2]);
+    });
+
     addCtrlCallback(CONTROL_DIGITAL_READ, [](std::vector<uint8_t>& data) { 
         int level = _discrete->digitalRead((DigitalInputNum_t)data[1]);
         data.push_back(static_cast<uint8_t>(level));
@@ -43,10 +47,6 @@ int DiscreteSlave::init(void)
         int value = _discrete->analogRead((AnalogInput_Num_t)data[1]);
         uint8_t *ptr = reinterpret_cast<uint8_t*>(&value);
         data.insert(data.end(), ptr, ptr + sizeof(int));
-    });
-
-    addCtrlCallback(CONTROL_ANALOG_WRITE, [](std::vector<uint8_t>& data) { 
-        _discrete->analogWrite((DigitalOutputNum_t)data[1], data[2]);
     });
 
     addCtrlCallback(CONTROL_ATTACH_INTERRUPT, [](std::vector<uint8_t>& data) { 

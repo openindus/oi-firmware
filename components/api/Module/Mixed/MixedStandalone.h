@@ -32,13 +32,13 @@ public:
     void attachInterrupt(DigitalInputNum_t num, IsrCallback_t callback, 
         InterruptMode_t mode=RISING_MODE, void* arg=NULL);
     void detachInterrupt(DigitalInputNum_t num);
-
+ 
     /* Digital Output */
     void digitalWrite(DigitalOutputNum_t num, uint8_t level);
     void digitalToggle(DigitalOutputNum_t num);
-    void analogWrite(DigitalOutputNum_t num, uint8_t duty);
-    float getCurrent(DigitalOutputNum_t num);
-
+    void digitalPWM(DigitalOutputNum_t num, uint8_t duty);
+    float digitalGetCurrent(DigitalOutputNum_t num);
+ 
     /* Analog Input */
     void analogInputMode(AnalogInput_Num_t num, AnalogInput_Mode_t mode);
     uint8_t analogInputGetMode(AnalogInput_Num_t num);

@@ -21,9 +21,9 @@ void DiscreteCLI::init(void)
 {
     _registerDigitalWrite();
     _registerDigitalRead();
-    _registerGetCurrent();
+    _registerDigitalGetCurrent();
     _registerAnalogRead();
-    _registerAnalogReadMillivolts();
+    _registerAnalogReadMilliVolt();
 }
 
 /** 'digital-write' */
@@ -108,34 +108,34 @@ void DiscreteCLI::_registerDigitalRead(void)
 static struct {
     struct arg_int *dout;
     struct arg_end *end;
-} getCurrentArgs;
+} digitalGetCurrentArgs;
 
-static int getCurrent(int argc, char **argv)
+static int digitalGetCurrent(int argc, char **argv)
 {
-    int nerrors = arg_parse(argc, argv, (void **) &getCurrentArgs);
+    int nerrors = arg_parse(argc, argv, (void **) &digitalGetCurrentArgs);
     if (nerrors != 0) {
-        arg_print_errors(stderr, getCurrentArgs.end, argv[0]);
+        arg_print_errors(stderr, digitalGetCurrentArgs.end, argv[0]);
         return 1;
     }
 
-    DigitalOutputNum_t dout = (DigitalOutputNum_t)(getCurrentArgs.dout->ival[0] - 1);
+    DigitalOutputNum_t dout = (DigitalOutputNum_t)(digitalGetCurrentArgs.dout->ival[0] - 1);
 
-    printf("%.3f\n", DiscreteStandalone::getCurrent(dout));
+    printf("%.3f\n", DiscreteStandalone::digitalGetCurrent(dout));
 
     return 0;
 }
 
-void DiscreteCLI::_registerGetCurrent(void)
+void DiscreteCLI::_registerDigitalGetCurrent(void)
 {
-    getCurrentArgs.dout = arg_int1(NULL, NULL, "<DOUT>", "[1-8]");
-    getCurrentArgs.end = arg_end(2);
+    digitalGetCurrentArgs.dout = arg_int1(NULL, NULL, "<DOUT>", "[1-8]");
+    digitalGetCurrentArgs.end = arg_end(2);
 
     const esp_console_cmd_t cmd = {
         .command = "get-current",
         .help = "Get Dout current",
         .hint = NULL,
-        .func = &getCurrent,
-        .argtable = &getCurrentArgs
+        .func = &digitalGetCurrent,
+        .argtable = &digitalGetCurrentArgs
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
 }
@@ -179,7 +179,7 @@ void DiscreteCLI::_registerAnalogRead(void)
 
 /** 'analog-read-millivolts' */
 
-static int analogReadMilliVolts(int argc, char **argv)
+static int analogReadMilliVolt(int argc, char **argv)
 {
     int nerrors = arg_parse(argc, argv, (void **) &analogReadArgs);
     if (nerrors != 0) {
@@ -189,13 +189,13 @@ static int analogReadMilliVolts(int argc, char **argv)
 
     AnalogInput_Num_t ain = (AnalogInput_Num_t)(analogReadArgs.ain->ival[0] - 1);
 
-    printf("%imV\n", DiscreteStandalone::analogReadMilliVolts(ain));
+    printf("%imV\n", DiscreteStandalone::analogReadMilliVolt(ain));
 
 
     return 0;
 }
 
-void DiscreteCLI::_registerAnalogReadMillivolts(void)
+void DiscreteCLI::_registerAnalogReadMilliVolt(void)
 {
     analogReadArgs.ain = arg_int1(NULL, NULL, "<AIN>", "[1-2]");
     analogReadArgs.end = arg_end(2);
@@ -204,7 +204,7 @@ void DiscreteCLI::_registerAnalogReadMillivolts(void)
         .command = "analog-read-millivolts",
         .help = "Get analog input value (MilliVolts)",
         .hint = NULL,
-        .func = &analogReadMilliVolts,
+        .func = &analogReadMilliVolt,
         .argtable = &analogReadArgs
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));

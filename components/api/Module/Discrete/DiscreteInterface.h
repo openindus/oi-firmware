@@ -71,7 +71,7 @@ public:
      * @param ain Analog input
      * @return int Measure in millivolts
      */
-    virtual int analogReadMilliVolts(AnalogInput_Num_t ain) = 0;
+    virtual int analogReadMilliVolt(AnalogInput_Num_t ain) = 0;
 
     /**
      * @brief Set a PWM output at a given duty cycle. 

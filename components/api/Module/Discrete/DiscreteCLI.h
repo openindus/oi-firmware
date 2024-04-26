@@ -30,9 +30,9 @@ private:
 
     static void _registerDigitalWrite(void);
     static void _registerDigitalRead(void);
-    static void _registerGetCurrent(void);
+    static void _registerDigitalGetCurrent(void);
     static void _registerAnalogRead(void);
-    static void _registerAnalogReadMillivolts(void);
+    static void _registerAnalogReadMilliVolt(void);
 
 };
 

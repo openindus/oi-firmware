@@ -71,7 +71,7 @@ public:
      * @param num DOUT to drive
      * @return float : current in A
     **/
-    virtual float getCurrent(DigitalOutputNum_t num) = 0;
+    virtual float digitalGetCurrent(DigitalOutputNum_t num) = 0;
 
     /**
      * @brief Set AdcMode of the current input

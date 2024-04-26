@@ -20,12 +20,12 @@ void loop(void)
     Serial.print("AIN_1 :");
     Serial.println(value);
 
-    value = core.analogReadMilliVolts(AIN_1);
+    value = core.analogReadMilliVolt(AIN_1);
     Serial.print("AIN_1 :");
     Serial.print(value);
     Serial.println("mV");
 
-    value = core.analogReadMilliVolts(AIN_2);
+    value = core.analogReadMilliVolt(AIN_2);
     Serial.print("AIN_2 :");
     Serial.print(value);
     Serial.println("mV");

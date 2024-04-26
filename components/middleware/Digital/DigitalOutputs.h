@@ -80,8 +80,8 @@ public:
     void modePWM(DigitalOutputNum_t dout, uint32_t freq, ledc_timer_bit_t bit);
     void setDutyCycle(DigitalOutputNum_t dout, uint32_t duty);
 
-    float getCurrent(DigitalOutputNum_t dout);
-    int getCurrentLevel(DigitalOutputNum_t dout);
+    float digitalGetCurrent(DigitalOutputNum_t dout);
+    int digitalGetOverCurrentStatus(DigitalOutputNum_t dout);
 
 private:
 

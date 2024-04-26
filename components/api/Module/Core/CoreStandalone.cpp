@@ -383,7 +383,7 @@ int CoreStandalone::analogRead(AnalogInput_Num_t ain)
     return adc_reading;
 }
 
-int CoreStandalone::analogReadMilliVolts(AnalogInput_Num_t ain)
+int CoreStandalone::analogReadMilliVolt(AnalogInput_Num_t ain)
 {
     int adc_reading = CoreStandalone::analogRead(ain);
 
@@ -403,9 +403,9 @@ void CoreStandalone::detachInterrupt(DigitalInputNum_t dinNum)
     din->detachInterrupt(dinNum);
 }
 
-uint8_t CoreStandalone::getCurrentLevel(DigitalOutputNum_t doutNum)
+uint8_t CoreStandalone::digitalGetOverCurrentStatus(DigitalOutputNum_t doutNum)
 {
-    return dout->getCurrentLevel(doutNum);
+    return dout->digitalGetOverCurrentStatus(doutNum);
 }
 
 void CoreStandalone::_controlTask(void *pvParameters)

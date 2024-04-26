@@ -23,9 +23,9 @@ void MixedControl::digitalWrite(DigitalOutputNum_t num, uint8_t level)
     ctrlRequest(msgBytes);
 }
 
-float MixedControl::getCurrent(DigitalOutputNum_t num)
+float MixedControl::digitalGetCurrent(DigitalOutputNum_t num)
 {
-    std::vector<uint8_t> msgBytes = {CONTROL_GET_CURRENT, (uint8_t)num};
+    std::vector<uint8_t> msgBytes = {CONTROL_DIGITAL_GET_CURRENT, (uint8_t)num};
     ctrlRequest(msgBytes);
     float* current = reinterpret_cast<float*>(&msgBytes[2]);
     return *current;

@@ -266,7 +266,7 @@ void DigitalOutputs::setDutyCycle(DigitalOutputNum_t dout, uint32_t duty)
     }
 }
 
-float DigitalOutputs::getCurrent(DigitalOutputNum_t dout)
+float DigitalOutputs::digitalGetCurrent(DigitalOutputNum_t dout)
 {
     if (dout < _num) {   
         if (_type == DIGITAL_OUTPUT_GPIO) {
@@ -313,7 +313,7 @@ float DigitalOutputs::getCurrent(DigitalOutputNum_t dout)
 
             return current;
         } else {
-            ESP_LOGE(DOUT_TAG, "this function is not available on this device. For current sensor with digital reading, call 'int getCurrentLevel(DigitalOutputNum_t)' function");
+            ESP_LOGE(DOUT_TAG, "this function is not available on this device. For current sensor with digital reading, call 'int digitalGetOverCurrentStatus(DigitalOutputNum_t)' function");
             return 0.0f;
         }
     } else {
@@ -322,12 +322,12 @@ float DigitalOutputs::getCurrent(DigitalOutputNum_t dout)
     }
 }
 
-int DigitalOutputs::getCurrentLevel(DigitalOutputNum_t dout)
+int DigitalOutputs::digitalGetOverCurrentStatus(DigitalOutputNum_t dout)
 {
     if (dout < _num) {
         if (_type == DIGITAL_OUTPUT_GPIO) {
-            ESP_LOGW(DOUT_TAG, "For current sensor with adc reading, call 'getCurrent' function");
-            return (getCurrent(dout) > 4.0f)?1:0;
+            ESP_LOGW(DOUT_TAG, "For current sensor with adc reading, call 'digitalGetCurrent' function");
+            return (digitalGetCurrent(dout) > 4.0f)?1:0;
         } else { // DIGITAL_OUTPUT_IOEX
             return ioex_get_level(*_ioex, _ioex_current[dout]);
         }
@@ -356,7 +356,7 @@ void DigitalOutputs::_controlTask(void *pvParameters)
             /* Checking if individual DOUT is in overcurrent (> 4A) */
             for (uint8_t i = 0; i < dout->_num; i++) {
                 // Read current
-                current = dout->getCurrent((DigitalOutputNum_t) i);
+                current = dout->digitalGetCurrent((DigitalOutputNum_t) i);
                 currentSum += current;
                 // If error happened
                 if (current > 4.0f) {
@@ -402,7 +402,7 @@ void DigitalOutputs::_controlTask(void *pvParameters)
             /* Checking if DOUT is in overcurrent */
             for (int i = 0; i < dout->_num; i++) {
                 // If error happened
-                if (dout->getCurrentLevel((DigitalOutputNum_t)i) == 1) {
+                if (dout->digitalGetOverCurrentStatus((DigitalOutputNum_t)i) == 1) {
                     ESP_LOGE(DOUT_TAG, "Current on DOUT_%u is too high", i+1);
                     ioex_set_level(*(dout->_ioex), dout->_ioex_num[i], IOEX_LOW);
                     dout_state[i] = 1;
