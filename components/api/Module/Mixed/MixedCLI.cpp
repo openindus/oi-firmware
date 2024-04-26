@@ -23,7 +23,7 @@ int MixedCLI::init(void)
 {
     _registerDigitalWrite();
     _registerDigitalRead();
-    _registerGetCurrent();
+    _registerDigitalGetCurrent();
     _registerSetAnalogInputMode();
     _registerSetAnalogInputVoltageRange();
     _registerAnalogInputRead();
@@ -110,34 +110,34 @@ void MixedCLI::_registerDigitalRead(void)
 static struct {
     struct arg_int *dout;
     struct arg_end *end;
-} _getCurrentArgs;
+} _digitalGetCurrentArgs;
 
-int MixedCLI::_getCurrent(int argc, char **argv)
+int MixedCLI::_digitalGetCurrent(int argc, char **argv)
 {
-    int nerrors = arg_parse(argc, argv, (void **) &_getCurrentArgs);
+    int nerrors = arg_parse(argc, argv, (void **) &_digitalGetCurrentArgs);
     if (nerrors != 0) {
-        arg_print_errors(stderr, _getCurrentArgs.end, argv[0]);
+        arg_print_errors(stderr, _digitalGetCurrentArgs.end, argv[0]);
         return 1;
     }
 
-    DigitalOutputNum_t dout = (DigitalOutputNum_t)(_getCurrentArgs.dout->ival[0] - 1);
+    DigitalOutputNum_t dout = (DigitalOutputNum_t)(_digitalGetCurrentArgs.dout->ival[0] - 1);
 
-    printf("%.3f\n", _mixed->getCurrent(dout));
+    printf("%.3f\n", _mixed->digitalGetCurrent(dout));
 
     return 0;
 }
 
-void MixedCLI::_registerGetCurrent(void)
+void MixedCLI::_registerDigitalGetCurrent(void)
 {
-    _getCurrentArgs.dout = arg_int1(NULL, NULL, "<DOUT>", "[1-4]");
-    _getCurrentArgs.end = arg_end(2);
+    _digitalGetCurrentArgs.dout = arg_int1(NULL, NULL, "<DOUT>", "[1-4]");
+    _digitalGetCurrentArgs.end = arg_end(2);
 
     const esp_console_cmd_t cmd = {
         .command = "get-current",
         .help = "Get Dout current",
         .hint = NULL,
-        .func = &_getCurrent,
-        .argtable = &_getCurrentArgs
+        .func = &_digitalGetCurrent,
+        .argtable = &_digitalGetCurrentArgs
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
 }

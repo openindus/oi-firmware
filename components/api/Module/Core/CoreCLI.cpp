@@ -22,8 +22,8 @@ void CoreCLI::init(void)
     _registerDigitalWrite();
     _registerDigitalRead();
     _registerAnalogRead();
-    _registerAnalogReadMillivolts();
-    _registerGetCurrentLevel();
+    _registerAnalogReadMilliVolt();
+    _registerDigitalGetOverCurrentStatus();
     _registerDate();
 }
 
@@ -144,7 +144,7 @@ void CoreCLI::_registerAnalogRead(void)
 
 /** 'analog-read-millivolts' */
 
-static int analogReadMilliVolts(int argc, char **argv)
+static int analogReadMilliVolt(int argc, char **argv)
 {
     int nerrors = arg_parse(argc, argv, (void **) &analogReadArgs);
     if (nerrors != 0) {
@@ -154,12 +154,12 @@ static int analogReadMilliVolts(int argc, char **argv)
 
     AnalogInput_Num_t ain = (AnalogInput_Num_t)(analogReadArgs.ain->ival[0] - 1);
 
-    printf("%imV\n", CoreStandalone::analogReadMilliVolts(ain));
+    printf("%imV\n", CoreStandalone::analogReadMilliVolt(ain));
 
     return 0;
 }
 
-void CoreCLI::_registerAnalogReadMillivolts(void)
+void CoreCLI::_registerAnalogReadMilliVolt(void)
 {
     analogReadArgs.ain = arg_int1(NULL, NULL, "<AIN>", "[1-2]");
     analogReadArgs.end = arg_end(2);
@@ -168,7 +168,7 @@ void CoreCLI::_registerAnalogReadMillivolts(void)
         .command = "analog-read-millivolts",
         .help = "Get analog input value (MilliVolts)",
         .hint = NULL,
-        .func = &analogReadMilliVolts,
+        .func = &analogReadMilliVolt,
         .argtable = &analogReadArgs
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
@@ -181,7 +181,7 @@ static struct {
     struct arg_end *end;
 } digitalReadOverCurrentArgs;
 
-static int getCurrentLevel(int argc, char **argv)
+static int digitalGetOverCurrentStatus(int argc, char **argv)
 {
     int nerrors = arg_parse(argc, argv, (void **) &digitalReadOverCurrentArgs);
     if (nerrors != 0) {
@@ -190,11 +190,11 @@ static int getCurrentLevel(int argc, char **argv)
     }
 
     DigitalOutputNum_t dout = (DigitalOutputNum_t)(digitalReadOverCurrentArgs.dout->ival[0] - 1);
-    printf("%u\n", CoreStandalone::getCurrentLevel(dout));
+    printf("%u\n", CoreStandalone::digitalGetOverCurrentStatus(dout));
     return 0;
 }
 
-void CoreCLI::_registerGetCurrentLevel(void)
+void CoreCLI::_registerDigitalGetOverCurrentStatus(void)
 {
     digitalReadOverCurrentArgs.dout = arg_int1(NULL, NULL, "<DOUT>", "[1-4]");
     digitalReadOverCurrentArgs.end = arg_end(2);
@@ -203,7 +203,7 @@ void CoreCLI::_registerGetCurrentLevel(void)
         .command = "get-current-level",
         .help = "Read the overcurrent status for the given output",
         .hint = NULL,
-        .func = &getCurrentLevel,
+        .func = &digitalGetOverCurrentStatus,
         .argtable = &digitalReadOverCurrentArgs
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));

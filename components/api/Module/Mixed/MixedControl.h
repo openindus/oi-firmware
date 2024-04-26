@@ -31,7 +31,7 @@ public:
 
     /* Digital Output */
     void digitalWrite(DigitalOutputNum_t num, uint8_t level) override;
-    float getCurrent(DigitalOutputNum_t num) override;
+    float digitalGetCurrent(DigitalOutputNum_t num) override;
 
     /* Digital Input */
     int digitalRead(DigitalInputNum_t num) override;

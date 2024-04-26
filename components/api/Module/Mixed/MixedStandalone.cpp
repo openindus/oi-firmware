@@ -143,14 +143,14 @@ void MixedStandalone::digitalToggle(DigitalOutputNum_t num)
     _douts->toggle(num);
 }
 
-void MixedStandalone::analogWrite(DigitalOutputNum_t num, uint8_t duty)
+void MixedStandalone::digitalPWM(DigitalOutputNum_t num, uint8_t duty)
 {
     /** @todo */
 }
 
-float MixedStandalone::getCurrent(DigitalOutputNum_t num)
+float MixedStandalone::digitalGetCurrent(DigitalOutputNum_t num)
 {
-    return _douts->getCurrent(num);
+    return _douts->digitalGetCurrent(num);
 }
 
 /*******  Analog Inputs  *******/
