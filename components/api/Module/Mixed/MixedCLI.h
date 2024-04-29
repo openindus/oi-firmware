@@ -28,8 +28,6 @@ public:
 
 private:
 
-    static MixedStandalone* _mixed;
-
     static int _digitalWrite(int argc, char **argv);
     static void _registerDigitalWrite(void);
 

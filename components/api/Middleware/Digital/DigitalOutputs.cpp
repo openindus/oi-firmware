@@ -18,16 +18,16 @@
 static const char DOUT_TAG[] = "DigitalOutputs";
 static SemaphoreHandle_t _mutex;
 
-DigitalOutputType_t _type;
-uint8_t _nb;
-gpio_num_t* _gpio_num;
-ioex_num_t* _ioex_num;
-AdcNumChannel_t* _adc_current;
-ioex_num_t* _ioex_current;
-ioex_device_t** _ioex;
-esp_adc_cal_characteristics_t _adc1Characteristics;
-esp_adc_cal_characteristics_t _adc2Characteristics;
-uint8_t* _doutLevel;
+DigitalOutputType_t DigitalOutputs::_type;
+uint8_t DigitalOutputs::_nb;
+gpio_num_t* DigitalOutputs::_gpio_num;
+ioex_num_t* DigitalOutputs::_ioex_num;
+AdcNumChannel_t* DigitalOutputs::_adc_current;
+ioex_num_t* DigitalOutputs::_ioex_current;
+ioex_device_t** DigitalOutputs::_ioex;
+esp_adc_cal_characteristics_t DigitalOutputs::_adc1Characteristics;
+esp_adc_cal_characteristics_t DigitalOutputs::_adc2Characteristics;
+uint8_t* DigitalOutputs::_doutLevel;
 
 
 void DigitalOutputs::init(const gpio_num_t *gpio, const AdcNumChannel_t *adc, int nb) 
@@ -192,7 +192,7 @@ void DigitalOutputs::digitalToggle(DigitalOutputNum_t dout)
         _doutLevel[dout] = level;
         xSemaphoreGive(_mutex);
         // Write level
-        this->write(dout, level);
+        digitalWrite(dout, level);
     } else {
         ESP_LOGE(DOUT_TAG, "Invalid DOUT_%d", dout+1);
     }

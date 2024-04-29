@@ -6,6 +6,10 @@
  * @see https://openindus.com
  */
 
+#pragma once
+
+#include "driver/adc.h"
+
 typedef enum {
     AIN_1 = 0,
     AIN_2 = 1,

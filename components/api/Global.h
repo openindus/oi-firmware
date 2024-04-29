@@ -84,6 +84,8 @@
 #include "AnalogOutputsHV.h"
 #include "AnalogOutputsLV.h"
 #include "AnalogOutputs.h"
+#include "AnalogInputsHV.h"
+#include "AnalogInputsLV.h"
 #include "AnalogInputs.h"
 #include "Motor.h"
 #include "MotorStepper.h"

@@ -18,7 +18,7 @@
 static const char DIN_TAG[] = "DigitalInputs";
 
 DigitalInputType_t DigitalInputs::_type;
-uint8_t DigitalInputs::_num;
+uint8_t DigitalInputs::_nb;
 gpio_num_t* DigitalInputs::_gpio_nums;
 ioex_num_t* DigitalInputs::_ioex_nums;
 IsrCallback_t* DigitalInputs::_callbacks;
@@ -27,19 +27,19 @@ ioex_device_t** DigitalInputs::_ioex;
 xQueueHandle DigitalInputs::_event;
 
 
-void DigitalInputs::init(const gpio_num_t *gpio, int num)
+void DigitalInputs::init(const gpio_num_t *gpio, int nb)
 {
     _type = DIGITAL_INPUT_GPIO;
 
     /* Save number of DIN */
-    _num = num;
+    _nb = nb;
     
     /* Init memory and copy gpio numbers in _gpio_nums table */
-    _gpio_nums = (gpio_num_t*) calloc(num, sizeof(gpio_num_t));
-    memcpy(_gpio_nums, gpio, num * sizeof(gpio_num_t));
+    _gpio_nums = (gpio_num_t*) calloc(nb, sizeof(gpio_num_t));
+    memcpy(_gpio_nums, gpio, nb * sizeof(gpio_num_t));
 
-    _callbacks = (IsrCallback_t*) calloc(num, sizeof(IsrCallback_t));
-    _args = (void**) calloc(num, sizeof(void*));
+    _callbacks = (IsrCallback_t*) calloc(nb, sizeof(IsrCallback_t));
+    _args = (void**) calloc(nb, sizeof(void*));
 
     /* Init DIN Gpio */
     ESP_LOGI(DIN_TAG, "Init DIN");
@@ -50,7 +50,7 @@ void DigitalInputs::init(const gpio_num_t *gpio, int num)
         .pull_down_en = GPIO_PULLDOWN_DISABLE,
         .intr_type = GPIO_INTR_DISABLE,
     };
-    for (uint8_t i = 0; i < _num; i++) {
+    for (uint8_t i = 0; i < _nb; i++) {
         dinConf.pin_bit_mask |= (1ULL <<_gpio_nums[i]);
     }
     ESP_ERROR_CHECK(gpio_config(&dinConf));
@@ -60,22 +60,22 @@ void DigitalInputs::init(const gpio_num_t *gpio, int num)
     xTaskCreate(_task, "DIN interrupt task", 2048, NULL, 10, NULL);
 }
 
-void DigitalInputs::init(ioex_device_t **ioex, const ioex_num_t *ioex_num, int num)
+void DigitalInputs::init(ioex_device_t **ioex, const ioex_num_t *ioex_num, int nb)
 {
     _type = DIGITAL_INPUT_IOEX;
 
     /* Save number of DOUT */
-    _num = num;
+    _nb = nb;
 
     /* Save pointer to ioex */
     _ioex = ioex;
     
     /* Init memory and copy gpio numbers in _gpio_nums table */
-    _ioex_nums = (ioex_num_t*) calloc(num, sizeof(ioex_num_t));
-    memcpy(_ioex_nums, ioex_num, num * sizeof(ioex_num_t));
+    _ioex_nums = (ioex_num_t*) calloc(nb, sizeof(ioex_num_t));
+    memcpy(_ioex_nums, ioex_num, nb * sizeof(ioex_num_t));
 
-    _callbacks = (IsrCallback_t*) calloc(num, sizeof(IsrCallback_t));
-    _args = (void**) calloc(num, sizeof(void*));
+    _callbacks = (IsrCallback_t*) calloc(nb, sizeof(IsrCallback_t));
+    _args = (void**) calloc(nb, sizeof(void*));
 
     /* Init DIN */
     ESP_LOGI(DIN_TAG, "Init DIN");
@@ -85,7 +85,7 @@ void DigitalInputs::init(ioex_device_t **ioex, const ioex_num_t *ioex_num, int n
         .pull_mode = IOEX_FLOATING,
         .interrupt_type = IOEX_INTERRUPT_DISABLE,
     };
-    for (uint8_t i = 0; i < _num; i++) {
+    for (uint8_t i = 0; i < _nb; i++) {
         dinConf.pin_bit_mask |= (1ULL <<_ioex_nums[i]);
         // /!\ Set level before setting to output
         ESP_ERROR_CHECK(ioex_set_level(*_ioex, _ioex_nums[i], IOEX_LOW));

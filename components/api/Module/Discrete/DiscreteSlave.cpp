@@ -33,7 +33,7 @@ int DiscreteSlave::init(void)
         DiscreteStandalone::digitalWrite((DigitalOutputNum_t)data[1], data[2]);
     });
 
-    addCtrlCallback(CONTROL_DIGITAL_PWM, [](std::vector<uint8_t>& data) { 
+    addCtrlCallback(CONTROL_DIGITAL_SET_PWM, [](std::vector<uint8_t>& data) { 
         _discrete->digitalPWM((DigitalOutputNum_t)data[1], data[2]);
     });
 

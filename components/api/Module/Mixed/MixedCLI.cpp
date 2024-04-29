@@ -17,8 +17,6 @@
 
 #if defined(OI_MIXED)
 
-MixedStandalone* MixedCLI::_mixed = new MixedStandalone();
-
 int MixedCLI::init(void)
 {
     _registerDigitalWrite();
@@ -51,7 +49,7 @@ int MixedCLI::_digitalWrite(int argc, char **argv)
     DigitalOutputNum_t dout = (DigitalOutputNum_t)(_digitalWriteArgs.dout->ival[0] - 1);
     uint8_t level = (uint8_t)_digitalWriteArgs.level->ival[0];
 
-    _mixed->digitalWrite(dout, level);
+    MixedStandalone::digitalWrite(dout, level);
 
     return 0;
 }
@@ -87,7 +85,7 @@ int MixedCLI::_digitalRead(int argc, char **argv)
 
     DigitalInputNum_t din = (DigitalInputNum_t)(_digitalReadArgs.din->ival[0] - 1);
 
-    printf("%d\n", _mixed->digitalRead(din));
+    printf("%d\n", MixedStandalone::digitalRead(din));
 
     return 0;
 }
@@ -122,7 +120,7 @@ int MixedCLI::_digitalGetCurrent(int argc, char **argv)
 
     DigitalOutputNum_t dout = (DigitalOutputNum_t)(_digitalGetCurrentArgs.dout->ival[0] - 1);
 
-    printf("%.3f\n", _mixed->digitalGetCurrent(dout));
+    printf("%.3f\n", MixedStandalone::digitalGetCurrent(dout));
 
     return 0;
 }
@@ -162,7 +160,7 @@ int MixedCLI::_setAnalogInputMode(int argc, char **argv)
     AnalogInput_Num_t ain = (AnalogInput_Num_t)(_setAnalogInputModeArgs.ain->ival[0] - 1);
     AnalogInput_Mode_t mode = (AnalogInput_Mode_t)(_setAnalogInputModeArgs.mode->ival[0]);
 
-    _mixed->analogInputMode(ain, mode);
+    MixedStandalone::analogInputMode(ain, mode);
 
     return 0;
 }
@@ -217,7 +215,7 @@ int MixedCLI::_setAnalogInputVoltageRange(int argc, char **argv)
         break;
     }
 
-    _mixed->analogInputVoltageRange(ain, range);
+    MixedStandalone::analogInputVoltageRange(ain, range);
 
     return 0;
 }
@@ -258,20 +256,20 @@ int MixedCLI::_analogInputRead(int argc, char **argv)
     switch (unit)
     {
     case AIN_UNIT_VOLT:
-        printf("%.3f\n", _mixed->analogReadVolt(ain));
+        printf("%.3f\n", MixedStandalone::analogReadVolt(ain));
         break;
     case AIN_UNIT_MILLIVOLT:
-        printf("%.1f\n", _mixed->analogReadMilliVolt(ain));
+        printf("%.1f\n", MixedStandalone::analogReadMilliVolt(ain));
         break;
     case AIN_UNIT_AMP:
-        printf("%.3f\n", _mixed->analogReadAmp(ain));
+        printf("%.3f\n", MixedStandalone::analogReadAmp(ain));
         break;
     case AIN_UNIT_MILLIAMP:
-        printf("%.3f\n", _mixed->analogReadMilliAmp(ain));
+        printf("%.3f\n", MixedStandalone::analogReadMilliAmp(ain));
         break;
 
     default:
-        printf("%d\n", _mixed->analogRead(ain));
+        printf("%d\n", MixedStandalone::analogRead(ain));
         break;
     }
 
@@ -314,7 +312,7 @@ int MixedCLI::_setAnalogOutputMode(int argc, char **argv)
     AnalogOutput_Num_t ain = (AnalogOutput_Num_t)(_setAnalogOutputModeArgs.aout->ival[0] - 1);
     AnalogOutput_Mode_t mode = (AnalogOutput_Mode_t)(_setAnalogOutputModeArgs.mode->ival[0]);
 
-    _mixed->analogOutputMode(ain, mode);
+    MixedStandalone::analogOutputMode(ain, mode);
 
     return 0;
 }
@@ -352,7 +350,7 @@ int MixedCLI::_analogOutputWrite(int argc, char **argv)
     AnalogOutput_Num_t ain = (AnalogOutput_Num_t)(_analogOutputWriteArgs.aout->ival[0] - 1);
     float value = _analogOutputWriteArgs.value->dval[0];
 
-    _mixed->analogWrite(ain, value);
+    MixedStandalone::analogWrite(ain, value);
 
     return 0;
 }

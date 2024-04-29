@@ -15,7 +15,7 @@
 
 #include "MixedSlave.h"
 
-#if defined(OI_MIXED)
+#if defined(OI_MIXED) && defined(MODULE_SLAVE)
 
 IsrCallback_t MixedSlave::_isrCallback[] = {
     [](void*){sendEvent({EVENT_DIGITAL_INTERRUPT, DIN_1});},
@@ -29,6 +29,7 @@ MixedStandalone* MixedSlave::_mixed = new MixedStandalone();
 int MixedSlave::init(void)
 {
     ModuleSlave::init();
+    MixedStandalone::init();
 
     addCtrlCallback(CONTROL_DIGITAL_WRITE, [](std::vector<uint8_t>& data) {
         _mixed->digitalWrite((DigitalOutputNum_t)data[1], data[2]);

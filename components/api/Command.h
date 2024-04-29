@@ -33,8 +33,8 @@ enum Command_Control_e {
     /* DIGITAL */
     CONTROL_DIGITAL_WRITE                   = 0x00,
     CONTROL_DIGITAL_TOGGLE                  = 0x01,
-    CONTROL_DIGITAL_BLINK                   = 0x02,
-    CONTROL_DIGITAL_PWM                     = 0x03,
+    CONTROL_DIGITAL_MODE_PWM                = 0x02,
+    CONTROL_DIGITAL_SET_PWM                 = 0x03,
     CONTROL_DIGITAL_GET_CURRENT             = 0x04,
     CONTROL_DIGITAL_GET_OVERCURRENT         = 0x05,
     CONTROL_DIGITAL_READ                    = 0x06,

@@ -56,21 +56,15 @@ static ads866x_config_t adcSPIConfig = {
     .adc_channel_nb = MIXED_ADC_NB
 };
 
-DigitalInputs* MixedStandalone::_dins = new DigitalInputs(_dinGpio, 4);
-DigitalOutputs* MixedStandalone::_douts = new DigitalOutputs(_doutGpio, _doutAdcNumChannel, 4);
-
-/* Analog inputs instances */
-AnalogInputs* MixedStandalone::_ains = new AnalogInputs(_ainCmdGpio, 4);
-
 int MixedStandalone::init(void)
 {
     ModuleStandalone::init();
 
     /* Initialize digital inputs */
-    _dins->init();
+    DigitalInputs::init(_dinGpio, 4);
 
     /* Initialize digital outputs */
-    _douts->init();
+    DigitalOutputs::init(_doutGpio, _doutAdcNumChannel, 4);
 
     /* Initialize the SPI bus */
     spi_bus_config_t busConfig = {
@@ -103,94 +97,9 @@ int MixedStandalone::init(void)
     AnalogOutputs::analogOutputMode(AOUT_2, AOUT_MODE_M10V5_10V5);
     
     /* Initialize analog inputs */
-    _ains->init(&adcSPIConfig, AIN_VOLTAGE_RANGE_0_10V24, AIN_MODE_VOLTAGE);
+    AnalogInputsLV::init(&adcSPIConfig, _ainCmdGpio, 4);
 
     return 0;
-}
-
-
-/*******  Digital Inputs *******/
-int MixedStandalone::digitalRead(DigitalInputNum_t num)
-{
-    return _dins->read(num);
-}
-
-void MixedStandalone::attachInterrupt(DigitalInputNum_t num, IsrCallback_t callback, 
-    InterruptMode_t mode, void* arg)
-{
-    _dins->attachInterrupt(num, callback, mode, arg);
-}
-
-void MixedStandalone::detachInterrupt(DigitalInputNum_t num)
-{
-    _dins->detachInterrupt(num);
-}
-
-/*******  Digital Outputs *******/
-void MixedStandalone::digitalWrite(DigitalOutputNum_t num, uint8_t level)
-{
-    _douts->write(num, level);
-}
-
-void MixedStandalone::digitalToggle(DigitalOutputNum_t num)
-{
-    _douts->toggle(num);
-}
-
-void MixedStandalone::digitalPWM(DigitalOutputNum_t num, uint8_t duty)
-{
-    /** @todo */
-}
-
-float MixedStandalone::digitalGetCurrent(DigitalOutputNum_t num)
-{
-    return _douts->digitalGetCurrent(num);
-}
-
-/*******  Analog Inputs  *******/
-void MixedStandalone::analogInputMode(AnalogInput_Num_t num, AnalogInput_Mode_t mode)
-{
-    _ains->setMode(num, mode);   
-}
-
-uint8_t MixedStandalone::analogInputGetMode(AnalogInput_Num_t num)
-{
-    return _ains->getMode(num);
-}
-
-void MixedStandalone::analogInputVoltageRange(AnalogInput_Num_t num, AnalogInput_VoltageRange_t range)
-{
-    _ains->setVoltageRange(num, range);
-}
-
-uint8_t MixedStandalone::analogInputGetVoltageRange(AnalogInput_Num_t num)
-{
-    return _ains->getVoltageRange(num);
-}
-
-int MixedStandalone::analogRead(AnalogInput_Num_t num)
-{
-    return _ains->read(num);
-}
-
-float MixedStandalone::analogReadVolt(AnalogInput_Num_t num)
-{
-    return _ains->read(num, AIN_UNIT_VOLT);
-}
-
-float MixedStandalone::analogReadMilliVolt(AnalogInput_Num_t num)
-{
-    return _ains->read(num, AIN_UNIT_MILLIVOLT);
-}
-
-float MixedStandalone::analogReadAmp(AnalogInput_Num_t num)
-{
-    return _ains->read(num, AIN_UNIT_AMP);
-}
-
-float MixedStandalone::analogReadMilliAmp(AnalogInput_Num_t num)
-{
-    return _ains->read(num, AIN_UNIT_MILLIAMP);
 }
 
 #endif

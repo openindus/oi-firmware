@@ -47,8 +47,7 @@ void System::init(void)
     StepperCLI::init();
     StepperParamCLI::init();
 #elif defined(OI_MIXED)
-    err |= MixedStandalone::init();
-    err |= MixedSlave::init();
+    err |= Mixed::init();
     err |= MixedCLI::init();
 #elif defined(OI_RELAY_HP) || defined(OI_RELAY_LP)
     RelayStandalone::init();

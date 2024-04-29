@@ -74,18 +74,18 @@ public:
     /**
      * @brief Read a current measure on analog pin
      * 
-     * @param[in] num : Analog input
+     * @param num : Analog input
      * @return float : Measure in A
      */
-    virtual float analogReadAmp(AnalogInput_Num_t num) = 0;
+    static float analogReadAmp(AnalogInput_Num_t num) ;
 
     /**
      * @brief Read a current measure on analog pin
      * 
-     * @param[in] num : Analog input
+     * @param num : Analog input
      * @return float : Measure in mA
      */
-    virtual float analogReadMilliAmp(AnalogInput_Num_t num) = 0;
+    static float analogReadMilliAmp(AnalogInput_Num_t num);
 
     /**
      * @brief Set Adc Mode of the given input

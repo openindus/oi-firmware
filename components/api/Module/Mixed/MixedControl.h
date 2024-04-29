@@ -17,7 +17,6 @@
 
 #include "ModuleControl.h"
 #include "ModuleMaster.h"
-#include "MixedInterface.h"
 
 #if !defined(OI_MIXED)
 
