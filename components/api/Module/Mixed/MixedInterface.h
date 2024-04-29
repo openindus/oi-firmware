@@ -19,7 +19,7 @@
 #include "DigitalInputs.h"
 #include "DigitalOutputs.h"
 #include "AnalogInputs.h"
-#include "AnalogOutput.h"
+#include "AnalogOutputs.h"
 
 class MixedInterface
 {

@@ -31,6 +31,26 @@ set(COMPONENT_SRCS
     "Module/AnalogLs/AnalogLsStandalone.cpp"
     "Module/AnalogLs/AnalogLsControl.cpp"
     "Module/AnalogLs/AnalogLsSlave.cpp"
+
+    "Middleware/Bus/BusIO.cpp"
+    "Middleware/Bus/BusRS.cpp"
+    "Middleware/Bus/BusCAN.cpp"
+    "Middleware/Encoder/Encoder.cpp"
+    "Middleware/Digital/DigitalInputs.cpp"
+    "Middleware/Digital/DigitalOutputs.cpp"
+    "Middleware/Motor/Motor.cpp"
+    "Middleware/Motor/MotorBLDC.cpp"
+    "Middleware/Motor/MotorStepper.cpp"
+    "Middleware/Motor/MotorStepperParam.cpp"
+    "Middleware/Usb/UsbConsole.cpp"
+    "Middleware/Usb/UsbSerial.cpp"
+    "Middleware/FlashLoader/FlashLoader.cpp"
+    "Middleware/Led/Led.cpp"
+    "Middleware/RTClock/RTClock.cpp"
+    "Middleware/Analog/AnalogOutputs.cpp"
+    "Middleware/Analog/AnalogInputs.cpp"
+    "Middleware/CAN/CAN.cpp"
+    "Middleware/RS/RS.cpp"
 )
 
 set(COMPONENT_INCLUDE_DIRS
@@ -44,6 +64,18 @@ set(COMPONENT_INCLUDE_DIRS
     "Module/Relay"
     "Module/Brushless"
     "Module/AnalogLs"
+
+    "Middleware/Bus"
+    "Middleware/Encoder"
+    "Middleware/Digital"
+    "Middleware/Analog"
+    "Middleware/Motor"
+    "Middleware/Usb"
+    "Middleware/FlashLoader"
+    "Middleware/Led"
+    "Middleware/RTClock"
+    "Middleware/CAN"
+    "Middleware/RS"
 )
 
 set(COMPONENT_PRIV_REQUIRES
@@ -53,11 +85,11 @@ set(COMPONENT_PRIV_REQUIRES
     "app_update"
     "fatfs"
     "sdmmc"
+    "esp_rom"
 )
 
 set(COMPONENT_REQUIRES
     "drivers"
-    "middleware"
 )
 
 idf_component_register(

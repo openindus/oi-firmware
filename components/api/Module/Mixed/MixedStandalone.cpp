@@ -62,12 +62,6 @@ DigitalOutputs* MixedStandalone::_douts = new DigitalOutputs(_doutGpio, _doutAdc
 /* Analog inputs instances */
 AnalogInputs* MixedStandalone::_ains = new AnalogInputs(_ainCmdGpio, 4);
 
-/* Analog outputs instances */
-AnalogOutput* MixedStandalone::_aout[MIXED_DAC_NB] = {
-    new AnalogOutputAD5413(AOUT_1),
-    new AnalogOutputAD5413(AOUT_2)
-};
-
 int MixedStandalone::init(void)
 {
     ModuleStandalone::init();
@@ -104,10 +98,10 @@ int MixedStandalone::init(void)
         {MIXED_SPI_HOST, MIXED_SPI_FREQ, MIXED_DAC_PIN_SYNC_1, MIXED_DAC_PIN_LDAC_1, 0, 0},
         {MIXED_SPI_HOST, MIXED_SPI_FREQ, MIXED_DAC_PIN_SYNC_2, MIXED_DAC_PIN_LDAC_2, 1, 1}
     };
-    AnalogOutputAD5413::init(dacConfig, 2);
-    _aout[0]->setMode(AOUT_MODE_M10V5_10V5);
-    _aout[1]->setMode(AOUT_MODE_M10V5_10V5);
-
+    AnalogOutputs::init(2, dacConfig);
+    AnalogOutputs::analogOutputMode(AOUT_1, AOUT_MODE_M10V5_10V5);
+    AnalogOutputs::analogOutputMode(AOUT_2, AOUT_MODE_M10V5_10V5);
+    
     /* Initialize analog inputs */
     _ains->init(&adcSPIConfig, AIN_VOLTAGE_RANGE_0_10V24, AIN_MODE_VOLTAGE);
 
@@ -197,26 +191,6 @@ float MixedStandalone::analogReadAmp(AnalogInput_Num_t num)
 float MixedStandalone::analogReadMilliAmp(AnalogInput_Num_t num)
 {
     return _ains->read(num, AIN_UNIT_MILLIAMP);
-}
-
-
-/*******  Analog Outputs  *******/
-void MixedStandalone::analogOutputMode(AnalogOutput_Num_t num, AnalogOutput_Mode_t mode)
-{
-    if (num < MIXED_DAC_NB) {
-        _aout[num]->setMode(mode);
-    } else {
-        ESP_LOGE(TAG, "Invalid Analog output num");
-    }
-}
-
-void MixedStandalone::analogWrite(AnalogOutput_Num_t num, float value)
-{
-    if (num < MIXED_DAC_NB) {
-        _aout[num]->write(value);
-    } else {
-        ESP_LOGE(TAG, "Invalid Analog output num");
-    }
 }
 
 #endif

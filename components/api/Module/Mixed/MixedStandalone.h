@@ -21,7 +21,7 @@
 
 #if defined(OI_MIXED)
 
-class MixedStandalone : public ModuleStandalone, public MixedInterface
+class MixedStandalone : public ModuleStandalone, public AnalogOutputs
 {
 public:
 
@@ -50,17 +50,11 @@ public:
     float analogReadAmp(AnalogInput_Num_t num);
     float analogReadMilliAmp(AnalogInput_Num_t num);
 
-    /* Analog Output */
-    void analogOutputMode(AnalogOutput_Num_t num, AnalogOutput_Mode_t mode);
-    void analogWrite(AnalogOutput_Num_t num, float value);
-
 private:
 
     static DigitalInputs* _dins;
     static DigitalOutputs* _douts;
     static AnalogInputs* _ains;
-    static AnalogOutput* _aout[2];
-
 };
 
 #endif

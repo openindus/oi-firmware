@@ -193,7 +193,7 @@ int DigitalOutputs::getLevel(DigitalOutputNum_t dout)
 void DigitalOutputs::write(DigitalOutputNum_t dout, uint8_t level)
 {
     if (dout < _num) {
-        // Store level 
+        // Stor level 
         xSemaphoreTake(_mutex, portMAX_DELAY);
         _doutLevel[dout] = level;
         xSemaphoreGive(_mutex);
@@ -210,7 +210,7 @@ void DigitalOutputs::toggle(DigitalOutputNum_t dout)
     if (dout < _num) {
         // Read level
         level = (getLevel(dout) == 1 ? 0 : 1);
-         // Store level 
+         // Stor level 
         xSemaphoreTake(_mutex, portMAX_DELAY);
         _doutLevel[dout] = level;
         xSemaphoreGive(_mutex);

@@ -21,7 +21,7 @@
 
 #if !defined(OI_MIXED)
 
-class MixedControl : public ModuleControl, public MixedInterface
+class MixedControl : public ModuleControl
 {
 public:
 
