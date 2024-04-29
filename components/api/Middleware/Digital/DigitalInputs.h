@@ -80,7 +80,7 @@ public:
      * @param mode Interrupt mode (RISING, FALLING or CHANGE)
      * @param arg argument for the handler
      */
-    static void attachInterrupt(DigitalInputNum_t num, IsrCallback_t callback, InterruptMode_t mode, void* arg);
+    static void attachInterrupt(DigitalInputNum_t num, IsrCallback_t callback, InterruptMode_t mode, void* arg = NULL);
     
     /**
      * @brief Detach interrupt of a given DIN.

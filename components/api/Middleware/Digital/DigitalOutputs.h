@@ -72,46 +72,46 @@ public:
      * @param num DOUT to drive.
      * @param level DOUT level, HIGH or LOW.
      */
-    static void digitalWrite(DigitalOutputNum_t dout, uint8_t level);
+    static void digitalWrite(DigitalOutputNum_t num, uint8_t level);
 
     /**
      * @brief Toggle a digital output
      * 
-     * @param dout DOUT to toggle
+     * @param num DOUT to toggle
     **/
-    static void digitalToggle(DigitalOutputNum_t dout);
+    static void digitalToggle(DigitalOutputNum_t num);
 
     /**
      * @brief Set a digital output into PWM mode
      * 
-     * @param dout DOUT to set
+     * @param num DOUT to set
      * @param freq PWM frequency [50 - 1000 Hz]
     **/
-    static int digitalModePWM(DigitalOutputNum_t dout, uint32_t freq);
+    static void digitalModePWM(DigitalOutputNum_t num, uint32_t freq);
 
     /**
      * @brief Set the duty cycle value of PWM for a digital output
      * 
-     * @param dout DOUT to set
+     * @param num DOUT to set
      * @param duty Duty cycle
     **/
-    static void digitalSetPWM(DigitalOutputNum_t dout, uint32_t duty);
+    static void digitalSetPWM(DigitalOutputNum_t num, uint32_t duty);
  
     /**
      * @brief Get the current of a digital output
      * 
      * @param num DOUT to get
-     * @return current in A
+     * @return current in Ampere
     **/
-    static float digitalGetCurrent(DigitalOutputNum_t dout);
+    static float digitalGetCurrent(DigitalOutputNum_t num);
 
     /**
      * @brief Get the overcurrent status of a digital output
      * 
-     * @param dout DOUT to get
+     * @param num DOUT to get
      * @return 1 if overcurrent, 0 if not
     **/
-    static int digitalGetOverCurrentStatus(DigitalOutputNum_t dout);
+    static int digitalGetOverCurrentStatus(DigitalOutputNum_t num);
 
 private:
 
@@ -135,8 +135,8 @@ private:
     static esp_adc_cal_characteristics_t _adc2Characteristics;
     static uint8_t* _doutLevel;
 
-    static void _setLevel(DigitalOutputNum_t dout, uint8_t level);
-    static int _getLevel(DigitalOutputNum_t dout);
+    static void _setLevel(DigitalOutputNum_t num, uint8_t level);
+    static int _getLevel(DigitalOutputNum_t num);
     static void _controlTask(void *pvParameters);
 
 };

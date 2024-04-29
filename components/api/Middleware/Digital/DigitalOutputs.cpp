@@ -148,59 +148,58 @@ void DigitalOutputs::init(ioex_device_t **ioex, const ioex_num_t *ioex_num, cons
     xTaskCreate(_controlTask, "Control task", 4096, NULL, 1, NULL);
 }
 
-
-void DigitalOutputs::_setLevel(DigitalOutputNum_t dout, uint8_t level)
+void DigitalOutputs::_setLevel(DigitalOutputNum_t num, uint8_t level)
 {
     if (_type == DIGITAL_OUTPUT_GPIO) {
-        gpio_set_level(_gpio_num[dout], level);
+        gpio_set_level(_gpio_num[num], level);
     } else { // DIGITAL_OUTPUT_IOEX
-        ioex_set_level(*_ioex, _ioex_num[dout], (ioex_level_t) level);
+        ioex_set_level(*_ioex, _ioex_num[num], (ioex_level_t) level);
     }
 }
 
-int DigitalOutputs::_getLevel(DigitalOutputNum_t dout)
+int DigitalOutputs::_getLevel(DigitalOutputNum_t num)
 {
     if (_type == DIGITAL_OUTPUT_GPIO) {
-        return gpio_get_level(_gpio_num[dout]);
+        return gpio_get_level(_gpio_num[num]);
     } else { // DIGITAL_OUTPUT_IOEX
-        return ioex_get_level(*_ioex, _ioex_num[dout]);
+        return ioex_get_level(*_ioex, _ioex_num[num]);
     }
 }
 
-void DigitalOutputs::digitalWrite(DigitalOutputNum_t dout, uint8_t level)
+void DigitalOutputs::digitalWrite(DigitalOutputNum_t num, uint8_t level)
 {
-    if (dout < _nb) {
+    if (num < _nb) {
         // Stor level 
         xSemaphoreTake(_mutex, portMAX_DELAY);
-        _doutLevel[dout] = level;
+        _doutLevel[num] = level;
         xSemaphoreGive(_mutex);
         // Set level
-        _setLevel(dout, level);
+        _setLevel(num, level);
     } else {
-        ESP_LOGE(DOUT_TAG, "Invalid DOUT_%d", dout+1);
+        ESP_LOGE(DOUT_TAG, "Invalid DOUT_%d", num+1);
     }
 }
 
-void DigitalOutputs::digitalToggle(DigitalOutputNum_t dout)
+void DigitalOutputs::digitalToggle(DigitalOutputNum_t num)
 {
     int level;
-    if (dout < _nb) {
+    if (num < _nb) {
         // Read level
-        level = (_getLevel(dout) == 1 ? 0 : 1);
+        level = (_getLevel(num) == 1 ? 0 : 1);
          // Stor level 
         xSemaphoreTake(_mutex, portMAX_DELAY);
-        _doutLevel[dout] = level;
+        _doutLevel[num] = level;
         xSemaphoreGive(_mutex);
         // Write level
-        digitalWrite(dout, level);
+        digitalWrite(num, level);
     } else {
-        ESP_LOGE(DOUT_TAG, "Invalid DOUT_%d", dout+1);
+        ESP_LOGE(DOUT_TAG, "Invalid DOUT_%d", num+1);
     }
 }
 
-int DigitalOutputs::digitalModePWM(DigitalOutputNum_t dout, uint32_t freq)
+void DigitalOutputs::digitalModePWM(DigitalOutputNum_t num, uint32_t freq)
 {
-    if (dout < DOUT_MAX) {
+    if (num < _nb && _type == DIGITAL_OUTPUT_GPIO) {
         if (freq >= DOUT_PWM_MAX_FREQUENCY_HZ) {
             ESP_LOGE(DOUT_TAG, "To high frequency %d, max is %d", freq, DOUT_PWM_MAX_FREQUENCY_HZ);
             return -1;
@@ -219,9 +218,9 @@ int DigitalOutputs::digitalModePWM(DigitalOutputNum_t dout, uint32_t freq)
         ESP_ERROR_CHECK(ledc_timer_config(&ledcTimer));
 
         ledc_channel_config_t ledcChannel = {
-            .gpio_num           = _gpio_num[dout],
+            .gpio_num           = _gpio_num[num],
             .speed_mode         = LEDC_SPEED_MODE_MAX,
-            .channel            = (ledc_channel_t)(LEDC_CHANNEL_0 + dout),
+            .channel            = (ledc_channel_t)(LEDC_CHANNEL_0 + num),
             .intr_type          = LEDC_INTR_DISABLE,
             .timer_sel          = LEDC_TIMER_1,
             .duty               = 0,
@@ -232,35 +231,35 @@ int DigitalOutputs::digitalModePWM(DigitalOutputNum_t dout, uint32_t freq)
         };
         ESP_ERROR_CHECK(ledc_channel_config(&ledcChannel));
     } else {
-        ESP_LOGE(DOUT_TAG, "Invalid DOUT_%d", dout+1);
+        ESP_LOGE(DOUT_TAG, "Invalid DOUT_%d", num+1);
         return -1;
     }
     return 0;
 }
 
-void DigitalOutputs::digitalSetPWM(DigitalOutputNum_t dout, uint32_t duty)
+void DigitalOutputs::digitalSetPWM(DigitalOutputNum_t num, uint32_t duty)
 {
-    if (dout < _nb) {
+    if (num < _nb) {
         ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, duty);
         ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0);
     } else {
-        ESP_LOGE(DOUT_TAG, "Invalid DOUT_%d", dout+1);
+        ESP_LOGE(DOUT_TAG, "Invalid DOUT_%d", num+1);
     }
 }
 
-float DigitalOutputs::digitalGetCurrent(DigitalOutputNum_t dout)
+float DigitalOutputs::digitalGetCurrent(DigitalOutputNum_t num)
 {
-    if (dout < _nb) {   
+    if (num < _nb) {   
         if (_type == DIGITAL_OUTPUT_GPIO) {
             int current_reading = 0;
             int adc_reading = 0;
             float voltage = 0.0f;
 
             for (int i = 0; i < DOUT_SENSOR_ADC_NO_OF_SAMPLES; i++) {
-                if (_adc_current[dout].adc_num == ADC_UNIT_1) {
-                    current_reading = adc1_get_raw((adc1_channel_t)_adc_current[dout].channel);
-                } else if (_adc_current[dout].adc_num == ADC_UNIT_2) {
-                    adc2_get_raw((adc2_channel_t)_adc_current[dout].channel, (adc_bits_width_t)ADC_WIDTH_BIT_DEFAULT, &current_reading);                    
+                if (_adc_current[num].adc_num == ADC_UNIT_1) {
+                    current_reading = adc1_get_raw((adc1_channel_t)_adc_current[num].channel);
+                } else if (_adc_current[num].adc_num == ADC_UNIT_2) {
+                    adc2_get_raw((adc2_channel_t)_adc_current[num].channel, (adc_bits_width_t)ADC_WIDTH_BIT_DEFAULT, &current_reading);                    
                 } else {
                     current_reading = 0;
                     ESP_LOGE(DOUT_TAG, "Invalid ADC channel");
@@ -271,9 +270,9 @@ float DigitalOutputs::digitalGetCurrent(DigitalOutputNum_t dout)
             adc_reading /= DOUT_SENSOR_ADC_NO_OF_SAMPLES;
 
             // Convert adc_reading to voltage in mV
-            if (_adc_current[dout].adc_num == ADC_UNIT_1) {
+            if (_adc_current[num].adc_num == ADC_UNIT_1) {
                 voltage = static_cast<float> (esp_adc_cal_raw_to_voltage(adc_reading, &_adc1Characteristics));
-            } else if (_adc_current[dout].adc_num == ADC_UNIT_2) {
+            } else if (_adc_current[num].adc_num == ADC_UNIT_2) {
                 voltage = static_cast<float> (esp_adc_cal_raw_to_voltage(adc_reading, &_adc2Characteristics));
             } else {
                 ESP_LOGE(DOUT_TAG, "Invalid ADC channel");
@@ -299,22 +298,22 @@ float DigitalOutputs::digitalGetCurrent(DigitalOutputNum_t dout)
             return 0.0f;
         }
     } else {
-        ESP_LOGE(DOUT_TAG, "Invalid DOUT_%d", dout+1);
+        ESP_LOGE(DOUT_TAG, "Invalid DOUT_%d", num+1);
         return 0.0f;
     }
 }
 
-int DigitalOutputs::digitalGetOverCurrentStatus(DigitalOutputNum_t dout)
+int DigitalOutputs::digitalGetOverCurrentStatus(DigitalOutputNum_t num)
 {
-    if (dout < _nb) {
+    if (num < _nb) {
         if (_type == DIGITAL_OUTPUT_GPIO) {
             ESP_LOGW(DOUT_TAG, "For current sensor with adc reading, call 'digitalGetCurrent' function");
-            return (digitalGetCurrent(dout) > 4.0f)?1:0;
+            return (digitalGetCurrent(num) > 4.0f)?1:0;
         } else { // DIGITAL_OUTPUT_IOEX
-            return ioex_get_level(*_ioex, _ioex_current[dout]);
+            return ioex_get_level(*_ioex, _ioex_current[num]);
         }
     } else {
-        ESP_LOGE(DOUT_TAG, "Invalid DOUT_%d", dout+1);
+        ESP_LOGE(DOUT_TAG, "Invalid DOUT_%d", num+1);
         return 0.0f;
     }
 }
