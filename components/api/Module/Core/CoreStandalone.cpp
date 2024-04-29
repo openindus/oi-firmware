@@ -252,7 +252,7 @@ void CoreStandalone::init()
     dout->init();
 
     /**
-     * @brief AIN Init
+     * @brief AIN Init 
      * 
      */
     AnalogInputs::init(_ainChannel, CORE_ADC_UNIT_AIN, 2);
@@ -364,14 +364,6 @@ int CoreStandalone::digitalRead(DigitalInputNum_t dinNum)
     return din->read(dinNum);
 }
 
-<<<<<<< HEAD
-int CoreStandalone::setAnalogCoeffs(float* coeff_a, float* coeff_b)
-{
-    return ain->setCoeffs(coeff_a, coeff_b);
-}
-
-=======
->>>>>>> 5f0f9f9... start to add analoginput as mother class of modules !
 void CoreStandalone::attachInterrupt(DigitalInputNum_t dinNum, IsrCallback_t callback, InterruptMode_t mode, void* arg)
 {
     din->attachInterrupt(dinNum, callback, mode, arg);
@@ -382,15 +374,9 @@ void CoreStandalone::detachInterrupt(DigitalInputNum_t dinNum)
     din->detachInterrupt(dinNum);
 }
 
-<<<<<<< HEAD
 uint8_t CoreStandalone::digitalGetOverCurrentStatus(DigitalOutputNum_t doutNum)
 {
     return dout->digitalGetOverCurrentStatus(doutNum);
-=======
-uint8_t CoreStandalone::getOverCurrentStatus(DigitalOutputNum_t doutNum)
-{
-    return dout->getOverCurrentStatus(doutNum);
->>>>>>> cddb34a... add function to set coeffs from console
 }
 
 void CoreStandalone::_controlTask(void *pvParameters)
