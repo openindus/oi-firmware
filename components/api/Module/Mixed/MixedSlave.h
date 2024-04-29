@@ -22,7 +22,7 @@
 
 #if defined(OI_MIXED) && defined(MODULE_SLAVE)
 
-class MixedSlave : public ModuleSlave, public MixedStandalone
+class MixedSlave : public ModuleSlave, public MixedStandalone, public AnalogOutputsSlave, public AnalogInputsLVSlave
 {
 public:
 

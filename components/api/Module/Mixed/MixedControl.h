@@ -22,16 +22,14 @@
 
 #if !defined(OI_MIXED)
 
-class MixedControl : public ModuleControl
+class MixedControl : public ModuleControl, public AnalogOutputsControl, public AnalogInputsLVControl
 {
 public:
 
     MixedControl(int sn = 0) : 
         ModuleControl(sn),
         AnalogOutputsControl(),
-        AnalogInputsLVControl(),
-        _isrCallback{NULL} {}
-
+        AnalogInputsLVControl() {}
 };
 
 #endif
