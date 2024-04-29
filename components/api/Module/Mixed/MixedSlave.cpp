@@ -103,14 +103,6 @@ int MixedSlave::init(void)
         data.insert(data.end(), ptr, ptr + sizeof(float));
     });
 
-    addCtrlCallback(CONTROL_ANALOG_OUTPUT_MODE, [](std::vector<uint8_t>& data) {
-        _mixed->analogOutputMode((AnalogOutput_Num_t)data[1], (AnalogOutput_Mode_t)data[2]);
-    });
-
-    addCtrlCallback(CONTROL_ANALOG_WRITE, [](std::vector<uint8_t>& data) {
-        float* value = reinterpret_cast<float*>(&data[2]);
-        _mixed->analogWrite((AnalogOutput_Num_t)data[1], *value);
-    });
 
     return 0;
 }
