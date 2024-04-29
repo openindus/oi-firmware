@@ -12,7 +12,7 @@
  * @see https://openindus.com
  */
 
-#include "AnalogOutputsSlave.h"
+#include "AnalogOutputsControl.h"
 
 #if !defined(MODULE_STANDALONE) && !defined(MODULE_SLAVE)
 
