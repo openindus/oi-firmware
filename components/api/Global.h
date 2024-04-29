@@ -81,6 +81,8 @@
 #include "Bus.h"
 #include "DigitalOutputs.h"
 #include "DigitalInputs.h"
+#include "AnalogOutputsHV.h"
+#include "AnalogOutputsLV.h"
 #include "AnalogOutputs.h"
 #include "AnalogInputs.h"
 #include "Motor.h"

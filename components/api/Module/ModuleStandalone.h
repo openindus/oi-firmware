@@ -46,7 +46,6 @@ public:
     static void getSoftwareVersion(char* version);
     static bool setBoardInfo(char* board_type, int serial_num, char* hardware_version);
 
-
 private:
 
     static int32_t _getBoardInfoFromNVS(const char* key);

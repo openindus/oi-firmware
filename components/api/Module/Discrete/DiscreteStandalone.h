@@ -19,33 +19,11 @@
 
 #if defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)
 
-class DiscreteStandalone : public ModuleStandalone, public AnalogInputs
+class DiscreteStandalone : public ModuleStandalone, public DigitalInputs, public DigitalOutputs, public AnalogInputsHV
 {
 public:
 
     static void init(void);
-
-    /* DigitalOutputs */
-    static void digitalWrite(DigitalOutputNum_t doutNum, uint8_t level);
-    static void digitalToggle(DigitalOutputNum_t doutNum);
-    static void digitalPWM(DigitalOutputNum_t doutNum, uint8_t duty);
-    static float digitalGetCurrent(DigitalOutputNum_t doutNum);
-
-    /* DigitalInputs */
-    static int digitalRead(DigitalInputNum_t dinNum);
-    static void attachInterrupt(DigitalInputNum_t dinNum, IsrCallback_t callback, InterruptMode_t mode=RISING_MODE, void* arg=NULL);
-    static void detachInterrupt(DigitalInputNum_t dinNum);
-
-    /* AnalogInputs */
-    // static int analogRead(AnalogInput_Num_t ainNum);
-    // static float analogReadVolt(AnalogInput_Num_t ainNum);
-    // static float analogReadMilliVolt(AnalogInput_Num_t ainNum);
-    // static int setAnalogCoeffs(float* coeff_a, float* coeff_b);
-
-private:
-
-    static DigitalInputs* din;
-    static DigitalOutputs* dout;
 
 };
 

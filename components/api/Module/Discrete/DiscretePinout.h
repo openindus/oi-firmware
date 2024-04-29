@@ -50,9 +50,8 @@
 #define DISCRETE_CHANNEL_DOUT_CURRENT_8     ADC1_CHANNEL_8
 
 /* AIN */
-#define DISCRETE_ADC_UNIT_AIN               ADC_UNIT_2
-#define DISCRETE_CHANNEL_AIN_1              ADC_CHANNEL_0
-#define DISCRETE_CHANNEL_AIN_2              ADC_CHANNEL_1
+#define DISCRETE_CHANNEL_AIN_1              {ADC_UNIT_2, ADC_CHANNEL_0}
+#define DISCRETE_CHANNEL_AIN_2              {ADC_UNIT_2, ADC_CHANNEL_1}
 
 #elif defined(OI_DISCRETE_VE)
 

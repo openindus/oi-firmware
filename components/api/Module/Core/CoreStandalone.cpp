@@ -48,114 +48,12 @@ const adc_channel_t _ainChannel[] = {
 
 ioex_device_t* CoreStandalone::_ioex;
 
-DigitalInputs* CoreStandalone::din = new DigitalInputs(&_ioex, _dinGpio, 4);
-DigitalOutputs* CoreStandalone::dout = new DigitalOutputs(&_ioex, _doutGpio, _doutCurrentGpio, 4);
-
 OI::CAN CoreStandalone::can(CORE_SPI_USER_HOST, CORE_PIN_CAN_SPI_CS, CORE_PIN_CAN_INTERRUPT);
 OI::RS CoreStandalone::rs(CORE_SPI_USER_HOST, CORE_PIN_RS_SPI_CS, CORE_PIN_RS_INTERRUPT);
 
 void CoreStandalone::init()
 {
     ModuleStandalone::init();
-
-#if defined(CONFIG_IDF_TARGET_ESP32)
-
-    /**
-     * @brief I2C init
-     * 
-     */
-    ESP_LOGI(CORE_TAG, "Initializes the bus I2C (I2C_NUM_%u)", CORE_I2C_PORT_NUM);
-    ESP_LOGI(CORE_TAG, "SDA: GPIO_NUM_%u | SCL: GPIO_NUM_%u",
-        CORE_PIN_I2C_SDA, CORE_PIN_I2C_SCL);
-
-    i2c_config_t i2c_config;
-	memset(&i2c_config, 0, sizeof(i2c_config_t));
-    i2c_config.mode = I2C_MODE_MASTER;
-    i2c_config.sda_io_num = CORE_PIN_I2C_SDA;
-    i2c_config.sda_pullup_en = GPIO_PULLUP_ENABLE;
-    i2c_config.scl_io_num = CORE_PIN_I2C_SCL;
-    i2c_config.scl_pullup_en = GPIO_PULLUP_ENABLE;
-    i2c_config.master.clk_speed = CORE_DEFAULT_I2C_SPEED;
-
-    ESP_ERROR_CHECK(i2c_param_config(CORE_I2C_PORT_NUM, &i2c_config));
-    ESP_ERROR_CHECK(i2c_driver_install(CORE_I2C_PORT_NUM, i2c_config.mode, 0, 0, 0));
-
-    /**
-     * @brief SPI Init
-     * 
-     */
-    ESP_LOGI(CORE_TAG, "Initializes the bus SPI%u", CORE_SPI_HOST+1);
-    ESP_LOGI(CORE_TAG, "MOSI:  GPIO_NUM_%u | MISO:  GPIO_NUM_%u | CLK:  GPIO_NUM_%u",
-        CORE_PIN_SPI_MOSI, CORE_PIN_SPI_MISO, CORE_PIN_SPI_SCK);
-
-    spi_bus_config_t spi_config;
-    spi_config.mosi_io_num = CORE_PIN_SPI_MOSI;
-    spi_config.miso_io_num = CORE_PIN_SPI_MISO;
-    spi_config.sclk_io_num = CORE_PIN_SPI_SCK;
-    spi_config.quadwp_io_num = -1;
-    spi_config.quadhd_io_num = -1;
-    spi_config.max_transfer_sz = 0;
-    spi_config.flags = 0;
-    spi_config.intr_flags = 0;
-
-    ESP_ERROR_CHECK(spi_bus_initialize(CORE_SPI_HOST, &spi_config, 1));
-
-    /**
-     * @brief IO Expander init
-     * 
-     */
-    _ioex = ioex_create(CORE_I2C_PORT_NUM, CORE_I2C_IOEXPANDER_ADDRESS, true, CORE_PIN_DIGITAL_INTERRUPT);
-
-    ESP_ERROR_CHECK(ioex_set_level(_ioex, CORE_IOEX_PIN_CMD_MOSFET, IOEX_LOW));
-    ESP_ERROR_CHECK(ioex_set_level(_ioex, CORE_IOEX_PIN_ALIM_EXT, IOEX_HIGH));
-
-    ioex_config_t config;
-    config.mode = IOEX_OUTPUT;
-    config.pull_mode = IOEX_FLOATING;
-    config.interrupt_type = IOEX_INTERRUPT_DISABLE;
-    config.pin_bit_mask = (1ULL<<CORE_IOEX_PIN_CMD_MOSFET) | (1ULL<<CORE_IOEX_PIN_ALIM_EXT);
-    ESP_ERROR_CHECK(ioex_config(_ioex, &config));
-
-    /**
-     * @brief DIN Init
-     * 
-     */
-    din->init();
-
-    /**
-     * @brief DOUT Init
-     * 
-     */
-    dout->init();
-
-    /**
-     * @brief AIN Init
-     * 
-     */
-    #if CONFIG_IDF_TARGET_ESP32
-    ESP_ERROR_CHECK(adc1_config_width(ADC_WIDTH_BIT_12));
-    ESP_ERROR_CHECK(adc1_config_channel_atten(_ainChannel[0], ADC_ATTEN_11db));
-    esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_11db, ADC_WIDTH_BIT_12, 1100, &_adc1Characteristics);
-    #endif
-
-    /**
-     * @brief CAN EXT init
-     * 
-     */
-    ioex_config_t io_can_conf;
-
-    io_can_conf.mode = IOEX_OUTPUT;
-    io_can_conf.pull_mode = IOEX_FLOATING;
-    io_can_conf.interrupt_type = IOEX_INTERRUPT_DISABLE;
-    io_can_conf.pin_bit_mask = (1ULL<<CORE_IOEX_PIN_CAN_RESET);
-    ioex_config(_ioex, &io_can_conf);
-    ioex_set_level(_ioex, CORE_IOEX_PIN_CAN_RESET, IOEX_HIGH);
-    vTaskDelay(10);
-    ioex_set_level(_ioex, CORE_IOEX_PIN_CAN_RESET, IOEX_LOW);
-    vTaskDelay(10);
-    ioex_set_level(_ioex, CORE_IOEX_PIN_CAN_RESET, IOEX_HIGH);
-
-#elif defined(CONFIG_IDF_TARGET_ESP32S3)
 
     /**
      * @brief I2C init
@@ -243,19 +141,20 @@ void CoreStandalone::init()
      * @brief DIN Init
      * 
      */
-    din->init();
+    DigitalInputs::init(&_ioex, _dinGpio, 4);
+
 
     /**
      * @brief DOUT Init
      * 
      */
-    dout->init();
+    DigitalOutputs::(&_ioex, _doutGpio, _doutCurrentGpio, 4);
 
     /**
      * @brief AIN Init 
      * 
      */
-    AnalogInputs::init(_ainChannel, CORE_ADC_UNIT_AIN, 2);
+    AnalogInputsHV::init(_ainChannel, 2);
 
     /**
      * @brief CAN EXT init
@@ -340,43 +239,11 @@ void CoreStandalone::init()
 
     ESP_ERROR_CHECK(ioex_config(_ioex, &io_rtc_conf));
 
-#endif
-
     ESP_LOGI(CORE_TAG, "Create control task");
     xTaskCreate(_controlTask, "Control task", 4096, NULL, 1, NULL);
 
     /* Init RTC */
     RTC.init(CORE_I2C_PORT_NUM);
-}
-
-void CoreStandalone::digitalWrite(DigitalOutputNum_t doutNum, uint8_t level)
-{
-    dout->write(doutNum, level);
-}
-
-void CoreStandalone::digitalToggle(DigitalOutputNum_t doutNum)
-{
-    dout->toggle(doutNum);
-}
-
-int CoreStandalone::digitalRead(DigitalInputNum_t dinNum)
-{
-    return din->read(dinNum);
-}
-
-void CoreStandalone::attachInterrupt(DigitalInputNum_t dinNum, IsrCallback_t callback, InterruptMode_t mode, void* arg)
-{
-    din->attachInterrupt(dinNum, callback, mode, arg);
-}
-
-void CoreStandalone::detachInterrupt(DigitalInputNum_t dinNum)
-{
-    din->detachInterrupt(dinNum);
-}
-
-uint8_t CoreStandalone::digitalGetOverCurrentStatus(DigitalOutputNum_t doutNum)
-{
-    return dout->digitalGetOverCurrentStatus(doutNum);
 }
 
 void CoreStandalone::_controlTask(void *pvParameters)

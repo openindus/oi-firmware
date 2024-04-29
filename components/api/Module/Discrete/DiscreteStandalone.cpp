@@ -60,9 +60,6 @@ adc_channel_t _ainChannel[] = {
     DISCRETE_CHANNEL_AIN_2
 };
 
-DigitalInputs* DiscreteStandalone::din = new DigitalInputs(_dinGpio, 10);
-DigitalOutputs* DiscreteStandalone::dout = new DigitalOutputs(_doutGpio, _doutAdcChannel, 8);
-
 void DiscreteStandalone::init()
 {
     ESP_LOGI(DISCRETE_TAG, "Init");
@@ -73,70 +70,19 @@ void DiscreteStandalone::init()
      * @brief DOUT Init
      * 
      */
-    dout->init();
+    DigitalOutputs::init(_doutGpio, _doutAdcChannel, 8);
 
     /**
      * @brief DIN Init
      * 
      */
-    din->init();
+    DigitalInputs::init(_dinGpio, 10);
 
     /**
      * @brief AIN Init
      * 
      */
-    AnalogInputs::init(_ainChannel, DISCRETE_ADC_UNIT_AIN, 2);
-}
-
-void DiscreteStandalone::digitalWrite(DigitalOutputNum_t doutNum, uint8_t level)
-{
-    dout->write(doutNum, level);
-}
-
-void DiscreteStandalone::digitalToggle(DigitalOutputNum_t doutNum)
-{
-    dout->toggle(doutNum);
-}
-
-int DiscreteStandalone::digitalRead(DigitalInputNum_t dinNum)
-{
-    return din->read(dinNum);
-}
-
-void DiscreteStandalone::attachInterrupt(DigitalInputNum_t dinNum, IsrCallback_t callback, InterruptMode_t mode, void* arg)
-{
-    din->attachInterrupt(dinNum, callback, mode, arg);
-}
-
-void DiscreteStandalone::detachInterrupt(DigitalInputNum_t dinNum)
-{
-    din->detachInterrupt(dinNum);
-}
-
-
-int DiscreteStandalone::analogRead(AnalogInput_Num_t ainNum)
-{
-    return (int) ain->read(ainNum, AIN_UNIT_RAW);
-}
-
-float DiscreteStandalone::analogReadVolt(AnalogInput_Num_t ainNum)
-{
-    return ain->read(ainNum, AIN_UNIT_VOLT);
-}
-
-float DiscreteStandalone::analogReadMilliVolt(AnalogInput_Num_t ainNum)
-{
-    return ain->read(ainNum, AIN_UNIT_MILLIVOLT);
-}
-
-void DiscreteStandalone::digitalPWM(DigitalOutputNum_t doutNum, uint8_t duty)
-{
-    /** @todo */
-}
-
-float DiscreteStandalone::digitalGetCurrent(DigitalOutputNum_t doutNum)
-{
-    return dout->digitalGetCurrent(doutNum);
+    AnalogInputsHV::init(_ainChannel, 2);
 }
 
 #endif
