@@ -17,26 +17,21 @@
 
 #include "ModuleControl.h"
 #include "ModuleMaster.h"
+#include "AnalogInputsLVControl.h"
+#include "DigitalInputsControl.h"
+#include "DigitalOutputsControl.h"
 
 #if !defined(OI_DISCRETE) && !defined(OI_DISCRETE_VE)
 
-class DiscreteControl : public ModuleControl
+class DiscreteControl : public ModuleControl, public AnalogInputsHVControl, public DigitalInputsControl, public DigitalOutputsControl
 {
 public:
 
-    DiscreteControl(int sn = 0) : ModuleControl(sn) {}
-
-    void digitalWrite(DigitalOutputNum_t dout, uint8_t level);
-    void analogWrite(DigitalOutputNum_t dout, uint8_t duty);
-    int digitalRead(DigitalInputNum_t din);
-    int analogRead(AnalogInput_Num_t eana);
-    void attachInterrupt(DigitalInputNum_t din, IsrCallback_t callback, InterruptMode_t mode);
-    void detachInterrupt(DigitalInputNum_t din);
-    float digitalGetCurrent(DigitalOutputNum_t dout);
-
-private:
-
-    IsrCallback_t _isrCallback[DIN_MAX];
+    MixedControl(int sn = 0) : 
+        ModuleControl(sn),
+        AnalogInputsHVControl(),
+        DigitalInputsControl(),
+        DigitalOutputsControl() {}
 };
 
 #endif

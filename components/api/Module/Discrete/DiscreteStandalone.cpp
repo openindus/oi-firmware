@@ -31,7 +31,7 @@ const gpio_num_t _doutGpio[] = {
     DISCRETE_PIN_DOUT_8
 };
 
-const adc1_channel_t _doutAdcChannel[] = {
+const AdcNumChannel_t _doutAdcChannel[] = {
     DISCRETE_CHANNEL_DOUT_CURRENT_1,
     DISCRETE_CHANNEL_DOUT_CURRENT_2,
     DISCRETE_CHANNEL_DOUT_CURRENT_3,
@@ -55,12 +55,12 @@ const gpio_num_t _dinGpio[] = {
     DISCRETE_PIN_DIN_10
 };
 
-adc_channel_t _ainChannel[] = {
+AdcNumChannel_t _ainChannel[] = {
     DISCRETE_CHANNEL_AIN_1,
     DISCRETE_CHANNEL_AIN_2
 };
 
-void DiscreteStandalone::init()
+int DiscreteStandalone::init()
 {
     ESP_LOGI(DISCRETE_TAG, "Init");
 

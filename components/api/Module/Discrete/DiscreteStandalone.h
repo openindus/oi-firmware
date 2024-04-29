@@ -23,7 +23,7 @@ class DiscreteStandalone : public ModuleStandalone, public DigitalInputs, public
 {
 public:
 
-    static void init(void);
+    static int init(void);
 };
 
 #endif
