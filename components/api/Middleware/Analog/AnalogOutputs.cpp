@@ -10,7 +10,10 @@
 
 static const char TAG[] = "AnalogOutputs";
 
-AnalogOutput_Mode_t AnalogOutputs::_modes[AOUT_MAX] = {};
+uint8_t AnalogOutputs::_nb = 0;
+AnalogOutput_Mode_t* AnalogOutputs::_modes = NULL;
+ad5413_device_t** AnalogOutputs::_devices = NULL;
+bool* AnalogOutputs::_devicesInitialized = NULL;
 
 int AnalogOutputs::init(uint8_t nb, ad5413_config_t* configs)
 {
@@ -24,15 +27,18 @@ int AnalogOutputs::init(uint8_t nb, ad5413_config_t* configs)
         _nb = nb;
     }
 
+    _modes = (AnalogOutput_Mode_t*) calloc(_nb, sizeof(AnalogOutput_Mode_t));
+    _devices = (ad5413_device_t**) malloc(_nb * sizeof(ad5413_device_t*));
+    _devicesInitialized = (bool*) calloc(_nb, sizeof(bool));
+
+    if (_devices == NULL) {
+        ESP_LOGE(TAG, "Failed to allocate memory for devices instance");
+        return -1;
+    }
+
     for (size_t i = 0; i < _nb; i++) {
         if (&configs[i] == NULL) {
             ESP_LOGE(TAG, "No configuration");
-            return -1;
-        }
-
-        _devices[i] = (ad5413_device_t*)malloc(_nb * sizeof(ad5413_device_t*));
-        if (_devices[i] == NULL) {
-            ESP_LOGE(TAG, "Failed to allocate memory for devices instance");
             return -1;
         }
 

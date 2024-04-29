@@ -57,48 +57,7 @@ public:
 private:
 
     static uint8_t _nb;
-    static AnalogOutput_Mode_t _modes[AOUT_MAX];
-    static ad5413_device_t* _devices[AOUT_MAX];
-    static bool _devicesInitialized[AOUT_MAX];
+    static AnalogOutput_Mode_t* _modes;
+    static ad5413_device_t** _devices;
+    static bool* _devicesInitialized;
 };
-
-
-
-
-//TODO: Delete under
-// class AnalogOutput
-// {
-// public:
-
-//     AnalogOutput(int num) : 
-//         _num(num),
-//         _mode(AOUT_MODE_UNDEFINED) {}
-
-//     virtual int setMode(AnalogOutput_Mode_t mode) = 0;
-//     virtual int write(float value) = 0;
-
-// protected:
-
-//     int _num;
-//     AnalogOutput_Mode_t _mode;
-
-// };
-
-// class AnalogOutputAD5413 : public AnalogOutput
-// {
-// public:
-
-//     AnalogOutputAD5413(int num) :
-//         AnalogOutput(num) {}
-
-//     static int init(ad5413_config_t* config, int nb);
-
-//     int setMode(AnalogOutput_Mode_t mode) override;
-//     int write(float value) override;
-
-// private:
-
-//     static ad5413_device_t** _device;
-//     static bool _deviceInitialized;
-    
-// };
