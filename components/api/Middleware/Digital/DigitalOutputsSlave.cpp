@@ -11,7 +11,7 @@
  * @see https://openindus.com
  */
 
-#include "DigitalInputsSlave.h"
+#include "DigitalOutputsSlave.h"
 
 #if defined(MODULE_SLAVE)
 
@@ -27,12 +27,12 @@ int DigitalOutputsSlave::init() {
 
     ModuleSlave::addCtrlCallback(CONTROL_DIGITAL_MODE_PWM, [](std::vector<uint8_t>& data) {
         uint32_t* freq = reinterpret_cast<uint32_t*>(&data[2]);
-        DigitalOutputs::digitalModePWM((DigitalOutputNum_t)data[1], freq);
+        DigitalOutputs::digitalModePWM((DigitalOutputNum_t)data[1], *freq);
     });
 
     ModuleSlave::addCtrlCallback(CONTROL_DIGITAL_SET_PWM, [](std::vector<uint8_t>& data) {
         uint32_t* duty = reinterpret_cast<uint32_t*>(&data[2]);
-        DigitalOutputs::digitalModePWM((DigitalOutputNum_t)data[1], duty);
+        DigitalOutputs::digitalModePWM((DigitalOutputNum_t)data[1], *duty);
     });
 
     ModuleSlave::addCtrlCallback(CONTROL_DIGITAL_GET_CURRENT, [](std::vector<uint8_t>& data) {

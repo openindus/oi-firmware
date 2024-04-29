@@ -19,10 +19,12 @@
 #include "ModuleSlave.h"
 #include "AnalogOutputsSlave.h"
 #include "AnalogInputsLVSlave.h"
+#include "DigitalInputsSlave.h"
+#include "DigitalOutputsSlave.h"
 
 #if defined(OI_MIXED) && defined(MODULE_SLAVE)
 
-class MixedSlave : public ModuleSlave, public MixedStandalone, public AnalogOutputsSlave, public AnalogInputsLVSlave
+class MixedSlave : public ModuleSlave, public MixedStandalone, public AnalogOutputsSlave, public AnalogInputsLVSlave, public DigitalInputsSlave, public DigitalOutputsSlave
 {
 public:
 

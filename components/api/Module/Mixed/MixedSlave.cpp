@@ -25,6 +25,8 @@ int MixedSlave::init(void)
     ret |= MixedStandalone::init();
     ret |= AnalogOutputsSlave::init();
     ret |= AnalogInputsLVSlave::init();
+    ret |= DigitalOutputsSlave::init();
+    ret |= DigitalInputsSlave::init();
 
     return ret;
 }

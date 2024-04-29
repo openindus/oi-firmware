@@ -19,17 +19,21 @@
 #include "ModuleMaster.h"
 #include "AnalogOutputsControl.h"
 #include "AnalogInputsLVControl.h"
+#include "DigitalInputsControl.h"
+#include "DigitalOutputsControl.h"
 
 #if !defined(OI_MIXED)
 
-class MixedControl : public ModuleControl, public AnalogOutputsControl, public AnalogInputsLVControl
+class MixedControl : public ModuleControl, public AnalogOutputsControl, public AnalogInputsLVControl, public DigitalInputsControl, public DigitalOutputsControl
 {
 public:
 
     MixedControl(int sn = 0) : 
         ModuleControl(sn),
         AnalogOutputsControl(),
-        AnalogInputsLVControl() {}
+        AnalogInputsLVControl(),
+        DigitalInputsControl(),
+        DigitalOutputsControl() {}
 };
 
 #endif

@@ -15,6 +15,8 @@
 
 #pragma once
 
+#if defined(OI_CORE)
+
 /* I2C pins */
 #define CORE_PIN_I2C_SDA                GPIO_NUM_5
 #define CORE_PIN_I2C_SCL                GPIO_NUM_6

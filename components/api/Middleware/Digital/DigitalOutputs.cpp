@@ -202,10 +202,10 @@ void DigitalOutputs::digitalModePWM(DigitalOutputNum_t num, uint32_t freq)
     if (num < _nb && _type == DIGITAL_OUTPUT_GPIO) {
         if (freq >= DOUT_PWM_MAX_FREQUENCY_HZ) {
             ESP_LOGE(DOUT_TAG, "To high frequency %d, max is %d", freq, DOUT_PWM_MAX_FREQUENCY_HZ);
-            return -1;
+            return;
         } else if (freq <= DOUT_PWM_MIN_FREQUENCY_HZ) {
             ESP_LOGE(DOUT_TAG, "To low frequency %d, min is %d", freq, DOUT_PWM_MIN_FREQUENCY_HZ);
-            return -1;
+            return;
         }
 
         ledc_timer_config_t ledcTimer = {
@@ -232,9 +232,8 @@ void DigitalOutputs::digitalModePWM(DigitalOutputNum_t num, uint32_t freq)
         ESP_ERROR_CHECK(ledc_channel_config(&ledcChannel));
     } else {
         ESP_LOGE(DOUT_TAG, "Invalid DOUT_%d", num+1);
-        return -1;
+        return;
     }
-    return 0;
 }
 
 void DigitalOutputs::digitalSetPWM(DigitalOutputNum_t num, uint32_t duty)
