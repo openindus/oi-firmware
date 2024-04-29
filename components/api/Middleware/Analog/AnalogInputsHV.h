@@ -55,7 +55,7 @@ public:
      * It is strongly recommended to use analogReadVolts or analogReadMillivolts instead.
      * 
      * @param ain ANA input number.
-     * @return int Value of the AIN input.
+     * @return Value of the AIN input.
      */
     static int analogRead(AnalogInput_Num_t num);
     
@@ -64,7 +64,7 @@ public:
      * The function return a float that correspond to the voltage of the ANA (from 0 to 30V).
      *
      * @param ain ANA input number.
-     * @return float Value of the AIN input.
+     * @return Value of the AIN input.
      */
     static float analogReadVolt(AnalogInput_Num_t num);
     
@@ -73,7 +73,7 @@ public:
      * The function return a float that correspond to the voltage of the ANA (from 0 to 30000mV).
      *
      * @param ain ANA input number.
-     * @return float Value of the AIN input.
+     * @return Value of the AIN input.
      */
     static float analogReadMilliVolt(AnalogInput_Num_t num);
     

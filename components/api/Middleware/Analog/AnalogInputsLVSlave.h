@@ -6,27 +6,28 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file MixedSlave.h
- * @brief Functions for mixed module
- *
+ * @file AnalogInputsLVSlave.h
+ * @author CBA
+ * @version 0.1
+ * @date 2024-04-29
+ * 
  * For more information on OpenIndus:
  * @see https://openindus.com
- */
+ * 
+ * @copyright Copyright (c) 2024
+**/
 
 #pragma once
 
-#include "MixedStandalone.h"
+#if defined(MODULE_SLAVE)
+
 #include "ModuleSlave.h"
-#include "AnalogOutputsSlave.h"
-#include "AnalogInputsLVSlave.h"
+#include "AnalogInputsLV.h"
 
-#if defined(OI_MIXED) && defined(MODULE_SLAVE)
-
-class MixedSlave : public ModuleSlave, public MixedStandalone
+class AnalogInputsLVSlave
 {
 public:
-
-    static int init(void);
+    static int init();
 };
 
 #endif

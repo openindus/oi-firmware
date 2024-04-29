@@ -48,8 +48,8 @@ public:
     /**
      * @brief Read a voltage measure on analog pin and return the raw value.
      * 
-     * @param num ANA input number.
-     * @return int : Adc raw value
+     * @param num Analog input
+     * @return Adc raw value
      */
     static int analogRead(AnalogInput_Num_t num);
     
@@ -57,8 +57,8 @@ public:
      * @brief Read the value of AIN.
      * The function return a float that correspond to the voltage of the AnalogInput.
      *
-     * @param num ANA input number.
-     * @return float Value of the AIN input.
+     * @param num Analog input
+     * @return Value of the AIN input
      */
     static float analogReadVolt(AnalogInput_Num_t num);
     
@@ -66,8 +66,8 @@ public:
      * @brief Read the value of AIN.
      * The function return a float that correspond to the voltage of the ANA (from 0 to 30000mV).
      *
-     * @param num ANA input number.
-     * @return float : Measure in mV
+     * @param num Analog input
+     * @return Measure in mV
      */
     static float analogReadMilliVolt(AnalogInput_Num_t num);
 
@@ -75,7 +75,7 @@ public:
      * @brief Read a current measure on analog pin
      * 
      * @param num : Analog input
-     * @return float : Measure in A
+     * @return Measure in A
      */
     static float analogReadAmp(AnalogInput_Num_t num) ;
 
@@ -83,14 +83,14 @@ public:
      * @brief Read a current measure on analog pin
      * 
      * @param num : Analog input
-     * @return float : Measure in mA
+     * @return Measure in mA
      */
     static float analogReadMilliAmp(AnalogInput_Num_t num);
 
     /**
      * @brief Set Adc Mode of the given input
      * 
-     * @param num ANA input number.
+     * @param num Analog input
      * @param mode Voltage or current measurement
      */
     static void analogInputMode(AnalogInput_Num_t num, AnalogInput_Mode_t mode);
@@ -98,24 +98,24 @@ public:
     /**
      * @brief Get Adc Mode of the given input
      * 
-     * @param num 
-     * @return uint8_t : mode (0: voltage, 1: current)
+     * @param num Analog input
+     * @return Mode (0: voltage, 1: current)
     **/
     static uint8_t analogInputGetMode(AnalogInput_Num_t num);
 
     /**
      * @brief Set the voltage range of the given input
      * 
-     * @param num ANA input number.
-     * @param range voltage range (5: 0-10.24V, 6: 0-5.12V, 7: 0-2.56V or 8: 0-1.28V)
+     * @param num Analog input
+     * @param range Voltage range (5: 0-10.24V, 6: 0-5.12V, 7: 0-2.56V or 8: 0-1.28V)
      */
     static void analogInputVoltageRange(AnalogInput_Num_t num, AnalogInput_VoltageRange_t range);
 
     /**
      * @brief Get the Voltage range of the given input
      * 
-     * @param num ANA input number.
-     * @return uint8_t range (5: 0-10.24V, 6: 0-5.12V, 7: 0-2.56V or 8: 0-1.28V)
+     * @param num Analog input
+     * @return Voltage range (5: 0-10.24V, 6: 0-5.12V, 7: 0-2.56V or 8: 0-1.28V)
     **/
     static uint8_t analogInputGetVoltageRange(AnalogInput_Num_t num);
 

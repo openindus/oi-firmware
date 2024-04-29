@@ -23,7 +23,7 @@ class ModuleSlave
 {
 public:
 
-    static void init(void);
+    static int init(void);
 
     static void sendEvent(std::vector<uint8_t> msgBytes);
 

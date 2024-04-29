@@ -21,8 +21,10 @@ static const char MODULE_TAG[] = "Module";
 uint16_t ModuleSlave::_id;
 std::map<uint8_t, std::function<void(std::vector<uint8_t>&)>> ModuleSlave::_ctrlCallbacks;
 
-void ModuleSlave::init(void)
+int ModuleSlave::init(void)
 {
+    int ret = 0;
+
     ESP_LOGI(MODULE_TAG, "Bus init");
     /* Bus RS/CAN */
     BusRS::begin(MODULE_RS_NUM_PORT, MODULE_PIN_RS_UART_TX, MODULE_PIN_RS_UART_RX);
@@ -45,6 +47,8 @@ void ModuleSlave::init(void)
     /* Bus task */
     ESP_LOGI(MODULE_TAG, "Create bus task");
     xTaskCreate(_busTask, "Bus task", 4096, NULL, 1, NULL);
+
+    return ret;
 }
 
 /**
