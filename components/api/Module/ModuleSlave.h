@@ -19,6 +19,8 @@
 #include "ModuleStandalone.h"
 #include "Command.h"
 
+#if defined(MODULE_SLAVE)
+
 class ModuleSlave
 {
 public:
@@ -42,3 +44,5 @@ private:
     static void _busTask(void *pvParameters);
     static void _heartbeatTask(void *pvParameters);
 };
+
+#endif

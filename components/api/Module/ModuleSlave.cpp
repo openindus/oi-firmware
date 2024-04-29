@@ -16,6 +16,8 @@
 #include "ModuleSlave.h"
 #include "ModulePinout.h"
 
+#if defined(MODULE_SLAVE)
+
 static const char MODULE_TAG[] = "Module";
 
 uint16_t ModuleSlave::_id;
@@ -243,3 +245,5 @@ void ModuleSlave::_heartbeatTask(void *pvParameters)
 {
     /** @todo Send heartbeat periodically */
 }
+
+#endif

@@ -15,7 +15,7 @@
 
 #include "StepperSlave.h"
 
-#if defined(OI_STEPPER) || defined(OI_STEPPER_VE)
+#if (defined(OI_STEPPER) || defined(OI_STEPPER_VE)) && defined(MODULE_SLAVE)
 
 IsrCallback_t StepperSlave::_isrCallback[] = {
     [](void*){sendEvent({EVENT_DIGITAL_INTERRUPT, DIN_1});},
@@ -27,6 +27,7 @@ IsrCallback_t StepperSlave::_isrCallback[] = {
 void StepperSlave::init(void)
 {
     ModuleSlave::init();
+    StepperStandalone::init();
 
     addCtrlCallback(CONTROL_DIGITAL_READ, [](std::vector<uint8_t>& data) { 
         int level = StepperStandalone::digitalRead((DigitalInputNum_t)data[1]);

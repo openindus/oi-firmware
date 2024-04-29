@@ -34,30 +34,24 @@ void System::init(void)
 
     /* Module init */
 #if defined(OI_CORE)
-    CoreStandalone::init();
-    CoreMaster::init();
+    Core::init();
     CoreCLI::init();
 #elif defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)
-    DiscreteStandalone::init();
-    DiscreteSlave::init();
+    Discrete::init();
     DiscreteCLI::init();
 #elif defined(OI_STEPPER) || defined(OI_STEPPER_VE)
-    StepperStandalone::init();
-    StepperSlave::init();
+    Stepper::init();
     StepperCLI::init();
     StepperParamCLI::init();
 #elif defined(OI_MIXED)
     err |= Mixed::init();
     err |= MixedCLI::init();
 #elif defined(OI_RELAY_HP) || defined(OI_RELAY_LP)
-    RelayStandalone::init();
-    RelaySlave::init();
+    Relay::init();
 #elif defined(OI_BRUSHLESS)
-    BrushlessStandalone::init();
-    BrushlessSlave::init();
+    Brushless::init();
 #elif defined(OI_ANALOG_LS)
-    err |= AnalogLsStandalone::init();
-    err |= AnalogLsSlave::init();
+    err |= AnalogLs::init();
 #endif
     ModuleCLI::init();
 #if defined(MODULE_MASTER)

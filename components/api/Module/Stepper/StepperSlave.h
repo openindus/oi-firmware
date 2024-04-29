@@ -18,7 +18,7 @@
 #include "StepperStandalone.h"
 #include "ModuleSlave.h"
 
-#if defined(OI_STEPPER) || defined(OI_STEPPER_VE)
+#if (defined(OI_STEPPER) || defined(OI_STEPPER_VE)) && defined(MODULE_SLAVE)
 
 class StepperSlave : public StepperStandalone, public ModuleSlave
 {

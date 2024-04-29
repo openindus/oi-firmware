@@ -22,6 +22,7 @@ static const char CORE_TAG[] = "Core";
 void CoreMaster::init(void)
 {
     ModuleMaster::init();
+    CoreStandalone::init();
 }
 
 #endif

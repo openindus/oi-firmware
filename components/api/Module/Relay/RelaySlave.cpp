@@ -15,11 +15,12 @@
 
 #include "RelaySlave.h"
 
-#if defined(OI_RELAY_HP) || defined(OI_RELAY_LP)
+#if (defined(OI_RELAY_HP) || defined(OI_RELAY_LP)) && defined(MODULE_SLAVE)
 
 void RelaySlave::init(void)
 {
     ModuleSlave::init();
+    RelayStandalone::init();
 
     addCtrlCallback(CONTROL_DIGITAL_WRITE, [](std::vector<uint8_t>& data) { 
         RelayStandalone::digitalWrite((Relay_t)data[1], data[2]);

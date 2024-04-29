@@ -16,11 +16,12 @@
 #include "BrushlessSlave.h"
 #include "BrushlessConfig.h"
 
-#if defined(OI_BRUSHLESS)
+#if defined(OI_BRUSHLESS) && defined(MODULE_SLAVE)
 
 void BrushlessSlave::init(void)
 {
     ModuleSlave::init();
+    BrushLessStandalone::init();
 
     addCtrlCallback(CONTROL_MOTOR_SET_SPEED, [](std::vector<uint8_t>& data) {
         uint32_t* duty_cycle = reinterpret_cast<uint32_t*>(&data[2]);

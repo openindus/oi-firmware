@@ -18,9 +18,9 @@
 #include "DiscreteStandalone.h"
 #include "ModuleSlave.h"
 
-#if defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)
+#if (defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)) && defined(MODULE_SLAVE)
 
-class DiscreteSlave : public ModuleSlave
+class DiscreteSlave : public ModuleSlave, public DiscreteStandalone
 {
 public:
 

@@ -15,7 +15,7 @@
 
 #include "DiscreteSlave.h"
 
-#if defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)
+#if (defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)) && defined(MODULE_SLAVE)
 
 IsrCallback_t DiscreteSlave::_isrCallback[] = {
     [](void*){ModuleSlave::sendEvent({EVENT_DIGITAL_INTERRUPT, DIN_1});},
@@ -28,6 +28,7 @@ IsrCallback_t DiscreteSlave::_isrCallback[] = {
 int DiscreteSlave::init(void)
 {
     ModuleSlave::init();
+    DiscreteStandalone::init();
 
     addCtrlCallback(CONTROL_DIGITAL_WRITE, [](std::vector<uint8_t>& data) { 
         DiscreteStandalone::digitalWrite((DigitalOutputNum_t)data[1], data[2]);
