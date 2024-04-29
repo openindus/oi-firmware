@@ -1,5 +1,5 @@
 /**
- * @file AnalogInputs.h
+ * @file AnalogInputsLV.h
  * @brief Analog Input
  * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
  * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
@@ -10,66 +10,18 @@
 
 #include <string.h>
 #include "ads866x.h"
-#include "driver/adc.h"
-#include "esp_adc_cal.h"
-#include "esp_efuse.h"
+#include "AnalogInputs.h"
 
-#define AIN_CURRENT_MODE_RES_VALUE   100.0f
+#define AIN_CURRENT_MODE_RES_VALUE  100.0f
+#define AIN_DEFAULT_MODE            AIN_MODE_VOLTAGE
+#define AIN_DEFAULT_RANGE           AIN_VOLTAGE_RANGE_0_10V24
 
-#define ESP_ADC_NO_OF_SAMPLES        128U
-#define ESP_ADC_DEFAULT_COEFF_A      11.6965f
-#define ESP_ADC_DEFAULT_COEFF_B      0.0f
-
-typedef enum {
-    AIN_1 = 0,
-    AIN_2 = 1,
-    AIN_3 = 2,
-    AIN_4 = 3,
-    AIN_MAX
-} AnalogInput_Num_t;
-
-typedef enum {
-    AIN_MODE_VOLTAGE = 0,
-    AIN_MODE_CURRENT = 1,
-    AIN_MODE_UNDEFINED
-} AnalogInput_Mode_t;
-
-typedef enum {
-    AIN_VOLTAGE_RANGE_0_10V24 = 5,
-    AIN_VOLTAGE_RANGE_0_5V12 = 6,
-    AIN_VOLTAGE_RANGE_0_2V56 = 7,
-    AIN_VOLTAGE_RANGE_0_1V28 = 8,
-    AIN_VOLTAGE_RANGE_UNDEFINED
-} AnalogInput_VoltageRange_t;
-
-typedef enum {
-    AIN_UNIT_RAW = 0,
-    AIN_UNIT_MILLIVOLT = 1,
-    AIN_UNIT_MILLIAMP = 2,
-    AIN_UNIT_VOLT = 3,
-    AIN_UNIT_AMP = 4,
-    AIN_UNIT_UNDEFINED
-} AnalogInput_Unit_t;
-
-typedef enum {
-    ANALOG_INPUT_ADS866X = 0,
-    ANALOG_INPUT_ESP32S3,
-    ANALOG_INPUT_MAX
-} AnalogInputType_t;
-
-typedef struct {
-    float ain_coeff_a;
-    float ain_coeff_b;
-} AnalogInput_eFuse_Coeff_t;
-
-class AnalogInputAds866x 
+class AnalogInputAds866x
 {
 public:
 
     AnalogInputAds866x(uint8_t num, gpio_num_t cmdGpio);
-
     void init(AnalogInput_VoltageRange_t range, AnalogInput_Mode_t mode);
-
     int read(void);
     float read(AnalogInput_Unit_t unit);
     void setMode(AnalogInput_Mode_t mode);
@@ -86,52 +38,26 @@ private:
     AnalogInput_VoltageRange_t _voltage_range;
 };
 
-class AnalogInputEsp32s3
+
+class AnalogInputsLV
 {
 public:
 
-    AnalogInputEsp32s3(uint8_t num, adc_channel_t channel, adc_unit_t adc_unit);
-
-    void init(void);
-    int read(void);
-    float read(AnalogInput_Unit_t unit);
-    
-    void getCoeffs();
-    float applyCoeffs(float voltage);
-
-private:
-
-    int _num;
-    adc_channel_t _channel;
-    adc_unit_t _adc_unit;
-    esp_adc_cal_characteristics_t _adc_characteristic;
-    AnalogInput_eFuse_Coeff_t _coeff;
-};
-
-class AnalogInputs
-{
-public:
-
-    AnalogInputs(const gpio_num_t* cmdGpio, uint8_t nb);
-
-    static int init(ads866x_config_t *ads866xConfig, AnalogInput_VoltageRange_t range, AnalogInput_Mode_t mode);
-    static int init(const adc_channel_t* channel, adc_unit_t adc_unit, uint8_t nb);
+    static int init(ads866x_config_t *ads866xConfig, const gpio_num_t* cmdGpio, uint8_t nb);
 
     /**
-     * @brief Read the value of AIN.
-     * The function return an integer that correspond to the raw value of the ANA.
-     * On OICore and OIDiscrete, the returned value correspond to the raw internal voltage and not raw value. 
-     * It is better to use analogReadVolts or analogReadMillivolts.
-     * @param ain ANA input.
-     * @return int Value of the AIN input.
+     * @brief Read a voltage measure on analog pin and return the raw value.
+     * 
+     * @param num ANA input number.
+     * @return int : Adc raw value
      */
     static int analogRead(AnalogInput_Num_t num);
     
     /**
      * @brief Read the value of AIN.
-     * The function return a float that correspond to the voltage of the ANA (from 0 to 30V).
+     * The function return a float that correspond to the voltage of the AnalogInput.
      *
-     * @param ain ANA input.
+     * @param num ANA input number.
      * @return float Value of the AIN input.
      */
     static float analogReadVolt(AnalogInput_Num_t num);
@@ -140,28 +66,63 @@ public:
      * @brief Read the value of AIN.
      * The function return a float that correspond to the voltage of the ANA (from 0 to 30000mV).
      *
-     * @param ain ANA input.
-     * @return float Value of the AIN input.
+     * @param num ANA input number.
+     * @return float : Measure in mV
      */
     static float analogReadMilliVolt(AnalogInput_Num_t num);
-    
-    static int setAnalogCoeffs(float* a, float* b);
 
-    // To delete
-    int read(AnalogInput_Num_t num);
-    void setMode(AnalogInput_Num_t num, AnalogInput_Mode_t mode);
-    uint8_t getMode(AnalogInput_Num_t num);
-    void setVoltageRange(AnalogInput_Num_t num, AnalogInput_VoltageRange_t range);
-    uint8_t getVoltageRange(AnalogInput_Num_t num);
-    
-     // keep this one in private
-    static float read(AnalogInput_Num_t num, AnalogInput_Unit_t unit);
+    /**
+     * @brief Read a current measure on analog pin
+     * 
+     * @param[in] num : Analog input
+     * @return float : Measure in A
+     */
+    virtual float analogReadAmp(AnalogInput_Num_t num) = 0;
+
+    /**
+     * @brief Read a current measure on analog pin
+     * 
+     * @param[in] num : Analog input
+     * @return float : Measure in mA
+     */
+    virtual float analogReadMilliAmp(AnalogInput_Num_t num) = 0;
+
+    /**
+     * @brief Set Adc Mode of the given input
+     * 
+     * @param num ANA input number.
+     * @param mode Voltage or current measurement
+     */
+    static void analogInputMode(AnalogInput_Num_t num, AnalogInput_Mode_t mode);
+
+    /**
+     * @brief Get Adc Mode of the given input
+     * 
+     * @param num 
+     * @return uint8_t : mode (0: voltage, 1: current)
+    **/
+    static uint8_t analogInputGetMode(AnalogInput_Num_t num);
+
+    /**
+     * @brief Set the voltage range of the given input
+     * 
+     * @param num ANA input number.
+     * @param range voltage range (5: 0-10.24V, 6: 0-5.12V, 7: 0-2.56V or 8: 0-1.28V)
+     */
+    static void analogInputVoltageRange(AnalogInput_Num_t num, AnalogInput_VoltageRange_t range);
+
+    /**
+     * @brief Get the Voltage range of the given input
+     * 
+     * @param num ANA input number.
+     * @return uint8_t range (5: 0-10.24V, 6: 0-5.12V, 7: 0-2.56V or 8: 0-1.28V)
+    **/
+    static uint8_t analogInputGetVoltageRange(AnalogInput_Num_t num);
 
 private:
 
     static uint8_t _nb;
-    static AnalogInputType_t _type;
+    static AnalogInputAds866x** _ains;
 
-    static AnalogInputAds866x* _ains[AIN_MAX];
-    static AnalogInputEsp32s3* _ains_esp[AIN_MAX];
+    static float read(AnalogInput_Num_t num, AnalogInput_Unit_t unit);
 };

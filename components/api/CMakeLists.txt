@@ -48,7 +48,8 @@ set(COMPONENT_SRCS
     "Middleware/Led/Led.cpp"
     "Middleware/RTClock/RTClock.cpp"
     "Middleware/Analog/AnalogOutputs.cpp"
-    "Middleware/Analog/AnalogInputs.cpp"
+    "Middleware/Analog/AnalogInputsLV.cpp"
+    "Middleware/Analog/AnalogInputsHV.cpp"
     "Middleware/CAN/CAN.cpp"
     "Middleware/RS/RS.cpp"
 )
