@@ -36,3 +36,8 @@ typedef enum {
     AIN_UNIT_AMP = 4,
     AIN_UNIT_UNDEFINED
 } AnalogInput_Unit_t;
+
+typedef struct {
+    adc_unit_t adc_num;
+    adc_channel_t channel;
+} AdcNumChannel_t;

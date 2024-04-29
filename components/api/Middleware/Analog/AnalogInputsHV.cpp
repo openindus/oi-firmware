@@ -13,7 +13,7 @@ static const char TAG[] = "AnalogInputsHV";
 uint8_t AnalogInputsHV::_nb;
 AnalogInputEsp32s3** AnalogInputsHV::_ains;
 
-int AnalogInputsHV::init(const adc_channel_t* channel, adc_unit_t adc_unit, uint8_t nb) 
+int AnalogInputsHV::init(const AdcNumChannel_t* channel, uint8_t nb) 
 {
     ESP_LOGI(TAG, "Initialize Analog Inputs");
 
@@ -22,7 +22,7 @@ int AnalogInputsHV::init(const adc_channel_t* channel, adc_unit_t adc_unit, uint
     _ains = (AnalogInputEsp32s3**)calloc(_nb, sizeof(AnalogInputEsp32s3));
 
     for (size_t i = 0; i < nb; i++) {
-        _ains[i] = new AnalogInputEsp32s3(i, channel[i], adc_unit);
+        _ains[i] = new AnalogInputEsp32s3(i, channel[i]);
         _ains[i]->init();
     }
 
@@ -97,23 +97,22 @@ int AnalogInputsHV::setAnalogCoeffs(float* a, float* b)
 
 /******************* Analog Input Esp32s3 **********************/
 
-AnalogInputEsp32s3::AnalogInputEsp32s3(uint8_t num, adc_channel_t channel, adc_unit_t adc_unit)
+AnalogInputEsp32s3::AnalogInputEsp32s3(uint8_t num, AdcNumChannel_t channel)
 {
     _num = num;
     _channel = channel;
-    _adc_unit = adc_unit;
 }
 
 void AnalogInputEsp32s3::init()
 {
-    if (_adc_unit == ADC_UNIT_1) {
+    if (_channel.adc_num == ADC_UNIT_1) {
         adc1_config_width(ADC_WIDTH_BIT_12);
-        adc1_config_channel_atten((adc1_channel_t)_channel, ADC_ATTEN_DB_11);
-        esp_adc_cal_characterize(_adc_unit, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &_adc_characteristic);
+        adc1_config_channel_atten((adc1_channel_t)_channel.channel, ADC_ATTEN_DB_11);
+        esp_adc_cal_characterize(_channel.adc_num, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &_adc_characteristic);
     } 
-    else if (_adc_unit == ADC_UNIT_2) {
-        adc1_config_channel_atten((adc1_channel_t)_channel, ADC_ATTEN_DB_11);
-        esp_adc_cal_characterize(_adc_unit, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &_adc_characteristic);
+    else if (_channel.adc_num == ADC_UNIT_2) {
+        adc1_config_channel_atten((adc1_channel_t)_channel.channel, ADC_ATTEN_DB_11);
+        esp_adc_cal_characterize(_channel.adc_num, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &_adc_characteristic);
     } 
     else {
         ESP_LOGE(TAG, "Wrong ADC unit !");
@@ -124,12 +123,12 @@ void AnalogInputEsp32s3::init()
 
 int AnalogInputEsp32s3::read(void)
 {
-    if (_adc_unit == ADC_UNIT_1) {
-        return adc1_get_raw((adc1_channel_t)_channel);
+    if (_channel.adc_num == ADC_UNIT_1) {
+        return adc1_get_raw((adc1_channel_t)_channel.channel);
     } 
-    else if (_adc_unit == ADC_UNIT_2) {
+    else if (_channel.adc_num == ADC_UNIT_2) {
         int raw = -1;
-        adc2_get_raw((adc2_channel_t)_channel, ADC_WIDTH_12Bit, &raw);
+        adc2_get_raw((adc2_channel_t)_channel.channel, ADC_WIDTH_12Bit, &raw);
         return raw;
     } 
     else {
