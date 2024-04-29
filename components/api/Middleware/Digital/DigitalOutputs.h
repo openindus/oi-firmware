@@ -26,6 +26,7 @@
 #include "driver/adc.h"
 #include "esp_adc_cal.h"
 #include "pcal6524.h"
+#include "AnalogInputs.h"
 
 #define DOUT_SENSOR_ADC_NO_OF_SAMPLES           64U
 #define DOUT_SENSOR_RESISTOR_SENSE_VALUE        1200
@@ -36,6 +37,9 @@
 #define DOUT_SENSOR_COEFF_BELOW_2A              1800
 #define DOUT_SENSOR_VOLTAGE_BELOW_2A_mV         1.33f
 #define DOUT_SENSOR_COEFF_ABOVE_2A              1750
+
+#define DOUT_PWM_MAX_FREQUENCY_HZ                  1000
+#define DOUT_PWM_MIN_FREQUENCY_HZ                  50
 
 typedef enum {
     DOUT_1 = 0,
@@ -54,57 +58,85 @@ typedef enum {
     DIGITAL_OUTPUT_IOEX
 } DigitalOutputType_t;
 
-typedef struct {
-    adc_unit_t adc_num;
-    adc_channel_t channel;
-} AdcNumChannel_t;
 
 class DigitalOutputs
 {
 public:
 
-    DigitalOutputs(const gpio_num_t *gpio, const AdcNumChannel_t *adc, int num);
-    DigitalOutputs(const gpio_num_t *gpio, const adc1_channel_t *adc, int num);
-    DigitalOutputs(ioex_device_t **ioex, const ioex_num_t *ioex_num, const ioex_num_t *current_num, int num);
-    ~DigitalOutputs();
+    static void init(const gpio_num_t *gpio, const AdcNumChannel_t *adc, int num);
+    static void init(ioex_device_t **ioex, const ioex_num_t *ioex_num, const ioex_num_t *ioex_current, int num);
+      
+    /**
+     * @brief Set an output at high or low level.
+     * 
+     * @param num DOUT to drive.
+     * @param level DOUT level, HIGH or LOW.
+     */
+    static void digitalWrite(DigitalOutputNum_t dout, uint8_t level);
 
-    void init();
-    void setLevel(DigitalOutputNum_t dout, uint8_t level);
-    void setAll(uint8_t level);
-    int getLevel(DigitalOutputNum_t dout);
+    /**
+     * @brief Toggle a digital output
+     * 
+     * @param dout DOUT to toggle
+    **/
+    static void digitalToggle(DigitalOutputNum_t dout);
 
-    void write(DigitalOutputNum_t dout, uint8_t level);
-    void toggle(DigitalOutputNum_t dout);
-    void blink(DigitalOutputNum_t dout);
+    /**
+     * @brief Set a digital output into PWM mode
+     * 
+     * @param dout DOUT to set
+     * @param freq PWM frequency [50 - 1000 Hz]
+    **/
+    static int digitalModePWM(DigitalOutputNum_t dout, uint32_t freq);
 
-    void modePWM(DigitalOutputNum_t dout, uint32_t freq, ledc_timer_bit_t bit);
-    void setDutyCycle(DigitalOutputNum_t dout, uint32_t duty);
+    /**
+     * @brief Set the duty cycle value of PWM for a digital output
+     * 
+     * @param dout DOUT to set
+     * @param duty Duty cycle
+    **/
+    static void digitalSetPWM(DigitalOutputNum_t dout, uint32_t duty);
+ 
+    /**
+     * @brief Get the current of a digital output
+     * 
+     * @param num DOUT to get
+     * @return current in A
+    **/
+    static float digitalGetCurrent(DigitalOutputNum_t dout);
 
-    float digitalGetCurrent(DigitalOutputNum_t dout);
-    int digitalGetOverCurrentStatus(DigitalOutputNum_t dout);
+    /**
+     * @brief Get the overcurrent status of a digital output
+     * 
+     * @param dout DOUT to get
+     * @return 1 if overcurrent, 0 if not
+    **/
+    static int digitalGetOverCurrentStatus(DigitalOutputNum_t dout);
 
 private:
 
     /* Type of DOUT (gpio or ioex) */
-    DigitalOutputType_t _type;
+    static DigitalOutputType_t _type;
 
     /* Number of DOUT */
-    uint8_t _num; 
+    static uint8_t _nb; 
     
     /* GPIO num for DOUT (can be initialized as esp gpio or ioexpander gpio)*/
-    gpio_num_t* _gpio_num;
-    ioex_num_t* _ioex_num;
+    static gpio_num_t* _gpio_num;
+    static ioex_num_t* _ioex_num;
 
     /* ADC Channel for analog current or ioexpander gpio for digital current (HIGH or LOW current)*/
-    AdcNumChannel_t* _adc_current;
-    ioex_num_t* _ioex_current;
+    static AdcNumChannel_t* _adc_current;
+    static ioex_num_t* _ioex_current;
 
     /* Store a local copy of the pointer to an initalized ioex_device_t */
-    ioex_device_t** _ioex;
-    esp_adc_cal_characteristics_t _adc1Characteristics;
-    esp_adc_cal_characteristics_t _adc2Characteristics;
-    uint8_t* _doutLevel;
+    static ioex_device_t** _ioex;
+    static esp_adc_cal_characteristics_t _adc1Characteristics;
+    static esp_adc_cal_characteristics_t _adc2Characteristics;
+    static uint8_t* _doutLevel;
 
+    static void _setLevel(DigitalOutputNum_t dout, uint8_t level);
+    static int _getLevel(DigitalOutputNum_t dout);
     static void _controlTask(void *pvParameters);
 
 };
