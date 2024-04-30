@@ -20,6 +20,8 @@
 #include "Command.h"
 #include "ModuleMaster.h"
 
+#if defined(MODULE_MASTER)
+
 class ModuleControl
 {
 public:
@@ -77,3 +79,5 @@ private:
     void _ledStatus(LedState_t state, LedColor_t color=LED_NONE, uint32_t period=0);
 
 };
+
+#endif

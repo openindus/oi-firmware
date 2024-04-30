@@ -21,7 +21,7 @@
 #include "DigitalInputsControl.h"
 #include "DigitalOutputsControl.h"
 
-#if !defined(OI_DISCRETE) && !defined(OI_DISCRETE_VE)
+#if defined(MODULE_MASTER)
 
 class DiscreteControl : public ModuleControl, public AnalogInputsHVControl, public DigitalInputsControl, public DigitalOutputsControl
 {

@@ -13,6 +13,8 @@
  * @see https://openindus.com
  */
 
+#if defined(MODULE_MASTER)
+
 #include "ModuleMaster.h"
 #include "ModuleControl.h"
 #include "ModulePinout.h"
@@ -412,3 +414,5 @@ end:
     frame.data = NULL;
     vTaskDelete(NULL);
 }
+
+#endif

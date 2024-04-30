@@ -13,6 +13,8 @@
  * @see https://openindus.com
  */
 
+#if defined(MODULE_MASTER)
+
 #include "ModuleControl.h"
 
 static const char MODULE_TAG[] = "Module";
@@ -98,3 +100,5 @@ void ModuleControl::_ledStatus(LedState_t state, LedColor_t color, uint32_t peri
     BusRS::write(&frame, pdMS_TO_TICKS(100));
     vTaskDelay(10 / portTICK_PERIOD_MS);
 }
+
+#endif

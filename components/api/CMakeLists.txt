@@ -7,7 +7,6 @@ set(COMPONENT_SRCS
     "Module/ModuleCLI.cpp"
     "Module/ModuleMasterCLI.cpp"
     "Module/Discrete/DiscreteStandalone.cpp"
-    "Module/Discrete/DiscreteControl.cpp"
     "Module/Discrete/DiscreteSlave.cpp"
     "Module/Discrete/DiscreteCLI.cpp"
     "Module/Stepper/StepperStandalone.cpp"

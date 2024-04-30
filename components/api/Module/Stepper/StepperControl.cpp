@@ -15,7 +15,7 @@
 
 #include "StepperControl.h"
 
-#if !defined(OI_STEPPER) && !defined(OI_STEPPER_VE)
+#if defined(MODULE_MASTER)
 
 int StepperControl::digitalRead(DigitalInputNum_t din) 
 {

@@ -15,7 +15,7 @@
 
 #include "RelayControl.h"
 
-#if !defined(OI_RELAY_HP) & !defined(OI_RELAY_LP)
+#if defined(MODULE_MASTER)
 
 void RelayControl::digitalWrite(Relay_t relay, uint8_t level)
 {

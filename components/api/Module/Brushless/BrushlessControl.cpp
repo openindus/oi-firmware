@@ -15,7 +15,7 @@
 
 #include "BrushlessControl.h"
 
-#if !defined(OI_BRUSHLESS)
+#if defined(MODULE_MASTER)
 
 void BrushlessControl::setSpeed(uint32_t duty_cycle)
 {

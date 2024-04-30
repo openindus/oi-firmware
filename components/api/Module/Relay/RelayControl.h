@@ -19,7 +19,7 @@
 #include "ModuleMaster.h"
 #include "RelayStandalone.h"
 
-#if !defined(OI_RELAY_HP) & !defined(OI_RELAY_LP)
+#if defined(MODULE_MASTER)
 
 class RelayControl : public ModuleControl
 {

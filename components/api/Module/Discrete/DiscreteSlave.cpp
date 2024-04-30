@@ -29,3 +29,5 @@ int DiscreteSlave::init(void)
 
     return ret;
 }
+
+#endif

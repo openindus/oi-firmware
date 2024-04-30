@@ -19,7 +19,7 @@
 
 #pragma once
 
-#if !defined(MODULE_STANDALONE) && !defined(MODULE_SLAVE)
+#if defined(MODULE_MASTER)
 
 #include "ModuleControl.h"
 #include "DgitalInputs.h"

@@ -83,6 +83,8 @@ int DiscreteStandalone::init()
      * 
      */
     AnalogInputsHV::init(_ainChannel, 2);
+
+    return 0;
 }
 
 #endif

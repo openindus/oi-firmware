@@ -15,6 +15,8 @@
 
 #pragma once
 
+#if defined(MODULE_MASTER)
+
 #include "Global.h"
 #include "ModuleStandalone.h"
 #include "Command.h"
@@ -42,3 +44,5 @@ private:
     static void _programmingTask(void *pvParameters);
 
 };
+
+#endif

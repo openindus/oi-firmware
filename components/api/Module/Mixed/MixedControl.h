@@ -22,7 +22,7 @@
 #include "DigitalInputsControl.h"
 #include "DigitalOutputsControl.h"
 
-#if !defined(OI_MIXED)
+#if defined(MODULE_MASTER)
 
 class MixedControl : public ModuleControl, public AnalogOutputsControl, public AnalogInputsLVControl, public DigitalInputsControl, public DigitalOutputsControl
 {
