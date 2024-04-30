@@ -32,7 +32,7 @@ int DigitalOutputsSlave::init() {
 
     ModuleSlave::addCtrlCallback(CONTROL_DIGITAL_SET_PWM, [](std::vector<uint8_t>& data) {
         uint32_t* duty = reinterpret_cast<uint32_t*>(&data[2]);
-        DigitalOutputs::digitalModePWM((DigitalOutputNum_t)data[1], *duty);
+        DigitalOutputs::digitalSetPWM((DigitalOutputNum_t)data[1], *duty);
     });
 
     ModuleSlave::addCtrlCallback(CONTROL_DIGITAL_GET_CURRENT, [](std::vector<uint8_t>& data) {

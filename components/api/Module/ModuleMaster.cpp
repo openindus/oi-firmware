@@ -55,7 +55,7 @@ bool ModuleMaster::autoId(void)
     int num_id_sn = 0;
 
     for (int i=0; i<ModuleControl::getAllInstances().size(); i++) {
-        if (ModuleControl::getSN(ModuleControl::getAllInstances()[i]) == 0) {
+        if (ModuleControl::getAllInstances()[i]->getSN() == 0) {
             num_id_auto++;
         } else {
             num_id_sn++;
@@ -90,8 +90,8 @@ bool ModuleMaster::autoId(void)
         if (ModuleControl::getAllInstances().size() == _ids.size()) {
             std::map<uint16_t, int>::iterator it = _ids.begin();
             for (int i=0; i<ModuleControl::getAllInstances().size(); i++) {
-                ModuleControl::setId(ModuleControl::getAllInstances()[i], it->first);
-                ModuleControl::setSN(ModuleControl::getAllInstances()[i], it->second);
+                ModuleControl::getAllInstances()[i]->setId(it->first);
+                ModuleControl::getAllInstances()[i]->setSN(it->second);
                 ++it;
                 ModuleControl::getAllInstances()[i]->ledOn(LED_YELLOW);
                 vTaskDelay(50/portTICK_PERIOD_MS);
@@ -106,13 +106,13 @@ bool ModuleMaster::autoId(void)
     /* Initialize module with SN */
     else {
         for (int i=0; i<ModuleControl::getAllInstances().size(); i++) {
-            uint16_t current_id = ModuleMaster::getIdFromSN(ModuleControl::getSN(ModuleControl::getAllInstances()[i]));
+            uint16_t current_id = ModuleMaster::getIdFromSN(ModuleControl::getAllInstances()[i]->getSN());
             if (current_id != 0) {
-                ModuleControl::setId(ModuleControl::getAllInstances()[i], current_id);
+                ModuleControl::getAllInstances()[i]->setId(current_id);
                 ModuleControl::getAllInstances()[i]->ledOn(LED_YELLOW);
                 vTaskDelay(50/portTICK_PERIOD_MS);
             } else {
-                ESP_LOGE(MODULE_TAG, "Cannot instanciate module with SN:%i",  ModuleControl::getSN(ModuleControl::getAllInstances()[i]));
+                ESP_LOGE(MODULE_TAG, "Cannot instantiate module with SN:%i",  ModuleControl::getAllInstances()[i]->getSN());
                 return false;
             }
         }

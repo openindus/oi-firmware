@@ -38,24 +38,16 @@ public:
 
     int ctrlRequest(std::vector<uint8_t>& msgBytes);
 
-    inline static void setId(ModuleControl* instance, uint16_t id) {
-        instance->_id = id;
-    }
+    inline void setId(uint16_t id) { _id = id; }
 
-    inline static uint16_t getId(ModuleControl* instance) {
-        return instance->_id;
-    }
+    inline uint16_t getId(void) { return _id; }
 
-    inline static void setSN(ModuleControl* instance, int sn) {
-        instance->_sn = sn;
-    }
+    inline void setSN(int sn) { _sn = sn; }
 
-    inline static int getSN(ModuleControl* instance) {
-        return instance->_sn;
-    }
+    inline int getSN(void) { return _sn; }
 
-    inline static void addEventCallback(ModuleControl* instance, uint8_t event, std::function<void(uint8_t)>callback) {
-        _eventCallbacks.insert({std::make_pair(event, instance->_id), callback});
+    inline static void addEventCallback(ModuleControl* instance, uint16_t id, uint8_t event, std::function<void(uint8_t)>callback) {
+        _eventCallbacks.insert({std::make_pair(event, id), callback});
     }
 
     inline static std::vector<ModuleControl*> getAllInstances(void) {
