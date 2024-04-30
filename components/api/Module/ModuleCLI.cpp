@@ -15,7 +15,7 @@
 
 #include "ModuleCLI.h"
 
-void ModuleCLI::init(void)
+int ModuleCLI::init(void)
 {
     _registerSetBoardInfo();
     _registerGetBoardInfo();
@@ -26,6 +26,8 @@ void ModuleCLI::init(void)
     _registerWriteSync();
     _registerReadSync();
     _registerBusPower();
+
+    return 0;
 }
 
 /** 'restart' */

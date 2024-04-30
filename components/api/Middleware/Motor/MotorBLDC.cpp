@@ -25,8 +25,10 @@ QueueHandle_t MotorBLDC::_PcntEvtQueue1;
 pcnt_unit_t MotorBLDC::_PcntUnit1 = PCNT_UNIT_1 ;
 MotorBLDC::pcnt_evt_t MotorBLDC::evt1;
 
-void MotorBLDC::init(gpio_num_t brake, gpio_num_t direction, gpio_num_t enable_chip, gpio_num_t speed_ctrl, gpio_num_t nfault, gpio_num_t fgout)
+int MotorBLDC::init(gpio_num_t brake, gpio_num_t direction, gpio_num_t enable_chip, gpio_num_t speed_ctrl, gpio_num_t nfault, gpio_num_t fgout)
 {
+    int err = 0;
+
     int8_t nbStepCommutationP = 6;
     int8_t nbStepCommutationN = -6;
     _brake = brake;
@@ -36,12 +38,12 @@ void MotorBLDC::init(gpio_num_t brake, gpio_num_t direction, gpio_num_t enable_c
     _nfault = nfault;
     _fgout = fgout;
 
-    gpio_set_direction(_brake, GPIO_MODE_OUTPUT);   
-    gpio_set_direction(_direction, GPIO_MODE_OUTPUT);
-    gpio_set_direction(_enable_chip, GPIO_MODE_OUTPUT);
-    gpio_set_direction(_speed_ctrl, GPIO_MODE_OUTPUT);
-    gpio_set_direction(_nfault, GPIO_MODE_INPUT);
-    gpio_set_direction(_fgout, GPIO_MODE_INPUT);
+    err |= gpio_set_direction(_brake, GPIO_MODE_OUTPUT);   
+    err |= gpio_set_direction(_direction, GPIO_MODE_OUTPUT);
+    err |= gpio_set_direction(_enable_chip, GPIO_MODE_OUTPUT);
+    err |= gpio_set_direction(_speed_ctrl, GPIO_MODE_OUTPUT);
+    err |= gpio_set_direction(_nfault, GPIO_MODE_INPUT);
+    err |= gpio_set_direction(_fgout, GPIO_MODE_INPUT);
 
     _ledcInit();
     vTaskDelay(10 / portTICK_PERIOD_MS);
@@ -61,26 +63,26 @@ void MotorBLDC::init(gpio_num_t brake, gpio_num_t direction, gpio_num_t enable_c
     };
 
     /* Initialize PCNT unit */
-    pcnt_unit_config(&pcnt_config1);
+    err |= pcnt_unit_config(&pcnt_config1);
 
     /* Configure and enable the input filter */
-    pcnt_set_filter_value(_PcntUnit1, 100);
-    pcnt_filter_enable(_PcntUnit1);
+    err |= pcnt_set_filter_value(_PcntUnit1, 100);
+    err |= pcnt_filter_enable(_PcntUnit1);
 
     /* Enable events on zero, maximum and minimum limit values */
-    pcnt_event_enable(_PcntUnit1, PCNT_EVT_H_LIM);
-    pcnt_event_enable(_PcntUnit1, PCNT_EVT_L_LIM);
+    err |= pcnt_event_enable(_PcntUnit1, PCNT_EVT_H_LIM);
+    err |= pcnt_event_enable(_PcntUnit1, PCNT_EVT_L_LIM);
 
     /* Initialize PCNT's counter */
-    pcnt_counter_pause(_PcntUnit1);
-    pcnt_counter_clear(_PcntUnit1);
+    err |= pcnt_counter_pause(_PcntUnit1);
+    err |= pcnt_counter_clear(_PcntUnit1);
     
     /* Install interrupt service and add isr callback handler */
-    pcnt_isr_service_install(0);
-    pcnt_isr_handler_add(_PcntUnit1, _pcntIntrHandler1, (void *)_PcntUnit1);
+    err |= pcnt_isr_service_install(0);
+    err |= pcnt_isr_handler_add(_PcntUnit1, _pcntIntrHandler1, (void *)_PcntUnit1);
 
     /* Everything is set up, now go to counting */
-    pcnt_counter_resume(_PcntUnit1);
+    err |= pcnt_counter_resume(_PcntUnit1);
 
     _PcntEvtQueue1 = xQueueCreate(10, sizeof(pcnt_evt_t));
 
@@ -88,7 +90,7 @@ void MotorBLDC::init(gpio_num_t brake, gpio_num_t direction, gpio_num_t enable_c
     xTaskCreate(&_vTaskFunctionSpeed, "vTaskFunctionSpeed", 4096, NULL , 2, NULL);
     vTaskDelay(10 / portTICK_PERIOD_MS);
 
-    gpio_set_level(_enable_chip, 1);
+    err |= gpio_set_level(_enable_chip, 1);
     uint32_t fault = gpio_get_level(_nfault);
     if (fault == 1){
         ESP_LOGE(TAG, "Error during initialisation");
@@ -96,6 +98,8 @@ void MotorBLDC::init(gpio_num_t brake, gpio_num_t direction, gpio_num_t enable_c
     else{
         ESP_LOGI(TAG, "Set-up done, Chip enable");
     }
+    
+    return err;
 }
 
 void MotorBLDC::setSpeed(uint32_t duty_cycle)

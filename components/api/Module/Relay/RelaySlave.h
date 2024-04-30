@@ -24,7 +24,7 @@ class RelaySlave : public RelayStandalone, public ModuleSlave
 {
 public:
 
-    static void init(void);
+    static int init(void);
 
 };
 

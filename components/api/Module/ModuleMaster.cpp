@@ -23,13 +23,15 @@ static const char MODULE_TAG[] = "Module";
 
 std::map<uint16_t,int,std::greater<uint16_t>> ModuleMaster::_ids;
 
-void ModuleMaster::init(void)
+int ModuleMaster::init(void)
 {
+    int err = 0;
+
     ESP_LOGI(MODULE_TAG, "Bus init");
 
     /* Bus RS/CAN */
-    BusRS::begin(MODULE_RS_NUM_PORT, MODULE_PIN_RS_UART_TX, MODULE_PIN_RS_UART_RX);
-    BusCAN::begin(MODULE_PIN_CAN_TX, MODULE_PIN_CAN_RX);
+    err |= BusRS::begin(MODULE_RS_NUM_PORT, MODULE_PIN_RS_UART_TX, MODULE_PIN_RS_UART_RX);
+    err |= BusCAN::begin(MODULE_PIN_CAN_TX, MODULE_PIN_CAN_RX);
 
     /* Bus IO */
     BusIO::Config_t config = {
@@ -39,11 +41,13 @@ void ModuleMaster::init(void)
         .gpioModeSync = GPIO_MODE_INPUT_OUTPUT,
         .gpioNumPower = MODULE_PIN_CMD_MOSFET_ALIM,
     };
-    BusIO::init(&config);
+    err |= BusIO::init(&config);
     BusIO::writeSync(0);
 
     ESP_LOGI(MODULE_TAG, "Create bus task");
     xTaskCreate(_busTask, "Bus task", 4096, NULL, 1, NULL);
+
+    return err;
 }
 
 bool ModuleMaster::autoId(void)

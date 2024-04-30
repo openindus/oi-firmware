@@ -14,10 +14,10 @@ AnalogLsStandalone* AnalogLsSlave::_analogLs = new AnalogLsStandalone();
 
 int AnalogLsSlave::init(void)
 {
-    ModuleSlave::init();
-    AnalogLsStandalone::init();
+    int err = ModuleSlave::init();
+    err |= AnalogLsStandalone::init();
 
-    return 0;
+    return err;
 }
 
 #endif

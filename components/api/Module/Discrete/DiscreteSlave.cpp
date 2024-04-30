@@ -19,15 +19,13 @@
 
 int DiscreteSlave::init(void)
 {
-    int ret = 0;
+    int err = ModuleSlave::init();
+    err |= DiscreteStandalone::init();
+    err |= AnalogInputsHVSlave::init();
+    err |= DigitalOutputsSlave::init();
+    err |= DigitalInputsSlave::init();
 
-    ret |= ModuleSlave::init();
-    ret |= DiscreteStandalone::init();
-    ret |= AnalogInputsHVSlave::init();
-    ret |= DigitalOutputsSlave::init();
-    ret |= DigitalInputsSlave::init();
-
-    return ret;
+    return err;
 }
 
 #endif

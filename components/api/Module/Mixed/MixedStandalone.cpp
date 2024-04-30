@@ -58,13 +58,15 @@ static ads866x_config_t adcSPIConfig = {
 
 int MixedStandalone::init(void)
 {
-    ModuleStandalone::init();
+    int err = 0;
+
+    err |=ModuleStandalone::init();
 
     /* Initialize digital inputs */
-    DigitalInputs::init(_dinGpio, 4);
+    err |=DigitalInputs::init(_dinGpio, 4);
 
     /* Initialize digital outputs */
-    DigitalOutputs::init(_doutGpio, _doutAdcNumChannel, 4);
+    err |=DigitalOutputs::init(_doutGpio, _doutAdcNumChannel, 4);
 
     /* Initialize the SPI bus */
     spi_bus_config_t busConfig = {
@@ -82,24 +84,21 @@ int MixedStandalone::init(void)
         .intr_flags = 0
     };
 
-    esp_err_t err = spi_bus_initialize(MIXED_SPI_HOST, &busConfig, SPI_DMA_CH_AUTO);
-    if (err != ESP_OK) {
-        ESP_LOGE(TAG, "Init SPI bus error");
-    }
+    err |= spi_bus_initialize(MIXED_SPI_HOST, &busConfig, SPI_DMA_CH_AUTO);
 
     /* Initialize analog outputs */
     ad5413_config_t dacConfig[] = {
         {MIXED_SPI_HOST, MIXED_SPI_FREQ, MIXED_DAC_PIN_SYNC_1, MIXED_DAC_PIN_LDAC_1, 0, 0},
         {MIXED_SPI_HOST, MIXED_SPI_FREQ, MIXED_DAC_PIN_SYNC_2, MIXED_DAC_PIN_LDAC_2, 1, 1}
     };
-    AnalogOutputs::init(2, dacConfig);
-    AnalogOutputs::analogOutputMode(AOUT_1, AOUT_MODE_M10V5_10V5);
-    AnalogOutputs::analogOutputMode(AOUT_2, AOUT_MODE_M10V5_10V5);
+    err |=AnalogOutputs::init(2, dacConfig);
+    err |=AnalogOutputs::analogOutputMode(AOUT_1, AOUT_MODE_M10V5_10V5);
+    err |=AnalogOutputs::analogOutputMode(AOUT_2, AOUT_MODE_M10V5_10V5);
     
     /* Initialize analog inputs */
-    AnalogInputsLV::init(&adcSPIConfig, _ainCmdGpio, 4);
+    err |=AnalogInputsLV::init(&adcSPIConfig, _ainCmdGpio, 4);
 
-    return 0;
+    return err;
 }
 
 #endif

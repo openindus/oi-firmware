@@ -17,7 +17,7 @@
 
 #if defined(OI_STEPPER) || defined(OI_STEPPER_VE)
 
-void StepperCLI::init(void)
+int StepperCLI::init(void)
 {
     _registerDigitalRead();
     _registerAttachInterrupt();
@@ -32,6 +32,8 @@ void StepperCLI::init(void)
     _registerMoveRelative();
     _registerRun();
     _registerHoming();
+
+    return 0;
 }
 
 /** 'digital-read' */

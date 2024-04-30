@@ -17,12 +17,14 @@
 
 #if defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)
 
-void DiscreteCLI::init(void)
+int DiscreteCLI::init(void)
 {
     _registerDigitalWrite();
     _registerDigitalRead();
     _registerDigitalGetCurrent();
     _registerAnalogInputRead();
+
+    return 0;
 }
 
 /** 'digital-write' */

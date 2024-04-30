@@ -20,16 +20,18 @@ static const char BUS_IO_TAG[] = "BusIO";
 esp_adc_cal_characteristics_t* BusIO::_adcCharsId;
 BusIO::Config_t* BusIO::_config;
 
-void BusIO::init(Config_t* config)
+int BusIO::init(Config_t* config)
 {
+    int err = 0;
+
     /* Config */
     _config = (BusIO::Config_t*)malloc(sizeof(BusIO::Config_t));
     memcpy(_config, config, sizeof(BusIO::Config_t));
 
     /* OI-ID */
     ESP_LOGI(BUS_IO_TAG, "Init OI-ID");
-    adc1_config_width(_config->adcWidthId);
-    adc1_config_channel_atten((adc1_channel_t)_config->adcChannelId, ADC_ATTEN_DB_11);
+    err |= adc1_config_width(_config->adcWidthId);
+    err |= adc1_config_channel_atten((adc1_channel_t)_config->adcChannelId, ADC_ATTEN_DB_11);
     // Characterize ADC
     _adcCharsId = (esp_adc_cal_characteristics_t*)calloc(1, sizeof(esp_adc_cal_characteristics_t));
     esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, _config->adcWidthId, 1100, _adcCharsId);
@@ -43,7 +45,7 @@ void BusIO::init(Config_t* config)
         .pull_down_en = GPIO_PULLDOWN_DISABLE,
         .intr_type = GPIO_INTR_DISABLE,
     };
-    gpio_config(&gpioConf);
+    err |= gpio_config(&gpioConf);
 
     /* Cmd MOSFET Alim */
     ESP_LOGI(BUS_IO_TAG, "Init Command mosfet alim");
@@ -54,8 +56,10 @@ void BusIO::init(Config_t* config)
         .pull_down_en = GPIO_PULLDOWN_DISABLE,
         .intr_type = GPIO_INTR_DISABLE,
     };
-    gpio_config(&cmdMosfetAlimConf);
-    gpio_set_level(_config->gpioNumPower, 0);
+    err |= gpio_config(&cmdMosfetAlimConf);
+    err |= gpio_set_level(_config->gpioNumPower, 0);
+
+    return err;
 }
 
 uint32_t BusIO::readId(void)

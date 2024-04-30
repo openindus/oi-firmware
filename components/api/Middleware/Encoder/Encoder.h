@@ -33,7 +33,7 @@ class Encoder
 {
 public:
 
-    static void init(gpio_num_t codera, gpio_num_t coderb, int16_t ValueMaxPulsePerRevolution = 1000, int16_t ValueMinPulsePerRevolution = -1000);
+    static int init(gpio_num_t codera, gpio_num_t coderb, int16_t ValueMaxPulsePerRevolution = 1000, int16_t ValueMinPulsePerRevolution = -1000);
     static bool getDirection(void);
     static float getSpeed(void);
     static float getPosition(void);

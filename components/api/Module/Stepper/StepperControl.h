@@ -15,21 +15,20 @@
 
 #pragma once
 
+#if defined(MODULE_MASTER)
+
 #include "ModuleControl.h"
 #include "ModuleMaster.h"
 #include "StepperParam.h"
+#include "DigitalInputsControl.h"
 
-#if defined(MODULE_MASTER)
-
-class StepperControl : public ModuleControl
+class StepperControl : public ModuleControl, public DigitalInputsControl
 {
 public:
 
-    StepperControl(int sn = 0) : ModuleControl(sn) {}
-
-    int digitalRead(DigitalInputNum_t din);
-    void attachInterrupt(DigitalInputNum_t din, IsrCallback_t callback, InterruptMode_t mode=RISING_MODE);
-    void detachInterrupt(DigitalInputNum_t din);
+    StepperControl(int sn = 0) : 
+        ModuleControl(sn),
+        DigitalInputsControl(this) {}
 
     void setLimitSwitch(MotorNum_t motor, DigitalInputNum_t din, DigitalInputLogic_t logic=ACTIVE_HIGH);
     void setStepResolution(MotorNum_t motor, MotorStepResolution_t res);
@@ -48,10 +47,6 @@ public:
     void run(MotorNum_t motor, MotorDirection_t direction, float speed);
     bool isRunning(MotorNum_t motor);
     void homing(MotorNum_t motor, float speed);
-
-private:
-
-    IsrCallback_t _isrCallback[DIN_MAX];
 };
 
 #endif

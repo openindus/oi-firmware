@@ -18,10 +18,10 @@
 
 #if defined(OI_BRUSHLESS) && defined(MODULE_SLAVE)
 
-void BrushlessSlave::init(void)
+int BrushlessSlave::init(void)
 {
-    ModuleSlave::init();
-    BrushLessStandalone::init();
+    int err = ModuleSlave::init();
+    err |= BrushLessStandalone::init();
 
     addCtrlCallback(CONTROL_MOTOR_SET_SPEED, [](std::vector<uint8_t>& data) {
         uint32_t* duty_cycle = reinterpret_cast<uint32_t*>(&data[2]);
@@ -60,6 +60,8 @@ void BrushlessSlave::init(void)
         uint8_t* ptr = reinterpret_cast<uint8_t*>(&position);
         data.insert(data.end(), ptr, ptr + sizeof(float));
     });
+
+    return err;
 }
 
 #endif

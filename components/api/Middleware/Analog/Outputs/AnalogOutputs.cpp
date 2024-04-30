@@ -18,7 +18,7 @@ bool* AnalogOutputs::_devicesInitialized = NULL;
 int AnalogOutputs::init(uint8_t nb, ad5413_config_t* configs)
 {
     ESP_LOGI(TAG, "Initialize Analog Outputs");
-    int ret = 0;
+    int err = 0;
 
     if (nb >= AOUT_MAX) {
         ESP_LOGE(TAG, "Invalid number of Analog Outputs");
@@ -43,14 +43,14 @@ int AnalogOutputs::init(uint8_t nb, ad5413_config_t* configs)
         }
 
         /* Initialize device */
-        ret |= ad5413_init(&_devices[i], &configs[i]);
+        err |= ad5413_init(&_devices[i], &configs[i]);
 
         /* Perform commands to start the device */
-        ret |= ad5413_soft_reset(_devices[i]);
-        ret |= ad5413_calib_mem_refresh(_devices[i]);
-        ret |= ad5413_clear_dig_diag_flag(_devices[i], DIG_DIAG_RESET_OCCURRED);
+        err |= ad5413_soft_reset(_devices[i]);
+        err |= ad5413_calib_mem_refresh(_devices[i]);
+        err |= ad5413_clear_dig_diag_flag(_devices[i], DIG_DIAG_RESET_OCCURRED);
 
-        if (ret == -1) {
+        if (err == -1) {
             _devicesInitialized[i] = false;
             ESP_LOGE(TAG, "Failed to Initialize device %d", i);
             return -1;
@@ -58,7 +58,7 @@ int AnalogOutputs::init(uint8_t nb, ad5413_config_t* configs)
         _devicesInitialized[i] = true;
     }
 
-    return 0;
+    return err;
 }
 
 int AnalogOutputs::analogOutputMode(AnalogOutput_Num_t num, AnalogOutput_Mode_t mode)

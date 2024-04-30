@@ -24,7 +24,7 @@ class BrushlessSlave : public ModuleSlave
 {
 public:
 
-    static void init(void);
+    static int init(void);
 
 private:
 

@@ -21,7 +21,7 @@ class AnalogInputAds866x
 public:
 
     AnalogInputAds866x(uint8_t num, gpio_num_t cmdGpio);
-    void init(AnalogInput_VoltageRange_t range, AnalogInput_Mode_t mode);
+    int init(AnalogInput_VoltageRange_t range, AnalogInput_Mode_t mode);
     int read(void);
     float read(AnalogInput_Unit_t unit);
     void setMode(AnalogInput_Mode_t mode);

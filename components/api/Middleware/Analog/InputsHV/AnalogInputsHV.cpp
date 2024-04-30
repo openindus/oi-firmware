@@ -103,15 +103,17 @@ AnalogInputEsp32s3::AnalogInputEsp32s3(uint8_t num, AdcNumChannel_t channel)
     _channel = channel;
 }
 
-void AnalogInputEsp32s3::init()
+int AnalogInputEsp32s3::init()
 {
+    int err = 0;
+
     if (_channel.adc_num == ADC_UNIT_1) {
-        adc1_config_width(ADC_WIDTH_BIT_12);
-        adc1_config_channel_atten((adc1_channel_t)_channel.channel, ADC_ATTEN_DB_11);
+        err |= adc1_config_width(ADC_WIDTH_BIT_12);
+        err |= adc1_config_channel_atten((adc1_channel_t)_channel.channel, ADC_ATTEN_DB_11);
         esp_adc_cal_characterize(_channel.adc_num, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &_adc_characteristic);
-    } 
+    }
     else if (_channel.adc_num == ADC_UNIT_2) {
-        adc1_config_channel_atten((adc1_channel_t)_channel.channel, ADC_ATTEN_DB_11);
+        err |= adc1_config_channel_atten((adc1_channel_t)_channel.channel, ADC_ATTEN_DB_11);
         esp_adc_cal_characterize(_channel.adc_num, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &_adc_characteristic);
     } 
     else {
@@ -119,6 +121,8 @@ void AnalogInputEsp32s3::init()
     }
 
     getCoeffs();
+
+    return err;
 }
 
 int AnalogInputEsp32s3::read(void)

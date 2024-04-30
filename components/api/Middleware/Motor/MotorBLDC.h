@@ -40,7 +40,7 @@ class MotorBLDC
 {
 public:
 
-    static void init(gpio_num_t brake, gpio_num_t direction, gpio_num_t enable_chip, gpio_num_t speed_ctrl, gpio_num_t nfault, gpio_num_t fgout);
+    static int init(gpio_num_t brake, gpio_num_t direction, gpio_num_t enable_chip, gpio_num_t speed_ctrl, gpio_num_t nfault, gpio_num_t fgout);
     static void setSpeed(uint32_t speed);
     static void setBrake(bool brake);
     static void setDirection(bool direction);

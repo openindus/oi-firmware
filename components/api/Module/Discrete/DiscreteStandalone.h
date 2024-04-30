@@ -15,9 +15,9 @@
 
 #pragma once
 
-#include "ModuleStandalone.h"
-
 #if defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)
+
+#include "ModuleStandalone.h"
 
 class DiscreteStandalone : public ModuleStandalone, public DigitalInputs, public DigitalOutputs, public AnalogInputsHV
 {

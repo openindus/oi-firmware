@@ -131,7 +131,7 @@ typedef struct
  * @param[in] config : Device configuration
  * @retval 0
  */
-uint8_t ads866x_init(ads866x_config_t *config);
+int ads866x_init(ads866x_config_t *config);
 
 /**
  * @brief Read adc raw value of corresponding analog

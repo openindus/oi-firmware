@@ -19,16 +19,16 @@
 
 int MixedSlave::init(void)
 {
-    int ret = 0;
+    int err = 0;
 
-    ret |= ModuleSlave::init();
-    ret |= MixedStandalone::init();
-    ret |= AnalogOutputsSlave::init();
-    ret |= AnalogInputsLVSlave::init();
-    ret |= DigitalOutputsSlave::init();
-    ret |= DigitalInputsSlave::init();
+    err |= ModuleSlave::init();
+    err |= MixedStandalone::init();
+    err |= AnalogOutputsSlave::init();
+    err |= AnalogInputsLVSlave::init();
+    err |= DigitalOutputsSlave::init();
+    err |= DigitalInputsSlave::init();
 
-    return ret;
+    return err;
 }
 
 #endif

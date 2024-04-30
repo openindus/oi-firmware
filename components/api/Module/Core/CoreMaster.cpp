@@ -19,10 +19,12 @@
 
 static const char CORE_TAG[] = "Core";
 
-void CoreMaster::init(void)
+int CoreMaster::init(void)
 {
-    ModuleMaster::init();
-    CoreStandalone::init();
+    int err = ModuleMaster::init();
+    err |= CoreStandalone::init();
+
+    return err;
 }
 
 #endif

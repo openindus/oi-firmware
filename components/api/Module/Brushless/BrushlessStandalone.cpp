@@ -30,26 +30,30 @@ gpio_num_t _dinNum[] = {
     BRUSHLESS_PIN_DIN_2
 };
 
-void BrushlessStandalone::init(void)
+int BrushlessStandalone::init(void)
 {
+    int err = 0;
+
     ESP_LOGI(BRUSHLESS_TAG, "Init");
-    ModuleStandalone::init();
+    err |= ModuleStandalone::init();
     vTaskDelay(10 / portTICK_PERIOD_MS);
 
     /* Init du moteur*/
-    MotorBLDC::init(BRUSHLESS_PIN_BRAKE, BRUSHLESS_PIN_DIRECTION, BRUSHLESS_PIN_ENABLE_CHIP, BRUSHLESS_PIN_SPEED_CTRL, BRUSHLESS_PIN_NFAULT, BRUSHLESS_PIN_FGOUT);
+    err |= MotorBLDC::init(BRUSHLESS_PIN_BRAKE, BRUSHLESS_PIN_DIRECTION, BRUSHLESS_PIN_ENABLE_CHIP, BRUSHLESS_PIN_SPEED_CTRL, BRUSHLESS_PIN_NFAULT, BRUSHLESS_PIN_FGOUT);
     vTaskDelay(10 / portTICK_PERIOD_MS);
 
     /* Init de l'encoder*/
-    Encoder::init(BRUSHLESS_PIN_CODEURA, BRUSHLESS_PIN_CODEURB);
+    err |= Encoder::init(BRUSHLESS_PIN_CODEURA, BRUSHLESS_PIN_CODEURB);
     vTaskDelay(10 / portTICK_PERIOD_MS);
 
     /* Init DOUT */
     gpio_config_t doutConf = BRUSHLESS_CONFIG_DOUT_DEFAULT();
-    DigitalOutputs::init(&doutConf, _doutNum);
+    err |= DigitalOutputs::init(&doutConf, _doutNum);
 
     DigitalOutputs::digitalWrite(DOUT_1,1);
     vTaskDelay(50 / portTICK_PERIOD_MS);
+
+    return err;
 }
 
 void BrushlessStandalone::setSpeed(uint32_t duty_cycle)

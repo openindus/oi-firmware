@@ -17,7 +17,7 @@
 
 #if defined(OI_CORE)
 
-void CoreCLI::init(void)
+int CoreCLI::init(void)
 {
     _registerDigitalWrite();
     _registerDigitalRead();
@@ -25,6 +25,8 @@ void CoreCLI::init(void)
     _registerAnalogInputRead();
     _registerSetAnalogCoeffs();
     _registerDate();
+
+    return 0;
 }
 
 /** 'digital-write' */

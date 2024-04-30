@@ -43,7 +43,7 @@ public:
         uint8_t* data;
     } Frame_t;
 
-    static void begin(uart_port_t port, gpio_num_t tx_num, gpio_num_t rx_num);
+    static int begin(uart_port_t port, gpio_num_t tx_num, gpio_num_t rx_num);
     static void end(void);
     static void write(Frame_t* frame, TickType_t timeout=0);
     static int read(Frame_t* frame, TickType_t timeout=portMAX_DELAY);

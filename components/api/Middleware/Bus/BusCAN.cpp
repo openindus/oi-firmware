@@ -25,8 +25,10 @@ SemaphoreHandle_t BusCAN::_mutex;
  * @param txNum pin
  * @param rxNum pin
  */
-void BusCAN::begin(gpio_num_t txNum, gpio_num_t rxNum)
+int BusCAN::begin(gpio_num_t txNum, gpio_num_t rxNum)
 {
+    int err = 0;
+
     ESP_LOGV(TAG, "init");
 
     _mutex = xSemaphoreCreateMutex();
@@ -45,16 +47,17 @@ void BusCAN::begin(gpio_num_t txNum, gpio_num_t rxNum)
 
     /* install TWAI driver */
     ESP_LOGI(TAG, "install twai driver");
-    ESP_ERROR_CHECK(twai_driver_install(&g_config, &t_config, &f_config));
+    err |= twai_driver_install(&g_config, &t_config, &f_config);
 
     /* Start TWAI driver */
     ESP_LOGI(TAG, "start twai driver");
-    ESP_ERROR_CHECK(twai_start());
+    err |= twai_start();
 
 #if !defined(DEBUG_BUS)
     esp_log_level_set(TAG, ESP_LOG_WARN);
 #endif
 
+    return err;
 }
 
 /**

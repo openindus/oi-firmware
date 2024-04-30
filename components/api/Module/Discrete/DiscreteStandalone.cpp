@@ -62,29 +62,31 @@ AdcNumChannel_t _ainChannel[] = {
 
 int DiscreteStandalone::init()
 {
+    int err = 0;
+    
     ESP_LOGI(DISCRETE_TAG, "Init");
 
-    ModuleStandalone::init();
+    err |= ModuleStandalone::init();
 
     /**
      * @brief DOUT Init
      * 
      */
-    DigitalOutputs::init(_doutGpio, _doutAdcChannel, 8);
+    err |= DigitalOutputs::init(_doutGpio, _doutAdcChannel, 8);
 
     /**
      * @brief DIN Init
      * 
      */
-    DigitalInputs::init(_dinGpio, 10);
+    err |= DigitalInputs::init(_dinGpio, 10);
 
     /**
      * @brief AIN Init
      * 
      */
-    AnalogInputsHV::init(_ainChannel, 2);
+    err |= AnalogInputsHV::init(_ainChannel, 2);
 
-    return 0;
+    return err;
 }
 
 #endif

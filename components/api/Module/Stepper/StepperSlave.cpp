@@ -17,31 +17,11 @@
 
 #if (defined(OI_STEPPER) || defined(OI_STEPPER_VE)) && defined(MODULE_SLAVE)
 
-IsrCallback_t StepperSlave::_isrCallback[] = {
-    [](void*){sendEvent({EVENT_DIGITAL_INTERRUPT, DIN_1});},
-    [](void*){sendEvent({EVENT_DIGITAL_INTERRUPT, DIN_2});},
-    [](void*){sendEvent({EVENT_DIGITAL_INTERRUPT, DIN_3});},
-    [](void*){sendEvent({EVENT_DIGITAL_INTERRUPT, DIN_4});},
-};
-
-void StepperSlave::init(void)
+int StepperSlave::init(void)
 {
-    ModuleSlave::init();
-    StepperStandalone::init();
-
-    addCtrlCallback(CONTROL_DIGITAL_READ, [](std::vector<uint8_t>& data) { 
-        int level = StepperStandalone::digitalRead((DigitalInputNum_t)data[1]);
-        data.push_back(static_cast<uint8_t>(level));
-    });
-
-    addCtrlCallback(CONTROL_ATTACH_INTERRUPT, [](std::vector<uint8_t>& data) { 
-        StepperStandalone::attachInterrupt((DigitalInputNum_t)data[1], 
-            _isrCallback[data[1]], (InterruptMode_t)data[2]);
-    });
-
-    addCtrlCallback(CONTROL_DETACH_INTERRUPT, [](std::vector<uint8_t>& data) { 
-        StepperStandalone::detachInterrupt((DigitalInputNum_t)data[1]);
-    });
+    int err = ModuleSlave::init();
+    err |= StepperStandalone::init();
+    err |= DigitalInputsSlave::init();
 
     addCtrlCallback(CONTROL_MOTOR_STOP, [](std::vector<uint8_t>& data) { 
         MotorNum_t motor = static_cast<MotorNum_t>(data[1]);
@@ -141,6 +121,8 @@ void StepperSlave::init(void)
         MotorNum_t motor = static_cast<MotorNum_t>(data[1]);
         StepperStandalone::resetHomePosition(motor); 
     });
+
+    return err;
 }
 
 #endif

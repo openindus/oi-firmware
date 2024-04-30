@@ -27,8 +27,10 @@ ioex_device_t** DigitalInputs::_ioex;
 xQueueHandle DigitalInputs::_event;
 
 
-void DigitalInputs::init(const gpio_num_t *gpio, int nb)
+int DigitalInputs::init(const gpio_num_t *gpio, int nb)
 {
+    int err = 0;
+
     _type = DIGITAL_INPUT_GPIO;
 
     /* Save number of DIN */
@@ -53,15 +55,19 @@ void DigitalInputs::init(const gpio_num_t *gpio, int nb)
     for (uint8_t i = 0; i < _nb; i++) {
         dinConf.pin_bit_mask |= (1ULL <<_gpio_nums[i]);
     }
-    ESP_ERROR_CHECK(gpio_config(&dinConf));
+    err |= gpio_config(&dinConf);
 
     _event = xQueueCreate(1, sizeof(uint32_t));
     ESP_LOGI(DIN_TAG, "Create interrupt task");
     xTaskCreate(_task, "DIN interrupt task", 2048, NULL, 10, NULL);
+
+    return err;
 }
 
-void DigitalInputs::init(ioex_device_t **ioex, const ioex_num_t *ioex_num, int nb)
+int DigitalInputs::init(ioex_device_t **ioex, const ioex_num_t *ioex_num, int nb)
 {
+    int err = 0;
+
     _type = DIGITAL_INPUT_IOEX;
 
     /* Save number of DOUT */
@@ -88,13 +94,15 @@ void DigitalInputs::init(ioex_device_t **ioex, const ioex_num_t *ioex_num, int n
     for (uint8_t i = 0; i < _nb; i++) {
         dinConf.pin_bit_mask |= (1ULL <<_ioex_nums[i]);
         // /!\ Set level before setting to output
-        ESP_ERROR_CHECK(ioex_set_level(*_ioex, _ioex_nums[i], IOEX_LOW));
+        err |= ioex_set_level(*_ioex, _ioex_nums[i], IOEX_LOW);
     }
-    ESP_ERROR_CHECK(ioex_config(*_ioex, &dinConf));
+    err |= ioex_config(*_ioex, &dinConf);
 
     _event = xQueueCreate(1, sizeof(uint32_t));
     ESP_LOGI(DIN_TAG, "Create interrupt task");
     xTaskCreate(_task, "DIN interrupt task", 2048, NULL, 10, NULL);
+
+    return err;
 }
 
 int DigitalInputs::digitalRead(DigitalInputNum_t num)

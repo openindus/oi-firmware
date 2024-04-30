@@ -60,8 +60,8 @@ class DigitalInputs
 {
 public:
 
-    static void init(const gpio_num_t *gpio, int nb);
-    static void init(ioex_device_t **ioex, const ioex_num_t *ioex_num, int nb);
+    static int init(const gpio_num_t *gpio, int nb);
+    static int init(ioex_device_t **ioex, const ioex_num_t *ioex_num, int nb);
 
     /**
      * @brief Read an input level. Argument is the DIN to read.

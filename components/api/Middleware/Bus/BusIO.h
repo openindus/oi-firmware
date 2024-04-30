@@ -33,7 +33,7 @@ public:
         gpio_num_t gpioNumPower;
     } Config_t;
 
-    static void init(Config_t* config);
+    static int init(Config_t* config);
     static uint32_t readId(void);
     static void powerOn(void);
     static void powerOff(void);

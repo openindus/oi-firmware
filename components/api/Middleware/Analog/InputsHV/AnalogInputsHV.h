@@ -28,7 +28,7 @@ class AnalogInputEsp32s3
 public:
 
     AnalogInputEsp32s3(uint8_t num, AdcNumChannel_t channel);
-    void init(void);
+    int init(void);
     int read(void);
     float read(AnalogInput_Unit_t unit);
     void getCoeffs();

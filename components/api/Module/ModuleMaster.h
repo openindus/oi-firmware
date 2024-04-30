@@ -25,7 +25,7 @@ class ModuleMaster
 {
 public:
 
-    static void init(void);
+    static int init(void);
 
     static bool autoId(void);
     static void autoTest(void);

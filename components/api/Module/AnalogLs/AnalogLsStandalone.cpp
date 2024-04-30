@@ -13,7 +13,7 @@ static const char TAG[] = "AnalogLsStandalone";
 
 int AnalogLsStandalone::init(void)
 {
-    ModuleStandalone::init();
+    int err = ModuleStandalone::init();
 
     /* Initialize the SPI bus */
     spi_bus_config_t busConfig = {
@@ -31,13 +31,13 @@ int AnalogLsStandalone::init(void)
         .intr_flags = 0
     };
 
-    esp_err_t err = spi_bus_initialize(ANALOG_LS_SPI_HOST, &busConfig, SPI_DMA_CH_AUTO);
+    err |= spi_bus_initialize(ANALOG_LS_SPI_HOST, &busConfig, SPI_DMA_CH_AUTO);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Failed to initialize SPI bus");
         return -1;
     }
 
-    return 0;
+    return err;
 }
 
 #endif

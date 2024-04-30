@@ -28,17 +28,21 @@ static void IRAM_ATTR _limitSwitchIsr(void* arg);
 static void _limitSwitchTask(void* arg);
 static void _homingTask(void* arg);
 
-void MotorStepper::init(PS01_Hal_Config_t* config, PS01_Param_t* param, const gpio_num_t* num)
+int MotorStepper::init(PS01_Hal_Config_t* config, PS01_Param_t* param, const gpio_num_t* num)
 {
+    int err = 0;
+
     /* Gpio */
     _gpio = num;
 
     /* Config powerSTEP01 */
-    PS01_Init(config, param);
+    PS01_Init(config, param); // TODO: watch for error
 
     /* Limit switch */
     _limitSwitchEvent = xQueueCreate(1, sizeof(uint32_t));
     xTaskCreate(_limitSwitchTask, "Limit switch task", 2048, NULL, 3, NULL);
+
+    return err;
 }
 
 void MotorStepper::setLimitSwitch(MotorNum_t motor, DigitalInputNum_t din, DigitalInputLogic_t logic)

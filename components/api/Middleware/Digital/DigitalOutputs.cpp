@@ -30,8 +30,10 @@ esp_adc_cal_characteristics_t DigitalOutputs::_adc2Characteristics;
 uint8_t* DigitalOutputs::_doutLevel;
 
 
-void DigitalOutputs::init(const gpio_num_t *gpio, const AdcNumChannel_t *adc, int nb) 
+int DigitalOutputs::init(const gpio_num_t *gpio, const AdcNumChannel_t *adc, int nb) 
 {
+    int err = 0;
+
     _type = DIGITAL_OUTPUT_GPIO;
 
     /* Save number of DOUT */
@@ -60,16 +62,16 @@ void DigitalOutputs::init(const gpio_num_t *gpio, const AdcNumChannel_t *adc, in
     for (uint8_t i = 0; i < _nb; i++) {
         doutConf.pin_bit_mask |= (1ULL <<_gpio_num[i]);
     }
-    ESP_ERROR_CHECK(gpio_config(&doutConf));
+    err |= gpio_config(&doutConf);
     
     /* Init DOUT current */
     ESP_LOGI(DOUT_TAG, "Init DOUT current");
-    ESP_ERROR_CHECK(adc1_config_width((adc_bits_width_t)ADC_WIDTH_BIT_DEFAULT));
+    err |= adc1_config_width((adc_bits_width_t)ADC_WIDTH_BIT_DEFAULT);
     for (uint8_t i = 0; i < _nb; i++) {
         if (_adc_current[i].adc_num == ADC_UNIT_1) {
-            ESP_ERROR_CHECK(adc1_config_channel_atten((adc1_channel_t)_adc_current[i].channel, ADC_ATTEN_DB_11));
+            err |= adc1_config_channel_atten((adc1_channel_t)_adc_current[i].channel, ADC_ATTEN_DB_11);
         } else if (_adc_current[i].adc_num == ADC_UNIT_2) {
-            ESP_ERROR_CHECK(adc2_config_channel_atten((adc2_channel_t)_adc_current[i].channel, ADC_ATTEN_DB_11));
+            err |= adc2_config_channel_atten((adc2_channel_t)_adc_current[i].channel, ADC_ATTEN_DB_11);
         } else {
             ESP_LOGE(DOUT_TAG, "Invalid ADC channel");
         }
@@ -89,11 +91,15 @@ void DigitalOutputs::init(const gpio_num_t *gpio, const AdcNumChannel_t *adc, in
     /* Create control task for overcurrent */
     ESP_LOGI(DOUT_TAG, "Create control task");
     xTaskCreate(_controlTask, "Control task", 4096, NULL, 1, NULL);
+
+    return err;
 }
 
 
-void DigitalOutputs::init(ioex_device_t **ioex, const ioex_num_t *ioex_num, const ioex_num_t *ioex_current, int nb)
+int DigitalOutputs::init(ioex_device_t **ioex, const ioex_num_t *ioex_num, const ioex_num_t *ioex_current, int nb)
 {
+    int err = 0;
+
     _type = DIGITAL_OUTPUT_IOEX;
 
     /* Save number of DOUT */
@@ -124,9 +130,9 @@ void DigitalOutputs::init(ioex_device_t **ioex, const ioex_num_t *ioex_num, cons
     for (uint8_t i = 0; i < _nb; i++) {
         doutConf.pin_bit_mask |= (1ULL <<_ioex_num[i]);
         // /!\ Set level before setting to output
-        ESP_ERROR_CHECK(ioex_set_level(*_ioex, _ioex_num[i], IOEX_LOW));
+        err |= ioex_set_level(*_ioex, _ioex_num[i], IOEX_LOW);
     }
-    ESP_ERROR_CHECK(ioex_config(*_ioex, &doutConf));
+    err |= ioex_config(*_ioex, &doutConf);
 
     ESP_LOGI(DOUT_TAG, "Init DOUT current");
     ioex_config_t doutSensorConf = {
@@ -138,7 +144,7 @@ void DigitalOutputs::init(ioex_device_t **ioex, const ioex_num_t *ioex_num, cons
     for (uint8_t i = 0; i < _nb; i++) {
         doutSensorConf.pin_bit_mask |= (1ULL <<_ioex_current[i]);
     }
-    ESP_ERROR_CHECK(ioex_config(*_ioex, &doutSensorConf));
+    err |= ioex_config(*_ioex, &doutSensorConf);
 
     _mutex = xSemaphoreCreateMutex();
     xSemaphoreGive(_mutex);
@@ -146,6 +152,8 @@ void DigitalOutputs::init(ioex_device_t **ioex, const ioex_num_t *ioex_num, cons
     /* Create control task for overcurrent */
     ESP_LOGI(DOUT_TAG, "Create control task");
     xTaskCreate(_controlTask, "Control task", 4096, NULL, 1, NULL);
+
+    return err;
 }
 
 void DigitalOutputs::_setLevel(DigitalOutputNum_t num, uint8_t level)

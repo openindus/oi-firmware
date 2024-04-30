@@ -17,28 +17,6 @@
 
 #if defined(MODULE_MASTER)
 
-int StepperControl::digitalRead(DigitalInputNum_t din) 
-{
-    std::vector<uint8_t> msgBytes = {CONTROL_DIGITAL_READ, (uint8_t)din};
-    ctrlRequest(msgBytes);
-    return static_cast<int>(msgBytes[2]);
-}
-
-void StepperControl::attachInterrupt(DigitalInputNum_t din, IsrCallback_t callback, InterruptMode_t mode)
-{
-    std::vector<uint8_t> msgBytes = {CONTROL_ATTACH_INTERRUPT, (uint8_t)din, (uint8_t)mode};
-    _isrCallback[din] = callback;
-    ctrlRequest(msgBytes);
-    
-    // addEventCallback(EVENT_DIGITAL_INTERRUPT, [this](uint8_t num) { _isrCallback[num](NULL); });
-}
-
-void StepperControl::detachInterrupt(DigitalInputNum_t din)
-{
-    std::vector<uint8_t> msgBytes = {CONTROL_DETACH_INTERRUPT, (uint8_t)din};
-    ctrlRequest(msgBytes);
-}
-
 void StepperControl::setLimitSwitch(MotorNum_t motor, DigitalInputNum_t din, DigitalInputLogic_t logic)
 {
     std::vector<uint8_t> msgBytes = {CONTROL_MOTOR_SET_LIMIT_SWITCH, (uint8_t)motor, (uint8_t)din, (uint8_t)logic};

@@ -15,9 +15,9 @@
 
 #pragma once
 
-#include "ModuleStandalone.h"
-
 #if defined(OI_STEPPER) || defined(OI_STEPPER_VE)
+
+#include "ModuleStandalone.h"
 
 #if defined(OI_STEPPER)
 #define STEPPER_DIN_NUM    4
@@ -27,14 +27,11 @@
 #define STEPPER_MOTOR_NUM   1
 #endif
 
-class StepperStandalone : public ModuleStandalone
+class StepperStandalone : public ModuleStandalone, public DigitalInputs
 {
 public:
 
-    /* DigitalInputs */
-    static int digitalRead(DigitalInputNum_t dinNum);
-    static void attachInterrupt(DigitalInputNum_t dinNum, IsrCallback_t callback, InterruptMode_t mode=RISING_MODE, void* arg=NULL);
-    static void detachInterrupt(DigitalInputNum_t dinNum);
+    static int init(void);
 
     /* Motor */
     static void setLimitSwitch(MotorNum_t motor, DigitalInputNum_t dinNum, DigitalInputLogic_t logic=ACTIVE_HIGH);
@@ -54,13 +51,8 @@ public:
     static bool isRunning(MotorNum_t motor);
     static void homing(MotorNum_t motor, float speed);
 
-// protected:
-
-    static void init(void);
-
 private:
 
-    static DigitalInputs* din;
     static Motor* motor;
 
 };

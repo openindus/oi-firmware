@@ -28,10 +28,12 @@ float Encoder::_pulsePerRevolution = 0;
 Encoder::pcnt_evt_t Encoder::evt;
 pcnt_unit_t Encoder::_PcntUnit = PCNT_UNIT_0;
 
-void Encoder::init(gpio_num_t coderA, gpio_num_t coderB, int16_t ValueMaxPulsePerRevolution, int16_t ValueMinPulsePerRevolution)
+int Encoder::init(gpio_num_t coderA, gpio_num_t coderB, int16_t ValueMaxPulsePerRevolution, int16_t ValueMinPulsePerRevolution)
 {
-    gpio_set_direction(coderA, GPIO_MODE_INPUT);   
-    gpio_set_direction(coderB, GPIO_MODE_INPUT);
+    int err = 0;
+
+    err |= gpio_set_direction(coderA, GPIO_MODE_INPUT);   
+    err |= gpio_set_direction(coderB, GPIO_MODE_INPUT);
 
     _pulsePerRevolution = ValueMaxPulsePerRevolution;
     /* Prepare configuration for the PCNT unit */
@@ -49,31 +51,33 @@ void Encoder::init(gpio_num_t coderA, gpio_num_t coderB, int16_t ValueMaxPulsePe
     };
 
     /* Initialize PCNT unit */
-    pcnt_unit_config(&pcnt_config);
+    err |= pcnt_unit_config(&pcnt_config);
 
     /* Configure and enable the input filter */
-    pcnt_set_filter_value(_PcntUnit, 100);
-    pcnt_filter_enable(_PcntUnit);
+    err |= pcnt_set_filter_value(_PcntUnit, 100);
+    err |= pcnt_filter_enable(_PcntUnit);
 
     /* Enable events on zero, maximum and minimum limit values */
-    pcnt_event_enable(_PcntUnit, PCNT_EVT_H_LIM);
-    pcnt_event_enable(_PcntUnit, PCNT_EVT_L_LIM);
+    err |= pcnt_event_enable(_PcntUnit, PCNT_EVT_H_LIM);
+    err |= pcnt_event_enable(_PcntUnit, PCNT_EVT_L_LIM);
 
     /* Initialize PCNT's counter */
-    pcnt_counter_pause(_PcntUnit);
-    pcnt_counter_clear(_PcntUnit);
+    err |= pcnt_counter_pause(_PcntUnit);
+    err |= pcnt_counter_clear(_PcntUnit);
 
     /* Install interrupt service and add isr callback handler */
     //pcnt_isr_service_install(0);
-    pcnt_isr_handler_add(_PcntUnit, _pcntIntrHandler, (void *)_PcntUnit);
+    err |= pcnt_isr_handler_add(_PcntUnit, _pcntIntrHandler, (void *)_PcntUnit);
 
     /* Everything is set up, now go to counting */
-    pcnt_counter_resume(_PcntUnit);
+    err |= pcnt_counter_resume(_PcntUnit);
 
     _PcntEvtQueue = xQueueCreate(10, sizeof(pcnt_evt_t));
 
     //Set-up getRevolution and getDirection task
     xTaskCreate(&_vTaskFunctionRevolution, "vTaskFunctionRevolution", 4096, NULL, 2, NULL);
+
+    return err;
 }
 
 bool Encoder::getDirection()

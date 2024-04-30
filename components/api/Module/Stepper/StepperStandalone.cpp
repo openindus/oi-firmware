@@ -33,40 +33,30 @@ const gpio_num_t _dinGpio[] = {
 #endif
 };
 
-DigitalInputs* StepperStandalone::din = new DigitalInputs(_dinGpio, STEPPER_DIN_NUM);
-
-void StepperStandalone::init()
+int StepperStandalone::init()
 {
-    ModuleStandalone::init();
+    int err = 0;
 
     ESP_LOGI(STEPPER_TAG, "Init");
 
-    /* Init DIN */
-    din->init();
+    err |= ModuleStandalone::init();
+
+    /**
+     * @brief DIN Init
+     * 
+     */
+    err |= DigitalInputs::init(_dinGpio, STEPPER_DIN_NUM);
 
     /* Init Motor stepper */
     ESP_LOGI(STEPPER_TAG, "Init Motor stepper");
     PS01_Hal_Config_t ps01Conf = STEPPER_CONFIG_MOTOR_DEFAULT();
     PS01_Param_t ps01Param = STEPPER_PARAM_MOTOR_DEFAULT();
-    MotorStepper::init(&ps01Conf, &ps01Param, _dinGpio);
+    err |= MotorStepper::init(&ps01Conf, &ps01Param, _dinGpio);
 
     /* Init Motor stepper NVS param */
     MotorStepperParam::initNVSParam();
-}
 
-int StepperStandalone::digitalRead(DigitalInputNum_t dinNum)
-{
-    return din->read(dinNum);
-}
-
-void StepperStandalone::attachInterrupt(DigitalInputNum_t dinNum, IsrCallback_t callback, InterruptMode_t mode, void* arg)
-{
-    din->attachInterrupt(dinNum, callback, mode, arg);
-}
-
-void StepperStandalone::detachInterrupt(DigitalInputNum_t dinNum)
-{
-    din->detachInterrupt(dinNum);
+    return err;
 }
 
 void StepperStandalone::setLimitSwitch(MotorNum_t motor, DigitalInputNum_t dinNum, DigitalInputLogic_t logic)

@@ -17,6 +17,7 @@ int AnalogInputsLV::init(ads866x_config_t *ads866xConfig, const gpio_num_t* cmdG
 {
     ESP_LOGI(TAG, "Initialize Analog Inputs");
     
+    int err = 0;
     _nb = nb;
 
     if (ads866xConfig == NULL) {
@@ -25,15 +26,16 @@ int AnalogInputsLV::init(ads866x_config_t *ads866xConfig, const gpio_num_t* cmdG
     }
 
     /* Init driver */
-    ads866x_init(ads866xConfig);
+    err |= ads866x_init(ads866xConfig);
 
     _ains = (AnalogInputAds866x**)calloc(_nb, sizeof(AnalogInputAds866x));
 
     for (size_t i = 0; i < _nb; i++) {
         _ains[i] = new AnalogInputAds866x(i, cmdGpio[i]);
-        _ains[i]->init(AIN_DEFAULT_RANGE, AIN_DEFAULT_MODE);
+        err |= _ains[i]->init(AIN_DEFAULT_RANGE, AIN_DEFAULT_MODE);
     }
-    return 0;
+    
+    return err;
 
 }
 
@@ -127,8 +129,9 @@ AnalogInputAds866x::AnalogInputAds866x(uint8_t num, gpio_num_t cmdGpio)
     _modePin = cmdGpio;
 }
 
-void AnalogInputAds866x::init(AnalogInput_VoltageRange_t range, AnalogInput_Mode_t mode)
+int AnalogInputAds866x::init(AnalogInput_VoltageRange_t range, AnalogInput_Mode_t mode)
 {
+    int err = 0;
     gpio_config_t cfg;
         
     /* Configure Cmd pin */
@@ -138,10 +141,12 @@ void AnalogInputAds866x::init(AnalogInput_VoltageRange_t range, AnalogInput_Mode
     cfg.pull_down_en = GPIO_PULLDOWN_DISABLE;
     cfg.intr_type = GPIO_INTR_DISABLE;
 
-    ESP_ERROR_CHECK(gpio_config(&cfg));
+    err |= gpio_config(&cfg);
     
     setMode(mode);
     setVoltageRange(range);
+
+    return err;
 }
 
 int AnalogInputAds866x::read(void)

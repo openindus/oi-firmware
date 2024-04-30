@@ -63,8 +63,8 @@ class DigitalOutputs
 {
 public:
 
-    static void init(const gpio_num_t *gpio, const AdcNumChannel_t *adc, int num);
-    static void init(ioex_device_t **ioex, const ioex_num_t *ioex_num, const ioex_num_t *ioex_current, int num);
+    static int init(const gpio_num_t *gpio, const AdcNumChannel_t *adc, int num);
+    static int init(ioex_device_t **ioex, const ioex_num_t *ioex_num, const ioex_num_t *ioex_current, int num);
       
     /**
      * @brief Set an output at high or low level.

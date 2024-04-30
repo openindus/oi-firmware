@@ -25,12 +25,13 @@ std::map<uint8_t, std::function<void(std::vector<uint8_t>&)>> ModuleSlave::_ctrl
 
 int ModuleSlave::init(void)
 {
-    int ret = 0;
+    int err = 0;
 
     ESP_LOGI(MODULE_TAG, "Bus init");
+
     /* Bus RS/CAN */
-    BusRS::begin(MODULE_RS_NUM_PORT, MODULE_PIN_RS_UART_TX, MODULE_PIN_RS_UART_RX);
-    BusCAN::begin(MODULE_PIN_CAN_TX, MODULE_PIN_CAN_RX);
+    err |= BusRS::begin(MODULE_RS_NUM_PORT, MODULE_PIN_RS_UART_TX, MODULE_PIN_RS_UART_RX);
+    err |= BusCAN::begin(MODULE_PIN_CAN_TX, MODULE_PIN_CAN_RX);
 
     /* Bus IO */
     BusIO::Config_t config = {
@@ -40,7 +41,7 @@ int ModuleSlave::init(void)
         .gpioModeSync = GPIO_MODE_INPUT,
         .gpioNumPower = MODULE_PIN_CMD_MOSFET_ALIM,
     };
-    BusIO::init(&config);
+    err |= BusIO::init(&config);
 
     /* Board ID is represented by the 10 most significants bits of the adc reading (12 bits) */
     _id = (uint16_t) (BusIO::readId()>>2);
@@ -50,7 +51,7 @@ int ModuleSlave::init(void)
     ESP_LOGI(MODULE_TAG, "Create bus task");
     xTaskCreate(_busTask, "Bus task", 4096, NULL, 1, NULL);
 
-    return ret;
+    return err;
 }
 
 /**

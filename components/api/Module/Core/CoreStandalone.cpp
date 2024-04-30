@@ -51,9 +51,9 @@ ioex_device_t* CoreStandalone::_ioex;
 OI::CAN CoreStandalone::can(CORE_SPI_USER_HOST, CORE_PIN_CAN_SPI_CS, CORE_PIN_CAN_INTERRUPT);
 OI::RS CoreStandalone::rs(CORE_SPI_USER_HOST, CORE_PIN_RS_SPI_CS, CORE_PIN_RS_INTERRUPT);
 
-void CoreStandalone::init()
+int CoreStandalone::init()
 {
-    ModuleStandalone::init();
+    int err = ModuleStandalone::init();
 
     /**
      * @brief I2C init
@@ -72,8 +72,8 @@ void CoreStandalone::init()
     i2c_config.scl_pullup_en = GPIO_PULLUP_ENABLE;
     i2c_config.master.clk_speed = CORE_DEFAULT_I2C_SPEED;
 
-    ESP_ERROR_CHECK(i2c_param_config(CORE_I2C_PORT_NUM, &i2c_config));
-    ESP_ERROR_CHECK(i2c_driver_install(CORE_I2C_PORT_NUM, i2c_config.mode, 0, 0, 0));
+    err |= i2c_param_config(CORE_I2C_PORT_NUM, &i2c_config);
+    err |= i2c_driver_install(CORE_I2C_PORT_NUM, i2c_config.mode, 0, 0, 0);
 
     /**
      * @brief SPI Init - RS User + CAN User
@@ -89,11 +89,15 @@ void CoreStandalone::init()
     spi_user_config.sclk_io_num = CORE_PIN_SPI_USER_SCK;
     spi_user_config.quadwp_io_num = -1;
     spi_user_config.quadhd_io_num = -1;
+    spi_user_config.data4_io_num = -1;
+    spi_user_config.data5_io_num = -1;
+    spi_user_config.data6_io_num = -1;
+    spi_user_config.data7_io_num = -1;
     spi_user_config.max_transfer_sz = 0;
     spi_user_config.flags = 0;
     spi_user_config.intr_flags = 0;
 
-    ESP_ERROR_CHECK(spi_bus_initialize(CORE_SPI_USER_HOST, &spi_user_config, SPI_DMA_CH_AUTO));
+    err |= spi_bus_initialize(CORE_SPI_USER_HOST, &spi_user_config, SPI_DMA_CH_AUTO);
 
     /**
      * @brief SPI Init - SD Card + Ethernet + USB Host
@@ -109,17 +113,26 @@ void CoreStandalone::init()
     spi_config.sclk_io_num = CORE_PIN_SPI_SCK;
     spi_config.quadwp_io_num = -1;
     spi_config.quadhd_io_num = -1;
+    spi_config.data4_io_num = -1;
+    spi_config.data5_io_num = -1;
+    spi_config.data6_io_num = -1;
+    spi_config.data7_io_num = -1;
     spi_config.max_transfer_sz = 0;
     spi_config.flags = 0;
     spi_config.intr_flags = 0;
 
-    ESP_ERROR_CHECK(spi_bus_initialize(CORE_SPI_HOST, &spi_config, SPI_DMA_CH_AUTO));
+    err |= spi_bus_initialize(CORE_SPI_HOST, &spi_config, SPI_DMA_CH_AUTO);
 
     /**
      * @brief IO Expander init
      * 
      */
     _ioex = ioex_create(CORE_I2C_PORT_NUM, CORE_I2C_IOEXPANDER_ADDRESS, true, CORE_PIN_DIGITAL_INTERRUPT);
+    if (_ioex == NULL) {
+        ESP_LOGE(CORE_TAG, "Cannot initialize ioexpander");
+        err |= -1;
+        return err;
+    }
 
     
     /**
@@ -128,33 +141,33 @@ void CoreStandalone::init()
      */
 
     // /!\ Set level before setting to output
-    ESP_ERROR_CHECK(ioex_set_level(_ioex, CORE_IOEX_PIN_ALIM_AUX, IOEX_HIGH));
+    err |= ioex_set_level(_ioex, CORE_IOEX_PIN_ALIM_AUX, IOEX_HIGH);
 
     ioex_config_t config;
     config.mode = IOEX_OUTPUT;
     config.pull_mode = IOEX_FLOATING;
     config.interrupt_type = IOEX_INTERRUPT_DISABLE;
     config.pin_bit_mask = (1ULL<<CORE_IOEX_PIN_ALIM_AUX);
-    ESP_ERROR_CHECK(ioex_config(_ioex, &config));
+    err |= ioex_config(_ioex, &config);
 
     /**
      * @brief DIN Init
      * 
      */
-    DigitalInputs::init(&_ioex, _dinGpio, 4);
+    err |= DigitalInputs::init(&_ioex, _dinGpio, 4);
 
 
     /**
      * @brief DOUT Init
      * 
      */
-    DigitalOutputs::init(&_ioex, _doutGpio, _doutCurrentGpio, 4);
+    err |= DigitalOutputs::init(&_ioex, _doutGpio, _doutCurrentGpio, 4);
 
     /**
      * @brief AIN Init 
      * 
      */
-    AnalogInputsHV::init(_ainChannel, 2);
+    err |= AnalogInputsHV::init(_ainChannel, 2);
 
     /**
      * @brief CAN EXT init
@@ -167,11 +180,11 @@ void CoreStandalone::init()
     io_can_conf.interrupt_type = IOEX_INTERRUPT_DISABLE;
     io_can_conf.pin_bit_mask = (1ULL<<CORE_IOEX_PIN_CAN_RESET);
     ioex_config(_ioex, &io_can_conf);
-    ioex_set_level(_ioex, CORE_IOEX_PIN_CAN_RESET, IOEX_HIGH);
+    err |= ioex_set_level(_ioex, CORE_IOEX_PIN_CAN_RESET, IOEX_HIGH);
     vTaskDelay(10);
-    ioex_set_level(_ioex, CORE_IOEX_PIN_CAN_RESET, IOEX_LOW);
+    err |= ioex_set_level(_ioex, CORE_IOEX_PIN_CAN_RESET, IOEX_LOW);
     vTaskDelay(10);
-    ioex_set_level(_ioex, CORE_IOEX_PIN_CAN_RESET, IOEX_HIGH);
+    err |= ioex_set_level(_ioex, CORE_IOEX_PIN_CAN_RESET, IOEX_HIGH);
 
     /**
      * @brief RS Ext Init
@@ -183,8 +196,8 @@ void CoreStandalone::init()
     io_rs_conf.pull_mode = IOEX_FLOATING;
     io_rs_conf.interrupt_type = IOEX_INTERRUPT_DISABLE;
     io_rs_conf.pin_bit_mask = (1ULL<<CORE_IOEX_PIN_RS_RESET);
-    ioex_config(_ioex, &io_rs_conf);
-    ioex_set_level(_ioex, CORE_IOEX_PIN_RS_RESET, IOEX_HIGH);
+    err |= ioex_config(_ioex, &io_rs_conf);
+    err |= ioex_set_level(_ioex, CORE_IOEX_PIN_RS_RESET, IOEX_HIGH);
 
     /**
      * @brief USB Host Init
@@ -196,15 +209,15 @@ void CoreStandalone::init()
     usb_host_conf.pull_mode = IOEX_FLOATING;
     usb_host_conf.interrupt_type = IOEX_INTERRUPT_DISABLE;
     usb_host_conf.pin_bit_mask = (1ULL<<CORE_IOEX_PIN_USB_HOST_RESET) | (1ULL<<CORE_IOEX_PIN_VBUS_EN);
-    ioex_config(_ioex, &usb_host_conf);
-    ioex_set_level(_ioex, CORE_IOEX_PIN_USB_HOST_RESET, IOEX_HIGH);
-    ioex_set_level(_ioex, CORE_IOEX_PIN_VBUS_EN, IOEX_LOW);
+    err |= ioex_config(_ioex, &usb_host_conf);
+    err |= ioex_set_level(_ioex, CORE_IOEX_PIN_USB_HOST_RESET, IOEX_HIGH);
+    err |= ioex_set_level(_ioex, CORE_IOEX_PIN_VBUS_EN, IOEX_LOW);
 
     usb_host_conf.mode = IOEX_INPUT;
     usb_host_conf.pull_mode = IOEX_PULLUP;
     usb_host_conf.interrupt_type = IOEX_INTERRUPT_DISABLE;
     usb_host_conf.pin_bit_mask = (1ULL<<CORE_IOEX_PIN_VBUS_OC);
-    ioex_config(_ioex, &usb_host_conf);
+    err |= ioex_config(_ioex, &usb_host_conf);
 
     /**
      * @brief 5V User Init
@@ -216,7 +229,7 @@ void CoreStandalone::init()
     v_user_conf.pull_mode = IOEX_PULLUP;
     v_user_conf.interrupt_type = IOEX_INTERRUPT_DISABLE;
     v_user_conf.pin_bit_mask = (1ULL<<CORE_IOEX_PIN_5V_USER_PG);
-    ioex_config(_ioex, &v_user_conf);
+    err |= ioex_config(_ioex, &v_user_conf);
 
     /* 5V user EN is set as floating input for normal operation. Set as OUTPUT LOW to disable 5V Output */
     v_user_conf.mode = IOEX_INPUT;
@@ -224,7 +237,7 @@ void CoreStandalone::init()
     v_user_conf.interrupt_type = IOEX_INTERRUPT_DISABLE;
     v_user_conf.pin_bit_mask = (1ULL<<CORE_IOEX_PIN_5V_USER_PG);
     v_user_conf.pin_bit_mask = (1ULL<<CORE_IOEX_PIN_5V_USER_EN);
-    ioex_config(_ioex, &v_user_conf);
+    err |= ioex_config(_ioex, &v_user_conf);
 
     /**
      * @brief RTC Init
@@ -237,13 +250,15 @@ void CoreStandalone::init()
     io_rtc_conf.interrupt_type = IOEX_INTERRUPT_NEGEDGE;
     io_rtc_conf.pin_bit_mask = (1ULL<<CORE_PIN_RTC_INTERRUPT);
 
-    ESP_ERROR_CHECK(ioex_config(_ioex, &io_rtc_conf));
+    err |= ioex_config(_ioex, &io_rtc_conf);
 
     ESP_LOGI(CORE_TAG, "Create control task");
     xTaskCreate(_controlTask, "Control task", 4096, NULL, 1, NULL);
 
     /* Init RTC */
     RTC.init(CORE_I2C_PORT_NUM);
+
+    return err;
 }
 
 void CoreStandalone::_controlTask(void *pvParameters)

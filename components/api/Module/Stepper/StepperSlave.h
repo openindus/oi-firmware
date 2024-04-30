@@ -15,16 +15,17 @@
 
 #pragma once
 
-#include "StepperStandalone.h"
-#include "ModuleSlave.h"
-
 #if (defined(OI_STEPPER) || defined(OI_STEPPER_VE)) && defined(MODULE_SLAVE)
 
-class StepperSlave : public StepperStandalone, public ModuleSlave
+#include "StepperStandalone.h"
+#include "ModuleSlave.h"
+#include "DigitalInputsSlave.h"
+
+class StepperSlave : public StepperStandalone, public ModuleSlave, public DigitalInputsSlave
 {
 public:
 
-    static void init(void);
+    static int init(void);
 
 private:
 

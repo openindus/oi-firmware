@@ -24,7 +24,7 @@ class CoreStandalone : public ModuleStandalone, public DigitalInputs, public Dig
 {
 public:
 
-    static void init(void);  
+    static int init(void);  
     static OI::CAN can;
     static OI::RS rs;
 

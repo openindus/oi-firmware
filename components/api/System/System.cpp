@@ -34,28 +34,28 @@ void System::init(void)
 
     /* Module init */
 #if defined(OI_CORE)
-    Core::init();
-    CoreCLI::init();
+    err |= Core::init();
+    err |= CoreCLI::init();
 #elif defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)
-    Discrete::init();
-    DiscreteCLI::init();
+    err |= Discrete::init();
+    err |= DiscreteCLI::init();
 #elif defined(OI_STEPPER) || defined(OI_STEPPER_VE)
-    Stepper::init();
-    StepperCLI::init();
-    StepperParamCLI::init();
+    err |= Stepper::init();
+    err |= StepperCLI::init();
+    err |= StepperParamCLI::init();
 #elif defined(OI_MIXED)
     err |= Mixed::init();
     err |= MixedCLI::init();
 #elif defined(OI_RELAY_HP) || defined(OI_RELAY_LP)
-    Relay::init();
+    err |= Relay::init();
 #elif defined(OI_BRUSHLESS)
-    Brushless::init();
+    err |= Brushless::init();
 #elif defined(OI_ANALOG_LS)
     err |= AnalogLs::init();
 #endif
-    ModuleCLI::init();
+    err |= ModuleCLI::init();
 #if defined(MODULE_MASTER)
-    ModuleMasterCLI::init();
+    err |= ModuleMasterCLI::init();
 #endif
 
     if (err != 0) {
@@ -106,7 +106,7 @@ void System::init(void)
     if (!UsbConsole::begin()) { // console will start only if user input "console" during startup
         /* Start main task if console is not started  */
         ESP_LOGI(TAG, "Create main task");
-        vTaskDelay(1);
+        vTaskDelay(10);
         xTaskCreate(_mainTask, "Main task", 8192, NULL, 1, NULL);
 #if defined(FORCE_CONSOLE)
         UsbConsole::begin(true); // Force console, will failed if Serial.begin() is called in user code

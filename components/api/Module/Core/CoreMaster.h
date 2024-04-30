@@ -25,7 +25,7 @@ class CoreMaster: public CoreStandalone, public ModuleMaster
 {
 public:
 
-    static void init(void);
+    static int init(void);
 
 };
 

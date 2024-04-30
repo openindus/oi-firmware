@@ -33,7 +33,7 @@ class ModuleStandalone
 {
 public:
 
-    static void init(void);
+    static int init(void);
 
     static void restart(void);
     static void ledOn(LedColor_t color);

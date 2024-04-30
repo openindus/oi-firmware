@@ -34,8 +34,9 @@ SemaphoreHandle_t BusRS::_semaphore;
  * @param tx_num Tx gpio num
  * @param rx_num Rx gpio Num
  */
-void BusRS::begin(uart_port_t port, gpio_num_t tx_num, gpio_num_t rx_num)
+int BusRS::begin(uart_port_t port, gpio_num_t tx_num, gpio_num_t rx_num)
 {
+    int err = 0;
     _port = port;
 
     _mutex = xSemaphoreCreateMutex();
@@ -54,21 +55,22 @@ void BusRS::begin(uart_port_t port, gpio_num_t tx_num, gpio_num_t rx_num)
         .rx_flow_ctrl_thresh = 122U,
         .source_clk = UART_SCLK_APB,
     };
-    ESP_ERROR_CHECK(uart_param_config( _port, &uart_config));
+    err |= uart_param_config( _port, &uart_config);
 
     /* install UART driver, and get the queue */
     ESP_LOGI(TAG, "Install uart driver");
     if (uart_is_driver_installed(_port)) {
         uart_driver_delete(_port);
     }
-    ESP_ERROR_CHECK(uart_driver_install(_port, BUS_RS_FRAME_LENGTH_MAX*2, 
-        BUS_RS_FRAME_LENGTH_MAX*2, 10, &_eventQueue, 0));
+    err |= uart_driver_install(_port, BUS_RS_FRAME_LENGTH_MAX*2, BUS_RS_FRAME_LENGTH_MAX*2, 10, &_eventQueue, 0);
 
-    ESP_ERROR_CHECK(uart_set_pin(_port, tx_num, rx_num, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
+    err |= uart_set_pin(_port, tx_num, rx_num, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
 
 #if !defined(DEBUG_BUS)
     esp_log_level_set(TAG, ESP_LOG_WARN);
 #endif
+
+    return err;
 
 }
 
@@ -78,7 +80,7 @@ void BusRS::begin(uart_port_t port, gpio_num_t tx_num, gpio_num_t rx_num)
 void BusRS::end(void)
 {
     ESP_LOGI(TAG, "Uninstall uart driver");
-    ESP_ERROR_CHECK(uart_driver_delete(_port));
+    uart_driver_delete(_port);
 }
 
 /**

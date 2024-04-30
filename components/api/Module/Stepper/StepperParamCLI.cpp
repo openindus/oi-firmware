@@ -40,9 +40,11 @@ static struct {
     struct arg_end *end;
 } getAdvancedParametersArgtable;
 
-void StepperParamCLI::init(void)
+int StepperParamCLI::init(void)
 {
     _registerDevice();
+
+    return 0;
 }
 
 static bool eq(const char * reference, const char * to_compare) {
