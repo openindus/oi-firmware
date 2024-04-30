@@ -16,10 +16,6 @@
 #pragma once
 
 #include "ModuleControl.h"
-#include "ModuleMaster.h"
-#include "AnalogInputsLVControl.h"
-#include "DigitalInputsControl.h"
-#include "DigitalOutputsControl.h"
 
 #if defined(MODULE_MASTER)
 

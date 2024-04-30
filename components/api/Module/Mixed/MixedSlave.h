@@ -17,10 +17,6 @@
 
 #include "MixedStandalone.h"
 #include "ModuleSlave.h"
-#include "AnalogOutputsSlave.h"
-#include "AnalogInputsLVSlave.h"
-#include "DigitalInputsSlave.h"
-#include "DigitalOutputsSlave.h"
 
 #if defined(OI_MIXED) && defined(MODULE_SLAVE)
 

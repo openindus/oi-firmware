@@ -38,7 +38,7 @@ static struct {
     struct arg_end *end;
 } _digitalWriteArgs;
 
-int MixedCLI::_digitalWrite(int argc, char **argv)
+int _digitalWrite(int argc, char **argv)
 {
     int nerrors = arg_parse(argc, argv, (void **) &_digitalWriteArgs);
     if (nerrors != 0) {
@@ -75,7 +75,7 @@ static struct {
     struct arg_end *end;
 } _digitalReadArgs;
 
-int MixedCLI::_digitalRead(int argc, char **argv)
+int _digitalRead(int argc, char **argv)
 {
     int nerrors = arg_parse(argc, argv, (void **) &_digitalReadArgs);
     if (nerrors != 0) {
@@ -110,7 +110,7 @@ static struct {
     struct arg_end *end;
 } _digitalGetCurrentArgs;
 
-int MixedCLI::_digitalGetCurrent(int argc, char **argv)
+int _digitalGetCurrent(int argc, char **argv)
 {
     int nerrors = arg_parse(argc, argv, (void **) &_digitalGetCurrentArgs);
     if (nerrors != 0) {
@@ -149,7 +149,7 @@ static struct {
     struct arg_end *end;
 } _setAnalogInputModeArgs;
 
-int MixedCLI::_setAnalogInputMode(int argc, char **argv)
+int _setAnalogInputMode(int argc, char **argv)
 {
     int nerrors = arg_parse(argc, argv, (void **) &_setAnalogInputModeArgs);
     if (nerrors != 0) {
@@ -187,7 +187,7 @@ static struct {
     struct arg_end *end;
 } _setAnalogInputVoltageRangeArgs;
 
-int MixedCLI::_setAnalogInputVoltageRange(int argc, char **argv)
+int _setAnalogInputVoltageRange(int argc, char **argv)
 {
     int nerrors = arg_parse(argc, argv, (void **) &_setAnalogInputVoltageRangeArgs);
     if (nerrors != 0) {
@@ -242,7 +242,7 @@ static struct {
     struct arg_end *end;
 } _analogReadInputReadArgs;
 
-int MixedCLI::_analogInputRead(int argc, char **argv)
+int _analogInputRead(int argc, char **argv)
 {
     int nerrors = arg_parse(argc, argv, (void **) &_analogReadInputReadArgs);
     if (nerrors != 0) {
@@ -301,7 +301,7 @@ static struct {
     struct arg_end *end;
 } _setAnalogOutputModeArgs;
 
-int MixedCLI::_setAnalogOutputMode(int argc, char **argv)
+int _setAnalogOutputMode(int argc, char **argv)
 {
     int nerrors = arg_parse(argc, argv, (void **) &_setAnalogOutputModeArgs);
     if (nerrors != 0) {
@@ -339,7 +339,7 @@ static struct {
     struct arg_end *end;
 } _analogOutputWriteArgs;
 
-int MixedCLI::_analogOutputWrite(int argc, char **argv)
+int _analogOutputWrite(int argc, char **argv)
 {
     int nerrors = arg_parse(argc, argv, (void **) &_analogOutputWriteArgs);
     if (nerrors != 0) {

@@ -17,9 +17,6 @@
 
 #include "DiscreteStandalone.h"
 #include "ModuleSlave.h"
-#include "AnalogInputsHVSlave.h"
-#include "DigitalInputsSlave.h"
-#include "DigitalOutputsSlave.h"
 
 #if (defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)) && defined(MODULE_SLAVE)
 
