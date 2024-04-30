@@ -30,11 +30,7 @@ void StepperControl::attachInterrupt(DigitalInputNum_t din, IsrCallback_t callba
     _isrCallback[din] = callback;
     ctrlRequest(msgBytes);
     
-    addEventCallback(
-        EVENT_DIGITAL_INTERRUPT, 
-        _id, 
-        [this](uint8_t num) { _isrCallback[num](NULL); }
-    );
+    // addEventCallback(EVENT_DIGITAL_INTERRUPT, [this](uint8_t num) { _isrCallback[num](NULL); });
 }
 
 void StepperControl::detachInterrupt(DigitalInputNum_t din)

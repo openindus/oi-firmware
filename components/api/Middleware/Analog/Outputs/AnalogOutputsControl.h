@@ -28,7 +28,7 @@ class AnalogOutputsControl
 {
 public:
 
-    AnalogOutputsControl() {}
+    AnalogOutputsControl(ModuleControl* control) :_control(control) {}
 
     /**
      * @brief Set the mode of the specified Analog Output
@@ -47,6 +47,10 @@ public:
      * @return 0 if success, -1 if error
      */
     int analogWrite(AnalogOutput_Num_t num, float value);
+
+private:
+
+    ModuleControl* _control;
 };
 
 #endif

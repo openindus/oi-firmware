@@ -15,19 +15,22 @@
 
 #pragma once
 
-#include "ModuleControl.h"
-
 #if defined(MODULE_MASTER)
 
-class DiscreteControl : public ModuleControl, public AnalogInputsHVControl, public DigitalInputsControl, public DigitalOutputsControl
+#include "ModuleControl.h"
+#include "DigitalInputsControl.h"
+#include "DigitalOutputsControl.h"
+#include "AnalogInputsHVControl.h"
+
+class DiscreteControl : public ModuleControl, public DigitalInputsControl, public DigitalOutputsControl, public AnalogInputsHVControl
 {
 public:
 
     DiscreteControl(int sn = 0) : 
         ModuleControl(sn),
-        AnalogInputsHVControl(),
-        DigitalInputsControl(),
-        DigitalOutputsControl() {}
+        DigitalInputsControl(this),
+        DigitalOutputsControl(this),
+        AnalogInputsHVControl(this) {}
 };
 
 #endif

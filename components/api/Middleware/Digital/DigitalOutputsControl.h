@@ -28,7 +28,7 @@ class DigitalOutputsControl
 {
 public:
 
-    DigitalOutputsControl() {}
+    DigitalOutputsControl(ModuleControl* control): _control(control) {}
 
     /**
      * @brief Set an output at high or low level.
@@ -51,7 +51,7 @@ public:
      * @param num DOUT to set
      * @param freq PWM frequency [50 - 1000 Hz]
     **/
-    int digitalModePWM(DigitalOutputNum_t num, uint32_t freq);
+    void digitalModePWM(DigitalOutputNum_t num, uint32_t freq);
 
     /**
      * @brief Set the duty cycle value of PWM for a digital output
@@ -68,6 +68,10 @@ public:
      * @return current in Ampere
     **/
     float digitalGetCurrent(DigitalOutputNum_t num);
+
+private:
+
+    ModuleControl* _control;
 };
 
 #endif

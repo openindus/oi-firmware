@@ -113,37 +113,6 @@ static struct {
     struct arg_end *end;
 } _analogReadInputReadArgs;
 
-static int analogRead(int argc, char **argv)
-{
-    int nerrors = arg_parse(argc, argv, (void **) &analogReadArgs);
-    if (nerrors != 0) {
-        arg_print_errors(stderr, analogReadArgs.end, argv[0]);
-        return 1;
-    }
-
-    AnalogInput_Num_t ain = (AnalogInput_Num_t)(analogReadArgs.ain->ival[0] - 1);
-
-    printf("%d\n", CoreStandalone::analogRead(ain));
-
-    return 0;
-}
-
-void CoreCLI::_registerAnalogRead(void)
-{
-    analogReadArgs.ain = arg_int1(NULL, NULL, "<AIN>", "[1-2]");
-    analogReadArgs.end = arg_end(2);
-
-    const esp_console_cmd_t cmd = {
-        .command = "analog-read",
-        .help = "Get analog input value (RAW)",
-        .hint = NULL,
-        .func = &analogRead,
-        .argtable = &analogReadArgs
-    };
-    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
-}
-
-
 /** 'analog-read-millivolts' */
 
 int analogInputRead(int argc, char **argv)

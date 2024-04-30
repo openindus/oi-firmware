@@ -28,7 +28,7 @@ class AnalogInputsHVControl
 {
 public:
 
-    AnalogInputsHVControl() {}
+    AnalogInputsHVControl(ModuleControl* control) :_control(control) {}
 
     /**
      * @brief Read the value of AIN.
@@ -58,6 +58,10 @@ public:
      * @return Value of the AIN input.
      */
     float analogReadMilliVolt(AnalogInput_Num_t num);
+    
+private:
+
+    ModuleControl* _control;
 };
 
 #endif

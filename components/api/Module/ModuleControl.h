@@ -15,12 +15,12 @@
 
 #pragma once
 
+#if defined(MODULE_MASTER)
+
 #include "Global.h"
 #include "ModuleStandalone.h"
 #include "Command.h"
 #include "ModuleMaster.h"
-
-#if defined(MODULE_MASTER)
 
 class ModuleControl
 {
@@ -54,8 +54,8 @@ public:
         return instance->_sn;
     }
 
-    inline static void addEventCallback(uint8_t event, uint16_t id, std::function<void(uint8_t)>callback) {
-        _eventCallbacks.insert({std::make_pair(event, id), callback});
+    inline static void addEventCallback(ModuleControl* instance, uint8_t event, std::function<void(uint8_t)>callback) {
+        _eventCallbacks.insert({std::make_pair(event, instance->_id), callback});
     }
 
     inline static std::vector<ModuleControl*> getAllInstances(void) {

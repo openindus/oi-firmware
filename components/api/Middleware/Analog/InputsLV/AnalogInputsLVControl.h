@@ -28,7 +28,7 @@ class AnalogInputsLVControl
 {
 public:
 
-    AnalogInputsLVControl() {}
+    AnalogInputsLVControl(ModuleControl* control) :_control(control) {}
 
     /**
      * @brief Read a voltage measure on analog pin and return the raw value.
@@ -103,6 +103,10 @@ public:
      * @return Voltage range (5: 0-10.24V, 6: 0-5.12V, 7: 0-2.56V or 8: 0-1.28V)
     **/
     uint8_t analogInputGetVoltageRange(AnalogInput_Num_t num);
+
+private:
+
+    ModuleControl* _control;
 };
 
 #endif

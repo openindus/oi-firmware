@@ -15,9 +15,13 @@
 
 #pragma once
 
-#include "ModuleControl.h"
-
 #if defined(MODULE_MASTER)
+
+#include "ModuleControl.h"
+#include "DigitalInputsControl.h"
+#include "DigitalOutputsControl.h"
+#include "AnalogInputsLVControl.h"
+#include "AnalogOutputsControl.h"
 
 class MixedControl : public ModuleControl, public AnalogOutputsControl, public AnalogInputsLVControl, public DigitalInputsControl, public DigitalOutputsControl
 {
@@ -25,10 +29,10 @@ public:
 
     MixedControl(int sn = 0) : 
         ModuleControl(sn),
-        AnalogOutputsControl(),
-        AnalogInputsLVControl(),
-        DigitalInputsControl(),
-        DigitalOutputsControl() {}
+        AnalogOutputsControl(this),
+        AnalogInputsLVControl(this),
+        DigitalInputsControl(this),
+        DigitalOutputsControl(this) {}
 };
 
 #endif

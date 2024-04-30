@@ -28,7 +28,7 @@ class DigitalInputsControl
 {
 public:
 
-    DigitalInputsControl() : _isrCallback{NULL} {}
+    DigitalInputsControl(ModuleControl* control) : _control(control), _isrCallback{NULL}  {}
 
     /**
      * @brief Read an input level. Argument is the DIN to read.
@@ -57,6 +57,7 @@ public:
 
 private:
 
+    ModuleControl* _control;
     IsrCallback_t _isrCallback[DIN_MAX];
 };
 
