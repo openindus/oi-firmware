@@ -41,7 +41,7 @@ const ioex_num_t _dinGpio[] = {
     CORE_IOEX_PIN_DIN_4,
 };
 
-const adc_channel_t _ainChannel[] = {
+const AdcNumChannel_t _ainChannel[] = {
     CORE_CHANNEL_AIN_1,
     CORE_CHANNEL_AIN_2
 };
@@ -148,7 +148,7 @@ void CoreStandalone::init()
      * @brief DOUT Init
      * 
      */
-    DigitalOutputs::(&_ioex, _doutGpio, _doutCurrentGpio, 4);
+    DigitalOutputs::init(&_ioex, _doutGpio, _doutCurrentGpio, 4);
 
     /**
      * @brief AIN Init 

@@ -200,17 +200,17 @@ void DigitalOutputs::digitalToggle(DigitalOutputNum_t num)
 void DigitalOutputs::digitalModePWM(DigitalOutputNum_t num, uint32_t freq)
 {
     if (num < _nb && _type == DIGITAL_OUTPUT_GPIO) {
-        if (freq >= DOUT_PWM_MAX_FREQUENCY_HZ) {
+        if (freq > DOUT_PWM_MAX_FREQUENCY_HZ) {
             ESP_LOGE(DOUT_TAG, "To high frequency %d, max is %d", freq, DOUT_PWM_MAX_FREQUENCY_HZ);
             return;
-        } else if (freq <= DOUT_PWM_MIN_FREQUENCY_HZ) {
+        } else if (freq < DOUT_PWM_MIN_FREQUENCY_HZ) {
             ESP_LOGE(DOUT_TAG, "To low frequency %d, min is %d", freq, DOUT_PWM_MIN_FREQUENCY_HZ);
             return;
         }
 
         ledc_timer_config_t ledcTimer = {
-            .speed_mode = LEDC_SPEED_MODE_MAX,
-            .duty_resolution = LEDC_TIMER_BIT_MAX,
+            .speed_mode = LEDC_LOW_SPEED_MODE,
+            .duty_resolution = LEDC_TIMER_14_BIT,
             .timer_num = LEDC_TIMER_1,
             .freq_hz = freq,
             .clk_cfg = LEDC_AUTO_CLK,
@@ -219,7 +219,7 @@ void DigitalOutputs::digitalModePWM(DigitalOutputNum_t num, uint32_t freq)
 
         ledc_channel_config_t ledcChannel = {
             .gpio_num           = _gpio_num[num],
-            .speed_mode         = LEDC_SPEED_MODE_MAX,
+            .speed_mode         = LEDC_LOW_SPEED_MODE,
             .channel            = (ledc_channel_t)(LEDC_CHANNEL_0 + num),
             .intr_type          = LEDC_INTR_DISABLE,
             .timer_sel          = LEDC_TIMER_1,

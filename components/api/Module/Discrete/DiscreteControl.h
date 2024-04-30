@@ -23,7 +23,7 @@ class DiscreteControl : public ModuleControl, public AnalogInputsHVControl, publ
 {
 public:
 
-    MixedControl(int sn = 0) : 
+    DiscreteControl(int sn = 0) : 
         ModuleControl(sn),
         AnalogInputsHVControl(),
         DigitalInputsControl(),

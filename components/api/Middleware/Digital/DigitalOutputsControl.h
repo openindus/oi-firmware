@@ -22,13 +22,13 @@
 #if defined(MODULE_MASTER)
 
 #include "ModuleControl.h"
-#include "DgitalInputs.h"
+#include "DigitalInputs.h"
 
 class DigitalOutputsControl
 {
 public:
 
-    DigitalInputsControl() {}
+    DigitalOutputsControl() {}
 
     /**
      * @brief Set an output at high or low level.

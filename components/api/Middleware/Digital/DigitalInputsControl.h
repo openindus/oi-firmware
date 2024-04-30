@@ -22,7 +22,7 @@
 #if defined(MODULE_MASTER)
 
 #include "ModuleControl.h"
-#include "DgitalInputs.h"
+#include "DigitalInputs.h"
 
 class DigitalInputsControl
 {
