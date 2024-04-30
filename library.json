@@ -28,13 +28,11 @@
             "components/libraries/Modem",
             "components/libraries/Netif",
             "components/libraries/Ethernet",
-            "components/libraries/USBHost",
-            "components/libraries/Modbus"
+            "components/libraries/USBHost"
         ]
     },
     "build": {
         "flags": [
-            "-I components",
             "-I components/api",
             "-I components/api/Module",
             "-I components/api/Module/AnalogLs",
@@ -48,7 +46,7 @@
             "-I components/drivers",
             "-I components/drivers/adc",
             "-I components/drivers/adc/ads114s0x",
-            "-I components/drivers/ads866x",
+            "-I components/drivers/adc/ads866x",
             "-I components/drivers/cd74hc4052",
             "-I components/drivers/dac",
             "-I components/drivers/dac/ad5413",
@@ -76,10 +74,16 @@
             "-I components/middleware/Thermocouple",
             "-I components/middleware/Usb",
             "-I components/middleware/WheastoneBridge",
-            "-I components/libraries"
+            "-I components/libraries/Modbus"
         ],
         "includeDir": ".",
         "srcDir": ".",
-        "srcFilter": ["-<*>", "+<components>"]
+        "srcFilter": [
+            "-<*>", 
+            "+<components/drivers>",
+            "+<components/middleware>",
+            "+<components/api>",
+            "+<components/libraries/Modbus>"
+        ]
     }
 }
