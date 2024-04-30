@@ -74,14 +74,14 @@
             "-I components/api/Middleware/Thermocouple",
             "-I components/api/Middleware/Usb",
             "-I components/api/Middleware/WheastoneBridge",
-            "-I components/libraries"
+            "-I components/libraries",
+            "-I components/libraries/Modbus"
         ],
         "includeDir": ".",
         "srcDir": ".",
         "srcFilter": [
             "-<*>", 
             "+<components/drivers>",
-            "+<components/middleware>",
             "+<components/api>",
             "+<components/libraries/Modbus>"
         ]
