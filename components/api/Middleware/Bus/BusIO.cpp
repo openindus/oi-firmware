@@ -46,7 +46,6 @@ void BusIO::init(Config_t* config)
     gpio_config(&gpioConf);
 
     /* Cmd MOSFET Alim */
-#if !defined(CONFIG_IDF_TARGET_ESP32) 
     ESP_LOGI(BUS_IO_TAG, "Init Command mosfet alim");
     gpio_config_t cmdMosfetAlimConf = {
         .pin_bit_mask = (1ULL<<_config->gpioNumPower),
@@ -57,7 +56,6 @@ void BusIO::init(Config_t* config)
     };
     gpio_config(&cmdMosfetAlimConf);
     gpio_set_level(_config->gpioNumPower, 0);
-#endif
 }
 
 uint32_t BusIO::readId(void)

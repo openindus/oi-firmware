@@ -15,10 +15,13 @@
 
 #pragma once
 
+#if (defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)) && defined(MODULE_SLAVE)
+
 #include "DiscreteStandalone.h"
 #include "ModuleSlave.h"
-
-#if (defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)) && defined(MODULE_SLAVE)
+#include "DigitalInputsSlave.h"
+#include "DigitalOutputsSlave.h"
+#include "AnalogInputsHVSlave.h"
 
 class DiscreteSlave : public ModuleSlave, public DiscreteStandalone, public DigitalInputsSlave, public DigitalOutputsSlave, public AnalogInputsHVSlave
 {

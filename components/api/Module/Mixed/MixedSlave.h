@@ -15,10 +15,14 @@
 
 #pragma once
 
+#if defined(OI_MIXED) && defined(MODULE_SLAVE)
+
 #include "MixedStandalone.h"
 #include "ModuleSlave.h"
-
-#if defined(OI_MIXED) && defined(MODULE_SLAVE)
+#include "DigitalInputsSlave.h"
+#include "DigitalOutputsSlave.h"
+#include "AnalogInputsLVSlave.h"
+#include "AnalogOutputsSlave.h"
 
 class MixedSlave : public ModuleSlave, public MixedStandalone, public AnalogOutputsSlave, public AnalogInputsLVSlave, public DigitalInputsSlave, public DigitalOutputsSlave
 {

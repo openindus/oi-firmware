@@ -258,8 +258,6 @@ void CoreStandalone::_controlTask(void *pvParameters)
     while(1) 
     {
 
-#if defined(CONFIG_IDF_TARGET_ESP32S3)
-
         /* Checking if user power is in overcurrent */
         // // If error happened
         // if (ioex_get_level(_ioex, CORE_IOEX_PIN_5V_USER_PG) == 0)
@@ -300,9 +298,6 @@ void CoreStandalone::_controlTask(void *pvParameters)
         {
             usb_power++;
         }
-
-#endif
-
         vTaskDelay(pdMS_TO_TICKS(500));
     }
 }

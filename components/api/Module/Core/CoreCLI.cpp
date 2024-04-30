@@ -24,7 +24,6 @@ void CoreCLI::init(void)
     _registerDigitalGetOverCurrentStatus();
     _registerAnalogInputRead();
     _registerSetAnalogCoeffs();
-    _registerGetOverCurrentStatus();
     _registerDate();
 }
 
@@ -224,7 +223,7 @@ static int digitalGetOverCurrentStatus(int argc, char **argv)
     return 0;
 }
 
-void CoreCLI::_registerGetOverCurrentStatus(void)
+void CoreCLI::_registerDigitalGetOverCurrentStatus(void)
 {
     digitalReadOverCurrentArgs.dout = arg_int1(NULL, NULL, "<DOUT>", "[1-4]");
     digitalReadOverCurrentArgs.end = arg_end(2);

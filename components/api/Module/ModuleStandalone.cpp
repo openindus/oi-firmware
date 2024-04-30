@@ -50,14 +50,12 @@ void ModuleStandalone::init()
     ESP_LOGI(MODULE_TAG, "Hardware version : %s", hardware_version);
 
     /* Temperature sensor */
-#if !defined(CONFIG_IDF_TARGET_ESP32)
     ESP_LOGI(MODULE_TAG, "Init Temperature sensor");
     temp_sensor_config_t temp_sensor = TSENS_CONFIG_DEFAULT();
     temp_sensor_get_config(&temp_sensor);
     temp_sensor.dac_offset = TSENS_DAC_DEFAULT; // DEFAULT: range:-10℃ ~  80℃, error < 1℃.
     temp_sensor_set_config(temp_sensor);
     temp_sensor_start();
-#endif
 }
 
 /**
@@ -110,9 +108,7 @@ void ModuleStandalone::ledBlink(LedColor_t color, uint32_t period)
 float ModuleStandalone::getTemperature(void)
 {
     float tsens_out = 0;
-#if !defined(CONFIG_IDF_TARGET_ESP32)
     temp_sensor_read_celsius(&tsens_out);
-#endif
     return tsens_out;
 }
 

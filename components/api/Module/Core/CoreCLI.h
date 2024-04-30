@@ -33,7 +33,6 @@ private:
     static void _registerDigitalGetOverCurrentStatus(void);
     static void _registerAnalogInputRead(void);
     static void _registerSetAnalogCoeffs(void);
-    static void _registerGetOverCurrentStatus(void);
     static void _registerDate(void);
 
 };
