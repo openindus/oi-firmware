@@ -45,7 +45,7 @@ public:
 
 private:
 
-    static void _initRelays(void);
+    static int _initRelays(void);
 
 };
 
