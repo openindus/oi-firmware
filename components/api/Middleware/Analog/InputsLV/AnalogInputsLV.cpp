@@ -9,9 +9,11 @@
 #include "AnalogInputsLV.h"
 
 static const char TAG[] = "AnalogInputsLV";
+static SemaphoreHandle_t _mutex;
 
 uint8_t AnalogInputsLV::_nb;
 AnalogInputAds866x** AnalogInputsLV::_ains;
+uint8_t* AnalogInputsLV::_current_sat;
 
 int AnalogInputsLV::init(ads866x_config_t *ads866xConfig, const gpio_num_t* cmdGpio, uint8_t nb) 
 {
@@ -29,11 +31,20 @@ int AnalogInputsLV::init(ads866x_config_t *ads866xConfig, const gpio_num_t* cmdG
     err |= ads866x_init(ads866xConfig);
 
     _ains = (AnalogInputAds866x**)calloc(_nb, sizeof(AnalogInputAds866x));
+    _current_sat = (uint8_t*)calloc(_nb, sizeof(uint8_t));
 
     for (size_t i = 0; i < _nb; i++) {
         _ains[i] = new AnalogInputAds866x(i, cmdGpio[i]);
         err |= _ains[i]->init(AIN_DEFAULT_RANGE, AIN_DEFAULT_MODE);
+        _current_sat[i] = 0;
     }
+
+    _mutex = xSemaphoreCreateMutex();
+    xSemaphoreGive(_mutex);
+
+    /* Create control task for overcurrent */
+    ESP_LOGI(TAG, "Create AIN control task");
+    xTaskCreate(_controlTask, "Control ain task", 4096, NULL, 1, NULL);
     
     return err;
 
@@ -115,6 +126,32 @@ uint8_t AnalogInputsLV::analogInputGetVoltageRange(AnalogInput_Num_t num)
         ESP_LOGE(TAG, "INVALID INPUT AIN_%i", num+1);
     }
     return 0;
+}
+
+/* Every 500ms check if there is a power error on DOUT or
+    If output is in error: desactivate for 5 secondes then retry */
+void AnalogInputsLV::_controlTask(void *pvParameters)
+{
+    while (1) {
+        for (size_t i = 0; i < _nb; i++) {
+            if (_ains[i]->getMode() == AIN_MODE_CURRENT) {  //TODO: revoir si besoin semaphore
+                if (_ains[i]->read(AIN_UNIT_AMP) > AIN_SAT_CURRENT_AMP) {
+                    _current_sat[i] += 1;
+                    if (_current_sat[i] >= 10) {
+                        xSemaphoreTake(_mutex, portMAX_DELAY);
+                        _ains[i]->setMode(AIN_MODE_VOLTAGE);
+                        xSemaphoreGive(_mutex);
+                        _current_sat[i] = 0;
+                        ESP_LOGE(TAG, "Overcurrent for more than 10s on AIN_%i, switching to voltage mode", i+1);
+                    }
+                }
+                else {
+                    _current_sat[i] = 0;
+                }
+            }
+        }
+        vTaskDelay(pdMS_TO_TICKS(500));
+    }
 }
 
 /******************* Analog Input Ads866x **********************/

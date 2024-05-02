@@ -8,13 +8,20 @@
 
 #pragma once
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/semphr.h"
+#include "esp_timer.h"
 #include <string.h>
+#include "esp_err.h"
+#include "esp_log.h"
 #include "ads866x.h"
 #include "AnalogInputs.h"
 
 #define AIN_CURRENT_MODE_RES_VALUE  100.0f
 #define AIN_DEFAULT_MODE            AIN_MODE_VOLTAGE
 #define AIN_DEFAULT_RANGE           AIN_VOLTAGE_RANGE_0_10V24
+#define AIN_SAT_CURRENT_AMP         25.5f
 
 class AnalogInputAds866x
 {
@@ -123,6 +130,8 @@ private:
 
     static uint8_t _nb;
     static AnalogInputAds866x** _ains;
+    static uint8_t* _current_sat;
 
     static float read(AnalogInput_Num_t num, AnalogInput_Unit_t unit);
+    static void _controlTask(void *pvParameters);
 };
