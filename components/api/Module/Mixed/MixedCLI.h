@@ -17,25 +17,18 @@
 
 #include "Global.h"
 #include "MixedStandalone.h"
+#include "DigitalInputsCLI.h"
+#include "DigitalOutputsCLI.h"
+#include "AnalogInputsLVCLI.h"
+#include "AnalogOutputsCLI.h"
 
 #if defined(OI_MIXED)
 
-class MixedCLI
+class MixedCLI : public AnalogOutputsCLI, public AnalogInputsLVCLI, public DigitalInputsCLI, public DigitalOutputsCLI
 {
 public:
 
     static int init(void);
-
-private:
-
-    static void _registerDigitalWrite(void);
-    static void _registerDigitalRead(void);
-    static void _registerDigitalGetCurrent(void);
-    static void _registerSetAnalogInputMode(void);
-    static void _registerSetAnalogInputVoltageRange(void);
-    static void _registerAnalogInputRead(void);
-    static void _registerSetAnalogOutputMode(void);
-    static void _registerAnalogOutputWrite(void);
 };
 
 #endif

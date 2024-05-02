@@ -26,13 +26,13 @@ public:
 
 private:
 
-    static void _registerRestart(void);
-    static void _registerSetBoardInfo(void);
-    static void _registerGetBoardInfo(void);
-    static void _registerLed(void);
-    static void _registerLog(void);
-    static void _registerReadId(void);
-    static void _registerWriteSync(void);
-    static void _registerReadSync(void);
-    static void _registerBusPower(void);
+    static int _registerRestart(void);
+    static int _registerSetBoardInfo(void);
+    static int _registerGetBoardInfo(void);
+    static int _registerLed(void);
+    static int _registerLog(void);
+    static int _registerReadId(void);
+    static int _registerWriteSync(void);
+    static int _registerReadSync(void);
+    static int _registerBusPower(void);
 };
