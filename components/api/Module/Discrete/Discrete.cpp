@@ -6,15 +6,14 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file DiscreteStandalone.cpp
+ * @file Discrete.cpp
  * @brief Functions for discrete module
  *
  * For more information on OpenIndus:
  * @see https://openindus.com
  */
 
-#include "DiscreteStandalone.h"
-#include "DiscretePinout.h"
+#include "Discrete.h"
 
 #if defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)
 
@@ -60,6 +59,17 @@ AdcNumChannel_t _ainChannel[] = {
     DISCRETE_CHANNEL_AIN_2
 };
 
+int DiscreteCLI::init(void)
+{
+    int err = 0;
+
+    err |= AnalogInputsHVCLI::init();
+    err |= DigitalOutputsCLI::init();
+    err |= DigitalInputsCLI::init();
+
+    return err;
+}
+
 int DiscreteStandalone::init()
 {
     int err = 0;
@@ -67,26 +77,24 @@ int DiscreteStandalone::init()
     ESP_LOGI(DISCRETE_TAG, "Init");
 
     err |= ModuleStandalone::init();
-
-    /**
-     * @brief DOUT Init
-     * 
-     */
     err |= DigitalOutputs::init(_doutGpio, _doutAdcChannel, 8);
-
-    /**
-     * @brief DIN Init
-     * 
-     */
     err |= DigitalInputs::init(_dinGpio, 10);
-
-    /**
-     * @brief AIN Init
-     * 
-     */
     err |= AnalogInputsHV::init(_ainChannel, 2);
 
     return err;
 }
+#endif
 
+#if (defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)) && defined(MODULE_SLAVE)
+
+int DiscreteSlave::init(void)
+{
+    int err = ModuleSlave::init();
+    err |= DiscreteStandalone::init();
+    err |= AnalogInputsHVSlave::init();
+    err |= DigitalOutputsSlave::init();
+    err |= DigitalInputsSlave::init();
+
+    return err;
+}
 #endif

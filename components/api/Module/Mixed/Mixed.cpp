@@ -6,18 +6,18 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file MixedStandalone.cpp
+ * @file Mixed.cpp
  * @brief Functions for Mixed module
  *
  * For more information on OpenIndus:
  * @see https://openindus.com
  */
 
-#include "MixedStandalone.h"
+#include "Mixed.h"
 
 #if defined(OI_MIXED)
 
-static const char TAG[] = "MixedStandalone";
+static const char TAG[] = "Mixed";
 
 static const gpio_num_t _dinGpio[] = {
     MIXED_PIN_DIN_1,
@@ -55,6 +55,18 @@ static ads866x_config_t adcSPIConfig = {
     .pin_alarm = MIXED_ADC_PIN_ALARM,
     .adc_channel_nb = MIXED_ADC_NB
 };
+
+int MixedCLI::init(void)
+{
+    int err = 0;
+
+    err |= AnalogOutputsCLI::init();
+    err |= AnalogInputsLVCLI::init();
+    err |= DigitalOutputsCLI::init();
+    err |= DigitalInputsCLI::init();
+
+    return err;
+}
 
 int MixedStandalone::init(void)
 {
@@ -97,6 +109,23 @@ int MixedStandalone::init(void)
     
     /* Initialize analog inputs */
     err |=AnalogInputsLV::init(&adcSPIConfig, _ainCmdGpio, 4);
+
+    return err;
+}
+#endif
+
+#if defined(OI_MIXED) && defined(MODULE_SLAVE)
+
+int MixedSlave::init(void)
+{
+    int err = 0;
+
+    err |= ModuleSlave::init();
+    err |= MixedStandalone::init();
+    err |= AnalogOutputsSlave::init();
+    err |= AnalogInputsLVSlave::init();
+    err |= DigitalOutputsSlave::init();
+    err |= DigitalInputsSlave::init();
 
     return err;
 }
