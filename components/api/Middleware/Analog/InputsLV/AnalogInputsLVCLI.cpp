@@ -30,7 +30,7 @@ static struct {
     struct arg_end *end;
 } _analogInputModeArgs;
 
-int _analogInputMode(int argc, char **argv)
+static int _analogInputMode(int argc, char **argv)
 {
     int err = arg_parse(argc, argv, (void **) &_analogInputModeArgs);
     if (err != 0) {
@@ -68,7 +68,7 @@ static struct {
     struct arg_end *end;
 } _analogInputVoltageRangeArgs;
 
-int _analogInputVoltageRange(int argc, char **argv)
+static int _analogInputVoltageRange(int argc, char **argv)
 {
     int err = arg_parse(argc, argv, (void **) &_analogInputVoltageRangeArgs);
     if (err != 0) {
@@ -123,7 +123,7 @@ static struct {
     struct arg_end *end;
 } _analogReadInputReadArgs;
 
-int _AnalogRead(int argc, char **argv)
+static int _AnalogRead(int argc, char **argv)
 {
     int err = arg_parse(argc, argv, (void **) &_analogReadInputReadArgs);
     if (err != 0) {

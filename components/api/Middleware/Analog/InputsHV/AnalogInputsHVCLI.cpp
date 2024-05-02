@@ -30,7 +30,7 @@ static struct {
     struct arg_end *end;
 } _analogReadArgs;
 
-int _analogRead(int argc, char **argv)
+static int _analogRead(int argc, char **argv)
 {
     int err = arg_parse(argc, argv, (void **) &_analogReadArgs);
     if (err != 0) {
@@ -88,7 +88,7 @@ static struct {
     struct arg_end *end;
 } _setAnalogCoeffsArgs;
 
-int _setAnalogCoeffs(int argc, char **argv)
+static int _setAnalogCoeffs(int argc, char **argv)
 {
     int err = arg_parse(argc, argv, (void **) &_setAnalogCoeffsArgs);
     if (err != 0) {
@@ -126,7 +126,7 @@ static struct {
     struct arg_end *end;
 } _getAnalogCoeffsArgs;
 
-int _getAnalogCoeffs(int argc, char **argv)
+static int _getAnalogCoeffs(int argc, char **argv)
 {
     int err = arg_parse(argc, argv, (void **) &_getAnalogCoeffsArgs);
     if (err != 0) {

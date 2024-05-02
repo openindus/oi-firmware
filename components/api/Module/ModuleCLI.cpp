@@ -17,17 +17,19 @@
 
 int ModuleCLI::init(void)
 {
-    _registerSetBoardInfo();
-    _registerGetBoardInfo();
-    _registerRestart();
-    _registerLog();
-    _registerLed();
-    _registerReadId();
-    _registerWriteSync();
-    _registerReadSync();
-    _registerBusPower();
+    int err = 0;
 
-    return 0;
+    err |= _registerSetBoardInfo();
+    err |= _registerGetBoardInfo();
+    err |= _registerRestart();
+    err |= _registerLog();
+    err |= _registerLed();
+    err |= _registerReadId();
+    err |= _registerWriteSync();
+    err |= _registerReadSync();
+    err |= _registerBusPower();
+
+    return err;
 }
 
 /** 'restart' */

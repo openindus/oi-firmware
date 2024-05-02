@@ -30,7 +30,7 @@ static struct {
     struct arg_end *end;
 } _digitalWriteArgs;
 
-int _digitalWrite(int argc, char **argv)
+static int _digitalWrite(int argc, char **argv)
 {
     int err = arg_parse(argc, argv, (void **) &_digitalWriteArgs);
     if (err != 0) {
@@ -67,7 +67,7 @@ static struct {
     struct arg_end *end;
 } _digitalGetArgs;
 
-int _digitalGetCurrent(int argc, char **argv)
+static int _digitalGetCurrent(int argc, char **argv)
 {
     int err = arg_parse(argc, argv, (void **) &_digitalGetArgs);
     if (err != 0) {
@@ -97,7 +97,7 @@ int DigitalOutputsCLI::_registerDigitalGetCurrent(void)
     return esp_console_cmd_register(&cmd);
 }
 
-int _digitalGetOverCurrentStatus(int argc, char **argv)
+static int _digitalGetOverCurrentStatus(int argc, char **argv)
 {
     int err = arg_parse(argc, argv, (void **) &_digitalGetArgs);
     if (err != 0) {

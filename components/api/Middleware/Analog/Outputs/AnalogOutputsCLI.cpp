@@ -29,7 +29,7 @@ static struct {
     struct arg_end *end;
 } _analogOutputModeArgs;
 
-int _analogOutputMode(int argc, char **argv)
+static int _analogOutputMode(int argc, char **argv)
 {
     int err = arg_parse(argc, argv, (void **) &_analogOutputModeArgs);
     if (err != 0) {
@@ -67,7 +67,7 @@ static struct {
     struct arg_end *end;
 } _analogOutputWriteArgs;
 
-int _analogOutputWrite(int argc, char **argv)
+static int _analogOutputWrite(int argc, char **argv)
 {
     int err = arg_parse(argc, argv, (void **) &_analogOutputWriteArgs);
     if (err != 0) {
