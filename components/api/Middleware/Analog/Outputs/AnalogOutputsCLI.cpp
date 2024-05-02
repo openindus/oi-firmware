@@ -14,8 +14,6 @@
 
 #include "AnalogOutputsCLI.h"
 
-#if defined(MODULE_STANDALONE) || defined(MODULE_MASTER)
-
 int AnalogOutputsCLI::init() {
     int err = 0;
 
@@ -55,7 +53,7 @@ int AnalogOutputsCLI::_registerAnalogOutputMode()
 
     const esp_console_cmd_t cmd = {
         .command = "analog-output-mode",
-        .help = "Set Aout mode between Voltage (-10V to 10V) and Current (0mA to 20mA)",
+        .help = "Set AOUT mode between Voltage (-10V to 10V) and Current (0mA to 20mA)",
         .hint = NULL,
         .func = &_analogOutputMode,
         .argtable = &_analogOutputModeArgs
@@ -93,11 +91,10 @@ int AnalogOutputsCLI::_registerAnalogOutputWrite()
 
     const esp_console_cmd_t cmd = {
         .command = "analog-write",
-        .help = "Set Aout to specified voltage (-10V to 10V) or current (0mA to 20mA)",
+        .help = "Set AOUT to specified voltage (-10V to 10V) or current (0mA to 20mA)",
         .hint = NULL,
         .func = &_analogOutputWrite,
         .argtable = &_analogOutputWriteArgs
     };
     return esp_console_cmd_register(&cmd);
 }
-#endif

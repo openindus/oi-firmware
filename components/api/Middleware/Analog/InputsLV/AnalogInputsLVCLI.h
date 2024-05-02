@@ -19,8 +19,6 @@
 
 #pragma once
 
-#if defined(MODULE_STANDALONE) || defined(MODULE_MASTER)
-
 #include "Global.h"
 #include "AnalogInputsLV.h"
 
@@ -32,7 +30,5 @@ public:
 private:
     static int _registerAnalogInputMode();
     static int _registerAnalogInputVoltageRange();
-    static int _registerAnalogInputRead();
+    static int _registerAnalogRead();
 };
-
-#endif

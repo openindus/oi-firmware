@@ -19,8 +19,6 @@
 
 #pragma once
 
-#if defined(MODULE_STANDALONE) || defined(MODULE_MASTER)
-
 #include "Global.h"
 #include "DigitalInputs.h"
 
@@ -32,5 +30,3 @@ public:
 private:
     static int _registerDigitalRead();
 };
-
-#endif

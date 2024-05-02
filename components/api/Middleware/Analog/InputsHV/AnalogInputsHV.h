@@ -31,7 +31,7 @@ public:
     int init(void);
     int read(void);
     float read(AnalogInput_Unit_t unit);
-    void getCoeffs();
+    void getCoeffs(float* a, float* b);
     float applyCoeffs(float voltage);
 
 private:
@@ -40,6 +40,8 @@ private:
     AdcNumChannel_t _channel;
     esp_adc_cal_characteristics_t _adc_characteristic;
     AnalogInput_eFuse_Coeff_t _coeff;
+
+    void getEFuseCoeffs();
 };
 
 class AnalogInputsHV
@@ -77,7 +79,22 @@ public:
      */
     static float analogReadMilliVolt(AnalogInput_Num_t num);
     
+    /**
+     * @brief Set the Analog Coeffs object
+     * 
+     * @param a slope coefficient
+     * @param b y-intercept
+     * @return 0 if success, -1 if error 
+    **/
     static int setAnalogCoeffs(float* a, float* b);
+
+    /**
+     * @brief Get the Analog Coeffs object
+     * 
+     * @param as slope coefficient of each Analog Inputs
+     * @param bs y-intercept of each Analog Inputs
+    **/
+    static void getAnalogCoeffs(float* as, float* bs);
 
 private:
 

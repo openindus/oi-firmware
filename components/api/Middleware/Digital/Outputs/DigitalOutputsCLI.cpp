@@ -14,13 +14,12 @@
 
 #include "DigitalOutputsCLI.h"
 
-#if defined(MODULE_STANDALONE) || defined(MODULE_MASTER)
-
 int DigitalOutputsCLI::init() {
     int err = 0;
 
     err |= _registerDigitalWrite();
     err |= _registerDigitalGetCurrent();
+    err |= _registerDigitalGetOverCurrentStatus();
 
     return err;
 }
@@ -66,17 +65,17 @@ int DigitalOutputsCLI::_registerDigitalWrite(void)
 static struct {
     struct arg_int *dout;
     struct arg_end *end;
-} _digitalGetCurrentArgs;
+} _digitalGetArgs;
 
 int _digitalGetCurrent(int argc, char **argv)
 {
-    int err = arg_parse(argc, argv, (void **) &_digitalGetCurrentArgs);
+    int err = arg_parse(argc, argv, (void **) &_digitalGetArgs);
     if (err != 0) {
-        arg_print_errors(stderr, _digitalGetCurrentArgs.end, argv[0]);
+        arg_print_errors(stderr, _digitalGetArgs.end, argv[0]);
         return -1;
     }
 
-    DigitalOutputNum_t dout = (DigitalOutputNum_t)(_digitalGetCurrentArgs.dout->ival[0] - 1);
+    DigitalOutputNum_t dout = (DigitalOutputNum_t)(_digitalGetArgs.dout->ival[0] - 1);
 
     printf("%.3f\n", DigitalOutputs::digitalGetCurrent(dout));
 
@@ -85,17 +84,45 @@ int _digitalGetCurrent(int argc, char **argv)
 
 int DigitalOutputsCLI::_registerDigitalGetCurrent(void)
 {
-    _digitalGetCurrentArgs.dout = arg_int1(NULL, NULL, "<DOUT>", "[1-4]");
-    _digitalGetCurrentArgs.end = arg_end(2);
+    _digitalGetArgs.dout = arg_int1(NULL, NULL, "<DOUT>", "[1-4]");
+    _digitalGetArgs.end = arg_end(2);
 
     const esp_console_cmd_t cmd = {
         .command = "digital-get-current",
-        .help = "Get Dout current",
+        .help = "Get DOUT current",
         .hint = NULL,
         .func = &_digitalGetCurrent,
-        .argtable = &_digitalGetCurrentArgs
+        .argtable = &_digitalGetArgs
     };
     return esp_console_cmd_register(&cmd);
 }
 
-#endif
+int _digitalGetOverCurrentStatus(int argc, char **argv)
+{
+    int err = arg_parse(argc, argv, (void **) &_digitalGetArgs);
+    if (err != 0) {
+        arg_print_errors(stderr, _digitalGetArgs.end, argv[0]);
+        return -1;
+    }
+
+    DigitalOutputNum_t dout = (DigitalOutputNum_t)(_digitalGetArgs.dout->ival[0] - 1);
+
+    printf("%d\n", DigitalOutputs::digitalGetOverCurrentStatus(dout));
+
+    return 0;
+}
+
+int DigitalOutputsCLI::_registerDigitalGetOverCurrentStatus(void)
+{
+    _digitalGetArgs.dout = arg_int1(NULL, NULL, "<DOUT>", "[1-4]");
+    _digitalGetArgs.end = arg_end(2);
+
+    const esp_console_cmd_t cmd = {
+        .command = "digital-get-over-current-status",
+        .help = "Get DOUT over current status",
+        .hint = NULL,
+        .func = &_digitalGetOverCurrentStatus,
+        .argtable = &_digitalGetArgs
+    };
+    return esp_console_cmd_register(&cmd);
+}

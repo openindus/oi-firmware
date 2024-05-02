@@ -19,8 +19,6 @@
 
 #pragma once
 
-#if defined(MODULE_STANDALONE) || defined(MODULE_MASTER)
-
 #include "Global.h"
 #include "DigitalOutputs.h"
 
@@ -32,6 +30,5 @@ public:
 private:
     static int _registerDigitalWrite();
     static int _registerDigitalGetCurrent();
+    static int _registerDigitalGetOverCurrentStatus();
 };
-
-#endif

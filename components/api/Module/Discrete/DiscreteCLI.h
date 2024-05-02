@@ -17,23 +17,17 @@
 
 #include "Global.h"
 #include "DiscreteStandalone.h"
+#include "DigitalInputsCLI.h"
+#include "DigitalOutputsCLI.h"
+#include "AnalogInputsHVCLI.h"
 
 #if defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)
 
-class DiscreteCLI
+class DiscreteCLI : public AnalogInputsHVCLI, public DigitalInputsCLI, public DigitalOutputsCLI
 {
 public:
 
     static int init(void);
-
-private:
-
-    static void _registerDigitalWrite(void);
-    static void _registerDigitalRead(void);
-    static void _registerDigitalGetCurrent(void);
-    static void _registerAnalogInputRead(void);
-    static void _registerSetAnalogCoeffs(void);
-
 };
 
 #endif

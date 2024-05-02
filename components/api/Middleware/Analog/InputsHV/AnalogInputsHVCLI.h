@@ -19,8 +19,6 @@
 
 #pragma once
 
-#if defined(MODULE_STANDALONE) || defined(MODULE_MASTER)
-
 #include "Global.h"
 #include "AnalogInputsHV.h"
 
@@ -30,7 +28,7 @@ public:
     static int init();
 
 private:
-
+    static int _registerAnalogRead();
+    static int _registerSetAnalogCoeffs();
+    static int _registerGetAnalogCoeffs();
 };
-
-#endif

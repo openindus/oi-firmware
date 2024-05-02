@@ -89,10 +89,17 @@ int AnalogInputsHV::setAnalogCoeffs(float* a, float* b)
 
     // Read coeffs
     for (int j = 0; j < _nb; j++) {
-        _ains[j]->getCoeffs();
+        _ains[j]->getCoeffs(NULL, NULL);
     }
 
     return 0;
+}
+
+void AnalogInputsHV::getAnalogCoeffs(float* as, float* bs)
+{
+    for (int i = 0; i < _nb; i++) {
+        _ains[i]->getCoeffs(&as[i], &bs[i]);
+    }
 }
 
 /******************* Analog Input Esp32s3 **********************/
@@ -120,7 +127,7 @@ int AnalogInputEsp32s3::init()
         ESP_LOGE(TAG, "Wrong ADC unit !");
     }
 
-    getCoeffs();
+    getEFuseCoeffs();
 
     return err;
 }
@@ -174,7 +181,7 @@ float AnalogInputEsp32s3::read(AnalogInput_Unit_t unit)
     return value;
 }
 
-void AnalogInputEsp32s3::getCoeffs(void)
+void AnalogInputEsp32s3::getEFuseCoeffs()
 {
     if (esp_efuse_block_is_empty(EFUSE_BLK_KEY1) == false) {
         // getting coeff in eFuse
@@ -191,6 +198,13 @@ void AnalogInputEsp32s3::getCoeffs(void)
     ESP_LOGI(TAG, "Reading default AIN_%i coeffs: a=%f b=%f", _num+1, _coeff.ain_coeff_a, _coeff.ain_coeff_b);
     
     return;
+}
+
+void AnalogInputEsp32s3::getCoeffs(float* a, float* b)
+{
+    getEFuseCoeffs();
+    *a = _coeff.ain_coeff_a;
+    *b = _coeff.ain_coeff_b;
 }
 
 float AnalogInputEsp32s3::applyCoeffs(float voltage)

@@ -14,14 +14,12 @@
 
 #include "AnalogInputsLVCLI.h"
 
-#if defined(MODULE_STANDALONE) || defined(MODULE_MASTER)
-
 int AnalogInputsLVCLI::init() {
     int err = 0;
 
     err |= _registerAnalogInputMode();
     err |= _registerAnalogInputVoltageRange();
-    err |= _registerAnalogInputRead();
+    err |= _registerAnalogRead();
 
     return err;
 }
@@ -111,7 +109,7 @@ int AnalogInputsLVCLI::_registerAnalogInputVoltageRange()
 
     const esp_console_cmd_t cmd = {
         .command = "analog-input-voltage-range",
-        .help = "Set Ain voltage range",
+        .help = "Set AIN voltage range",
         .hint = NULL,
         .func = &_analogInputVoltageRange,
         .argtable = &_analogInputVoltageRangeArgs
@@ -125,7 +123,7 @@ static struct {
     struct arg_end *end;
 } _analogReadInputReadArgs;
 
-int _analogInputRead(int argc, char **argv)
+int _AnalogRead(int argc, char **argv)
 {
     int err = arg_parse(argc, argv, (void **) &_analogReadInputReadArgs);
     if (err != 0) {
@@ -134,7 +132,10 @@ int _analogInputRead(int argc, char **argv)
     }
 
     AnalogInput_Num_t ain = (AnalogInput_Num_t)(_analogReadInputReadArgs.ain->ival[0] - 1);
-    AnalogInput_Unit_t unit = (AnalogInput_Unit_t)(_analogReadInputReadArgs.unit->ival[0]);
+    AnalogInput_Unit_t unit = AIN_UNIT_MILLIVOLT;
+    if (_analogReadInputReadArgs.unit->count == 1) {
+        unit = (AnalogInput_Unit_t)(_analogReadInputReadArgs.unit->ival[0]);
+    }
 
     switch (unit)
     {
@@ -152,14 +153,14 @@ int _analogInputRead(int argc, char **argv)
         break;
 
     default:
-        printf("%d\n", AnalogInputsLV::analogRead(ain));
+        printf("Wrong unit\n");
         break;
     }
 
     return 0;
 }
 
-int AnalogInputsLVCLI::_registerAnalogInputRead()
+int AnalogInputsLVCLI::_registerAnalogRead()
 {
     _analogReadInputReadArgs.ain = arg_int1(NULL, NULL, "<AIN>", "[1-4]");
     _analogReadInputReadArgs.unit = arg_int1(NULL, NULL, "<UNIT>", "0 = Raw, 1 = mV, 2 = mA, 3 = V, 4 = A");
@@ -167,12 +168,10 @@ int AnalogInputsLVCLI::_registerAnalogInputRead()
 
     const esp_console_cmd_t read_cmd = {
         .command = "analog-read",
-        .help = "Read Ain voltage or current in desired unit",
+        .help = "Read AIN voltage or current in desired unit (default to mV)",
         .hint = NULL,
-        .func = &_analogInputRead,
+        .func = &_AnalogRead,
         .argtable = &_analogReadInputReadArgs
     };
     return esp_console_cmd_register(&read_cmd);
 }
-
-#endif

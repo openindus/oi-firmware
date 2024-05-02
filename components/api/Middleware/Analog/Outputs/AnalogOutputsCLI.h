@@ -19,8 +19,6 @@
 
 #pragma once
 
-#if defined(MODULE_STANDALONE) || defined(MODULE_MASTER)
-
 #include "Global.h"
 #include "AnalogOutputs.h"
 
@@ -33,5 +31,3 @@ private:
     static int _registerAnalogOutputMode();
     static int _registerAnalogOutputWrite();
 };
-
-#endif

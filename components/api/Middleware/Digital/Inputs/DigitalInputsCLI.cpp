@@ -14,8 +14,6 @@
 
 #include "DigitalInputsCLI.h"
 
-#if defined(MODULE_STANDALONE) || defined(MODULE_MASTER)
-
 int DigitalInputsCLI::init() {
     int err = 0;
 
@@ -58,5 +56,3 @@ int DigitalInputsCLI::_registerDigitalRead(void)
     };
     return esp_console_cmd_register(&cmd);
 }
-
-#endif
