@@ -72,6 +72,8 @@
             "-I components/api/Middleware/FlashLoader",
             "-I components/api/Middleware/Led",
             "-I components/api/Middleware/Motor",
+            "-I components/api/Middleware/Motor/Brushless",
+            "-I components/api/Middleware/Motor/Stepper",
             "-I components/api/Middleware/RS",
             "-I components/api/Middleware/RTClock",
             "-I components/api/Middleware/RTD",

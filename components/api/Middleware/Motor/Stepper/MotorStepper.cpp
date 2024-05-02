@@ -22,6 +22,8 @@ static float _homingSpeed[MOTOR_MAX];
 static DigitalInputNum_t _limitSwitchDigitalInput[MOTOR_MAX];
 static DigitalInputLogic_t _limitSwitchDigitalInputLogic[MOTOR_MAX];
 static bool _limitSwitchSetted[MOTOR_MAX];
+static MotorNum_t _motorNums[MOTOR_MAX] = {MOTOR_1, MOTOR_2};
+
 static xQueueHandle _limitSwitchEvent;
 
 static void IRAM_ATTR _limitSwitchIsr(void* arg);
@@ -39,7 +41,7 @@ int MotorStepper::init(PS01_Hal_Config_t* config, PS01_Param_t* param, const gpi
     PS01_Init(config, param); // TODO: watch for error
 
     /* Limit switch */
-    _limitSwitchEvent = xQueueCreate(1, sizeof(uint32_t));
+    _limitSwitchEvent = xQueueCreate(1, sizeof(MotorNum_t));
     xTaskCreate(_limitSwitchTask, "Limit switch task", 2048, NULL, 3, NULL);
 
     return err;
@@ -157,20 +159,22 @@ void MotorStepper::run(MotorNum_t motor, MotorDirection_t direction, float speed
     PS01_Cmd_Run(motor, (motorDir_t)direction, stepPerTick);
 }
 
-bool MotorStepper::isRunning(MotorNum_t motor)
+void MotorStepper::wait(MotorNum_t motor)
 {
-    return PS01_Param_GetBusyStatus(motor);
+    while(PS01_Param_GetBusyStatus(motor)) {
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
 }
 
 void MotorStepper::homing(MotorNum_t motor, float speed)
 {
     _homingSpeed[motor] = speed;
-    xTaskCreate(_homingTask, "Homing task", 2048, &motor, 7, NULL);
+    xTaskCreate(_homingTask, "Homing task", 4096, &_motorNums[motor], 7, NULL);
 }
+
 static void IRAM_ATTR _limitSwitchIsr(void* arg)
 {
-    uint32_t motor = (uint32_t)arg;
-    xQueueSendFromISR(_limitSwitchEvent, &motor, NULL);
+    xQueueSendFromISR(_limitSwitchEvent, arg, NULL);
 }
 
 static void _limitSwitchTask(void* arg)
@@ -203,7 +207,7 @@ static void _homingTask(void* arg)
     PS01_Cmd_GetStatus(motor);
 
     /* Attach interrupt to limit switch */
-    gpio_isr_handler_add(gpio, _limitSwitchIsr, (void *)motor);
+    gpio_isr_handler_add(gpio, _limitSwitchIsr, &_motorNums[motor]);
     intrType = (logic == ACTIVE_LOW) ? GPIO_INTR_NEGEDGE : GPIO_INTR_POSEDGE;
     gpio_set_intr_type(gpio, intrType);
     gpio_intr_enable(gpio);
@@ -223,7 +227,7 @@ static void _homingTask(void* arg)
     gpio_set_intr_type(gpio, intrType);
     gpio_intr_enable(gpio);
 
-    /* Perform release SW command anfd wait */
+    /* Perform release SW command and wait */
     PS01_Cmd_ReleaseSw(motor, ACTION_RESET, (motorDir_t)FORWARD);
     do {
         vTaskDelay(10/portTICK_PERIOD_MS);

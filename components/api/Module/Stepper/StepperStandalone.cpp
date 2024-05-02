@@ -15,7 +15,6 @@
 
 #include "StepperStandalone.h"
 #include "StepperPinout.h"
-#include "StepperConfig.h"
 #include "StepperParam.h"
 
 #if defined(OI_STEPPER) || defined(OI_STEPPER_VE)
@@ -47,96 +46,23 @@ int StepperStandalone::init()
      */
     err |= DigitalInputs::init(_dinGpio, STEPPER_DIN_NUM);
 
-    /* Init Motor stepper */
+    /**
+     * @brief Init Motor stepper
+     * 
+     */
     ESP_LOGI(STEPPER_TAG, "Init Motor stepper");
+
     PS01_Hal_Config_t ps01Conf = STEPPER_CONFIG_MOTOR_DEFAULT();
     PS01_Param_t ps01Param = STEPPER_PARAM_MOTOR_DEFAULT();
     err |= MotorStepper::init(&ps01Conf, &ps01Param, _dinGpio);
 
-    /* Init Motor stepper NVS param */
-    MotorStepperParam::initNVSParam();
+    /**
+     * @brief Init Motor stepper NVS param
+     * 
+     */
+    err |= MotorStepperParam::initNVSParam();
 
     return err;
-}
-
-void StepperStandalone::setLimitSwitch(MotorNum_t motor, DigitalInputNum_t dinNum, DigitalInputLogic_t logic)
-{
-    MotorStepper::setLimitSwitch(motor, dinNum, logic);
-}
-
-void StepperStandalone::setStepResolution(MotorNum_t motor, MotorStepResolution_t res)
-{
-    MotorStepper::setStepResolution(motor, res);
-}
-
-void StepperStandalone::setMaxSpeed(MotorNum_t motor, float speed)
-{
-    MotorStepper::setMaxSpeed(motor, speed);
-}
-
-void StepperStandalone::setMinSpeed(MotorNum_t motor, float speed)
-{
-    MotorStepper::setMinSpeed(motor, speed);
-}
-
-void StepperStandalone::setFullStepSpeed(MotorNum_t motor, float speed)
-{
-    MotorStepper::setFullStepSpeed(motor, speed);
-}
-
-void StepperStandalone::setAcceleration(MotorNum_t motor, float acc)
-{
-    MotorStepper::setAcceleration(motor, acc);
-}
-
-void StepperStandalone::setDeceleration(MotorNum_t motor, float dec)
-{
-    MotorStepper::setDeceleration(motor, dec);
-}
-
-int32_t StepperStandalone::getPosition(MotorNum_t motor)
-{
-    return MotorStepper::getPosition(motor);
-}
-
-float StepperStandalone::getSpeed(MotorNum_t motor)
-{
-    return MotorStepper::getSpeed(motor);
-}
-
-void StepperStandalone::resetHomePosition(MotorNum_t motor)
-{
-    MotorStepper::resetHomePosition(motor);
-}
-
-void StepperStandalone::stop(MotorNum_t motor, MotorStopMode_t mode)
-{
-    MotorStepper::stop(motor, mode);
-}
-
-void StepperStandalone::moveAbsolute(MotorNum_t motor, uint32_t position, bool microStep)
-{
-    MotorStepper::moveAbsolute(motor, position, microStep);
-}
-
-void StepperStandalone::moveRelative(MotorNum_t motor, int32_t position, bool microStep)
-{
-    MotorStepper::moveRelative(motor, position, microStep);
-}
-
-void StepperStandalone::run(MotorNum_t motor, MotorDirection_t direction, float speed)
-{
-    MotorStepper::run(motor, direction, speed);
-}
-
-bool StepperStandalone::isRunning(MotorNum_t motor)
-{
-    return MotorStepper::isRunning(motor);
-}
-
-void StepperStandalone::homing(MotorNum_t motor, float speed)
-{
-    MotorStepper::homing(motor, speed);
 }
 
 #endif

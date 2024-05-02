@@ -329,7 +329,7 @@ int MotorStepperParam::setAdvancedParam(MotorNum_t motor, AdvancedParameter_t ad
     // If the write was successful, update the NVS
     if (errorCode == 0)
     {
-        setNVSParam(motor, param);
+        errorCode |= setNVSParam(motor, param);
     }
     return errorCode;
 }
@@ -1457,20 +1457,27 @@ int MotorStepperParam::setAllAdvancedParamPS01(MotorNum_t motor, PS01_AdvancedPa
     return errorCode;
 }
 
-void MotorStepperParam::initNVSParam() {
-         /* Initialize NVS */
-    ESP_ERROR_CHECK(nvs_flash_init_partition(MOTOR_STEPPER_NVS_PARTITION));
+int MotorStepperParam::initNVSParam() {
+        
+    int err = 0;
+
+    /* Initialize NVS */
+    err |= nvs_flash_init_partition(MOTOR_STEPPER_NVS_PARTITION);
+
     for (int i=0; i<POWERSTEP01_NUMBER_OF_DEVICES; i++) {
         // Check if motor is active
         if (PS01_IsActive(i)) {
             // Get or create the advanced param from NVS
             PS01_AdvancedParam_t param = MotorStepperParam::getNVSParam((MotorNum_t) i);
             // printf("param step sel %d\n", param.stepModeStepSel);
-            MotorStepperParam::setAllAdvancedParamPS01((MotorNum_t) i, param);
+            err |= MotorStepperParam::setAllAdvancedParamPS01((MotorNum_t) i, param);
         } else {
             ESP_LOGE("MotorStepper", "Motor %d is not active", i);
+            err |= -1;
         }
     }
+
+    return err;
 }
 
 
@@ -1505,18 +1512,23 @@ PS01_AdvancedParam_t MotorStepperParam::getNVSParam(MotorNum_t motor)
     return nvsParam;
 }
 
-void MotorStepperParam::setNVSParam(MotorNum_t motor, PS01_AdvancedParam_t nvsParam) 
+int MotorStepperParam::setNVSParam(MotorNum_t motor, PS01_AdvancedParam_t nvsParam) 
 {
+    int err = 0;
+
     // Check if the motor is active
     if (nvsParam.maxSpeed == 0 && nvsParam.minSpeed == 0 && nvsParam.acc == 0 && nvsParam.dec == 0) {
         // print error
         ESP_LOGE("MotorStepper", "Motor %d is not active, unable to set NVS", motor);
+        err |= ESP_ERR_INVALID_ARG;
     } else {
     /* Open NVS */
         nvs_handle_t handle;
-        ESP_ERROR_CHECK_WITHOUT_ABORT(nvs_open_from_partition(MOTOR_STEPPER_NVS_PARTITION, MOTOR_STEPPER_NVS_NAMESPACE, NVS_READWRITE, &handle));
-        ESP_ERROR_CHECK_WITHOUT_ABORT(nvs_set_blob(handle, MOTOR_STEPPER_NVS_KEY[(uint8_t) motor], &nvsParam, sizeof(nvsParam)));
-        ESP_ERROR_CHECK_WITHOUT_ABORT(nvs_commit(handle));
+        err |= nvs_open_from_partition(MOTOR_STEPPER_NVS_PARTITION, MOTOR_STEPPER_NVS_NAMESPACE, NVS_READWRITE, &handle);
+        err |= nvs_set_blob(handle, MOTOR_STEPPER_NVS_KEY[(uint8_t) motor], &nvsParam, sizeof(nvsParam));
+        err |= nvs_commit(handle);
         nvs_close(handle);
     }
+
+    return err;
 }
