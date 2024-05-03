@@ -25,10 +25,12 @@ static bool _limitSwitchSetted[MOTOR_MAX];
 static MotorNum_t _motorNums[MOTOR_MAX] = {MOTOR_1, MOTOR_2};
 
 static xQueueHandle _limitSwitchEvent;
+static xQueueHandle _busyEvent[MOTOR_MAX];
 
 static void IRAM_ATTR _limitSwitchIsr(void* arg);
 static void _limitSwitchTask(void* arg);
 static void _homingTask(void* arg);
+static void _busyCallback(uint8_t motor);
 
 int MotorStepper::init(PS01_Hal_Config_t* config, PS01_Param_t* param, const gpio_num_t* num)
 {
@@ -43,6 +45,11 @@ int MotorStepper::init(PS01_Hal_Config_t* config, PS01_Param_t* param, const gpi
     /* Limit switch */
     _limitSwitchEvent = xQueueCreate(1, sizeof(MotorNum_t));
     xTaskCreate(_limitSwitchTask, "Limit switch task", 2048, NULL, 3, NULL);
+
+    /* Attach busy pin callbacks */
+    _busyEvent[MOTOR_1] = xQueueCreate(1, 0);
+    _busyEvent[MOTOR_2] = xQueueCreate(1, 0);
+    PS01_Hal_AttachBusyInterrupt(&_busyCallback);
 
     return err;
 }
@@ -161,9 +168,8 @@ void MotorStepper::run(MotorNum_t motor, MotorDirection_t direction, float speed
 
 void MotorStepper::wait(MotorNum_t motor)
 {
-    while(PS01_Param_GetBusyStatus(motor)) {
-        vTaskDelay(pdMS_TO_TICKS(10));
-    }
+    xQueueReset(_busyEvent[motor]);
+    xQueueReceive(_busyEvent[motor], &motor, portMAX_DELAY);
 }
 
 void MotorStepper::homing(MotorNum_t motor, float speed)
@@ -238,4 +244,10 @@ static void _homingTask(void* arg)
 
     /* Delete task */
     vTaskDelete(NULL);
+}
+
+static void _busyCallback(uint8_t motor)
+{
+    printf("motor:%i\n", motor);
+    xQueueSend(_busyEvent[motor], NULL, pdMS_TO_TICKS(1));
 }

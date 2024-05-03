@@ -12,13 +12,14 @@ static uint8_t _deviceId[NUMBER_OF_DEVICES] = {0, 1};
 
 static SemaphoreHandle_t _mutex;
 static spi_device_handle_t _spiHandler = NULL;
-PS01_Hal_Config_t _deviceConfig;
+static PS01_Hal_Config_t _deviceConfig;
 
-TaskHandle_t _flagTaskHandle;
-xQueueHandle _flagEvent;
-TaskHandle_t _busyTaskHandle;
-xQueueHandle _busyEvent;
+static TaskHandle_t _flagTaskHandle;
+static xQueueHandle _flagEvent;
+static TaskHandle_t _busyTaskHandle;
+static xQueueHandle _busyEvent;
 
+static void (*_busyCallback)(uint8_t) = NULL;
 
 void IRAM_ATTR _flagIsr(void *arg)
 {
@@ -75,13 +76,36 @@ void _busyTask(void* arg)
     while(1) {
         if(xQueueReceive(_busyEvent, &deviceId, portMAX_DELAY)) {
             gpio_intr_disable(_deviceConfig.pin_flag[deviceId]);
-            /** @todo
-             * 
-            */
+            if (_busyCallback != NULL) {
+                printf("motooor:%i\n", deviceId);
+                _busyCallback(deviceId); 
+            }
             gpio_intr_enable(_deviceConfig.pin_flag[deviceId]);
         }
     }
 }
+
+/**
+ * @brief Attach a busy interrupt for the given motor
+ * 
+ * @param deviceId 
+ * @param callback 
+ */
+void PS01_Hal_AttachBusyInterrupt(void(*callback)(uint8_t))
+{
+    _busyCallback = callback;
+}
+
+/**
+ * @brief Detach busy interrupt callback for the given motor
+ * 
+ * @param deviceId 
+ */
+void PS01_Hal_DetachBusyInterrupt(void)
+{
+    _busyCallback = NULL;
+}
+
 
 /**
  * @brief This function provides an accurate delay in milliseconds

@@ -220,7 +220,7 @@ const PS01_AdvancedParam_t defaultParameters = {
     .cmToffMin = 21,
 #else
     .vmConfigEnVscomp = 0,
-    .vmConfigFPwmDec = 3,
+    .vmConfigFPwmDec = 7,
     .vmConfigFPwmInt = 1,
 
     .vmKvalHold = 16.02,
