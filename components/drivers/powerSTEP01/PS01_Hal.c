@@ -14,25 +14,24 @@ static SemaphoreHandle_t _mutex;
 static spi_device_handle_t _spiHandler = NULL;
 static PS01_Hal_Config_t _deviceConfig;
 
-static TaskHandle_t _flagTaskHandle;
-static xQueueHandle _flagEvent;
-static TaskHandle_t _busyTaskHandle;
-static xQueueHandle _busyEvent;
+static xQueueHandle _flagEvent[NUMBER_OF_DEVICES];
+static xQueueHandle _busyEvent[NUMBER_OF_DEVICES];
 
 static void (*_busyCallback)(uint8_t) = NULL;
 
 void IRAM_ATTR _flagIsr(void *arg)
 {
-    xQueueSendFromISR(_flagEvent, arg, NULL);
+    uint8_t deviceId = *(uint8_t*)arg;
+    xQueueSendFromISR(_flagEvent[deviceId], NULL, NULL);
 }
 
 void _flagTask(void* arg)
 {
     uint16_t status;
-    uint8_t deviceId = 0;
+    uint8_t deviceId = *(uint8_t*)arg;
 
     while(1) {
-        if(xQueueReceive(_flagEvent, &deviceId, portMAX_DELAY)) {
+        if(xQueueReceive(_flagEvent[deviceId], NULL, portMAX_DELAY)) {
             gpio_intr_disable(_deviceConfig.pin_flag[deviceId]);
             status = PS01_Cmd_GetStatus(deviceId);
             if (((status & POWERSTEP01_STATUS_CMD_ERROR) >> 7) == 1) {
@@ -67,20 +66,21 @@ void _flagTask(void* arg)
 
 void IRAM_ATTR _busyIsr(void* arg)
 {
-    xQueueSendFromISR(_busyEvent, arg, NULL);
+    uint8_t deviceId = *(uint8_t*)arg;
+    xQueueSendFromISR(_busyEvent[deviceId], NULL, NULL);
 }
 
 void _busyTask(void* arg)
 {
-    uint8_t deviceId;
+    uint8_t deviceId = *(uint8_t*)arg;
+
     while(1) {
-        if(xQueueReceive(_busyEvent, &deviceId, portMAX_DELAY)) {
-            gpio_intr_disable(_deviceConfig.pin_flag[deviceId]);
+        if(xQueueReceive(_busyEvent[deviceId], NULL, portMAX_DELAY)) {
+            gpio_intr_disable(_deviceConfig.pin_busy_sync[deviceId]);
             if (_busyCallback != NULL) {
-                printf("motooor:%i\n", deviceId);
                 _busyCallback(deviceId); 
             }
-            gpio_intr_enable(_deviceConfig.pin_flag[deviceId]);
+            gpio_intr_enable(_deviceConfig.pin_busy_sync[deviceId]);
         }
     }
 }
@@ -485,17 +485,15 @@ void PS01_Hal_Init(uint8_t deviceId)
 
     /* PowerSTEP01 Flag */
     // Create task only once
-    if (deviceId == 0) {
-        _flagEvent = xQueueCreate(1, sizeof(uint8_t));
-        xTaskCreate(_flagTask, "Flag task", 4096, NULL, 5, &_flagTaskHandle);
-    }
+    _flagEvent[deviceId] = xQueueCreate(1, 0);
+    char task_name[14];
+    snprintf(task_name, 14, "Flag task %i", deviceId);        
+    xTaskCreate(_flagTask, task_name, 4096, &deviceId, 5, NULL);
     gpio_isr_handler_add(_deviceConfig.pin_flag[deviceId], (gpio_isr_t)_flagIsr, &_deviceId[deviceId]);
 
     /* PowerSTEP01 Busy */
-    // Create task only once
-    if (deviceId == 0) {
-        _busyEvent = xQueueCreate(1, sizeof(uint8_t));
-        xTaskCreate(_busyTask, "Busy task", 4096, NULL, 5, &_busyTaskHandle);
-    }
+    _busyEvent[deviceId] = xQueueCreate(1, 0);
+    snprintf(task_name, 14, "Busy task %i", deviceId);   
+    xTaskCreate(_busyTask, task_name, 2048, &deviceId, 5, NULL);
     gpio_isr_handler_add(_deviceConfig.pin_busy_sync[deviceId], (gpio_isr_t)_busyIsr, &_deviceId[deviceId]);
 }

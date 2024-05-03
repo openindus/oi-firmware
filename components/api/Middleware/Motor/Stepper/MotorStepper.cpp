@@ -15,50 +15,62 @@
 
 #include "MotorStepper.h"
 
-// static const char MOTOR_STEPPER_TAG[] = "MotorStepper";
+static const char TAG[] = "MotorStepper";
 
-static const gpio_num_t* _gpio;
 static float _homingSpeed[MOTOR_MAX];
-static DigitalInputNum_t _limitSwitchDigitalInput[MOTOR_MAX];
-static DigitalInputLogic_t _limitSwitchDigitalInputLogic[MOTOR_MAX];
-static bool _limitSwitchSetted[MOTOR_MAX];
+
+
+static std::vector<std::pair<DigitalInputNum_t, DigitalInputLogic_t>> _limitSwitchDigitalInput[MOTOR_MAX]; 
+
 static MotorNum_t _motorNums[MOTOR_MAX] = {MOTOR_1, MOTOR_2};
 
-static xQueueHandle _limitSwitchEvent;
 static xQueueHandle _busyEvent[MOTOR_MAX];
+static xSemaphoreHandle _homingSemaphore[MOTOR_MAX];
 
-static void IRAM_ATTR _limitSwitchIsr(void* arg);
-static void _limitSwitchTask(void* arg);
+static void _digitalInterruptHandler(void* arg);
 static void _homingTask(void* arg);
 static void _busyCallback(uint8_t motor);
 
-int MotorStepper::init(PS01_Hal_Config_t* config, PS01_Param_t* param, const gpio_num_t* num)
+int MotorStepper::init(PS01_Hal_Config_t* config, PS01_Param_t* param)
 {
     int err = 0;
 
-    /* Gpio */
-    _gpio = num;
-
     /* Config powerSTEP01 */
     PS01_Init(config, param); // TODO: watch for error
-
-    /* Limit switch */
-    _limitSwitchEvent = xQueueCreate(1, sizeof(MotorNum_t));
-    xTaskCreate(_limitSwitchTask, "Limit switch task", 2048, NULL, 3, NULL);
 
     /* Attach busy pin callbacks */
     _busyEvent[MOTOR_1] = xQueueCreate(1, 0);
     _busyEvent[MOTOR_2] = xQueueCreate(1, 0);
     PS01_Hal_AttachBusyInterrupt(&_busyCallback);
 
+    /* Create semaphore for homing task */
+    _homingSemaphore[MOTOR_1] = xSemaphoreCreateMutex();
+    xSemaphoreGive(_homingSemaphore[MOTOR_1]);
+    _homingSemaphore[MOTOR_2] = xSemaphoreCreateMutex();
+    xSemaphoreGive(_homingSemaphore[MOTOR_2]);
+
     return err;
 }
 
-void MotorStepper::setLimitSwitch(MotorNum_t motor, DigitalInputNum_t din, DigitalInputLogic_t logic)
+void MotorStepper::attachLimitSwitch(MotorNum_t motor, DigitalInputNum_t din, DigitalInputLogic_t logic)
+{   
+    /* Stor limit switch info */
+    _limitSwitchDigitalInput[motor].push_back({din, logic});
+
+    /* Attach interrupt to limit switch */
+    DigitalInputs::attachInterrupt(din, _digitalInterruptHandler, (logic == ACTIVE_LOW) ? FALLING_MODE : RISING_MODE, &_motorNums[motor]);
+}
+
+void MotorStepper::detachLimitSwitch(MotorNum_t motor, DigitalInputNum_t din) 
 {
-    _limitSwitchDigitalInput[motor] = din;
-    _limitSwitchDigitalInputLogic[motor] = logic;
-    _limitSwitchSetted[motor] = true;
+    /* Find the element in the vector */
+    auto it = std::find_if( _limitSwitchDigitalInput[motor].begin(), _limitSwitchDigitalInput[motor].end(),
+        [&din](const std::pair<DigitalInputNum_t, DigitalInputLogic_t>& element){ return element.first == din;} );
+
+    if(it != _limitSwitchDigitalInput[motor].end()) _limitSwitchDigitalInput[motor].erase(it);
+
+    /* Remove the interrupt */
+    DigitalInputs::detachInterrupt(din);
 }
 
 void MotorStepper::setStepResolution(MotorNum_t motor, MotorStepResolution_t res) 
@@ -168,43 +180,52 @@ void MotorStepper::run(MotorNum_t motor, MotorDirection_t direction, float speed
 
 void MotorStepper::wait(MotorNum_t motor)
 {
+    // Wait for motor to start
+    vTaskDelay(pdTICKS_TO_MS(1));
+
+    // Wait for homing to finish
+    xSemaphoreTake(_homingSemaphore[motor], portMAX_DELAY);
+    xSemaphoreGive(_homingSemaphore[motor]);
+
+    // Empty the queue is a precedent interrupt happened
     xQueueReset(_busyEvent[motor]);
-    xQueueReceive(_busyEvent[motor], &motor, portMAX_DELAY);
+
+    if (PS01_Param_GetBusyStatus(motor)) {
+        // Wait for an interrupt on busy pin
+        xQueueReceive(_busyEvent[motor], NULL, portMAX_DELAY);
+    }
 }
 
 void MotorStepper::homing(MotorNum_t motor, float speed)
 {
     _homingSpeed[motor] = speed;
-    xTaskCreate(_homingTask, "Homing task", 4096, &_motorNums[motor], 7, NULL);
+    char task_name[16];
+    snprintf(task_name, 16, "Homing task %i", motor);   
+    xTaskCreate(_homingTask, task_name, 4096, &_motorNums[motor], 7, NULL);
 }
 
-static void IRAM_ATTR _limitSwitchIsr(void* arg)
+static void _digitalInterruptHandler(void *arg)
 {
-    xQueueSendFromISR(_limitSwitchEvent, arg, NULL);
-}
-
-static void _limitSwitchTask(void* arg)
-{
-    MotorNum_t motor;
-    while(1) {
-        if(xQueueReceive(_limitSwitchEvent, &motor, portMAX_DELAY)) {
-            gpio_intr_disable(_gpio[_limitSwitchDigitalInput[motor]]);
-            PS01_Hal_SetSwitchLevel((MotorNum_t)motor, 1);
-            vTaskDelay(1/portTICK_PERIOD_MS);
-            PS01_Hal_SetSwitchLevel((MotorNum_t)motor, 0);
-            gpio_intr_enable(_gpio[_limitSwitchDigitalInput[motor]]);
-        }
-    }
+    MotorNum_t motor = *(MotorNum_t*)arg;
+    PS01_Hal_SetSwitchLevel((MotorNum_t)motor, 1);
+    vTaskDelay(1);
+    PS01_Hal_SetSwitchLevel((MotorNum_t)motor, 0);
 }
 
 static void _homingTask(void* arg)
 {
     MotorNum_t motor = *(MotorNum_t*)arg;
-    DigitalInputNum_t din = _limitSwitchDigitalInput[motor];
-    DigitalInputLogic_t logic = _limitSwitchDigitalInputLogic[motor];
-    gpio_num_t gpio = _gpio[din];
+    xSemaphoreTake(_homingSemaphore[motor], portMAX_DELAY);
+
+    if (_limitSwitchDigitalInput[motor].size() == 0) {
+        ESP_LOGE(TAG, "Please attach a limit swich before homing !");
+        vTaskDelete(NULL);
+    }
+    DigitalInputNum_t din = _limitSwitchDigitalInput[motor].front().first;
+    DigitalInputLogic_t logic = _limitSwitchDigitalInput[motor].front().second;
     uint32_t stepPerTick = PS01_Speed_Steps_s_to_RegVal(_homingSpeed[motor]);
-    gpio_int_type_t intrType = GPIO_INTR_DISABLE;
+
+    printf("Homing %i %i %i\n", motor, din, logic);
 
     /* Set switch level and releases the SW_EVN flag */
     PS01_Hal_SetSwitchLevel(motor, 0);
@@ -212,35 +233,36 @@ static void _homingTask(void* arg)
     /* Fetch and clear status */
     PS01_Cmd_GetStatus(motor);
 
-    /* Attach interrupt to limit switch */
-    gpio_isr_handler_add(gpio, _limitSwitchIsr, &_motorNums[motor]);
-    intrType = (logic == ACTIVE_LOW) ? GPIO_INTR_NEGEDGE : GPIO_INTR_POSEDGE;
-    gpio_set_intr_type(gpio, intrType);
-    gpio_intr_enable(gpio);
-
     /* Check if motor is at home */
-    if (gpio_get_level(gpio) != logic) {
+    if (DigitalInputs::digitalRead(din) != logic) {
+        printf("a %i\n", motor);
         /* Perform go until command and wait */
         PS01_Cmd_GoUntil(motor, ACTION_RESET, (motorDir_t)REVERSE, stepPerTick);
-        do {
-            vTaskDelay(10/portTICK_PERIOD_MS);
-        } while (PS01_Param_GetBusyStatus(motor));
+        vTaskDelay(1);
+        // Empty the queue is a precedent interrupt happened
+        xQueueReset(_busyEvent[motor]);
+        if (PS01_Param_GetBusyStatus(motor)) {
+            printf("sdf %i\n", motor);
+            // Wait for an interrupt on busy pin
+            xQueueReceive(_busyEvent[motor], NULL, portMAX_DELAY);
+        }
     }
-
-    /* Change interrupt mode */
-    gpio_intr_disable(gpio);
-    intrType = (logic == ACTIVE_LOW) ? GPIO_INTR_POSEDGE : GPIO_INTR_NEGEDGE;
-    gpio_set_intr_type(gpio, intrType);
-    gpio_intr_enable(gpio);
 
     /* Perform release SW command and wait */
     PS01_Cmd_ReleaseSw(motor, ACTION_RESET, (motorDir_t)FORWARD);
-    do {
-        vTaskDelay(10/portTICK_PERIOD_MS);
-    } while (PS01_Param_GetBusyStatus(motor));
+    vTaskDelay(1);
+    
+    /* Wait for the motor to slowly move outside of the sensor */
+    while(DigitalInputs::digitalRead(din) == logic) vTaskDelay(1);
+        printf("c %i\n", motor);
 
-    /* Detach interrupt to limit switch */
-    gpio_isr_handler_remove(gpio);
+    /* Stop the motor */
+    PS01_Hal_SetSwitchLevel(motor, 1);
+    vTaskDelay(1);
+    PS01_Hal_SetSwitchLevel(motor, 0);
+
+    /* Release semaphore */
+    xSemaphoreGive(_homingSemaphore[motor]);
 
     /* Delete task */
     vTaskDelete(NULL);
@@ -248,6 +270,5 @@ static void _homingTask(void* arg)
 
 static void _busyCallback(uint8_t motor)
 {
-    printf("motor:%i\n", motor);
-    xQueueSend(_busyEvent[motor], NULL, pdMS_TO_TICKS(1));
+    xQueueSend(_busyEvent[motor], NULL, pdMS_TO_TICKS(10));
 }

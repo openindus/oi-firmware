@@ -15,6 +15,7 @@
 
 #pragma once
 
+#include "Global.h"
 #include "Motor.h"
 #include "DigitalInputs.h"
 #include "powerSTEP01/PS01.h"
@@ -46,16 +47,26 @@ class MotorStepper : public Motor
 {
 public:
 
-    static int init(PS01_Hal_Config_t* config, PS01_Param_t* param, const gpio_num_t* num);
+    static int init(PS01_Hal_Config_t* config, PS01_Param_t* param);
     
     /**
-     * @brief Configure limit switch to perform homing
+     * @brief Attach a limit switch to the specified motor
+     * The first limit switch attached will be used for homing.
+     * Limit switches will be used for stopping motor when they will be reached
      * 
      * @param motor 
      * @param dinNum
      * @param logic 
      */
-    static void setLimitSwitch(MotorNum_t motor, DigitalInputNum_t din, DigitalInputLogic_t logic=ACTIVE_HIGH);
+    static void attachLimitSwitch(MotorNum_t motor, DigitalInputNum_t din, DigitalInputLogic_t logic=ACTIVE_HIGH);
+
+    /**
+     * @brief =Detach a limit switch to the specified motor
+     * 
+     * @param motor 
+     * @param dinNum
+     */
+    static void detachLimitSwitch(MotorNum_t motor, DigitalInputNum_t din);
     
     /**
      * @brief Set the Step Resolution

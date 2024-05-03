@@ -54,7 +54,7 @@ int StepperStandalone::init()
 
     PS01_Hal_Config_t ps01Conf = STEPPER_CONFIG_MOTOR_DEFAULT();
     PS01_Param_t ps01Param = STEPPER_PARAM_MOTOR_DEFAULT();
-    err |= MotorStepper::init(&ps01Conf, &ps01Param, _dinGpio);
+    err |= MotorStepper::init(&ps01Conf, &ps01Param);
 
     /**
      * @brief Init Motor stepper NVS param

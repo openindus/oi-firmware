@@ -177,9 +177,9 @@ static int limitSwitch(int argc, char **argv)
 
     if (limitSwitchArgs.logic->count > 0) {
         DigitalInputLogic_t logic = (DigitalInputLogic_t)(limitSwitchArgs.logic->ival[0]);
-        StepperStandalone::setLimitSwitch(motor, din, logic);
+        StepperStandalone::attachLimitSwitch(motor, din, logic);
     } else {
-        StepperStandalone::setLimitSwitch(motor, din);
+        StepperStandalone::attachLimitSwitch(motor, din);
     }
 
     return 0;
@@ -193,7 +193,7 @@ void StepperCLI::_registerLimitSwitch(void)
     limitSwitchArgs.end     = arg_end(4);
 
     const esp_console_cmd_t cmd = {
-        .command = "limit-switch",
+        .command = "attach-limit-switch",
         .help = "set limit switch",
         .hint = NULL,
         .func = &limitSwitch,
