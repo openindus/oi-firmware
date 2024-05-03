@@ -61,7 +61,7 @@ public:
     static void attachLimitSwitch(MotorNum_t motor, DigitalInputNum_t din, DigitalInputLogic_t logic=ACTIVE_HIGH);
 
     /**
-     * @brief =Detach a limit switch to the specified motor
+     * @brief Detach a limit switch to the specified motor
      * 
      * @param motor 
      * @param dinNum

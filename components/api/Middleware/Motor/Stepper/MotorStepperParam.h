@@ -187,7 +187,7 @@ const PS01_AdvancedParam_t defaultParameters = {
     .alarmEnUvlo = true,
     .alarmEnAdcUvlo = true,
     .alarmEnStallDetection = true,
-    .alarmEnSwTurnOn = true,
+    .alarmEnSwTurnOn = false,
     .alarmEnCommandError = true,
 
     .gateCfg1Tcc = 3,

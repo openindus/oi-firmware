@@ -192,7 +192,7 @@ void MotorStepper::wait(MotorNum_t motor)
 
     if (PS01_Param_GetBusyStatus(motor)) {
         // Wait for an interrupt on busy pin
-        xQueueReceive(_busyEvent[motor], NULL, portMAX_DELAY);
+        xQueueReceive(_busyEvent[motor], NULL, pdMS_TO_TICKS(100));
     }
 }
 
@@ -218,35 +218,30 @@ static void _homingTask(void* arg)
     xSemaphoreTake(_homingSemaphore[motor], portMAX_DELAY);
 
     if (_limitSwitchDigitalInput[motor].size() == 0) {
-        ESP_LOGE(TAG, "Please attach a limit swich before homing !");
+        ESP_LOGE(TAG, "Please attach a limit switch before homing !");
         vTaskDelete(NULL);
     }
+    
     DigitalInputNum_t din = _limitSwitchDigitalInput[motor].front().first;
     DigitalInputLogic_t logic = _limitSwitchDigitalInput[motor].front().second;
     uint32_t stepPerTick = PS01_Speed_Steps_s_to_RegVal(_homingSpeed[motor]);
-
-    printf("Homing %i %i %i\n", motor, din, logic);
-
-    /* Set switch level and releases the SW_EVN flag */
-    PS01_Hal_SetSwitchLevel(motor, 0);
 
     /* Fetch and clear status */
     PS01_Cmd_GetStatus(motor);
 
     /* Check if motor is at home */
     if (DigitalInputs::digitalRead(din) != logic) {
-        printf("a %i\n", motor);
         /* Perform go until command and wait */
         PS01_Cmd_GoUntil(motor, ACTION_RESET, (motorDir_t)REVERSE, stepPerTick);
         vTaskDelay(1);
         // Empty the queue is a precedent interrupt happened
         xQueueReset(_busyEvent[motor]);
-        if (PS01_Param_GetBusyStatus(motor)) {
-            printf("sdf %i\n", motor);
+        while (PS01_Param_GetBusyStatus(motor)) {
             // Wait for an interrupt on busy pin
-            xQueueReceive(_busyEvent[motor], NULL, portMAX_DELAY);
+            xQueueReceive(_busyEvent[motor], NULL, pdMS_TO_TICKS(100));
         }
     }
+    vTaskDelay(1000);
 
     /* Perform release SW command and wait */
     PS01_Cmd_ReleaseSw(motor, ACTION_RESET, (motorDir_t)FORWARD);
@@ -254,12 +249,14 @@ static void _homingTask(void* arg)
     
     /* Wait for the motor to slowly move outside of the sensor */
     while(DigitalInputs::digitalRead(din) == logic) vTaskDelay(1);
-        printf("c %i\n", motor);
 
     /* Stop the motor */
     PS01_Hal_SetSwitchLevel(motor, 1);
     vTaskDelay(1);
     PS01_Hal_SetSwitchLevel(motor, 0);
+
+    /* Wait a bit */
+    vTaskDelay(100);
 
     /* Release semaphore */
     xSemaphoreGive(_homingSemaphore[motor]);

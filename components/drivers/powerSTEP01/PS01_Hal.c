@@ -480,11 +480,13 @@ void PS01_Hal_Init(uint8_t deviceId)
 	/* Standby-reset deactivation */
 	PS01_Hal_ReleaseReset(deviceId);
 
+    /* Reset the SW pin */
+    PS01_Hal_SetSwitchLevel(deviceId, 0);
+
     /* Let a delay after reset */
 	PS01_Hal_Delay(1);
 
     /* PowerSTEP01 Flag */
-    // Create task only once
     _flagEvent[deviceId] = xQueueCreate(1, 0);
     char task_name[14];
     snprintf(task_name, 14, "Flag task %i", deviceId);        
