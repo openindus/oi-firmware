@@ -128,19 +128,17 @@ uint8_t AnalogInputsLV::analogInputGetVoltageRange(AnalogInput_Num_t num)
     return 0;
 }
 
-/* Every 500ms check if there is a power error on DOUT or
-    If output is in error: desactivate for 5 secondes then retry */
+/* Every 500ms check if there is a current saturation on a channel
+ * and switch to voltage mode if it lasts more than 10s */
 void AnalogInputsLV::_controlTask(void *pvParameters)
 {
     while (1) {
         for (size_t i = 0; i < _nb; i++) {
-            if (_ains[i]->getMode() == AIN_MODE_CURRENT) {  //TODO: revoir si besoin semaphore
+            if (_ains[i]->getMode() == AIN_MODE_CURRENT) {
                 if (_ains[i]->read(AIN_UNIT_AMP) > AIN_SAT_CURRENT_AMP) {
                     _current_sat[i] += 1;
                     if (_current_sat[i] >= 10) {
-                        xSemaphoreTake(_mutex, portMAX_DELAY);
                         _ains[i]->setMode(AIN_MODE_VOLTAGE);
-                        xSemaphoreGive(_mutex);
                         _current_sat[i] = 0;
                         ESP_LOGE(TAG, "Overcurrent for more than 10s on AIN_%i, switching to voltage mode", i+1);
                     }
@@ -236,8 +234,10 @@ void AnalogInputAds866x::setMode(AnalogInput_Mode_t mode)
     if (mode != AIN_MODE_VOLTAGE && mode != AIN_MODE_CURRENT) {
             ESP_LOGE(TAG, "Invalid mode");
     } else {
+        xSemaphoreTake(_mutex, portMAX_DELAY);
         _mode = mode;
         gpio_set_level(_modePin, _mode);
+        xSemaphoreGive(_mutex);
     }
 }
 
