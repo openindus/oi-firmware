@@ -20,7 +20,7 @@ int AnalogOutputs::init(uint8_t nb, ad5413_config_t* configs)
     ESP_LOGI(TAG, "Initialize Analog Outputs");
     int err = 0;
 
-    if (nb >= AOUT_MAX) {
+    if (nb > AOUT_MAX) {
         ESP_LOGE(TAG, "Invalid number of Analog Outputs");
         return -1;
     } else {

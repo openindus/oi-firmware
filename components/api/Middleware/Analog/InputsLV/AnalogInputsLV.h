@@ -43,6 +43,7 @@ private:
     gpio_num_t _modePin;
     AnalogInput_Mode_t _mode;
     AnalogInput_VoltageRange_t _voltage_range;
+    SemaphoreHandle_t _mutex;
 };
 
 

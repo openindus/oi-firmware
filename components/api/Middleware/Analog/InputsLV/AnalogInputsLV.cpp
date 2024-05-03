@@ -9,7 +9,6 @@
 #include "AnalogInputsLV.h"
 
 static const char TAG[] = "AnalogInputsLV";
-static SemaphoreHandle_t _mutex;
 
 uint8_t AnalogInputsLV::_nb;
 AnalogInputAds866x** AnalogInputsLV::_ains;
@@ -38,9 +37,6 @@ int AnalogInputsLV::init(ads866x_config_t *ads866xConfig, const gpio_num_t* cmdG
         err |= _ains[i]->init(AIN_DEFAULT_RANGE, AIN_DEFAULT_MODE);
         _current_sat[i] = 0;
     }
-
-    _mutex = xSemaphoreCreateMutex();
-    xSemaphoreGive(_mutex);
 
     /* Create control task for overcurrent */
     ESP_LOGI(TAG, "Create AIN control task");
@@ -178,6 +174,9 @@ int AnalogInputAds866x::init(AnalogInput_VoltageRange_t range, AnalogInput_Mode_
 
     err |= gpio_config(&cfg);
     
+    _mutex = xSemaphoreCreateMutex();
+    xSemaphoreGive(_mutex);
+
     setMode(mode);
     setVoltageRange(range);
 
