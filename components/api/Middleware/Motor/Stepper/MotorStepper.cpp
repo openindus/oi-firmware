@@ -54,11 +54,17 @@ int MotorStepper::init(PS01_Hal_Config_t* config, PS01_Param_t* param)
 
 void MotorStepper::attachLimitSwitch(MotorNum_t motor, DigitalInputNum_t din, DigitalInputLogic_t logic)
 {   
-    /* Stor limit switch info */
+    /* Remove sensor if it was already added to the list */
+    auto it = std::find_if( _limitSwitchDigitalInput[motor].begin(), _limitSwitchDigitalInput[motor].end(),
+        [&din](const std::pair<DigitalInputNum_t, DigitalInputLogic_t>& element){ return element.first == din;} );
+
+    if(it != _limitSwitchDigitalInput[motor].end()) _limitSwitchDigitalInput[motor].erase(it);
+
+    /* Store limit switch info */
     _limitSwitchDigitalInput[motor].push_back({din, logic});
 
     /* Attach interrupt to limit switch */
-    DigitalInputs::attachInterrupt(din, _digitalInterruptHandler, (logic == ACTIVE_LOW) ? FALLING_MODE : RISING_MODE, &_motorNums[motor]);
+    DigitalInputs::attachInterrupt(din, _digitalInterruptHandler, (logic == ACTIVE_HIGH) ? RISING_MODE : FALLING_MODE, &_motorNums[motor]);
 }
 
 void MotorStepper::detachLimitSwitch(MotorNum_t motor, DigitalInputNum_t din) 
@@ -67,6 +73,7 @@ void MotorStepper::detachLimitSwitch(MotorNum_t motor, DigitalInputNum_t din)
     auto it = std::find_if( _limitSwitchDigitalInput[motor].begin(), _limitSwitchDigitalInput[motor].end(),
         [&din](const std::pair<DigitalInputNum_t, DigitalInputLogic_t>& element){ return element.first == din;} );
 
+    /* Remove the element if found */
     if(it != _limitSwitchDigitalInput[motor].end()) _limitSwitchDigitalInput[motor].erase(it);
 
     /* Remove the interrupt */
@@ -190,9 +197,10 @@ void MotorStepper::wait(MotorNum_t motor)
     // Empty the queue is a precedent interrupt happened
     xQueueReset(_busyEvent[motor]);
 
-    if (PS01_Param_GetBusyStatus(motor)) {
-        // Wait for an interrupt on busy pin
-        xQueueReceive(_busyEvent[motor], NULL, pdMS_TO_TICKS(100));
+    // Check if status if not already high
+    if (!PS01_Hal_GetBusyLevel(motor)) {
+        // Wait for an interrupt (rising edge) on busy pin
+        xQueueReceive(_busyEvent[motor], NULL, portMAX_DELAY);
     }
 }
 
@@ -208,7 +216,7 @@ static void _digitalInterruptHandler(void *arg)
 {
     MotorNum_t motor = *(MotorNum_t*)arg;
     PS01_Hal_SetSwitchLevel((MotorNum_t)motor, 1);
-    vTaskDelay(1);
+    vTaskDelay(pdTICKS_TO_MS(1));
     PS01_Hal_SetSwitchLevel((MotorNum_t)motor, 0);
 }
 
@@ -221,42 +229,39 @@ static void _homingTask(void* arg)
         ESP_LOGE(TAG, "Please attach a limit switch before homing !");
         vTaskDelete(NULL);
     }
-    
+
     DigitalInputNum_t din = _limitSwitchDigitalInput[motor].front().first;
     DigitalInputLogic_t logic = _limitSwitchDigitalInput[motor].front().second;
     uint32_t stepPerTick = PS01_Speed_Steps_s_to_RegVal(_homingSpeed[motor]);
-
-    /* Fetch and clear status */
-    PS01_Cmd_GetStatus(motor);
 
     /* Check if motor is at home */
     if (DigitalInputs::digitalRead(din) != logic) {
         /* Perform go until command and wait */
         PS01_Cmd_GoUntil(motor, ACTION_RESET, (motorDir_t)REVERSE, stepPerTick);
-        vTaskDelay(1);
-        // Empty the queue is a precedent interrupt happened
+        /* Empty the queue is a precedent interrupt happened */
         xQueueReset(_busyEvent[motor]);
-        while (PS01_Param_GetBusyStatus(motor)) {
-            // Wait for an interrupt on busy pin
-            xQueueReceive(_busyEvent[motor], NULL, pdMS_TO_TICKS(100));
+        /* Check if status if not already high */
+        if (!PS01_Hal_GetBusyLevel(motor)) {
+            /* Wait for an interrupt (rising edge) on busy pin */
+            xQueueReceive(_busyEvent[motor], NULL, portMAX_DELAY);
         }
     }
-    vTaskDelay(1000);
+
+    /* Invert the switch logic to stop the motor when it leaves the sensor */
+    DigitalInputs::attachInterrupt(din, _digitalInterruptHandler, (logic == ACTIVE_HIGH) ? FALLING_MODE : RISING_MODE, &_motorNums[motor]);
 
     /* Perform release SW command and wait */
     PS01_Cmd_ReleaseSw(motor, ACTION_RESET, (motorDir_t)FORWARD);
-    vTaskDelay(1);
-    
-    /* Wait for the motor to slowly move outside of the sensor */
-    while(DigitalInputs::digitalRead(din) == logic) vTaskDelay(1);
+    /* Empty the queue is a precedent interrupt happened */
+    xQueueReset(_busyEvent[motor]);
+    /* Check if status if not already high */
+    if (!PS01_Hal_GetBusyLevel(motor)) {
+        /* Wait for an interrupt (rising edge) on busy pin */
+        xQueueReceive(_busyEvent[motor], NULL, portMAX_DELAY);
+    }
 
-    /* Stop the motor */
-    PS01_Hal_SetSwitchLevel(motor, 1);
-    vTaskDelay(1);
-    PS01_Hal_SetSwitchLevel(motor, 0);
-
-    /* Wait a bit */
-    vTaskDelay(100);
+    /* Re-invert the switch logic */
+    DigitalInputs::attachInterrupt(din, _digitalInterruptHandler, (logic == ACTIVE_HIGH) ? RISING_MODE : FALLING_MODE, &_motorNums[motor]);
 
     /* Release semaphore */
     xSemaphoreGive(_homingSemaphore[motor]);

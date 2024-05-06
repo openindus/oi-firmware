@@ -20,20 +20,21 @@ void setup(void)
 void loop(void) 
 {
 <<<<<<< HEAD
+<<<<<<< HEAD
     setup();
 =======
     
     delay(1000);
 
+=======
+>>>>>>> bdcc50d... fix ps01 driver for good git status
     /* Homing */
-    printf("Homing\n");
-    stepper.attachLimitSwitch(MOTOR_1, DIN_1, ACTIVE_HIGH);
-    stepper.attachLimitSwitch(MOTOR_2, DIN_4, ACTIVE_HIGH);
-    stepper.homing(MOTOR_1, 100);
-    stepper.homing(MOTOR_2, 100);
+    stepper.homing(MOTOR_1, 1000);
+    stepper.homing(MOTOR_2, 1000);
     stepper.wait(MOTOR_1);
     stepper.wait(MOTOR_2);
 
+<<<<<<< HEAD
     stepper.detachLimitSwitch(MOTOR_1, DIN_1);
     stepper.detachLimitSwitch(MOTOR_2, DIN_4);
 
@@ -41,3 +42,16 @@ void loop(void)
     stepper.moveAbsolute(MOTOR_2, 50);
 
 
+=======
+    stepper.moveAbsolute(MOTOR_1, 100);
+    stepper.wait(MOTOR_1);
+
+    stepper.moveAbsolute(MOTOR_1, 150);
+    stepper.wait(MOTOR_1);
+
+    stepper.moveAbsolute(MOTOR_2, 250);
+    stepper.wait(MOTOR_2);
+
+    // printf("status:%x\n", PS01_Cmd_GetStatus(MOTOR_2));
+}
+>>>>>>> bdcc50d... fix ps01 driver for good git status

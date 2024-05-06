@@ -10,7 +10,6 @@ static bool _pwmInitialized[NUMBER_OF_DEVICES] = {false, false};
 static bool _gpioInitialized[NUMBER_OF_DEVICES] = {false, false};
 static uint8_t _deviceId[NUMBER_OF_DEVICES] = {0, 1};
 
-static SemaphoreHandle_t _mutex;
 static spi_device_handle_t _spiHandler = NULL;
 static PS01_Hal_Config_t _deviceConfig;
 
@@ -27,39 +26,44 @@ void IRAM_ATTR _flagIsr(void *arg)
 
 void _flagTask(void* arg)
 {
-    uint16_t status;
+    uint16_t status = 0;
     uint8_t deviceId = *(uint8_t*)arg;
 
-    while(1) {
-        if(xQueueReceive(_flagEvent[deviceId], NULL, portMAX_DELAY)) {
+    while(1) 
+    {
+        if (PS01_Hal_GetFlagLevel(deviceId) == 0) {
+            status = PS01_Cmd_GetStatus(deviceId);
+        }
+        else if(xQueueReceive(_flagEvent[deviceId], NULL, portMAX_DELAY)) {
             gpio_intr_disable(_deviceConfig.pin_flag[deviceId]);
             status = PS01_Cmd_GetStatus(deviceId);
-            if (((status & POWERSTEP01_STATUS_CMD_ERROR) >> 7) == 1) {
-                ESP_LOGW(PS01_TAG, "Flag event (%d) : Command error", deviceId);
-            }
-            if (((status & POWERSTEP01_STATUS_UVLO) >> 9) == 0) {
-                ESP_LOGW(PS01_TAG, "Flag event (%d) : Undervoltage lockout (UVLO)", deviceId);
-            }
-            if (((status & POWERSTEP01_STATUS_UVLO_ADC) >> 10) == 0) {
-                ESP_LOGW(PS01_TAG, "Flag event (%d) : VS undervoltage lockout (UVLO_ADC)", deviceId);
-            }
-            if (((status & POWERSTEP01_STATUS_TH_STATUS) >> 11) == 0b01) {
-                ESP_LOGW(PS01_TAG, "Flag event (%d) : Thermal warning", deviceId);
-            }
-            if (((((status & POWERSTEP01_STATUS_TH_STATUS) >> 11) == 0b10) ||
-                ((status & POWERSTEP01_STATUS_TH_STATUS) >> 11) == 0b11)) {
-                ESP_LOGW(PS01_TAG, "Flag event (%d) : Thermal shutdown", deviceId);
-            }
-            if (((status & POWERSTEP01_STATUS_OCD) >> 13) == 0) {
-                ESP_LOGW(PS01_TAG, "Flag event (%d) : Overcurrent detection", deviceId);
-            }
-            if (((status & POWERSTEP01_STATUS_STALL_A) >> 14) == 0) {
-                ESP_LOGW(PS01_TAG, "Flag event (%d) : Stall detection (A)", deviceId);
-            }
-            if (((status & POWERSTEP01_STATUS_STALL_B) >> 15) == 0) {
-                ESP_LOGW(PS01_TAG, "Flag event (%d) : Stall detection (B)", deviceId);
-            }
             gpio_intr_enable(_deviceConfig.pin_flag[deviceId]);
+        }
+
+        if (((status & POWERSTEP01_STATUS_CMD_ERROR) >> 7) == 1) {
+            ESP_LOGW(PS01_TAG, "Flag event (%d) : Command error", deviceId);
+        }
+        if (((status & POWERSTEP01_STATUS_UVLO) >> 9) == 0) {
+            ESP_LOGW(PS01_TAG, "Flag event (%d) : Undervoltage lockout (UVLO)", deviceId);
+        }
+        if (((status & POWERSTEP01_STATUS_UVLO_ADC) >> 10) == 0) {
+            ESP_LOGW(PS01_TAG, "Flag event (%d) : VS undervoltage lockout (UVLO_ADC)", deviceId);
+        }
+        if (((status & POWERSTEP01_STATUS_TH_STATUS) >> 11) == 0b01) {
+            ESP_LOGW(PS01_TAG, "Flag event (%d) : Thermal warning", deviceId);
+        }
+        if (((((status & POWERSTEP01_STATUS_TH_STATUS) >> 11) == 0b10) ||
+            ((status & POWERSTEP01_STATUS_TH_STATUS) >> 11) == 0b11)) {
+            ESP_LOGW(PS01_TAG, "Flag event (%d) : Thermal shutdown", deviceId);
+        }
+        if (((status & POWERSTEP01_STATUS_OCD) >> 13) == 0) {
+            ESP_LOGW(PS01_TAG, "Flag event (%d) : Overcurrent detection", deviceId);
+        }
+        if (((status & POWERSTEP01_STATUS_STALL_A) >> 14) == 0) {
+            ESP_LOGW(PS01_TAG, "Flag event (%d) : Stall detection (A)", deviceId);
+        }
+        if (((status & POWERSTEP01_STATUS_STALL_B) >> 15) == 0) {
+            ESP_LOGW(PS01_TAG, "Flag event (%d) : Stall detection (B)", deviceId);
         }
     }
 }
@@ -351,9 +355,6 @@ uint8_t PS01_Hal_SpiInit(void)
 
             ESP_ERROR_CHECK(spi_bus_add_device(_deviceConfig.spi_host, &devConfig, &_spiHandler));
 
-            _mutex = xSemaphoreCreateMutex();
-            xSemaphoreGive(_mutex);
-
             _spiInitialized = true;
         } else {
             ESP_LOGE(PS01_TAG, "Device is not configured !!!");
@@ -373,7 +374,6 @@ uint8_t PS01_Hal_SpiWriteBytes(uint8_t *pByteToTransmit, uint8_t *pReceivedByte)
     ESP_LOGV(PS01_TAG, "Write and read SPI byte to the powerSTEP01");
 
     if (_spiInitialized == true) {
-        xSemaphoreTake(_mutex, portMAX_DELAY);
 
         spi_transaction_t trans = {
             .flags = 0,
@@ -392,8 +392,6 @@ uint8_t PS01_Hal_SpiWriteBytes(uint8_t *pByteToTransmit, uint8_t *pReceivedByte)
         trans.rx_buffer = pReceivedByte;
 
         ESP_ERROR_CHECK(spi_device_polling_transmit(_spiHandler, &trans));
-
-        xSemaphoreGive(_mutex);
     }
     else {
         ESP_LOGE(PS01_TAG, "SPI is not initialized !!!");
@@ -472,7 +470,12 @@ void PS01_Hal_Init(uint8_t deviceId)
 {
 	/* Initialise the GPIOs of the just added device */
 	PS01_Hal_GpioInit(deviceId);
-	PS01_Hal_SpiInit();
+
+    /* Init spi only once */
+    if (deviceId == 0) {
+        PS01_Hal_SpiInit();
+        PS01_InitCommands();
+    }
 
 	/* configure the step clock */
 	PS01_Hal_StepClockInit(deviceId);
@@ -484,18 +487,19 @@ void PS01_Hal_Init(uint8_t deviceId)
     PS01_Hal_SetSwitchLevel(deviceId, 0);
 
     /* Let a delay after reset */
-	PS01_Hal_Delay(1);
+	PS01_Hal_Delay(10);
 
     /* PowerSTEP01 Flag */
-    _flagEvent[deviceId] = xQueueCreate(1, 0);
+    _flagEvent[deviceId] = xQueueCreate(2, 0);
     char task_name[14];
     snprintf(task_name, 14, "Flag task %i", deviceId);        
     xTaskCreate(_flagTask, task_name, 4096, &deviceId, 5, NULL);
     gpio_isr_handler_add(_deviceConfig.pin_flag[deviceId], (gpio_isr_t)_flagIsr, &_deviceId[deviceId]);
 
     /* PowerSTEP01 Busy */
-    _busyEvent[deviceId] = xQueueCreate(1, 0);
+    _busyEvent[deviceId] = xQueueCreate(2, 0);
     snprintf(task_name, 14, "Busy task %i", deviceId);   
     xTaskCreate(_busyTask, task_name, 2048, &deviceId, 5, NULL);
     gpio_isr_handler_add(_deviceConfig.pin_busy_sync[deviceId], (gpio_isr_t)_busyIsr, &_deviceId[deviceId]);
+
 }

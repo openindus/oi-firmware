@@ -173,7 +173,7 @@ const PS01_AdvancedParam_t defaultParameters = {
     .minSpeed = 0,
     .minSpeedLspdOpt = false,
 
-    .fsSpd = 595.09,
+    .fsSpd = 991.821,
     .fsSpdBoostMode = false,
 
     .stepModeStepSel = 4,

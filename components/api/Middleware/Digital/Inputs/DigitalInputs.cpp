@@ -121,6 +121,11 @@ int DigitalInputs::digitalRead(DigitalInputNum_t num)
 
 void DigitalInputs::attachInterrupt(DigitalInputNum_t num, IsrCallback_t callback, InterruptMode_t mode, void* arg)
 {
+    /* Remove previous callback if it exists */
+    if (_callbacks[num] != NULL) {
+        detachInterrupt(num);
+    }
+
     _callbacks[num] = callback;
     _args[num] = arg;
 
@@ -137,9 +142,14 @@ void DigitalInputs::attachInterrupt(DigitalInputNum_t num, IsrCallback_t callbac
 
 void DigitalInputs::detachInterrupt(DigitalInputNum_t num)
 {
+    _callbacks[num] = NULL;
+    _args[num] = NULL;
+    
     if (_type == DIGITAL_INPUT_GPIO) {
+        gpio_intr_disable(_gpio_nums[num]);
         gpio_isr_handler_remove(_gpio_nums[num]);
     } else { // DIGITAL_INPUT_IOEX
+        ioex_interrupt_disable(*_ioex, _ioex_nums[num]);
         ioex_isr_handler_remove(*_ioex, _ioex_nums[num]);
     }
 }

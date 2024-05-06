@@ -1485,7 +1485,8 @@ PS01_AdvancedParam_t MotorStepperParam::getNVSParam(MotorNum_t motor)
 {
     PS01_AdvancedParam_t nvsParam;
     size_t nvsParamSize = sizeof(PS01_AdvancedParam_t);
-        /* Initialize NVS */
+    
+    /* Initialize NVS */
     ESP_ERROR_CHECK(nvs_flash_init_partition(MOTOR_STEPPER_NVS_PARTITION));
 
     /* Open NVS */
