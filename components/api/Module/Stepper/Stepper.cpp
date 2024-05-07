@@ -35,6 +35,8 @@ int StepperCLI::init(void)
     int err = 0;
 
     err |= DigitalInputsCLI::init();
+    err |= MotorStepperCLI::init();
+    err |= MotorStepperParamCLI::init();
 
     return err;
 }

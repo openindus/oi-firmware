@@ -24,6 +24,8 @@
 #include "DigitalInputs.h"
 #include "MotorStepper.h"
 #include "DigitalInputsCLI.h"
+#include "MotorStepperCLI.h"
+#include "MotorStepperParamCLI.h"
 #endif
 
 #if (defined(OI_STEPPER) || defined(OI_STEPPER_VE)) && defined(MODULE_STANDALONE)
@@ -42,7 +44,7 @@
 
 #if defined(OI_STEPPER) || defined(OI_STEPPER_VE)
 
-class StepperCLI : public DigitalInputsCLI
+class StepperCLI : public DigitalInputsCLI, public MotorStepperCLI, public MotorStepperParam
 {
 public:
 
