@@ -16,31 +16,31 @@
 #pragma once
 
 #include "Global.h"
-#include "StepperStandalone.h"
+#include "Stepper.h"
 
 #if defined(OI_STEPPER) || defined(OI_STEPPER_VE)
 
-class StepperCLI
-{
-public:
+// class StepperCLI
+// {
+// public:
 
-    static int init(void);
+//     static int init(void);
 
-private:
+// private:
 
-    static void _registerDigitalRead(void);
-    static void _registerAttachInterrupt(void);
-    static void _registerDetachInterrupt(void);
-    static void _registerLimitSwitch(void);
-    static void _registerStepResolution(void);
-    static void _registerSetMaxSpeed(void);
-    static void _registerGetPosition(void);
-    static void _registerGetSpeed(void);
-    static void _registerStop(void);
-    static void _registerMoveAbsolute(void);
-    static void _registerMoveRelative(void);
-    static void _registerRun(void);
-    static void _registerHoming(void);
-};
+//     static void _registerDigitalRead(void);
+//     static void _registerAttachInterrupt(void);
+//     static void _registerDetachInterrupt(void);
+//     static void _registerLimitSwitch(void);
+//     static void _registerStepResolution(void);
+//     static void _registerSetMaxSpeed(void);
+//     static void _registerGetPosition(void);
+//     static void _registerGetSpeed(void);
+//     static void _registerStop(void);
+//     static void _registerMoveAbsolute(void);
+//     static void _registerMoveRelative(void);
+//     static void _registerRun(void);
+//     static void _registerHoming(void);
+// };
 
 #endif

@@ -58,23 +58,25 @@ void ModuleControl::ledBlink(LedColor_t color, uint32_t period)
  * @param byte Byte array
  * @return -1: error, 0 success
  */
-int ModuleControl::ctrlRequest(std::vector<uint8_t>& msgBytes)
+int ModuleControl::ctrlRequest(std::vector<uint8_t>& msgBytes, bool ackNeeded)
 {
     BusRS::Frame_t frame;
     frame.cmd = CMD_CONTROL;
     frame.id = _id;
     frame.dir = 1;
-    frame.ack = true;
+    frame.ack = ackNeeded;
     frame.length = msgBytes.size();
     frame.data = msgBytes.data();
     BusRS::write(&frame, pdMS_TO_TICKS(100));
-    if (BusRS::read(&frame, pdMS_TO_TICKS(100)) < 0) {
-        ESP_LOGE(MODULE_TAG, "control error");
-        return -1;
-    } else {
-        msgBytes.assign(frame.data, frame.data + frame.length);
-        return 0;
+    if (ackNeeded) {
+        if (BusRS::read(&frame, pdMS_TO_TICKS(100)) < 0) {
+            ESP_LOGE(MODULE_TAG, "control error");
+            return -1;
+        } else {
+            msgBytes.assign(frame.data, frame.data + frame.length);
+        }
     }
+    return 0;
 }
 
 /**

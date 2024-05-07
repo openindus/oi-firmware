@@ -36,7 +36,7 @@ public:
 
     // friend class ModuleMaster;
 
-    int ctrlRequest(std::vector<uint8_t>& msgBytes);
+    int ctrlRequest(std::vector<uint8_t>& msgBytes, bool ackNeeded = true);
 
     inline void setId(uint16_t id) { _id = id; }
 
@@ -46,7 +46,7 @@ public:
 
     inline int getSN(void) { return _sn; }
 
-    inline static void addEventCallback(ModuleControl* instance, uint16_t id, uint8_t event, std::function<void(uint8_t)>callback) {
+    inline static void addEventCallback(uint8_t event, uint16_t id, std::function<void(uint8_t)>callback) {
         _eventCallbacks.insert({std::make_pair(event, id), callback});
     }
 

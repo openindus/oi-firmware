@@ -6,20 +6,18 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file StepperStandalone.h
- * @brief Functions for stepper module
+ * @file Stepper.cpp
+ * @brief Functions for Stepper module
  *
  * For more information on OpenIndus:
  * @see https://openindus.com
  */
 
-#include "StepperStandalone.h"
-#include "StepperPinout.h"
-#include "StepperParam.h"
-
 #if defined(OI_STEPPER) || defined(OI_STEPPER_VE)
 
-static const char STEPPER_TAG[] = "Stepper";
+#include "Stepper.h"
+
+static const char TAG[] = "Stepper";
 
 const gpio_num_t _dinGpio[] = {
     STEPPER_GPIO_PIN_DIN_1,
@@ -32,25 +30,32 @@ const gpio_num_t _dinGpio[] = {
 #endif
 };
 
-int StepperStandalone::init()
+int StepperCLI::init(void)
 {
     int err = 0;
 
-    ESP_LOGI(STEPPER_TAG, "Init");
+    err |= DigitalInputsCLI::init();
 
-    err |= ModuleStandalone::init();
+    return err;
+}
+
+int StepperStandalone::init(void)
+{
+    int err = 0;
+
+    err |=ModuleStandalone::init();
 
     /**
      * @brief DIN Init
      * 
      */
-    err |= DigitalInputs::init(_dinGpio, STEPPER_DIN_NUM);
+    err |=DigitalInputs::init(_dinGpio, 4);
 
-    /**
+/**
      * @brief Init Motor stepper
      * 
      */
-    ESP_LOGI(STEPPER_TAG, "Init Motor stepper");
+    ESP_LOGI(TAG, "Init Motor stepper");
 
     PS01_Hal_Config_t ps01Conf = STEPPER_CONFIG_MOTOR_DEFAULT();
     PS01_Param_t ps01Param = STEPPER_PARAM_MOTOR_DEFAULT();
@@ -61,6 +66,22 @@ int StepperStandalone::init()
      * 
      */
     err |= MotorStepperParam::initNVSParam();
+
+    return err;
+}
+
+#endif
+
+#if (defined(OI_STEPPER) || defined(OI_STEPPER_VE)) && defined(MODULE_SLAVE)
+
+int StepperSlave::init(void)
+{
+    int err = 0;
+
+    err |= ModuleSlave::init();
+    err |= StepperStandalone::init();
+    err |= DigitalInputsSlave::init();
+    err |= MotorStepperSlave::init();
 
     return err;
 }

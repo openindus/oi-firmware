@@ -42,7 +42,6 @@ void System::init(void)
 #elif defined(OI_STEPPER) || defined(OI_STEPPER_VE)
     err |= Stepper::init();
     err |= StepperCLI::init();
-    err |= StepperParamCLI::init();
 #elif defined(OI_MIXED)
     err |= Mixed::init();
     err |= MixedCLI::init();

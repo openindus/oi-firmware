@@ -60,23 +60,24 @@ enum Command_Control_e {
     CONTROL_MOTOR_MOVE_ABSOLUTE             = 0x41,
     CONTROL_MOTOR_MOVE_RELATIVE             = 0x42,
     CONTROL_MOTOR_RUN                       = 0x43,
-    CONTROL_MOTOR_IS_RUNNING                = 0x44,
+    CONTROL_MOTOR_WAIT                      = 0x44,
     CONTROL_MOTOR_HOMING                    = 0x45,
-    CONTROL_MOTOR_SET_LIMIT_SWITCH          = 0x46,
-    CONTROL_MOTOR_SET_STEP_RESOLUTION       = 0x47,
-    CONTROL_MOTOR_GET_POSITION              = 0x48,
-    CONTROL_MOTOR_GET_SPEED                 = 0x49,
-    CONTROL_MOTOR_RESET_HOME_POSITION       = 0x4A,
-    CONTROL_MOTOR_SET_MAX_SPEED             = 0x4B,
-    CONTROL_MOTOR_SET_MIN_SPEED             = 0x4C,
-    CONTROL_MOTOR_SET_FULL_STEP_SPEED       = 0x4D,
-    CONTROL_MOTOR_SET_ACCELERATION          = 0x4E,
-    CONTROL_MOTOR_SET_DECELERATION          = 0x4F,
+    CONTROL_MOTOR_ATTACH_LIMIT_SWITCH       = 0x46,
+    CONTROL_MOTOR_DETACH_LIMIT_SWITCH       = 0x47,
+    CONTROL_MOTOR_SET_STEP_RESOLUTION       = 0x48,
+    CONTROL_MOTOR_GET_POSITION              = 0x49,
+    CONTROL_MOTOR_GET_SPEED                 = 0x4A,
+    CONTROL_MOTOR_RESET_HOME_POSITION       = 0x4B,
+    CONTROL_MOTOR_SET_MAX_SPEED             = 0x4C,
+    CONTROL_MOTOR_SET_MIN_SPEED             = 0x4D,
+    CONTROL_MOTOR_SET_FULL_STEP_SPEED       = 0x4E,
+    CONTROL_MOTOR_SET_ACCELERATION          = 0x4F,
+    CONTROL_MOTOR_SET_DECELERATION          = 0x50,
 
     /* BRUSHLESS MOTOR */
-    CONTROL_MOTOR_SET_SPEED                 = 0x50,
-    CONTROL_MOTOR_SET_BRAKE                 = 0x51,
-    CONTROL_MOTOR_SET_DIRECTION             = 0x52,
+    CONTROL_MOTOR_SET_SPEED                 = 0x60,
+    CONTROL_MOTOR_SET_BRAKE                 = 0x61,
+    CONTROL_MOTOR_SET_DIRECTION             = 0x62,
 
     /* ENCODER */
     CONTROL_ENCODER_GET_DIRECTION           = 0x81,
@@ -86,4 +87,5 @@ enum Command_Control_e {
 
 enum Command_Event_e {
     EVENT_DIGITAL_INTERRUPT                 = 0x00,
+    EVENT_MOTOR_READY                       = 0x01,
 };

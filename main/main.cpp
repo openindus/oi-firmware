@@ -2,6 +2,7 @@
 #include "Arduino.h"
 
 OIStepper stepper;
+OIDiscrete discrete;
 
 void printTask(void*)
 {
@@ -14,7 +15,7 @@ void printTask(void*)
 
 void setup(void) 
 {
-   
+
 }
 
 void loop(void) 
@@ -29,10 +30,9 @@ void loop(void)
 =======
 >>>>>>> bdcc50d... fix ps01 driver for good git status
     /* Homing */
-    stepper.homing(MOTOR_1, 1000);
     stepper.homing(MOTOR_2, 1000);
-    stepper.wait(MOTOR_1);
     stepper.wait(MOTOR_2);
+<<<<<<< HEAD
 
 <<<<<<< HEAD
     stepper.detachLimitSwitch(MOTOR_1, DIN_1);
@@ -55,3 +55,9 @@ void loop(void)
     // printf("status:%x\n", PS01_Cmd_GetStatus(MOTOR_2));
 }
 >>>>>>> bdcc50d... fix ps01 driver for good git status
+=======
+    delay(1000);
+    stepper.moveAbsolute(MOTOR_2, 180);
+    stepper.wait(MOTOR_2);
+}
+>>>>>>> 54668b6... add control and slmave motorstepper

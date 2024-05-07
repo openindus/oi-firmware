@@ -69,7 +69,7 @@ public:
     static void detachLimitSwitch(MotorNum_t motor, DigitalInputNum_t din);
     
     /**
-     * @brief Set the Step Resolution
+     * @brief Set the Step Resolution. Default resolution is 1/16 step
      * 
      * @param motor 
      * @param res 
@@ -185,7 +185,9 @@ public:
     static void wait(MotorNum_t motor);
     
     /**
-     * @brief Run task to perform homing
+     * @brief Run task to perform homing. Please set a limit switch before performing a homing.
+     * The motor will run in reverse until it reach the limit switch. Then it will move at min speed until it move out of the sensor.
+     * The position will be set at the home position.
      * 
      * @param motor 
      * @param speed

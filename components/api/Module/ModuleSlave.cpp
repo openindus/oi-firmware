@@ -190,14 +190,11 @@ void ModuleSlave::_busTask(void *pvParameters)
 
                 if (frame.id == _id) {
 
-                    if (_ctrlCallbacks.find(frame.data[0]) != _ctrlCallbacks.end()) {
-                        for (auto it=_ctrlCallbacks.begin(); it!=_ctrlCallbacks.end(); it++) {
-                            if (it->first == frame.data[0]) {
-                                (*it).second(msg);
-                                break;
-                            }
-                        }
+                    auto it = _ctrlCallbacks.find(frame.data[0]);
+                    if (it != _ctrlCallbacks.end()) {
+                        (*it).second(msg);
                     } else {
+                        frame.error = 1;
                         ESP_LOGW(MODULE_TAG, "CTRL Request does not exist: 0x%02x", frame.data[0]);
                     }
 

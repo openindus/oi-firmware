@@ -229,13 +229,9 @@ void ModuleMaster::_busTask(void *pvParameters)
             {
                 case CMD_EVENT:
                 {
-                    if (ModuleControl::getEventCallbacks().find(std::make_pair(frame.data[0], id)) != ModuleControl::getEventCallbacks().end()) {
-                        for (auto it=ModuleControl::getEventCallbacks().begin(); it!=ModuleControl::getEventCallbacks().end(); it++) {
-                            if ((it->first.first == frame.data[0]) && 
-                                (it->first.second == id)) {
-                                (*it).second(frame.data[1]);
-                            }
-                        }
+                    auto it = ModuleControl::getEventCallbacks().find(std::make_pair(frame.data[0], id));
+                    if (it != ModuleControl::getEventCallbacks().end()) {
+                        (*it).second(frame.data[1]);
                     } else {
                         ESP_LOGW(MODULE_TAG, "Command does not exist: command: 0x%02x, id: %d", frame.data[0], id);
                     }                

@@ -198,9 +198,9 @@ void MotorStepper::wait(MotorNum_t motor)
     xQueueReset(_busyEvent[motor]);
 
     // Check if status if not already high
-    if (!PS01_Hal_GetBusyLevel(motor)) {
+    while (!PS01_Hal_GetBusyLevel(motor)) {
         // Wait for an interrupt (rising edge) on busy pin
-        xQueueReceive(_busyEvent[motor], NULL, portMAX_DELAY);
+        xQueueReceive(_busyEvent[motor], NULL, pdMS_TO_TICKS(500));
     }
 }
 
