@@ -20,6 +20,7 @@ int AnalogInputsLVSlave::init() {
     
     ModuleSlave::addCtrlCallback(CONTROL_ANALOG_INPUT_MODE, [](std::vector<uint8_t>& data) {
         AnalogInputsLV::analogInputMode((AnalogInput_Num_t)data[1], (AnalogInput_Mode_t)data[2]);
+        data.clear();
     });
 
     ModuleSlave::addCtrlCallback(CONTROL_ANALOG_INPUT_GET_MODE, [](std::vector<uint8_t>& data) {
@@ -29,6 +30,7 @@ int AnalogInputsLVSlave::init() {
 
     ModuleSlave::addCtrlCallback(CONTROL_ANALOG_INPUT_VOLTAGE_RANGE, [](std::vector<uint8_t>& data) {
         AnalogInputsLV::analogInputVoltageRange((AnalogInput_Num_t)data[1], (AnalogInput_VoltageRange_t)data[2]);
+        data.clear();
     });
 
     ModuleSlave::addCtrlCallback(CONTROL_ANALOG_INPUT_GET_VOLTAGE_RANGE, [](std::vector<uint8_t>& data) {

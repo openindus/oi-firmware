@@ -31,10 +31,12 @@ int DigitalInputsSlave::init() {
 
     ModuleSlave::addCtrlCallback(CONTROL_ATTACH_INTERRUPT, [](std::vector<uint8_t>& data) { 
         DigitalInputs::attachInterrupt((DigitalInputNum_t)data[1], _isrCallback[data[1]], (InterruptMode_t)data[2]);
+        data.clear();
     });
 
     ModuleSlave::addCtrlCallback(CONTROL_DETACH_INTERRUPT, [](std::vector<uint8_t>& data) { 
         DigitalInputs::detachInterrupt((DigitalInputNum_t)data[1]);
+        data.clear();
     });
     
     return 0;

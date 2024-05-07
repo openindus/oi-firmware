@@ -20,11 +20,13 @@ int AnalogOutputsSlave::init() {
     
     ModuleSlave::addCtrlCallback(CONTROL_ANALOG_OUTPUT_MODE, [](std::vector<uint8_t>& data) {
         AnalogOutputs::analogOutputMode((AnalogOutput_Num_t)data[1], (AnalogOutput_Mode_t)data[2]);
+        data.clear();
     });
 
     ModuleSlave::addCtrlCallback(CONTROL_ANALOG_WRITE, [](std::vector<uint8_t>& data) {
         float* value = reinterpret_cast<float*>(&data[2]);
         AnalogOutputs::analogWrite((AnalogOutput_Num_t)data[1], *value);
+        data.clear();
     });
     
     return 0;
