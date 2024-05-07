@@ -21,9 +21,6 @@ MotorStepperControl::MotorStepperControl(ModuleControl* control) : _control(cont
     /* Create the queue for wait function and add callback for CAN event */
     _motorWaitEvent[MOTOR_1] = xQueueCreate(1, 0);
     _motorWaitEvent[MOTOR_2] = xQueueCreate(1, 0);
-    _control->addEventCallback(EVENT_MOTOR_READY, _control->getId(), [this](uint8_t motor) {
-        xQueueSend(_motorWaitEvent[motor], NULL, pdMS_TO_TICKS(100));
-    });
 }
 
 void MotorStepperControl::attachLimitSwitch(MotorNum_t motor, DigitalInputNum_t din, DigitalInputLogic_t logic)
@@ -140,10 +137,19 @@ void MotorStepperControl::run(MotorNum_t motor, MotorDirection_t direction, floa
 
 void MotorStepperControl::wait(MotorNum_t motor)
 {
+    // Add callback
+    _control->addEventCallback(EVENT_MOTOR_READY, _control->getId(), [this](uint8_t motor) {
+        xQueueSend(_motorWaitEvent[motor], NULL, pdMS_TO_TICKS(100));
+    });
+    // Send a message to slave
     std::vector<uint8_t> msgBytes = {CONTROL_MOTOR_WAIT, (uint8_t)motor};
     _control->ctrlRequest(msgBytes, false);
+    // Wait for event
     xQueueReset(_motorWaitEvent[motor]);
     xQueueReceive(_motorWaitEvent[motor], NULL, portMAX_DELAY);
+    // Remove event callback
+    _control->removeEventCallback(EVENT_MOTOR_READY, _control->getId());
+
 }
 
 void MotorStepperControl::homing(MotorNum_t motor, float speed)

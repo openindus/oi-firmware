@@ -489,6 +489,9 @@ void PS01_Hal_Init(uint8_t deviceId)
     /* Let a delay after reset */
 	PS01_Hal_Delay(10);
 
+    /* Clear status */
+    PS01_Cmd_GetStatus(deviceId);
+
     /* PowerSTEP01 Flag */
     _flagEvent[deviceId] = xQueueCreate(2, 0);
     char task_name[14];

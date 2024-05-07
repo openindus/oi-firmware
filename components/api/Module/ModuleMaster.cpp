@@ -58,8 +58,8 @@ bool ModuleMaster::autoId(void)
     int num_id_auto = 0;
     int num_id_sn = 0;
 
-    for (int i=0; i<ModuleControl::getAllInstances().size(); i++) {
-        if (ModuleControl::getAllInstances()[i]->getSN() == 0) {
+    for (int i=0; i<ModuleControl::_instances.size(); i++) {
+        if (ModuleControl::_instances[i]->getSN() == 0) {
             num_id_auto++;
         } else {
             num_id_sn++;
@@ -91,17 +91,17 @@ bool ModuleMaster::autoId(void)
         /* Wait */
         vTaskDelay(200/portTICK_PERIOD_MS);
     
-        if (ModuleControl::getAllInstances().size() == _ids.size()) {
+        if (ModuleControl::_instances.size() == _ids.size()) {
             std::map<uint16_t, int>::iterator it = _ids.begin();
-            for (int i=0; i<ModuleControl::getAllInstances().size(); i++) {
-                ModuleControl::getAllInstances()[i]->setId(it->first);
-                ModuleControl::getAllInstances()[i]->setSN(it->second);
+            for (int i=0; i<ModuleControl::_instances.size(); i++) {
+                ModuleControl::_instances[i]->setId(it->first);
+                ModuleControl::_instances[i]->setSN(it->second);
                 ++it;
-                ModuleControl::getAllInstances()[i]->ledOn(LED_YELLOW);
+                ModuleControl::_instances[i]->ledOn(LED_YELLOW);
                 vTaskDelay(50/portTICK_PERIOD_MS);
             }
         } else {
-            ESP_LOGE(MODULE_TAG, "Number of instantiated modules: %d",  ModuleControl::getAllInstances().size());
+            ESP_LOGE(MODULE_TAG, "Number of instantiated modules: %d",  ModuleControl::_instances.size());
             ESP_LOGE(MODULE_TAG, "Number of IDs received: %d",  _ids.size());
             return false;
         }
@@ -109,14 +109,14 @@ bool ModuleMaster::autoId(void)
 
     /* Initialize module with SN */
     else {
-        for (int i=0; i<ModuleControl::getAllInstances().size(); i++) {
-            uint16_t current_id = ModuleMaster::getIdFromSN(ModuleControl::getAllInstances()[i]->getSN());
+        for (int i=0; i<ModuleControl::_instances.size(); i++) {
+            uint16_t current_id = ModuleMaster::getIdFromSN(ModuleControl::_instances[i]->getSN());
             if (current_id != 0) {
-                ModuleControl::getAllInstances()[i]->setId(current_id);
-                ModuleControl::getAllInstances()[i]->ledOn(LED_YELLOW);
+                ModuleControl::_instances[i]->setId(current_id);
+                ModuleControl::_instances[i]->ledOn(LED_YELLOW);
                 vTaskDelay(50/portTICK_PERIOD_MS);
             } else {
-                ESP_LOGE(MODULE_TAG, "Cannot instantiate module with SN:%i",  ModuleControl::getAllInstances()[i]->getSN());
+                ESP_LOGE(MODULE_TAG, "Cannot instantiate module with SN:%i",  ModuleControl::_instances[i]->getSN());
                 return false;
             }
         }
@@ -125,8 +125,8 @@ bool ModuleMaster::autoId(void)
     vTaskDelay(50/portTICK_PERIOD_MS);
 
     /* Success, broadcast message to set all led green */
-    for (int i=0; i<ModuleControl::getAllInstances().size(); i++) {
-        ModuleControl::getAllInstances()[i]->ledBlink(LED_GREEN, 1000);
+    for (int i=0; i<ModuleControl::_instances.size(); i++) {
+        ModuleControl::_instances[i]->ledBlink(LED_GREEN, 1000);
     }
     return true;
 }
@@ -223,18 +223,21 @@ void ModuleMaster::_busTask(void *pvParameters)
     BusCAN::Frame_t frame;
     uint16_t id;
     uint8_t length;
+
     while (1) {
         if (BusCAN::read(&frame, &id, &length) != -1) { 
             switch (frame.cmd)
             {
                 case CMD_EVENT:
                 {
-                    auto it = ModuleControl::getEventCallbacks().find(std::make_pair(frame.data[0], id));
-                    if (it != ModuleControl::getEventCallbacks().end()) {
-                        (*it).second(frame.data[1]);
+                    auto it = ModuleControl::_eventCallbacks.find(std::make_pair(frame.data[0], id));
+                    if (it != ModuleControl::_eventCallbacks.end()) {
+                        if (it->second != NULL) {
+                            it->second(frame.data[1]);
+                        }
                     } else {
                         ESP_LOGW(MODULE_TAG, "Command does not exist: command: 0x%02x, id: %d", frame.data[0], id);
-                    }                
+                    }
                     break;
                 }
                 case CMD_DISCOVER:

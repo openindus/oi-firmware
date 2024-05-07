@@ -33,7 +33,6 @@ public:
 private:
 
     static void _waitTask(void *pvParameters);
-    static xQueueHandle _motorWaitEvent[MOTOR_MAX];
 };
 
 #endif

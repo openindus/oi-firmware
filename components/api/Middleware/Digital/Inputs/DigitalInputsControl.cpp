@@ -27,8 +27,8 @@ void DigitalInputsControl::attachInterrupt(DigitalInputNum_t num, IsrCallback_t 
 {
     std::vector<uint8_t> msgBytes = {CONTROL_ATTACH_INTERRUPT, (uint8_t)num, (uint8_t)mode};
     _isrCallback[num] = callback;
-    _control->ctrlRequest(msgBytes);
     _control->addEventCallback(EVENT_DIGITAL_INTERRUPT, _control->getId(), [this](uint8_t num) { _isrCallback[num](NULL); });
+    _control->ctrlRequest(msgBytes);
 }
 
 void DigitalInputsControl::detachInterrupt(DigitalInputNum_t num)

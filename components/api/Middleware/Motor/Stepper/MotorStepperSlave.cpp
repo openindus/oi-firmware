@@ -15,20 +15,11 @@
 
 #include "MotorStepperSlave.h"
 
-xQueueHandle MotorStepperSlave::_motorWaitEvent[MOTOR_MAX];
 static MotorNum_t _motorNums[MOTOR_MAX] = {MOTOR_1, MOTOR_2};
 
 int MotorStepperSlave::init() {
     
     int err = 0;
-
-    /* Create queue and task for wait function */
-    for (uint8_t i = 0; i < MOTOR_MAX; i++) {
-        _motorWaitEvent[i] = xQueueCreate(1, 0);
-        char task_name[14];
-        snprintf(task_name, 14, "Wait task %i", i);   
-        xTaskCreate(_waitTask, task_name, 2048, &_motorNums[i], 1, NULL);
-    }
 
     ModuleSlave::addCtrlCallback(CONTROL_MOTOR_ATTACH_LIMIT_SWITCH, [](std::vector<uint8_t>& data) {
         MotorNum_t motor = static_cast<MotorNum_t>(data[1]);
@@ -46,7 +37,7 @@ int MotorStepperSlave::init() {
     ModuleSlave::addCtrlCallback(CONTROL_MOTOR_SET_STEP_RESOLUTION, [](std::vector<uint8_t>& data) {
         MotorNum_t motor = static_cast<MotorNum_t>(data[1]);
         MotorStepResolution_t res = static_cast<MotorStepResolution_t>(data[2]);
-        MotorStepper::setStepResolution(motor, res); 
+        MotorStepper::setStepResolution(motor, res);
     });
 
     ModuleSlave::addCtrlCallback(CONTROL_MOTOR_SET_ACCELERATION, [](std::vector<uint8_t>& data) {
@@ -127,7 +118,9 @@ int MotorStepperSlave::init() {
 
     ModuleSlave::addCtrlCallback(CONTROL_MOTOR_WAIT, [](std::vector<uint8_t>& data) {
         MotorNum_t motor = static_cast<MotorNum_t>(data[1]);
-        xQueueSend(_motorWaitEvent[motor], NULL, pdMS_TO_TICKS(100));
+        char task_name[14];
+        snprintf(task_name, 14, "Wait task %i", motor);   
+        xTaskCreate(_waitTask, task_name, 4096, &_motorNums[motor], 9, NULL);
     });
 
     ModuleSlave::addCtrlCallback(CONTROL_MOTOR_HOMING, [](std::vector<uint8_t>& data) {
@@ -143,14 +136,14 @@ void MotorStepperSlave::_waitTask(void *pvParameters)
 {
     MotorNum_t motor = *(MotorNum_t*)pvParameters;
 
-    while(1) {
-        // Wait for an wait event
-        xQueueReceive(_motorWaitEvent[motor], NULL, portMAX_DELAY); 
-        // Wait motor to be ready
-        MotorStepper::wait(motor);
-        // Send a CAN event to master
-        ModuleSlave::sendEvent({EVENT_MOTOR_READY, (uint8_t)motor});
-    }
+    // Wait motor to be ready
+    MotorStepper::wait(motor);
+
+    // Send a CAN event to master
+    ModuleSlave::sendEvent({EVENT_MOTOR_READY, (uint8_t)motor});
+
+    // Delete task
+    vTaskDelete(NULL);
 }
 
 #endif

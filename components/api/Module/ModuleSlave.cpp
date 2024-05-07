@@ -64,7 +64,7 @@ void ModuleSlave::sendEvent(std::vector<uint8_t> msgBytes)
     BusCAN::Frame_t frame;
     frame.cmd = CMD_EVENT;
     std::copy(msgBytes.begin(), msgBytes.end(), frame.data);
-    uint8_t length = msgBytes.size();
+    uint8_t length = msgBytes.size() + 1;
     BusCAN::write(&frame, _id, length);
 }
 

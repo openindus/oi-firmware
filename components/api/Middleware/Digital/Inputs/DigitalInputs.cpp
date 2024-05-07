@@ -59,7 +59,7 @@ int DigitalInputs::init(const gpio_num_t *gpio, int nb)
 
     _event = xQueueCreate(1, sizeof(uint32_t));
     ESP_LOGI(DIN_TAG, "Create interrupt task");
-    xTaskCreate(_task, "DIN interrupt task", 2048, NULL, 10, NULL);
+    xTaskCreate(_task, "DIN intr task", 4096, NULL, 10, NULL);
 
     return err;
 }
@@ -100,7 +100,7 @@ int DigitalInputs::init(ioex_device_t **ioex, const ioex_num_t *ioex_num, int nb
 
     _event = xQueueCreate(1, sizeof(uint32_t));
     ESP_LOGI(DIN_TAG, "Create interrupt task");
-    xTaskCreate(_task, "DIN interrupt task", 2048, NULL, 10, NULL);
+    xTaskCreate(_task, "DIN intr task", 4096, NULL, 10, NULL);
 
     return err;
 }

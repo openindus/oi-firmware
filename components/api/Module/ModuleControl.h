@@ -34,7 +34,7 @@ public:
     void ledOff(void);
     void ledBlink(LedColor_t color, uint32_t period);
 
-    // friend class ModuleMaster;
+    friend class ModuleMaster;
 
     int ctrlRequest(std::vector<uint8_t>& msgBytes, bool ackNeeded = true);
 
@@ -50,24 +50,19 @@ public:
         _eventCallbacks.insert({std::make_pair(event, id), callback});
     }
 
-    inline static std::vector<ModuleControl*> getAllInstances(void) {
-        return _instances;
-    }
-
-    inline static std::map<std::pair<uint8_t,uint16_t>, std::function<void(uint8_t)>> getEventCallbacks(void) {
-        return _eventCallbacks;
+    inline static void removeEventCallback(uint8_t event, uint16_t id) {
+        _eventCallbacks.erase(std::make_pair(event, id));
     }
 
 protected:
 
-    uint16_t _id; // Board id
-    int _sn; // Serial number
+    static std::map<std::pair<uint8_t,uint16_t>, std::function<void(uint8_t)>> _eventCallbacks;
+    static std::vector<ModuleControl*> _instances;
 
 private:
-
-    static std::vector<ModuleControl*> _instances;
-    static std::map<std::pair<uint8_t,uint16_t>, std::function<void(uint8_t)>> _eventCallbacks;
-
+    
+    uint16_t _id; // Board id
+    int _sn; // Serial number
     void _ledStatus(LedState_t state, LedColor_t color=LED_NONE, uint32_t period=0);
 
 };
