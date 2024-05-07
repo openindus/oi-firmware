@@ -72,13 +72,13 @@ int MixedStandalone::init(void)
 {
     int err = 0;
 
-    err |=ModuleStandalone::init();
+    err |= ModuleStandalone::init();
 
     /* Initialize digital inputs */
-    err |=DigitalInputs::init(_dinGpio, 4);
+    err |= DigitalInputs::init(_dinGpio, 4);
 
     /* Initialize digital outputs */
-    err |=DigitalOutputs::init(_doutGpio, _doutAdcNumChannel, 4);
+    err |= DigitalOutputs::init(_doutGpio, _doutAdcNumChannel, 4);
 
     /* Initialize the SPI bus */
     spi_bus_config_t busConfig = {
@@ -103,12 +103,13 @@ int MixedStandalone::init(void)
         {MIXED_SPI_HOST, MIXED_SPI_FREQ, MIXED_DAC_PIN_SYNC_1, MIXED_DAC_PIN_LDAC_1, 0, 0},
         {MIXED_SPI_HOST, MIXED_SPI_FREQ, MIXED_DAC_PIN_SYNC_2, MIXED_DAC_PIN_LDAC_2, 1, 1}
     };
-    err |=AnalogOutputs::init(2, dacConfig);
-    err |=AnalogOutputs::analogOutputMode(AOUT_1, AOUT_MODE_M10V5_10V5);
-    err |=AnalogOutputs::analogOutputMode(AOUT_2, AOUT_MODE_M10V5_10V5);
+    err |= AnalogOutputs::init(2, dacConfig);
     
     /* Initialize analog inputs */
-    err |=AnalogInputsLV::init(&adcSPIConfig, _ainCmdGpio, 4);
+    err |= AnalogInputsLV::init(&adcSPIConfig, _ainCmdGpio, 4);
+
+    /* Enable analog outputs */
+    AnalogOutputs::start();
 
     return err;
 }

@@ -24,11 +24,12 @@ int ModuleCLI::init(void)
     err |= _registerRestart();
     err |= _registerLog();
     err |= _registerLed();
+#if !defined(MODULE_STANDALONE)
     err |= _registerReadId();
     err |= _registerWriteSync();
     err |= _registerReadSync();
     err |= _registerBusPower();
-
+#endif
     return err;
 }
 

@@ -65,8 +65,7 @@ int BusIO::init(Config_t* config)
 uint32_t BusIO::readId(void)
 {
     uint32_t adc_reading = 0;
-    for (int i = 0; i < 64; i++)
-    {
+    for (int i = 0; i < 64; i++) {
         adc_reading += adc1_get_raw((adc1_channel_t)_config->adcChannelId);
     }
     adc_reading /= 64;

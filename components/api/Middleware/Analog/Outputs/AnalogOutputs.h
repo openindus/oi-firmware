@@ -10,6 +10,7 @@
 
 #include <string.h>
 #include "ad5413.h"
+#include "freertos/task.h"
 
 typedef enum {
     AOUT_1 = 0,
@@ -35,6 +36,13 @@ public:
      * @return 0 if success, -1 if error
     **/
     static int init(uint8_t nb, ad5413_config_t* configs);
+
+    /**
+     * @brief start the devices to enable Outputs
+     * 
+     * @return 0 if success, -1 if error 
+    **/
+    static int start();
 
     /**
      * @brief Set the mode of the specified Analog Output

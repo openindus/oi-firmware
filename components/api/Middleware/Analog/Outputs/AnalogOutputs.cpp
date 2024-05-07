@@ -45,17 +45,38 @@ int AnalogOutputs::init(uint8_t nb, ad5413_config_t* configs)
         /* Initialize device */
         err |= ad5413_init(&_devices[i], &configs[i]);
 
-        /* Perform commands to start the device */
-        err |= ad5413_soft_reset(_devices[i]);
-        err |= ad5413_calib_mem_refresh(_devices[i]);
-        err |= ad5413_clear_dig_diag_flag(_devices[i], DIG_DIAG_RESET_OCCURRED);
-
         if (err == -1) {
             _devicesInitialized[i] = false;
             ESP_LOGE(TAG, "Failed to Initialize device %d", i);
             return -1;
         }
         _devicesInitialized[i] = true;
+    }
+
+    return err;
+}
+
+int AnalogOutputs::start()  //Should be used after the init of other SPI devices on the bus
+{
+    int err = 0;
+
+    /* Perform commands to start the device */
+    for (size_t i = 0; i < _nb; i++) {
+        if (_devices[i] == NULL) {
+            ESP_LOGE(TAG, "No device");
+            return -1;
+        }
+
+        err |= ad5413_soft_reset(_devices[i]);
+        err |= ad5413_calib_mem_refresh(_devices[i]);
+        err |= ad5413_clear_dig_diag_flag(_devices[i], DIG_DIAG_RESET_OCCURRED);
+        err |= ad5413_internal_buffers_en(_devices[i], 1);
+        err |= ad5413_set_output_range(_devices[i], OUTPUT_RANGE_M10V5_10V5);
+        _modes[i] = AOUT_MODE_M10V5_10V5;
+        err |= analogWrite((AnalogOutput_Num_t)i, 0.0);
+        err |= ad5413_soft_ldac_cmd(_devices[i]);
+        err |= ad5413_dac_out_en(_devices[i], 1);
+        err |= analogWrite((AnalogOutput_Num_t)i, 0.0);
     }
 
     return err;
@@ -77,19 +98,20 @@ int AnalogOutputs::analogOutputMode(AnalogOutput_Num_t num, AnalogOutput_Mode_t 
     _modes[num] = mode;
 
     /* Set mode sequence */
+    ret |= analogWrite((AnalogOutput_Num_t)num, 0.0);
     ret |= ad5413_dac_out_en(_devices[num], 0);
-    ret |= ad5413_dac_input_write(_devices[num], 0);
     ret |= ad5413_soft_ldac_cmd(_devices[num]);
     ret |= ad5413_internal_buffers_en(_devices[num], 1);
     if (_modes[num] == AOUT_MODE_M10V5_10V5) {
-        ret |= ad5758_set_output_range(_devices[num], OUTPUT_RANGE_M10V5_10V5);
+        ret |= ad5413_set_output_range(_devices[num], OUTPUT_RANGE_M10V5_10V5);
     } else if (_modes[num] == AOUT_MODE_0mA_20mA) {
-        ret |= ad5758_set_output_range(_devices[num], OUTPUT_RANGE_0mA_20mA);
+        ret |= ad5413_set_output_range(_devices[num], OUTPUT_RANGE_0mA_20mA);
     } else {
         ESP_LOGE(TAG, "Undefined mode");
         ret = -1;
     }    
     ret |= ad5413_dac_out_en(_devices[num], 1);
+    ret |= analogWrite((AnalogOutput_Num_t)num, 0.0);   //Without this, the output is not ensure to be at 0V.
 
     if (ret == -1) {
         ESP_LOGE(TAG, "Failed to set mode");
@@ -120,17 +142,18 @@ int AnalogOutputs::analogWrite(AnalogOutput_Num_t num, float value)
         }
         data = (uint16_t)(((value + 10.5) * (0X3FFF / 21)) - 10.5);
     } else if (_modes[num] == AOUT_MODE_0mA_20mA) {
-        if ((value < -10.5) || (value > 10.5)) {
+        if ((value < 0) || (value > 20)) {
             ESP_LOGE(TAG, "Value out of range: [0;20mA]");
             return -1;
         }
-        data = (uint16_t)((value) * (0X3FFF / 20));
+        data = (uint16_t)((value) * (0X3FFF / 24));
     } else {
         ESP_LOGE(TAG, "Undefined output mode");
         return -1;
     }
 
     ret |= ad5413_dac_input_write(_devices[num], data);
+
     if (ret == -1) {
         ESP_LOGE(TAG, "Failed to write");
         return -1;

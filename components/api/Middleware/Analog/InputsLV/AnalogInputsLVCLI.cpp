@@ -139,21 +139,21 @@ static int _AnalogRead(int argc, char **argv)
 
     switch (unit)
     {
-    case AIN_UNIT_VOLT:
-        printf("%.3f\n", AnalogInputsLV::analogReadVolt(ain));
-        break;
     case AIN_UNIT_MILLIVOLT:
         printf("%.1f\n", AnalogInputsLV::analogReadMilliVolt(ain));
-        break;
-    case AIN_UNIT_AMP:
-        printf("%.3f\n", AnalogInputsLV::analogReadAmp(ain));
         break;
     case AIN_UNIT_MILLIAMP:
         printf("%.3f\n", AnalogInputsLV::analogReadMilliAmp(ain));
         break;
+    case AIN_UNIT_VOLT:
+        printf("%.3f\n", AnalogInputsLV::analogReadVolt(ain));
+        break;
+    case AIN_UNIT_AMP:
+        printf("%.3f\n", AnalogInputsLV::analogReadAmp(ain));
+        break;
 
     default:
-        printf("Wrong unit\n");
+        printf("%d\n", AnalogInputsLV::analogRead(ain));
         break;
     }
 
@@ -163,7 +163,7 @@ static int _AnalogRead(int argc, char **argv)
 int AnalogInputsLVCLI::_registerAnalogRead()
 {
     _analogReadInputReadArgs.ain = arg_int1(NULL, NULL, "<AIN>", "[1-4]");
-    _analogReadInputReadArgs.unit = arg_int1(NULL, NULL, "<UNIT>", "0 = Raw, 1 = mV, 2 = mA, 3 = V, 4 = A");
+    _analogReadInputReadArgs.unit = arg_int0(NULL, NULL, "<UNIT>", "0 = Raw, 1 = mV, 2 = mA, 3 = V, 4 = A");
     _analogReadInputReadArgs.end = arg_end(2);
 
     const esp_console_cmd_t read_cmd = {
