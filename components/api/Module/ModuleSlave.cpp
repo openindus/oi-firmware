@@ -16,17 +16,22 @@
 #include "ModuleSlave.h"
 #include "ModulePinout.h"
 
+#if defined(MODULE_SLAVE)
+
 static const char MODULE_TAG[] = "Module";
 
 uint16_t ModuleSlave::_id;
 std::map<uint8_t, std::function<void(std::vector<uint8_t>&)>> ModuleSlave::_ctrlCallbacks;
 
-void ModuleSlave::init(void)
+int ModuleSlave::init(void)
 {
+    int err = 0;
+
     ESP_LOGI(MODULE_TAG, "Bus init");
+
     /* Bus RS/CAN */
-    BusRS::begin(MODULE_RS_NUM_PORT, MODULE_PIN_RS_UART_TX, MODULE_PIN_RS_UART_RX);
-    BusCAN::begin(MODULE_PIN_CAN_TX, MODULE_PIN_CAN_RX);
+    err |= BusRS::begin(MODULE_RS_NUM_PORT, MODULE_PIN_RS_UART_TX, MODULE_PIN_RS_UART_RX);
+    err |= BusCAN::begin(MODULE_PIN_CAN_TX, MODULE_PIN_CAN_RX);
 
     /* Bus IO */
     BusIO::Config_t config = {
@@ -36,7 +41,7 @@ void ModuleSlave::init(void)
         .gpioModeSync = GPIO_MODE_INPUT,
         .gpioNumPower = MODULE_PIN_CMD_MOSFET_ALIM,
     };
-    BusIO::init(&config);
+    err |= BusIO::init(&config);
 
     /* Board ID is represented by the 10 most significants bits of the adc reading (12 bits) */
     _id = (uint16_t) (BusIO::readId()>>2);
@@ -45,6 +50,8 @@ void ModuleSlave::init(void)
     /* Bus task */
     ESP_LOGI(MODULE_TAG, "Create bus task");
     xTaskCreate(_busTask, "Bus task", 4096, NULL, 1, NULL);
+
+    return err;
 }
 
 /**
@@ -57,7 +64,7 @@ void ModuleSlave::sendEvent(std::vector<uint8_t> msgBytes)
     BusCAN::Frame_t frame;
     frame.cmd = CMD_EVENT;
     std::copy(msgBytes.begin(), msgBytes.end(), frame.data);
-    uint8_t length = msgBytes.size();
+    uint8_t length = msgBytes.size() + 1;
     BusCAN::write(&frame, _id, length);
 }
 
@@ -183,14 +190,11 @@ void ModuleSlave::_busTask(void *pvParameters)
 
                 if (frame.id == _id) {
 
-                    if (_ctrlCallbacks.find(frame.data[0]) != _ctrlCallbacks.end()) {
-                        for (auto it=_ctrlCallbacks.begin(); it!=_ctrlCallbacks.end(); it++) {
-                            if (it->first == frame.data[0]) {
-                                (*it).second(msg);
-                                break;
-                            }
-                        }
+                    auto it = _ctrlCallbacks.find(frame.data[0]);
+                    if (it != _ctrlCallbacks.end()) {
+                        (*it).second(msg);
                     } else {
+                        frame.error = 1;
                         ESP_LOGW(MODULE_TAG, "CTRL Request does not exist: 0x%02x", frame.data[0]);
                     }
 
@@ -239,3 +243,5 @@ void ModuleSlave::_heartbeatTask(void *pvParameters)
 {
     /** @todo Send heartbeat periodically */
 }
+
+#endif

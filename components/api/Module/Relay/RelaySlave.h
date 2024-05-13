@@ -18,13 +18,13 @@
 #include "RelayStandalone.h"
 #include "ModuleSlave.h"
 
-#if defined(OI_RELAY_HP) || defined(OI_RELAY_LP)
+#if (defined(OI_RELAY_HP) || defined(OI_RELAY_LP)) && defined(MODULE_SLAVE)
 
 class RelaySlave : public RelayStandalone, public ModuleSlave
 {
 public:
 
-    static void init(void);
+    static int init(void);
 
 };
 

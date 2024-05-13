@@ -33,7 +33,7 @@ class ModuleStandalone
 {
 public:
 
-    static void init(void);
+    static int init(void);
 
     static void restart(void);
     static void ledOn(LedColor_t color);
@@ -45,7 +45,6 @@ public:
     static void getHardwareVersion(char* version);
     static void getSoftwareVersion(char* version);
     static bool setBoardInfo(char* board_type, int serial_num, char* hardware_version);
-
 
 private:
 

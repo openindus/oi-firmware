@@ -8,7 +8,7 @@
 
 #include "AnalogLsControl.h"
 
-#if !defined(OI_ANALOG_LS)
+#if defined(MODULE_MASTER)
 
 
 

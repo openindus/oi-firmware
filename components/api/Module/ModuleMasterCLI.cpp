@@ -17,13 +17,15 @@
 
 #if defined(MODULE_MASTER)
 
-void ModuleMasterCLI::init(void)
+int ModuleMasterCLI::init(void)
 {
     _registerPing();
     _registerProgram();
     _registerAutoId();
     _registerDiscoverSlaves();
     _registerGetSlaveInfo();
+
+    return 0;
 }
 
 /** 'program' */

@@ -19,11 +19,13 @@
 #include "ModuleStandalone.h"
 #include "Command.h"
 
+#if defined(MODULE_SLAVE)
+
 class ModuleSlave
 {
 public:
 
-    static void init(void);
+    static int init(void);
 
     static void sendEvent(std::vector<uint8_t> msgBytes);
 
@@ -42,3 +44,5 @@ private:
     static void _busTask(void *pvParameters);
     static void _heartbeatTask(void *pvParameters);
 };
+
+#endif

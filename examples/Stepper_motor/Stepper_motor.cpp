@@ -27,27 +27,27 @@ void setup(void)
 
     /* Homing */
     Serial.printf("Homing\n");
-    stepper.setLimitSwitch(MOTOR_1, DIN_1, ACTIVE_HIGH);
+    stepper.attachLimitSwitch(MOTOR_1, DIN_1, ACTIVE_HIGH);
     stepper.homing(MOTOR_1, 800);
-    delay(3000);
+    stepper.wait(MOTOR_1);
     Serial.printf("position: %d\n", stepper.getPosition(MOTOR_1));
 
     /* Move relative */
     Serial.printf("moveRelative\n");
     stepper.moveRelative(MOTOR_1, 100);
-    delay(1000);
+    stepper.wait(MOTOR_1);
     Serial.printf("position: %d\n", stepper.getPosition(MOTOR_1));
 
     /* Move relative */
     Serial.printf("moveRelative\n");
     stepper.moveRelative(MOTOR_1, -200);
-    delay(1000);
+    stepper.wait(MOTOR_1);
     Serial.printf("position: %d\n", stepper.getPosition(MOTOR_1));
 
     /* Move absolute */
     Serial.printf("moveAbsolute\n");
     stepper.moveAbsolute(MOTOR_1, 200);
-    delay(1000);
+    stepper.wait(MOTOR_1);
     Serial.printf("position: %d\n", stepper.getPosition(MOTOR_1));
 }
 

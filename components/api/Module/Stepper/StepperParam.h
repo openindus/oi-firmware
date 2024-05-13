@@ -61,8 +61,8 @@
         .ocSd = POWERSTEP01_CONFIG_OC_SD_DISABLE,                               \
         .uvloVal = POWERSTEP01_CONFIG_UVLOVAL_LOW,                              \
         .vccVal = POWERSTEP01_CONFIG_VCCVAL_15V,                                \
-        .fPwmInt = POWERSTEP01_CONFIG_PWM_DIV_2,                                \
-        .fPwmDec = POWERSTEP01_CONFIG_PWM_MUL_1,                                \
+        .fPwmInt = POWERSTEP01_CONFIG_PWM_DIV_1,                                \
+        .fPwmDec = POWERSTEP01_CONFIG_PWM_MUL_2,                                \
     }                                                                           \
 }
 #elif defined(CONFIG_CURRENT_MODE)

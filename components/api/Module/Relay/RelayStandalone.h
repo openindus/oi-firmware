@@ -35,7 +35,7 @@ class RelayStandalone : public ModuleStandalone
 {
 public:
 
-    static void init(void);
+    static int init(void);
 
     /**
      * @brief Enable or disable relay
@@ -45,7 +45,7 @@ public:
 
 private:
 
-    static void _initRelays(void);
+    static int _initRelays(void);
 
 };
 

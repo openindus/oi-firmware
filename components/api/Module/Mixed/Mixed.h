@@ -15,15 +15,74 @@
 
 #pragma once
 
-#include "MixedStandalone.h"
-#include "MixedSlave.h"
-#include "MixedControl.h"
-#include "MixedCLI.h"
+#include "Global.h"
+
+#if defined(OI_MIXED)
+#include "ModuleStandalone.h"
+#include "MixedPinout.h"
+#include "AnalogOutputsCLI.h"
+#include "AnalogInputsLVCLI.h"
+#include "DigitalInputsCLI.h"
+#include "DigitalOutputsCLI.h"
+#endif
 
 #if defined(OI_MIXED) && defined(MODULE_STANDALONE)
 #define Mixed MixedStandalone
-#elif defined(OI_MIXED) && !defined(MODULE_STANDALONE)
+#elif defined(OI_MIXED) && defined(MODULE_SLAVE)
 #define Mixed MixedSlave
-#else 
+#include "ModuleSlave.h"
+#include "AnalogOutputsSlave.h"
+#include "AnalogInputsLVSlave.h"
+#include "DigitalInputsSlave.h"
+#include "DigitalOutputsSlave.h"
+#elif defined(MODULE_MASTER) 
 #define Mixed MixedControl
+#include "ModuleControl.h"
+#include "AnalogOutputsControl.h"
+#include "AnalogInputsLVControl.h"
+#include "DigitalInputsControl.h"
+#include "DigitalOutputsControl.h"
 #endif
+
+#if defined(OI_MIXED)
+
+class MixedCLI : public AnalogOutputsCLI, public AnalogInputsLVCLI, public DigitalInputsCLI, public DigitalOutputsCLI
+{
+public:
+
+    static int init(void);
+};
+
+class MixedStandalone : public ModuleStandalone, public AnalogOutputs, public AnalogInputsLV, public DigitalOutputs, public DigitalInputs
+{
+public:
+
+    static int init(void);
+};
+#endif
+
+#if defined(OI_MIXED) && defined(MODULE_SLAVE)
+
+class MixedSlave : public ModuleSlave, public MixedStandalone, public AnalogOutputsSlave, public AnalogInputsLVSlave, public DigitalInputsSlave, public DigitalOutputsSlave
+{
+public:
+
+    static int init(void);
+};
+
+#elif defined(MODULE_MASTER)
+
+class MixedControl : public ModuleControl, public AnalogOutputsControl, public AnalogInputsLVControl, public DigitalInputsControl, public DigitalOutputsControl
+{
+public:
+
+    MixedControl(int sn = 0) : 
+        ModuleControl(sn),
+        AnalogOutputsControl(this),
+        AnalogInputsLVControl(this),
+        DigitalInputsControl(this),
+        DigitalOutputsControl(this) {}
+};
+#endif
+
+

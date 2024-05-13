@@ -8,15 +8,16 @@
 
 #include "AnalogLsSlave.h"
 
-#if defined(OI_ANALOG_LS)
+#if defined(OI_ANALOG_LS) && defined(MODULE_SLAVE)
 
 AnalogLsStandalone* AnalogLsSlave::_analogLs = new AnalogLsStandalone();
 
 int AnalogLsSlave::init(void)
 {
-    ModuleSlave::init();
+    int err = ModuleSlave::init();
+    err |= AnalogLsStandalone::init();
 
-    return 0;
+    return err;
 }
 
 #endif

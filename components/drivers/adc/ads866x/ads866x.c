@@ -12,8 +12,10 @@ static bool s_gpio_initialized = false;
 static bool s_device_configured = false;
 
 
-static void ads866x_gpio_init(void)
+static int ads866x_gpio_init(void)
 {
+    int err = 0;
+
     assert(s_config != NULL);
 
     if (s_device_configured == true) {
@@ -28,7 +30,7 @@ static void ads866x_gpio_init(void)
         cfg.pull_down_en = GPIO_PULLDOWN_DISABLE;
         cfg.intr_type = GPIO_INTR_DISABLE;
 
-        ESP_ERROR_CHECK(gpio_config(&cfg));
+        err |= gpio_config(&cfg);
 
         /* Configure Alarm pin */
         cfg.pin_bit_mask = (1ULL << s_config->pin_alarm);
@@ -37,19 +39,24 @@ static void ads866x_gpio_init(void)
         cfg.pull_down_en = GPIO_PULLDOWN_DISABLE;
         cfg.intr_type = GPIO_INTR_POSEDGE;
 
-        ESP_ERROR_CHECK(gpio_config(&cfg));
+        err |= gpio_config(&cfg);
 
         // Set Rst pin to HIGH level
-        ESP_ERROR_CHECK(gpio_set_level(s_config->pin_rst, 1));
+        err |= gpio_set_level(s_config->pin_rst, 1);
 
         s_gpio_initialized = true;
     } else {
         ESP_LOGE(ADS866x_TAG, "Device is not configured !!!");
+        return -1;
     }
+
+    return err;
 }
 
-static void ads866x_spi_init(void)
+static int ads866x_spi_init(void)
 {
+    int err = 0;
+
     if (s_spi_initialized == false) {
         ESP_LOGI(ADS866x_TAG, "Initialize the Ads866x device on the SPI bus");
 
@@ -73,18 +80,21 @@ static void ads866x_spi_init(void)
                 .post_cb = NULL
             };
 
-            ESP_ERROR_CHECK(spi_bus_add_device(s_config->spi_host, &device_config, &s_spi_handler));
+            err = spi_bus_add_device(s_config->spi_host, &device_config, &s_spi_handler);
 
             s_spi_initialized = true;
         } else {
             ESP_LOGE(ADS866x_TAG, "Device is not configured !!!");
+            return -1;
         }
     }
+
+    return err;
 }
 
-uint8_t ads866x_init(ads866x_config_t *config)
+int ads866x_init(ads866x_config_t *config)
 {
-    uint8_t ret = 0;
+    int ret = 0;
 
     ESP_LOGI(ADS866x_TAG, "Configure Ads866x device");
 

@@ -13,6 +13,8 @@
  * @see https://openindus.com
  */
 
+#if defined(MODULE_MASTER)
+
 #include "ModuleMaster.h"
 #include "ModuleControl.h"
 #include "ModulePinout.h"
@@ -21,13 +23,15 @@ static const char MODULE_TAG[] = "Module";
 
 std::map<uint16_t,int,std::greater<uint16_t>> ModuleMaster::_ids;
 
-void ModuleMaster::init(void)
+int ModuleMaster::init(void)
 {
+    int err = 0;
+
     ESP_LOGI(MODULE_TAG, "Bus init");
 
     /* Bus RS/CAN */
-    BusRS::begin(MODULE_RS_NUM_PORT, MODULE_PIN_RS_UART_TX, MODULE_PIN_RS_UART_RX);
-    BusCAN::begin(MODULE_PIN_CAN_TX, MODULE_PIN_CAN_RX);
+    err |= BusRS::begin(MODULE_RS_NUM_PORT, MODULE_PIN_RS_UART_TX, MODULE_PIN_RS_UART_RX);
+    err |= BusCAN::begin(MODULE_PIN_CAN_TX, MODULE_PIN_CAN_RX);
 
     /* Bus IO */
     BusIO::Config_t config = {
@@ -37,11 +41,13 @@ void ModuleMaster::init(void)
         .gpioModeSync = GPIO_MODE_INPUT_OUTPUT,
         .gpioNumPower = MODULE_PIN_CMD_MOSFET_ALIM,
     };
-    BusIO::init(&config);
+    err |= BusIO::init(&config);
     BusIO::writeSync(0);
 
     ESP_LOGI(MODULE_TAG, "Create bus task");
     xTaskCreate(_busTask, "Bus task", 4096, NULL, 1, NULL);
+
+    return err;
 }
 
 bool ModuleMaster::autoId(void)
@@ -52,8 +58,8 @@ bool ModuleMaster::autoId(void)
     int num_id_auto = 0;
     int num_id_sn = 0;
 
-    for (int i=0; i<ModuleControl::getAllInstances().size(); i++) {
-        if (ModuleControl::getSN(ModuleControl::getAllInstances()[i]) == 0) {
+    for (int i=0; i<ModuleControl::_instances.size(); i++) {
+        if (ModuleControl::_instances[i]->getSN() == 0) {
             num_id_auto++;
         } else {
             num_id_sn++;
@@ -85,17 +91,17 @@ bool ModuleMaster::autoId(void)
         /* Wait */
         vTaskDelay(200/portTICK_PERIOD_MS);
     
-        if (ModuleControl::getAllInstances().size() == _ids.size()) {
+        if (ModuleControl::_instances.size() == _ids.size()) {
             std::map<uint16_t, int>::iterator it = _ids.begin();
-            for (int i=0; i<ModuleControl::getAllInstances().size(); i++) {
-                ModuleControl::setId(ModuleControl::getAllInstances()[i], it->first);
-                ModuleControl::setSN(ModuleControl::getAllInstances()[i], it->second);
+            for (int i=0; i<ModuleControl::_instances.size(); i++) {
+                ModuleControl::_instances[i]->setId(it->first);
+                ModuleControl::_instances[i]->setSN(it->second);
                 ++it;
-                ModuleControl::getAllInstances()[i]->ledOn(LED_YELLOW);
+                ModuleControl::_instances[i]->ledOn(LED_YELLOW);
                 vTaskDelay(50/portTICK_PERIOD_MS);
             }
         } else {
-            ESP_LOGE(MODULE_TAG, "Number of instantiated modules: %d",  ModuleControl::getAllInstances().size());
+            ESP_LOGE(MODULE_TAG, "Number of instantiated modules: %d",  ModuleControl::_instances.size());
             ESP_LOGE(MODULE_TAG, "Number of IDs received: %d",  _ids.size());
             return false;
         }
@@ -103,14 +109,14 @@ bool ModuleMaster::autoId(void)
 
     /* Initialize module with SN */
     else {
-        for (int i=0; i<ModuleControl::getAllInstances().size(); i++) {
-            uint16_t current_id = ModuleMaster::getIdFromSN(ModuleControl::getSN(ModuleControl::getAllInstances()[i]));
+        for (int i=0; i<ModuleControl::_instances.size(); i++) {
+            uint16_t current_id = ModuleMaster::getIdFromSN(ModuleControl::_instances[i]->getSN());
             if (current_id != 0) {
-                ModuleControl::setId(ModuleControl::getAllInstances()[i], current_id);
-                ModuleControl::getAllInstances()[i]->ledOn(LED_YELLOW);
+                ModuleControl::_instances[i]->setId(current_id);
+                ModuleControl::_instances[i]->ledOn(LED_YELLOW);
                 vTaskDelay(50/portTICK_PERIOD_MS);
             } else {
-                ESP_LOGE(MODULE_TAG, "Cannot instanciate module with SN:%i",  ModuleControl::getSN(ModuleControl::getAllInstances()[i]));
+                ESP_LOGE(MODULE_TAG, "Cannot instantiate module with SN:%i",  ModuleControl::_instances[i]->getSN());
                 return false;
             }
         }
@@ -119,8 +125,8 @@ bool ModuleMaster::autoId(void)
     vTaskDelay(50/portTICK_PERIOD_MS);
 
     /* Success, broadcast message to set all led green */
-    for (int i=0; i<ModuleControl::getAllInstances().size(); i++) {
-        ModuleControl::getAllInstances()[i]->ledBlink(LED_GREEN, 1000);
+    for (int i=0; i<ModuleControl::_instances.size(); i++) {
+        ModuleControl::_instances[i]->ledBlink(LED_GREEN, 1000);
     }
     return true;
 }
@@ -217,22 +223,21 @@ void ModuleMaster::_busTask(void *pvParameters)
     BusCAN::Frame_t frame;
     uint16_t id;
     uint8_t length;
+
     while (1) {
         if (BusCAN::read(&frame, &id, &length) != -1) { 
             switch (frame.cmd)
             {
                 case CMD_EVENT:
                 {
-                    if (ModuleControl::getEventCallbacks().find(std::make_pair(frame.data[0], id)) != ModuleControl::getEventCallbacks().end()) {
-                        for (auto it=ModuleControl::getEventCallbacks().begin(); it!=ModuleControl::getEventCallbacks().end(); it++) {
-                            if ((it->first.first == frame.data[0]) && 
-                                (it->first.second == id)) {
-                                (*it).second(frame.data[1]);
-                            }
+                    auto it = ModuleControl::_eventCallbacks.find(std::make_pair(frame.data[0], id));
+                    if (it != ModuleControl::_eventCallbacks.end()) {
+                        if (it->second != NULL) {
+                            it->second(frame.data[1]);
                         }
                     } else {
                         ESP_LOGW(MODULE_TAG, "Command does not exist: command: 0x%02x, id: %d", frame.data[0], id);
-                    }                
+                    }
                     break;
                 }
                 case CMD_DISCOVER:
@@ -412,3 +417,5 @@ end:
     frame.data = NULL;
     vTaskDelete(NULL);
 }
+
+#endif

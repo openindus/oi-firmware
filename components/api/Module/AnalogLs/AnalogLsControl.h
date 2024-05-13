@@ -12,7 +12,7 @@
 #include "ModuleMaster.h"
 #include "AnalogLsInterface.h"
 
-#if !defined(OI_ANALOG_LS)
+#if defined(MODULE_MASTER)
 
 class AnalogLsControl : public ModuleControl, public AnalogLsInterface
 {

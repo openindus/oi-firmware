@@ -15,6 +15,8 @@
 
 #pragma once
 
+#if defined(MODULE_MASTER)
+
 #include "Global.h"
 #include "ModuleStandalone.h"
 #include "Command.h"
@@ -23,7 +25,7 @@ class ModuleMaster
 {
 public:
 
-    static void init(void);
+    static int init(void);
 
     static bool autoId(void);
     static void autoTest(void);
@@ -42,3 +44,5 @@ private:
     static void _programmingTask(void *pvParameters);
 
 };
+
+#endif

@@ -23,7 +23,7 @@ class BrushlessStandalone : public ModuleStandalone
 {
 public:
 
-    static void init(void);
+    static int init(void);
     static void setSpeed(uint32_t duty_cycle);
     static void setBrake(bool brake);
     static void setDirection(bool direction);

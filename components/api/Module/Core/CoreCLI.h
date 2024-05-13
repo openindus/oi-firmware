@@ -17,24 +17,21 @@
 
 #include "Global.h"
 #include "CoreStandalone.h"
+#include "DigitalInputsCLI.h"
+#include "DigitalOutputsCLI.h"
+#include "AnalogInputsHVCLI.h"
 
 #if defined(OI_CORE)
 
-class CoreCLI
+class CoreCLI : public AnalogInputsHVCLI, public DigitalInputsCLI, public DigitalOutputsCLI
 {
 public:
 
-    static void init(void);
+    static int init(void);
 
 private:
 
-    static void _registerDigitalWrite(void);
-    static void _registerDigitalRead(void);
-    static void _registerAnalogRead(void);
-    static void _registerAnalogReadMilliVolt(void);
-    static void _registerDigitalGetOverCurrentStatus(void);
-    static void _registerDate(void);
-
+    static int _registerDate(void);
 };
 
 #endif

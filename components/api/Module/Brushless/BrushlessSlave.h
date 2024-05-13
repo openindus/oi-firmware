@@ -18,13 +18,13 @@
 #include "BrushlessStandalone.h"
 #include "ModuleSlave.h"
 
-#if defined(OI_BRUSHLESS)
+#if defined(OI_BRUSHLESS) && defined(MODULE_SLAVE)
 
 class BrushlessSlave : public ModuleSlave
 {
 public:
 
-    static void init(void);
+    static int init(void);
 
 private:
 

@@ -18,22 +18,23 @@
 
 static const char MODULE_TAG[] = "Module";
 
-void ModuleStandalone::init()
+int ModuleStandalone::init()
 {
+    int err = 0;
+
     /* Init GPIO service */
-    ESP_ERROR_CHECK(gpio_install_isr_service(0));
+    err |= gpio_install_isr_service(0);
 
     /* Initialize NVS */ 
-    esp_err_t err = nvs_flash_init_partition(NVS_DEFAULT_PART_NAME);
-    if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+    esp_err_t ret = nvs_flash_init_partition(NVS_DEFAULT_PART_NAME);
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
         ESP_ERROR_CHECK(nvs_flash_erase());
         err = nvs_flash_init();
     }
-    ESP_ERROR_CHECK(err);
 
     /* GPIO19 and GPIO20 are USB interface, force reset/config before setting them as GPIO */
-    gpio_reset_pin(GPIO_NUM_19);
-    gpio_reset_pin(GPIO_NUM_20);
+    err |= gpio_reset_pin(GPIO_NUM_19);
+    err |= gpio_reset_pin(GPIO_NUM_20);
 
     /* LED */
     ESP_LOGI(MODULE_TAG, "Init LED");
@@ -50,14 +51,14 @@ void ModuleStandalone::init()
     ESP_LOGI(MODULE_TAG, "Hardware version : %s", hardware_version);
 
     /* Temperature sensor */
-#if !defined(CONFIG_IDF_TARGET_ESP32)
     ESP_LOGI(MODULE_TAG, "Init Temperature sensor");
     temp_sensor_config_t temp_sensor = TSENS_CONFIG_DEFAULT();
-    temp_sensor_get_config(&temp_sensor);
+    err |= temp_sensor_get_config(&temp_sensor);
     temp_sensor.dac_offset = TSENS_DAC_DEFAULT; // DEFAULT: range:-10℃ ~  80℃, error < 1℃.
-    temp_sensor_set_config(temp_sensor);
-    temp_sensor_start();
-#endif
+    err |= temp_sensor_set_config(temp_sensor);
+    err |= temp_sensor_start();
+
+    return err;
 }
 
 /**
@@ -110,9 +111,7 @@ void ModuleStandalone::ledBlink(LedColor_t color, uint32_t period)
 float ModuleStandalone::getTemperature(void)
 {
     float tsens_out = 0;
-#if !defined(CONFIG_IDF_TARGET_ESP32)
     temp_sensor_read_celsius(&tsens_out);
-#endif
     return tsens_out;
 }
 

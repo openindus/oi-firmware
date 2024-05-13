@@ -15,17 +15,22 @@
 
 #include "ModuleCLI.h"
 
-void ModuleCLI::init(void)
+int ModuleCLI::init(void)
 {
-    _registerSetBoardInfo();
-    _registerGetBoardInfo();
-    _registerRestart();
-    _registerLog();
-    _registerLed();
-    _registerReadId();
-    _registerWriteSync();
-    _registerReadSync();
-    _registerBusPower();
+    int err = 0;
+
+    err |= _registerSetBoardInfo();
+    err |= _registerGetBoardInfo();
+    err |= _registerRestart();
+    err |= _registerLog();
+    err |= _registerLed();
+#if !defined(MODULE_STANDALONE)
+    err |= _registerReadId();
+    err |= _registerWriteSync();
+    err |= _registerReadSync();
+    err |= _registerBusPower();
+#endif
+    return err;
 }
 
 /** 'restart' */
@@ -36,7 +41,7 @@ static int restart(int argc, char **argv)
     return 0;
 }
 
-void ModuleCLI::_registerRestart(void)
+int ModuleCLI::_registerRestart(void)
 {
     const esp_console_cmd_t cmd = {
         .command = "restart",
@@ -45,7 +50,7 @@ void ModuleCLI::_registerRestart(void)
         .func = &restart,
         .argtable = NULL
     };
-    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+    return esp_console_cmd_register(&cmd);
 }
 
 /** 'set-board-info' */
@@ -59,10 +64,10 @@ static struct {
 
 static int setBoardInfo(int argc, char **argv)
 {
-    int nerrors = arg_parse(argc, argv, (void **) &setBoardInfoArgs);
-    if (nerrors != 0) {
+    int err = arg_parse(argc, argv, (void **) &setBoardInfoArgs);
+    if (err != 0) {
         arg_print_errors(stderr, setBoardInfoArgs.end, argv[0]);
-        return 1;
+        return -1;
     }
 
     char board_type[16];
@@ -74,10 +79,10 @@ static int setBoardInfo(int argc, char **argv)
     if (ModuleStandalone::setBoardInfo(board_type, serial_number, hardware_version)) {
         return 0;
     }
-    return 1;
+    return -1;
 }
 
-void ModuleCLI::_registerSetBoardInfo(void)
+int ModuleCLI::_registerSetBoardInfo(void)
 {
     setBoardInfoArgs.boardType = arg_str1("t", "type", "TYPE", "Board type");
     setBoardInfoArgs.serialNum = arg_int1("n", "serial-num", "NUM", "Serial number");
@@ -91,7 +96,7 @@ void ModuleCLI::_registerSetBoardInfo(void)
         .func = &setBoardInfo,
         .argtable = &setBoardInfoArgs
     };
-    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+    return esp_console_cmd_register(&cmd);
 }
 
 /** 'get-board-info' */
@@ -106,10 +111,10 @@ static struct {
 
 static int getBoardInfo(int argc, char **argv)
 {
-    int nerrors = arg_parse(argc, argv, (void **) &getBoardInfoArgs);
-    if (nerrors != 0) {
+    int err = arg_parse(argc, argv, (void **) &getBoardInfoArgs);
+    if (err != 0) {
         arg_print_errors(stderr, getBoardInfoArgs.end, argv[0]);
-        return 1;
+        return -1;
     }
 
     if (getBoardInfoArgs.boardType->count > 0) {
@@ -134,7 +139,7 @@ static int getBoardInfo(int argc, char **argv)
     return 0;
 }
 
-void ModuleCLI::_registerGetBoardInfo(void)
+int ModuleCLI::_registerGetBoardInfo(void)
 {
     getBoardInfoArgs.boardType = arg_lit0("t", "type", "Board type");
     getBoardInfoArgs.serialNum = arg_lit0("n", "serial-num","Serial number");
@@ -149,7 +154,7 @@ void ModuleCLI::_registerGetBoardInfo(void)
         .func = &getBoardInfo,
         .argtable = &getBoardInfoArgs
     };
-    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+    return esp_console_cmd_register(&cmd);
 }
 
 /** 'led' */
@@ -162,10 +167,10 @@ static struct {
 
 static int led(int argc, char **argv)
 {
-    int nerrors = arg_parse(argc, argv, (void **) &ledArgs);
-    if (nerrors != 0) {
+    int err = arg_parse(argc, argv, (void **) &ledArgs);
+    if (err != 0) {
         arg_print_errors(stderr, ledArgs.end, argv[0]);
-        return 1;
+        return -1;
     }
 
     if(strcmp(ledArgs.state->sval[0], "on") == 0) {
@@ -182,12 +187,12 @@ static int led(int argc, char **argv)
         }
     } else {
         arg_print_errors(stderr, ledArgs.end, argv[0]);
-        return 2;
+        return -2;
     }
     return 0;
 }
 
-void ModuleCLI::_registerLed(void)
+int ModuleCLI::_registerLed(void)
 {
     ledArgs.state = arg_str1(NULL, NULL, "<STATE>", "[on, off, blink]");
     ledArgs.color = arg_int0(NULL, NULL, "color", "[0: None, 1: red, 2: green, 3: yellow, 4: blue, 5: purple, 6: cyan, 7; white]");
@@ -200,8 +205,7 @@ void ModuleCLI::_registerLed(void)
         .func = &led,
         .argtable = &ledArgs
     };
-    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
-
+    return esp_console_cmd_register(&cmd);
 }
 
 /** 'log' */
@@ -214,12 +218,11 @@ static struct {
 
 static int log(int argc, char **argv)
 {
-    int nerrors = arg_parse(argc, argv, (void **) &logArgs);
-    if (nerrors != 0) {
+    int err = arg_parse(argc, argv, (void **) &logArgs);
+    if (err != 0) {
         arg_print_errors(stderr, logArgs.end, argv[0]);
-        return 1;
+        return -1;
     }
-
 
     if (logArgs.tag->count == 0) {
         logArgs.tag->sval[0] = "*";
@@ -241,13 +244,13 @@ static int log(int argc, char **argv)
         esp_log_level_set(logArgs.tag->sval[0], ESP_LOG_VERBOSE);
     } else {
         arg_print_errors(stderr, logArgs.end, argv[0]);
-        return 2;
+        return -2;
     }
 
     return 0;
 }
 
-void ModuleCLI::_registerLog(void)
+int ModuleCLI::_registerLog(void)
 {
     logArgs.level = arg_str1(NULL, NULL, "<LEVEL>", "[NONE, ERROR, WARN, INFO, DEBUG, VERBOSE]");
     logArgs.tag = arg_str0(NULL, NULL, "<TAG>", "specific tag");
@@ -260,7 +263,7 @@ void ModuleCLI::_registerLog(void)
         .func = &log,
         .argtable = &logArgs
     };
-    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+    return esp_console_cmd_register(&cmd);
 }
 
 /** 'read-id' */
@@ -271,7 +274,7 @@ static int readId(int argc, char **argv)
     return 0;
 }
 
-void ModuleCLI::_registerReadId(void)
+int ModuleCLI::_registerReadId(void)
 {
     const esp_console_cmd_t cmd = {
         .command = "read-id",
@@ -280,7 +283,7 @@ void ModuleCLI::_registerReadId(void)
         .func = &readId,
         .argtable = NULL
     };
-    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+    return esp_console_cmd_register(&cmd);
 }
 
 /** 'write-sync' */
@@ -292,10 +295,10 @@ static struct {
 
 static int writeSync(int argc, char **argv) 
 {
-    int nerrors = arg_parse(argc, argv, (void **) &writeSyncArgs);
-    if (nerrors != 0) {
+    int err = arg_parse(argc, argv, (void **) &writeSyncArgs);
+    if (err != 0) {
         arg_print_errors(stderr, writeSyncArgs.end, argv[0]);
-        return 1;
+        return -1;
     }
 
     BusIO::writeSync((uint8_t)writeSyncArgs.level->ival[0]);
@@ -303,7 +306,7 @@ static int writeSync(int argc, char **argv)
     return 0;
 }
 
-void ModuleCLI::_registerWriteSync(void)
+int ModuleCLI::_registerWriteSync(void)
 {
     writeSyncArgs.level = arg_int1(NULL, NULL, "<LEVEL>", "0 = LOW, 1 = HIGH");
     writeSyncArgs.end = arg_end(1);
@@ -315,7 +318,7 @@ void ModuleCLI::_registerWriteSync(void)
         .func = &writeSync,
         .argtable = &writeSyncArgs
     };
-    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+    return esp_console_cmd_register(&cmd);
 }
 
 /** 'read-sync' */
@@ -326,7 +329,7 @@ static int readSync(int argc, char **argv)
     return 0;
 }
 
-void ModuleCLI::_registerReadSync(void)
+int ModuleCLI::_registerReadSync(void)
 {
     const esp_console_cmd_t cmd = {
         .command = "read-sync",
@@ -335,7 +338,7 @@ void ModuleCLI::_registerReadSync(void)
         .func = &readSync,
         .argtable = NULL
     };
-    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+    return esp_console_cmd_register(&cmd);
 }
 
 /** 'bus-power on/off' */
@@ -347,10 +350,10 @@ static struct {
 
 static int busPower(int argc, char **argv) 
 {
-    int nerrors = arg_parse(argc, argv, (void **) &busPowerArgs);
-    if (nerrors != 0) {
+    int err = arg_parse(argc, argv, (void **) &busPowerArgs);
+    if (err != 0) {
         arg_print_errors(stderr, busPowerArgs.end, argv[0]);
-        return 1;
+        return -1;
     }
 
     if(strcmp(busPowerArgs.state->sval[0], "on") == 0) {
@@ -364,7 +367,7 @@ static int busPower(int argc, char **argv)
     return 0;
 }
 
-void ModuleCLI::_registerBusPower(void)
+int ModuleCLI::_registerBusPower(void)
 {
     busPowerArgs.state = arg_str1(NULL, NULL, "<STATE>", "[on/off]");
     busPowerArgs.end = arg_end(2);
@@ -376,5 +379,5 @@ void ModuleCLI::_registerBusPower(void)
         .func = &busPower,
         .argtable = &busPowerArgs
     };
-    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+    return esp_console_cmd_register(&cmd);
 }
