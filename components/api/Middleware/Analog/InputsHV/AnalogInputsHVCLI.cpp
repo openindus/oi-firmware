@@ -122,39 +122,27 @@ int AnalogInputsHVCLI::_registerSetAnalogCoeffs()
 
 /** 'get-analog-coeffs' */
 
-static struct {
-    struct arg_end *end;
-} _getAnalogCoeffsArgs;
-
 static int _getAnalogCoeffs(int argc, char **argv)
 {
-    int err = arg_parse(argc, argv, (void **) &_getAnalogCoeffsArgs);
-    if (err != 0) {
-        arg_print_errors(stderr, _getAnalogCoeffsArgs.end, argv[0]);
-        return -1;
-    }
-
     float as[2], bs[2];
     AnalogInputsHV::getAnalogCoeffs(as, bs);
 
-    printf("a1 %.3f\n", as[1]);
-    printf("a2 %.3f\n", as[2]);
-    printf("b1 %.3f\n", bs[1]);
-    printf("b2 %.3f\n", bs[2]);
+    printf("a1 %.3f\n", as[0]);
+    printf("a2 %.3f\n", as[1]);
+    printf("b1 %.3f\n", bs[0]);
+    printf("b2 %.3f\n", bs[1]);
 
     return 0;
 }
 
 int AnalogInputsHVCLI::_registerGetAnalogCoeffs()
 {
-    _setAnalogCoeffsArgs.end = arg_end(1);
-
     const esp_console_cmd_t read_cmd = {
         .command = "get-analog-coeffs",
         .help = "Get coefficients of each AIN",
         .hint = NULL,
         .func = &_getAnalogCoeffs,
-        .argtable = &_getAnalogCoeffsArgs
+        .argtable = NULL
     };
     return esp_console_cmd_register(&read_cmd);
 }
