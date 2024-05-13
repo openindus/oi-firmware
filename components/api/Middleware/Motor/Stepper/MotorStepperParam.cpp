@@ -6,7 +6,7 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file MotorStepperParam.c
+ * @file MotorStepperParam.cpp
  * @brief 
  *
  * For more information on OpenIndus:

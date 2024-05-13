@@ -6,7 +6,7 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file DigitalInputs.c
+ * @file DigitalInputs.cpp
  * @brief Functions for din
  *
  * For more information on OpenIndus:

@@ -1,8 +1,15 @@
 /**
+ * Copyright (C) OpenIndus, Inc - All Rights Reserved
+ *
+ * This file is part of OpenIndus Library.
+ *
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential
+ * 
  * @file AnalogInputsHV.h
- * @brief Analog Input
- * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
- * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
+ * @brief
+ *
+ * For more information on OpenIndus:
  * @see https://openindus.com
  */
 
@@ -56,7 +63,7 @@ public:
      * This value is not calibrated and not converted to the real Analog Input voltage.
      * It is strongly recommended to use analogReadVolts or analogReadMillivolts instead.
      * 
-     * @param ain ANA input number.
+     * @param num ANA input number.
      * @return Value of the AIN input.
      */
     static int analogRead(AnalogInput_Num_t num);
@@ -65,7 +72,7 @@ public:
      * @brief Read the value of AIN.
      * The function return a float that correspond to the voltage of the ANA (from 0 to 30V).
      *
-     * @param ain ANA input number.
+     * @param num ANA input number.
      * @return Value of the AIN input.
      */
     static float analogReadVolt(AnalogInput_Num_t num);
@@ -74,7 +81,7 @@ public:
      * @brief Read the value of AIN.
      * The function return a float that correspond to the voltage of the ANA (from 0 to 30000mV).
      *
-     * @param ain ANA input number.
+     * @param num ANA input number.
      * @return Value of the AIN input.
      */
     static float analogReadMilliVolt(AnalogInput_Num_t num);

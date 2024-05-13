@@ -23,8 +23,16 @@
 #include "freertos/queue.h"
 #include "pcal6524.h"
 
+/**
+ * @brief Function prototype for attachInterrupt callbacks
+ * 
+ */
 typedef void (*IsrCallback_t)(void*);
 
+/**
+ * @brief Digital Inputs Numbers
+ * 
+ */
 typedef enum {
     DIN_1 = 0,
     DIN_2,
@@ -39,11 +47,19 @@ typedef enum {
     DIN_MAX
 } DigitalInputNum_t;
 
+/**
+ * @brief Digital Inputs Logic (for configuring sensors)
+ * 
+ */
 typedef enum {
     ACTIVE_LOW = 0,
     ACTIVE_HIGH = 1
 } DigitalInputLogic_t;
 
+/**
+ * @brief Digital Inputs Interrupts Modes
+ * 
+ */
 typedef enum {
     NONE_MODE = 0,
     RISING_MODE,
