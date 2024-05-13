@@ -41,6 +41,10 @@
 #define DOUT_PWM_MAX_FREQUENCY_HZ                  1000
 #define DOUT_PWM_MIN_FREQUENCY_HZ                  50
 
+/**
+ * @brief Digital Outputs Numbers
+ * 
+ */
 typedef enum {
     DOUT_1 = 0,
     DOUT_2,

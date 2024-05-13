@@ -1,23 +1,37 @@
 /**
+ * Copyright (C) OpenIndus, Inc - All Rights Reserved
+ *
+ * This file is part of OpenIndus Library.
+ *
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential
+ * 
  * @file AnalogOutputs.h
- * @brief Analog Output
- * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
- * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
+ * @brief
+ *
+ * For more information on OpenIndus:
  * @see https://openindus.com
  */
-
 #pragma once
 
 #include <string.h>
 #include "ad5413.h"
 #include "freertos/task.h"
 
+/**
+ * @brief Analog Outputs Number
+ * 
+ */
 typedef enum {
     AOUT_1 = 0,
     AOUT_2 = 1,
     AOUT_MAX
 } AnalogOutput_Num_t;
 
+/**
+ * @brief Analog Outputs Modes
+ * 
+ */
 typedef enum {
     AOUT_MODE_M10V5_10V5 = 0,
     AOUT_MODE_0mA_20mA = 1,

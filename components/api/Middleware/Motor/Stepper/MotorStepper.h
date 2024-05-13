@@ -20,6 +20,10 @@
 #include "DigitalInputs.h"
 #include "powerSTEP01/PS01.h"
 
+/**
+ * @brief Stepper motors step modes
+ * 
+ */
 typedef enum {
     FULL_STEP   = 0, 
     HALF_STEP   = 1,
@@ -31,11 +35,19 @@ typedef enum {
     STEP_1_128  = 7
 } MotorStepResolution_t;
 
+/**
+ * @brief Stepper motors directions
+ * 
+ */
 typedef enum {
     FORWARD = 1,
     REVERSE = 0,
 } MotorDirection_t;
 
+/**
+ * @brief Stepper motors stop modes
+ * 
+ */
 typedef enum {
     SOFT_STOP = 0,
     HARD_STOP,
@@ -55,7 +67,7 @@ public:
      * Limit switches will be used for stopping motor when they will be reached
      * 
      * @param motor 
-     * @param dinNum
+     * @param din
      * @param logic 
      */
     static void attachLimitSwitch(MotorNum_t motor, DigitalInputNum_t din, DigitalInputLogic_t logic=ACTIVE_HIGH);
@@ -64,7 +76,7 @@ public:
      * @brief Detach a limit switch to the specified motor
      * 
      * @param motor 
-     * @param dinNum
+     * @param din
      */
     static void detachLimitSwitch(MotorNum_t motor, DigitalInputNum_t din);
     
@@ -80,7 +92,7 @@ public:
      * @brief Set acceleration speed
      * 
      * @param motor 
-     * @param speed step/s
+     * @param acc step/s
      */
     static void setAcceleration(MotorNum_t motor, float acc);
     
@@ -88,7 +100,7 @@ public:
      * @brief Set deceleration speed
      * 
      * @param motor 
-     * @param speed step/s
+     * @param dec step/s
      */
     static void setDeceleration(MotorNum_t motor, float dec);
     

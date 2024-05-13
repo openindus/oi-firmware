@@ -1,8 +1,15 @@
 /**
+ * Copyright (C) OpenIndus, Inc - All Rights Reserved
+ *
+ * This file is part of OpenIndus Library.
+ *
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential
+ * 
  * @file AnalogInputsLV.h
- * @brief Analog Input
- * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
- * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
+ * @brief
+ *
+ * For more information on OpenIndus:
  * @see https://openindus.com
  */
 
