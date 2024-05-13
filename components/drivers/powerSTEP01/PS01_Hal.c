@@ -31,7 +31,7 @@ void _flagTask(void* arg)
 
     while(1) 
     {
-        if (PS01_Hal_GetFlagLevel(deviceId) == 0) {
+        if (PS01_Hal_GetFlagLevel(deviceId) == 0 && PS01_Cmd_GetParam(deviceId, POWERSTEP01_STATUS) != status) {
             status = PS01_Cmd_GetStatus(deviceId);
         }
         else if(xQueueReceive(_flagEvent[deviceId], NULL, portMAX_DELAY)) {
