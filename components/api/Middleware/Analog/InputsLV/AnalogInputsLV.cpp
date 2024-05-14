@@ -240,6 +240,10 @@ void AnalogInputAds866x::setMode(AnalogInput_Mode_t mode)
         _mode = mode;
         gpio_set_level(_modePin, _mode);
         xSemaphoreGive(_mutex);
+
+        if (_mode == AIN_MODE_CURRENT) {
+            setVoltageRange(AIN_VOLTAGE_RANGE_0_2V56);
+        }
     }
 }
 
