@@ -40,6 +40,13 @@ static const AdcNumChannel_t _doutAdcNumChannel[] = {
     MIXED_CHANNEL_DOUT_CURRENT_4
 };
 
+static const ain_num_t _ainChannel[] = {
+    MIXED_PIN_EANA_1,
+    MIXED_PIN_EANA_2,
+    MIXED_PIN_EANA_3,
+    MIXED_PIN_EANA_4
+};
+
 static const gpio_num_t _ainCmdGpio[] = {
     MIXED_PIN_EANA_CMD_1,
     MIXED_PIN_EANA_CMD_2,
@@ -106,7 +113,7 @@ int MixedStandalone::init(void)
     err |= AnalogOutputs::init(2, dacConfig);
     
     /* Initialize analog inputs */
-    err |= AnalogInputsLV::init(&adcSPIConfig, _ainCmdGpio, 4);
+    err |= AnalogInputsLV::init(&adcSPIConfig, _ainChannel, _ainCmdGpio, 4);
 
     /* Enable analog outputs */
     AnalogOutputs::start();

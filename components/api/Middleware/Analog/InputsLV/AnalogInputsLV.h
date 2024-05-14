@@ -30,6 +30,14 @@
 #define AIN_DEFAULT_RANGE           AIN_VOLTAGE_RANGE_0_10V24
 #define AIN_SAT_CURRENT_AMP         25.5f
 
+typedef enum
+{
+    AIN_NUM_1 = 0,
+    AIN_NUM_2 = 1,
+    AIN_NUM_3 = 2,
+    AIN_NUM_4 = 3,
+} ain_num_t;
+
 class AnalogInputAds866x
 {
 public:
@@ -58,7 +66,7 @@ class AnalogInputsLV
 {
 public:
 
-    static int init(ads866x_config_t *ads866xConfig, const gpio_num_t* cmdGpio, uint8_t nb);
+    static int init(ads866x_config_t *ads866xConfig, const  ain_num_t* num, const gpio_num_t* cmdGpio, uint8_t nb);
 
     /**
      * @brief Read a voltage measure on analog pin and return the raw value.

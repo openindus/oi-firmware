@@ -20,6 +20,7 @@
 #include "driver/spi_master.h"
 #include "driver/gpio.h"
 #include "freertos/task.h"
+#include "math.h"
 
 #ifdef __cplusplus
 extern "C"

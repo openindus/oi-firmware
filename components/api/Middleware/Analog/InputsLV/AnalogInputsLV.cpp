@@ -22,7 +22,7 @@ uint8_t AnalogInputsLV::_nb;
 AnalogInputAds866x** AnalogInputsLV::_ains;
 uint8_t* AnalogInputsLV::_current_sat;
 
-int AnalogInputsLV::init(ads866x_config_t *ads866xConfig, const gpio_num_t* cmdGpio, uint8_t nb) 
+int AnalogInputsLV::init(ads866x_config_t *ads866xConfig, const ain_num_t* num, const gpio_num_t* cmdGpio, uint8_t nb) 
 {
     ESP_LOGI(TAG, "Initialize Analog Inputs");
     
@@ -41,7 +41,7 @@ int AnalogInputsLV::init(ads866x_config_t *ads866xConfig, const gpio_num_t* cmdG
     _current_sat = (uint8_t*)calloc(_nb, sizeof(uint8_t));
 
     for (size_t i = 0; i < _nb; i++) {
-        _ains[i] = new AnalogInputAds866x(i, cmdGpio[i]);
+        _ains[i] = new AnalogInputAds866x(num[i], cmdGpio[i]);
         err |= _ains[i]->init(AIN_DEFAULT_RANGE, AIN_DEFAULT_MODE);
         _current_sat[i] = 0;
     }
@@ -133,18 +133,18 @@ uint8_t AnalogInputsLV::analogInputGetVoltageRange(AnalogInput_Num_t num)
 }
 
 /* Every 500ms check if there is a current saturation on a channel
- * and switch to voltage mode if it lasts more than 10s */
+ * and switch to voltage mode if it lasts more than 30s */
 void AnalogInputsLV::_controlTask(void *pvParameters)
 {
     while (1) {
         for (size_t i = 0; i < _nb; i++) {
             if (_ains[i]->getMode() == AIN_MODE_CURRENT) {
-                if (_ains[i]->read(AIN_UNIT_AMP) > AIN_SAT_CURRENT_AMP) {
+                if (_ains[i]->read(AIN_UNIT_MILLIAMP) > AIN_SAT_CURRENT_AMP) {
                     _current_sat[i] += 1;
-                    if (_current_sat[i] >= 10) {
+                    if (_current_sat[i] >= 60) {
                         _ains[i]->setMode(AIN_MODE_VOLTAGE);
                         _current_sat[i] = 0;
-                        ESP_LOGE(TAG, "Overcurrent for more than 10s on AIN_%i, switching to voltage mode", i+1);
+                        ESP_LOGE(TAG, "Overcurrent for more than 30s on AIN_%i, switching to voltage mode", i+1);
                     }
                 }
                 else {
@@ -198,6 +198,11 @@ int AnalogInputAds866x::read(void)
 
 float AnalogInputAds866x::read(AnalogInput_Unit_t unit)
 {
+    if ((unit == AIN_UNIT_MILLIAMP || unit == AIN_UNIT_AMP) && _mode != AIN_MODE_CURRENT) {
+        ESP_LOGE(TAG, "To read into MilliAmps or Amps, you should be into Current Mode");
+        return -1;
+    }
+
     float value = ads866x_analog_read(_num);
     float voltage = ads866x_convert_raw_2_volt(value, _voltage_range);
 
@@ -212,21 +217,11 @@ float AnalogInputAds866x::read(AnalogInput_Unit_t unit)
             break;
 
         case AIN_UNIT_MILLIAMP:
-            if (_mode != AIN_MODE_CURRENT) {
-                ESP_LOGE(TAG, "To read into MilliAmps, you should be into Current Mode");
-                value = -1;
-            } else {
-                value = voltage * 1000 / AIN_CURRENT_MODE_RES_VALUE;
-            }
+            value = voltage * 1000 / AIN_CURRENT_MODE_RES_VALUE;
             break;
 
         case AIN_UNIT_AMP:
-        if (_mode != AIN_MODE_CURRENT) {
-                ESP_LOGE(TAG, "To read into Amps, you should be into Current Mode");
-                value = -1;
-            } else {
-                value = voltage / AIN_CURRENT_MODE_RES_VALUE;
-            }
+            value = voltage / AIN_CURRENT_MODE_RES_VALUE;
             break;
         
         default:
