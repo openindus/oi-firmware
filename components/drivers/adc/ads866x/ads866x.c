@@ -69,7 +69,7 @@ static int ads866x_spi_init(void)
                 .dummy_bits = 0,
                 .mode = 1,
                 .duty_cycle_pos = 0,
-                .cs_ena_pretrans = 0,
+                .cs_ena_pretrans = 1,
                 .cs_ena_posttrans = 0,
                 .clock_speed_hz = s_config->spi_freq,
                 .input_delay_ns = 0,
@@ -513,7 +513,10 @@ uint8_t ads866x_spi_read_program_register(uint8_t reg)
     } else {
         ESP_LOGE(ADS866x_TAG, "SPI is not initialized !!!");
     }
-    return rxBuffer[2];
+
+    uint32_t res = rxBuffer[0] << 16 | rxBuffer[1] << 8 | rxBuffer[2];
+
+    return (uint8_t)(res >> 1);    //Correction of the ESP reading which is left shifted by 1 bit
 }
 
 uint16_t ads866x_spi_write_command_register(uint8_t reg)
@@ -575,45 +578,31 @@ uint16_t ads866x_spi_write_command_register(uint8_t reg)
             break;
     }
 
-    return ((rxBuffer[2] << 8) | rxBuffer[3]);
+    uint32_t res = rxBuffer[0] << 24 | rxBuffer[1] << 16 | rxBuffer[2] << 8 | rxBuffer[3];
+
+    return (uint16_t)(res >> 1);    //Correction of the ESP reading which is left shifted by 1 bit
 }
 
 float ads866x_convert_raw_2_volt(uint16_t raw, uint8_t range)
 {
     float out_min, out_max;
+
     switch (range) {
-        case ADS866X_VOLTAGE_RANGE_1:
-            out_min = -1.25 * s_ads866x_voltage_reference;
-            out_max = 1.25 * s_ads866x_voltage_reference;
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+            out_min = -1.25 * s_ads866x_voltage_reference / (float)pow(2, range-1);
+            out_max = 1.25 * s_ads866x_voltage_reference / (float)pow(2, range-1);
             break;
-        case ADS866X_VOLTAGE_RANGE_2:
-            out_min = -0.625 * s_ads866x_voltage_reference;
-            out_max = 0.625 * s_ads866x_voltage_reference;
-            break;
-        case ADS866X_VOLTAGE_RANGE_3:
-            out_min = -0.3125 * s_ads866x_voltage_reference;
-            out_max = 0.3125 * s_ads866x_voltage_reference;
-            break;
-        case ADS866X_VOLTAGE_RANGE_4:
-            out_min = -0.15625 * s_ads866x_voltage_reference;
-            out_max = 0.15625 * s_ads866x_voltage_reference;
-            break;
-        case ADS866X_VOLTAGE_RANGE_5:
+        case 5:
+        case 6:
+        case 7:
+        case 8:
             out_min = 0;
-            out_max = 2.5 * s_ads866x_voltage_reference;
+            out_max = 2.5 * s_ads866x_voltage_reference / (float)pow(2, range-5);
             break;
-        case ADS866X_VOLTAGE_RANGE_6:
-            out_min = 0;
-            out_max = 1.25 * s_ads866x_voltage_reference;
-            break;
-        case ADS866X_VOLTAGE_RANGE_7:
-            out_min = 0;
-            out_max = 0.625 * s_ads866x_voltage_reference;
-            break;
-        case ADS866X_VOLTAGE_RANGE_8:
-            out_min = 0;
-            out_max = 0.3125 * s_ads866x_voltage_reference;
-            break;
+
         default:
             out_min = -2.5 * s_ads866x_voltage_reference;
             out_max = 2.5 * s_ads866x_voltage_reference;
@@ -626,38 +615,21 @@ uint16_t ads866x_convert_volt_2_raw(float voltage, uint8_t range)
 {
     float in_min, in_max;
     switch (range) {
-        case ADS866X_VOLTAGE_RANGE_1:
-            in_min = -1.25 * s_ads866x_voltage_reference;
-            in_max = 1.25 * s_ads866x_voltage_reference;
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+            in_min = -1.25 * s_ads866x_voltage_reference / (float)pow(2, range-1);
+            in_max = 1.25 * s_ads866x_voltage_reference / (float)pow(2, range-1);
             break;
-        case ADS866X_VOLTAGE_RANGE_2:
-            in_min = -0.625 * s_ads866x_voltage_reference;
-            in_max = 0.625 * s_ads866x_voltage_reference;
-            break;
-        case ADS866X_VOLTAGE_RANGE_3:
-            in_min = -0.3125 * s_ads866x_voltage_reference;
-            in_max = 0.3125 * s_ads866x_voltage_reference;
-            break;
-        case ADS866X_VOLTAGE_RANGE_4:
-            in_min = -0.15625 * s_ads866x_voltage_reference;
-            in_max = 0.15625 * s_ads866x_voltage_reference;
-            break;
-        case ADS866X_VOLTAGE_RANGE_5:
+        case 5:
+        case 6:
+        case 7:
+        case 8:
             in_min = 0;
-            in_max = 2.5 * s_ads866x_voltage_reference;
+            in_max = 2.5 * s_ads866x_voltage_reference / (float)pow(2, range-5);
             break;
-        case ADS866X_VOLTAGE_RANGE_6:
-            in_min = 0;
-            in_max = 1.25 * s_ads866x_voltage_reference;
-            break;
-        case ADS866X_VOLTAGE_RANGE_7:
-            in_min = 0;
-            in_max = 0.625 * s_ads866x_voltage_reference;
-            break;
-        case ADS866X_VOLTAGE_RANGE_8:
-            in_min = 0;
-            in_max = 0.3125 * s_ads866x_voltage_reference;
-            break;
+
         default:
             in_min = -2.5 * s_ads866x_voltage_reference;
             in_max = 2.5 * s_ads866x_voltage_reference;

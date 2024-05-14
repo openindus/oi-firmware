@@ -35,6 +35,12 @@
 #define MIXED_CHANNEL_DOUT_CURRENT_3    {ADC_UNIT_1, ADC_CHANNEL_0}
 #define MIXED_CHANNEL_DOUT_CURRENT_4    {ADC_UNIT_1, ADC_CHANNEL_6}
 
+/* EANA */
+#define MIXED_PIN_EANA_1                AIN_NUM_2
+#define MIXED_PIN_EANA_2                AIN_NUM_1
+#define MIXED_PIN_EANA_3                AIN_NUM_3
+#define MIXED_PIN_EANA_4                AIN_NUM_4
+
 /* EANA_Commands */
 #define MIXED_PIN_EANA_CMD_1            GPIO_NUM_16
 #define MIXED_PIN_EANA_CMD_2            GPIO_NUM_18

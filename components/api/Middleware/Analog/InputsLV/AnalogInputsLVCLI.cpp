@@ -140,10 +140,10 @@ static int _AnalogRead(int argc, char **argv)
     switch (unit)
     {
     case AIN_UNIT_MILLIVOLT:
-        printf("%.1f\n", AnalogInputsLV::analogReadMilliVolt(ain));
+        printf("%.4f\n", AnalogInputsLV::analogReadMilliVolt(ain));
         break;
     case AIN_UNIT_MILLIAMP:
-        printf("%.3f\n", AnalogInputsLV::analogReadMilliAmp(ain));
+        printf("%.4f\n", AnalogInputsLV::analogReadMilliAmp(ain));
         break;
     case AIN_UNIT_VOLT:
         printf("%.3f\n", AnalogInputsLV::analogReadVolt(ain));
