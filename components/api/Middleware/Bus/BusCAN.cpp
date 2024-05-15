@@ -53,10 +53,6 @@ int BusCAN::begin(gpio_num_t txNum, gpio_num_t rxNum)
     ESP_LOGI(TAG, "start twai driver");
     err |= twai_start();
 
-#if !defined(DEBUG_BUS)
-    esp_log_level_set(TAG, ESP_LOG_WARN);
-#endif
-
     return err;
 }
 
@@ -105,11 +101,17 @@ int BusCAN::write(Frame_t* frame, uint16_t id, uint8_t length)
 error:
     xSemaphoreGive(_mutex);
     ESP_LOGE(TAG, "Error in twai_transmit: %s", esp_err_to_name(err));
+#if defined(DEBUG_BUS)    
+    ESP_LOGW(TAG, "WRITE - ID: %u | DATA:", msg.identifier);
+    ESP_LOG_BUFFER_HEX_LEVEL(TAG, msg.data, msg.data_length_code, ESP_LOG_WARN);
+#endif
     return -1;
 success:
     xSemaphoreGive(_mutex);
+#if defined(DEBUG_BUS)    
     ESP_LOGI(TAG, "WRITE - ID: %u | DATA:", msg.identifier);
     ESP_LOG_BUFFER_HEX_LEVEL(TAG, msg.data, msg.data_length_code, ESP_LOG_INFO);
+#endif
     return 0;
 }
 
@@ -138,12 +140,18 @@ int BusCAN::read(Frame_t* frame, uint16_t* id, uint8_t* length, TickType_t timeo
     }    
 
 error:
-    xSemaphoreGive(_mutex);
+    xSemaphoreGive(_mutex);    
     ESP_LOGE(TAG, "Error in twai_receive: %s", esp_err_to_name(err));
+#if defined(DEBUG_BUS)    
+    ESP_LOGW(TAG, "READ - ID: %u | DATA:", msg.identifier);
+    ESP_LOG_BUFFER_HEX_LEVEL(TAG, msg.data, msg.data_length_code, ESP_LOG_WARN);
+#endif
     return -1;
 success:
     xSemaphoreGive(_mutex);
+#if defined(DEBUG_BUS)    
     ESP_LOGI(TAG, "READ - ID: %u | DATA:", msg.identifier);
     ESP_LOG_BUFFER_HEX_LEVEL(TAG, msg.data, msg.data_length_code, ESP_LOG_INFO);
+#endif
     return 0;
 }

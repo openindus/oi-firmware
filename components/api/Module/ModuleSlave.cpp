@@ -187,7 +187,6 @@ void ModuleSlave::_busTask(void *pvParameters)
             {
                 std::vector<uint8_t> msg;
                 msg.assign(frame.data, frame.data + frame.length);
-
                 if (frame.id == _id) {
 
                     auto it = _ctrlCallbacks.find(frame.data[0]);
