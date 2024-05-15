@@ -100,6 +100,7 @@ void ModuleControl::_ledStatus(LedState_t state, LedColor_t color, uint32_t peri
     frame.length = 6;
     frame.data = payload;
     BusRS::write(&frame, pdMS_TO_TICKS(100));
+    vTaskDelay(1 / portTICK_PERIOD_MS);
 }
 
 #endif
