@@ -8,8 +8,7 @@
 
 #pragma once
 
-#include "ModuleControl.h"
-#include "ModuleMaster.h"
+#include "Module.h"
 #include "AnalogLsInterface.h"
 
 #if defined(MODULE_MASTER)
@@ -18,7 +17,7 @@ class AnalogLsControl : public ModuleControl, public AnalogLsInterface
 {
 public:
 
-    AnalogLsControl(int sn = 0) : ModuleControl(sn) {}
+    AnalogLsControl(int sn = 0) : ModuleControl(TYPE_OI_ANALOG_LS, sn) {}
 
 };
 

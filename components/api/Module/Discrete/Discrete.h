@@ -16,9 +16,9 @@
 #pragma once
 
 #include "Global.h"
+#include "Module.h"
 
 #if defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)
-#include "ModuleStandalone.h"
 #include "DiscretePinout.h"
 #include "DigitalInputsCLI.h"
 #include "DigitalOutputsCLI.h"
@@ -29,13 +29,11 @@
 #define Discrete DiscreteStandalone
 #elif (defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)) && defined(MODULE_SLAVE)
 #define Discrete DiscreteSlave
-#include "ModuleSlave.h"
 #include "AnalogInputsHVSlave.h"
 #include "DigitalInputsSlave.h"
 #include "DigitalOutputsSlave.h"
 #elif defined(MODULE_MASTER) 
 #define Discrete DiscreteControl
-#include "ModuleControl.h"
 #include "AnalogInputsHVControl.h"
 #include "DigitalInputsControl.h"
 #include "DigitalOutputsControl.h"
@@ -72,7 +70,7 @@ class DiscreteControl : public ModuleControl, public DigitalInputsControl, publi
 public:
 
     DiscreteControl(int sn = 0) : 
-        ModuleControl(sn),
+        ModuleControl(TYPE_OI_DISCRETE, sn),
         DigitalInputsControl(this),
         DigitalOutputsControl(this),
         AnalogInputsHVControl(this) {}

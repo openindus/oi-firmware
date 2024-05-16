@@ -15,13 +15,11 @@
 
 #if defined(MODULE_MASTER)
 
-#include "ModuleMaster.h"
-#include "ModuleControl.h"
-#include "ModulePinout.h"
+#include "Module.h"
 
 static const char MODULE_TAG[] = "Module";
 
-std::map<uint16_t,int,std::greater<uint16_t>> ModuleMaster::_ids;
+std::map<uint16_t, std::pair<uint16_t, uint32_t>, std::greater<uint16_t>> ModuleMaster::_ids;
 
 int ModuleMaster::init(void)
 {
@@ -92,13 +90,25 @@ bool ModuleMaster::autoId(void)
         vTaskDelay(200/portTICK_PERIOD_MS);
     
         if (ModuleControl::_instances.size() == _ids.size()) {
-            std::map<uint16_t, int>::iterator it = _ids.begin();
+            std::map<uint16_t, std::pair<uint16_t, uint32_t>>::iterator it = _ids.begin();
             for (int i=0; i<ModuleControl::_instances.size(); i++) {
-                ModuleControl::_instances[i]->setId(it->first);
-                ModuleControl::_instances[i]->setSN(it->second);
-                ++it;
-                ModuleControl::_instances[i]->ledOn(LED_YELLOW);
-                vTaskDelay(50/portTICK_PERIOD_MS);
+                // First, check if board type is good
+                if (it->second.first == ModuleControl::_instances[i]->getType()) {
+                    // If OK, set ID and SN
+                    ModuleControl::_instances[i]->setId(it->first);
+                    ModuleControl::_instances[i]->setSN(it->second.second);
+                    ++it;
+                    ModuleControl::_instances[i]->ledOn(LED_YELLOW);
+                    vTaskDelay(50/portTICK_PERIOD_MS);
+                } else {
+                    char name[16];
+                    ESP_LOGE(MODULE_TAG, "Type of module %i is incorrect: you have instantiate an %s and module detected is an %s", \
+                                        i+1, \
+                                        ModuleUtils::typeToName(ModuleControl::_instances[i]->getType(), name), \
+                                        ModuleUtils::typeToName(it->second.first, name));
+                    ESP_LOGE(MODULE_TAG, "Check that the order of module in your main.cpp file correspond with the order of modules on the rail");
+                    return false;
+                }
             }
         } else {
             ESP_LOGE(MODULE_TAG, "Number of instantiated modules: %d",  ModuleControl::_instances.size());
@@ -110,7 +120,7 @@ bool ModuleMaster::autoId(void)
     /* Initialize module with SN */
     else {
         for (int i=0; i<ModuleControl::_instances.size(); i++) {
-            uint16_t current_id = ModuleMaster::getIdFromSN(ModuleControl::_instances[i]->getSN());
+            uint16_t current_id = ModuleMaster::_getIdFromSerialNumAndType(ModuleControl::_instances[i]->getType(), ModuleControl::_instances[i]->getSN());
             if (current_id != 0) {
                 ModuleControl::_instances[i]->setId(current_id);
                 ModuleControl::_instances[i]->ledOn(LED_YELLOW);
@@ -136,50 +146,33 @@ void autoTest(void)
     /** @todo: auto test when starting the module */
 }
 
-void ModuleMaster::program(int num)
+void ModuleMaster::program(uint16_t type, uint32_t sn)
 {
     UsbConsole::end(); // Do not perform in the task
-    xTaskCreate(&_programmingTask, "Module programming task", 4096, (void*)num, 1, NULL);
+    uint16_t id = _getIdFromSerialNumAndType(type, sn);
+    xTaskCreate(_programmingTask, "Module programming task", 4096, (void*)&id, 1, NULL);
     ModuleStandalone::ledBlink(LED_WHITE, 1000); // Programming mode
 }
 
-bool ModuleMaster::ping(int num) 
+bool ModuleMaster::ping(uint16_t type, uint32_t sn) 
 {
     BusRS::Frame_t frame;
     frame.cmd = CMD_PING;
     frame.id = 0;
     frame.dir = 1;
     frame.ack = true;
-    frame.length = 4;
-    frame.data = (uint8_t*)&num; // Serial number
+    frame.length = sizeof(type)+sizeof(sn);
+    frame.data = (uint8_t*)malloc(sizeof(type)+sizeof(sn));
+    memcpy(frame.data, &type, sizeof(type)); // Type 
+    memcpy(&frame.data[sizeof(type)], &sn, sizeof(sn)); // Serial number
     BusRS::write(&frame, pdMS_TO_TICKS(10));
     return (BusRS::read(&frame, pdMS_TO_TICKS(10)) == 0);
 }
 
-uint16_t ModuleMaster::getIdFromSN(int num)
+void ModuleMaster::getBoardInfo(uint16_t type, uint32_t sn, Module_Info_t* board_info)
 {
-    uint16_t id = 0;
+    uint16_t id = _getIdFromSerialNumAndType(type, sn);
 
-    BusRS::Frame_t frame;
-    frame.cmd = CMD_PING;
-    frame.id = 0;
-    frame.dir = 1;
-    frame.ack = true;
-    frame.length = 4;
-    frame.data = (uint8_t*)malloc(4);
-    memcpy(frame.data, &num, 4); // Serial number
-    BusRS::write(&frame, pdMS_TO_TICKS(100));
-    BusRS::read(&frame, pdMS_TO_TICKS(100));
-    id = frame.id;
-    free(frame.data);
-    return id;
-}
-
-void ModuleMaster::getBoardInfo(int num, Module_Info_t* board_info)
-{
-    uint16_t id = 0;
-    
-    id = ModuleMaster::getIdFromSN(num);
     if (id == 0) {
         ModuleStandalone::ledBlink(LED_RED, 1000); // Error
         return;
@@ -199,7 +192,7 @@ void ModuleMaster::getBoardInfo(int num, Module_Info_t* board_info)
     return;
 }
 
-std::map<uint16_t,int,std::greater<uint16_t>> ModuleMaster::discoverSlaves(void)
+std::map<uint16_t,std::pair<uint16_t, uint32_t>,std::greater<uint16_t>> ModuleMaster::discoverSlaves(void)
 {
     // Delete previous id list
     _ids.clear();
@@ -216,6 +209,26 @@ std::map<uint16_t,int,std::greater<uint16_t>> ModuleMaster::discoverSlaves(void)
     vTaskDelay(pdMS_TO_TICKS(200));
 
     return _ids;
+}
+
+uint16_t ModuleMaster::_getIdFromSerialNumAndType(uint16_t type, uint32_t sn)
+{
+    uint16_t id = 0;
+
+    BusRS::Frame_t frame;
+    frame.cmd = CMD_PING;
+    frame.id = 0;
+    frame.dir = 1;
+    frame.ack = true;
+    frame.length = sizeof(type)+sizeof(sn);
+    frame.data = (uint8_t*)malloc(sizeof(type)+sizeof(sn));
+    memcpy(frame.data, &type, sizeof(type)); // Type 
+    memcpy(&frame.data[sizeof(type)], &sn, sizeof(sn)); // Serial number
+    BusRS::write(&frame, pdMS_TO_TICKS(100));
+    BusRS::read(&frame, pdMS_TO_TICKS(100));
+    id = frame.id;
+    free(frame.data);
+    return id;
 }
 
 void ModuleMaster::_busTask(void *pvParameters) 
@@ -242,8 +255,9 @@ void ModuleMaster::_busTask(void *pvParameters)
                 }
                 case CMD_DISCOVER:
                 {
-                    int* sn = reinterpret_cast<int*>(frame.data);
-                    _ids.insert(std::pair<int, int>(id, *sn));
+                    uint16_t* type = reinterpret_cast<uint16_t*>(&frame.data[0]);
+                    uint32_t* sn = reinterpret_cast<uint32_t*>(&frame.data[2]);
+                    _ids.insert(std::pair<uint16_t, std::pair<uint16_t, uint32_t>>(id, std::pair<uint16_t, uint32_t>(*type, *sn)));
                     break;
                 }
                 default:
@@ -260,16 +274,12 @@ void ModuleMaster::_busTask(void *pvParameters)
 
 void ModuleMaster::_programmingTask(void *pvParameters)
 {
-    uint16_t id = 0;
-    uint32_t num = (uint32_t)pvParameters;
+    uint16_t id = *(uint16_t*)pvParameters;
     int sequence = 0;
     UsbSerialProtocol::Packet_t packet;
     packet.data = (uint8_t*)malloc(16400);
     BusRS::Frame_t frame;
     frame.data = (uint8_t*)malloc(1024);
-
-    /* Get bus ID */
-    id = getIdFromSN(num);
 
     /* FlashLoader begin */
     frame.cmd = CMD_FLASH_LOADER_BEGIN;

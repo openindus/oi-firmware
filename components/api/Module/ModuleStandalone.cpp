@@ -42,13 +42,17 @@ int ModuleStandalone::init()
     Led::on(LED_BLUE);
 
     /* eFuse - Board info */
-    char board_type[16];
-    getBoardType(board_type);
-    ESP_LOGI(MODULE_TAG, "Board type       : %s", board_type);
+    ESP_LOGI(MODULE_TAG, "Board type       : %u", getBoardType());
     ESP_LOGI(MODULE_TAG, "Serial number    : %d", getSerialNum());
-    char hardware_version[16];
+    char hardware_version[4];
     getHardwareVersion(hardware_version);
-    ESP_LOGI(MODULE_TAG, "Hardware version : %s", hardware_version);
+    ESP_LOGI(MODULE_TAG, "Hardware version : %.*s", 4, hardware_version);
+    char date_code[4];
+    getDateCode(date_code);
+    ESP_LOGI(MODULE_TAG, "Date code        : %.*s", 4, date_code);
+    char software_version[32];
+    getDateCode(software_version);
+    ESP_LOGI(MODULE_TAG, "Software version : %s", software_version);
 
     /* Temperature sensor */
     ESP_LOGI(MODULE_TAG, "Init Temperature sensor");
@@ -115,61 +119,95 @@ float ModuleStandalone::getTemperature(void)
     return tsens_out;
 }
 
-void ModuleStandalone::getBoardType(char* board_type)
+uint16_t ModuleStandalone::getBoardType(void)
 {
     if (esp_efuse_block_is_empty(EFUSE_BLK_KEY0) == false) {
         Module_eFuse_Info_t data;
         esp_efuse_read_block(EFUSE_BLK_KEY0, &data, 0, sizeof(Module_eFuse_Info_t)*8);
-        strcpy(board_type, data.board_type);
+        if (_verify_eFuse_checksum(data)) {
+            return data.board_type;
+        } else {
+            ESP_LOGW(MODULE_TAG, "eFuse BLOCK0 corrupted !");
+            return 0;
+        }
     } else {
         ESP_LOGW(MODULE_TAG, "Board type is not defined !");
-        strcpy(board_type, "undefined");
+        return 0;
     }
-    return;
+    return 0;
 }
 
-int ModuleStandalone::getSerialNum(void)
+uint32_t ModuleStandalone::getSerialNum(void)
 {
     if (esp_efuse_block_is_empty(EFUSE_BLK_KEY0) == false) {
         Module_eFuse_Info_t data;
         esp_efuse_read_block(EFUSE_BLK_KEY0, &data, 0, sizeof(Module_eFuse_Info_t)*8);
-        return data.serial_number;
+        if (_verify_eFuse_checksum(data)) {
+            return data.serial_number;
+        } else {
+            ESP_LOGW(MODULE_TAG, "eFuse BLOCK0 corrupted !");
+            return 0;
+        }
     } else {
         ESP_LOGW(MODULE_TAG, "Serial number is not defined !");
         return 0;
     }
-    
 }
 
-void ModuleStandalone::getHardwareVersion(char* version)
+void ModuleStandalone::getHardwareVersion(char hardware_version[4])
 {
     if (esp_efuse_block_is_empty(EFUSE_BLK_KEY0) == false) {
         Module_eFuse_Info_t data;
         esp_efuse_read_block(EFUSE_BLK_KEY0, &data, 0, sizeof(Module_eFuse_Info_t)*8);
-        strcpy(version, data.hardware_version);
+        if (_verify_eFuse_checksum(data)) {
+            strcpy(hardware_version, data.hardware_version);
+        } else {
+            ESP_LOGW(MODULE_TAG, "eFuse BLOCK0 corrupted !");
+            strcpy(hardware_version, "none");
+        }
     } else {
         ESP_LOGW(MODULE_TAG, "Hardware version is not defined !");
-        strcpy(version, "undefined");
+        strcpy(hardware_version, "none");
     }
     return;
 }
 
-void ModuleStandalone::getSoftwareVersion(char* version)
+void ModuleStandalone::getDateCode(char date_code[4])
 {
-    const esp_app_desc_t* app_info = esp_ota_get_app_description();
-    strcpy(version,app_info->version);
+    if (esp_efuse_block_is_empty(EFUSE_BLK_KEY0) == false) {
+        Module_eFuse_Info_t data;
+        esp_efuse_read_block(EFUSE_BLK_KEY0, &data, 0, sizeof(Module_eFuse_Info_t)*8);
+        if (_verify_eFuse_checksum(data)) {
+            strcpy(date_code, data.date_code);
+        } else {
+            ESP_LOGW(MODULE_TAG, "eFuse BLOCK0 corrupted !");
+            strcpy(date_code, "none");
+        }
+    } else {
+        ESP_LOGW(MODULE_TAG, "Date code is not defined !");
+        strcpy(date_code, "none");
+    }
     return;
 }
 
-bool ModuleStandalone::setBoardInfo(char* board_type, int serial_num, char* hardware_version)
+void ModuleStandalone::getSoftwareVersion(char software_version[32])
+{
+    const esp_app_desc_t* app_info = esp_ota_get_app_description();
+    strcpy(software_version, app_info->version);
+    return;
+}
+
+bool ModuleStandalone::setBoardInfo(uint16_t board_type, uint32_t serial_num, char hardware_version[4], char date_code[4])
 {
     ESP_LOGW(MODULE_TAG, "This operation can be done only once !");
 
     Module_eFuse_Info_t data;
     memset(&data, 0, sizeof(Module_eFuse_Info_t));
-    strcpy(data.board_type, board_type);
+    data.board_type = board_type;
     data.serial_number = serial_num;
     strcpy(data.hardware_version, hardware_version);
+    strcpy(data.date_code, date_code);
+    data.checksum = _calculate_eFuse_checksum((uint8_t*)&data);
 
     esp_err_t err = esp_efuse_write_key(EFUSE_BLK_KEY0, ESP_EFUSE_KEY_PURPOSE_USER, &data, sizeof(Module_eFuse_Info_t));
     
@@ -178,4 +216,20 @@ bool ModuleStandalone::setBoardInfo(char* board_type, int serial_num, char* hard
         return false;
     }
     return true;
+}
+
+uint8_t ModuleStandalone::_calculate_eFuse_checksum(uint8_t* data)
+{
+    uint8_t checksum = 0xFE;
+
+    for (int i = 0; i < 31; i++) {
+        checksum ^= data[i];
+    }
+
+    return checksum;
+}
+
+bool ModuleStandalone::_verify_eFuse_checksum(Module_eFuse_Info_t info)
+{
+    return (info.checksum == _calculate_eFuse_checksum((uint8_t*)&info));
 }

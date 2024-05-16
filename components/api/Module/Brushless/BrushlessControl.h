@@ -15,8 +15,7 @@
 
 #pragma once
 
-#include "ModuleControl.h"
-#include "ModuleMaster.h"
+#include "Module.h"
 
 #if defined(MODULE_MASTER)
 
@@ -24,7 +23,7 @@ class BrushlessControl : public ModuleControl
 {
 public:
 
-    BrushlessControl(int sn = 0) : ModuleControl(sn) {}
+    BrushlessControl(int sn = 0) : ModuleControl(TYPE_OI_BRUSHLESS, sn) {}
     void setSpeed(uint32_t duty_cycle);
     void setBrake(bool brake);
     void setDirection(bool direction);

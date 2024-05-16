@@ -15,8 +15,7 @@
 
 #pragma once
 
-#include "ModuleControl.h"
-#include "ModuleMaster.h"
+#include "Module.h"
 #include "RelayStandalone.h"
 
 #if defined(MODULE_MASTER)
@@ -25,7 +24,7 @@ class RelayControl : public ModuleControl
 {
 public:
 
-    RelayControl(int sn = 0) : ModuleControl(sn) {}
+    RelayControl(int sn = 0) : ModuleControl(TYPE_OI_RELAY_HP, sn) {}
 
     void digitalWrite(Relay_t relay, uint8_t level);
 

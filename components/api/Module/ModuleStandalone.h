@@ -18,10 +18,13 @@
 #include "Global.h"
 
 /* Struct can fill an eFuse block of 32 msgBytes */
-typedef struct {
-    char board_type[16];
-    int serial_number;
-    char hardware_version[12];
+typedef struct __attribute__((__packed__)) {
+    uint16_t board_type;
+    uint32_t serial_number;
+    char hardware_version[4]; // AA01
+    char date_code[4]; // MMYY
+    uint8_t reserved[17];
+    uint8_t checksum;
 } Module_eFuse_Info_t;
 
 typedef struct {
@@ -40,14 +43,16 @@ public:
     static void ledOff(void);
     static void ledBlink(LedColor_t color, uint32_t period);
     static float getTemperature(void);
-    static void getBoardType(char* board_type);
-    static int getSerialNum(void);
-    static void getHardwareVersion(char* version);
-    static void getSoftwareVersion(char* version);
-    static bool setBoardInfo(char* board_type, int serial_num, char* hardware_version);
+    static uint16_t getBoardType(void);
+    static uint32_t getSerialNum(void);
+    static void getHardwareVersion(char hardware_version[4]);
+    static void getDateCode(char date_code[4]);
+    static void getSoftwareVersion(char software_version[32]);
+    static bool setBoardInfo(uint16_t board_type, uint32_t serial_num, char hardware_version[4], char date_code[4]);
 
 private:
 
-    static int32_t _getBoardInfoFromNVS(const char* key);
-    static void _setBoardInfoToNVS(const char* key, int32_t value);
+    static uint8_t _calculate_eFuse_checksum(uint8_t* data);
+    static bool _verify_eFuse_checksum(Module_eFuse_Info_t info);
+
 };

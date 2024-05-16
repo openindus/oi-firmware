@@ -26,7 +26,7 @@ class ModuleControl
 {
 public:
 
-    inline ModuleControl(int sn) : _id(0xFFFF), _sn(sn) {
+    inline ModuleControl(uint16_t type, uint32_t sn) : _id(0xFFFF), _type(type), _sn(sn) {
         _instances.push_back(this);
     }
 
@@ -42,9 +42,11 @@ public:
 
     inline uint16_t getId(void) { return _id; }
 
-    inline void setSN(int sn) { _sn = sn; }
+    inline void setSN(uint32_t sn) { _sn = sn; }
 
-    inline int getSN(void) { return _sn; }
+    inline uint32_t getSN(void) { return _sn; }
+
+    inline uint16_t getType(void) { return _type; }
 
     inline static void addEventCallback(uint8_t event, uint16_t id, std::function<void(uint8_t)>callback) {
         _eventCallbacks.insert({std::make_pair(event, id), callback});
@@ -62,7 +64,8 @@ protected:
 private:
     
     uint16_t _id; // Board id
-    int _sn; // Serial number
+    uint16_t _type; // Board 
+    uint32_t _sn; // Serial number
     void _ledStatus(LedState_t state, LedColor_t color=LED_NONE, uint32_t period=0);
 
 };

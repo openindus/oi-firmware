@@ -89,3 +89,4 @@ enum Command_Event_e {
     EVENT_DIGITAL_INTERRUPT                 = 0x00,
     EVENT_MOTOR_READY                       = 0x01,
 };
+

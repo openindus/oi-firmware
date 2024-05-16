@@ -16,9 +16,9 @@
 #pragma once
 
 #include "Global.h"
+#include "Module.h"
 
 #if defined(OI_STEPPER) || defined(OI_STEPPER_VE)
-#include "ModuleStandalone.h"
 #include "StepperPinout.h"
 #include "StepperParam.h"
 #include "DigitalInputs.h"
@@ -32,12 +32,10 @@
 #define Stepper StepperStandalone
 #elif (defined(OI_STEPPER) || defined(OI_STEPPER_VE)) && defined(MODULE_SLAVE)
 #define Stepper StepperSlave
-#include "ModuleSlave.h"
 #include "DigitalInputsSlave.h"
 #include "MotorStepperSlave.h"
 #elif defined(MODULE_MASTER) 
 #define Stepper StepperControl
-#include "ModuleControl.h"
 #include "DigitalInputsControl.h"
 #include "MotorStepperControl.h"
 #endif
@@ -75,7 +73,7 @@ class StepperControl : public ModuleControl, public DigitalInputsControl, public
 public:
 
     StepperControl(int sn = 0) : 
-        ModuleControl(sn),
+        ModuleControl(TYPE_OI_STEPPER, sn),
         DigitalInputsControl(this),
         MotorStepperControl(this) {}
 };
