@@ -14,6 +14,7 @@
  */
 
 #include "BusRS.h"
+#include "BusIO.h"
 
 #define BUS_RS_SYNC_BYTE 0xAA
 #define BUS_RS_HEADER_LENGTH 7
@@ -66,12 +67,10 @@ int BusRS::begin(uart_port_t port, gpio_num_t tx_num, gpio_num_t rx_num)
 
     err |= uart_set_pin(_port, tx_num, rx_num, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
 
-#if !defined(DEBUG_BUS)
-    esp_log_level_set(TAG, ESP_LOG_WARN);
-#endif
+    /* Important: trigger an interrupt as soon as one byte time of empty uart rx happened */
+    err |= uart_set_rx_timeout(_port, 1);
 
     return err;
-
 }
 
 /**
@@ -107,9 +106,11 @@ void BusRS::write(Frame_t* frame, TickType_t timeout)
     }
     free(buffer);
     buffer = NULL;
-    ESP_LOGI(TAG, "WRITE - ID: %u | CMD: 0x%02X | CHKSUM: 0x%02X | DATA:", \
-        frame->id, frame->cmd, frame->checksum);
+#if defined(DEBUG_BUS)
+    ESP_LOGI(TAG, "READ - ID: %u | CMD: 0x%02X | LENGTH: 0x%02X | CHCK: 0x%02X | DATA:", \
+            frame->id, frame->cmd, frame->length, frame->checksum);
     ESP_LOG_BUFFER_HEX_LEVEL(TAG, frame->data, frame->length, ESP_LOG_INFO);
+#endif
 }
 
 /**
@@ -131,10 +132,9 @@ int BusRS::read(Frame_t* frame, TickType_t timeout)
                         memcpy(frame, buffer, BUS_RS_HEADER_LENGTH);
                         memcpy(frame->data, &buffer[BUS_RS_HEADER_LENGTH], event.size - BUS_RS_HEADER_LENGTH);
                         index += (event.size - BUS_RS_HEADER_LENGTH);
-                        if ((frame->sync != BUS_RS_SYNC_BYTE) || 
-                            (frame->length > BUS_RS_DATA_LENGTH_MAX)) { // Check header frame
-                                ESP_LOGE(TAG, "Invalid header frame");
-                                goto error;
+                        if ((frame->sync != BUS_RS_SYNC_BYTE) || (frame->length > BUS_RS_DATA_LENGTH_MAX)) { // Check header frame
+                            ESP_LOGE(TAG, "Invalid header frame");
+                            goto error;
                         }
                     } else {
                         // Ignore data
@@ -148,7 +148,7 @@ int BusRS::read(Frame_t* frame, TickType_t timeout)
                     if (_verifyChecksum(frame)) {
                         goto success;
                     } else {
-                        ESP_LOGE(TAG, "Invalid checksum");
+                        ESP_LOGE(TAG, "Invalid checksum: %02X, expected: %02X", frame->checksum, _calculateChecksum(frame));
                         goto error;
                     }
                 }
@@ -167,14 +167,21 @@ error:
     free(buffer);
     buffer = NULL;
     xSemaphoreGive(_semaphore);
+#if defined(DEBUG_BUS)
+    ESP_LOGI(TAG, "READ - ID: %u | CMD: 0x%02X | LENGTH: 0x%02X | CHCK: 0x%02X | DATA:", \
+            frame->id, frame->cmd, frame->length, frame->checksum);
+    ESP_LOG_BUFFER_HEX_LEVEL(TAG, frame->data, frame->length, ESP_LOG_INFO);
+#endif
     return -1;
 success:
     free(buffer);
     buffer = NULL;
     xSemaphoreGive(_semaphore);
-    ESP_LOGI(TAG, "READ - ID: %u | CMD: 0x%02X | CHKSUM: 0x%02X | DATA:", \
-        frame->id, frame->cmd, frame->checksum);
+#if defined(DEBUG_BUS)
+    ESP_LOGI(TAG, "READ - ID: %u | CMD: 0x%02X | LENGTH: 0x%02X | CHCK: 0x%02X | DATA:", \
+            frame->id, frame->cmd, frame->length, frame->checksum);
     ESP_LOG_BUFFER_HEX_LEVEL(TAG, frame->data, frame->length, ESP_LOG_INFO);
+#endif
     return 0;
 }
 
