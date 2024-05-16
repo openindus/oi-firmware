@@ -108,7 +108,7 @@ int MotorStepperSlave::init() {
     ModuleSlave::addCtrlCallback(CONTROL_MOTOR_MOVE_ABSOLUTE, [](std::vector<uint8_t>& data) {
         MotorNum_t motor = static_cast<MotorNum_t>(data[1]);
         uint32_t* position = reinterpret_cast<uint32_t*>(&data[2]);
-        bool microStep = static_cast<bool>(data[3]);
+        bool microStep = static_cast<bool>(data[6]);
         MotorStepper::moveAbsolute(motor, *position, microStep);
         data.clear();
     });
@@ -116,7 +116,7 @@ int MotorStepperSlave::init() {
     ModuleSlave::addCtrlCallback(CONTROL_MOTOR_MOVE_RELATIVE, [](std::vector<uint8_t>& data) {
         MotorNum_t motor = static_cast<MotorNum_t>(data[1]);
         uint32_t* position = reinterpret_cast<uint32_t*>(&data[2]);
-        bool microStep = static_cast<bool>(data[3]);
+        bool microStep = static_cast<bool>(data[6]);
         MotorStepper::moveRelative(motor, *position, microStep);
         data.clear();
     });
