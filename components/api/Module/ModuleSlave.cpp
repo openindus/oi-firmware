@@ -86,9 +86,11 @@ void ModuleSlave::_busTask(void *pvParameters)
             }
             case CMD_PING:
             {
-                int num; // Serial number
-                memcpy(&num, frame.data, 4);
-                if (num ==  ModuleStandalone::getSerialNum()) {
+                uint16_t type; // Board type
+                uint32_t num; // Serial number
+                memcpy(&type, frame.data, sizeof(uint16_t));
+                memcpy(&num, &frame.data[2], sizeof(uint32_t));
+                if (num ==  ModuleStandalone::getSerialNum() && type == ModuleStandalone::getBoardType()) {
                     frame.dir = 0;
                     frame.ack = false;
                     frame.id = _id; // return our id --> the master can get the id from serialNumber
@@ -100,9 +102,11 @@ void ModuleSlave::_busTask(void *pvParameters)
             {
                 BusCAN::Frame_t discoverFrame;
                 discoverFrame.cmd = CMD_DISCOVER;
-                int sn = ModuleStandalone::getSerialNum();
-                memcpy(discoverFrame.data, &sn, sizeof(int));
-                if (BusCAN::write(&discoverFrame, _id, sizeof(int)+1) == -1)
+                uint16_t type = ModuleStandalone::getBoardType();
+                uint32_t sn = ModuleStandalone::getSerialNum();
+                memcpy(discoverFrame.data, &type, sizeof(uint16_t));
+                memcpy(&discoverFrame.data[2], &sn, sizeof(uint32_t));
+                if (BusCAN::write(&discoverFrame, _id, sizeof(uint16_t)+sizeof(uint32_t)+1) == -1)
                     ModuleStandalone::ledBlink(LED_RED, 1000); // Error
                 break;
             }
@@ -185,10 +189,10 @@ void ModuleSlave::_busTask(void *pvParameters)
             }
             case CMD_CONTROL:
             {
-                std::vector<uint8_t> msg;
-                msg.assign(frame.data, frame.data + frame.length);
                 if (frame.id == _id) {
 
+                    std::vector<uint8_t> msg;
+                    msg.assign(frame.data, frame.data + frame.length);
                     auto it = _ctrlCallbacks.find(frame.data[0]);
                     if (it != _ctrlCallbacks.end()) {
                         (*it).second(msg);

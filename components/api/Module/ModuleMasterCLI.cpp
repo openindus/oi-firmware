@@ -199,7 +199,7 @@ static int getSlaveInfo(int argc, char **argv)
 
     Module_Info_t boardInfo;
 
-    if (getSlaveInfoArgs.sn->count == 1) {
+    if (getSlaveInfoArgs.type->count == 1 && getSlaveInfoArgs.sn->count == 1) {
         ModuleMaster::getBoardInfo((uint16_t)getSlaveInfoArgs.type->ival[0], (uint32_t)getSlaveInfoArgs.sn->ival[0], &boardInfo);
     } else {
         return -1;

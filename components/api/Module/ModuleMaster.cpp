@@ -101,11 +101,12 @@ bool ModuleMaster::autoId(void)
                     ModuleControl::_instances[i]->ledOn(LED_YELLOW);
                     vTaskDelay(50/portTICK_PERIOD_MS);
                 } else {
-                    char name[16];
+                    char name1[16];
+                    char name2[16];
                     ESP_LOGE(TAG, "Type of module %i is incorrect: you have instantiate an %s and module detected is an %s", \
                                         i+1, \
-                                        ModuleUtils::typeToName(ModuleControl::_instances[i]->getType(), name), \
-                                        ModuleUtils::typeToName(it->second.first, name));
+                                        ModuleUtils::typeToName(ModuleControl::_instances[i]->getType(), name1), \
+                                        ModuleUtils::typeToName(it->second.first, name2));
                     ESP_LOGE(TAG, "Check that the order of module in your main.cpp file correspond with the order of modules on the rail");
                     return false;
                 }
@@ -164,7 +165,7 @@ bool ModuleMaster::ping(uint16_t type, uint32_t sn)
     frame.length = sizeof(type)+sizeof(sn);
     frame.data = (uint8_t*)malloc(sizeof(type)+sizeof(sn));
     memcpy(frame.data, &type, sizeof(type)); // Type 
-    memcpy(&frame.data[sizeof(type)], &sn, sizeof(sn)); // Serial number
+    memcpy(&frame.data[2], &sn, sizeof(sn)); // Serial number
     BusRS::write(&frame, pdMS_TO_TICKS(10));
     return (BusRS::read(&frame, pdMS_TO_TICKS(10)) == 0);
 }
@@ -223,7 +224,7 @@ uint16_t ModuleMaster::_getIdFromSerialNumAndType(uint16_t type, uint32_t sn)
     frame.length = sizeof(type)+sizeof(sn);
     frame.data = (uint8_t*)malloc(sizeof(type)+sizeof(sn));
     memcpy(frame.data, &type, sizeof(type)); // Type 
-    memcpy(&frame.data[sizeof(type)], &sn, sizeof(sn)); // Serial number
+    memcpy(&frame.data[2], &sn, sizeof(sn)); // Serial number
     BusRS::write(&frame, pdMS_TO_TICKS(100));
     BusRS::read(&frame, pdMS_TO_TICKS(100));
     id = frame.id;

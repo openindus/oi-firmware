@@ -78,7 +78,7 @@ void BusCAN::end(void)
  * @param frame 
  * @param id identifier
  * @param length data length
- * @return error: -1, succed: 0
+ * @return error: -1, succeed: 0
  */
 int BusCAN::write(Frame_t* frame, uint16_t id, uint8_t length)
 {
@@ -104,10 +104,10 @@ error:
     return -1;
 success:
     xSemaphoreGive(_mutex);
-// #if defined(DEBUG_BUS)    
+#if defined(DEBUG_BUS)    
     ESP_LOGI(TAG, "WRITE - ID: %u | DATA:", msg.identifier);
     ESP_LOG_BUFFER_HEX_LEVEL(TAG, msg.data, msg.data_length_code, ESP_LOG_INFO);
-// #endif
+#endif
     return 0;
 }
 
@@ -141,9 +141,9 @@ error:
     return -1;
 success:
     xSemaphoreGive(_mutex);
-// #if defined(DEBUG_BUS)    
+#if defined(DEBUG_BUS)    
     ESP_LOGI(TAG, "READ - ID: %u | DATA:", msg.identifier);
     ESP_LOG_BUFFER_HEX_LEVEL(TAG, msg.data, msg.data_length_code, ESP_LOG_INFO);
-// #endif
+#endif
     return 0;
 }

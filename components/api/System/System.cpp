@@ -107,9 +107,9 @@ void System::init(void)
         ESP_LOGI(TAG, "Create main task");
         vTaskDelay(10);
         xTaskCreate(_mainTask, "Main task", 8192, NULL, 1, NULL);
-// #if defined(FORCE_CONSOLE)
+#if defined(FORCE_CONSOLE)
         UsbConsole::begin(true); // Force console, will failed if Serial.begin() is called in user code
-// #endif
+#endif
     }
     
 #endif
