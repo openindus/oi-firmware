@@ -19,6 +19,7 @@
 #include "Module.h"
 
 #if defined(OI_MIXED)
+#include "MixedPinout.h"
 #include "AnalogOutputsCLI.h"
 #include "AnalogInputsLVCLI.h"
 #include "DigitalInputsCLI.h"
