@@ -17,7 +17,7 @@ class AnalogLsControl : public ModuleControl, public AnalogLsInterface
 {
 public:
 
-    AnalogLsControl(int sn = 0) : ModuleControl(TYPE_OI_ANALOG_LS, sn) {}
+    AnalogLsControl(uint32_t sn = 0) : ModuleControl(TYPE_OI_ANALOG_LS, sn) {}
 
 };
 

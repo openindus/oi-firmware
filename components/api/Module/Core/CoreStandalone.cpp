@@ -53,7 +53,7 @@ OI::RS CoreStandalone::rs(CORE_SPI_USER_HOST, CORE_PIN_RS_SPI_CS, CORE_PIN_RS_IN
 
 int CoreStandalone::init()
 {
-    int err = ModuleStandalone::init();
+    int err = ModuleStandalone::init(TYPE_OI_CORE);
 
     /**
      * @brief I2C init

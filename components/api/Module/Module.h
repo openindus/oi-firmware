@@ -24,18 +24,19 @@
 #include "ModulePinout.h"
 
 enum Module_Type_List_e {
-        TYPE_OI_CORE            = (uint16_t) 3,
-        TYPE_OI_CORELITE        = (uint16_t) 4,
-        TYPE_OI_DISCRETE        = (uint16_t) 6,
-        TYPE_OI_DISCRETE_VE     = (uint16_t) 7,
-        TYPE_OI_MIXED           = (uint16_t) 8,
-        TYPE_OI_RELAY_LP        = (uint16_t) 9,
-        TYPE_OI_RELAY_HP        = (uint16_t) 10,
-        TYPE_OI_STEPPER         = (uint16_t) 11,
-        TYPE_OI_STEPPER_VE      = (uint16_t) 12,
-        TYPE_OI_ANALOG_LS       = (uint16_t) 13,
-        TYPE_OI_BRUSHLESS       = (uint16_t) 18,
-    };
+    TYPE_OI_CORE            = (uint16_t) 3,
+    TYPE_OI_CORELITE        = (uint16_t) 4,
+    TYPE_OI_DISCRETE        = (uint16_t) 6,
+    TYPE_OI_DISCRETE_VE     = (uint16_t) 7,
+    TYPE_OI_MIXED           = (uint16_t) 8,
+    TYPE_OI_RELAY_LP        = (uint16_t) 9,
+    TYPE_OI_RELAY_HP        = (uint16_t) 10,
+    TYPE_OI_STEPPER         = (uint16_t) 11,
+    TYPE_OI_STEPPER_VE      = (uint16_t) 12,
+    TYPE_OI_ANALOG_LS       = (uint16_t) 13,
+    TYPE_OI_BRUSHLESS       = (uint16_t) 18,
+};
+
 class ModuleUtils {
 
 public:
@@ -79,6 +80,7 @@ public:
             break;
         
         default:
+            strcpy(name, "Unknow");
             break;
         }
 

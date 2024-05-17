@@ -73,7 +73,7 @@ class MixedControl : public ModuleControl, public AnalogOutputsControl, public A
 {
 public:
 
-    MixedControl(int sn = 0) : 
+    MixedControl(uint32_t sn = 0) : 
         ModuleControl(TYPE_OI_MIXED , sn),
         AnalogOutputsControl(this),
         AnalogInputsLVControl(this),

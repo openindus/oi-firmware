@@ -23,7 +23,7 @@ class BrushlessControl : public ModuleControl
 {
 public:
 
-    BrushlessControl(int sn = 0) : ModuleControl(TYPE_OI_BRUSHLESS, sn) {}
+    BrushlessControl(uint32_t sn = 0) : ModuleControl(TYPE_OI_BRUSHLESS, sn) {}
     void setSpeed(uint32_t duty_cycle);
     void setBrake(bool brake);
     void setDirection(bool direction);

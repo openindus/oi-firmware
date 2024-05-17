@@ -72,7 +72,7 @@ class StepperControl : public ModuleControl, public DigitalInputsControl, public
 {
 public:
 
-    StepperControl(int sn = 0) : 
+    StepperControl(uint32_t sn = 0) : 
         ModuleControl(TYPE_OI_STEPPER, sn),
         DigitalInputsControl(this),
         MotorStepperControl(this) {}

@@ -17,7 +17,7 @@
 
 #include "ModuleControl.h"
 
-static const char MODULE_TAG[] = "Module";
+static const char TAG[] = "Module";
 
 std::map<std::pair<uint8_t, uint16_t>, std::function<void(uint8_t)>> ModuleControl::_eventCallbacks;
 std::vector<ModuleControl*> ModuleControl::_instances;
@@ -70,7 +70,7 @@ int ModuleControl::ctrlRequest(std::vector<uint8_t>& msgBytes, bool ackNeeded)
     BusRS::write(&frame, pdMS_TO_TICKS(100));
     if (ackNeeded) {
         if (BusRS::read(&frame, pdMS_TO_TICKS(100)) < 0) {
-            ESP_LOGE(MODULE_TAG, "control error");
+            ESP_LOGE(TAG, "control error");
             return -1;
         } else {
             msgBytes.assign(frame.data, frame.data + frame.length);

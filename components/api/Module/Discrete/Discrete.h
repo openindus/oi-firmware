@@ -69,7 +69,7 @@ class DiscreteControl : public ModuleControl, public DigitalInputsControl, publi
 {
 public:
 
-    DiscreteControl(int sn = 0) : 
+    DiscreteControl(uint32_t sn = 0) : 
         ModuleControl(TYPE_OI_DISCRETE, sn),
         DigitalInputsControl(this),
         DigitalOutputsControl(this),

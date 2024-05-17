@@ -17,7 +17,7 @@
 
 #include "Module.h"
 
-static const char MODULE_TAG[] = "Module";
+static const char TAG[] = "Module";
 
 std::map<uint16_t, std::pair<uint16_t, uint32_t>, std::greater<uint16_t>> ModuleMaster::_ids;
 
@@ -25,7 +25,7 @@ int ModuleMaster::init(void)
 {
     int err = 0;
 
-    ESP_LOGI(MODULE_TAG, "Bus init");
+    ESP_LOGI(TAG, "Bus init");
 
     /* Bus RS/CAN */
     err |= BusRS::begin(MODULE_RS_NUM_PORT, MODULE_PIN_RS_UART_TX, MODULE_PIN_RS_UART_RX);
@@ -42,7 +42,7 @@ int ModuleMaster::init(void)
     err |= BusIO::init(&config);
     BusIO::writeSync(0);
 
-    ESP_LOGI(MODULE_TAG, "Create bus task");
+    ESP_LOGI(TAG, "Create bus task");
     xTaskCreate(_busTask, "Bus task", 4096, NULL, 1, NULL);
 
     return err;
@@ -50,7 +50,7 @@ int ModuleMaster::init(void)
 
 bool ModuleMaster::autoId(void)
 {
-    ESP_LOGI(MODULE_TAG, "Auto ID");
+    ESP_LOGI(TAG, "Auto ID");
 
     /* Check if IDs are in bus order or by Serial Number */
     int num_id_auto = 0;
@@ -65,9 +65,9 @@ bool ModuleMaster::autoId(void)
     }
 
     if ((num_id_auto > 0) && (num_id_sn > 0)) {
-        ESP_LOGE(MODULE_TAG, "Modules must be initialized using the same constructor. You cannot initialize some module without SN and some modules with SN.");
-        ESP_LOGE(MODULE_TAG, "Number of module with SN:%i", num_id_sn);
-        ESP_LOGE(MODULE_TAG, "Number of module without SN:%i", num_id_auto);
+        ESP_LOGE(TAG, "Modules must be initialized using the same constructor. You cannot initialize some module without SN and some modules with SN.");
+        ESP_LOGE(TAG, "Number of module with SN:%i", num_id_sn);
+        ESP_LOGE(TAG, "Number of module without SN:%i", num_id_auto);
         return false;
     }
 
@@ -102,17 +102,17 @@ bool ModuleMaster::autoId(void)
                     vTaskDelay(50/portTICK_PERIOD_MS);
                 } else {
                     char name[16];
-                    ESP_LOGE(MODULE_TAG, "Type of module %i is incorrect: you have instantiate an %s and module detected is an %s", \
+                    ESP_LOGE(TAG, "Type of module %i is incorrect: you have instantiate an %s and module detected is an %s", \
                                         i+1, \
                                         ModuleUtils::typeToName(ModuleControl::_instances[i]->getType(), name), \
                                         ModuleUtils::typeToName(it->second.first, name));
-                    ESP_LOGE(MODULE_TAG, "Check that the order of module in your main.cpp file correspond with the order of modules on the rail");
+                    ESP_LOGE(TAG, "Check that the order of module in your main.cpp file correspond with the order of modules on the rail");
                     return false;
                 }
             }
         } else {
-            ESP_LOGE(MODULE_TAG, "Number of instantiated modules: %d",  ModuleControl::_instances.size());
-            ESP_LOGE(MODULE_TAG, "Number of IDs received: %d",  _ids.size());
+            ESP_LOGE(TAG, "Number of instantiated modules: %d",  ModuleControl::_instances.size());
+            ESP_LOGE(TAG, "Number of IDs received: %d",  _ids.size());
             return false;
         }
     }
@@ -126,7 +126,7 @@ bool ModuleMaster::autoId(void)
                 ModuleControl::_instances[i]->ledOn(LED_YELLOW);
                 vTaskDelay(50/portTICK_PERIOD_MS);
             } else {
-                ESP_LOGE(MODULE_TAG, "Cannot instantiate module with SN:%i",  ModuleControl::_instances[i]->getSN());
+                ESP_LOGE(TAG, "Cannot instantiate module with SN:%i",  ModuleControl::_instances[i]->getSN());
                 return false;
             }
         }
@@ -249,7 +249,7 @@ void ModuleMaster::_busTask(void *pvParameters)
                             it->second(frame.data[1]);
                         }
                     } else {
-                        ESP_LOGW(MODULE_TAG, "Command does not exist: command: 0x%02x, id: %d", frame.data[0], id);
+                        ESP_LOGW(TAG, "Command does not exist: command: 0x%02x, id: %d", frame.data[0], id);
                     }
                     break;
                 }
@@ -262,7 +262,7 @@ void ModuleMaster::_busTask(void *pvParameters)
                 }
                 default:
                 {
-                    ESP_LOGW(MODULE_TAG, "Receive undefined command");
+                    ESP_LOGW(TAG, "Receive undefined command");
                     break;
                 }
             }

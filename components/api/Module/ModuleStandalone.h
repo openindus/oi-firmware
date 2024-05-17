@@ -36,7 +36,7 @@ class ModuleStandalone
 {
 public:
 
-    static int init(void);
+    static int init(uint16_t type);
 
     static void restart(void);
     static void ledOn(LedColor_t color);
@@ -54,5 +54,6 @@ private:
 
     static uint8_t _calculate_eFuse_checksum(uint8_t* data);
     static bool _verify_eFuse_checksum(Module_eFuse_Info_t info);
+    static uint16_t _type;
 
 };

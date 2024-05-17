@@ -28,7 +28,7 @@ const gpio_num_t relayHpTable[4] = {RELAY_HP_PHASE_CMD1, RELAY_HP_PHASE_CMD2, RE
 
 int RelayStandalone::init()
 {
-    int err = ModuleStandalone::init();
+    int err = ModuleStandalone::init(TYPE_OI_RELAY_HP);
 
     /* Init of ana pins */
     ESP_LOGI(RELAY_TAG, "initializing RELAYS");

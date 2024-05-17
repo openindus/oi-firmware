@@ -16,7 +16,7 @@
 #pragma once
 
 #include "Global.h"
-#include "ModuleStandalone.h"
+#include "Module.h"
 
 #if defined(OI_CORE)
 
