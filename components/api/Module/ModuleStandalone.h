@@ -22,8 +22,8 @@ typedef struct __attribute__((__packed__)) {
     uint16_t board_type;
     uint32_t serial_number;
     char hardware_version[4]; // AA01
-    char date_code[4]; // MMYY
-    uint8_t reserved[17];
+    int64_t timestamp; // Unix timestamp
+    uint8_t reserved[13];
     uint8_t checksum;
 } Module_eFuse_Info_t;
 
@@ -46,9 +46,9 @@ public:
     static uint16_t getBoardType(void);
     static uint32_t getSerialNum(void);
     static void getHardwareVersion(char hardware_version[4]);
-    static void getDateCode(char date_code[4]);
+    static int64_t getTimestamp(void);
     static void getSoftwareVersion(char software_version[32]);
-    static bool setBoardInfo(uint16_t board_type, uint32_t serial_num, char hardware_version[4], char date_code[4]);
+    static bool setBoardInfo(uint16_t board_type, uint32_t serial_num, char hardware_version[4], int64_t timestamp);
 
 private:
 

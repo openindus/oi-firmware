@@ -168,7 +168,7 @@ void ModuleMasterCLI::_registerDiscoverSlaves(void)
 {
     const esp_console_cmd_t cmd = {
         .command = "discover-slaves",
-        .help = "Discover all slaves on Bus and return information as json table: [{\"id\":1,\"type\":3,\"sn\":1},{\"id\":2,\"sn\":2},...]",
+        .help = "Discover all slaves on Bus and return information as json table: [{\"id\":1,\"type\":3,\"sn\":1},{\"id\":233,\"type\":13,\"sn\":563633},...]",
         .hint = NULL,
         .func = &discoverSlaves,
         .argtable = NULL
@@ -215,7 +215,7 @@ static int getSlaveInfo(int argc, char **argv)
         printf("%.*s\n", 4, boardInfo.efuse.hardware_version);
     }
     if (getSlaveInfoArgs.dateCode->count > 0) {
-        printf("%.*s\n", 4, boardInfo.efuse.date_code);
+        printf("%lli\n", boardInfo.efuse.timestamp);
     }
     if (getSlaveInfoArgs.versionSW->count > 0) {
         printf("%s\n", boardInfo.software_version);
@@ -231,7 +231,7 @@ void ModuleMasterCLI::_registerGetSlaveInfo(void)
     getSlaveInfoArgs.boardType = arg_lit0("t", "type", "Board type");
     getSlaveInfoArgs.serialNum = arg_lit0("n", "serial-num","Serial number");
     getSlaveInfoArgs.versionHW = arg_lit0("h", "version-hw", "Hardware version");
-    getSlaveInfoArgs.dateCode = arg_lit0("d", "date-code", "Date code");
+    getSlaveInfoArgs.dateCode = arg_lit0("d", "timestamp", "Board timestamp");
     getSlaveInfoArgs.versionSW = arg_lit0("s", "version-sw", "Software version");
     getSlaveInfoArgs.end = arg_end(2);
 

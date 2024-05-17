@@ -59,7 +59,7 @@ static struct {
     struct arg_int *boardType;
     struct arg_int *serialNum;
     struct arg_str *versionHW;
-    struct arg_str *dateCode;
+    struct arg_str *timestamp;
     struct arg_end *end;
 } setBoardInfoArgs;
 
@@ -75,10 +75,9 @@ static int setBoardInfo(int argc, char **argv)
     uint32_t serial_number = setBoardInfoArgs.serialNum->ival[0];
     char hardware_version[4];
     strncpy(hardware_version, setBoardInfoArgs.versionHW->sval[0], 4);
-    char date_code[4];
-    strncpy(date_code, setBoardInfoArgs.dateCode->sval[0], 4);
+    int64_t timestamp = atoll(setBoardInfoArgs.timestamp->sval[0]);
 
-    if (ModuleStandalone::setBoardInfo(board_type, serial_number, hardware_version, date_code)) {
+    if (ModuleStandalone::setBoardInfo(board_type, serial_number, hardware_version, timestamp)) {
         return 0;
     }
     return -1;
@@ -89,12 +88,12 @@ int ModuleCLI::_registerSetBoardInfo(void)
     setBoardInfoArgs.boardType = arg_int1("t", "type", "TYPE", "Board type");
     setBoardInfoArgs.serialNum = arg_int1("n", "serial-num", "NUM", "Serial number");
     setBoardInfoArgs.versionHW = arg_str1("h", "version-hw", "VERSION", "Hardware version");
-    setBoardInfoArgs.dateCode = arg_str1("d", "date", "DATE", "Date code");
+    setBoardInfoArgs.timestamp = arg_str1("d", "date", "DATE", "Board date as a timestamp");
     setBoardInfoArgs.end = arg_end(5);
 
     const esp_console_cmd_t cmd = {
         .command = "set-board-info",
-        .help = "WARNING ! This operation can be done only once !\nSet board informations: \"type, serial number and hardware version\"\nExample :\n\tset-board-info -t 12 -n 259 -h AE01 -d 0524",
+        .help = "WARNING ! This operation can be done only once !\nSet board informations: \"type, serial number and hardware version\"\nExample: set-board-info -t 12 -n 259 -h AE01 -d 1715947670",
         .hint = NULL,
         .func = &setBoardInfo,
         .argtable = &setBoardInfoArgs
@@ -133,9 +132,7 @@ static int getBoardInfo(int argc, char **argv)
         printf("%.*s\n", 4, version);
     }
     if (getBoardInfoArgs.dateCode->count > 0) {
-        char date[4];
-        ModuleStandalone::getDateCode(date);
-        printf("%.*s\n", 4, date);
+        printf("%lli\n", ModuleStandalone::getTimestamp());
     }
     if (getBoardInfoArgs.versionSW->count > 0) {
         char version[32];

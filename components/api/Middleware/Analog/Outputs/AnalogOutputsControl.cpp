@@ -24,7 +24,7 @@ int AnalogOutputsControl::analogOutputMode(AnalogOutput_Num_t num, AnalogOutput_
 
 int AnalogOutputsControl::analogWrite(AnalogOutput_Num_t num, float value)
 {
-    std::vector<uint8_t> msgBytes = {CONTROL_ANALOG_WRITE};
+    std::vector<uint8_t> msgBytes = {CONTROL_ANALOG_WRITE, (uint8_t)num};
     uint8_t* ptr = reinterpret_cast<uint8_t*>(&value);
     msgBytes.insert(msgBytes.end(), ptr, ptr + sizeof(float));
     return _control->ctrlRequest(msgBytes);

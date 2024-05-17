@@ -110,7 +110,7 @@ void ModuleSlave::_busTask(void *pvParameters)
             {
                 if (frame.id == _id) {
                     Module_Info_t board_info;
-                    ModuleStandalone::getBoardType(board_info.efuse.board_type);
+                    board_info.efuse.board_type = ModuleStandalone::getBoardType();
                     board_info.efuse.serial_number = ModuleStandalone::getSerialNum();
                     ModuleStandalone::getHardwareVersion(board_info.efuse.hardware_version);
                     ModuleStandalone::getSoftwareVersion(board_info.software_version);

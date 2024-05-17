@@ -48,11 +48,9 @@ int ModuleStandalone::init(uint16_t type)
     char hardware_version[4];
     getHardwareVersion(hardware_version);
     ESP_LOGI(TAG, "Hardware version : %.*s", 4, hardware_version);
-    char date_code[4];
-    getDateCode(date_code);
-    ESP_LOGI(TAG, "Date code        : %.*s", 4, date_code);
+    ESP_LOGI(TAG, "Board timestamp  : %lli", getTimestamp());
     char software_version[32];
-    getDateCode(software_version);
+    getSoftwareVersion(software_version);
     ESP_LOGI(TAG, "Software version : %s", software_version);
 
     if (local_type != type) {
@@ -189,22 +187,21 @@ void ModuleStandalone::getHardwareVersion(char hardware_version[4])
     return;
 }
 
-void ModuleStandalone::getDateCode(char date_code[4])
+int64_t ModuleStandalone::getTimestamp(void)
 {
     if (esp_efuse_block_is_empty(EFUSE_BLK_KEY5) == false) {
         Module_eFuse_Info_t data;
         esp_efuse_read_block(EFUSE_BLK_KEY5, &data, 0, sizeof(Module_eFuse_Info_t)*8);
         if (_verify_eFuse_checksum(data)) {
-            strcpy(date_code, data.date_code);
+            return data.timestamp;
         } else {
             ESP_LOGW(TAG, "eFuse BLOCK5 corrupted !");
-            strcpy(date_code, "none");
+            return 0;
         }
     } else {
         ESP_LOGW(TAG, "Date code is not defined !");
-        strcpy(date_code, "none");
+        return 0;
     }
-    return;
 }
 
 void ModuleStandalone::getSoftwareVersion(char software_version[32])
@@ -214,16 +211,17 @@ void ModuleStandalone::getSoftwareVersion(char software_version[32])
     return;
 }
 
-bool ModuleStandalone::setBoardInfo(uint16_t board_type, uint32_t serial_num, char hardware_version[4], char date_code[4])
+bool ModuleStandalone::setBoardInfo(uint16_t board_type, uint32_t serial_num, char hardware_version[4], int64_t timestamp)
 {
     ESP_LOGW(TAG, "This operation can be done only once !");
 
     Module_eFuse_Info_t data;
-    memset(&data, 0, sizeof(Module_eFuse_Info_t));
+
     data.board_type = board_type;
     data.serial_number = serial_num;
     strcpy(data.hardware_version, hardware_version);
-    strcpy(data.date_code, date_code);
+    data.timestamp = timestamp;
+    memset(&data.reserved, 0, sizeof(data.reserved));
     data.checksum = _calculate_eFuse_checksum((uint8_t*)&data);
 
     esp_err_t err = esp_efuse_write_key(EFUSE_BLK_KEY5, ESP_EFUSE_KEY_PURPOSE_USER, &data, sizeof(Module_eFuse_Info_t));

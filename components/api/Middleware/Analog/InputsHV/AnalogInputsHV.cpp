@@ -88,7 +88,7 @@ int AnalogInputsHV::setAnalogCoeffs(float* a, float* b)
     }
 
     // Write coeff into eFuse
-    esp_err_t err = esp_efuse_write_key(EFUSE_BLK_KEY1, ESP_EFUSE_KEY_PURPOSE_USER, &coeffs, sizeof(AnalogInput_eFuse_Coeff_t)*_nb);
+    esp_err_t err = esp_efuse_write_key(EFUSE_BLK_KEY4, ESP_EFUSE_KEY_PURPOSE_USER, &coeffs, sizeof(AnalogInput_eFuse_Coeff_t)*_nb);
 
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Error in eFuse write: %s", esp_err_to_name(err));
@@ -191,9 +191,9 @@ float AnalogInputEsp32s3::read(AnalogInput_Unit_t unit)
 
 void AnalogInputEsp32s3::getEFuseCoeffs()
 {
-    if (esp_efuse_block_is_empty(EFUSE_BLK_KEY1) == false) {
+    if (esp_efuse_block_is_empty(EFUSE_BLK_KEY4) == false) {
         // getting coeff in eFuse
-        esp_efuse_read_block(EFUSE_BLK_KEY1, &_coeff, sizeof(AnalogInput_eFuse_Coeff_t)*8*_num, sizeof(AnalogInput_eFuse_Coeff_t)*8);
+        esp_efuse_read_block(EFUSE_BLK_KEY4, &_coeff, sizeof(AnalogInput_eFuse_Coeff_t)*8*_num, sizeof(AnalogInput_eFuse_Coeff_t)*8);
         // Checking if coeff are valid
         if ((abs(_coeff.ain_coeff_a) < 100.0f) && (abs(_coeff.ain_coeff_b) < 1000.0f)) {
             ESP_LOGI(TAG, "Reading AIN_%i coeffs: a=%f b=%f", _num+1, _coeff.ain_coeff_a, _coeff.ain_coeff_b);
