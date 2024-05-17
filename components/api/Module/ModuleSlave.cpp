@@ -18,7 +18,7 @@
 
 #if defined(MODULE_SLAVE)
 
-static const char MODULE_TAG[] = "Module";
+static const char TAG[] = "Module";
 
 uint16_t ModuleSlave::_id;
 std::map<uint8_t, std::function<void(std::vector<uint8_t>&)>> ModuleSlave::_ctrlCallbacks;
@@ -27,7 +27,7 @@ int ModuleSlave::init(void)
 {
     int err = 0;
 
-    ESP_LOGI(MODULE_TAG, "Bus init");
+    ESP_LOGI(TAG, "Bus init");
 
     /* Bus RS/CAN */
     err |= BusRS::begin(MODULE_RS_NUM_PORT, MODULE_PIN_RS_UART_TX, MODULE_PIN_RS_UART_RX);
@@ -45,10 +45,10 @@ int ModuleSlave::init(void)
 
     /* Board ID is represented by the 10 most significants bits of the adc reading (12 bits) */
     _id = (uint16_t) (BusIO::readId()>>2);
-    ESP_LOGI(MODULE_TAG, "Bus Id: %d", _id);
+    ESP_LOGI(TAG, "Bus Id: %d", _id);
 
     /* Bus task */
-    ESP_LOGI(MODULE_TAG, "Create bus task");
+    ESP_LOGI(TAG, "Create bus task");
     xTaskCreate(_busTask, "Bus task", 4096, NULL, 1, NULL);
 
     return err;
@@ -86,9 +86,11 @@ void ModuleSlave::_busTask(void *pvParameters)
             }
             case CMD_PING:
             {
-                int num; // Serial number
-                memcpy(&num, frame.data, 4);
-                if (num ==  ModuleStandalone::getSerialNum()) {
+                uint16_t type; // Board type
+                uint32_t num; // Serial number
+                memcpy(&type, frame.data, sizeof(uint16_t));
+                memcpy(&num, &frame.data[2], sizeof(uint32_t));
+                if (num ==  ModuleStandalone::getSerialNum() && type == ModuleStandalone::getBoardType()) {
                     frame.dir = 0;
                     frame.ack = false;
                     frame.id = _id; // return our id --> the master can get the id from serialNumber
@@ -100,9 +102,11 @@ void ModuleSlave::_busTask(void *pvParameters)
             {
                 BusCAN::Frame_t discoverFrame;
                 discoverFrame.cmd = CMD_DISCOVER;
-                int sn = ModuleStandalone::getSerialNum();
-                memcpy(discoverFrame.data, &sn, sizeof(int));
-                if (BusCAN::write(&discoverFrame, _id, sizeof(int)+1) == -1)
+                uint16_t type = ModuleStandalone::getBoardType();
+                uint32_t sn = ModuleStandalone::getSerialNum();
+                memcpy(discoverFrame.data, &type, sizeof(uint16_t));
+                memcpy(&discoverFrame.data[2], &sn, sizeof(uint32_t));
+                if (BusCAN::write(&discoverFrame, _id, sizeof(uint16_t)+sizeof(uint32_t)+1) == -1)
                     ModuleStandalone::ledBlink(LED_RED, 1000); // Error
                 break;
             }
@@ -110,7 +114,7 @@ void ModuleSlave::_busTask(void *pvParameters)
             {
                 if (frame.id == _id) {
                     Module_Info_t board_info;
-                    ModuleStandalone::getBoardType(board_info.efuse.board_type);
+                    board_info.efuse.board_type = ModuleStandalone::getBoardType();
                     board_info.efuse.serial_number = ModuleStandalone::getSerialNum();
                     ModuleStandalone::getHardwareVersion(board_info.efuse.hardware_version);
                     ModuleStandalone::getSoftwareVersion(board_info.software_version);
@@ -185,16 +189,16 @@ void ModuleSlave::_busTask(void *pvParameters)
             }
             case CMD_CONTROL:
             {
-                std::vector<uint8_t> msg;
-                msg.assign(frame.data, frame.data + frame.length);
                 if (frame.id == _id) {
 
+                    std::vector<uint8_t> msg;
+                    msg.assign(frame.data, frame.data + frame.length);
                     auto it = _ctrlCallbacks.find(frame.data[0]);
                     if (it != _ctrlCallbacks.end()) {
                         (*it).second(msg);
                     } else {
                         frame.error = 1;
-                        ESP_LOGW(MODULE_TAG, "CTRL Request does not exist: 0x%02x", frame.data[0]);
+                        ESP_LOGW(TAG, "CTRL Request does not exist: 0x%02x", frame.data[0]);
                     }
 
                     if (frame.ack == true) {

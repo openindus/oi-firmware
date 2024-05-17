@@ -29,17 +29,18 @@ public:
 
     static bool autoId(void);
     static void autoTest(void);
-    static void program(int num);
-    static bool ping(int num); 
+    static void program(uint16_t type, uint32_t sn);
+    static bool ping(uint16_t type, uint32_t sn); 
 
-    static uint16_t getIdFromSN(int num);
-    static void getBoardInfo(int num, Module_Info_t* board_info);
-    static std::map<uint16_t,int,std::greater<uint16_t>> discoverSlaves(void);
+    static void getBoardInfo(uint16_t type, uint32_t sn, Module_Info_t* board_info);
+    static std::map<uint16_t,std::pair<uint16_t, uint32_t>,std::greater<uint16_t>> discoverSlaves(void);
 
 private:
 
-    static std::map<uint16_t,int,std::greater<uint16_t>> _ids; // List of ids and serial number received via CMD_DISCOVER
+     // List of ids and serial number received via CMD_DISCOVER < ID < TYPE, SN > >
+    static std::map<uint16_t, std::pair<uint16_t, uint32_t>, std::greater<uint16_t>> _ids;
 
+    static uint16_t _getIdFromSerialNumAndType(uint16_t type, uint32_t sn);
     static void _busTask(void *pvParameters);
     static void _programmingTask(void *pvParameters);
 

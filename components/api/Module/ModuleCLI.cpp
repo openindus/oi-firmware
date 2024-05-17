@@ -56,9 +56,10 @@ int ModuleCLI::_registerRestart(void)
 /** 'set-board-info' */
 
 static struct {
-    struct arg_str *boardType;
+    struct arg_int *boardType;
     struct arg_int *serialNum;
     struct arg_str *versionHW;
+    struct arg_str *timestamp;
     struct arg_end *end;
 } setBoardInfoArgs;
 
@@ -70,13 +71,13 @@ static int setBoardInfo(int argc, char **argv)
         return -1;
     }
 
-    char board_type[16];
-    strcpy(board_type, setBoardInfoArgs.boardType->sval[0]);
-    int serial_number = setBoardInfoArgs.serialNum->ival[0];
-    char hardware_version[5];
-    strcpy(hardware_version, setBoardInfoArgs.versionHW->sval[0]);
+    uint16_t board_type = setBoardInfoArgs.boardType->ival[0];
+    uint32_t serial_number = setBoardInfoArgs.serialNum->ival[0];
+    char hardware_version[4];
+    strncpy(hardware_version, setBoardInfoArgs.versionHW->sval[0], 4);
+    int64_t timestamp = atoll(setBoardInfoArgs.timestamp->sval[0]);
 
-    if (ModuleStandalone::setBoardInfo(board_type, serial_number, hardware_version)) {
+    if (ModuleStandalone::setBoardInfo(board_type, serial_number, hardware_version, timestamp)) {
         return 0;
     }
     return -1;
@@ -84,14 +85,15 @@ static int setBoardInfo(int argc, char **argv)
 
 int ModuleCLI::_registerSetBoardInfo(void)
 {
-    setBoardInfoArgs.boardType = arg_str1("t", "type", "TYPE", "Board type");
+    setBoardInfoArgs.boardType = arg_int1("t", "type", "TYPE", "Board type");
     setBoardInfoArgs.serialNum = arg_int1("n", "serial-num", "NUM", "Serial number");
     setBoardInfoArgs.versionHW = arg_str1("h", "version-hw", "VERSION", "Hardware version");
+    setBoardInfoArgs.timestamp = arg_str1("d", "date", "DATE", "Board date as a timestamp");
     setBoardInfoArgs.end = arg_end(5);
 
     const esp_console_cmd_t cmd = {
         .command = "set-board-info",
-        .help = "WARNING ! This operation can be done only once !\nSet board informations: \"type, serial number and hardware version\"\nExample :\n\tset-board-info -t OICore -n 4 -h AE01",
+        .help = "WARNING ! This operation can be done only once !\nSet board informations: \"type, serial number and hardware version\"\nExample: set-board-info -t 12 -n 259 -h AE01 -d 1715947670",
         .hint = NULL,
         .func = &setBoardInfo,
         .argtable = &setBoardInfoArgs
@@ -105,6 +107,7 @@ static struct {
     struct arg_lit *boardType;
     struct arg_lit *serialNum;
     struct arg_lit *versionHW;
+    struct arg_lit *dateCode;
     struct arg_lit *versionSW;
     struct arg_end *end;
 } getBoardInfoArgs;
@@ -118,17 +121,18 @@ static int getBoardInfo(int argc, char **argv)
     }
 
     if (getBoardInfoArgs.boardType->count > 0) {
-        char board_type[16];
-        ModuleStandalone::getBoardType(board_type);
-        printf("%s\n", board_type);
+        printf("%u\n", ModuleStandalone::getBoardType());
     }
     if (getBoardInfoArgs.serialNum->count > 0) {
-        printf("%d\n", ModuleStandalone::getSerialNum());
+        printf("%u\n", ModuleStandalone::getSerialNum());
     }
     if (getBoardInfoArgs.versionHW->count > 0) {
         char version[5];
         ModuleStandalone::getHardwareVersion(version);
-        printf("%s\n", version);
+        printf("%.*s\n", 4, version);
+    }
+    if (getBoardInfoArgs.dateCode->count > 0) {
+        printf("%lli\n", ModuleStandalone::getTimestamp());
     }
     if (getBoardInfoArgs.versionSW->count > 0) {
         char version[32];
@@ -144,6 +148,7 @@ int ModuleCLI::_registerGetBoardInfo(void)
     getBoardInfoArgs.boardType = arg_lit0("t", "type", "Board type");
     getBoardInfoArgs.serialNum = arg_lit0("n", "serial-num","Serial number");
     getBoardInfoArgs.versionHW = arg_lit0("h", "version-hw", "Hardware version");
+    getBoardInfoArgs.dateCode = arg_lit0("d", "date-code", "Date code");
     getBoardInfoArgs.versionSW = arg_lit0("s", "version-sw", "Software version");
     getBoardInfoArgs.end = arg_end(2);
 

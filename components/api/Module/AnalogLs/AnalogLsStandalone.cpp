@@ -13,7 +13,7 @@ static const char TAG[] = "AnalogLsStandalone";
 
 int AnalogLsStandalone::init(void)
 {
-    int err = ModuleStandalone::init();
+    int err = ModuleStandalone::init(TYPE_OI_ANALOG_LS);
 
     /* Initialize the SPI bus */
     spi_bus_config_t busConfig = {

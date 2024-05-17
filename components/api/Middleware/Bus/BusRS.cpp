@@ -107,7 +107,7 @@ void BusRS::write(Frame_t* frame, TickType_t timeout)
     free(buffer);
     buffer = NULL;
 #if defined(DEBUG_BUS)
-    ESP_LOGI(TAG, "READ - ID: %u | CMD: 0x%02X | LENGTH: 0x%02X | CHCK: 0x%02X | DATA:", \
+    ESP_LOGI(TAG, "WRITE - ID: %u | CMD: 0x%02X | LENGTH: 0x%02X | CHCK: 0x%02X | DATA:", \
             frame->id, frame->cmd, frame->length, frame->checksum);
     ESP_LOG_BUFFER_HEX_LEVEL(TAG, frame->data, frame->length, ESP_LOG_INFO);
 #endif
@@ -167,11 +167,6 @@ error:
     free(buffer);
     buffer = NULL;
     xSemaphoreGive(_semaphore);
-#if defined(DEBUG_BUS)
-    ESP_LOGI(TAG, "READ - ID: %u | CMD: 0x%02X | LENGTH: 0x%02X | CHCK: 0x%02X | DATA:", \
-            frame->id, frame->cmd, frame->length, frame->checksum);
-    ESP_LOG_BUFFER_HEX_LEVEL(TAG, frame->data, frame->length, ESP_LOG_INFO);
-#endif
     return -1;
 success:
     free(buffer);

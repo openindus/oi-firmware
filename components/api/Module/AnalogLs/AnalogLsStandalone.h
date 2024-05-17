@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "ModuleStandalone.h"
+#include "Module.h"
 #include "AnalogLsInterface.h"
 #include "AnalogLsPinout.h"
 

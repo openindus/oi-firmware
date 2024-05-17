@@ -35,7 +35,7 @@ int BrushlessStandalone::init(void)
     int err = 0;
 
     ESP_LOGI(BRUSHLESS_TAG, "Init");
-    err |= ModuleStandalone::init();
+    err |= ModuleStandalone::init(TYPE_OI_BRUSHLESS);
     vTaskDelay(10 / portTICK_PERIOD_MS);
 
     /* Init du moteur*/

@@ -19,6 +19,8 @@ namespace OI
      */
     void RS::begin(RS_Mode_t mode, unsigned long baudrate)
     {
+        _mode = mode;
+        
         SC16IS750_DeviceConfig_t device_config;
         device_config.spi_host = _spi_host;
         device_config.spi_pin_cs = _pin_cs;
@@ -36,6 +38,10 @@ namespace OI
         conf.trigger_halt = TCR_HALT_DEFAULT;
         conf.trigger_resume = TCR_RESUME_DEFAULT;
 
+        SC16IS750_init(conf);
+
+        SC16IS750_setAutoRts();
+
         SC16IS750_ioSetDirection(SC16IS750_IO0_OUTPUT | SC16IS750_IO1_OUTPUT);
 
         if (_mode == RS_485) {
@@ -45,8 +51,7 @@ namespace OI
             SC16IS750_ioSetState(0x00);
         }
         
-        SC16IS750_setAutoRts();
-        SC16IS750_init(conf);
+        
     }
 
     /**

@@ -16,9 +16,9 @@
 #pragma once
 
 #include "Global.h"
+#include "Module.h"
 
 #if defined(OI_MIXED)
-#include "ModuleStandalone.h"
 #include "MixedPinout.h"
 #include "AnalogOutputsCLI.h"
 #include "AnalogInputsLVCLI.h"
@@ -30,14 +30,12 @@
 #define Mixed MixedStandalone
 #elif defined(OI_MIXED) && defined(MODULE_SLAVE)
 #define Mixed MixedSlave
-#include "ModuleSlave.h"
 #include "AnalogOutputsSlave.h"
 #include "AnalogInputsLVSlave.h"
 #include "DigitalInputsSlave.h"
 #include "DigitalOutputsSlave.h"
 #elif defined(MODULE_MASTER) 
 #define Mixed MixedControl
-#include "ModuleControl.h"
 #include "AnalogOutputsControl.h"
 #include "AnalogInputsLVControl.h"
 #include "DigitalInputsControl.h"
@@ -76,8 +74,8 @@ class MixedControl : public ModuleControl, public AnalogOutputsControl, public A
 {
 public:
 
-    MixedControl(int sn = 0) : 
-        ModuleControl(sn),
+    MixedControl(uint32_t sn = 0) : 
+        ModuleControl(TYPE_OI_MIXED , sn),
         AnalogOutputsControl(this),
         AnalogInputsLVControl(this),
         DigitalInputsControl(this),

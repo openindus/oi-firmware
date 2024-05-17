@@ -79,7 +79,7 @@ int MixedStandalone::init(void)
 {
     int err = 0;
 
-    err |= ModuleStandalone::init();
+    err |= ModuleStandalone::init(TYPE_OI_MIXED);
 
     /* Initialize digital inputs */
     err |= DigitalInputs::init(_dinGpio, 4);

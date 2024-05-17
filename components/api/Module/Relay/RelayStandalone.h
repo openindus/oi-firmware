@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include "ModuleStandalone.h"
+#include "Module.h"
 
 typedef enum {
     RELAY_1 = 0,

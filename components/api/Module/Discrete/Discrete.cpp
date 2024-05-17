@@ -76,7 +76,11 @@ int DiscreteStandalone::init()
     
     ESP_LOGI(DISCRETE_TAG, "Init");
 
-    err |= ModuleStandalone::init();
+#if defined(OI_DISCRETE)
+    err |= ModuleStandalone::init(TYPE_OI_DISCRETE);
+#elif defined(OI_DISCRETE_VE)
+    err |= ModuleStandalone::init(TYPE_OI_DISCRETE_VE);
+#endif
     err |= DigitalOutputs::init(_doutGpio, _doutAdcChannel, 8);
     err |= DigitalInputs::init(_dinGpio, 10);
     err |= AnalogInputsHV::init(_ainChannel, 2);

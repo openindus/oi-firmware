@@ -45,13 +45,17 @@ int StepperStandalone::init(void)
 {
     int err = 0;
 
-    err |=ModuleStandalone::init();
+#if defined(OI_STEPPER)
+    err |= ModuleStandalone::init(TYPE_OI_STEPPER);
+#elif defined(OI_STEPPER_VE)
+    err |= ModuleStandalone::init(TYPE_OI_STEPPER_VE);
+#endif
 
     /**
      * @brief DIN Init
      * 
      */
-    err |=DigitalInputs::init(_dinGpio, 4);
+    err |= DigitalInputs::init(_dinGpio, 4);
 
 /**
      * @brief Init Motor stepper
