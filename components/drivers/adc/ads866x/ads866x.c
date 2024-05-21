@@ -10,7 +10,7 @@ static spi_device_handle_t s_spi_handler = NULL;
 static bool s_spi_initialized = false;
 static bool s_gpio_initialized = false;
 static bool s_device_configured = false;
-
+static bool* adc_channels_PD = NULL;
 
 static int ads866x_gpio_init(void)
 {
@@ -101,8 +101,11 @@ int ads866x_init(ads866x_config_t *config)
     s_config = config;
     s_device_configured = true;
 
+    adc_channels_PD = (bool*)calloc(s_config->adc_channel_nb, sizeof(bool));
+
     ads866x_gpio_init();
     ads866x_spi_init();
+    ads866x_set_channels_power_down(0xFF);  //Power down all channels for power consumption optimization
 
     return ret;
 }
@@ -113,11 +116,7 @@ uint16_t ads866x_analog_read(uint8_t channel)
 
     if (s_device_configured) {
         if (channel < s_config->adc_channel_nb) {
-            // Active channel
-            ads866x_set_channel_SPD(1 << channel);
-            // Change mode of Ads866x
-            ads866x_auto_reset();
-
+            ads866x_manual_channel_select(channel);
             res = ads866x_noOp();
 
             // Puts result in 12 bits format - Cf datasheet ADS8664 Block Table 4 - Page 56
@@ -180,34 +179,44 @@ uint16_t ads866x_manual_channel_select(uint8_t channel)
         ESP_LOGE(ADS866x_TAG,"Invalid channel number");
         return -1;
     }
+
+    if (adc_channels_PD[channel] == true) { 
+        uint8_t channels_PD = ads866x_get_channels_power_down();
+        ads866x_set_channels_power_down(channels_PD & (0 << channel));      //Power up the channel
+    }
+
     cmd = ADS866X_CMD_MAN_CH_0 + (channel * 4);
     ret = ads866x_spi_write_command_register(cmd);
 
     return ret;
 }
 
-void ads866x_set_channel_sequence(uint8_t channels_on)
+void ads866x_set_channels_sequence(uint8_t channels_on)
 {
     ads866x_spi_write_register(AUTO_SEQ_EN, channels_on);
 }
 
-void ads866x_set_channel_power_down(uint8_t channels_off)
+void ads866x_set_channels_power_down(uint8_t channels_off)
 {
+    for (size_t i = 0; i < s_config->adc_channel_nb; i++) {
+        adc_channels_PD[i] = (bool)((channels_off >> i) & 1);
+    }
+    
     ads866x_spi_write_register(CH_PWR_DN, channels_off);
 }
 
 void ads866x_set_channel_SPD(uint8_t channels)
 {
-    ads866x_set_channel_sequence(channels);
-    ads866x_set_channel_power_down((uint8_t)~channels);
+    ads866x_set_channels_sequence(channels);
+    ads866x_set_channels_power_down((uint8_t)~channels);
 }
 
-uint8_t ads866x_get_channel_sequence(void)
+uint8_t ads866x_get_channels_sequence(void)
 {
     return ads866x_spi_read_program_register(AUTO_SEQ_EN);
 }
 
-uint8_t ads866x_get_channel_power_down(void)
+uint8_t ads866x_get_channels_power_down(void)
 {
     return ads866x_spi_read_program_register(CH_PWR_DN);
 }

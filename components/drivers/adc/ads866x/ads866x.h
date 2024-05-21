@@ -195,13 +195,13 @@ uint16_t ads866x_manual_channel_select(uint8_t channel);
  * @brief Set the AUTO_SEQ_EN register used to selec channels in auto_reset mode
  * @param[in] channels_on : vector of bits to select channels to enable
  */
-void ads866x_set_channel_sequence(uint8_t channels_on);
+void ads866x_set_channels_sequence(uint8_t channels_on);
 
 /**
  * @brief Set the Channel Power Down register used to not include channels in auto_reset mode
  * @param[in] channels_off : vector of bits to select channels to disable
  */
-void ads866x_set_channel_power_down(uint8_t channels_off);
+void ads866x_set_channels_power_down(uint8_t channels_off);
 
 /**
  * @brief Configure both AUTO_SEQ_EN and Channel power down registers for auto_reset mode
@@ -212,12 +212,12 @@ void ads866x_set_channel_SPD(uint8_t channels);
 /**
  * @brief Retval the value of the AUTO_SEQ_EN Register
  */
-uint8_t ads866x_get_channel_sequence(void);
+uint8_t ads866x_get_channels_sequence(void);
 
 /**
  * @brief Retval the value of the power down register
  */
-uint8_t ads866x_get_channel_power_down(void);
+uint8_t ads866x_get_channels_power_down(void);
 
 /**
  * @brief Retval device id (Feature Select Register)
