@@ -19,9 +19,9 @@
 int AnalogInputsHVSlave::init() {
     
     ModuleSlave::addCtrlCallback(CONTROL_ANALOG_READ, [](std::vector<uint8_t>& data) {
-        int value = AnalogInputsHV::analogRead((AnalogInput_Num_t)data[1]);
+        float value = AnalogInputsHV::analogRead((AnalogInput_Num_t)data[1]);
         uint8_t* ptr = reinterpret_cast<uint8_t*>(&value);
-        data.insert(data.end(), ptr, ptr + sizeof(int));
+        data.insert(data.end(), ptr, ptr + sizeof(float));
     });
 
     ModuleSlave::addCtrlCallback(CONTROL_ANALOG_READ_VOLT, [](std::vector<uint8_t>& data) {

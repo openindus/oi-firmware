@@ -47,7 +47,7 @@ float AnalogInputsHV::read(AnalogInput_Num_t num, AnalogInput_Unit_t unit)
     return -1;
 }
 
-int AnalogInputsHV::analogRead(AnalogInput_Num_t num)
+float AnalogInputsHV::analogRead(AnalogInput_Num_t num)
 {
     if (num < _nb) {
         return _ains[num]->read();
@@ -128,7 +128,7 @@ int AnalogInputEsp32s3::init()
         esp_adc_cal_characterize(_channel.adc_num, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &_adc_characteristic);
     }
     else if (_channel.adc_num == ADC_UNIT_2) {
-        err |= adc1_config_channel_atten((adc1_channel_t)_channel.channel, ADC_ATTEN_DB_11);
+        err |= adc2_config_channel_atten((adc2_channel_t)_channel.channel, ADC_ATTEN_DB_11);
         esp_adc_cal_characterize(_channel.adc_num, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &_adc_characteristic);
     } 
     else {
@@ -140,34 +140,35 @@ int AnalogInputEsp32s3::init()
     return err;
 }
 
-int AnalogInputEsp32s3::read(void)
+float AnalogInputEsp32s3::read(void)
 {
+    int voltage_sum = -1;
     if (_channel.adc_num == ADC_UNIT_1) {
-        return adc1_get_raw((adc1_channel_t)_channel.channel);
+        // Making the mean with voltage and not adc_reading to be more precise
+        for (int i = 0; i < ESP_ADC_NO_OF_SAMPLES; i++)
+        {
+            voltage_sum += (int) esp_adc_cal_raw_to_voltage(adc1_get_raw((adc1_channel_t)_channel.channel), &_adc_characteristic);
+        }
     } 
     else if (_channel.adc_num == ADC_UNIT_2) {
         int raw = -1;
-        adc2_get_raw((adc2_channel_t)_channel.channel, ADC_WIDTH_12Bit, &raw);
-        return raw;
-    } 
+        for (int i = 0; i < ESP_ADC_NO_OF_SAMPLES; i++)
+        {
+            adc2_get_raw((adc2_channel_t)_channel.channel, ADC_WIDTH_12Bit, &raw);
+            voltage_sum += esp_adc_cal_raw_to_voltage(raw, &_adc_characteristic);
+        }
+    }
     else {
         ESP_LOGE(TAG, "Wrong ADC unit !");
-        return -1;
+        return 0;
     }
+    return (float) voltage_sum / (float) ESP_ADC_NO_OF_SAMPLES;
 }
 
 float AnalogInputEsp32s3::read(AnalogInput_Unit_t unit)
 {
-    uint32_t voltage_sum = 0;
-
-    // Making the mean with voltage and not adc_reading to be more precise
-    for (int i = 0; i < ESP_ADC_NO_OF_SAMPLES; i++)
-    {
-        voltage_sum += esp_adc_cal_raw_to_voltage(read(), &_adc_characteristic);
-    }
-
     // using float to increase precision
-    float voltage = (float) voltage_sum / (float) ESP_ADC_NO_OF_SAMPLES;
+    float voltage = read();
 
     // Application coefficients
     float value = 0.0f;

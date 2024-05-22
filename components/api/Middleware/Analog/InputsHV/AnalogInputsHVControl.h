@@ -39,7 +39,7 @@ public:
      * @param ain ANA input number.
      * @return Value of the AIN input.
      */
-    int analogRead(AnalogInput_Num_t num);
+    float analogRead(AnalogInput_Num_t num);
     
     /**
      * @brief Read the value of AIN.

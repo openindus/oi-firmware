@@ -47,7 +47,7 @@ static int _analogRead(int argc, char **argv)
     switch (unit)
     {
     case AIN_UNIT_RAW:
-        printf("%i\n", AnalogInputsHV::analogRead(ain));
+        printf("%.1f\n", AnalogInputsHV::analogRead(ain));
         break;
     case AIN_UNIT_VOLT:
         printf("%.3f\n", AnalogInputsHV::analogReadVolt(ain));

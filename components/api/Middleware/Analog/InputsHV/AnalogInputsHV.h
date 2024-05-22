@@ -21,7 +21,7 @@
 
 #include "AnalogInputs.h"
 
-#define ESP_ADC_NO_OF_SAMPLES        128U
+#define ESP_ADC_NO_OF_SAMPLES        10U
 #define ESP_ADC_DEFAULT_COEFF_A      11.6965f
 #define ESP_ADC_DEFAULT_COEFF_B      0.0f
 
@@ -36,7 +36,7 @@ public:
 
     AnalogInputEsp32s3(uint8_t num, AdcNumChannel_t channel);
     int init(void);
-    int read(void);
+    float read(void);
     float read(AnalogInput_Unit_t unit);
     void getCoeffs(float* a, float* b);
     float applyCoeffs(float voltage);
@@ -66,7 +66,7 @@ public:
      * @param num ANA input number.
      * @return Value of the AIN input.
      */
-    static int analogRead(AnalogInput_Num_t num);
+    static float analogRead(AnalogInput_Num_t num);
     
     /**
      * @brief Read the value of AIN.
