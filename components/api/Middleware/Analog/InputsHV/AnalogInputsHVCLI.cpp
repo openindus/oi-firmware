@@ -127,10 +127,10 @@ static int _getAnalogCoeffs(int argc, char **argv)
     float as[2], bs[2];
     AnalogInputsHV::getAnalogCoeffs(as, bs);
 
-    printf("a1 %.3f\n", as[0]);
-    printf("a2 %.3f\n", as[1]);
-    printf("b1 %.3f\n", bs[0]);
-    printf("b2 %.3f\n", bs[1]);
+    printf("a1:%.3f " , as[0]);
+    printf("a2:%.3f " , as[1]);
+    printf("b1:%.3f " , bs[0]);
+    printf("b2:%.3f\n", bs[1]);
 
     return 0;
 }

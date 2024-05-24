@@ -28,8 +28,9 @@ def copy_binaries(source, target, env):
         shutil.copyfile(join(BUILD_DIR, "bootloader.bin"), join(oi_bin_dir, PIOENV + "_bootloader-" + oi_tag + ".bin"))
         shutil.copyfile(join(BUILD_DIR, "partitions.bin"), join(oi_bin_dir, PIOENV + "_partitions-" + oi_tag + ".bin"))
         print("Copy binaries to the %s directory" % oi_bin_dir)
-    except:
-        print("Cannot copy binaries")
+    except Exception as error:
+        print("Cannot copy binaries:")
+        print(error)
 
 
 env.AddPostAction("checkprogsize", copy_binaries)
