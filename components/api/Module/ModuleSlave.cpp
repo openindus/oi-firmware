@@ -63,9 +63,9 @@ void ModuleSlave::sendEvent(std::vector<uint8_t> msgBytes)
 {
     BusCAN::Frame_t frame;
     frame.cmd = CMD_EVENT;
-    std::copy(msgBytes.begin(), msgBytes.end(), frame.data);
-    uint8_t length = msgBytes.size() + 1;
-    BusCAN::write(&frame, _id, length);
+    std::copy(msgBytes.begin(), msgBytes.end(), frame.args);
+    uint8_t size = msgBytes.size() + 1;
+    BusCAN::write(&frame, _id, size);
 }
 
 void ModuleSlave::_busTask(void *pvParameters) 
@@ -104,8 +104,8 @@ void ModuleSlave::_busTask(void *pvParameters)
                 discoverFrame.cmd = CMD_DISCOVER;
                 uint16_t type = ModuleStandalone::getBoardType();
                 uint32_t sn = ModuleStandalone::getSerialNum();
-                memcpy(discoverFrame.data, &type, sizeof(uint16_t));
-                memcpy(&discoverFrame.data[2], &sn, sizeof(uint32_t));
+                memcpy(discoverFrame.args, &type, sizeof(uint16_t));
+                memcpy(&discoverFrame.args[2], &sn, sizeof(uint32_t));
                 if (BusCAN::write(&discoverFrame, _id, sizeof(uint16_t)+sizeof(uint32_t)+1) == -1)
                     ModuleStandalone::ledBlink(LED_RED, 1000); // Error
                 break;

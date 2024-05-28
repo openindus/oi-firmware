@@ -77,19 +77,19 @@ void BusCAN::end(void)
  * 
  * @param frame 
  * @param id identifier
- * @param length data length
+ * @param size frame size 
  * @return error: -1, succeed: 0
  */
-int BusCAN::write(Frame_t* frame, uint16_t id, uint8_t length)
+int BusCAN::write(Frame_t* frame, uint16_t id, uint8_t size)
 {
     esp_err_t err;
     twai_message_t msg = {
         .flags = 0,
         .identifier = id,
-        .data_length_code = length,
+        .data_length_code = size,
         .data = {}
     };
-    memcpy(msg.data, frame, length);
+    memcpy(msg.data, frame, size);
     xSemaphoreTake(_mutex, portMAX_DELAY);
     err = twai_transmit(&msg, pdMS_TO_TICKS(100)); 
     if (err != ESP_OK) {
@@ -116,11 +116,11 @@ success:
  * 
  * @param frame
  * @param id identifier
- * @param length data length
+ * @param size frame size
  * @param timeout 
  * @return error: -1, succed: 0
  */
-int BusCAN::read(Frame_t* frame, uint16_t* id, uint8_t* length, TickType_t timeout)
+int BusCAN::read(Frame_t* frame, uint16_t* id, uint8_t* size, TickType_t timeout)
 {
     esp_err_t err;
     twai_message_t msg;
@@ -131,7 +131,7 @@ int BusCAN::read(Frame_t* frame, uint16_t* id, uint8_t* length, TickType_t timeo
     } else {
         memcpy(frame, msg.data, sizeof(Frame_t));
         *id = msg.identifier;
-        *length = msg.data_length_code;
+        *size = msg.data_length_code;
         goto success;
     }    
 

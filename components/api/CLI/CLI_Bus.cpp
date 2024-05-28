@@ -7,6 +7,7 @@
  */
 
 #include "CLI_Bus.h"
+#include "Bus.h"
 
 static const char TAG[] = "CLI_Bus";
 
@@ -33,11 +34,11 @@ static int CANWriteCmd(int argc, char **argv)
         data[i] = CANWriteArgs.data->ival[i];
     }
 
-    printf("Writing to CAN bus: ID = %d, DATA =", id);
-    for (int i = 0; i < size; i++) {
-        printf(" %d", data[i]);
+    BusCAN::Frame_t frame;
+    if (size > 0) {
+        memcpy(&frame, data, size);
     }
-    printf("\n");
+    BusCAN::write(&frame, id, size);
 
     return 0;
 }

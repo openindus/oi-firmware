@@ -15,13 +15,7 @@
 
 #pragma once
 
-#include <string.h>
-#include "esp_err.h"
-#include "esp_log.h"
-#include "driver/gpio.h"
-#include "driver/twai.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/semphr.h"
+#include "Global.h"
 
 class BusCAN
 {
@@ -29,13 +23,13 @@ public:
 
     typedef struct __attribute__((__packed__)) {
         uint8_t cmd;
-        uint8_t data[7];
+        uint8_t args[7];
     } Frame_t;
 
     static int begin(gpio_num_t txNum, gpio_num_t rxNum);
     static void end(void);
-    static int write(Frame_t* frame, uint16_t id, uint8_t length = 8);
-    static int read(Frame_t* frame, uint16_t* id, uint8_t* length, TickType_t timeout = portMAX_DELAY);
+    static int write(Frame_t* frame, uint16_t id, uint8_t size = 8);
+    static int read(Frame_t* frame, uint16_t* id, uint8_t* size, TickType_t timeout = portMAX_DELAY);
 
 private:
 
