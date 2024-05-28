@@ -11,7 +11,125 @@
 
 static const char TAG[] = "CLI_Bus";
 
-/* --- CAN Write --- */
+#if !defined(MODULE_STANDALONE)
+
+/* --- read-id --- */
+
+static int readIdCmd(int argc, char **argv) 
+{
+    printf("%u\n", BusIO::readId());
+    return 0;
+}
+
+int CLI::_registerReadIdCmd(void)
+{
+    const esp_console_cmd_t cmd = {
+        .command = "read-id",
+        .help = "Read the bus ID of the device",
+        .hint = NULL,
+        .func = &readIdCmd,
+        .argtable = NULL
+    };
+    return esp_console_cmd_register(&cmd);
+}
+
+/* --- write-sync --- */
+
+static struct {
+    struct arg_int *level;
+    struct arg_end *end;
+} writeSyncArgs;
+
+static int writeSyncCmd(int argc, char **argv) 
+{
+    int err = arg_parse(argc, argv, (void **) &writeSyncArgs);
+    if (err != 0) {
+        arg_print_errors(stderr, writeSyncArgs.end, argv[0]);
+        return -1;
+    }
+
+    BusIO::writeSync((uint8_t)writeSyncArgs.level->ival[0]);
+
+    return 0;
+}
+
+int CLI::_registerWriteSyncCmd(void)
+{
+    writeSyncArgs.level = arg_int1(NULL, NULL, "<LEVEL>", "0 = LOW, 1 = HIGH");
+    writeSyncArgs.end = arg_end(1);
+
+    const esp_console_cmd_t cmd = {
+        .command = "write-sync",
+        .help = "set sync pin level",
+        .hint = NULL,
+        .func = &writeSyncCmd,
+        .argtable = &writeSyncArgs
+    };
+    return esp_console_cmd_register(&cmd);
+}
+
+/* --- read-sync --- */
+
+static int readSyncCmd(int argc, char **argv) 
+{
+    printf("%u\n", BusIO::readSync());
+    return 0;
+}
+
+int CLI::_registerReadSyncCmd(void)
+{
+    const esp_console_cmd_t cmd = {
+        .command = "read-sync",
+        .help = "get sync pin level",
+        .hint = NULL,
+        .func = &readSyncCmd,
+        .argtable = NULL
+    };
+    return esp_console_cmd_register(&cmd);
+}
+
+/* --- bus-power --- */
+
+static struct {
+    struct arg_str *state;
+    struct arg_end *end;
+} busPowerArgs;
+
+static int busPowerCmd(int argc, char **argv) 
+{
+    int err = arg_parse(argc, argv, (void **) &busPowerArgs);
+    if (err != 0) {
+        arg_print_errors(stderr, busPowerArgs.end, argv[0]);
+        return -1;
+    }
+
+    if(strcmp(busPowerArgs.state->sval[0], "on") == 0) {
+        BusIO::powerOn();
+    } else if (strcmp(busPowerArgs.state->sval[0], "off") == 0) {
+        BusIO::powerOff();
+    } else {
+        arg_print_errors(stderr, busPowerArgs.end, argv[0]);
+        return 2;
+    }
+    return 0;
+}
+
+int CLI::_registerBusPowerCmd(void)
+{
+    busPowerArgs.state = arg_str1(NULL, NULL, "<STATE>", "[on/off]");
+    busPowerArgs.end = arg_end(2);
+
+    const esp_console_cmd_t cmd = {
+        .command = "bus-power",
+        .help = "Bus power on/off",
+        .hint = NULL,
+        .func = &busPowerCmd,
+        .argtable = &busPowerArgs
+    };
+    return esp_console_cmd_register(&cmd);
+}
+
+/* --- can-write --- */
 
 static struct {
     struct arg_int *id;
@@ -43,7 +161,7 @@ static int CANWriteCmd(int argc, char **argv)
     return 0;
 }
 
-static int registerCANWriteCmd(void)
+int CLI::_registerCANWriteCmd(void)
 {
     CANWriteArgs.id = arg_int1(NULL, "id", "ID", "identifier");
     CANWriteArgs.data = arg_intn(NULL, NULL, "<DATA>", 0, 8, "CAN data");
@@ -64,11 +182,4 @@ static int registerCANWriteCmd(void)
     }
 }
 
-/* --- */
-
-int CLI_Bus_registerCommands(void)
-{
-    int err = 0;
-    err |= registerCANWriteCmd();
-    return err;
-}
+#endif

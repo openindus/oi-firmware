@@ -23,6 +23,10 @@
 #include "Relay.h"
 #include "AnalogLs.h"
 #include "Brushless.h"
+#include "ModuleStandalone.h"
+#include "ModuleSlave.h"
+#include "ModuleControl.h"
+#include "ModuleMaster.h"
 #include "CLI.h"
 
 void setup(void);

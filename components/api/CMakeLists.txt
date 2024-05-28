@@ -4,8 +4,6 @@ set(COMPONENT_SRCS
     "Module/ModuleMaster.cpp"
     "Module/ModuleSlave.cpp"
     "Module/ModuleControl.cpp"
-    "Module/ModuleCLI.cpp"
-    "Module/ModuleMasterCLI.cpp"
     "Module/Discrete/Discrete.cpp"
     "Module/Stepper/Stepper.cpp"
     "Module/Core/CoreStandalone.cpp"
@@ -60,7 +58,9 @@ set(COMPONENT_SRCS
     "Middleware/Analog/InputsHV/AnalogInputsHVCLI.cpp"
     "Middleware/CAN/CAN.cpp"
     "Middleware/RS/RS.cpp"
+    "CLI/CLI.cpp"
     "CLI/CLI_Bus.cpp"
+    "CLI/CLI_Led.cpp"
     "CLI/CLI_Module.cpp"
 )
 
