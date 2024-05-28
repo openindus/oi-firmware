@@ -57,6 +57,8 @@ void System::init(void)
     err |= ModuleMasterCLI::init();
 #endif
 
+    err |= CLI_Bus_registerCommands();
+
     if (err != 0) {
         ESP_LOGE(TAG, "Failed to initialize module");
         ModuleStandalone::ledBlink(LED_RED, 250);

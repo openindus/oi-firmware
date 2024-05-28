@@ -21,7 +21,6 @@ set(COMPONENT_SRCS
     "Module/AnalogLs/AnalogLsStandalone.cpp"
     "Module/AnalogLs/AnalogLsControl.cpp"
     "Module/AnalogLs/AnalogLsSlave.cpp"
-
     "Middleware/Bus/BusIO.cpp"
     "Middleware/Bus/BusRS.cpp"
     "Middleware/Bus/BusCAN.cpp"
@@ -61,6 +60,7 @@ set(COMPONENT_SRCS
     "Middleware/Analog/InputsHV/AnalogInputsHVCLI.cpp"
     "Middleware/CAN/CAN.cpp"
     "Middleware/RS/RS.cpp"
+    "CLI/CLI_Bus.cpp"
 )
 
 set(COMPONENT_INCLUDE_DIRS
@@ -74,7 +74,6 @@ set(COMPONENT_INCLUDE_DIRS
     "Module/Relay"
     "Module/Brushless"
     "Module/AnalogLs"
-
     "Middleware/Bus"
     "Middleware/Encoder"
     "Middleware/Digital/Inputs"
@@ -92,6 +91,7 @@ set(COMPONENT_INCLUDE_DIRS
     "Middleware/RTClock"
     "Middleware/CAN"
     "Middleware/RS"
+    "CLI"
 )
 
 set(COMPONENT_PRIV_REQUIRES

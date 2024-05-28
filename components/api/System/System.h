@@ -24,6 +24,7 @@
 #include "Relay.h"
 #include "AnalogLs.h"
 #include "Brushless.h"
+#include "CLI_Bus.h"
 
 void setup(void);
 void loop(void);
