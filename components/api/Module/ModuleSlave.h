@@ -16,8 +16,9 @@
 #pragma once
 
 #include "Global.h"
+#include "Module.h"
 #include "ModuleStandalone.h"
-#include "Command.h"
+#include "ModulePinout.h"
 
 #if defined(MODULE_SLAVE)
 

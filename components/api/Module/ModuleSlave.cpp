@@ -14,7 +14,6 @@
  */
 
 #include "ModuleSlave.h"
-#include "ModulePinout.h"
 
 #if defined(MODULE_SLAVE)
 

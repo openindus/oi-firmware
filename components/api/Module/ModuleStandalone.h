@@ -16,6 +16,8 @@
 #pragma once
 
 #include "Global.h"
+#include "Module.h"
+#include "ModulePinout.h"
 
 /* Struct can fill an eFuse block of 32 msgBytes */
 typedef struct __attribute__((__packed__)) {

@@ -18,6 +18,13 @@
 #include "Arduino.h"
 #endif
 
+#include "ModuleStandalone.h"
+#include "ModuleSlave.h"
+#include "ModuleControl.h"
+#include "ModuleMaster.h"
+#include "ModuleCLI.h"
+#include "ModuleMasterCLI.h"
+
 static const char TAG[] = "System";
 
 void System::_mainTask(void *pvParameters)
@@ -58,6 +65,7 @@ void System::init(void)
 #endif
 
     err |= CLI_Bus_registerCommands();
+    err |= CLI_Module_registerCommands();
 
     if (err != 0) {
         ESP_LOGE(TAG, "Failed to initialize module");

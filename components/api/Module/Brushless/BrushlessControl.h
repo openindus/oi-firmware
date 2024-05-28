@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include "Module.h"
+#include "ModuleControl.h"
 
 #if defined(MODULE_MASTER)
 

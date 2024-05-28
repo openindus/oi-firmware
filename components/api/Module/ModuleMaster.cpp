@@ -15,10 +15,13 @@
 
 #if defined(MODULE_MASTER)
 
-#include "Module.h"
+#include "ModuleMaster.h"
+#include "ModuleControl.h"
 
 static const char TAG[] = "Module";
 
+Module_State_t ModuleMaster::_state = STATE_IDLE;
+TaskHandle_t ModuleMaster::_taskHandle = NULL;
 std::map<uint16_t, std::pair<uint16_t, uint32_t>, std::greater<uint16_t>> ModuleMaster::_ids;
 
 int ModuleMaster::init(void)
@@ -43,9 +46,32 @@ int ModuleMaster::init(void)
     BusIO::writeSync(0);
 
     ESP_LOGI(TAG, "Create bus task");
-    xTaskCreate(_busTask, "Bus task", 4096, NULL, 1, NULL);
+    xTaskCreate(_busTask, "Bus task", 4096, NULL, 1, &_taskHandle);
+
+    _state = STATE_RUNNING;
 
     return err;
+}
+
+void ModuleMaster::start(void)
+{
+    if (_taskHandle != NULL) {
+        vTaskResume(_taskHandle);
+    }
+    _state = STATE_RUNNING;
+}
+
+void ModuleMaster::stop(void)
+{
+    if (_taskHandle != NULL) {
+        vTaskSuspend(_taskHandle);
+    }
+    _state = STATE_IDLE;
+}
+
+int ModuleMaster::getStatus(void)
+{
+    return (int)_state;
 }
 
 bool ModuleMaster::autoId(void)

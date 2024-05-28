@@ -124,8 +124,9 @@ int BusCAN::read(Frame_t* frame, uint16_t* id, uint8_t* size, TickType_t timeout
 {
     esp_err_t err;
     twai_message_t msg;
-    xSemaphoreTake(_mutex, portMAX_DELAY);
+    // xSemaphoreTake(_mutex, portMAX_DELAY);
     err = twai_receive(&msg, timeout);
+    xSemaphoreTake(_mutex, portMAX_DELAY);
     if (err != ESP_OK) {
         goto error;
     } else {

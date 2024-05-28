@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "Module.h"
+#include "ModuleControl.h"
 #include "AnalogLsInterface.h"
 
 #if defined(MODULE_MASTER)

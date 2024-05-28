@@ -18,14 +18,20 @@
 #if defined(MODULE_MASTER)
 
 #include "Global.h"
+#include "Module.h"
 #include "ModuleStandalone.h"
-#include "Command.h"
 
-class ModuleMaster
+class ModuleMaster : 
+    public BusRS,
+    public BusCAN,
+    public BusIO
 {
 public:
 
     static int init(void);
+    static void start(void);
+    static void stop(void);
+    static int getStatus(void);
 
     static bool autoId(void);
     static void autoTest(void);
@@ -37,7 +43,10 @@ public:
 
 private:
 
-     // List of ids and serial number received via CMD_DISCOVER < ID < TYPE, SN > >
+    static Module_State_t _state;
+    static TaskHandle_t _taskHandle;
+
+    // List of ids and serial number received via CMD_DISCOVER < ID < TYPE, SN > >
     static std::map<uint16_t, std::pair<uint16_t, uint32_t>, std::greater<uint16_t>> _ids;
 
     static uint16_t _getIdFromSerialNumAndType(uint16_t type, uint32_t sn);

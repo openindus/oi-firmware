@@ -19,8 +19,8 @@
 
 #include "Global.h"
 #include "ModuleStandalone.h"
-#include "Command.h"
 #include "ModuleMaster.h"
+#include "Module.h"
 
 class ModuleControl
 {

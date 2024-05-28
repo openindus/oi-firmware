@@ -61,6 +61,7 @@ set(COMPONENT_SRCS
     "Middleware/CAN/CAN.cpp"
     "Middleware/RS/RS.cpp"
     "CLI/CLI_Bus.cpp"
+    "CLI/CLI_Module.cpp"
 )
 
 set(COMPONENT_INCLUDE_DIRS

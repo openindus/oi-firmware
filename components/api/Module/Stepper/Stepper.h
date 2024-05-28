@@ -16,7 +16,6 @@
 #pragma once
 
 #include "Global.h"
-#include "Module.h"
 
 #if defined(OI_STEPPER) || defined(OI_STEPPER_VE)
 #include "StepperPinout.h"

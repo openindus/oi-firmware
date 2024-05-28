@@ -6,7 +6,7 @@
  * @see https://openindus.com
  */
 
-#include "CLI_Bus.h"
+#include "CLI.h"
 #include "Bus.h"
 
 static const char TAG[] = "CLI_Bus";
