@@ -182,4 +182,45 @@ int CLI::_registerCANWriteCmd(void)
     }
 }
 
+/* --- can-read --- */
+
+static int CANReadCmd(int argc, char **argv)
+{
+    uint16_t id;
+    uint8_t dlc;
+    BusCAN::Frame_t frame;
+
+    if (BusCAN::read(&frame, &id, &dlc) == ESP_OK) {
+        printf("ID: %d\n", id);
+        printf("DLC: %d\n", dlc);
+        printf("Data: ");
+        for (int i = 0; i < dlc; i++) {
+            printf("%02X ", frame.data[i]);
+        }
+        printf("\n");
+    } else {
+        fprintf(stderr, "Failed to read from CAN bus\n");
+        return 1;
+    }
+
+    return 0;
+}
+
+int CLI::_registerCANReadCmd(void)
+{
+    const esp_console_cmd_t cmd = {
+        .command = "can-read",
+        .help = "Read data from the CAN bus",
+        .hint = NULL,
+        .func = &CANReadCmd,
+        .argtable = NULL
+    };
+    
+    if (esp_console_cmd_register(&cmd) == ESP_OK) {
+        return 0;
+    } else {
+        return -1;
+    }
+}
+
 #endif

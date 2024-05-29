@@ -22,8 +22,14 @@ class BusCAN
 public:
 
     typedef struct __attribute__((__packed__)) {
-        uint8_t cmd;
-        uint8_t args[7];
+        union {
+            struct {
+                uint8_t cmd;
+                uint8_t args[7];
+            };
+            uint8_t data[8];
+        };
+
     } Frame_t;
 
     static int begin(gpio_num_t txNum, gpio_num_t rxNum);
