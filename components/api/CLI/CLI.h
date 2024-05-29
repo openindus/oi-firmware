@@ -19,7 +19,6 @@ public:
         err |= _registerRestartCmd();
         err |= _registerLogCmd();
         err |= _registerLedCmd();
-        err |= _registerModuleStopCmd();
         err |= _registerSetBoardInfoCmd();
         err |= _registerGetBoardInfoCmd();
 #if defined(MODULE_MASTER)
@@ -30,11 +29,17 @@ public:
         err |= _registerGetSlaveInfoCmd();
 #endif
 #if !defined(MODULE_STANDALONE)
+        err |= _registerModuleStopCmd();
+        err |= _registerModuleStartCmd();
+        err |= _registerModuleGetStatusCmd();
         err |= _registerReadIdCmd();
         err |= _registerWriteSyncCmd();
         err |= _registerReadSyncCmd();
         err |= _registerBusPowerCmd();
         err |= _registerCANWriteCmd();
+        err |= _registerCANReadCmd();
+        err |= _registerRSWriteCmd();
+        err |= _registerRSReadCmd();
 #endif
         return err;
     }
@@ -58,6 +63,8 @@ private:
     static int _registerGetSlaveInfoCmd(void);
 #endif
     static int _registerModuleStopCmd(void);
+    static int _registerModuleStartCmd(void);
+    static int _registerModuleGetStatusCmd(void);
 
     /* Bus */
 #if !defined(MODULE_STANDALONE)

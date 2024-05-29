@@ -20,6 +20,8 @@
 static const char TAG[] = "Module";
 
 uint16_t ModuleSlave::_id;
+Module_State_t ModuleSlave::_state = STATE_IDLE;
+TaskHandle_t ModuleSlave::_taskHandle = NULL;
 std::map<uint8_t, std::function<void(std::vector<uint8_t>&)>> ModuleSlave::_ctrlCallbacks;
 
 int ModuleSlave::init(void)
@@ -48,9 +50,32 @@ int ModuleSlave::init(void)
 
     /* Bus task */
     ESP_LOGI(TAG, "Create bus task");
-    xTaskCreate(_busTask, "Bus task", 4096, NULL, 1, NULL);
+    xTaskCreate(_busTask, "Bus task", 4096, NULL, 1, &_taskHandle);
+
+    _state = STATE_RUNNING;
 
     return err;
+}
+
+void ModuleSlave::start(void)
+{
+    if (_taskHandle != NULL) {
+        vTaskResume(_taskHandle);
+    }
+    _state = STATE_RUNNING;
+}
+
+void ModuleSlave::stop(void)
+{
+    if (_taskHandle != NULL) {
+        vTaskSuspend(_taskHandle);
+    }
+    _state = STATE_IDLE;
+}
+
+int ModuleSlave::getStatus(void)
+{
+    return (int)_state;
 }
 
 /**

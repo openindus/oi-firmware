@@ -179,6 +179,7 @@ int CLI::_registerProgramCmd(void)
 }
 
 /* --- ping --- */
+
 static struct {
     struct arg_int *type;
     struct arg_int *sn;
@@ -381,6 +382,8 @@ static int moduleStopCmd(int argc, char **argv)
 {
 #if defined(MODULE_MASTER)
     ModuleMaster::stop();
+#elif defined(MODULE_SLAVE)
+    ModuleSlave::stop();
 #endif
     return 0;
 }
@@ -392,6 +395,82 @@ int CLI::_registerModuleStopCmd(void)
         .help = "Stop module tasks",
         .hint = NULL,
         .func = &moduleStopCmd,
+        .argtable = NULL
+    };
+    
+    if (esp_console_cmd_register(&cmd) == ESP_OK) {
+        return 0;
+    } else {
+        return -1;
+    }
+}
+
+/* --- start --- */
+
+static int moduleStartCmd(int argc, char **argv)
+{
+#if defined(MODULE_MASTER)
+    ModuleMaster::start();
+#elif defined(MODULE_SLAVE)
+    ModuleSlave::start();
+#endif
+    return 0;
+}
+
+int CLI::_registerModuleStartCmd(void)
+{
+    const esp_console_cmd_t cmd = {
+        .command = "start",
+        .help = "Start module tasks",
+        .hint = NULL,
+        .func = &moduleStartCmd,
+        .argtable = NULL
+    };
+    
+    if (esp_console_cmd_register(&cmd) == ESP_OK) {
+        return 0;
+    } else {
+        return -1;
+    }
+}
+
+/* --- get-status --- */
+
+static int moduleGetStatusCmd(int argc, char **argv)
+{
+    int state;
+
+#if defined(MODULE_MASTER)
+    state = ModuleMaster::getStatus();
+#elif defined(MODULE_SLAVE)
+    state = ModuleSlave::getStatus();
+#endif
+
+    switch (state) {
+        case STATE_IDLE:
+            printf("Module state: IDLE\n");
+            break;
+        case STATE_RUNNING:
+            printf("Module state: RUNNING\n");
+            break;
+        case STATE_ERROR:
+            printf("Module state: ERROR\n");
+            break;
+        default:
+            printf("Module state: UNKNOWN\n");
+            break;
+    }
+
+    return 0;
+}
+
+int CLI::_registerModuleGetStatusCmd(void)
+{
+    const esp_console_cmd_t cmd = {
+        .command = "status",
+        .help = "Get module status",
+        .hint = NULL,
+        .func = &moduleGetStatusCmd,
         .argtable = NULL
     };
     

@@ -27,6 +27,9 @@ class ModuleSlave
 public:
 
     static int init(void);
+    static void start(void);
+    static void stop(void);
+    static int getStatus(void);
 
     static void sendEvent(std::vector<uint8_t> msgBytes);
 
@@ -39,6 +42,9 @@ protected:
     static uint16_t _id;
 
 private:
+
+    static Module_State_t _state;
+    static TaskHandle_t _taskHandle;
 
     static std::map<uint8_t, std::function<void(std::vector<uint8_t>&)>> _ctrlCallbacks;
 
