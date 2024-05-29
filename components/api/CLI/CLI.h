@@ -67,6 +67,8 @@ private:
     static int _registerBusPowerCmd(void);
     static int _registerCANWriteCmd(void);
     static int _registerCANReadCmd(void);
+    static int _registerRSWriteCmd(void);
+    static int _registerRSReadCmd(void);
 #endif
 
 };

@@ -223,4 +223,112 @@ int CLI::_registerCANReadCmd(void)
     }
 }
 
+/* --- rs-write --- */
+
+static struct {
+    struct arg_int *cmd;
+    struct arg_int *id;
+    struct arg_int *dir;
+    struct arg_int *ack;
+    struct arg_int *data;
+    struct arg_end *end;
+} RSWriteArgs;
+
+static int RSWriteCmd(int argc, char **argv)
+{
+    int nerrors = arg_parse(argc, argv, (void **) &RSWriteArgs);
+    if (nerrors != 0) {
+        arg_print_errors(stderr, RSWriteArgs.end, argv[0]);
+        return 1;
+    }
+
+    BusRS::Frame_t frame;
+
+    frame.cmd = RSWriteArgs.cmd->ival[0];
+    frame.id = RSWriteArgs.id->ival[0];
+    frame.dir = RSWriteArgs.dir->ival[0];
+    frame.ack = RSWriteArgs.ack->ival[0];
+
+    int size = argc - 5;
+    frame.length = size;
+    frame.data = (uint8_t*) malloc(size * sizeof(uint8_t));
+    for (int i = 0; i < size; i++) {
+        frame.data[i] = RSWriteArgs.data->ival[i];
+    }
+
+    BusRS::write(&frame);
+
+    free(frame.data);
+    return 0;
+}
+
+int CLI::_registerRSWriteCmd(void)
+{
+    RSWriteArgs.cmd = arg_int1(NULL, "cmd", "CMD", "command");
+    RSWriteArgs.id = arg_int1(NULL, "id", "ID", "identifier");
+    RSWriteArgs.dir = arg_int1(NULL, "dir", "Direction", "direction (0 or 1)");
+    RSWriteArgs.ack = arg_int1(NULL, "ack", "Acknowledge", "acknowledge flag (0 or 1)");
+    RSWriteArgs.data = arg_intn(NULL, NULL, "<DATA>", 0, 255, "RS data");
+    RSWriteArgs.end = arg_end(1);
+
+    const esp_console_cmd_t cmd = {
+        .command = "rs-write",
+        .help = "Write data to the RS bus",
+        .hint = NULL,
+        .func = &RSWriteCmd,
+        .argtable = &RSWriteArgs
+    };
+    
+    if (esp_console_cmd_register(&cmd) == ESP_OK) {
+        return 0;
+    } else {
+        return -1;
+    }
+}
+
+/* --- rs-read --- */
+
+static int RSReadCmd(int argc, char **argv)
+{
+    BusRS::Frame_t frame;
+
+    if (BusRS::read(&frame) == ESP_OK) {
+        printf("Sync: %02X\n", frame.sync);
+        printf("Command: %02X\n", frame.cmd);
+        printf("ID: %d\n", frame.id);
+        printf("Direction: %d\n", frame.dir);
+        printf("Acknowledge: %d\n", frame.ack);
+        printf("Error: %d\n", frame.error);
+        printf("Length: %d\n", frame.length);
+        printf("Checksum: %02X\n", frame.checksum);
+        printf("Data: ");
+        for (int i = 0; i < frame.length; i++) {
+            printf("%02X ", frame.data[i]);
+        }
+        printf("\n");
+    } else {
+        fprintf(stderr, "Failed to read from RS bus\n");
+        return 1;
+    }
+
+    return 0;
+}
+
+int CLI::_registerRSReadCmd(void)
+{
+    const esp_console_cmd_t cmd = {
+        .command = "rs-read",
+        .help = "Read data from the RS bus",
+        .hint = NULL,
+        .func = &RSReadCmd,
+        .argtable = NULL
+    };
+    
+    if (esp_console_cmd_register(&cmd) == ESP_OK) {
+        return 0;
+    } else {
+        return -1;
+    }
+}
+
 #endif
