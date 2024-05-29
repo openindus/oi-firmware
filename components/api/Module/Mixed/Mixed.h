@@ -16,7 +16,6 @@
 #pragma once
 
 #include "Global.h"
-#include "Module.h"
 
 #if defined(OI_MIXED)
 #include "MixedPinout.h"

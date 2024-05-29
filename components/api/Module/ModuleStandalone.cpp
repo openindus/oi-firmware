@@ -13,7 +13,7 @@
  * @see https://openindus.com
  */
 
-#include "Module.h"
+#include "ModuleStandalone.h"
 
 static const char TAG[] = "Module";
 uint16_t ModuleStandalone::_type = 0;

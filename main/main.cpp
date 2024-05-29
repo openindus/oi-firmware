@@ -3,8 +3,7 @@
 
 void setup(void)
 {
-    Serial.begin(115200);
-    Serial.println("Hello World !");
+    printf("Hello OpenIndus !\n");
 }
 
 void loop(void)

@@ -15,10 +15,13 @@
 
 #if defined(MODULE_MASTER)
 
-#include "Module.h"
+#include "ModuleMaster.h"
+#include "ModuleControl.h"
 
 static const char TAG[] = "Module";
 
+Module_State_t ModuleMaster::_state = STATE_IDLE;
+TaskHandle_t ModuleMaster::_taskHandle = NULL;
 std::map<uint16_t, std::pair<uint16_t, uint32_t>, std::greater<uint16_t>> ModuleMaster::_ids;
 
 int ModuleMaster::init(void)
@@ -43,9 +46,32 @@ int ModuleMaster::init(void)
     BusIO::writeSync(0);
 
     ESP_LOGI(TAG, "Create bus task");
-    xTaskCreate(_busTask, "Bus task", 4096, NULL, 1, NULL);
+    xTaskCreate(_busTask, "Bus task", 4096, NULL, 1, &_taskHandle);
+
+    _state = STATE_RUNNING;
 
     return err;
+}
+
+void ModuleMaster::start(void)
+{
+    if (_taskHandle != NULL) {
+        vTaskResume(_taskHandle);
+    }
+    _state = STATE_RUNNING;
+}
+
+void ModuleMaster::stop(void)
+{
+    if (_taskHandle != NULL) {
+        vTaskSuspend(_taskHandle);
+    }
+    _state = STATE_IDLE;
+}
+
+int ModuleMaster::getStatus(void)
+{
+    return (int)_state;
 }
 
 bool ModuleMaster::autoId(void)
@@ -236,28 +262,28 @@ void ModuleMaster::_busTask(void *pvParameters)
 {
     BusCAN::Frame_t frame;
     uint16_t id;
-    uint8_t length;
+    uint8_t size;
 
     while (1) {
-        if (BusCAN::read(&frame, &id, &length) != -1) { 
+        if (BusCAN::read(&frame, &id, &size) != -1) { 
             switch (frame.cmd)
             {
                 case CMD_EVENT:
                 {
-                    auto it = ModuleControl::_eventCallbacks.find(std::make_pair(frame.data[0], id));
+                    auto it = ModuleControl::_eventCallbacks.find(std::make_pair(frame.args[0], id));
                     if (it != ModuleControl::_eventCallbacks.end()) {
                         if (it->second != NULL) {
-                            it->second(frame.data[1]);
+                            it->second(frame.args[1]);
                         }
                     } else {
-                        ESP_LOGW(TAG, "Command does not exist: command: 0x%02x, id: %d", frame.data[0], id);
+                        ESP_LOGW(TAG, "Command does not exist: command: 0x%02x, id: %d", frame.args[0], id);
                     }
                     break;
                 }
                 case CMD_DISCOVER:
                 {
-                    uint16_t* type = reinterpret_cast<uint16_t*>(&frame.data[0]);
-                    uint32_t* sn = reinterpret_cast<uint32_t*>(&frame.data[2]);
+                    uint16_t* type = reinterpret_cast<uint16_t*>(&frame.args[0]);
+                    uint32_t* sn = reinterpret_cast<uint32_t*>(&frame.args[2]);
                     _ids.insert(std::pair<uint16_t, std::pair<uint16_t, uint32_t>>(id, std::pair<uint16_t, uint32_t>(*type, *sn)));
                     break;
                 }

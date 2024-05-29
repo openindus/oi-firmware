@@ -14,13 +14,14 @@
  */
 
 #include "ModuleSlave.h"
-#include "ModulePinout.h"
 
 #if defined(MODULE_SLAVE)
 
 static const char TAG[] = "Module";
 
 uint16_t ModuleSlave::_id;
+Module_State_t ModuleSlave::_state = STATE_IDLE;
+TaskHandle_t ModuleSlave::_taskHandle = NULL;
 std::map<uint8_t, std::function<void(std::vector<uint8_t>&)>> ModuleSlave::_ctrlCallbacks;
 
 int ModuleSlave::init(void)
@@ -49,9 +50,32 @@ int ModuleSlave::init(void)
 
     /* Bus task */
     ESP_LOGI(TAG, "Create bus task");
-    xTaskCreate(_busTask, "Bus task", 4096, NULL, 1, NULL);
+    xTaskCreate(_busTask, "Bus task", 4096, NULL, 1, &_taskHandle);
+
+    _state = STATE_RUNNING;
 
     return err;
+}
+
+void ModuleSlave::start(void)
+{
+    if (_taskHandle != NULL) {
+        vTaskResume(_taskHandle);
+    }
+    _state = STATE_RUNNING;
+}
+
+void ModuleSlave::stop(void)
+{
+    if (_taskHandle != NULL) {
+        vTaskSuspend(_taskHandle);
+    }
+    _state = STATE_IDLE;
+}
+
+int ModuleSlave::getStatus(void)
+{
+    return (int)_state;
 }
 
 /**
@@ -63,9 +87,9 @@ void ModuleSlave::sendEvent(std::vector<uint8_t> msgBytes)
 {
     BusCAN::Frame_t frame;
     frame.cmd = CMD_EVENT;
-    std::copy(msgBytes.begin(), msgBytes.end(), frame.data);
-    uint8_t length = msgBytes.size() + 1;
-    BusCAN::write(&frame, _id, length);
+    std::copy(msgBytes.begin(), msgBytes.end(), frame.args);
+    uint8_t size = msgBytes.size() + 1;
+    BusCAN::write(&frame, _id, size);
 }
 
 void ModuleSlave::_busTask(void *pvParameters) 
@@ -104,8 +128,8 @@ void ModuleSlave::_busTask(void *pvParameters)
                 discoverFrame.cmd = CMD_DISCOVER;
                 uint16_t type = ModuleStandalone::getBoardType();
                 uint32_t sn = ModuleStandalone::getSerialNum();
-                memcpy(discoverFrame.data, &type, sizeof(uint16_t));
-                memcpy(&discoverFrame.data[2], &sn, sizeof(uint32_t));
+                memcpy(discoverFrame.args, &type, sizeof(uint16_t));
+                memcpy(&discoverFrame.args[2], &sn, sizeof(uint32_t));
                 if (BusCAN::write(&discoverFrame, _id, sizeof(uint16_t)+sizeof(uint32_t)+1) == -1)
                     ModuleStandalone::ledBlink(LED_RED, 1000); // Error
                 break;

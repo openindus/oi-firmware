@@ -16,7 +16,6 @@
 #pragma once
 
 #include "Global.h"
-#include "Module.h"
 #include "Core.h"
 #include "Discrete.h"
 #include "Mixed.h"
@@ -24,6 +23,11 @@
 #include "Relay.h"
 #include "AnalogLs.h"
 #include "Brushless.h"
+#include "ModuleStandalone.h"
+#include "ModuleSlave.h"
+#include "ModuleControl.h"
+#include "ModuleMaster.h"
+#include "CLI.h"
 
 void setup(void);
 void loop(void);

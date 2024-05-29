@@ -52,10 +52,8 @@ void System::init(void)
 #elif defined(OI_ANALOG_LS)
     err |= AnalogLs::init();
 #endif
-    err |= ModuleCLI::init();
-#if defined(MODULE_MASTER)
-    err |= ModuleMasterCLI::init();
-#endif
+
+    err |= CLI::registerCommands();
 
     if (err != 0) {
         ESP_LOGE(TAG, "Failed to initialize module");
