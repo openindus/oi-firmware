@@ -36,7 +36,13 @@
 // #define CMD_HEARTBEAT               (uint8_t) 0x10
 // #define CMD_AUTO_TEST               (uint8_t) 0x11
 
-enum Module_Type_List_e {
+typedef enum {
+    STATE_IDLE      = (int) 0,
+    STATE_RUNNING   = (int) 1,
+    STATE_ERROR     = (int) 2
+} Module_State_t;
+
+enum ModuleType_List_e {
     TYPE_OI_CORE            = (uint16_t) 3,
     TYPE_OI_CORELITE        = (uint16_t) 4,
     TYPE_OI_DISCRETE        = (uint16_t) 6,
@@ -49,12 +55,6 @@ enum Module_Type_List_e {
     TYPE_OI_ANALOG_LS       = (uint16_t) 13,
     TYPE_OI_BRUSHLESS       = (uint16_t) 18,
 };
-
-typedef enum {
-    STATE_IDLE      = (int) 0,
-    STATE_RUNNING   = (int) 1,
-    STATE_ERROR     = (int) 2
-} Module_State_t;
 
 class ModuleUtils
 {
@@ -79,7 +79,7 @@ public:
     }
 };
 
-enum Module_CommandControl_e {
+enum ModuleCmd_Control_e {
     /* DIGITAL */
     CONTROL_DIGITAL_WRITE                   = 0x00,
     CONTROL_DIGITAL_TOGGLE                  = 0x01,
@@ -101,7 +101,6 @@ enum Module_CommandControl_e {
     CONTROL_ANALOG_READ_MILLIVOLT           = 0x26,
     CONTROL_ANALOG_READ_AMP                 = 0x27,
     CONTROL_ANALOG_READ_MILLIAMP            = 0x28,
-
     CONTROL_ANALOG_OUTPUT_MODE              = 0x29,
     CONTROL_ANALOG_WRITE                    = 0x2A,
 
@@ -135,7 +134,7 @@ enum Module_CommandControl_e {
     CONTROL_ENCODER_GET_SPEED               = 0x83,
 };
 
-enum Module_CommandEvent_e {
+enum ModuleCmd_Event_e {
     EVENT_DIGITAL_INTERRUPT                 = 0x00,
     EVENT_MOTOR_READY                       = 0x01,
 };

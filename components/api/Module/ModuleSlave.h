@@ -24,7 +24,7 @@
 
 #if defined(MODULE_SLAVE)
 
-class ModuleSlave
+class ModuleSlave : private Bus
 {
 public:
 
@@ -39,16 +39,14 @@ public:
         _ctrlCallbacks.insert({ctrl, callback});
     }
 
-    static inline void busPowerOn(void) { _bus->powerOn(); }
-    static inline void busPowerOff(void) { _bus->powerOff(); }
+    static inline void busPowerOn(void) { BusIO::powerOn(); }
+    static inline void busPowerOff(void) { BusIO::powerOff(); }
 
 protected:
 
     static uint16_t _id;
 
 private:
-
-    static Bus* _bus;
 
     static Module_State_t _state;
     static TaskHandle_t _taskHandle;

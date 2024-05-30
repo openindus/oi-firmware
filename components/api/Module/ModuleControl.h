@@ -18,9 +18,10 @@
 #if defined(MODULE_MASTER)
 
 #include "Global.h"
+#include "Module.h"
 #include "ModuleStandalone.h"
 #include "ModuleMaster.h"
-#include "Module.h"
+#include "Bus.h"
 
 class ModuleControl
 {

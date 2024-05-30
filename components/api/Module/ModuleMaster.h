@@ -24,7 +24,7 @@
 #include "UsbConsole.h"
 #include "UsbSerial.h"
 
-class ModuleMaster
+class ModuleMaster: private Bus
 {
 public:
 
@@ -41,12 +41,10 @@ public:
     static void getBoardInfo(uint16_t type, uint32_t sn, Module_Info_t* board_info);
     static std::map<uint16_t,std::pair<uint16_t, uint32_t>,std::greater<uint16_t>> discoverSlaves(void);
 
-    static inline void busPowerOn(void) { _bus->powerOn(); }
-    static inline void busPowerOff(void) { _bus->powerOff(); }
+    static inline void busPowerOn(void) { BusIO::powerOn(); }
+    static inline void busPowerOff(void) { BusIO::powerOff(); }
 
 private:
-
-    static Bus* _bus;
 
     static Module_State_t _state;
     static TaskHandle_t _taskHandle;

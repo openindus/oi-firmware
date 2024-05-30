@@ -19,7 +19,6 @@
 
 static const char TAG[] = "Module";
 
-Bus* ModuleSlave::_bus = new Bus();
 uint16_t ModuleSlave::_id;
 Module_State_t ModuleSlave::_state = STATE_IDLE;
 TaskHandle_t ModuleSlave::_taskHandle = NULL;
