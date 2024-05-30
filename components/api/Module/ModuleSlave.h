@@ -19,6 +19,7 @@
 #include "Module.h"
 #include "ModuleStandalone.h"
 #include "ModulePinout.h"
+#include "Bus.h"
 
 #if defined(MODULE_SLAVE)
 
@@ -37,11 +38,16 @@ public:
         _ctrlCallbacks.insert({ctrl, callback});
     }
 
+    static inline void busPowerOn(void) { _bus->powerOn(); }
+    static inline void busPowerOff(void) { _bus->powerOff(); }
+
 protected:
 
     static uint16_t _id;
 
 private:
+
+    static Bus* _bus;
 
     static Module_State_t _state;
     static TaskHandle_t _taskHandle;

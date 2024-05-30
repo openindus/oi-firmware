@@ -20,6 +20,7 @@
 
 static const char TAG[] = "Module";
 
+Bus* ModuleMaster::_bus = new Bus();
 Module_State_t ModuleMaster::_state = STATE_IDLE;
 TaskHandle_t ModuleMaster::_taskHandle = NULL;
 std::map<uint16_t, std::pair<uint16_t, uint32_t>, std::greater<uint16_t>> ModuleMaster::_ids;

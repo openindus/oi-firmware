@@ -76,7 +76,6 @@
 #include "cd74hc4052.h"
 
 /* OpenIndus Middleware */
-#include "Bus.h"
 #include "DigitalOutputs.h"
 #include "DigitalInputs.h"
 #include "AnalogOutputs.h"

@@ -20,11 +20,9 @@
 #include "Global.h"
 #include "Module.h"
 #include "ModuleStandalone.h"
+#include "Bus.h"
 
-class ModuleMaster : 
-    public BusRS,
-    public BusCAN,
-    public BusIO
+class ModuleMaster
 {
 public:
 
@@ -41,7 +39,12 @@ public:
     static void getBoardInfo(uint16_t type, uint32_t sn, Module_Info_t* board_info);
     static std::map<uint16_t,std::pair<uint16_t, uint32_t>,std::greater<uint16_t>> discoverSlaves(void);
 
+    static inline void busPowerOn(void) { _bus->powerOn(); }
+    static inline void busPowerOff(void) { _bus->powerOff(); }
+
 private:
+
+    static Bus* _bus;
 
     static Module_State_t _state;
     static TaskHandle_t _taskHandle;
