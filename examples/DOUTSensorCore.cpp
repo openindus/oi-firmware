@@ -19,10 +19,10 @@ void loop(void)
 {
     /* Print value in monitor */
     Serial.printf("DOUT Sensor 1: %u\t 2: %u\t 3: %u\t 4: %u\n", \
-        core.digitalGetOverCurrentStatus(DOUT_1),\
-        core.digitalGetOverCurrentStatus(DOUT_2),\
-        core.digitalGetOverCurrentStatus(DOUT_3),\
-        core.digitalGetOverCurrentStatus(DOUT_4));
+        core.outputIsOvercurrent(DOUT_1),\
+        core.outputIsOvercurrent(DOUT_2),\
+        core.outputIsOvercurrent(DOUT_3),\
+        core.outputIsOvercurrent(DOUT_4));
 
     /* Wait for 200ms before reading value again */
     delay(200);

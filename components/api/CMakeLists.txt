@@ -28,6 +28,7 @@ set(COMPONENT_SRCS
     "Middleware/Digital/Inputs/DigitalInputsSlave.cpp"
     "Middleware/Digital/Inputs/DigitalInputsCLI.cpp"
     "Middleware/Digital/Outputs/DigitalOutputs.cpp"
+    "Middleware/Digital/Outputs/DigitalOutputsExp.cpp"
     "Middleware/Digital/Outputs/DigitalOutputsControl.cpp"
     "Middleware/Digital/Outputs/DigitalOutputsSlave.cpp"
     "Middleware/Digital/Outputs/DigitalOutputsCLI.cpp"

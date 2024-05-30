@@ -21,14 +21,27 @@
 
 #include "Global.h"
 #include "DigitalOutputs.h"
+#include "DigitalOutputsExp.h"
 
 class DigitalOutputsCLI : public DigitalOutputs
 {
 public:
-    static int init();
+
+    static inline int init(void) {
+        int err = 0;
+        err |= _registerDigitalWrite();
+#if !defined(OI_CORE)
+        err |= _registerGetOutputCurrent();
+#endif
+        err |= _registerOuputIsOvercurrent();
+        return err;
+    };
 
 private:
+
     static int _registerDigitalWrite();
-    static int _registerDigitalGetCurrent();
-    static int _registerDigitalGetOverCurrentStatus();
+#if !defined(OI_CORE)
+    static int _registerGetOutputCurrent();
+#endif
+    static int _registerOuputIsOvercurrent();
 };

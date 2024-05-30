@@ -18,29 +18,29 @@
 int DigitalOutputsSlave::init() {
     
     ModuleSlave::addCtrlCallback(CONTROL_DIGITAL_WRITE, [](std::vector<uint8_t>& data) {
-        DigitalOutputs::digitalWrite((DigitalOutputNum_t)data[1], data[2]);
+        DigitalOutputs::digitalWrite((DOut_Num_t)data[1], data[2]);
         data.clear();
     });
 
     ModuleSlave::addCtrlCallback(CONTROL_DIGITAL_TOGGLE, [](std::vector<uint8_t>& data) {
-        DigitalOutputs::digitalToggle((DigitalOutputNum_t)data[1]);
+        DigitalOutputs::toggleOutput((DOut_Num_t)data[1]);
         data.clear();
     });
 
     ModuleSlave::addCtrlCallback(CONTROL_DIGITAL_MODE_PWM, [](std::vector<uint8_t>& data) {
         uint32_t* freq = reinterpret_cast<uint32_t*>(&data[2]);
-        DigitalOutputs::digitalModePWM((DigitalOutputNum_t)data[1], *freq);
+        DigitalOutputs::setPWMFrequency((DOut_Num_t)data[1], *freq);
         data.clear();
     });
 
     ModuleSlave::addCtrlCallback(CONTROL_DIGITAL_SET_PWM, [](std::vector<uint8_t>& data) {
         uint32_t* duty = reinterpret_cast<uint32_t*>(&data[2]);
-        DigitalOutputs::digitalSetPWM((DigitalOutputNum_t)data[1], *duty);
+        DigitalOutputs::setPWMDutyCycle((DOut_Num_t)data[1], *duty);
         data.clear();
     });
 
     ModuleSlave::addCtrlCallback(CONTROL_DIGITAL_GET_CURRENT, [](std::vector<uint8_t>& data) {
-        float current = DigitalOutputs::digitalGetCurrent((DigitalOutputNum_t)data[1]);
+        float current = DigitalOutputs::getOutputCurrent((DOut_Num_t)data[1]);
         uint8_t* ptr = reinterpret_cast<uint8_t*>(&current);
         data.insert(data.end(), ptr, ptr + sizeof(float));
     });

@@ -17,7 +17,7 @@
 
 #include "Global.h"
 #include "ModuleStandalone.h"
-#include "DigitalOutputs.h"
+#include "DigitalOutputsExp.h"
 #include "DigitalInputs.h"
 #include "AnalogInputsHV.h"
 #include "RTClock.h"
@@ -26,11 +26,17 @@
 
 #if defined(OI_CORE)
 
-class CoreStandalone : public ModuleStandalone, public DigitalInputs, public DigitalOutputs, public AnalogInputsHV
+class CoreStandalone : 
+    public ModuleStandalone, 
+    public DigitalInputs, 
+    public DigitalOutputsExp, 
+    public AnalogInputsHV
 {
 public:
 
-    static int init(void);  
+    static int init(void);
+
+    /* External bus */
     static OI::CAN can;
     static OI::RS rs;
 

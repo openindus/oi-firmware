@@ -110,7 +110,7 @@ int DigitalInputs::digitalRead(DigitalInputNum_t num)
     if (num < DIN_MAX) {
         if (_type == DIGITAL_INPUT_GPIO) {
             return gpio_get_level(_gpio_nums[num]);
-        } else { // DIGITAL_OUTPUT_IOEX
+        } else { // DOUT_IOEX
             return ioex_get_level(*_ioex, _ioex_nums[num]);
         }
     } else {

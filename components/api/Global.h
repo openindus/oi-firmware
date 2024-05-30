@@ -75,3 +75,10 @@
 #include "DriversComponents/MCP25625.h"
 #include "stds75.h"
 #include "cd74hc4052.h"
+
+/* Typedef */
+
+typedef struct {
+    adc_unit_t adc_num;
+    adc_channel_t channel;
+} AdcNumChannel_t;

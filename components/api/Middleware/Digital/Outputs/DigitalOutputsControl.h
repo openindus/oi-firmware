@@ -37,22 +37,22 @@ public:
      * @param num DOUT to drive.
      * @param level DOUT level, HIGH or LOW.
      */
-    void digitalWrite(DigitalOutputNum_t num, uint8_t level);
+    void digitalWrite(DOut_Num_t num, uint8_t level);
 
     /**
      * @brief Toggle a digital output
      * 
      * @param num DOUT to toggle
     **/
-    void digitalToggle(DigitalOutputNum_t num);
+    void toggleOutput(DOut_Num_t num);
 
     /**
-     * @brief Set a digital output into PWM mode
+     * @brief Set the frequency value of PWM for a digital output
      * 
      * @param num DOUT to set
      * @param freq PWM frequency [50 - 1000 Hz]
     **/
-    void digitalModePWM(DigitalOutputNum_t num, uint32_t freq);
+    void setPWMFrequency(DOut_Num_t num, uint32_t freq);
 
     /**
      * @brief Set the duty cycle value of PWM for a digital output
@@ -60,7 +60,7 @@ public:
      * @param num DOUT to set
      * @param duty Duty cycle
     **/
-    void digitalSetPWM(DigitalOutputNum_t num, uint32_t duty);
+    void setPWMDutyCycle(DOut_Num_t num, uint32_t duty);
  
     /**
      * @brief Get the current of a digital output
@@ -68,7 +68,7 @@ public:
      * @param num DOUT to get
      * @return current in Ampere
     **/
-    float digitalGetCurrent(DigitalOutputNum_t num);
+    float getOutputCurrent(DOut_Num_t num);
 
 private:
 

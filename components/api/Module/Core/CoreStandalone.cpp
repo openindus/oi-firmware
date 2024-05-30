@@ -161,7 +161,7 @@ int CoreStandalone::init()
      * @brief DOUT Init
      * 
      */
-    err |= DigitalOutputs::init(&_ioex, _doutGpio, _doutCurrentGpio, 4);
+    err |= DigitalOutputsExp::init(&_ioex, _doutGpio, _doutCurrentGpio, 4);
 
     /**
      * @brief AIN Init 

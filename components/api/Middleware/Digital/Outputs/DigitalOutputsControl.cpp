@@ -16,19 +16,19 @@
 
 #if !defined(MODULE_STANDALONE) && !defined(MODULE_SLAVE)
 
-void DigitalOutputsControl::digitalWrite(DigitalOutputNum_t num, uint8_t level)
+void DigitalOutputsControl::digitalWrite(DOut_Num_t num, uint8_t level)
 {
     std::vector<uint8_t> msgBytes = {CONTROL_DIGITAL_WRITE, (uint8_t)num, (uint8_t)level};
     _control->ctrlRequest(msgBytes);
 }
 
-void DigitalOutputsControl::digitalToggle(DigitalOutputNum_t num)
+void DigitalOutputsControl::toggleOutput(DOut_Num_t num)
 {
     std::vector<uint8_t> msgBytes = {CONTROL_DIGITAL_TOGGLE, (uint8_t)num};
     _control->ctrlRequest(msgBytes);
 }
 
-void DigitalOutputsControl::digitalModePWM(DigitalOutputNum_t num, uint32_t freq)
+void DigitalOutputsControl::setPWMFrequency(DOut_Num_t num, uint32_t freq)
 {
     std::vector<uint8_t> msgBytes = {CONTROL_DIGITAL_MODE_PWM, (uint8_t)num};
     uint8_t* ptr = reinterpret_cast<uint8_t*>(&freq);
@@ -36,7 +36,7 @@ void DigitalOutputsControl::digitalModePWM(DigitalOutputNum_t num, uint32_t freq
     _control->ctrlRequest(msgBytes);
 }
     
-void DigitalOutputsControl::digitalSetPWM(DigitalOutputNum_t num, uint32_t duty)
+void DigitalOutputsControl::setPWMDutyCycle(DOut_Num_t num, uint32_t duty)
 {
     std::vector<uint8_t> msgBytes = {CONTROL_DIGITAL_SET_PWM, (uint8_t)num};
     uint8_t* ptr = reinterpret_cast<uint8_t*>(&duty);
@@ -44,7 +44,7 @@ void DigitalOutputsControl::digitalSetPWM(DigitalOutputNum_t num, uint32_t duty)
     _control->ctrlRequest(msgBytes);
 }
 
-float DigitalOutputsControl::digitalGetCurrent(DigitalOutputNum_t num)
+float DigitalOutputsControl::getOutputCurrent(DOut_Num_t num)
 {
     std::vector<uint8_t> msgBytes = {CONTROL_DIGITAL_GET_CURRENT, (uint8_t)num};
     _control->ctrlRequest(msgBytes);
