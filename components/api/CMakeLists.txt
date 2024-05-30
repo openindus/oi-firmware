@@ -1,9 +1,11 @@
 set(COMPONENT_SRCS
     "System/System.cpp"
+    "System/SystemCLI.cpp"
     "Module/ModuleStandalone.cpp"
     "Module/ModuleMaster.cpp"
     "Module/ModuleSlave.cpp"
     "Module/ModuleControl.cpp"
+    "Module/ModuleCLI.cpp"
     "Module/Discrete/Discrete.cpp"
     "Module/Stepper/Stepper.cpp"
     "Module/Core/CoreStandalone.cpp"
@@ -22,6 +24,7 @@ set(COMPONENT_SRCS
     "Middleware/Bus/BusIO.cpp"
     "Middleware/Bus/BusRS.cpp"
     "Middleware/Bus/BusCAN.cpp"
+    "Middleware/Bus/BusCLI.cpp"
     "Middleware/Encoder/Encoder.cpp"
     "Middleware/Digital/Inputs/DigitalInputs.cpp"
     "Middleware/Digital/Inputs/DigitalInputsControl.cpp"
@@ -44,6 +47,7 @@ set(COMPONENT_SRCS
     "Middleware/Usb/UsbSerial.cpp"
     "Middleware/FlashLoader/FlashLoader.cpp"
     "Middleware/Led/Led.cpp"
+    "Middleware/Led/LedCLI.cpp"
     "Middleware/RTClock/RTClock.cpp"
     "Middleware/Analog/Outputs/AnalogOutputs.cpp"
     "Middleware/Analog/Outputs/AnalogOutputsControl.cpp"
@@ -59,10 +63,6 @@ set(COMPONENT_SRCS
     "Middleware/Analog/InputsHV/AnalogInputsHVCLI.cpp"
     "Middleware/CAN/CAN.cpp"
     "Middleware/RS/RS.cpp"
-    "CLI/CLI.cpp"
-    "CLI/CLI_Bus.cpp"
-    "CLI/CLI_Led.cpp"
-    "CLI/CLI_Module.cpp"
 )
 
 set(COMPONENT_INCLUDE_DIRS
@@ -93,7 +93,6 @@ set(COMPONENT_INCLUDE_DIRS
     "Middleware/RTClock"
     "Middleware/CAN"
     "Middleware/RS"
-    "CLI"
 )
 
 set(COMPONENT_PRIV_REQUIRES

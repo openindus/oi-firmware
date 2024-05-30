@@ -1,12 +1,12 @@
 /**
- * @file CLI.cpp
+ * @file SystemCLI.cpp
  * @brief Command line interface
  * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
  * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
 
-#include "CLI.h"
+#include "SystemCLI.h"
 
 /* --- restart --- */
 
@@ -16,7 +16,7 @@ static int restartCmd(int argc, char **argv)
     return 0;
 }
 
-int CLI::_registerRestartCmd(void)
+int SystemCLI::_registerRestartCmd(void)
 {
     const esp_console_cmd_t cmd = {
         .command = "restart",
@@ -70,7 +70,7 @@ static int logCmd(int argc, char **argv)
     return 0;
 }
 
-int CLI::_registerLogCmd(void)
+int SystemCLI::_registerLogCmd(void)
 {
     logArgs.level = arg_str1(NULL, NULL, "<LEVEL>", "[NONE, ERROR, WARN, INFO, DEBUG, VERBOSE]");
     logArgs.tag = arg_str0(NULL, NULL, "<TAG>", "specific tag");

@@ -1,12 +1,12 @@
 /**
- * @file CLI_Module.cpp
+ * @file ModuleCLI.cpp
  * @brief Command line interface - Module
  * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
  * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
 
-#include "CLI.h"
+#include "ModuleCLI.h"
 #include "ModuleMaster.h"
 #include "ModuleSlave.h"
 
@@ -40,7 +40,7 @@ static int setBoardInfoCmd(int argc, char **argv)
     return -1;
 }
 
-int CLI::_registerSetBoardInfoCmd(void)
+int ModuleCLI::_registerSetBoardInfoCmd(void)
 {
     setBoardInfoArgs.boardType = arg_int1("t", "type", "TYPE", "Board type");
     setBoardInfoArgs.serialNum = arg_int1("n", "serial-num", "NUM", "Serial number");
@@ -105,7 +105,7 @@ static int getBoardInfoCmd(int argc, char **argv)
     return 0;
 }
 
-int CLI::_registerGetBoardInfoCmd(void)
+int ModuleCLI::_registerGetBoardInfoCmd(void)
 {
     getBoardInfoArgs.boardType = arg_lit0("t", "type", "Board type");
     getBoardInfoArgs.serialNum = arg_lit0("n", "serial-num","Serial number");
@@ -158,7 +158,7 @@ static int programCmd(int argc, char **argv)
     return 0;
 }
 
-int CLI::_registerProgramCmd(void)
+int ModuleCLI::_registerProgramCmd(void)
 {
     programArgs.type = arg_int1(NULL, NULL, "<TYPE>", "Board type");
     programArgs.sn = arg_int1(NULL, NULL, "<SN>", "Board serial number");
@@ -212,7 +212,7 @@ static int pingCmd(int argc, char **argv)
     return 0;
 }
 
-int CLI::_registerPingCmd(void)
+int ModuleCLI::_registerPingCmd(void)
 {
     pingArgs.type = arg_int1(NULL, NULL, "<TYPE>", "Board type");
     pingArgs.sn = arg_int1(NULL, NULL, "<SN>", "Board serial number");
@@ -240,7 +240,7 @@ static int autoId(int argc, char **argv)
     return 0;
 }
 
-int CLI::_registerAutoIdCmd(void)
+int ModuleCLI::_registerAutoIdCmd(void)
 {
     const esp_console_cmd_t cmd = {
         .command = "auto-id",
@@ -283,7 +283,7 @@ static int discoverSlavesCmd(int argc, char **argv)
     return 0;
 }
 
-int CLI::_registerDiscoverSlavesCmd(void)
+int ModuleCLI::_registerDiscoverSlavesCmd(void)
 {
     const esp_console_cmd_t cmd = {
         .command = "discover-slaves",
@@ -348,7 +348,7 @@ static int getSlaveInfoCmd(int argc, char **argv)
     return 0;
 }
 
-int CLI::_registerGetSlaveInfoCmd(void)
+int ModuleCLI::_registerGetSlaveInfoCmd(void)
 {
     getSlaveInfoArgs.type = arg_int1(NULL, NULL, "<TYPE>", "Board type");
     getSlaveInfoArgs.sn = arg_int1(NULL, NULL, "<SN>", "Board serial number");
@@ -388,7 +388,7 @@ static int moduleStopCmd(int argc, char **argv)
     return 0;
 }
 
-int CLI::_registerModuleStopCmd(void)
+int ModuleCLI::_registerModuleStopCmd(void)
 {
     const esp_console_cmd_t cmd = {
         .command = "stop",
@@ -417,7 +417,7 @@ static int moduleStartCmd(int argc, char **argv)
     return 0;
 }
 
-int CLI::_registerModuleStartCmd(void)
+int ModuleCLI::_registerModuleStartCmd(void)
 {
     const esp_console_cmd_t cmd = {
         .command = "start",
@@ -464,7 +464,7 @@ static int moduleGetStatusCmd(int argc, char **argv)
     return 0;
 }
 
-int CLI::_registerModuleGetStatusCmd(void)
+int ModuleCLI::_registerModuleGetStatusCmd(void)
 {
     const esp_console_cmd_t cmd = {
         .command = "status",

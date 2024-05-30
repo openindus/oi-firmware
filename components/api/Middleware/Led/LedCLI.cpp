@@ -1,12 +1,12 @@
 /**
- * @file CLI_Led.cpp
+ * @file LedCLI.cpp
  * @brief Command line interface - Led
  * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
  * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
 
-#include "CLI.h"
+#include "LedCLI.h"
 #include "Led.h"
 
 /* --- led --- */
@@ -44,7 +44,7 @@ static int ledCmd(int argc, char **argv)
     return 0;
 }
 
-int CLI::_registerLedCmd(void)
+int LedCLI::_registerLedCmd(void)
 {
     ledArgs.state = arg_str1(NULL, NULL, "<STATE>", "[on, off, blink]");
     ledArgs.color = arg_int0(NULL, NULL, "color", "[0: None, 1: red, 2: green, 3: yellow, 4: blue, 5: purple, 6: cyan, 7; white]");

@@ -53,7 +53,8 @@ void System::init(void)
     err |= AnalogLs::init();
 #endif
 
-    err |= CLI::registerCommands();
+    err |= ModuleCLI::init();
+    err |= SystemCLI::init();
 
     if (err != 0) {
         ESP_LOGE(TAG, "Failed to initialize module");
