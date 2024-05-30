@@ -16,6 +16,7 @@
 #pragma once
 
 #include "ModuleControl.h"
+#include "DigitalInputs.h"
 
 #if defined(MODULE_MASTER)
 

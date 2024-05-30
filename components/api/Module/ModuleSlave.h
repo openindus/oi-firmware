@@ -20,6 +20,7 @@
 #include "ModuleStandalone.h"
 #include "ModulePinout.h"
 #include "Bus.h"
+#include "FlashLoader.h"
 
 #if defined(MODULE_SLAVE)
 

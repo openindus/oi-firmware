@@ -17,6 +17,12 @@
 
 #include "Global.h"
 #include "ModuleStandalone.h"
+#include "DigitalOutputs.h"
+#include "DigitalInputs.h"
+#include "AnalogInputsHV.h"
+#include "RTClock.h"
+#include "CAN.h"
+#include "RS.h"
 
 #if defined(OI_CORE)
 

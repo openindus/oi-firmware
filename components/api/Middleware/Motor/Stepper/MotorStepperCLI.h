@@ -18,6 +18,9 @@
 #if defined(OI_STEPPER) || defined(OI_STEPPER_VE)
 
 #include "Global.h"
+#include "Motor.h"
+#include "MotorStepper.h"
+#include "DigitalInputs.h"
 
 class MotorStepperCLI
 {

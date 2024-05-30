@@ -21,6 +21,8 @@
 #include "Module.h"
 #include "ModuleStandalone.h"
 #include "Bus.h"
+#include "UsbConsole.h"
+#include "UsbSerial.h"
 
 class ModuleMaster
 {

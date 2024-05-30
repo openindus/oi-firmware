@@ -28,6 +28,7 @@
 #include "ModuleControl.h"
 #include "ModuleMaster.h"
 #include "CLI.h"
+#include "UsbConsole.h"
 
 void setup(void);
 void loop(void);

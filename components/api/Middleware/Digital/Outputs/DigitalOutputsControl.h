@@ -23,6 +23,7 @@
 
 #include "ModuleControl.h"
 #include "DigitalInputs.h"
+#include "DigitalOutputs.h"
 
 class DigitalOutputsControl
 {
