@@ -21,6 +21,7 @@
 
 #include "Global.h"
 #include "DigitalInputs.h"
+#include "DigitalInputsExp.h"
 
 class DigitalInputsCLI : public DigitalInputs
 {

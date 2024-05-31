@@ -27,6 +27,7 @@ set(COMPONENT_SRCS
     "Middleware/Bus/BusCLI.cpp"
     "Middleware/Encoder/Encoder.cpp"
     "Middleware/Digital/Inputs/DigitalInputs.cpp"
+    "Middleware/Digital/Inputs/DigitalInputsExp.cpp"
     "Middleware/Digital/Inputs/DigitalInputsControl.cpp"
     "Middleware/Digital/Inputs/DigitalInputsSlave.cpp"
     "Middleware/Digital/Inputs/DigitalInputsCLI.cpp"

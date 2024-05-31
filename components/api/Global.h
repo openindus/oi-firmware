@@ -76,7 +76,7 @@
 #include "stds75.h"
 #include "cd74hc4052.h"
 
-/* Typedef */
+/* Types */
 
 typedef struct {
     adc_unit_t adc_num;

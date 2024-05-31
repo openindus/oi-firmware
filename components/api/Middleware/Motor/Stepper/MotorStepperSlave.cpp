@@ -23,15 +23,15 @@ int MotorStepperSlave::init() {
 
     ModuleSlave::addCtrlCallback(CONTROL_MOTOR_ATTACH_LIMIT_SWITCH, [](std::vector<uint8_t>& data) {
         MotorNum_t motor = static_cast<MotorNum_t>(data[1]);
-        DigitalInputNum_t din = static_cast<DigitalInputNum_t>(data[2]);
-        DigitalInputLogic_t logic = static_cast<DigitalInputLogic_t>(data[3]);
+        DIn_Num_t din = static_cast<DIn_Num_t>(data[2]);
+        Logic_t logic = static_cast<Logic_t>(data[3]);
         MotorStepper::attachLimitSwitch(motor, din, logic);
         data.clear();
     });
 
     ModuleSlave::addCtrlCallback(CONTROL_MOTOR_DETACH_LIMIT_SWITCH, [](std::vector<uint8_t>& data) {
         MotorNum_t motor = static_cast<MotorNum_t>(data[1]);
-        DigitalInputNum_t din = static_cast<DigitalInputNum_t>(data[2]);
+        DIn_Num_t din = static_cast<DIn_Num_t>(data[2]);
         MotorStepper::detachLimitSwitch(motor, din);
         data.clear();
     });

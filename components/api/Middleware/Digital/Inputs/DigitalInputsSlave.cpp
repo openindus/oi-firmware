@@ -25,17 +25,17 @@ IsrCallback_t DigitalInputsSlave::_isrCallback[] = {
 int DigitalInputsSlave::init() {
     
     ModuleSlave::addCtrlCallback(CONTROL_DIGITAL_READ, [](std::vector<uint8_t>& data) { 
-        int level = DigitalInputs::digitalRead((DigitalInputNum_t)data[1]);
+        int level = DigitalInputs::digitalRead((DIn_Num_t)data[1]);
         data.push_back(static_cast<uint8_t>(level));
     });
 
     ModuleSlave::addCtrlCallback(CONTROL_ATTACH_INTERRUPT, [](std::vector<uint8_t>& data) { 
-        DigitalInputs::attachInterrupt((DigitalInputNum_t)data[1], _isrCallback[data[1]], (InterruptMode_t)data[2]);
+        DigitalInputs::attachInterrupt((DIn_Num_t)data[1], _isrCallback[data[1]], (InterruptMode_t)data[2]);
         data.clear();
     });
 
     ModuleSlave::addCtrlCallback(CONTROL_DETACH_INTERRUPT, [](std::vector<uint8_t>& data) { 
-        DigitalInputs::detachInterrupt((DigitalInputNum_t)data[1]);
+        DigitalInputs::detachInterrupt((DIn_Num_t)data[1]);
         data.clear();
     });
     

@@ -32,7 +32,7 @@ static const char TAG[] = "DigitalOutputs";
 
 DOut_Mode_t* DigitalOutputs::_mode;
 uint8_t DigitalOutputs::_nb;
-gpio_num_t* DigitalOutputs::_gpio;
+gpio_num_t* DigitalOutputs::_gpio_num;
 AdcNumChannel_t* DigitalOutputs::_adc_current;
 esp_adc_cal_characteristics_t DigitalOutputs::_adc1Characteristics;
 esp_adc_cal_characteristics_t DigitalOutputs::_adc2Characteristics;
@@ -53,9 +53,9 @@ int DigitalOutputs::init(const gpio_num_t *gpio, const AdcNumChannel_t *adc, int
     /* Save number of DOUT */
     _nb = nb;
     
-    /* Init memory and copy gpio numbers in _gpio table */
-    _gpio = (gpio_num_t*) calloc(nb, sizeof(gpio_num_t));
-    memcpy(_gpio, gpio, nb * sizeof(gpio_num_t));
+    /* Init memory and copy gpio numbers in _gpio_num table */
+    _gpio_num = (gpio_num_t*) calloc(nb, sizeof(gpio_num_t));
+    memcpy(_gpio_num, gpio, nb * sizeof(gpio_num_t));
     
     /* Init memory and copy adc channels in _adc_current table */
     _adc_current = (AdcNumChannel_t*) calloc(nb, sizeof(AdcNumChannel_t));
@@ -74,7 +74,7 @@ int DigitalOutputs::init(const gpio_num_t *gpio, const AdcNumChannel_t *adc, int
         .intr_type = GPIO_INTR_DISABLE,
     };
     for (uint8_t i = 0; i < _nb; i++) {
-        doutConf.pin_bit_mask |= (1ULL <<_gpio[i]);
+        doutConf.pin_bit_mask |= (1ULL <<_gpio_num[i]);
     }
     err |= gpio_config(&doutConf);
     
@@ -115,7 +115,7 @@ void DigitalOutputs::digitalWrite(DOut_Num_t num, uint8_t level)
         xSemaphoreTake(_mutex, portMAX_DELAY);
         _level[num] = level; // Stor level 
         xSemaphoreGive(_mutex);
-        gpio_set_level(_gpio[num], level); // Set level
+        gpio_set_level(_gpio_num[num], level); // Set level
     } else {
         ESP_LOGE(TAG, "Invalid DOUT_%d", num+1);
     }
@@ -124,7 +124,7 @@ void DigitalOutputs::digitalWrite(DOut_Num_t num, uint8_t level)
 void DigitalOutputs::toggleOutput(DOut_Num_t num)
 {
     if (num < _nb) {
-        int level = (gpio_get_level(_gpio[num]) == 1 ? 0 : 1); // Read level
+        int level = (gpio_get_level(_gpio_num[num]) == 1 ? 0 : 1); // Read level
         xSemaphoreTake(_mutex, portMAX_DELAY);
         _level[num] = level; // Stor level 
         xSemaphoreGive(_mutex);
@@ -164,7 +164,7 @@ void DigitalOutputs::setPWMFrequency(DOut_Num_t num, uint32_t freq)
         ESP_ERROR_CHECK(ledc_timer_config(&ledcTimer));
 
         ledc_channel_config_t ledcChannel = {
-            .gpio_num           = _gpio[num],
+            .gpio_num           = _gpio_num[num],
             .speed_mode         = LEDC_LOW_SPEED_MODE,
             .channel            = (ledc_channel_t)(LEDC_CHANNEL_0 + num),
             .intr_type          = LEDC_INTR_DISABLE,
@@ -277,13 +277,13 @@ void DigitalOutputs::_controlTask(void *pvParameters)
             // If error happened
             if (current > 4.0f) {
                 ESP_LOGE(TAG, "Current on DOUT_%u is too high: %.2fA", i+1, current);
-                gpio_set_level(DigitalOutputs::_gpio[i], 0);
+                gpio_set_level(DigitalOutputs::_gpio_num[i], 0);
                 state[i] = 1;
             } else if (state[i] == 10) { // Retry after 10 loops
                 state[i] = 0;
                 // Set output at user choice (do not set HIGH if user setted this pin LOW during error)
                 xSemaphoreTake(_mutex, portMAX_DELAY);
-                gpio_set_level(DigitalOutputs::_gpio[i] , DigitalOutputs::_level[i]);
+                gpio_set_level(DigitalOutputs::_gpio_num[i] , DigitalOutputs::_level[i]);
                 xSemaphoreGive(_mutex);
             } else if (state[i] != 0) { // increase error counter to reach 10
                 state[i]++;
@@ -301,13 +301,13 @@ void DigitalOutputs::_controlTask(void *pvParameters)
             ESP_LOGE(TAG, "Total current is too high: %.2fA", currentSum);
             // Set all DOUT to 0;
             for (uint8_t i = 0; i < DigitalOutputs::_nb; i++) {
-                gpio_set_level(DigitalOutputs::_gpio[i], 0);
+                gpio_set_level(DigitalOutputs::_gpio_num[i], 0);
             }
         } else if (currentSumState == -1) { // When off for two minute, reactivate outputs
             // Set all DOUT to wanted value;
             for (uint8_t i = 0; i < DigitalOutputs::_nb; i++) {
                 xSemaphoreTake(_mutex, portMAX_DELAY);
-                gpio_set_level(DigitalOutputs::_gpio[i] , DigitalOutputs::_level[i]);
+                gpio_set_level(DigitalOutputs::_gpio_num[i] , DigitalOutputs::_level[i]);
                 xSemaphoreGive(_mutex);
             }
         }

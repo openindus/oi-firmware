@@ -16,14 +16,14 @@
 
 #if !defined(MODULE_STANDALONE) && !defined(MODULE_SLAVE)
 
-int DigitalInputsControl::digitalRead(DigitalInputNum_t num)
+int DigitalInputsControl::digitalRead(DIn_Num_t num)
 {
     std::vector<uint8_t> msgBytes = {CONTROL_DIGITAL_READ, (uint8_t)num};
     _control->ctrlRequest(msgBytes);
     return static_cast<int>(msgBytes[2]);
 }
 
-void DigitalInputsControl::attachInterrupt(DigitalInputNum_t num, IsrCallback_t callback, InterruptMode_t mode)
+void DigitalInputsControl::attachInterrupt(DIn_Num_t num, IsrCallback_t callback, InterruptMode_t mode)
 {
     std::vector<uint8_t> msgBytes = {CONTROL_ATTACH_INTERRUPT, (uint8_t)num, (uint8_t)mode};
     _isrCallback[num] = callback;
@@ -31,7 +31,7 @@ void DigitalInputsControl::attachInterrupt(DigitalInputNum_t num, IsrCallback_t 
     _control->ctrlRequest(msgBytes);
 }
 
-void DigitalInputsControl::detachInterrupt(DigitalInputNum_t num)
+void DigitalInputsControl::detachInterrupt(DIn_Num_t num)
 {
     std::vector<uint8_t> msgBytes = {CONTROL_DETACH_INTERRUPT, (uint8_t)num};
     _control->ctrlRequest(msgBytes);

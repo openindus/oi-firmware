@@ -35,9 +35,13 @@ static int _digitalRead(int argc, char **argv)
         return -1;
     }
 
-    DigitalInputNum_t din = (DigitalInputNum_t)(_digitalReadArgs.din->ival[0] - 1);
+    DIn_Num_t din = (DIn_Num_t)(_digitalReadArgs.din->ival[0] - 1);
 
+#if !defined(OI_CORE)
     printf("%d\n", DigitalInputs::digitalRead(din));
+#else
+    printf("%d\n", DigitalInputsExp::digitalRead(din));
+#endif
 
     return 0;
 }

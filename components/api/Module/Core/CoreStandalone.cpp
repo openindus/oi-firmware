@@ -154,7 +154,7 @@ int CoreStandalone::init()
      * @brief DIN Init
      * 
      */
-    err |= DigitalInputs::init(&_ioex, _dinGpio, 4);
+    err |= DigitalInputsExp::init(&_ioex, _dinGpio, 4);
 
 
     /**

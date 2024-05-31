@@ -110,7 +110,7 @@ private:
     static uint8_t _nb; 
     
     /* GPIO num for DOUT */
-    static gpio_num_t* _gpio;
+    static gpio_num_t* _gpio_num;
 
     /* ADC Channel for ouput current */
     static AdcNumChannel_t* _adc_current;

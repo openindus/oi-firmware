@@ -51,10 +51,10 @@ static int limitSwitch(int argc, char **argv)
     }
 
     MotorNum_t motor = (MotorNum_t)(limitSwitchArgs.motor->ival[0] - 1);
-    DigitalInputNum_t din = (DigitalInputNum_t)(limitSwitchArgs.din->ival[0] - 1);
+    DIn_Num_t din = (DIn_Num_t)(limitSwitchArgs.din->ival[0] - 1);
 
     if (limitSwitchArgs.logic->count > 0) {
-        DigitalInputLogic_t logic = (DigitalInputLogic_t)(limitSwitchArgs.logic->ival[0]);
+        Logic_t logic = (Logic_t)(limitSwitchArgs.logic->ival[0]);
         MotorStepper::attachLimitSwitch(motor, din, logic);
     } else {
         MotorStepper::attachLimitSwitch(motor, din);

@@ -23,13 +23,13 @@ MotorStepperControl::MotorStepperControl(ModuleControl* control) : _control(cont
     _motorWaitEvent[MOTOR_2] = xQueueCreate(1, 0);
 }
 
-void MotorStepperControl::attachLimitSwitch(MotorNum_t motor, DigitalInputNum_t din, DigitalInputLogic_t logic)
+void MotorStepperControl::attachLimitSwitch(MotorNum_t motor, DIn_Num_t din, Logic_t logic)
 {
     std::vector<uint8_t> msgBytes = {CONTROL_MOTOR_ATTACH_LIMIT_SWITCH, (uint8_t)motor, (uint8_t)din, (uint8_t)logic};
     _control->ctrlRequest(msgBytes);
 }
 
-void MotorStepperControl::detachLimitSwitch(MotorNum_t motor, DigitalInputNum_t din)
+void MotorStepperControl::detachLimitSwitch(MotorNum_t motor, DIn_Num_t din)
 {
     std::vector<uint8_t> msgBytes = {CONTROL_MOTOR_DETACH_LIMIT_SWITCH, (uint8_t)motor, (uint8_t)din};
     _control->ctrlRequest(msgBytes);

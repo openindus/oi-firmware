@@ -1,71 +1,21 @@
 /**
- * Copyright (C) OpenIndus, Inc - All Rights Reserved
- *
- * This file is part of OpenIndus Library.
- *
- * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential
- * 
- * @file DigitalInputs.h
- * @brief Functions for discrete module
- *
- * For more information on OpenIndus:
+ * @file DigitalInputsExp.h
+ * @brief Digital input expander
+ * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
+ * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
 
 #pragma once
 
 #include "Global.h"
+#include "DigitalInputs.h"
 
-/**
- * @brief Digital Inputs Numbers
- * 
- */
-typedef enum {
-    DIN_1 = 0,
-    DIN_2,
-    DIN_3,
-    DIN_4,
-    DIN_5,
-    DIN_6,
-    DIN_7,
-    DIN_8,
-    DIN_9,
-    DIN_10,
-    DIN_MAX
-} DIn_Num_t;
-
-/**
- * @brief Digital Inputs Logic (for configuring sensors)
- * 
- */
-typedef enum {
-    ACTIVE_LOW = 0,
-    ACTIVE_HIGH = 1
-} Logic_t;
-
-/**
- * @brief Digital Inputs Interrupts Modes
- * 
- */
-typedef enum {
-    NONE_MODE = 0,
-    RISING_MODE,
-    FALLING_MODE,
-    CHANGE_MODE
-} InterruptMode_t;
-
-/**
- * @brief Function prototype for attachInterrupt callbacks
- * 
- */
-typedef void (*IsrCallback_t)(void*);
-
-class DigitalInputs
+class DigitalInputsExp
 {
 protected:
 
-    static int init(const gpio_num_t *gpio, int nb);
+    static int init(ioex_device_t **device, const ioex_num_t *num, int nb);
 
 public:
 
@@ -101,10 +51,13 @@ private:
     static uint8_t _nb; 
     
     /* GPIO num for DIN */
-    static gpio_num_t* _gpio_nums;
+    static ioex_num_t* _ioex_nums;
 
     static IsrCallback_t* _callbacks;
     static void** _args;
+
+    /* Stor a local copy of the pointer to an initalized ioex_device_t */
+    static ioex_device_t** _device;
 
     static xQueueHandle _event;
     static void IRAM_ATTR _isr(void* pvParameters);

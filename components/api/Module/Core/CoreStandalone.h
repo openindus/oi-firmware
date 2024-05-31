@@ -18,7 +18,7 @@
 #include "Global.h"
 #include "ModuleStandalone.h"
 #include "DigitalOutputsExp.h"
-#include "DigitalInputs.h"
+#include "DigitalInputsExp.h"
 #include "AnalogInputsHV.h"
 #include "RTClock.h"
 #include "CAN.h"
@@ -28,7 +28,7 @@
 
 class CoreStandalone : 
     public ModuleStandalone, 
-    public DigitalInputs, 
+    public DigitalInputsExp, 
     public DigitalOutputsExp, 
     public AnalogInputsHV
 {
