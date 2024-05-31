@@ -63,9 +63,9 @@ int DiscreteCLI::init(void)
 {
     int err = 0;
 
-    err |= AnalogInputsHVCLI::init();
-    err |= DigitalOutputsCLI::init();
-    err |= DigitalInputsCLI::init();
+    err |= CLI_AInHV::init();
+    err |= CLI_DOut::init();
+    err |= CLI_DIn::init();
 
     return err;
 }
@@ -93,11 +93,11 @@ int DiscreteStandalone::init()
 
 int DiscreteSlave::init(void)
 {
-    int err = ModuleSlave::init();
+    int err = ControlSlave::init();
     err |= DiscreteStandalone::init();
-    err |= AnalogInputsHVSlave::init();
-    err |= DigitalOutputsSlave::init();
-    err |= DigitalInputsSlave::init();
+    err |= ControlSlave_AInHV::init();
+    err |= ControlSlave_DOut::init();
+    err |= ControlSlave_DIn::init();
 
     return err;
 }

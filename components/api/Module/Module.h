@@ -16,25 +16,9 @@
 #pragma once
 
 #include "Global.h"
-
-#define CMD_NOP                     (uint8_t) 0x00
-#define CMD_RESTART                 (uint8_t) 0x01
-#define CMD_PING                    (uint8_t) 0x02
-#define CMD_LED_STATUS              (uint8_t) 0x03
-#define CMD_DISCOVER                (uint8_t) 0x04
-#define CMD_GET_BOARD_INFO          (uint8_t) 0x05
-#define CMD_CONTROL                 (uint8_t) 0x06
-#define CMD_EVENT                   (uint8_t) 0x07
-#define CMD_FLASH_LOADER_BEGIN      (uint8_t) 0x08
-#define CMD_FLASH_LOADER_WRITE      (uint8_t) 0x09
-#define CMD_FLASH_LOADER_CHECK      (uint8_t) 0x0A
-#define CMD_FLASH_LOADER_END        (uint8_t) 0x0B 
-#define CMD_READ_REGISTER           (uint8_t) 0x0C
-// #define CMD_WRITE_REGISTER          (uint8_t) 0x0D
-// #define CMD_READ_NVS                (uint8_t) 0x0E
-// #define CMD_WRITE_NVS               (uint8_t) 0x0F
-// #define CMD_HEARTBEAT               (uint8_t) 0x10
-// #define CMD_AUTO_TEST               (uint8_t) 0x11
+#include "Module.h"
+#include "ModulePinout.h"
+#include "Led.h"
 
 typedef enum {
     STATE_IDLE      = (int) 0,
@@ -79,62 +63,43 @@ public:
     }
 };
 
-enum ModuleCmd_Control_e {
-    /* DIGITAL */
-    CONTROL_DIGITAL_WRITE                   = 0x00,
-    CONTROL_DIGITAL_TOGGLE                  = 0x01,
-    CONTROL_DIGITAL_MODE_PWM                = 0x02,
-    CONTROL_DIGITAL_SET_PWM                 = 0x03,
-    CONTROL_DIGITAL_GET_CURRENT             = 0x04,
-    CONTROL_DIGITAL_GET_OVERCURRENT         = 0x05,
-    CONTROL_DIGITAL_READ                    = 0x06,
-    CONTROL_ATTACH_INTERRUPT                = 0x07,
-    CONTROL_DETACH_INTERRUPT                = 0x08,
+/* Struct can fill an eFuse block of 32 msgBytes */
+typedef struct __attribute__((__packed__)) {
+    uint16_t board_type;
+    uint32_t serial_number;
+    char hardware_version[4]; // AA01
+    int64_t timestamp; // Unix timestamp
+    uint8_t reserved[13];
+    uint8_t checksum;
+} Module_eFuse_Info_t;
 
-    /* ANALOG */
-    CONTROL_ANALOG_INPUT_MODE               = 0x20,
-    CONTROL_ANALOG_INPUT_GET_MODE           = 0x21,
-    CONTROL_ANALOG_INPUT_VOLTAGE_RANGE      = 0x22,
-    CONTROL_ANALOG_INPUT_GET_VOLTAGE_RANGE  = 0x23,
-    CONTROL_ANALOG_READ                     = 0x24,
-    CONTROL_ANALOG_READ_VOLT                = 0x25,
-    CONTROL_ANALOG_READ_MILLIVOLT           = 0x26,
-    CONTROL_ANALOG_READ_AMP                 = 0x27,
-    CONTROL_ANALOG_READ_MILLIAMP            = 0x28,
-    CONTROL_ANALOG_OUTPUT_MODE              = 0x29,
-    CONTROL_ANALOG_WRITE                    = 0x2A,
+typedef struct {
+    Module_eFuse_Info_t efuse;
+    char software_version[32];
+} Module_Info_t;
 
-    /* STEPPER MOTOR */
-    CONTROL_MOTOR_STOP                      = 0x40,
-    CONTROL_MOTOR_MOVE_ABSOLUTE             = 0x41,
-    CONTROL_MOTOR_MOVE_RELATIVE             = 0x42,
-    CONTROL_MOTOR_RUN                       = 0x43,
-    CONTROL_MOTOR_WAIT                      = 0x44,
-    CONTROL_MOTOR_HOMING                    = 0x45,
-    CONTROL_MOTOR_ATTACH_LIMIT_SWITCH       = 0x46,
-    CONTROL_MOTOR_DETACH_LIMIT_SWITCH       = 0x47,
-    CONTROL_MOTOR_SET_STEP_RESOLUTION       = 0x48,
-    CONTROL_MOTOR_GET_POSITION              = 0x49,
-    CONTROL_MOTOR_GET_SPEED                 = 0x4A,
-    CONTROL_MOTOR_RESET_HOME_POSITION       = 0x4B,
-    CONTROL_MOTOR_SET_MAX_SPEED             = 0x4C,
-    CONTROL_MOTOR_SET_MIN_SPEED             = 0x4D,
-    CONTROL_MOTOR_SET_FULL_STEP_SPEED       = 0x4E,
-    CONTROL_MOTOR_SET_ACCELERATION          = 0x4F,
-    CONTROL_MOTOR_SET_DECELERATION          = 0x50,
+class ModuleStandalone
+{
+public:
 
-    /* BRUSHLESS MOTOR */
-    CONTROL_MOTOR_SET_SPEED                 = 0x60,
-    CONTROL_MOTOR_SET_BRAKE                 = 0x61,
-    CONTROL_MOTOR_SET_DIRECTION             = 0x62,
+    static int init(uint16_t type);
 
-    /* ENCODER */
-    CONTROL_ENCODER_GET_DIRECTION           = 0x81,
-    CONTROL_ENCODER_GET_POSITION            = 0x82,
-    CONTROL_ENCODER_GET_SPEED               = 0x83,
-};
+    static void restart(void);
+    static void ledOn(LedColor_t color);
+    static void ledOff(void);
+    static void ledBlink(LedColor_t color, uint32_t period);
+    static float getTemperature(void);
+    static uint16_t getBoardType(void);
+    static uint32_t getSerialNum(void);
+    static void getHardwareVersion(char hardware_version[4]);
+    static int64_t getTimestamp(void);
+    static void getSoftwareVersion(char software_version[32]);
+    static bool setBoardInfo(uint16_t board_type, uint32_t serial_num, char hardware_version[4], int64_t timestamp);
 
-enum ModuleCmd_Event_e {
-    EVENT_DIGITAL_INTERRUPT                 = 0x00,
-    EVENT_MOTOR_READY                       = 0x01,
+private:
+
+    static uint8_t _calculate_eFuse_checksum(uint8_t* data);
+    static bool _verify_eFuse_checksum(Module_eFuse_Info_t info);
+    static uint16_t _type;
+
 };

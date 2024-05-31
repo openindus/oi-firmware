@@ -16,7 +16,7 @@
 #pragma once
 
 #include "Global.h"
-#include "ModuleStandalone.h"
+#include "Module.h"
 #include "DigitalOutputsExp.h"
 #include "DigitalInputsExp.h"
 #include "AnalogInputsHV.h"

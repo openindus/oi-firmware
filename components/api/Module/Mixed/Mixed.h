@@ -19,31 +19,31 @@
 
 #if defined(OI_MIXED)
 #include "MixedPinout.h"
-#include "AnalogOutputsCLI.h"
-#include "AnalogInputsLVCLI.h"
-#include "DigitalInputsCLI.h"
-#include "DigitalOutputsCLI.h"
+#include "CLI_AOut.h"
+#include "CLI_AInLV.h"
+#include "CLI_DIn.h"
+#include "CLI_DOut.h"
 #endif
 
 #if defined(OI_MIXED) && defined(MODULE_STANDALONE)
 #define Mixed MixedStandalone
 #elif defined(OI_MIXED) && defined(MODULE_SLAVE)
 #define Mixed MixedSlave
-#include "AnalogOutputsSlave.h"
-#include "AnalogInputsLVSlave.h"
-#include "DigitalInputsSlave.h"
-#include "DigitalOutputsSlave.h"
+#include "ControlSlave_AOut.h"
+#include "ControlSlave_AInLV.h"
+#include "ControlSlave_DIn.h"
+#include "ControlSlave_DOut.h"
 #elif defined(MODULE_MASTER) 
 #define Mixed MixedControl
-#include "AnalogOutputsControl.h"
-#include "AnalogInputsLVControl.h"
-#include "DigitalInputsControl.h"
-#include "DigitalOutputsControl.h"
+#include "ControlCmd_AOut.h"
+#include "ControlCmd_AInLV.h"
+#include "ControlCmd_DIn.h"
+#include "ControlCmd_DOut.h"
 #endif
 
 #if defined(OI_MIXED)
 
-class MixedCLI : public AnalogOutputsCLI, public AnalogInputsLVCLI, public DigitalInputsCLI, public DigitalOutputsCLI
+class MixedCLI : public CLI_AOut, public CLI_AInLV, public CLI_DIn, public CLI_DOut
 {
 public:
 
@@ -60,7 +60,7 @@ public:
 
 #if defined(OI_MIXED) && defined(MODULE_SLAVE)
 
-class MixedSlave : public ModuleSlave, public MixedStandalone, public AnalogOutputsSlave, public AnalogInputsLVSlave, public DigitalInputsSlave, public DigitalOutputsSlave
+class MixedSlave : public ControlSlave, public MixedStandalone, public ControlSlave_AOut, public ControlSlave_AInLV, public ControlSlave_DIn, public ControlSlave_DOut
 {
 public:
 
@@ -69,16 +69,16 @@ public:
 
 #elif defined(MODULE_MASTER)
 
-class MixedControl : public ModuleControl, public AnalogOutputsControl, public AnalogInputsLVControl, public DigitalInputsControl, public DigitalOutputsControl
+class MixedControl : public ControlCmd, public ControlCmd_AOut, public ControlCmd_AInLV, public ControlCmd_DIn, public ControlCmd_DOut
 {
 public:
 
     MixedControl(uint32_t sn = 0) : 
-        ModuleControl(TYPE_OI_MIXED , sn),
-        AnalogOutputsControl(this),
-        AnalogInputsLVControl(this),
-        DigitalInputsControl(this),
-        DigitalOutputsControl(this) {}
+        ControlCmd(TYPE_OI_MIXED , sn),
+        ControlCmd_AOut(this),
+        ControlCmd_AInLV(this),
+        ControlCmd_DIn(this),
+        ControlCmd_DOut(this) {}
 };
 #endif
 

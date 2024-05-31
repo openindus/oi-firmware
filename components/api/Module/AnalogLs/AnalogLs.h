@@ -7,15 +7,3 @@
  */
 
 #pragma once
-
-#include "AnalogLsStandalone.h"
-#include "AnalogLsSlave.h"
-#include "AnalogLsControl.h"
-
-#if defined(OI_ANALOG_LS) && defined(MODULE_STANDALONE)
-#define AnalogLs AnalogLsStandalone
-#elif defined(OI_ANALOG_LS) && !defined(MODULE_STANDALONE)
-#define AnalogLs AnalogLsSlave
-#else 
-#define AnalogLs AnalogLsControl
-#endif

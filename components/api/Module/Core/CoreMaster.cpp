@@ -21,7 +21,7 @@ static const char CORE_TAG[] = "Core";
 
 int CoreMaster::init(void)
 {
-    int err = ModuleMaster::init();
+    int err = ControlMaster::init();
     err |= CoreStandalone::init();
 
     return err;

@@ -35,7 +35,7 @@ void System::init(void)
     /* Module init */
 #if defined(OI_CORE)
     err |= Core::init();
-    err |= CoreCLI::init();
+    err |= CLI_Core::init();
 #elif defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)
     err |= Discrete::init();
     err |= DiscreteCLI::init();
@@ -45,16 +45,10 @@ void System::init(void)
 #elif defined(OI_MIXED)
     err |= Mixed::init();
     err |= MixedCLI::init();
-#elif defined(OI_RELAY_HP) || defined(OI_RELAY_LP)
-    err |= Relay::init();
-#elif defined(OI_BRUSHLESS)
-    err |= Brushless::init();
-#elif defined(OI_ANALOG_LS)
-    err |= AnalogLs::init();
 #endif
 
-    err |= ModuleCLI::init();
-    err |= SystemCLI::init();
+    err |= CLI_Module::init();
+    err |= CLI::init();
 
     if (err != 0) {
         ESP_LOGE(TAG, "Failed to initialize module");
@@ -92,7 +86,7 @@ void System::init(void)
 
     /* On master module, call autoId */
 #if defined(MODULE_MASTER)
-    if (ModuleMaster::autoId()) {
+    if (ControlMaster::autoId()) {
         ModuleStandalone::ledBlink(LED_GREEN, 1000); // Paired
     } else {
         ModuleStandalone::ledBlink(LED_RED, 1000); // Paired error

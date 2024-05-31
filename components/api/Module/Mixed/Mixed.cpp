@@ -67,10 +67,10 @@ int MixedCLI::init(void)
 {
     int err = 0;
 
-    err |= AnalogOutputsCLI::init();
-    err |= AnalogInputsLVCLI::init();
-    err |= DigitalOutputsCLI::init();
-    err |= DigitalInputsCLI::init();
+    err |= CLI_AOut::init();
+    err |= CLI_AInLV::init();
+    err |= CLI_DOut::init();
+    err |= CLI_DIn::init();
 
     return err;
 }
@@ -128,12 +128,12 @@ int MixedSlave::init(void)
 {
     int err = 0;
 
-    err |= ModuleSlave::init();
+    err |= ControlSlave::init();
     err |= MixedStandalone::init();
-    err |= AnalogOutputsSlave::init();
-    err |= AnalogInputsLVSlave::init();
-    err |= DigitalOutputsSlave::init();
-    err |= DigitalInputsSlave::init();
+    err |= ControlSlave_AOut::init();
+    err |= ControlSlave_AInLV::init();
+    err |= ControlSlave_DOut::init();
+    err |= ControlSlave_DIn::init();
 
     return err;
 }

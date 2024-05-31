@@ -17,11 +17,11 @@
 
 #include "Global.h"
 #include "CoreStandalone.h"
-#include "ModuleMaster.h"
+#include "ControlMaster.h"
 
 #if defined(OI_CORE)
 
-class CoreMaster: public CoreStandalone, public ModuleMaster
+class CoreMaster: public CoreStandalone, public ControlMaster
 {
 public:
 
