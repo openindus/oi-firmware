@@ -20,12 +20,6 @@
 #include "ModulePinout.h"
 #include "Led.h"
 
-typedef enum {
-    STATE_IDLE      = (int) 0,
-    STATE_RUNNING   = (int) 1,
-    STATE_ERROR     = (int) 2
-} Module_State_t;
-
 enum ModuleType_List_e {
     TYPE_OI_CORE            = (uint16_t) 3,
     TYPE_OI_CORELITE        = (uint16_t) 4,

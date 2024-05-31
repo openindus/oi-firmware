@@ -88,3 +88,10 @@ enum Control_Event_e {
     EVENT_DIGITAL_INTERRUPT                 = 0x00,
     EVENT_MOTOR_READY                       = 0x01,
 };
+
+typedef enum {
+    STATE_UNDEFINED = (int) -1,
+    STATE_IDLE      = (int) 0,
+    STATE_RUNNING   = (int) 1,
+    STATE_ERROR     = (int) 2
+} Control_State_t;

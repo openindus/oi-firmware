@@ -46,7 +46,7 @@ public:
 
 private:
 
-    static Module_State_t _state;
+    static Control_State_t _state;
     static TaskHandle_t _taskHandle;
 
     // List of ids and serial number received via CMD_DISCOVER < ID < TYPE, SN > >

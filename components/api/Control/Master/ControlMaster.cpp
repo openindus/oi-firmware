@@ -20,7 +20,7 @@
 
 static const char TAG[] = "Module";
 
-Module_State_t ControlMaster::_state = STATE_IDLE;
+Control_State_t ControlMaster::_state = STATE_IDLE;
 TaskHandle_t ControlMaster::_taskHandle = NULL;
 std::map<uint16_t, std::pair<uint16_t, uint32_t>, std::greater<uint16_t>> ControlMaster::_ids;
 

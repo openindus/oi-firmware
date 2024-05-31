@@ -112,10 +112,14 @@ int DigitalOutputs::init(const gpio_num_t *gpio, const AdcNumChannel_t *adc, int
 void DigitalOutputs::digitalWrite(DOut_Num_t num, uint8_t level)
 {
     if (num < _nb) {
-        xSemaphoreTake(_mutex, portMAX_DELAY);
-        _level[num] = level; // Stor level 
-        xSemaphoreGive(_mutex);
-        gpio_set_level(_gpio_num[num], level); // Set level
+        if (_mode[num] == DOUT_MODE_DIGITAL) {
+            xSemaphoreTake(_mutex, portMAX_DELAY);
+            _level[num] = level; // Stor level 
+            xSemaphoreGive(_mutex);
+            gpio_set_level(_gpio_num[num], level); // Set level
+        } else {
+            ESP_LOGE(TAG, "Invalid output mode");
+        }
     } else {
         ESP_LOGE(TAG, "Invalid DOUT_%d", num+1);
     }
@@ -124,11 +128,15 @@ void DigitalOutputs::digitalWrite(DOut_Num_t num, uint8_t level)
 void DigitalOutputs::toggleOutput(DOut_Num_t num)
 {
     if (num < _nb) {
-        int level = (gpio_get_level(_gpio_num[num]) == 1 ? 0 : 1); // Read level
-        xSemaphoreTake(_mutex, portMAX_DELAY);
-        _level[num] = level; // Stor level 
-        xSemaphoreGive(_mutex);
-        digitalWrite(num, level); // Write level
+        if (_mode[num] == DOUT_MODE_DIGITAL) {
+            int level = (gpio_get_level(_gpio_num[num]) == 1 ? 0 : 1); // Read level
+            xSemaphoreTake(_mutex, portMAX_DELAY);
+            _level[num] = level; // Stor level 
+            xSemaphoreGive(_mutex);
+            digitalWrite(num, level); // Write level
+        } else {
+            ESP_LOGE(TAG, "Invalid output mode");
+        }
     } else {
         ESP_LOGE(TAG, "Invalid DOUT_%d", num+1);
     }
@@ -146,36 +154,40 @@ void DigitalOutputs::outputMode(DOut_Num_t num, DOut_Mode_t mode)
 void DigitalOutputs::setPWMFrequency(DOut_Num_t num, uint32_t freq)
 {
     if (num < _nb) {
-        if (freq > DOUT_PWM_MAX_FREQUENCY_HZ) {
-            ESP_LOGE(TAG, "To high frequency %d, max is %d", freq, DOUT_PWM_MAX_FREQUENCY_HZ);
-            return;
-        } else if (freq < DOUT_PWM_MIN_FREQUENCY_HZ) {
-            ESP_LOGE(TAG, "To low frequency %d, min is %d", freq, DOUT_PWM_MIN_FREQUENCY_HZ);
-            return;
-        }
-
-        ledc_timer_config_t ledcTimer = {
-            .speed_mode = LEDC_LOW_SPEED_MODE,
-            .duty_resolution = LEDC_TIMER_14_BIT,
-            .timer_num = LEDC_TIMER_1,
-            .freq_hz = freq,
-            .clk_cfg = LEDC_AUTO_CLK,
-        };
-        ESP_ERROR_CHECK(ledc_timer_config(&ledcTimer));
-
-        ledc_channel_config_t ledcChannel = {
-            .gpio_num           = _gpio_num[num],
-            .speed_mode         = LEDC_LOW_SPEED_MODE,
-            .channel            = (ledc_channel_t)(LEDC_CHANNEL_0 + num),
-            .intr_type          = LEDC_INTR_DISABLE,
-            .timer_sel          = LEDC_TIMER_1,
-            .duty               = 0,
-            .hpoint             = 0,
-            .flags {
-                .output_invert  = 0
+        if (_mode[num] == DOUT_MODE_PWM) {
+            if (freq > DOUT_PWM_MAX_FREQUENCY_HZ) {
+                ESP_LOGE(TAG, "To high frequency %d, max is %d", freq, DOUT_PWM_MAX_FREQUENCY_HZ);
+                return;
+            } else if (freq < DOUT_PWM_MIN_FREQUENCY_HZ) {
+                ESP_LOGE(TAG, "To low frequency %d, min is %d", freq, DOUT_PWM_MIN_FREQUENCY_HZ);
+                return;
             }
-        };
-        ESP_ERROR_CHECK(ledc_channel_config(&ledcChannel));
+
+            ledc_timer_config_t ledcTimer = {
+                .speed_mode = LEDC_LOW_SPEED_MODE,
+                .duty_resolution = LEDC_TIMER_14_BIT,
+                .timer_num = LEDC_TIMER_1,
+                .freq_hz = freq,
+                .clk_cfg = LEDC_AUTO_CLK,
+            };
+            ESP_ERROR_CHECK(ledc_timer_config(&ledcTimer));
+
+            ledc_channel_config_t ledcChannel = {
+                .gpio_num           = _gpio_num[num],
+                .speed_mode         = LEDC_LOW_SPEED_MODE,
+                .channel            = (ledc_channel_t)(LEDC_CHANNEL_0 + num),
+                .intr_type          = LEDC_INTR_DISABLE,
+                .timer_sel          = LEDC_TIMER_1,
+                .duty               = 0,
+                .hpoint             = 0,
+                .flags {
+                    .output_invert  = 0
+                }
+            };
+            ESP_ERROR_CHECK(ledc_channel_config(&ledcChannel));
+        } else {
+            ESP_LOGE(TAG, "Invalid output mode");
+        }
     } else {
         ESP_LOGE(TAG, "Invalid DOUT_%d", num+1);
         return;
@@ -185,8 +197,12 @@ void DigitalOutputs::setPWMFrequency(DOut_Num_t num, uint32_t freq)
 void DigitalOutputs::setPWMDutyCycle(DOut_Num_t num, uint32_t duty)
 {
     if (num < _nb) {
-        ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, duty);
-        ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0);
+        if (_mode[num] == DOUT_MODE_PWM) {
+            ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, duty);
+            ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0);
+        } else {
+            ESP_LOGE(TAG, "Invalid output mode");
+        }
     } else {
         ESP_LOGE(TAG, "Invalid DOUT_%d", num+1);
     }

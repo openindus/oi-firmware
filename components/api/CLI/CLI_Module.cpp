@@ -444,6 +444,8 @@ static int moduleGetStatusCmd(int argc, char **argv)
     state = ControlMaster::getStatus();
 #elif defined(MODULE_SLAVE)
     state = ControlSlave::getStatus();
+#else 
+    state = STATE_UNDEFINED;
 #endif
 
     switch (state) {
@@ -457,7 +459,7 @@ static int moduleGetStatusCmd(int argc, char **argv)
             printf("Module state: ERROR\n");
             break;
         default:
-            printf("Module state: UNKNOWN\n");
+            printf("Module state: UNDEFINED\n");
             break;
     }
 

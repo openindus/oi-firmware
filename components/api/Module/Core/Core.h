@@ -15,6 +15,8 @@
 
 #pragma once
 
+#include "Global.h"
+#include "Module.h"
 #include "CoreStandalone.h"
 #include "CoreMaster.h"
 #include "CLI_Core.h"

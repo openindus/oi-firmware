@@ -9,3 +9,4 @@
 #pragma once
 
 #include "Relay.h"
+#include "Module.h"

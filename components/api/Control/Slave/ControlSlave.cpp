@@ -20,7 +20,7 @@
 static const char TAG[] = "Module";
 
 uint16_t ControlSlave::_id;
-Module_State_t ControlSlave::_state = STATE_IDLE;
+Control_State_t ControlSlave::_state = STATE_IDLE;
 TaskHandle_t ControlSlave::_taskHandle = NULL;
 std::map<uint8_t, std::function<void(std::vector<uint8_t>&)>> ControlSlave::_ctrlCallbacks;
 

@@ -16,6 +16,7 @@
 #pragma once
 
 #include "Global.h"
+#include "Module.h"
 
 #if defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)
 #include "DiscretePinout.h"
