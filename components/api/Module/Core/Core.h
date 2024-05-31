@@ -17,7 +17,7 @@
 
 #include "CoreStandalone.h"
 #include "CoreMaster.h"
-#include "CoreCLI.h"
+#include "CLI_Core.h"
 
 #if defined(OI_CORE) && defined(MODULE_STANDALONE)
 #define Core CoreStandalone

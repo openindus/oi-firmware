@@ -34,9 +34,9 @@ int StepperCLI::init(void)
 {
     int err = 0;
 
-    err |= DigitalInputsCLI::init();
-    err |= MotorStepperCLI::init();
-    err |= MotorStepperParamCLI::init();
+    err |= CLI_DIn::init();
+    err |= CLI_Stepper::init();
+    err |= CLI_StepperParam::init();
 
     return err;
 }
@@ -84,10 +84,10 @@ int StepperSlave::init(void)
 {
     int err = 0;
 
-    err |= ModuleSlave::init();
+    err |= ControlSlave::init();
     err |= StepperStandalone::init();
-    err |= DigitalInputsSlave::init();
-    err |= MotorStepperSlave::init();
+    err |= ControlSlave_DIn::init();
+    err |= ControlSlave_Stepper::init();
 
     return err;
 }
