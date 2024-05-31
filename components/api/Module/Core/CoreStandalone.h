@@ -37,8 +37,8 @@ public:
     static int init(void);
 
     /* External bus */
-    static OI::CAN can;
-    static OI::RS rs;
+    static CAN can;
+    static RS rs;
 
 private:
 

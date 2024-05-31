@@ -8,7 +8,7 @@ void setup(void)
     Serial.begin(115200);
     
     /* Init RS */
-    core.rs.begin(OI::RS_485);
+    core.rs.begin(RS_485);
 }
 
 void loop(void)

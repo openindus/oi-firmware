@@ -1,8 +1,6 @@
 #include "OpenIndus.h"
 #include "Arduino.h"
 
-using namespace OI;
-
 #define NODE_ID 11
 
 OICore core;

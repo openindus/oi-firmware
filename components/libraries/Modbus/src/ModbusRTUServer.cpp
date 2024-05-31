@@ -30,7 +30,7 @@ ModbusRTUServerClass::ModbusRTUServerClass()
 {
 }
 
-ModbusRTUServerClass::ModbusRTUServerClass(OI::RS& rs485) : _rs485(&rs485)
+ModbusRTUServerClass::ModbusRTUServerClass(RS& rs485) : _rs485(&rs485)
 {
 }
 
@@ -51,7 +51,7 @@ int ModbusRTUServerClass::begin(int id, unsigned long baudrate, uint32_t config)
   return 1;
 }
 
-int ModbusRTUServerClass::begin(OI::RS& rs485, int id, unsigned long baudrate, uint32_t config)
+int ModbusRTUServerClass::begin(RS& rs485, int id, unsigned long baudrate, uint32_t config)
 {
   _rs485 = &rs485;
   return begin(id, baudrate, config);

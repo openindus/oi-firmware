@@ -26,7 +26,7 @@
 class ModbusRTUClientClass : public ModbusClient {
 public:
   ModbusRTUClientClass();
-  ModbusRTUClientClass(OI::RS& rs485);
+  ModbusRTUClientClass(RS& rs485);
   virtual ~ModbusRTUClientClass();
 
   /**
@@ -38,10 +38,10 @@ public:
    * Return 1 on success, 0 on failure
    */
   int begin(unsigned long baudrate, uint32_t config = SERIAL_8N1);
-  int begin(OI::RS& rs485, unsigned long baudrate, uint32_t config = SERIAL_8N1);
+  int begin(RS& rs485, unsigned long baudrate, uint32_t config = SERIAL_8N1);
 
 private:
-  OI::RS* _rs485 = &CoreStandalone::rs;
+  RS* _rs485 = &CoreStandalone::rs;
 
 };
 
