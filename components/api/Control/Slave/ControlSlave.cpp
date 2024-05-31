@@ -137,13 +137,13 @@ void ControlSlave::_busTask(void *pvParameters)
             case CMD_GET_BOARD_INFO:
             {
                 if (frame.id == _id) {
-                    Module_Info_t board_info;
+                    Board_Info_t board_info;
                     board_info.efuse.board_type = ModuleStandalone::getBoardType();
                     board_info.efuse.serial_number = ModuleStandalone::getSerialNum();
                     ModuleStandalone::getHardwareVersion(board_info.efuse.hardware_version);
                     ModuleStandalone::getSoftwareVersion(board_info.software_version);
-                    memcpy(frame.data, &board_info, sizeof(Module_Info_t));
-                    frame.length = sizeof(Module_Info_t);
+                    memcpy(frame.data, &board_info, sizeof(Board_Info_t));
+                    frame.length = sizeof(Board_Info_t);
                     frame.dir = 0;
                     frame.ack = false;
                     frame.id = _id;

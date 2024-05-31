@@ -13,7 +13,7 @@
  * @see https://openindus.com
  */
 
-#include "CoreStandalone.h"
+#include "Core.h"
 #include "CorePinout.h"
 
 #if defined(OI_CORE)
@@ -267,7 +267,6 @@ void CoreStandalone::_controlTask(void *pvParameters)
     /* Every 500ms check if there is a power error (5V User or 5V USB)
     If output is in error: desactivate for 5 secondes then retry */
 
-    uint8_t user_power = 0;
     uint8_t usb_power = 0;
 
     while(1) 

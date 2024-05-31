@@ -1,5 +1,5 @@
 /**
- * @file CLI.h
+ * @file CLI_Control.h
  * @brief Command line interface
  * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
  * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
@@ -9,21 +9,13 @@
 #pragma once
 
 #include "Global.h"
-#include "CLI_Led.h"
-#include "CLI_Bus.h"
 
-class CLI_Module : 
-    public CLI_Led,
-    public CLI_Bus
+class CLI_Control
 {
 public: 
 
     static inline int init(void) {
         int err = 0;
-        err |= CLI_Led::init();
-        err |= CLI_Bus::init();
-        err |= _registerSetBoardInfoCmd();
-        err |= _registerGetBoardInfoCmd();
 #if defined(MODULE_MASTER)
         err |= _registerPingCmd();
         err |= _registerProgramCmd();
@@ -32,17 +24,15 @@ public:
         err |= _registerGetSlaveInfoCmd();
 #endif
 #if !defined(MODULE_STANDALONE)
-        err |= _registerModuleStopCmd();
-        err |= _registerModuleStartCmd();
-        err |= _registerModuleGetStatusCmd();
+        err |= _registerStopCmd();
+        err |= _registerStartCmd();
+        err |= _registerGetStatusCmd();
 #endif
         return err;
     }
 
 private:
 
-    static int _registerSetBoardInfoCmd(void);
-    static int _registerGetBoardInfoCmd(void);
 #if defined(MODULE_MASTER)
     static int _registerProgramCmd(void);
     static int _registerPingCmd(void);
@@ -50,8 +40,10 @@ private:
     static int _registerDiscoverSlavesCmd(void);
     static int _registerGetSlaveInfoCmd(void);
 #endif
-    static int _registerModuleStopCmd(void);
-    static int _registerModuleStartCmd(void);
-    static int _registerModuleGetStatusCmd(void);
+#if !defined(MODULE_STANDALONE)
+    static int _registerStopCmd(void);
+    static int _registerStartCmd(void);
+    static int _registerGetStatusCmd(void);
+#endif
 
 };

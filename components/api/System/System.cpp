@@ -33,6 +33,7 @@ void System::init(void)
     int err = 0;
 
     /* Module init */
+    err |= ModuleCLI::init();
 #if defined(OI_CORE)
     err |= Core::init();
     err |= CLI_Core::init();
@@ -47,8 +48,7 @@ void System::init(void)
     err |= MixedCLI::init();
 #endif
 
-    err |= CLI_Module::init();
-    err |= CLI::init();
+    err |= CLI_Control::init();
 
     if (err != 0) {
         ESP_LOGE(TAG, "Failed to initialize module");

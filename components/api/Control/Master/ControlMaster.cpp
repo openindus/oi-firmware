@@ -196,7 +196,7 @@ bool ControlMaster::ping(uint16_t type, uint32_t sn)
     return (BusRS::read(&frame, pdMS_TO_TICKS(10)) == 0);
 }
 
-void ControlMaster::getBoardInfo(uint16_t type, uint32_t sn, Module_Info_t* board_info)
+void ControlMaster::getBoardInfo(uint16_t type, uint32_t sn, Board_Info_t* board_info)
 {
     uint16_t id = _getIdFromSerialNumAndType(type, sn);
 
@@ -211,10 +211,10 @@ void ControlMaster::getBoardInfo(uint16_t type, uint32_t sn, Module_Info_t* boar
     frame.dir = 1;
     frame.ack = true;
     frame.length = 0;
-    frame.data = (uint8_t*)malloc(sizeof(Module_Info_t));
+    frame.data = (uint8_t*)malloc(sizeof(Board_Info_t));
     BusRS::write(&frame, pdMS_TO_TICKS(100));
     BusRS::read(&frame, pdMS_TO_TICKS(100));
-    memcpy(board_info, frame.data, sizeof(Module_Info_t));
+    memcpy(board_info, frame.data, sizeof(Board_Info_t));
     free(frame.data);
     return;
 }

@@ -92,6 +92,12 @@ void Led::remove(void)
     }
 }
 
+/**
+ * @brief Turn the led on with the given color
+ * 
+ * @param[in] LedColor_t color
+ *
+ */
 void Led::on(LedColor_t color)
 {
     if (_control.installed == true) {
@@ -102,6 +108,10 @@ void Led::on(LedColor_t color)
     }
 }
 
+/**
+ * @brief Turn the led off
+ * 
+ */
 void Led::off(void)
 {
     if (_control.installed == true)
@@ -113,6 +123,12 @@ void Led::off(void)
     }
 }
 
+/**
+ * @brief Blink the led with given color and period
+ * 
+ * @param[in] LedColor_t color
+ * @param[in] uint32_t period un millisecond
+ */
 void Led::blink(LedColor_t color, uint32_t period)
 {
     if (_control.installed == true)

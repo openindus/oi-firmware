@@ -16,7 +16,6 @@
 #pragma once
 
 #include "Global.h"
-#include "CLI.h"
 #include "Core.h"
 #include "Discrete.h"
 #include "Mixed.h"
@@ -28,7 +27,7 @@
 #include "ControlSlave.h"
 #include "ControlCmd.h"
 #include "ControlMaster.h"
-#include "CLI_Module.h"
+#include "CLI_Control.h"
 #include "UsbConsole.h"
 
 void setup(void);

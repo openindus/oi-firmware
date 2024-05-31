@@ -16,7 +16,7 @@
 #pragma once
 
 #include "Global.h"
-#include "CoreStandalone.h"
+#include "Core.h"
 #include "CLI_DIn.h"
 #include "CLI_DOut.h"
 #include "CLI_AInHV.h"

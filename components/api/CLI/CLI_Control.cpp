@@ -1,133 +1,14 @@
 /**
- * @file CLI_Module.cpp
+ * @file CLI_Control.cpp
  * @brief Command line interface - Module
  * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
  * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
 
-#include "CLI_Module.h"
+#include "CLI_Control.h"
 #include "ControlMaster.h"
 #include "ControlSlave.h"
-
-/* --- set-board-info --- */
-
-static struct {
-    struct arg_int *boardType;
-    struct arg_int *serialNum;
-    struct arg_str *versionHW;
-    struct arg_str *timestamp;
-    struct arg_end *end;
-} setBoardInfoArgs;
-
-static int setBoardInfoCmd(int argc, char **argv)
-{
-    int err = arg_parse(argc, argv, (void **) &setBoardInfoArgs);
-    if (err != 0) {
-        arg_print_errors(stderr, setBoardInfoArgs.end, argv[0]);
-        return -1;
-    }
-
-    uint16_t board_type = setBoardInfoArgs.boardType->ival[0];
-    uint32_t serial_number = setBoardInfoArgs.serialNum->ival[0];
-    char hardware_version[4];
-    strncpy(hardware_version, setBoardInfoArgs.versionHW->sval[0], 4);
-    int64_t timestamp = atoll(setBoardInfoArgs.timestamp->sval[0]);
-
-    if (ModuleStandalone::setBoardInfo(board_type, serial_number, hardware_version, timestamp)) {
-        return 0;
-    }
-    return -1;
-}
-
-int CLI_Module::_registerSetBoardInfoCmd(void)
-{
-    setBoardInfoArgs.boardType = arg_int1("t", "type", "TYPE", "Board type");
-    setBoardInfoArgs.serialNum = arg_int1("n", "serial-num", "NUM", "Serial number");
-    setBoardInfoArgs.versionHW = arg_str1("h", "version-hw", "VERSION", "Hardware version");
-    setBoardInfoArgs.timestamp = arg_str1("d", "date", "DATE", "Board date as a timestamp");
-    setBoardInfoArgs.end = arg_end(5);
-
-    const esp_console_cmd_t cmd = {
-        .command = "set-board-info",
-        .help = "WARNING ! This operation can be done only once !\nSet board informations: \"type, serial number and hardware version\"\nExample: set-board-info -t 12 -n 259 -h AE01 -d 1715947670",
-        .hint = NULL,
-        .func = &setBoardInfoCmd,
-        .argtable = &setBoardInfoArgs
-    };
-
-    if (esp_console_cmd_register(&cmd) == ESP_OK) {
-        return 0;
-    } else {
-        return -1;
-    }
-}
-
-/* --- get-board-info --- */
-
-static struct {
-    struct arg_lit *boardType;
-    struct arg_lit *serialNum;
-    struct arg_lit *versionHW;
-    struct arg_lit *dateCode;
-    struct arg_lit *versionSW;
-    struct arg_end *end;
-} getBoardInfoArgs;
-
-static int getBoardInfoCmd(int argc, char **argv)
-{
-    int err = arg_parse(argc, argv, (void **) &getBoardInfoArgs);
-    if (err != 0) {
-        arg_print_errors(stderr, getBoardInfoArgs.end, argv[0]);
-        return -1;
-    }
-
-    if (getBoardInfoArgs.boardType->count > 0) {
-        printf("%u\n", ModuleStandalone::getBoardType());
-    }
-    if (getBoardInfoArgs.serialNum->count > 0) {
-        printf("%u\n", ModuleStandalone::getSerialNum());
-    }
-    if (getBoardInfoArgs.versionHW->count > 0) {
-        char version[5];
-        ModuleStandalone::getHardwareVersion(version);
-        printf("%.*s\n", 4, version);
-    }
-    if (getBoardInfoArgs.dateCode->count > 0) {
-        printf("%lli\n", ModuleStandalone::getTimestamp());
-    }
-    if (getBoardInfoArgs.versionSW->count > 0) {
-        char version[32];
-        ModuleStandalone::getSoftwareVersion(version);
-        printf("%s\n", version);
-    }
-
-    return 0;
-}
-
-int CLI_Module::_registerGetBoardInfoCmd(void)
-{
-    getBoardInfoArgs.boardType = arg_lit0("t", "type", "Board type");
-    getBoardInfoArgs.serialNum = arg_lit0("n", "serial-num","Serial number");
-    getBoardInfoArgs.versionHW = arg_lit0("h", "version-hw", "Hardware version");
-    getBoardInfoArgs.dateCode = arg_lit0("d", "date-code", "Date code");
-    getBoardInfoArgs.versionSW = arg_lit0("s", "version-sw", "Software version");
-    getBoardInfoArgs.end = arg_end(2);
-
-    const esp_console_cmd_t cmd = {
-        .command = "get-board-info",
-        .help = "Get board informations: \"type, serial number, hardware and software version\"",
-        .hint = NULL,
-        .func = &getBoardInfoCmd,
-        .argtable = &getBoardInfoArgs
-    };
-
-    if (esp_console_cmd_register(&cmd) == ESP_OK) {
-        return 0;
-    } else {
-        return -1;
-    }
-}
 
 #if defined(MODULE_MASTER)
 
@@ -158,7 +39,7 @@ static int programCmd(int argc, char **argv)
     return 0;
 }
 
-int CLI_Module::_registerProgramCmd(void)
+int CLI_Control::_registerProgramCmd(void)
 {
     programArgs.type = arg_int1(NULL, NULL, "<TYPE>", "Board type");
     programArgs.sn = arg_int1(NULL, NULL, "<SN>", "Board serial number");
@@ -212,7 +93,7 @@ static int pingCmd(int argc, char **argv)
     return 0;
 }
 
-int CLI_Module::_registerPingCmd(void)
+int CLI_Control::_registerPingCmd(void)
 {
     pingArgs.type = arg_int1(NULL, NULL, "<TYPE>", "Board type");
     pingArgs.sn = arg_int1(NULL, NULL, "<SN>", "Board serial number");
@@ -240,7 +121,7 @@ static int autoId(int argc, char **argv)
     return 0;
 }
 
-int CLI_Module::_registerAutoIdCmd(void)
+int CLI_Control::_registerAutoIdCmd(void)
 {
     const esp_console_cmd_t cmd = {
         .command = "auto-id",
@@ -283,7 +164,7 @@ static int discoverSlavesCmd(int argc, char **argv)
     return 0;
 }
 
-int CLI_Module::_registerDiscoverSlavesCmd(void)
+int CLI_Control::_registerDiscoverSlavesCmd(void)
 {
     const esp_console_cmd_t cmd = {
         .command = "discover-slaves",
@@ -321,7 +202,7 @@ static int getSlaveInfoCmd(int argc, char **argv)
         return 1;
     }
 
-    Module_Info_t boardInfo;
+    Board_Info_t boardInfo;
 
     if (getSlaveInfoArgs.type->count == 1 && getSlaveInfoArgs.sn->count == 1) {
         ControlMaster::getBoardInfo((uint16_t)getSlaveInfoArgs.type->ival[0], (uint32_t)getSlaveInfoArgs.sn->ival[0], &boardInfo);
@@ -348,7 +229,7 @@ static int getSlaveInfoCmd(int argc, char **argv)
     return 0;
 }
 
-int CLI_Module::_registerGetSlaveInfoCmd(void)
+int CLI_Control::_registerGetSlaveInfoCmd(void)
 {
     getSlaveInfoArgs.type = arg_int1(NULL, NULL, "<TYPE>", "Board type");
     getSlaveInfoArgs.sn = arg_int1(NULL, NULL, "<SN>", "Board serial number");
@@ -376,6 +257,8 @@ int CLI_Module::_registerGetSlaveInfoCmd(void)
 
 #endif
 
+#if !defined(MODULE_STANDALONE)
+
 /* --- stop --- */
 
 static int moduleStopCmd(int argc, char **argv)
@@ -388,7 +271,7 @@ static int moduleStopCmd(int argc, char **argv)
     return 0;
 }
 
-int CLI_Module::_registerModuleStopCmd(void)
+int CLI_Control::_registerStopCmd(void)
 {
     const esp_console_cmd_t cmd = {
         .command = "stop",
@@ -417,7 +300,7 @@ static int moduleStartCmd(int argc, char **argv)
     return 0;
 }
 
-int CLI_Module::_registerModuleStartCmd(void)
+int CLI_Control::_registerStartCmd(void)
 {
     const esp_console_cmd_t cmd = {
         .command = "start",
@@ -466,7 +349,7 @@ static int moduleGetStatusCmd(int argc, char **argv)
     return 0;
 }
 
-int CLI_Module::_registerModuleGetStatusCmd(void)
+int CLI_Control::_registerGetStatusCmd(void)
 {
     const esp_console_cmd_t cmd = {
         .command = "status",
@@ -482,3 +365,5 @@ int CLI_Module::_registerModuleGetStatusCmd(void)
         return -1;
     }
 }
+
+#endif

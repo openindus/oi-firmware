@@ -19,8 +19,11 @@
 #include "Module.h"
 #include "ModulePinout.h"
 #include "Led.h"
+#include "CLI_Led.h"
+#include "CLI_Bus.h"
+#include "CLI_Board.h"
 
-enum ModuleType_List_e {
+enum Module_Type_e {
     TYPE_OI_CORE            = (uint16_t) 3,
     TYPE_OI_CORELITE        = (uint16_t) 4,
     TYPE_OI_DISCRETE        = (uint16_t) 6,
@@ -57,43 +60,34 @@ public:
     }
 };
 
-/* Struct can fill an eFuse block of 32 msgBytes */
-typedef struct __attribute__((__packed__)) {
-    uint16_t board_type;
-    uint32_t serial_number;
-    char hardware_version[4]; // AA01
-    int64_t timestamp; // Unix timestamp
-    uint8_t reserved[13];
-    uint8_t checksum;
-} Module_eFuse_Info_t;
+class ModuleCLI:
+    public CLI_Board,
+    public CLI_Led,
+    public CLI_Bus
+{
+public: 
 
-typedef struct {
-    Module_eFuse_Info_t efuse;
-    char software_version[32];
-} Module_Info_t;
+    static inline int init(void) {
+        int err = 0;
+        err |= CLI_Led::init();
+        err |= CLI_Bus::init();
+        err |= CLI_Board::init();
+        return err;
+    }
+};
 
-class ModuleStandalone
+class ModuleStandalone: public Board, public Led
 {
 public:
 
     static int init(uint16_t type);
 
-    static void restart(void);
-    static void ledOn(LedColor_t color);
-    static void ledOff(void);
-    static void ledBlink(LedColor_t color, uint32_t period);
-    static float getTemperature(void);
-    static uint16_t getBoardType(void);
-    static uint32_t getSerialNum(void);
-    static void getHardwareVersion(char hardware_version[4]);
-    static int64_t getTimestamp(void);
-    static void getSoftwareVersion(char software_version[32]);
-    static bool setBoardInfo(uint16_t board_type, uint32_t serial_num, char hardware_version[4], int64_t timestamp);
+    static inline void ledOn(LedColor_t color) {Led::on(color);};
+    static inline void ledOff(void) {Led::off();};
+    static inline void ledBlink(LedColor_t color, uint32_t period) {Led::blink(color, period);};
 
 private:
 
-    static uint8_t _calculate_eFuse_checksum(uint8_t* data);
-    static bool _verify_eFuse_checksum(Module_eFuse_Info_t info);
     static uint16_t _type;
 
 };
