@@ -11,3 +11,9 @@
 #include "BusIO.h"
 #include "BusCAN.h"
 #include "BusRS.h"
+
+class Bus : 
+    public BusRS,
+    public BusCAN,
+    public BusIO
+{};

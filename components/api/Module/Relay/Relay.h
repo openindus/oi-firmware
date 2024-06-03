@@ -1,28 +1,31 @@
 /**
- * Copyright (C) OpenIndus, Inc - All Rights Reserved
- *
- * This file is part of OpenIndus Library.
- *
- * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential
- * 
  * @file Relay.h
- * @brief Functions for Relay module
- *
- * For more information on OpenIndus:
+ * @brief Relay
+ * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
+ * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
 
 #pragma once
 
-#include "RelayStandalone.h"
-#include "RelaySlave.h"
-#include "RelayControl.h"
+#include "Relay.h"
+#include "Module.h"
 
-#if (defined(OI_RELAY_HP) || defined(OI_RELAY_LP)) && defined(MODULE_STANDALONE)
-#define Relay RelayStandalone
-#elif (defined(OI_RELAY_HP) || defined(OI_RELAY_LP)) && !defined(MODULE_STANDALONE)
-#define Relay RelaySlave
-#else 
-#define Relay RelayControl
-#endif
+typedef enum {
+    RELAY_1 = DOUT_1,
+    RELAY_2 = DOUT_2,
+    RELAY_3 = DOUT_3,
+    RELAY_4 = DOUT_4,
+    RELAY_5 = DOUT_5,
+    RELAY_6 = DOUT_6,
+    RELAY_MAX
+} Relay_Num_t;
+
+class Relay
+{
+public:
+
+    static inline int digitalWrite(Relay_Num_t num, uint8_t level) {
+        return -1;
+    };
+};

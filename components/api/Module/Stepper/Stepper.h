@@ -16,32 +16,33 @@
 #pragma once
 
 #include "Global.h"
+#include "Module.h"
 
 #if defined(OI_STEPPER) || defined(OI_STEPPER_VE)
 #include "StepperPinout.h"
 #include "StepperParam.h"
 #include "DigitalInputs.h"
 #include "MotorStepper.h"
-#include "DigitalInputsCLI.h"
-#include "MotorStepperCLI.h"
-#include "MotorStepperParamCLI.h"
+#include "CLI_DIn.h"
+#include "CLI_Stepper.h"
+#include "CLI_StepperParam.h"
 #endif
 
 #if (defined(OI_STEPPER) || defined(OI_STEPPER_VE)) && defined(MODULE_STANDALONE)
 #define Stepper StepperStandalone
 #elif (defined(OI_STEPPER) || defined(OI_STEPPER_VE)) && defined(MODULE_SLAVE)
 #define Stepper StepperSlave
-#include "DigitalInputsSlave.h"
-#include "MotorStepperSlave.h"
+#include "ControlSlave_DIn.h"
+#include "ControlSlave_Stepper.h"
 #elif defined(MODULE_MASTER) 
 #define Stepper StepperControl
-#include "DigitalInputsControl.h"
-#include "MotorStepperControl.h"
+#include "ControlCmd_DIn.h"
+#include "ControlCmd_Stepper.h"
 #endif
 
 #if defined(OI_STEPPER) || defined(OI_STEPPER_VE)
 
-class StepperCLI : public DigitalInputsCLI, public MotorStepperCLI, public MotorStepperParam
+class StepperCLI : public CLI_DIn, public CLI_Stepper, public MotorStepperParam
 {
 public:
 
@@ -58,7 +59,7 @@ public:
 
 #if (defined(OI_STEPPER) || defined(OI_STEPPER_VE)) && defined(MODULE_SLAVE)
 
-class StepperSlave : public ModuleSlave, public StepperStandalone,  public DigitalInputsSlave, public MotorStepperSlave
+class StepperSlave : public ControlSlave, public StepperStandalone,  public ControlSlave_DIn, public ControlSlave_Stepper
 {
 public:
 
@@ -67,14 +68,14 @@ public:
 
 #elif defined(MODULE_MASTER)
 
-class StepperControl : public ModuleControl, public DigitalInputsControl, public MotorStepperControl
+class StepperControl : public ControlCmd, public ControlCmd_DIn, public ControlCmd_Stepper
 {
 public:
 
     StepperControl(uint32_t sn = 0) : 
-        ModuleControl(TYPE_OI_STEPPER, sn),
-        DigitalInputsControl(this),
-        MotorStepperControl(this) {}
+        ControlCmd(TYPE_OI_STEPPER, sn),
+        ControlCmd_DIn(this),
+        ControlCmd_Stepper(this) {}
 };
 #endif
 

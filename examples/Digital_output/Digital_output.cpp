@@ -10,7 +10,7 @@ void monitor_current(void*)
 {
     while (1) {    
         Serial.print("Get output current: ");
-        Serial.println(discrete.digitalGetCurrent(DOUT_1));
+        Serial.println(discrete.getOutputCurrent(DOUT_1));
         delay(100);
     }
 }

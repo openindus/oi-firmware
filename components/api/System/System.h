@@ -23,11 +23,12 @@
 #include "Relay.h"
 #include "AnalogLs.h"
 #include "Brushless.h"
-#include "ModuleStandalone.h"
-#include "ModuleSlave.h"
-#include "ModuleControl.h"
-#include "ModuleMaster.h"
-#include "CLI.h"
+#include "Module.h"
+#include "ControlSlave.h"
+#include "ControlCmd.h"
+#include "ControlMaster.h"
+#include "CLI_Control.h"
+#include "UsbConsole.h"
 
 void setup(void);
 void loop(void);

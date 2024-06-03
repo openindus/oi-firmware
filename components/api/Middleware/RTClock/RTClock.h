@@ -1,29 +1,21 @@
 /**
- * Copyright (C) OpenIndus, Inc - All Rights Reserved
- *
- * This file is part of OpenIndus Library.
- *
- * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential
- * 
  * @file RTClock.h
- * @brief Functions for RTC
- *
- * For more information on OpenIndus:
+ * @brief Real-time clock
+ * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
+ * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
 
 #pragma once
 
-#include <stdint.h>
-#include "esp_err.h"
-#include "esp_log.h"
-#include "pcal6524.h"
-#include "m41t62.h"
+#include "Global.h"
+
+#define SECONDS_FROM_1970_TO_2000 946684800
 
 class DateTime
 {
 public:
+
     DateTime(uint32_t t =0);
     DateTime(uint16_t year, uint8_t month, uint8_t day,
                 uint8_t hour =0, uint8_t min =0, uint8_t sec =0);
@@ -43,6 +35,7 @@ public:
     uint32_t unixtime(void) const; 
 
 protected:
+
     uint8_t yOff;
     uint8_t m;
     uint8_t d;
@@ -51,13 +44,19 @@ protected:
     uint8_t ss;
 };
 
-class OIRTC
+class RTClock
 {
 public:
 
-    OIRTC() {}
+    RTClock(i2c_port_t i2c_num, gpio_num_t intr_pin) :
+        _i2c_num(i2c_num),
+        _intr_pin(intr_pin) {}
 
-    void init(i2c_port_t i2c_num);
+    /**
+     * @brief begin
+     * 
+     */
+    void begin(void);
 
     /**
      * @brief Get the current time compute by RTC Clock.
@@ -116,7 +115,7 @@ public:
      * @param callback function to attach
      * @param args optional function arguments
      */
-    virtual void attachRTCAlarm(void (*callback)(void), void * args);
+    virtual void attachRTCAlarm(void (*callback)(void), void* args=NULL);
 
     /**
      * @brief Detach the RTC interrupt handler if exists
@@ -125,10 +124,7 @@ public:
 
 private:
 
-    static ioex_device_t *_ioex;
+    i2c_port_t _i2c_num;
+    gpio_num_t _intr_pin;
 
 };
-
-#define SECONDS_FROM_1970_TO_2000 946684800
-
-extern OIRTC RTC;

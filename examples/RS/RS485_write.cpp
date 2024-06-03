@@ -1,8 +1,6 @@
 #include "OpenIndus.h"
 #include "Arduino.h"
 
-using namespace OI;
-
 OICore core;
 
 void setup(void)

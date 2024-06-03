@@ -70,7 +70,7 @@ public:
      * @param din
      * @param logic 
      */
-    static void attachLimitSwitch(MotorNum_t motor, DigitalInputNum_t din, DigitalInputLogic_t logic=ACTIVE_HIGH);
+    static void attachLimitSwitch(MotorNum_t motor, DIn_Num_t din, Logic_t logic=ACTIVE_HIGH);
 
     /**
      * @brief Detach a limit switch to the specified motor
@@ -78,7 +78,7 @@ public:
      * @param motor 
      * @param din
      */
-    static void detachLimitSwitch(MotorNum_t motor, DigitalInputNum_t din);
+    static void detachLimitSwitch(MotorNum_t motor, DIn_Num_t din);
     
     /**
      * @brief Set the Step Resolution. Default resolution is 1/16 step

@@ -2,34 +2,37 @@
 #include "Arduino.h"
 #include "RTClock.h"
 
+OICore core;
 DateTime currTime;
 
-void rtc_alarm(void)
+void alarm(void)
 {
-    static uint8_t color = LED_RED;
-
-    DateTime currTime= RTC.now();
-    DateTime awakeTime(currTime.year(), currTime.month(), currTime.day(), currTime.hour(), currTime.minute() + 1, currTime.second());    
-    RTC.setRTCAlarm(awakeTime);
+    printf("alarm !\n");
 }
 
 void setup(void)
 {
-    Serial.begin(115200);
-    RTC.setTime(DateTime(__DATE__, __TIME__));
+    core.rtc.begin();
+    core.rtc.setTime(DateTime(__DATE__, __TIME__));
 
-    currTime = RTC.now();
-    DateTime awakeTime(currTime.year(), currTime.month(), currTime.day(), currTime.hour(), currTime.minute() + 1, currTime.second());
+    currTime = core.rtc.now();
+    DateTime awakeTime( currTime.year(), 
+                        currTime.month(), 
+                        currTime.day(), 
+                        currTime.hour(), 
+                        currTime.minute() + 1, // set alarm in a minute
+                        currTime.second());
 
-    RTC.attachRTCAlarm(rtc_alarm, NULL);
-    RTC.enableRTCAlarm();
-    RTC.setRTCAlarm(awakeTime);
+    core.rtc.attachRTCAlarm(alarm, NULL);
+    core.rtc.enableRTCAlarm();
+    core.rtc.setRTCAlarm(awakeTime);
 }
 
 void loop(void)
 {
-    currTime = RTC.now();
-    Serial.printf("[%d-%d %d:%d:%d]\r\n", 
+    currTime = core.rtc.now();
+    
+    printf("[%d-%d %d:%d:%d]\r\n", 
             currTime.day(), 
             currTime.month(), 
             currTime.hour(), 

@@ -15,19 +15,7 @@
 
 #pragma once
 
-#include <cstring>
-#include "esp_err.h"
-#include "esp_log.h"
-#include "driver/gpio.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/queue.h"
-#include "pcal6524.h"
-
-/**
- * @brief Function prototype for attachInterrupt callbacks
- * 
- */
-typedef void (*IsrCallback_t)(void*);
+#include "Global.h"
 
 /**
  * @brief Digital Inputs Numbers
@@ -45,7 +33,7 @@ typedef enum {
     DIN_9,
     DIN_10,
     DIN_MAX
-} DigitalInputNum_t;
+} DIn_Num_t;
 
 /**
  * @brief Digital Inputs Logic (for configuring sensors)
@@ -54,7 +42,7 @@ typedef enum {
 typedef enum {
     ACTIVE_LOW = 0,
     ACTIVE_HIGH = 1
-} DigitalInputLogic_t;
+} Logic_t;
 
 /**
  * @brief Digital Inputs Interrupts Modes
@@ -67,17 +55,19 @@ typedef enum {
     CHANGE_MODE
 } InterruptMode_t;
 
-typedef enum {
-    DIGITAL_INPUT_GPIO = 0,
-    DIGITAL_INPUT_IOEX
-} DigitalInputType_t;
+/**
+ * @brief Function prototype for attachInterrupt callbacks
+ * 
+ */
+typedef void (*IsrCallback_t)(void*);
 
 class DigitalInputs
 {
-public:
+protected:
 
     static int init(const gpio_num_t *gpio, int nb);
-    static int init(ioex_device_t **ioex, const ioex_num_t *ioex_num, int nb);
+
+public:
 
     /**
      * @brief Read an input level. Argument is the DIN to read.
@@ -86,7 +76,7 @@ public:
      * @param num DIN to monitor.
      * @return Value of the DIN input (1 or 0). 
      */
-    static int digitalRead(DigitalInputNum_t num);
+    static int digitalRead(DIn_Num_t num);
 
     /**
      * @brief Attach a user callback to the DIN interrupts.
@@ -96,32 +86,25 @@ public:
      * @param mode Interrupt mode (RISING, FALLING or CHANGE)
      * @param arg argument for the handler
      */
-    static void attachInterrupt(DigitalInputNum_t num, IsrCallback_t callback, InterruptMode_t mode, void* arg = NULL);
+    static void attachInterrupt(DIn_Num_t num, IsrCallback_t callback, InterruptMode_t mode, void* arg = NULL);
     
     /**
      * @brief Detach interrupt of a given DIN.
      * 
      * @param num DIN to detach interrupt.
      */
-    static void detachInterrupt(DigitalInputNum_t num);
+    static void detachInterrupt(DIn_Num_t num);
 
 private:
-
-    /* Type of DIN (gpio or ioex) */
-    static DigitalInputType_t _type;
 
     /* Number of DIN */
     static uint8_t _nb; 
     
-    /* GPIO num for DIN (can be initialized as esp gpio or ioexpander gpio)*/
+    /* GPIO num for DIN */
     static gpio_num_t* _gpio_nums;
-    static ioex_num_t* _ioex_nums;
 
     static IsrCallback_t* _callbacks;
     static void** _args;
-
-    /* Stor a local copy of the pointer to an initalized ioex_device_t */
-    static ioex_device_t** _ioex;
 
     static xQueueHandle _event;
     static void IRAM_ATTR _isr(void* pvParameters);

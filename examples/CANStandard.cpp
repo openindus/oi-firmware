@@ -1,8 +1,6 @@
 #include "OpenIndus.h"
 #include "Arduino.h"
 
-using namespace OI;
-
 Core core;
 
 CAN_Message_t rx_msg;

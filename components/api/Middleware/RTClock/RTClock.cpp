@@ -1,15 +1,8 @@
 /**
- * Copyright (C) OpenIndus, Inc - All Rights Reserved
- *
- * This file is part of OpenIndus Library.
- *
- * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential
- * 
- * @file RTC.cpp
- * @brief Functions for RTC
- *
- * For more information on OpenIndus:
+ * @file RTClock.cpp
+ * @brief Real-time clock
+ * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
+ * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
 
@@ -17,36 +10,48 @@
 
 #if defined(OI_CORE)
 
-ioex_device_t *OIRTC::_ioex;
+static const char TAG[] = "RTClock";
+static const uint8_t DAYS_IN_MONTH[] = {31,28,31,30,31,30,31,31,30,31,30,31};
 
-void OIRTC::init(i2c_port_t i2c_num)
+/* Alarm */
+static void (*_alarmCallback)(void);
+static xQueueHandle _alarmEvtQueue = NULL;
+static void _AlarmTask(void* arg);
+static void IRAM_ATTR _alarmIsrHandler(void* arg);
+
+void RTClock::begin(void)
 {
-    rtc_i2c_set_port(i2c_num);
+    rtc_i2c_set_port(_i2c_num);
+
+    /* Create task for alarm intr. */
+    _alarmEvtQueue = xQueueCreate(10, sizeof(int));
+    xTaskCreate(_AlarmTask, "_AlarmTask", 2048, NULL, 10, NULL);
 }
 
-time_t OIRTC::time(void)
+time_t RTClock::time(void)
 {
     DateTime seconds = now();
     return seconds.unixtime();
 }
 
-DateTime OIRTC::now(void)
+DateTime RTClock::now(void)
 {
     M41T62_Time_st time;
     M41T62_Date_st date;
     M41T62_Getting_Time(&time);
     M41T62_Getting_Date(&date);
-    DateTime now(date.Year, date.Month, date.DayMonth, time.Hours, time.Minutes, time.Seconds);
+    DateTime now(date.Year, date.Month, date.DayMonth, 
+        time.Hours, time.Minutes, time.Seconds);
 
     return now;
 }
 
-void OIRTC::setTime(time_t time)
+void RTClock::setTime(time_t time)
 {
     setTime(DateTime(time));
 }
 
-void OIRTC::setTime(DateTime datetime)
+void RTClock::setTime(DateTime datetime)
 {
     M41T62_Time_st time;
     M41T62_Date_st date;
@@ -65,25 +70,24 @@ void OIRTC::setTime(DateTime datetime)
     M41T62_Setting_Date(date);
 }
 
-void OIRTC::enableRTCAlarm(void)
+void RTClock::enableRTCAlarm(void)
 {
     M41T62_Set_AFE_Bit(M41T62_AFE_HIGH);
-    ioex_interrupt_enable(_ioex, IOEX_NUM_25);
+    gpio_intr_enable(_intr_pin);
 }
 
-void OIRTC::disableRTCAlarm(void)
+void RTClock::disableRTCAlarm(void)
 {
-    ioex_interrupt_disable(_ioex, IOEX_NUM_25);
+    gpio_intr_disable(_intr_pin);
     M41T62_Set_AFE_Bit(M41T62_AFE_LOW);
 }
 
-void OIRTC::setRTCAlarm(time_t alarm)
+void RTClock::setRTCAlarm(time_t alarm)
 {
-    // Set Alarm
     setRTCAlarm(DateTime(alarm));
 }
 
-void OIRTC::setRTCAlarm(DateTime alarm)
+void RTClock::setRTCAlarm(DateTime alarm)
 {
     M41T62_Alarm_st alarm_set;
 
@@ -96,27 +100,36 @@ void OIRTC::setRTCAlarm(DateTime alarm)
     M41T62_Alarm_Setting(alarm_set);
 }
 
-void OIRTC::attachRTCAlarm(void (*callback)(void), void * args)
+void RTClock::attachRTCAlarm(void (*callback)(void), void* args)
 {
-    rtc_user_handler = (rtc_isr_t)callback;
-    ioex_isr_handler_add(_ioex, IOEX_NUM_25, (ioex_isr_t) rtc_isr_handler, args, 10);
+    if (callback != NULL) {
+        _alarmCallback = callback;
+        gpio_isr_handler_add(_intr_pin, _alarmIsrHandler, args);
+    } else {
+        ESP_LOGE(TAG, "callback is a null pointer");
+    }    
 }
 
-void OIRTC::detachRTCAlarm(void)
+void RTClock::detachRTCAlarm(void)
 {
-    ioex_isr_handler_remove(_ioex, IOEX_NUM_25);
+    gpio_isr_handler_remove(_intr_pin);
 }
 
-const uint8_t daysInMonth [] = { 31,28,31,30,31,30,31,31,30,31,30,31 };
-
-// Number of days since 2000/01/01, valid for 2001..2099
+/**
+ * @brief Number of days since 2000/01/01, valid for 2001..2099
+ * 
+ * @param y 
+ * @param m 
+ * @param d 
+ * @return uint16_t 
+ */
 static uint16_t date2days(uint16_t y, uint8_t m, uint8_t d)
 {
     if (y >= 2000)
         y -= 2000;
     uint16_t days = d;
     for (uint8_t i = 1; i < m; ++i)
-        days += daysInMonth[i - 1];
+        days += DAYS_IN_MONTH[i - 1];
     if (m > 2 && y % 4 == 0)
         ++days;
     return days + 365 * y + (y + 3) / 4 - 1;
@@ -127,10 +140,12 @@ static long time2long(uint16_t days, uint8_t h, uint8_t m, uint8_t s)
     return ((days * 24L + h) * 60 + m) * 60 + s;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// DateTime implementation - ignores time zones and DST changes
-// NOTE: also ignores leap seconds, see http://en.wikipedia.org/wiki/Leap_second
-
+/**
+ * @brief  DateTime implementation - ignores time zones and DST changes
+ * @note also ignores leap seconds, see http://en.wikipedia.org/wiki/Leap_second
+ * 
+ * @param t 
+ */
 DateTime::DateTime(uint32_t t)
 {
     t -= SECONDS_FROM_1970_TO_2000;    // bring to 2000 timestamp from 1970
@@ -149,7 +164,7 @@ DateTime::DateTime(uint32_t t)
         days -= 365 + leap;
     }
     for (m = 1; ; ++m) {
-        uint8_t daysPerMonth = daysInMonth[m - 1];
+        uint8_t daysPerMonth = DAYS_IN_MONTH[m - 1];
         if (leap && m == 2)
             ++daysPerMonth;
         if (days < daysPerMonth)
@@ -172,12 +187,12 @@ DateTime::DateTime (uint16_t year, uint8_t month, uint8_t day, uint8_t hour, uin
 }
 
 DateTime::DateTime (const DateTime& copy):
-  yOff(copy.yOff),
-  m(copy.m),
-  d(copy.d),
-  hh(copy.hh),
-  mm(copy.mm),
-  ss(copy.ss)
+    yOff(copy.yOff),
+    m(copy.m),
+    d(copy.d),
+    hh(copy.hh),
+    mm(copy.mm),
+    ss(copy.ss)
 {}
 
 static uint8_t conv2d(const char* p)
@@ -188,8 +203,13 @@ static uint8_t conv2d(const char* p)
     return 10 * v + *++p - '0';
 }
 
-// A convenient constructor for using "the compiler's time":
-//   DateTime now (__DATE__, __TIME__);
+/**
+ * @brief A convenient constructor for using "the compiler's time":
+ * DateTime now (__DATE__, __TIME__);
+ * 
+ * @param date 
+ * @param time 
+ */
 DateTime::DateTime (const char* date, const char* time)
 {
     // sample input: date = "Dec 26 2009", time = "12:34:56"
@@ -219,22 +239,42 @@ uint8_t DateTime::dayOfWeek() const
 
 uint32_t DateTime::unixtime(void) const
 {
-  uint32_t t;
-  uint16_t days = date2days(yOff, m, d);
-  t = time2long(days, hh, mm, ss);
-  t += SECONDS_FROM_1970_TO_2000;  // seconds from 1970 to 2000
+    uint32_t t;
+    uint16_t days = date2days(yOff, m, d);
+    t = time2long(days, hh, mm, ss);
+    t += SECONDS_FROM_1970_TO_2000;  // seconds from 1970 to 2000
 
-  return t;
+    return t;
 }
 
 long DateTime::secondstime(void) const
 {
-  long t;
-  uint16_t days = date2days(yOff, m, d);
-  t = time2long(days, hh, mm, ss);
-  return t;
+    long t;
+    uint16_t days = date2days(yOff, m, d);
+    t = time2long(days, hh, mm, ss);
+    return t;
 }
 
-OIRTC RTC;
+static void IRAM_ATTR _alarmIsrHandler(void* arg)
+{
+    int tmp = (int) arg;
+    xQueueSendFromISR(_alarmEvtQueue, &tmp, NULL);
+}
+
+static void _AlarmTask(void* arg)
+{
+    int tmp;
+    while(1) {
+        if (xQueueReceive(_alarmEvtQueue, &tmp, portMAX_DELAY)) {
+            M41T62_AF_State_et flag;
+            M41T62_Get_AF_Bit(&flag); // Read alarm flag
+            if (flag == M41T62_AF_HIGH) {
+                if (_alarmCallback != NULL) {
+                    _alarmCallback();
+                }
+            }
+        }
+    }
+}
 
 #endif
