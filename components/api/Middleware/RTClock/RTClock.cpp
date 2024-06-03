@@ -1,15 +1,8 @@
 /**
- * Copyright (C) OpenIndus, Inc - All Rights Reserved
- *
- * This file is part of OpenIndus Library.
- *
- * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential
- * 
- * @file RTC.cpp
- * @brief Functions for RTC
- *
- * For more information on OpenIndus:
+ * @file RTClock.cpp
+ * @brief Real-time clock
+ * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
+ * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
 
@@ -17,20 +10,18 @@
 
 #if defined(OI_CORE)
 
-ioex_device_t *OIRTC::_ioex;
-
-void OIRTC::init(i2c_port_t i2c_num)
+void RTClock::begin(void)
 {
-    rtc_i2c_set_port(i2c_num);
+    rtc_i2c_set_port(_i2c_num);
 }
 
-time_t OIRTC::time(void)
+time_t RTClock::time(void)
 {
     DateTime seconds = now();
     return seconds.unixtime();
 }
 
-DateTime OIRTC::now(void)
+DateTime RTClock::now(void)
 {
     M41T62_Time_st time;
     M41T62_Date_st date;
@@ -41,12 +32,12 @@ DateTime OIRTC::now(void)
     return now;
 }
 
-void OIRTC::setTime(time_t time)
+void RTClock::setTime(time_t time)
 {
     setTime(DateTime(time));
 }
 
-void OIRTC::setTime(DateTime datetime)
+void RTClock::setTime(DateTime datetime)
 {
     M41T62_Time_st time;
     M41T62_Date_st date;
@@ -65,25 +56,24 @@ void OIRTC::setTime(DateTime datetime)
     M41T62_Setting_Date(date);
 }
 
-void OIRTC::enableRTCAlarm(void)
+void RTClock::enableRTCAlarm(void)
 {
     M41T62_Set_AFE_Bit(M41T62_AFE_HIGH);
-    ioex_interrupt_enable(_ioex, IOEX_NUM_25);
+    ioex_interrupt_enable(_device, IOEX_NUM_25);
 }
 
-void OIRTC::disableRTCAlarm(void)
+void RTClock::disableRTCAlarm(void)
 {
-    ioex_interrupt_disable(_ioex, IOEX_NUM_25);
+    ioex_interrupt_disable(_device, IOEX_NUM_25);
     M41T62_Set_AFE_Bit(M41T62_AFE_LOW);
 }
 
-void OIRTC::setRTCAlarm(time_t alarm)
+void RTClock::setRTCAlarm(time_t alarm)
 {
-    // Set Alarm
     setRTCAlarm(DateTime(alarm));
 }
 
-void OIRTC::setRTCAlarm(DateTime alarm)
+void RTClock::setRTCAlarm(DateTime alarm)
 {
     M41T62_Alarm_st alarm_set;
 
@@ -96,20 +86,27 @@ void OIRTC::setRTCAlarm(DateTime alarm)
     M41T62_Alarm_Setting(alarm_set);
 }
 
-void OIRTC::attachRTCAlarm(void (*callback)(void), void * args)
+void RTClock::attachRTCAlarm(void (*callback)(void), void * args)
 {
     rtc_user_handler = (rtc_isr_t)callback;
-    ioex_isr_handler_add(_ioex, IOEX_NUM_25, (ioex_isr_t) rtc_isr_handler, args, 10);
+    ioex_isr_handler_add(_device, IOEX_NUM_25, (ioex_isr_t) rtc_isr_handler, args, 10);
 }
 
-void OIRTC::detachRTCAlarm(void)
+void RTClock::detachRTCAlarm(void)
 {
-    ioex_isr_handler_remove(_ioex, IOEX_NUM_25);
+    ioex_isr_handler_remove(_device, IOEX_NUM_25);
 }
 
 const uint8_t daysInMonth [] = { 31,28,31,30,31,30,31,31,30,31,30,31 };
 
-// Number of days since 2000/01/01, valid for 2001..2099
+/**
+ * @brief Number of days since 2000/01/01, valid for 2001..2099
+ * 
+ * @param y 
+ * @param m 
+ * @param d 
+ * @return uint16_t 
+ */
 static uint16_t date2days(uint16_t y, uint8_t m, uint8_t d)
 {
     if (y >= 2000)
@@ -127,10 +124,12 @@ static long time2long(uint16_t days, uint8_t h, uint8_t m, uint8_t s)
     return ((days * 24L + h) * 60 + m) * 60 + s;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// DateTime implementation - ignores time zones and DST changes
-// NOTE: also ignores leap seconds, see http://en.wikipedia.org/wiki/Leap_second
-
+/**
+ * @brief  DateTime implementation - ignores time zones and DST changes
+ * @note also ignores leap seconds, see http://en.wikipedia.org/wiki/Leap_second
+ * 
+ * @param t 
+ */
 DateTime::DateTime(uint32_t t)
 {
     t -= SECONDS_FROM_1970_TO_2000;    // bring to 2000 timestamp from 1970
@@ -188,8 +187,13 @@ static uint8_t conv2d(const char* p)
     return 10 * v + *++p - '0';
 }
 
-// A convenient constructor for using "the compiler's time":
-//   DateTime now (__DATE__, __TIME__);
+/**
+ * @brief A convenient constructor for using "the compiler's time":
+ * DateTime now (__DATE__, __TIME__);
+ * 
+ * @param date 
+ * @param time 
+ */
 DateTime::DateTime (const char* date, const char* time)
 {
     // sample input: date = "Dec 26 2009", time = "12:34:56"
@@ -234,7 +238,5 @@ long DateTime::secondstime(void) const
   t = time2long(days, hh, mm, ss);
   return t;
 }
-
-OIRTC RTC;
 
 #endif

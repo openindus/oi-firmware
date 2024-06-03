@@ -10,3 +10,18 @@
 
 #include "Relay.h"
 #include "Module.h"
+
+typedef enum {
+    RELAY_1 = DOUT_1,
+    RELAY_2 = DOUT_2,
+    RELAY_3 = DOUT_3,
+    RELAY_4 = DOUT_4,
+    RELAY_5 = DOUT_5,
+    RELAY_6 = DOUT_6,
+    RELAY_MAX
+} Relay_Num_t;
+
+class Relay : public DigitalOutputs
+{
+
+};

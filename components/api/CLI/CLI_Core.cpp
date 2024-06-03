@@ -54,12 +54,12 @@ static int _date(int argc, char **argv)
                                           dateArgs.date->tmval->tm_min,         \
                                           dateArgs.date->tmval->tm_sec);
         printf("Setting RTC date to %04u-%02u-%02u %02u:%02u:%02u\n", setDate->year(), setDate->month(), setDate->day(), setDate->hour(), setDate->minute(), setDate->second());
-        RTC.setTime(*setDate);
+        Core::rtc.setTime(*setDate);
     }
     else {
         // Get date
         DateTime currTime;
-        currTime = RTC.now();
+        currTime = Core::rtc.now();
         printf("%04u-%02u-%02u %02u:%02u:%02u\n", currTime.year(), currTime.month(), currTime.day(), currTime.hour(), currTime.minute(), currTime.second());
     }
 

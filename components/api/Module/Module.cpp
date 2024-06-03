@@ -25,22 +25,8 @@ int ModuleStandalone::init(uint16_t type)
 
     _type = type;
 
-    /* Init GPIO service */
-    err |= gpio_install_isr_service(0);
-
-    /* Initialize NVS */ 
-    esp_err_t ret = nvs_flash_init_partition(NVS_DEFAULT_PART_NAME);
-    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-        ESP_ERROR_CHECK(nvs_flash_erase());
-        err = nvs_flash_init();
-    }
-
-    /* GPIO19 and GPIO20 are USB interface, force reset/config before setting them as GPIO */
-    err |= gpio_reset_pin(GPIO_NUM_19);
-    err |= gpio_reset_pin(GPIO_NUM_20);
-
     /* Board */
-    Board::init();
+    err |= Board::init();
 
     /* LED */
     ESP_LOGI(TAG, "Init LED");

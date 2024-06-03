@@ -46,10 +46,10 @@ const AdcNumChannel_t _ainChannel[] = {
     CORE_CHANNEL_AIN_2
 };
 
-ioex_device_t* CoreStandalone::_ioex;
-
+ioex_device_t* CoreStandalone::_ioex = NULL;
 CAN CoreStandalone::can(CORE_SPI_USER_HOST, CORE_PIN_CAN_SPI_CS, CORE_PIN_CAN_INTERRUPT);
 RS CoreStandalone::rs(CORE_SPI_USER_HOST, CORE_PIN_RS_SPI_CS, CORE_PIN_RS_INTERRUPT);
+RTClock CoreStandalone::rtc(_ioex, CORE_I2C_PORT_NUM);
 
 int CoreStandalone::init()
 {
@@ -254,9 +254,6 @@ int CoreStandalone::init()
 
     ESP_LOGI(CORE_TAG, "Create control task");
     xTaskCreate(_controlTask, "Control task", 4096, NULL, 1, NULL);
-
-    /* Init RTC */
-    RTC.init(CORE_I2C_PORT_NUM);
 
     return err;
 }

@@ -39,6 +39,7 @@ public:
     /* External bus */
     static CAN can;
     static RS rs;
+    static RTClock rtc;
 
 private:
 
