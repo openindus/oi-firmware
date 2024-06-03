@@ -49,7 +49,7 @@ const AdcNumChannel_t _ainChannel[] = {
 ioex_device_t* CoreStandalone::_ioex = NULL;
 CAN CoreStandalone::can(CORE_SPI_USER_HOST, CORE_PIN_CAN_SPI_CS, CORE_PIN_CAN_INTERRUPT);
 RS CoreStandalone::rs(CORE_SPI_USER_HOST, CORE_PIN_RS_SPI_CS, CORE_PIN_RS_INTERRUPT);
-RTClock CoreStandalone::rtc(_ioex, CORE_I2C_PORT_NUM);
+RTClock CoreStandalone::rtc(CORE_I2C_PORT_NUM, CORE_PIN_RTC_INTERRUPT);
 
 int CoreStandalone::init()
 {
@@ -243,14 +243,12 @@ int CoreStandalone::init()
      * @brief RTC Init
      * Configure IOExpander RTC Interrupt pin
      */
-
-    ioex_config_t io_rtc_conf;
-    io_rtc_conf.mode = IOEX_INPUT;
-    io_rtc_conf.pull_mode = IOEX_PULLUP;
-    io_rtc_conf.interrupt_type = IOEX_INTERRUPT_NEGEDGE;
-    io_rtc_conf.pin_bit_mask = (1ULL<<CORE_PIN_RTC_INTERRUPT);
-
-    err |= ioex_config(_ioex, &io_rtc_conf);
+    gpio_config_t io_rtc_conf;
+    io_rtc_conf.mode = GPIO_MODE_INPUT;
+    io_rtc_conf.pull_up_en = GPIO_PULLUP_ENABLE;
+    io_rtc_conf.intr_type = GPIO_INTR_NEGEDGE;
+    io_rtc_conf.pin_bit_mask = (1ULL << CORE_PIN_RTC_INTERRUPT);
+    err |= gpio_config(&io_rtc_conf);
 
     ESP_LOGI(CORE_TAG, "Create control task");
     xTaskCreate(_controlTask, "Control task", 4096, NULL, 1, NULL);

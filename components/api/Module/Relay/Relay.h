@@ -21,7 +21,11 @@ typedef enum {
     RELAY_MAX
 } Relay_Num_t;
 
-class Relay : public DigitalOutputs
+class Relay
 {
+public:
 
+    static inline int digitalWrite(Relay_Num_t num, uint8_t level) {
+        return -1;
+    };
 };

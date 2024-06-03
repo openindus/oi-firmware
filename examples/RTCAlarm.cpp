@@ -5,12 +5,9 @@
 OICore core;
 DateTime currTime;
 
-void rtc_alarm(void)
+void alarm(void)
 {
-    DateTime currTime= core.rtc.now();
-    DateTime awakeTime(currTime.year(), currTime.month(), 
-        currTime.day(), currTime.hour(), currTime.minute() + 1, currTime.second());    
-    core.rtc.setRTCAlarm(awakeTime);
+    printf("alarm !\n");
 }
 
 void setup(void)
@@ -19,10 +16,14 @@ void setup(void)
     core.rtc.setTime(DateTime(__DATE__, __TIME__));
 
     currTime = core.rtc.now();
-    DateTime awakeTime(currTime.year(), currTime.month(), 
-        currTime.day(), currTime.hour(), currTime.minute() + 1, currTime.second());
+    DateTime awakeTime( currTime.year(), 
+                        currTime.month(), 
+                        currTime.day(), 
+                        currTime.hour(), 
+                        currTime.minute() + 1, // set alarm in a minute
+                        currTime.second());
 
-    core.rtc.attachRTCAlarm(rtc_alarm, NULL);
+    core.rtc.attachRTCAlarm(alarm, NULL);
     core.rtc.enableRTCAlarm();
     core.rtc.setRTCAlarm(awakeTime);
 }

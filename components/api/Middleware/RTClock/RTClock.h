@@ -48,10 +48,14 @@ class RTClock
 {
 public:
 
-    RTClock(ioex_device_t* device, i2c_port_t i2c_num) :
-        _device(device),
-        _i2c_num(i2c_num) {}
+    RTClock(i2c_port_t i2c_num, gpio_num_t intr_pin) :
+        _i2c_num(i2c_num),
+        _intr_pin(intr_pin) {}
 
+    /**
+     * @brief begin
+     * 
+     */
     void begin(void);
 
     /**
@@ -111,7 +115,7 @@ public:
      * @param callback function to attach
      * @param args optional function arguments
      */
-    virtual void attachRTCAlarm(void (*callback)(void), void * args);
+    virtual void attachRTCAlarm(void (*callback)(void), void* args=NULL);
 
     /**
      * @brief Detach the RTC interrupt handler if exists
@@ -120,7 +124,7 @@ public:
 
 private:
 
-    ioex_device_t* _device;
     i2c_port_t _i2c_num;
+    gpio_num_t _intr_pin;
 
 };

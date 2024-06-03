@@ -33,8 +33,6 @@ i2c_port_t rtc_i2c_port = -1;
 #define ACK_VAL                         (0x00)  /*!< I2C ack value */
 #define NACK_VAL                        (0x01)  /*!< I2C nack value */
 
-rtc_isr_t rtc_user_handler = NULL;
-
 ///////////////////////////////ST I2C INTERFACE/////////////////////////////////////////////////////////////////////////
 
 bool HAL_ReadReg(uint8_t i2cAddr ,uint8_t regAddr, uint32_t numByteToRead, uint8_t *data)
@@ -109,18 +107,4 @@ esp_err_t rtc_i2c_read(i2c_port_t i2c_port, uint8_t address, uint8_t reg, uint8_
 void rtc_i2c_set_port(i2c_port_t i2c_port)
 {
     rtc_i2c_port = i2c_port;
-}
-
-///////////////////////////////INTERRUPTION FUNCTIONS/////////////////////////////////////////////////////////////////////////
-
-void IRAM_ATTR rtc_isr_handler(void* arg)
-{
-    // Read alarm flag
-    M41T62_AF_State_et af_flag;
-    M41T62_Get_AF_Bit(&af_flag);
-
-    if (af_flag == M41T62_AF_HIGH)
-    {
-        rtc_user_handler(arg);
-    }
 }
