@@ -109,10 +109,11 @@ pkg:library:
     - mkdir .oi/lib/
   script:
     - pio pkg pack --output=".oi/lib/"
+    - mv .oi/lib/ library/
   artifacts:
     name: "library"
     paths:
-      - .oi/lib/
+      - library/
   rules:
     - if: '$CI_COMMIT_TAG'
 
@@ -130,10 +131,10 @@ pkg:bin:
     # - job: build:brushless
     - job: build:analogls
   script:
-    - echo "pkb bin"
+    - mv .oi/bin/ binary/
   artifacts:
     name: "binary"
     paths:
-      - .oi/bin/
+      - binary/
   rules:
     - if: '$CI_COMMIT_TAG'
