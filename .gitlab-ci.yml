@@ -16,8 +16,7 @@ setup:
   script:
     - pip install -U platformio
     - pio platform update
-    - rm -rf .oi/
-    - rm -rf .pio/
+    - rm -rf .oi/bin/
   rules:
     - if: '($CI_PIPELINE_SOURCE == "merge_request_event") &&
     ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")'
