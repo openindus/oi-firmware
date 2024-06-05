@@ -67,16 +67,19 @@ int ControlCmd::request(std::vector<uint8_t>& msgBytes, bool ackNeeded)
     frame.ack = ackNeeded;
     frame.length = msgBytes.size();
     frame.data = msgBytes.data();
-    BusRS::write(&frame, pdMS_TO_TICKS(100));
+    int err = BusRS::transfer(&frame, pdMS_TO_TICKS(100));
     if (ackNeeded) {
-        if (BusRS::read(&frame, pdMS_TO_TICKS(100)) < 0) {
-            ESP_LOGE(TAG, "control error");
-            return -1;
+        if (err < 0) {
+            goto error;
         } else {
             msgBytes.assign(frame.data, frame.data + frame.length);
         }
     }
     return 0;
+
+error:
+    ESP_LOGE(TAG, "request error");
+    return -1;
 }
 
 /**

@@ -47,13 +47,15 @@ public:
     static void end(void);
     static void write(Frame_t* frame, TickType_t timeout=0);
     static int read(Frame_t* frame, TickType_t timeout=portMAX_DELAY);
+    static int transfer(Frame_t* frame, TickType_t timeout);
 
 private:
 
     static uart_port_t _port;
     static QueueHandle_t _eventQueue;
-    static SemaphoreHandle_t _mutex;
-    static SemaphoreHandle_t _semaphore;
+    static SemaphoreHandle_t _writeMutex;
+    static SemaphoreHandle_t _writeReadMutex;
+    static SemaphoreHandle_t _transferMutex;
 
     static uint8_t _calculateChecksum(Frame_t *frame);
     static bool _verifyChecksum(Frame_t *frame);
