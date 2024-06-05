@@ -46,6 +46,7 @@ static int _date(int argc, char **argv)
         return 1;
     }
 
+    Core::rtc.begin();
     if (dateArgs.date->count == 1) {
         DateTime* setDate =  new DateTime(dateArgs.date->tmval->tm_year + 1900, \
                                           dateArgs.date->tmval->tm_mon + 1,     \
@@ -55,8 +56,7 @@ static int _date(int argc, char **argv)
                                           dateArgs.date->tmval->tm_sec);
         printf("Setting RTC date to %04u-%02u-%02u %02u:%02u:%02u\n", setDate->year(), setDate->month(), setDate->day(), setDate->hour(), setDate->minute(), setDate->second());
         Core::rtc.setTime(*setDate);
-    }
-    else {
+    } else {
         // Get date
         DateTime currTime;
         currTime = Core::rtc.now();
