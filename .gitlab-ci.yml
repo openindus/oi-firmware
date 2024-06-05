@@ -110,6 +110,7 @@ pkg:library:
   script:
     - pio pkg pack --output=".oi/lib/"
   artifacts:
+    name: "library"
     paths:
       - .oi/lib/
   rules:
@@ -131,6 +132,7 @@ pkg:bin:
   script:
     - echo "pkb bin"
   artifacts:
+    name: "binary"
     paths:
       - .oi/bin/
   rules:
