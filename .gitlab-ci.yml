@@ -16,9 +16,12 @@ setup:
   script:
     - pip install -U platformio
     - pio platform update
+    - rm -rf .oi/
+    - rm -rf .pio/
   rules:
     - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && 
-      ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")'
+      ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")' &&
+      '$CI_COMMIT_TAG'
 
 .build:
   stage: build
@@ -26,7 +29,8 @@ setup:
     - job: setup
   rules:
     - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && 
-      ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")'
+      ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")' &&
+      '$CI_COMMIT_TAG'
 
 build:core:
   extends: .build
@@ -91,9 +95,11 @@ build:examples:
       done
   after_script:
     - git restore main/main.cpp
+    - pio run -e core 
   rules:
     - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && 
-      ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")'
+      ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")' &&
+      '$CI_COMMIT_TAG'
 
 pkg:library:
   stage: pkg
@@ -108,8 +114,7 @@ pkg:library:
     paths:
       - .oi/lib/
   rules:
-    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && 
-      ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")'
+    - if: '$CI_COMMIT_TAG'
 
 pkg:bin:
   stage: pkg
@@ -130,5 +135,4 @@ pkg:bin:
     paths:
       - .oi/bin/
   rules:
-    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && 
-      ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")'
+    - if: '$CI_COMMIT_TAG'
