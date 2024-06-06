@@ -25,8 +25,9 @@ static const char TAG[] = "BusRS";
 
 uart_port_t BusRS::_port;
 QueueHandle_t BusRS::_eventQueue;
-SemaphoreHandle_t BusRS::_mutex;
-SemaphoreHandle_t BusRS::_semaphore;
+SemaphoreHandle_t BusRS::_writeMutex;
+SemaphoreHandle_t BusRS::_writeReadMutex;
+SemaphoreHandle_t BusRS::_transferMutex;
 
 /**
  * @brief initialization of RS communication
@@ -40,11 +41,13 @@ int BusRS::begin(uart_port_t port, gpio_num_t tx_num, gpio_num_t rx_num)
     int err = 0;
     _port = port;
 
-    _mutex = xSemaphoreCreateMutex();
-    xSemaphoreGive(_mutex);
-
-    _semaphore = xSemaphoreCreateMutex();
-    xSemaphoreGive(_semaphore);
+    /* Mutex */
+    _writeMutex = xSemaphoreCreateMutex();
+    xSemaphoreGive(_writeMutex);
+    _writeReadMutex = xSemaphoreCreateMutex();
+    xSemaphoreGive(_writeReadMutex);
+    _transferMutex = xSemaphoreCreateMutex();
+    xSemaphoreGive(_transferMutex);
 
     ESP_LOGI(TAG, "Configure uart parameters");
     uart_config_t uart_config = {
@@ -98,11 +101,11 @@ void BusRS::write(Frame_t* frame, TickType_t timeout)
         memcpy(&buffer[BUS_RS_HEADER_LENGTH], frame->data, frame->length);
         length = frame->length + BUS_RS_HEADER_LENGTH;
         if(frame->ack)
-            xSemaphoreTake(_semaphore, portMAX_DELAY);
-        xSemaphoreTake(_mutex, portMAX_DELAY);
+            xSemaphoreTake(_writeReadMutex, portMAX_DELAY);
+        xSemaphoreTake(_writeMutex, portMAX_DELAY);
         uart_write_bytes(_port, (const char*) buffer, length);
         uart_wait_tx_done(_port, timeout);
-        xSemaphoreGive(_mutex);
+        xSemaphoreGive(_writeMutex);
     }
     free(buffer);
     buffer = NULL;
@@ -144,7 +147,7 @@ int BusRS::read(Frame_t* frame, TickType_t timeout)
                     index += event.size;
                 }
                 if (index >= frame->length || index > BUS_RS_FRAME_LENGTH_MAX) {
-                    xSemaphoreGive(_semaphore);
+                    xSemaphoreGive(_writeReadMutex);
                     if (_verifyChecksum(frame)) {
                         goto success;
                     } else {
@@ -166,18 +169,39 @@ int BusRS::read(Frame_t* frame, TickType_t timeout)
 error:
     free(buffer);
     buffer = NULL;
-    xSemaphoreGive(_semaphore);
+    xSemaphoreGive(_writeReadMutex);
     return -1;
 success:
     free(buffer);
     buffer = NULL;
-    xSemaphoreGive(_semaphore);
+    xSemaphoreGive(_writeReadMutex);
 #if defined(DEBUG_BUS)
     ESP_LOGI(TAG, "READ - ID: %u | CMD: 0x%02X | LENGTH: 0x%02X | CHCK: 0x%02X | DATA:", \
             frame->id, frame->cmd, frame->length, frame->checksum);
     ESP_LOG_BUFFER_HEX_LEVEL(TAG, frame->data, frame->length, ESP_LOG_INFO);
 #endif
     return 0;
+}
+
+/**
+ * @brief Write and read RS frame
+ * 
+ * @param frame 
+ * @param timeout 
+ * @return int 
+ */
+int BusRS::transfer(Frame_t* frame, TickType_t timeout)
+{
+    int ret = 0;
+    xSemaphoreTake(_transferMutex, portMAX_DELAY);
+    if (frame != NULL) {
+        write(frame, timeout);
+        if (frame->ack == true) {
+            ret = read(frame, timeout);
+        }
+    }
+    xSemaphoreGive(_transferMutex);
+    return ret;
 }
 
 /**

@@ -2,23 +2,20 @@
 #include "Arduino.h"
 
 #ifdef OI_CORE
-OICore core;
+Core core;
 #endif
-OIDiscrete discrete;
+Discrete discrete;
 
 void monitor_current(void*)
 {
     while (1) {    
-        Serial.print("Get output current: ");
-        Serial.println(discrete.getOutputCurrent(DOUT_1));
+        printf("Get output current: %d\n", discrete.getOutputCurrent(DOUT_1));
         delay(100);
     }
 }
 
 void setup(void)
 {
-    Serial.begin(115200);
-
     // Task to monitor output current
     xTaskCreate(monitor_current, "Task", 10000, NULL, 1, NULL);
 }

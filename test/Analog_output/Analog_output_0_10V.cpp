@@ -2,14 +2,12 @@
 #include "Arduino.h"
 
 #ifdef OI_CORE
-OICore core;
+Core core;
 #endif
-OIMixed mixed;
+Mixed mixed;
 
 void setup(void)
 {
-    Serial.begin(115200);
-
     /* Configure Analog output 1 in voltage mode */
     mixed.analogOutputMode(AOUT_1, AOUT_MODE_M10V5_10V5);
 }
@@ -21,6 +19,5 @@ void loop(void)
         mixed.analogWrite(AOUT_1, f);
         delay(100);
     }
-
     delay(100);
 }

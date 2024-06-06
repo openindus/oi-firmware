@@ -10,6 +10,7 @@
 
 #include "Global.h"
 
+/* Control cmd */
 #define CMD_NOP                     (uint8_t) 0x00
 #define CMD_RESTART                 (uint8_t) 0x01
 #define CMD_PING                    (uint8_t) 0x02
@@ -32,14 +33,15 @@
 enum Control_Request_e {
     /* DIGITAL */
     REQUEST_DIGITAL_WRITE                   = 0x00,
-    REQUEST_DIGITAL_TOGGLE                  = 0x01,
-    REQUEST_DIGITAL_MODE_PWM                = 0x02,
-    REQUEST_DIGITAL_SET_PWM                 = 0x03,
-    REQUEST_DIGITAL_GET_CURRENT             = 0x04,
-    REQUEST_DIGITAL_GET_OVERCURRENT         = 0x05,
-    REQUEST_DIGITAL_READ                    = 0x06,
-    REQUEST_ATTACH_INTERRUPT                = 0x07,
-    REQUEST_DETACH_INTERRUPT                = 0x08,
+    REQUEST_TOGGLE_OUTPUT                   = 0x01,
+    REQUEST_OUTPUT_MODE                     = 0x02,
+    REQUEST_SET_PWM_FREQUENCY               = 0x03,
+    REQUEST_SET_PWM_DUTY_CYCLE              = 0x04,
+    REQUEST_GET_OUTPUT_CURRENT              = 0x05,
+    REQUEST_OUTPUT_IS_OVERCURRENT           = 0x06,
+    REQUEST_DIGITAL_READ                    = 0x07,
+    REQUEST_ATTACH_INTERRUPT                = 0x08,
+    REQUEST_DETACH_INTERRUPT                = 0x09,
 
     /* ANALOG */
     REQUEST_ANALOG_INPUT_MODE               = 0x20,

@@ -2,14 +2,12 @@
 #include "Arduino.h"
 
 #ifdef OI_CORE
-OICore core;
+Core core;
 #endif
-OIMixed mixed;
+Mixed mixed;
 
 void setup(void)
 {
-    Serial.begin(115200);
-
     /* Configure Analog output 2 in current mode */
     mixed.analogOutputMode(AOUT_2, AOUT_MODE_0mA_20mA);
 }
@@ -21,6 +19,5 @@ void loop(void)
         mixed.analogWrite(AOUT_2, f);
         delay(100);
     }
-
     delay(100);
 }
