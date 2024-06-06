@@ -3,14 +3,12 @@
 
 #define NODE_ID 6
 
-OICore core;
+Core core;
 
 CAN_Message_t tx_msg = {.id=NODE_ID, .size=1, .IDE=false, .RTR=false, .msg={0}};
 
 void setup(void)
-{
-    Serial.begin(115200);
-    
+{    
     /* Initialize CAN */
     core.can.begin(1000000); // Bit rates : 1MHz
     core.can.setStandardFilter(0xFF0, 0x0AA);
