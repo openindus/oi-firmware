@@ -40,10 +40,10 @@ static int setBoardInfoCmd(int argc, char **argv)
 
 int CLI_Board::_registerSetBoardInfoCmd(void)
 {
-    setBoardInfoArgs.boardType = arg_int0("t", "type", "TYPE", "Board type");
-    setBoardInfoArgs.serialNum = arg_int0("n", "serial-num", "NUM", "Serial number");
-    setBoardInfoArgs.versionHW = arg_str0("h", "version-hw", "VERSION", "Hardware version");
-    setBoardInfoArgs.timestamp = arg_str0("d", "date", "DATE", "Board date as a timestamp");
+    setBoardInfoArgs.boardType = arg_int1("t", "type", "TYPE", "Board type");
+    setBoardInfoArgs.serialNum = arg_int1("n", "serial-num", "NUM", "Serial number");
+    setBoardInfoArgs.versionHW = arg_str1("h", "version-hw", "VERSION", "Hardware version");
+    setBoardInfoArgs.timestamp = arg_str1("d", "date", "DATE", "Board date as a timestamp");
     setBoardInfoArgs.end = arg_end(5);
 
     const esp_console_cmd_t cmd = {

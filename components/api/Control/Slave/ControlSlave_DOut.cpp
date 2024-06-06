@@ -28,7 +28,7 @@ int ControlSlave_DOut::init() {
     });
 
     ControlSlave::addCtrlCallback(REQUEST_OUTPUT_MODE, [](std::vector<uint8_t>& data) {
-        DigitalOutputs::setPWMFrequency((DOut_Num_t)data[1], (DOut_Mode_t)data[2]);
+        DigitalOutputs::outputMode((DOut_Num_t)data[1], (DOut_Mode_t)data[2]);
         data.clear();
     });
 
