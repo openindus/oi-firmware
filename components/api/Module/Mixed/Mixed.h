@@ -30,16 +30,16 @@
 #define Mixed MixedStandalone
 #elif defined(OI_MIXED) && defined(MODULE_SLAVE)
 #define Mixed MixedSlave
-#include "ControlSlave_AOut.h"
-#include "ControlSlave_AInLV.h"
-#include "ControlSlave_DIn.h"
-#include "ControlSlave_DOut.h"
+#include "BusCtrlSlave_AOut.h"
+#include "BusCtrlSlave_AInLV.h"
+#include "BusCtrlSlave_DIn.h"
+#include "BusCtrlSlave_DOut.h"
 #elif defined(MODULE_MASTER) 
-#define Mixed MixedControl
-#include "ControlCmd_AOut.h"
-#include "ControlCmd_AInLV.h"
-#include "ControlCmd_DIn.h"
-#include "ControlCmd_DOut.h"
+#define Mixed MixedBusCtrl
+#include "BusCtrlCmd_AOut.h"
+#include "BusCtrlCmd_AInLV.h"
+#include "BusCtrlCmd_DIn.h"
+#include "BusCtrlCmd_DOut.h"
 #endif
 
 #if defined(OI_MIXED)
@@ -61,7 +61,7 @@ public:
 
 #if defined(OI_MIXED) && defined(MODULE_SLAVE)
 
-class MixedSlave : public ControlSlave, public MixedStandalone, public ControlSlave_AOut, public ControlSlave_AInLV, public ControlSlave_DIn, public ControlSlave_DOut
+class MixedSlave : public BusCtrlSlave, public MixedStandalone, public BusCtrlSlave_AOut, public BusCtrlSlave_AInLV, public BusCtrlSlave_DIn, public BusCtrlSlave_DOut
 {
 public:
 
@@ -70,16 +70,16 @@ public:
 
 #elif defined(MODULE_MASTER)
 
-class MixedControl : public ControlCmd, public ControlCmd_AOut, public ControlCmd_AInLV, public ControlCmd_DIn, public ControlCmd_DOut
+class MixedBusCtrl : public BusCtrlCmd, public BusCtrlCmd_AOut, public BusCtrlCmd_AInLV, public BusCtrlCmd_DIn, public BusCtrlCmd_DOut
 {
 public:
 
-    MixedControl(uint32_t sn = 0) : 
-        ControlCmd(TYPE_OI_MIXED , sn),
-        ControlCmd_AOut(this),
-        ControlCmd_AInLV(this),
-        ControlCmd_DIn(this),
-        ControlCmd_DOut(this) {}
+    MixedBusCtrl(uint32_t sn = 0) : 
+        BusCtrlCmd(TYPE_OI_MIXED , sn),
+        BusCtrlCmd_AOut(this),
+        BusCtrlCmd_AInLV(this),
+        BusCtrlCmd_DIn(this),
+        BusCtrlCmd_DOut(this) {}
 };
 #endif
 

@@ -49,14 +49,14 @@ private:
 
 #if !defined(MODULE_STANDALONE)
 
-#include "ControlMaster.h"
+#include "BusCtrlMaster.h"
 
-class CoreMaster: public CoreStandalone, public ControlMaster
+class CoreMaster: public CoreStandalone, public BusCtrlMaster
 {
 public:
 
     static inline int init(void) {
-        int err = ControlMaster::init();
+        int err = BusCtrlMaster::init();
         err |= CoreStandalone::init();
         return err;
     };

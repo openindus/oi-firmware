@@ -251,7 +251,7 @@ int CoreStandalone::init()
     err |= gpio_config(&io_rtc_conf);
 
     ESP_LOGI(CORE_TAG, "Create control task");
-    xTaskCreate(_controlTask, "Control task", 4096, NULL, 1, NULL);
+    xTaskCreate(_controlTask, "BusCtrl task", 4096, NULL, 1, NULL);
 
     return err;
 }
