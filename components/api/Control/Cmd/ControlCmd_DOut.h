@@ -47,6 +47,14 @@ public:
     void toggleOutput(DOut_Num_t num);
 
     /**
+     * @brief Configure output mode
+     * 
+     * @param num ouput number
+     * @param mode ouput mode [DIGITAL, PWM]
+     */
+    void outputMode(DOut_Num_t num, DOut_Mode_t mode);
+
+    /**
      * @brief Set the frequency value of PWM for a digital output
      * 
      * @param num DOUT to set
