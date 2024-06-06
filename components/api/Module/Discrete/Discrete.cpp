@@ -93,11 +93,11 @@ int DiscreteStandalone::init()
 
 int DiscreteSlave::init(void)
 {
-    int err = ControlSlave::init();
+    int err = BusCtrlSlave::init();
     err |= DiscreteStandalone::init();
-    err |= ControlSlave_AInHV::init();
-    err |= ControlSlave_DOut::init();
-    err |= ControlSlave_DIn::init();
+    err |= BusCtrlSlave_AInHV::init();
+    err |= BusCtrlSlave_DOut::init();
+    err |= BusCtrlSlave_DIn::init();
 
     return err;
 }

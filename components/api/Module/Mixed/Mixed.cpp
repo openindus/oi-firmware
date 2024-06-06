@@ -128,12 +128,12 @@ int MixedSlave::init(void)
 {
     int err = 0;
 
-    err |= ControlSlave::init();
+    err |= BusCtrlSlave::init();
     err |= MixedStandalone::init();
-    err |= ControlSlave_AOut::init();
-    err |= ControlSlave_AInLV::init();
-    err |= ControlSlave_DOut::init();
-    err |= ControlSlave_DIn::init();
+    err |= BusCtrlSlave_AOut::init();
+    err |= BusCtrlSlave_AInLV::init();
+    err |= BusCtrlSlave_DOut::init();
+    err |= BusCtrlSlave_DIn::init();
 
     return err;
 }

@@ -84,10 +84,10 @@ int StepperSlave::init(void)
 {
     int err = 0;
 
-    err |= ControlSlave::init();
+    err |= BusCtrlSlave::init();
     err |= StepperStandalone::init();
-    err |= ControlSlave_DIn::init();
-    err |= ControlSlave_Stepper::init();
+    err |= BusCtrlSlave_DIn::init();
+    err |= BusCtrlSlave_Stepper::init();
 
     return err;
 }

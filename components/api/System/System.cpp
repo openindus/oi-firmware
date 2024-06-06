@@ -48,7 +48,7 @@ void System::init(void)
     err |= MixedCLI::init();
 #endif
 
-    err |= CLI_Control::init();
+    err |= CLI_BusCtrl::init();
 
     if (err != 0) {
         ESP_LOGE(TAG, "Failed to initialize module");
@@ -86,7 +86,7 @@ void System::init(void)
 
     /* On master module, call autoId */
 #if defined(MODULE_MASTER)
-    if (ControlMaster::autoId()) {
+    if (BusCtrlMaster::autoId()) {
         ModuleStandalone::ledBlink(LED_GREEN, 1000); // Paired
     } else {
         ModuleStandalone::ledBlink(LED_RED, 1000); // Paired error

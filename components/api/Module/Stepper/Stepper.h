@@ -32,12 +32,12 @@
 #define Stepper StepperStandalone
 #elif (defined(OI_STEPPER) || defined(OI_STEPPER_VE)) && defined(MODULE_SLAVE)
 #define Stepper StepperSlave
-#include "ControlSlave_DIn.h"
-#include "ControlSlave_Stepper.h"
+#include "BusCtrlSlave_DIn.h"
+#include "BusCtrlSlave_Stepper.h"
 #elif defined(MODULE_MASTER) 
-#define Stepper StepperControl
-#include "ControlCmd_DIn.h"
-#include "ControlCmd_Stepper.h"
+#define Stepper StepperBusCtrl
+#include "BusCtrlCmd_DIn.h"
+#include "BusCtrlCmd_Stepper.h"
 #endif
 
 #if defined(OI_STEPPER) || defined(OI_STEPPER_VE)
@@ -59,7 +59,7 @@ public:
 
 #if (defined(OI_STEPPER) || defined(OI_STEPPER_VE)) && defined(MODULE_SLAVE)
 
-class StepperSlave : public ControlSlave, public StepperStandalone,  public ControlSlave_DIn, public ControlSlave_Stepper
+class StepperSlave : public BusCtrlSlave, public StepperStandalone,  public BusCtrlSlave_DIn, public BusCtrlSlave_Stepper
 {
 public:
 
@@ -68,14 +68,14 @@ public:
 
 #elif defined(MODULE_MASTER)
 
-class StepperControl : public ControlCmd, public ControlCmd_DIn, public ControlCmd_Stepper
+class StepperBusCtrl : public BusCtrlCmd, public BusCtrlCmd_DIn, public BusCtrlCmd_Stepper
 {
 public:
 
-    StepperControl(uint32_t sn = 0) : 
-        ControlCmd(TYPE_OI_STEPPER, sn),
-        ControlCmd_DIn(this),
-        ControlCmd_Stepper(this) {}
+    StepperBusCtrl(uint32_t sn = 0) : 
+        BusCtrlCmd(TYPE_OI_STEPPER, sn),
+        BusCtrlCmd_DIn(this),
+        BusCtrlCmd_Stepper(this) {}
 };
 #endif
 

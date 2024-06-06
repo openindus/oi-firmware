@@ -26,10 +26,11 @@ int ModuleStandalone::init(uint16_t type)
     _type = type;
 
     /* Board */
+    ESP_LOGI(TAG, "Board init.");
     err |= Board::init();
 
     /* LED */
-    ESP_LOGI(TAG, "Init LED");
+    ESP_LOGI(TAG, "LED init.");
     Led::install(MODULE_PIN_LED);
     Led::on(LED_BLUE);
 
