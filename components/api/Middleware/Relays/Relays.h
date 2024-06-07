@@ -29,6 +29,7 @@ protected:
 public:
 
     static int digitalWrite(Relay_Num_t num, uint8_t level);
+    static int digitalRead(Relay_Num_t num);
     static int toggleOutput(Relay_Num_t num);
 
 

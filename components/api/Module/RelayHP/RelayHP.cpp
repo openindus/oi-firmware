@@ -1,3 +1,11 @@
+/**
+ * @file Discrete.h
+ * @brief Discrete
+ * @author Georges de Massol
+ * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
+ * @see https://openindus.com
+ */
+
 #include "RelayHP.h"
 
 #if defined(OI_RELAY_HP)
@@ -27,6 +35,9 @@ int RelayHPStandalone::init(void)
 
     err |= ModuleStandalone::init(TYPE_OI_DISCRETE);
     err |= Relays::init(_relayGpio, sizeof(_relayGpio) / sizeof(gpio_num_t));
+    
+    /* CLI */
+    err |= RelayHPCLI::init();
 
     return err;
 }

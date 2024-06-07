@@ -42,7 +42,7 @@ int Relays::init(const gpio_num_t *gpio, int nb)
 
 int Relays::digitalWrite(Relay_Num_t num, uint8_t level)
 {
-    if (num >= _nb)
+    if (num >= _nb || num < 0)
     {
         ESP_LOGE(TAG, "Invalid RELAY_%d", num+1);
         return -1;
@@ -56,9 +56,20 @@ int Relays::digitalWrite(Relay_Num_t num, uint8_t level)
     return 0;
 }
 
+int Relays::digitalRead(Relay_Num_t num)
+{
+    if (num >= _nb || num < 0)
+    {
+        ESP_LOGE(TAG, "Invalid RELAY_%d", num+1);
+        return -1;
+    }
+    
+    return _level[num];
+}
+
 int Relays::toggleOutput(Relay_Num_t num)
 {
-    if (num >= _nb)
+    if (num >= _nb || num < 0)
     {
         ESP_LOGE(TAG, "Invalid RELAY_%d", num+1);
         return -1;
