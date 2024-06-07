@@ -1,21 +1,14 @@
 /**
- * Copyright (C) OpenIndus, Inc - All Rights Reserved
- *
- * This file is part of OpenIndus Library.
- *
- * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential
- * 
  * @file Stepper.cpp
- * @brief Functions for Stepper module
- *
- * For more information on OpenIndus:
+ * @brief Stepper
+ * @author
+ * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
 
-#if defined(OI_STEPPER) || defined(OI_STEPPER_VE)
-
 #include "Stepper.h"
+
+#if defined(OI_STEPPER) || defined(OI_STEPPER_VE)
 
 static const char TAG[] = "Stepper";
 
@@ -30,20 +23,11 @@ const gpio_num_t _dinGpio[] = {
 #endif
 };
 
-int StepperCLI::init(void)
-{
-    int err = 0;
-
-    err |= CLI_DIn::init();
-    err |= CLI_Stepper::init();
-    err |= CLI_StepperParam::init();
-
-    return err;
-}
-
 int StepperStandalone::init(void)
 {
     int err = 0;
+
+    ESP_LOGI(TAG, "Stepper init.");
 
 #if defined(OI_STEPPER)
     err |= ModuleStandalone::init(TYPE_OI_STEPPER);
@@ -51,27 +35,31 @@ int StepperStandalone::init(void)
     err |= ModuleStandalone::init(TYPE_OI_STEPPER_VE);
 #endif
 
-    /**
-     * @brief DIN Init
-     * 
-     */
+    /* Digital inputs */
     err |= DigitalInputs::init(_dinGpio, 4);
 
-/**
-     * @brief Init Motor stepper
-     * 
-     */
-    ESP_LOGI(TAG, "Init Motor stepper");
-
+    /* Stepper motor */
     PS01_Hal_Config_t ps01Conf = STEPPER_CONFIG_MOTOR_DEFAULT();
     PS01_Param_t ps01Param = STEPPER_PARAM_MOTOR_DEFAULT();
     err |= MotorStepper::init(&ps01Conf, &ps01Param);
 
-    /**
-     * @brief Init Motor stepper NVS param
-     * 
-     */
+    /* Parameters */
     err |= MotorStepperParam::initNVSParam();
+
+    /* CLI */
+    err |= StepperCLI::init();
+
+    return err;
+}
+
+int StepperCLI::init(void)
+{
+    int err = 0;
+
+    /* Command line interface */
+    err |= CLI_DIn::init();
+    err |= CLI_Stepper::init();
+    err |= CLI_StepperParam::init();
 
     return err;
 }
@@ -84,8 +72,8 @@ int StepperSlave::init(void)
 {
     int err = 0;
 
-    err |= BusCtrlSlave::init();
     err |= StepperStandalone::init();
+    err |= BusCtrlSlave::init();
     err |= BusCtrlSlave_DIn::init();
     err |= BusCtrlSlave_Stepper::init();
 

@@ -1,15 +1,8 @@
 /**
- * Copyright (C) OpenIndus, Inc - All Rights Reserved
- *
- * This file is part of OpenIndus Library.
- *
- * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential
- * 
  * @file Discrete.cpp
- * @brief Functions for discrete module
- *
- * For more information on OpenIndus:
+ * @brief Discrete
+ * @author
+ * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
 
@@ -17,7 +10,7 @@
 
 #if defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)
 
-static const char DISCRETE_TAG[] = "Discrete";
+static const char TAG[] = "Discrete";
 
 const gpio_num_t _doutGpio[] = {
     DISCRETE_PIN_DOUT_1,
@@ -59,6 +52,27 @@ AdcNumChannel_t _ainChannel[] = {
     DISCRETE_CHANNEL_AIN_2
 };
 
+int DiscreteStandalone::init()
+{
+    int err = 0;
+    
+    ESP_LOGI(TAG, "Discrete init.");
+
+#if defined(OI_DISCRETE)
+    err |= ModuleStandalone::init(TYPE_OI_DISCRETE);
+#elif defined(OI_DISCRETE_VE)
+    err |= ModuleStandalone::init(TYPE_OI_DISCRETE_VE);
+#endif
+    err |= DigitalOutputs::init(_doutGpio, _doutAdcChannel, 8);
+    err |= DigitalInputs::init(_dinGpio, 10);
+    err |= AnalogInputsHV::init(_ainChannel, 2);
+
+    /* CLI */
+    err |= DiscreteCLI::init();
+
+    return err;
+}
+
 int DiscreteCLI::init(void)
 {
     int err = 0;
@@ -70,31 +84,16 @@ int DiscreteCLI::init(void)
     return err;
 }
 
-int DiscreteStandalone::init()
-{
-    int err = 0;
-    
-    ESP_LOGI(DISCRETE_TAG, "Init");
-
-#if defined(OI_DISCRETE)
-    err |= ModuleStandalone::init(TYPE_OI_DISCRETE);
-#elif defined(OI_DISCRETE_VE)
-    err |= ModuleStandalone::init(TYPE_OI_DISCRETE_VE);
-#endif
-    err |= DigitalOutputs::init(_doutGpio, _doutAdcChannel, 8);
-    err |= DigitalInputs::init(_dinGpio, 10);
-    err |= AnalogInputsHV::init(_ainChannel, 2);
-
-    return err;
-}
 #endif
 
 #if (defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)) && defined(MODULE_SLAVE)
 
 int DiscreteSlave::init(void)
 {
-    int err = BusCtrlSlave::init();
+    int err = 0;
+
     err |= DiscreteStandalone::init();
+    err |= BusCtrlSlave::init();
     err |= BusCtrlSlave_AInHV::init();
     err |= BusCtrlSlave_DOut::init();
     err |= BusCtrlSlave_DIn::init();

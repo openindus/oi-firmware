@@ -1,15 +1,8 @@
 /**
- * Copyright (C) OpenIndus, Inc - All Rights Reserved
- *
- * This file is part of OpenIndus Library.
- *
- * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential
- * 
  * @file Mixed.cpp
- * @brief Functions for Mixed module
- *
- * For more information on OpenIndus:
+ * @brief Mixed
+ * @author
+ * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
 
@@ -63,18 +56,6 @@ static ads866x_config_t adcSPIConfig = {
     .adc_channel_nb = MIXED_ADC_NB
 };
 
-int MixedCLI::init(void)
-{
-    int err = 0;
-
-    err |= CLI_AOut::init();
-    err |= CLI_AInLV::init();
-    err |= CLI_DOut::init();
-    err |= CLI_DIn::init();
-
-    return err;
-}
-
 int MixedStandalone::init(void)
 {
     int err = 0;
@@ -118,8 +99,24 @@ int MixedStandalone::init(void)
     /* Enable analog outputs */
     AnalogOutputs::start();
 
+    /* CLI */
+    err |= MixedCLI::init();
+
     return err;
 }
+
+int MixedCLI::init(void)
+{
+    int err = 0;
+
+    err |= CLI_AOut::init();
+    err |= CLI_AInLV::init();
+    err |= CLI_DOut::init();
+    err |= CLI_DIn::init();
+
+    return err;
+}
+
 #endif
 
 #if defined(OI_MIXED) && defined(MODULE_SLAVE)
@@ -128,8 +125,8 @@ int MixedSlave::init(void)
 {
     int err = 0;
 
-    err |= BusCtrlSlave::init();
     err |= MixedStandalone::init();
+    err |= BusCtrlSlave::init();
     err |= BusCtrlSlave_AOut::init();
     err |= BusCtrlSlave_AInLV::init();
     err |= BusCtrlSlave_DOut::init();

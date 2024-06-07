@@ -33,22 +33,15 @@ void System::init(void)
     int err = 0;
 
     /* Module init */
-    err |= ModuleCLI::init();
 #if defined(OI_CORE)
     err |= Core::init();
-    err |= CLI_Core::init();
 #elif defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)
     err |= Discrete::init();
-    err |= DiscreteCLI::init();
 #elif defined(OI_STEPPER) || defined(OI_STEPPER_VE)
     err |= Stepper::init();
-    err |= StepperCLI::init();
 #elif defined(OI_MIXED)
     err |= Mixed::init();
-    err |= MixedCLI::init();
 #endif
-
-    err |= CLI_BusCtrl::init();
 
     if (err != 0) {
         ESP_LOGE(TAG, "Failed to initialize module");
