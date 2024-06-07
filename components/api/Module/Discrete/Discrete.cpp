@@ -67,6 +67,9 @@ int DiscreteStandalone::init()
     err |= DigitalInputs::init(_dinGpio, 10);
     err |= AnalogInputsHV::init(_ainChannel, 2);
 
+    /* CLI */
+    err |= DiscreteCLI::init();
+
     return err;
 }
 

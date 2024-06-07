@@ -34,5 +34,8 @@ int ModuleStandalone::init(uint16_t type)
     Led::install(MODULE_PIN_LED);
     Led::on(LED_BLUE);
 
+    /* CLI */
+    err |= ModuleCLI::init();
+
     return err;
 }

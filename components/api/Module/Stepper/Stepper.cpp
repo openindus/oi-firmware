@@ -46,6 +46,9 @@ int StepperStandalone::init(void)
     /* Parameters */
     err |= MotorStepperParam::initNVSParam();
 
+    /* CLI */
+    err |= StepperCLI::init();
+
     return err;
 }
 

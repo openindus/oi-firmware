@@ -99,6 +99,9 @@ int MixedStandalone::init(void)
     /* Enable analog outputs */
     AnalogOutputs::start();
 
+    /* CLI */
+    err |= MixedCLI::init();
+
     return err;
 }
 
