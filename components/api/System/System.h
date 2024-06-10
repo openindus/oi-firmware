@@ -20,7 +20,7 @@
 #include "Discrete.h"
 #include "Mixed.h"
 #include "Stepper.h"
-#include "Relay.h"
+#include "RelayHP.h"
 #include "AnalogLs.h"
 #include "Brushless.h"
 #include "Module.h"

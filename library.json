@@ -40,7 +40,7 @@
             "-I components/api/Module/Core",
             "-I components/api/Module/Discrete",
             "-I components/api/Module/Mixed",
-            "-I components/api/Module/Relay",
+            "-I components/api/Module/RelayHP",
             "-I components/api/Module/Stepper",
             "-I components/api/System",
             "-I components/drivers",

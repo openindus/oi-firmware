@@ -41,6 +41,8 @@ void System::init(void)
     err |= Stepper::init();
 #elif defined(OI_MIXED)
     err |= Mixed::init();
+#elif defined(OI_RELAY_HP)
+    err |= RelayHP::init();
 #endif
 
     if (err != 0) {

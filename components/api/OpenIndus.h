@@ -21,6 +21,6 @@
 #define OIDiscrete  Discrete
 #define OIMixed     Mixed
 #define OIStepper   Stepper
-#define OIRelay     Relay
+#define OIRelayHP     RelayHP
 #define OIAnalogLs  AnalogLs
 #define OIBrushless Brushless
