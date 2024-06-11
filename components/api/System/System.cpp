@@ -43,6 +43,8 @@ void System::init(void)
     err |= Mixed::init();
 #elif defined(OI_RELAY_HP)
     err |= RelayHP::init();
+#elif defined(OI_ANALOG_LS)
+    err |= AnalogLs::init();
 #endif
 
     /* Controller init */

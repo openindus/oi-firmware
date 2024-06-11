@@ -16,6 +16,8 @@
 #pragma once
 
 #include "Global.h"
+#include "UsbConsole.h"
+#include "Module.h"
 #include "Core.h"
 #include "Discrete.h"
 #include "Mixed.h"
@@ -23,11 +25,8 @@
 #include "RelayHP.h"
 #include "AnalogLs.h"
 #include "Brushless.h"
-#include "Module.h"
-#include "ControllerSlave.h"
-#include "Controller.h"
 #include "ControllerMaster.h"
-#include "CLI_Controller.h"
+#include "ControllerSlave.h"
 #include "UsbConsole.h"
 
 void setup(void);
