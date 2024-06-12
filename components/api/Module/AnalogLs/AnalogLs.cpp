@@ -15,11 +15,11 @@ static const char TAG[] = "AnalogLs";
 ads114s0x_device_t* _device;
 
 ads114s0x_config_t _config = {
-    .host_id = ANALOG_LS_ADC_SPI_HOST,
+    .host_id = ANALOG_LS_SPI_HOST,
     .sclk_freq = ANALOG_LS_ADC_SPI_FREQ/8,
     .start_sync = ANALOG_LS_ADC_PIN_START_SYNC,
     .reset = ANALOG_LS_ADC_PIN_RESET,
-    .cs = ANALOG_LS_ADC_PIN_SPI_CS,
+    .cs = ANALOG_LS_ADC_PIN_CS,
     .drdy = ANALOG_LS_ADC_PIN_DRDY
 };
 
@@ -36,7 +36,24 @@ int AnalogLsStandalone::init(void)
 
     ESP_LOGI(TAG, "ADC init.");
 
-    /* Initialize the ADC */
+    /* Initialize SPI bus */
+    spi_bus_config_t spiConfig = {
+        .mosi_io_num = ANALOG_LS_SPI_PIN_MOSI,
+        .miso_io_num = ANALOG_LS_SPI_PIN_MISO,
+        .sclk_io_num = ANALOG_LS_SPI_PIN_SCLK,
+        .quadwp_io_num = -1,
+        .quadhd_io_num = -1,
+        .data4_io_num = -1,
+        .data5_io_num = -1,
+        .data6_io_num = -1,
+        .data7_io_num = -1,
+        .max_transfer_sz = 0,
+        .flags = 0,
+        .intr_flags = 0
+    };
+    ret |= spi_bus_initialize(ANALOG_LS_SPI_HOST, &spiConfig, SPI_DMA_CH_AUTO);
+
+    /* Initialize ADC device */
     ads114s0x_init(&_device, &_config);
 
     ads114s0x_wakeup(_device);
