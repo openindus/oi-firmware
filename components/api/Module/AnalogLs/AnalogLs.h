@@ -13,6 +13,7 @@
 
 #if defined(OI_ANALOG_LS)
 
+#include "AnalogLsConfig.h"
 #include "RTD.h"
 #include "Thermocouple.h"
 #include "WheastoneBridge.h"

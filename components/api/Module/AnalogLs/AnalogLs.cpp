@@ -15,12 +15,12 @@ static const char TAG[] = "AnalogLs";
 ads114s0x_device_t* _device;
 
 ads114s0x_config_t _config = {
-    .host_id = SPI2_HOST,
-    .sclk_freq = SPI_MASTER_FREQ_8M/8,
-    .start_sync = GPIO_NUM_NC,
-    .reset = GPIO_NUM_NC,
-    .cs = GPIO_NUM_47,
-    .drdy = GPIO_NUM_NC
+    .host_id = ANALOG_LS_ADC_SPI_HOST,
+    .sclk_freq = ANALOG_LS_ADC_SPI_FREQ/8,
+    .start_sync = ANALOG_LS_ADC_PIN_START_SYNC,
+    .reset = ANALOG_LS_ADC_PIN_RESET,
+    .cs = ANALOG_LS_ADC_PIN_SPI_CS,
+    .drdy = ANALOG_LS_ADC_PIN_DRDY
 };
 
 int AnalogLsStandalone::init(void)
@@ -43,7 +43,6 @@ int AnalogLsStandalone::init(void)
 
     ads114s0x_reg_id_t id;
     ads114s0x_read_register(_device, ADS114S0X_REG_ID, (uint8_t*)&id, sizeof(ads114s0x_reg_id_t));
-    
     if (id.dev_id == ADS114S0X_DEV_ID_ADS114S08) {
         ESP_LOGI(TAG, "device id: ADS114S08\n");
     } else if (id.dev_id == ADS114S0X_DEV_ID_ADS114S06) {
