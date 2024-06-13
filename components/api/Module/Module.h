@@ -56,7 +56,7 @@ public:
             case TYPE_OI_STEPPER_VE:    strcpy(name, "OIStepperVE"); break;
             case TYPE_OI_ANALOG_LS:     strcpy(name, "OIAnalogLS"); break;
             case TYPE_OI_BRUSHLESS:     strcpy(name, "OIBrushless"); break;
-            default:                    strcpy(name, "Unknow"); break;
+            default:                    strcpy(name, "Unknown"); break;
         }
         return name;
     }

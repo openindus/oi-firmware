@@ -23,7 +23,7 @@
 #include "Mixed.h"
 #include "Stepper.h"
 #include "RelayHP.h"
-#include "AnalogLs.h"
+#include "AnalogLS.h"
 #include "Brushless.h"
 #include "ControllerMaster.h"
 #include "ControllerSlave.h"

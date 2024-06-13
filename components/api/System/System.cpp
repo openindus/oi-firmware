@@ -44,7 +44,7 @@ void System::init(void)
 #elif defined(OI_RELAY_HP)
     err |= RelayHP::init();
 #elif defined(OI_ANALOG_LS)
-    err |= AnalogLs::init();
+    err |= AnalogLS::init();
 #endif
 
     /* Controller init */

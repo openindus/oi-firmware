@@ -1,5 +1,5 @@
 /**
- * @file AnalogLs.h
+ * @file AnalogLS.h
  * @brief Analog LS
  * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
  * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
@@ -10,10 +10,7 @@
 
 #include "Global.h"
 #include "Module.h"
-
-#if defined(OI_ANALOG_LS)
-
-#include "AnalogLsConfig.h"
+#include "AnalogLSConfig.h"
 #include "RTD.h"
 #include "Thermocouple.h"
 #include "WheastoneBridge.h"
@@ -32,8 +29,10 @@ typedef enum {
     EANA_MAX
 } EAna_num_t;
 
-class AnalogLsStandalone:
-    public ModuleStandalone
+#if (OI_ANALOG_LS)
+
+class AnalogLS:
+    public Module
 {
 public:
 
@@ -43,8 +42,4 @@ public:
 
 };
 
-#endif
-
-#if (OI_ANALOG_LS) // && defined(MODULE_STANDALONE)
-class AnalogLs : public AnalogLsStandalone {};
 #endif

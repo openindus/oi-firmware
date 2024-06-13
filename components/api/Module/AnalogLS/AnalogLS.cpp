@@ -1,20 +1,20 @@
 /**
- * @file AnalogLs.cpp
+ * @file AnalogLS.cpp
  * @brief Analog LS
  * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
  * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
 
-#include "AnalogLs.h"
+#include "AnalogLS.h"
 
 #if defined(OI_ANALOG_LS)
 
-static const char TAG[] = "AnalogLs";
+static const char TAG[] = "AnalogLS";
 
 ads114s0x_device_t* _device;
 
-ads114s0x_config_t _config = {
+ads114s0x_config_t _adcConfig = {
     .host_id = ANALOG_LS_SPI_HOST,
     .sclk_freq = ANALOG_LS_ADC_SPI_FREQ/8,
     .start_sync = ANALOG_LS_ADC_PIN_START_SYNC,
@@ -23,14 +23,14 @@ ads114s0x_config_t _config = {
     .drdy = ANALOG_LS_ADC_PIN_DRDY
 };
 
-int AnalogLsStandalone::init(void)
+int AnalogLS::init(void)
 {
     int ret = 0;
 
     ESP_LOGI(TAG, "Init.");
 
     /* --- Module --- */
-    ret |= ModuleStandalone::init(TYPE_OI_ANALOG_LS);
+    ret |= Module::init(TYPE_OI_ANALOG_LS);
 
     /* --- ADC --- */
 
@@ -54,7 +54,7 @@ int AnalogLsStandalone::init(void)
     ret |= spi_bus_initialize(ANALOG_LS_SPI_HOST, &spiConfig, SPI_DMA_CH_AUTO);
 
     /* Initialize ADC device */
-    ads114s0x_init(&_device, &_config);
+    ads114s0x_init(&_device, &_adcConfig);
 
     ads114s0x_wakeup(_device);
 

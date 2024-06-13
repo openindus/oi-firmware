@@ -1,5 +1,5 @@
 /**
- * @file AnalogLsConfig.h
+ * @file AnalogLSConfig.h
  * @brief Analog LS
  * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
  * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
