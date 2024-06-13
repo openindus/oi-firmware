@@ -24,10 +24,10 @@
 #include "AnalogLs.h"
 #include "Brushless.h"
 #include "Module.h"
-#include "BusCtrlSlave.h"
-#include "BusCtrlCmd.h"
-#include "BusCtrlMaster.h"
-#include "CLI_BusCtrl.h"
+#include "Slave.h"
+#include "Command.h"
+#include "Master.h"
+#include "CLI_BusControl.h"
 #include "UsbConsole.h"
 
 void setup(void);

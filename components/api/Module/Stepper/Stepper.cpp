@@ -73,9 +73,9 @@ int StepperSlave::init(void)
     int err = 0;
 
     err |= StepperStandalone::init();
-    err |= BusCtrlSlave::init();
-    err |= BusCtrlSlave_DIn::init();
-    err |= BusCtrlSlave_Stepper::init();
+    err |= Slave::init();
+    err |= ResponseDIn::init();
+    err |= ResponseStepper::init();
 
     return err;
 }

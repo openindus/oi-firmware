@@ -16,7 +16,7 @@
 #elif (defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)) && defined(MODULE_SLAVE)
 #define Discrete DiscreteSlave
 #elif defined(MODULE_MASTER) 
-#define Discrete DiscreteCmd
+#define Discrete DiscreteMaster
 #endif
 
 
@@ -56,16 +56,16 @@ public:
 
 #if (defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)) && defined(MODULE_SLAVE)
 
-#include "BusCtrlSlave.h"
-#include "BusCtrlSlave_DIn.h"
-#include "BusCtrlSlave_DOut.h"
-#include "BusCtrlSlave_AInHV.h"
+#include "Slave.h"
+#include "ResponseDIn.h"
+#include "ResponseDOut.h"
+#include "ResponseAInHV.h"
 
 class DiscreteSlave : 
-    public BusCtrlSlave, 
-    public BusCtrlSlave_DIn, 
-    public BusCtrlSlave_DOut, 
-    public BusCtrlSlave_AInHV
+    public Slave, 
+    public ResponseDIn, 
+    public ResponseDOut, 
+    public ResponseAInHV
 {
 public:
 
@@ -74,23 +74,23 @@ public:
 
 #elif defined(MODULE_MASTER) 
 
-#include "BusCtrlCmd.h"
-#include "BusCtrlCmd_DIn.h"
-#include "BusCtrlCmd_DOut.h"
-#include "BusCtrlCmd_AInHV.h"
+#include "Command.h"
+#include "CommandDIn.h"
+#include "CommandDOut.h"
+#include "CommandAInHV.h"
 
-class DiscreteCmd : 
-    public BusCtrlCmd, 
-    public BusCtrlCmd_DIn, 
-    public BusCtrlCmd_DOut, 
-    public BusCtrlCmd_AInHV
+class DiscreteMaster : 
+    public Command, 
+    public CommandDIn, 
+    public CommandDOut, 
+    public CommandAInHV
 {
 public:
 
-    DiscreteCmd(uint32_t sn = 0) : 
-        BusCtrlCmd(TYPE_OI_DISCRETE, sn),
-        BusCtrlCmd_DIn(this),
-        BusCtrlCmd_DOut(this),
-        BusCtrlCmd_AInHV(this) {}
+    DiscreteMaster(uint32_t sn = 0) : 
+        Command(TYPE_OI_DISCRETE, sn),
+        CommandDIn(this),
+        CommandDOut(this),
+        CommandAInHV(this) {}
 };
 #endif
