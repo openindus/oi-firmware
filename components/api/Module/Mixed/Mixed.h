@@ -10,25 +10,27 @@
 
 #include "Global.h"
 #include "Module.h"
-
-#if defined(OI_MIXED) && defined(MODULE_STANDALONE)
-#define Mixed MixedStandalone
-#elif defined(OI_MIXED) && defined(MODULE_SLAVE)
-#define Mixed MixedSlave
-#elif defined(MODULE_MASTER) 
-#define Mixed MixedMaster
-#endif
-
-#if defined(OI_MIXED)
-
 #include "MixedPinout.h"
 #include "AnalogOutputs.h"
 #include "AnalogInputsLV.h"
 #include "DigitalOutputs.h"
 #include "DigitalInputs.h"
+#include "CLI_AOut.h"
+#include "CLI_AInLV.h"
+#include "CLI_DIn.h"
+#include "CLI_DOut.h"
+#include "ResponseAOut.h"
+#include "ResponseAInLV.h"
+#include "ResponseDIn.h"
+#include "ResponseDOut.h"
+#include "CommandAOut.h"
+#include "CommandAInLV.h"
+#include "CommandDIn.h"
+#include "CommandDOut.h"
 
-class MixedStandalone : 
-    public ModuleStandalone, 
+#if defined(OI_MIXED)
+
+class Mixed : public Module, 
     public AnalogOutputs, 
     public AnalogInputsLV, 
     public DigitalOutputs, 
@@ -37,54 +39,13 @@ class MixedStandalone :
 public:
 
     static int init(void);
+
 };
 
-#include "CLI_AOut.h"
-#include "CLI_AInLV.h"
-#include "CLI_DIn.h"
-#include "CLI_DOut.h"
+#elif defined(MODULE_MASTER) 
 
-class MixedCLI : 
-    public CLI_AOut, 
-    public CLI_AInLV, 
-    public CLI_DIn, 
-    public CLI_DOut
-{
-public:
-
-    static int init(void);
-};
-
-#endif
-
-#if defined(OI_MIXED) && defined(MODULE_SLAVE)
-
-#include "ResponseAOut.h"
-#include "ResponseAInLV.h"
-#include "ResponseDIn.h"
-#include "ResponseDOut.h"
-
-class MixedSlave : 
-    public Slave, 
-    public ResponseAOut, 
-    public ResponseAInLV, 
-    public ResponseDIn, 
-    public ResponseDOut
-{
-public:
-
-    static int init(void);
-};
-
-#elif defined(MODULE_MASTER)
-
-#include "CommandAOut.h"
-#include "CommandAInLV.h"
-#include "CommandDIn.h"
-#include "CommandDOut.h"
-
-class MixedMaster : 
-    public Command, 
+class Mixed : 
+    public Controller, 
     public CommandAOut, 
     public CommandAInLV, 
     public CommandDIn, 
@@ -92,13 +53,13 @@ class MixedMaster :
 {
 public:
 
-    MixedMaster(uint32_t sn = 0) : 
-        Command(TYPE_OI_MIXED , sn),
+    Mixed(uint32_t sn = 0) : 
+        Controller(TYPE_OI_MIXED , sn),
         CommandAOut(this),
         CommandAInLV(this),
         CommandDIn(this),
         CommandDOut(this) {}
+
 };
+
 #endif
-
-

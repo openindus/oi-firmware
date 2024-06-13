@@ -33,7 +33,7 @@ int RelayHPStandalone::init(void)
 
     ESP_LOGI(RELAY_HP_TAG, "RelayHPStandalone::init");
 
-    err |= ModuleStandalone::init(TYPE_OI_DISCRETE);
+    err |= Module::init(TYPE_OI_DISCRETE);
     err |= Relays::init(_relayGpio, sizeof(_relayGpio) / sizeof(gpio_num_t));
     
     /* CLI */
@@ -46,7 +46,8 @@ int RelayHPStandalone::init(void)
 
 int RelayHPSlave::init(void)
 {
-    int err = Slave::init();
+    int err = 0;
+    
     err |= RelayHPStandalone::init();
     err |= ResponseRelay::init();
 

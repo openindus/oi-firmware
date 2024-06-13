@@ -45,14 +45,21 @@ void System::init(void)
     err |= RelayHP::init();
 #endif
 
+    /* Controller init */
+#if defined(MODULE_MASTER)
+    err |= ControllerMaster::init();
+#elif defined(MODULE_SLAVE)
+    err |= ControllerSlave::init();
+#endif
+
     if (err != 0) {
         ESP_LOGE(TAG, "Failed to initialize module");
-        ModuleStandalone::ledBlink(LED_RED, 250);
+        Module::ledBlink(LED_RED, 250);
         UsbConsole::begin(true); // Force console to start, convenient for debugging
         return;
     } else {
         /* Module Initialized */
-        ModuleStandalone::ledBlink(LED_BLUE, 1000);
+        Module::ledBlink(LED_BLUE, 1000);
     }
 
     /* Check reset reason */
@@ -61,7 +68,7 @@ void System::init(void)
         (reason != ESP_RST_SW) && 
         (reason != ESP_RST_UNKNOWN)) {
         ESP_LOGE(TAG, "Reset reason : %d", reason);
-        ModuleStandalone::ledBlink(LED_RED, 1000); // Error
+        Module::ledBlink(LED_RED, 1000); // Error
         UsbConsole::begin(true); // Force console to start, convenient for debugging
         return;
     }
@@ -81,10 +88,10 @@ void System::init(void)
 
     /* On master module, call autoId */
 #if defined(MODULE_MASTER)
-    if (Master::autoId()) {
-        ModuleStandalone::ledBlink(LED_GREEN, 1000); // Paired
+    if (ControllerMaster::autoId()) {
+        Module::ledBlink(LED_GREEN, 1000); // Paired
     } else {
-        ModuleStandalone::ledBlink(LED_RED, 1000); // Paired error
+        Module::ledBlink(LED_RED, 1000); // Paired error
         UsbConsole::begin(true); // Force console to start, convenient for debugging
         return;
     }

@@ -8,7 +8,7 @@
 
 #include "Discrete.h"
 
-#if defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)
+#if (defined(OI_DISCRETE) || defined(OI_DISCRETE_VE))
 
 static const char TAG[] = "Discrete";
 
@@ -52,52 +52,33 @@ AdcNumChannel_t _ainChannel[] = {
     DISCRETE_CHANNEL_AIN_2
 };
 
-int DiscreteStandalone::init()
+int Discrete::init(void)
 {
     int err = 0;
     
     ESP_LOGI(TAG, "Discrete init.");
 
 #if defined(OI_DISCRETE)
-    err |= ModuleStandalone::init(TYPE_OI_DISCRETE);
+    err |= Module::init(TYPE_OI_DISCRETE);
 #elif defined(OI_DISCRETE_VE)
-    err |= ModuleStandalone::init(TYPE_OI_DISCRETE_VE);
+    err |= Module::init(TYPE_OI_DISCRETE_VE);
 #endif
     err |= DigitalOutputs::init(_doutGpio, _doutAdcChannel, 8);
     err |= DigitalInputs::init(_dinGpio, 10);
     err |= AnalogInputsHV::init(_ainChannel, 2);
 
     /* CLI */
-    err |= DiscreteCLI::init();
-
-    return err;
-}
-
-int DiscreteCLI::init(void)
-{
-    int err = 0;
-
     err |= CLI_AInHV::init();
     err |= CLI_DOut::init();
     err |= CLI_DIn::init();
 
-    return err;
-}
-
-#endif
-
-#if (defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)) && defined(MODULE_SLAVE)
-
-int DiscreteSlave::init(void)
-{
-    int err = 0;
-
-    err |= DiscreteStandalone::init();
-    err |= Slave::init();
+#if defined(MODULE_SLAVE)
     err |= ResponseAInHV::init();
     err |= ResponseDOut::init();
     err |= ResponseDIn::init();
+#endif
 
     return err;
 }
+
 #endif

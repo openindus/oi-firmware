@@ -23,16 +23,16 @@ const gpio_num_t _dinGpio[] = {
 #endif
 };
 
-int StepperStandalone::init(void)
+int Stepper::init(void)
 {
     int err = 0;
 
     ESP_LOGI(TAG, "Stepper init.");
 
 #if defined(OI_STEPPER)
-    err |= ModuleStandalone::init(TYPE_OI_STEPPER);
+    err |= Module::init(TYPE_OI_STEPPER);
 #elif defined(OI_STEPPER_VE)
-    err |= ModuleStandalone::init(TYPE_OI_STEPPER_VE);
+    err |= Module::init(TYPE_OI_STEPPER_VE);
 #endif
 
     /* Digital inputs */
@@ -47,35 +47,15 @@ int StepperStandalone::init(void)
     err |= MotorStepperParam::initNVSParam();
 
     /* CLI */
-    err |= StepperCLI::init();
-
-    return err;
-}
-
-int StepperCLI::init(void)
-{
-    int err = 0;
-
-    /* Command line interface */
     err |= CLI_DIn::init();
     err |= CLI_Stepper::init();
     err |= CLI_StepperParam::init();
 
-    return err;
-}
-
-#endif
-
-#if (defined(OI_STEPPER) || defined(OI_STEPPER_VE)) && defined(MODULE_SLAVE)
-
-int StepperSlave::init(void)
-{
-    int err = 0;
-
-    err |= StepperStandalone::init();
-    err |= Slave::init();
+#if defined(MODULE_SLAVE)
+    err |= Stepper::init();
     err |= ResponseDIn::init();
     err |= ResponseStepper::init();
+#endif
 
     return err;
 }

@@ -18,16 +18,10 @@
 #include "RS.h"
 #include "CLI_Core.h"
 
-#if defined(OI_CORE) && defined(MODULE_STANDALONE)
-#define Core CoreStandalone
-#elif defined(OI_CORE) && !defined(MODULE_STANDALONE)
-#define Core CoreMaster
-#endif
-
 #if defined(OI_CORE)
 
-class CoreStandalone : 
-    public ModuleStandalone, 
+class Core : 
+    public Module, 
     public DigitalInputsExp, 
     public DigitalOutputsExp, 
     public AnalogInputsHV
@@ -46,22 +40,5 @@ private:
     static ioex_device_t *_ioex;
     static void _controlTask(void *pvParameters);
 };
-
-#if !defined(MODULE_STANDALONE)
-
-#include "Master.h"
-
-class CoreMaster: public CoreStandalone, public Master
-{
-public:
-
-    static inline int init(void) {
-        int err = Master::init();
-        err |= CoreStandalone::init();
-        return err;
-    };
-};
-
-#endif
 
 #endif
