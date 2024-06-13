@@ -81,7 +81,7 @@ void System::init(void)
 
     /* On master module, call autoId */
 #if defined(MODULE_MASTER)
-    if (BusCtrlMaster::autoId()) {
+    if (Master::autoId()) {
         ModuleStandalone::ledBlink(LED_GREEN, 1000); // Paired
     } else {
         ModuleStandalone::ledBlink(LED_RED, 1000); // Paired error

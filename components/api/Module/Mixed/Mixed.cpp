@@ -126,11 +126,11 @@ int MixedSlave::init(void)
     int err = 0;
 
     err |= MixedStandalone::init();
-    err |= BusCtrlSlave::init();
-    err |= BusCtrlSlave_AOut::init();
-    err |= BusCtrlSlave_AInLV::init();
-    err |= BusCtrlSlave_DOut::init();
-    err |= BusCtrlSlave_DIn::init();
+    err |= Slave::init();
+    err |= ResponseAOut::init();
+    err |= ResponseAInLV::init();
+    err |= ResponseDOut::init();
+    err |= ResponseDIn::init();
 
     return err;
 }

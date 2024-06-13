@@ -22,7 +22,7 @@
 #include "CLI_Led.h"
 #include "CLI_Bus.h"
 #include "CLI_Board.h"
-#include "CLI_BusCtrl.h"
+#include "CLI_BusControl.h"
 
 enum Module_Type_e {
     TYPE_OI_CORE            = (uint16_t) 3,
@@ -65,7 +65,7 @@ class ModuleCLI:
     public CLI_Board,
     public CLI_Led,
     public CLI_Bus,
-    public CLI_BusCtrl
+    public CLI_BusControl
 {
 public: 
 
@@ -75,7 +75,7 @@ public:
         err |= CLI_Board::init();
         err |= CLI_Led::init();
         err |= CLI_Bus::init();
-        err |= CLI_BusCtrl::init();
+        err |= CLI_BusControl::init();
         
         return err;
     }
