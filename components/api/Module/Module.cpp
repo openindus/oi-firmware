@@ -74,6 +74,7 @@ int Module::init(uint16_t type)
     err |= BusRS::begin(MODULE_RS_NUM_PORT, MODULE_PIN_RS_UART_TX, MODULE_PIN_RS_UART_RX);
     err |= BusCAN::begin(MODULE_PIN_CAN_TX, MODULE_PIN_CAN_RX);
 
+#if defined(MODULE_MASTER)
     /* Bus IO */
     BusIO::Config_t config = {
         .adcChannelId = MODULE_OI_ID_ADC_CHANNEL,
@@ -82,8 +83,17 @@ int Module::init(uint16_t type)
         .gpioModeSync = GPIO_MODE_INPUT_OUTPUT,
         .gpioNumPower = MODULE_PIN_CMD_MOSFET_ALIM,
     };
+#elif defined(MODULE_SLAVE)
+    /* Bus IO */
+    BusIO::Config_t config = {
+        .adcChannelId = MODULE_OI_ID_ADC_CHANNEL,
+        .adcWidthId = MODULE_OI_ID_ADC_WIDTH,
+        .gpioNumSync = MODULE_PIN_OI_GPIO,
+        .gpioModeSync = GPIO_MODE_INPUT,
+        .gpioNumPower = MODULE_PIN_CMD_MOSFET_ALIM,
+    };
+#endif
     err |= BusIO::init(&config);
-
 #endif
 
     return err;
