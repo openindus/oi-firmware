@@ -16,7 +16,7 @@
 #elif (defined(OI_RELAY_HP)) && defined(MODULE_SLAVE)
 #define RelayHP RelayHPSlave
 #elif defined(MODULE_MASTER)
-#define RelayHP RelayHPBusControl
+#define RelayHP RelayHPController
 #endif
 
 #if defined(OI_RELAY_HP)
@@ -25,7 +25,7 @@
 #include "Relays.h"
 
 class RelayHPStandalone : 
-    public ModuleStandalone, 
+    public Module, 
     public Relays
 {
 public:
@@ -47,11 +47,11 @@ public:
 
 #if (defined(OI_RELAY_HP)) && defined(MODULE_SLAVE)
 
-#include "Slave.h"
+#include "ControllerSlave.h"
 #include "ResponseRelay.h"
 
 class RelayHPSlave : 
-    public Slave, 
+    public ControllerSlave, 
     public RelayHPStandalone, 
     public ResponseRelay
 {
@@ -62,17 +62,17 @@ public:
 
 #elif defined(MODULE_MASTER)
 
-#include "Command.h"
+#include "Controller.h"
 #include "CommandRelay.h"
 
-class RelayHPBusControl : 
-    public Command, 
+class RelayHPController : 
+    public Controller, 
     public CommandRelay
 {
 public:
 
-    RelayHPBusControl(uint32_t sn = 0) :
-        Command(TYPE_OI_RELAY_HP, sn),
+    RelayHPController(uint32_t sn = 0) :
+        Controller(TYPE_OI_RELAY_HP, sn),
         CommandRelay(this){}
 
     static int init(void);

@@ -6,7 +6,7 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file CoreStandalone.cpp
+ * @file Core.cpp
  * @brief Functions for core module
  *
  * For more information on OpenIndus:
@@ -46,14 +46,14 @@ const AdcNumChannel_t _ainChannel[] = {
     CORE_CHANNEL_AIN_2
 };
 
-ioex_device_t* CoreStandalone::_ioex = NULL;
-CAN CoreStandalone::can(CORE_SPI_USER_HOST, CORE_PIN_CAN_SPI_CS, CORE_PIN_CAN_INTERRUPT);
-RS CoreStandalone::rs(CORE_SPI_USER_HOST, CORE_PIN_RS_SPI_CS, CORE_PIN_RS_INTERRUPT);
-RTClock CoreStandalone::rtc(CORE_I2C_PORT_NUM, CORE_PIN_RTC_INTERRUPT);
+ioex_device_t* Core::_ioex = NULL;
+CAN Core::can(CORE_SPI_USER_HOST, CORE_PIN_CAN_SPI_CS, CORE_PIN_CAN_INTERRUPT);
+RS Core::rs(CORE_SPI_USER_HOST, CORE_PIN_RS_SPI_CS, CORE_PIN_RS_INTERRUPT);
+RTClock Core::rtc(CORE_I2C_PORT_NUM, CORE_PIN_RTC_INTERRUPT);
 
-int CoreStandalone::init()
+int Core::init()
 {
-    int err = ModuleStandalone::init(TYPE_OI_CORE);
+    int err = Module::init(TYPE_OI_CORE);
 
     /**
      * @brief I2C init
@@ -251,7 +251,7 @@ int CoreStandalone::init()
     err |= gpio_config(&io_rtc_conf);
 
     ESP_LOGI(CORE_TAG, "Create control task");
-    xTaskCreate(_controlTask, "BusControl task", 4096, NULL, 1, NULL);
+    xTaskCreate(_controlTask, "Controller task", 4096, NULL, 1, NULL);
 
     /* CLI */
     err |= CLI_Core::init();
@@ -259,7 +259,7 @@ int CoreStandalone::init()
     return err;
 }
 
-void CoreStandalone::_controlTask(void *pvParameters)
+void Core::_controlTask(void *pvParameters)
 {
 
     /* Every 500ms check if there is a power error (5V User or 5V USB)

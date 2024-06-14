@@ -19,10 +19,11 @@
 #include "Module.h"
 #include "ModulePinout.h"
 #include "Led.h"
+#include "Bus.h"
 #include "CLI_Led.h"
 #include "CLI_Bus.h"
 #include "CLI_Board.h"
-#include "CLI_BusControl.h"
+#include "CLI_Controller.h"
 
 enum Module_Type_e {
     TYPE_OI_CORE            = (uint16_t) 3,
@@ -61,35 +62,27 @@ public:
     }
 };
 
-class ModuleCLI:
-    public CLI_Board,
-    public CLI_Led,
-    public CLI_Bus,
-    public CLI_BusControl
-{
-public: 
-
-    static inline int init(void) {
-        int err = 0;
-        
-        err |= CLI_Board::init();
-        err |= CLI_Led::init();
-        err |= CLI_Bus::init();
-        err |= CLI_BusControl::init();
-        
-        return err;
-    }
-};
-
-class ModuleStandalone: public Board, public Led
+class Module: 
+    public Board, 
+    public Led,
+    public Bus
 {
 public:
+
+    // Module(uint16_t type) : _type(type) {}
 
     static int init(uint16_t type);
 
     static inline void ledOn(LedColor_t color) {Led::on(color);};
     static inline void ledOff(void) {Led::off();};
     static inline void ledBlink(LedColor_t color, uint32_t period) {Led::blink(color, period);};
+
+#if defined(MODULE_MASTER) || defined(MODULE_SLAVE)
+
+    static inline void busPowerOn(void) { BusIO::powerOn(); }
+    static inline void busPowerOff(void) { BusIO::powerOff(); }
+
+#endif
 
 private:
 
