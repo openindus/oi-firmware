@@ -11,34 +11,26 @@
 #include "Global.h"
 #include "Module.h"
 #include "AnalogLSConfig.h"
+#include "AnalogInputsLS.h"
 #include "RTD.h"
 #include "Thermocouple.h"
 #include "WheastoneBridge.h"
 
-typedef enum {
-    EANA_A_P = 0,
-    EANA_A_N,
-    EANA_B_P,
-    EANA_B_N,
-    EANA_C_P,
-    EANA_C_N,
-    EANA_D_P,
-    EANA_D_N,
-    EANA_E_P,
-    EANA_E_N,
-    EANA_MAX
-} EAna_num_t;
-
 #if (OI_ANALOG_LS)
 
 class AnalogLS:
-    public Module
+    public Module,
+    public AnalogInputsLS
 {
 public:
 
     static int init(void);
 
-    // static RTD rtd;
+    static RTD rtd;
+
+private:
+
+    static ADC_Device* _adcDevice;
 
 };
 
