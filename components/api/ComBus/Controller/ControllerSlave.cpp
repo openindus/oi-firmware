@@ -241,6 +241,25 @@ void ControllerSlave::_busTask(void *pvParameters)
                 }
                 break;
             }
+            case CMD_OI_GPIO:
+            {
+                uint8_t state = frame.data[0];
+                if (frame.id == _id) {
+                    switch (state)
+                    {
+                    case TOGGLE:
+                        Module::toggleSync();
+                        break;
+                    case READ:
+                        Module::readSync();
+                        break;
+                    default:
+                        Module::writeSync(state);
+                        break;
+                    }
+                }
+                break;
+            }
             default:
                 break;
             }

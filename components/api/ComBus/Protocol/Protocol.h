@@ -29,6 +29,7 @@
 // #define CMD_WRITE_NVS               (uint8_t) 0x0F
 // #define CMD_HEARTBEAT               (uint8_t) 0x10
 // #define CMD_AUTO_TEST               (uint8_t) 0x11
+#define CMD_OI_GPIO                 (uint8_t) 0x12
 
 enum Protocol_Request_e {
     /* DIGITAL */
@@ -89,4 +90,12 @@ enum Protocol_Request_e {
 enum Protocol_Event_e {
     EVENT_DIGITAL_INTERRUPT                 = 0x00,
     EVENT_MOTOR_READY                       = 0x01,
+};
+
+enum Protocol_OIGpio
+{
+    SET_LOW = 0,
+    SET_HIGH = 1,
+    TOGGLE = 2,
+    READ = 3
 };

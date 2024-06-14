@@ -39,6 +39,7 @@ public:
     static void powerOff(void);
     static uint8_t readSync(void);
     static void writeSync(uint8_t level);
+    static void toggleSync(void);
 
 private:
 

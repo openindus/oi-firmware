@@ -23,15 +23,17 @@ std::map<std::pair<uint8_t, uint16_t>, std::function<void(uint8_t)>> Controller:
 std::vector<Controller*> Controller::_instances;
 
 /**
- * @brief Request a control Controller
- * 
- * @param byte Byte array
- * @return -1: error, 0 success
+ * Sends a command over the communication bus.
+ *
+ * @param cmd The command to send.
+ * @param msgBytes The message bytes to send along with the command.
+ * @param ackNeeded Indicates whether an acknowledgment is needed for this command.
+ * @return 0 if the command was sent successfully, -1 if there was an error.
  */
-int Controller::request(std::vector<uint8_t>& msgBytes, bool ackNeeded)
+int Controller::command(const uint8_t cmd, std::vector<uint8_t>& msgBytes, bool ackNeeded)
 {
     BusRS::Frame_t frame;
-    frame.cmd = CMD_REQUEST;
+    frame.cmd = cmd;
     frame.id = _id;
     frame.dir = 1;
     frame.ack = ackNeeded;
@@ -53,6 +55,17 @@ error:
 }
 
 /**
+ * @brief Request a control Controller
+ * 
+ * @param byte Byte array
+ * @return -1: error, 0 success
+ */
+int Controller::request(std::vector<uint8_t>& msgBytes, bool ackNeeded)
+{
+    return command(CMD_REQUEST, msgBytes, ackNeeded);
+}
+
+/**
  * @brief Send Controller to change led status
  * 
  * @param state Led state (On, Off, Blink)
@@ -61,19 +74,29 @@ error:
  */
 void Controller::_ledStatus(LedState_t state, LedColor_t color, uint32_t period)
 {
-    uint8_t payload[6];
-    payload[0] = (uint8_t)state;
-    payload[1] = (uint8_t)color;
-    memcpy(&payload[2], &period, sizeof(uint32_t));
-    BusRS::Frame_t frame;
-    frame.cmd = CMD_LED_STATUS;
-    frame.id = _id;
-    frame.dir = 1;
-    frame.ack = false;
-    frame.length = 6;
-    frame.data = payload;
-    BusRS::write(&frame, pdMS_TO_TICKS(100));
-    vTaskDelay(1 / portTICK_PERIOD_MS);
+    std::vector<uint8_t> msgBytes = {(uint8_t)state, (uint8_t)color};
+    // Add period to message (4 bytes)
+    msgBytes.insert(msgBytes.end(), (uint8_t*)&period, (uint8_t*)&period + sizeof(uint32_t));
+    this->command(CMD_LED_STATUS, msgBytes, false);
 }
 
+void Controller::writeSync(uint8_t level)
+{
+    std::vector<uint8_t> msgBytes = {(uint8_t)level};
+    this->command(CMD_OI_GPIO, msgBytes);
+}
+
+void Controller::toggleSync()
+{
+    std::vector<uint8_t> msgBytes = {TOGGLE};
+    this->command(CMD_OI_GPIO, msgBytes);
+}
+
+
+int Controller::readSync()
+{
+    std::vector<uint8_t> msgBytes = {READ};
+    this->command(CMD_OI_GPIO, msgBytes);
+    return static_cast<int>(msgBytes[1]);
+}
 #endif
