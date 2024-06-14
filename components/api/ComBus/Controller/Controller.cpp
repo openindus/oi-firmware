@@ -96,7 +96,10 @@ void Controller::toggleSync()
 int Controller::readSync()
 {
     std::vector<uint8_t> msgBytes = {READ};
-    this->command(CMD_OI_GPIO, msgBytes);
-    return static_cast<int>(msgBytes[1]);
+    int err = this->command(CMD_OI_GPIO, msgBytes);
+    if (err < 0) {
+        return -1;
+    }
+    return static_cast<int>(msgBytes[0]);
 }
 #endif

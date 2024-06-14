@@ -251,8 +251,15 @@ void ControllerSlave::_busTask(void *pvParameters)
                         Module::toggleSync();
                         break;
                     case READ:
-                        Module::readSync();
+                    {
+                        uint8_t sync_value = Module::readSync();
+                        frame.dir = 0;
+                        frame.ack = false;
+                        frame.length = 1;
+                        frame.data[0] = sync_value;
+                        BusRS::write(&frame);
                         break;
+                    }
                     default:
                         Module::writeSync(state);
                         break;
