@@ -87,6 +87,14 @@ uint8_t BusIO::readSync(void)
     return gpio_get_level(_config->gpioNumSync);
 }
 
+void BusIO::toggleSync(void)
+{
+    BusIO::writeSync(0);
+    // vTaskDelay(100 / portTICK_PERIOD_MS);
+    BusIO::writeSync(1);
+    BusIO::readSync();
+}
+
 void BusIO::writeSync(uint8_t level)
 {
     if (_config->gpioModeSync != GPIO_MODE_INPUT_OUTPUT)

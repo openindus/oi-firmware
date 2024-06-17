@@ -58,6 +58,10 @@ public:
     inline static void removeEventCallback(uint8_t event, uint16_t id) {
         _eventCallbacks.erase(std::make_pair(event, id));
     }
+   
+    void writeSync(uint8_t level);
+    void toggleSync();
+    int readSync();
 
 protected:
 
@@ -70,7 +74,8 @@ private:
     uint16_t _type; // Board 
     uint32_t _sn; // Serial number
     void _ledStatus(LedState_t state, LedColor_t color=LED_NONE, uint32_t period=0);
-
+        
+    int command(const uint8_t cmd, std::vector<uint8_t>& msgBytes, bool ackNeeded = true);
 };
 
 #endif
