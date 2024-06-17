@@ -305,6 +305,8 @@ typedef struct __attribute__((packed)) {
 
 /* Init */
 int ads114s0x_init(ads114s0x_device_t** dev, ads114s0x_config_t* conf);
+int ads114s0x_enable(ads114s0x_device_t* dev);
+int ads114s0x_disable(ads114s0x_device_t* dev);
 
 /* Control */
 int ads114s0x_wakeup(ads114s0x_device_t* dev);

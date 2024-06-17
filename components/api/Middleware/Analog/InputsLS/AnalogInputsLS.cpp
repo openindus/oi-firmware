@@ -18,15 +18,16 @@ int ADC_Device::init(void)
 
     /* Initialize ADC device */
     ads114s0x_init(&_device, &_config);
+    ads114s0x_enable(_device);
 
     ads114s0x_wakeup(_device);
 
     ads114s0x_reg_id_t id;
     ads114s0x_read_register(_device, ADS114S0X_REG_ID, (uint8_t*)&id, sizeof(ads114s0x_reg_id_t));
     if (id.dev_id == ADS114S0X_DEV_ID_ADS114S08) {
-        ESP_LOGI(TAG, "ADC device: ADS114S08\n");
+        ESP_LOGI(TAG, "ADC device: ADS114S08");
     } else if (id.dev_id == ADS114S0X_DEV_ID_ADS114S06) {
-        ESP_LOGI(TAG, "ADC device: ADS114S06\n");
+        ESP_LOGI(TAG, "ADC device: ADS114S06");
     } else {
         ESP_LOGE(TAG, "ADC device not found");
     }
@@ -73,7 +74,7 @@ int AnalogInputsLS::init(ADC_Device* adc)
     }
 
     ret |= _adc->init();
-    ret |= _adc->test();
+    // ret |= _adc->test();
 
     return ret;
 }
