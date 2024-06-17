@@ -26,11 +26,12 @@ public:
 
     static int init(void);
 
-    static RTD rtd;
+    static std::vector<RTD*> rtd;
 
 private:
 
     static ADC_Device* _adcDevice;
+    static Excitation* _excit;
 
 };
 

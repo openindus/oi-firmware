@@ -24,6 +24,8 @@ ADC_Device* AnalogLS::_adcDevice = new ADC_Device {
     }
 };
 
+Excitation* AnalogLS::_excit = new Excitation;
+
 int AnalogLS::init(void)
 {
     int ret = 0;
@@ -50,12 +52,10 @@ int AnalogLS::init(void)
     };
     ret |= spi_bus_initialize(ANALOG_LS_SPI_HOST, &spiConfig, SPI_DMA_CH_AUTO);
 
-    /* Inputs LS */
-    ret |= AnalogInputsLS::init(_adcDevice);
+    /* Initialize I2C bus */
 
-    /* Digipot */
-
-    /* Digital thermometer */
+    /* Initialize analog inputs low signal */
+    ret |= AnalogInputsLS::init(_adcDevice, _excit);
 
     return ret;
 }

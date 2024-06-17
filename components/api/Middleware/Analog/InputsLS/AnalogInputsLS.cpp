@@ -62,7 +62,7 @@ int ADC_Device::test(void)
 
 ADC_Device* AnalogInputsLS::_adc;
 
-int AnalogInputsLS::init(ADC_Device* adc)
+int AnalogInputsLS::init(ADC_Device* adc, Excitation* excit)
 {
     int ret = 0;
 
@@ -73,8 +73,16 @@ int AnalogInputsLS::init(ADC_Device* adc)
         _adc = adc;
     }
 
+    /* ADC */
     ret |= _adc->init();
     // ret |= _adc->test();
+
+
+    /* Excitation Mux (high side/ low side)*/
+
+    /* Digipot */
+
+    /* Digital thermometer */
 
     return ret;
 }

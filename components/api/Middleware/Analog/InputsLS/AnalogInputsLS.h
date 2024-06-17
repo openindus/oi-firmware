@@ -40,14 +40,45 @@ private:
     ads114s0x_config_t _config;
 };
 
+class Multiplexer
+{
+public:
+
+    Multiplexer() {}
+
+};
+
+class Digipot
+{
+public:
+
+    Digipot() {}
+
+};
+
+class Excitation
+{
+public:
+
+    Excitation() {}
+
+private:
+
+    Multiplexer* _highSideMux;
+    Multiplexer* _lowSideMux;
+    Digipot* _digipot;
+
+};
+
 class AnalogInputsLS
 {
 protected:
 
-    static int init(ADC_Device* adc);
+    static int init(ADC_Device* adc, Excitation* excit);
 
 private:
 
     static ADC_Device* _adc;
+    static Excitation _excit;
 
 };
