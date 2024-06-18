@@ -29,12 +29,19 @@ int Module::init(uint16_t type)
 
     /* eFuse - Board info */
     uint16_t local_type = getBoardType(); // read it only once to avoid multiple warning
-    ESP_LOGI(TAG, "Board type       : %u", local_type);
+    
+    char local_name[16];
+    ESP_LOGI(TAG, "Board type       : %u (%s)", local_type, ModuleUtils::typeToName(local_type, local_name));
     ESP_LOGI(TAG, "Serial number    : %d", getSerialNum());
     char hardware_version[4];
     getHardwareVersion(hardware_version);
     ESP_LOGI(TAG, "Hardware version : %.*s", 4, hardware_version);
-    ESP_LOGI(TAG, "Board timestamp  : %lli", getTimestamp());
+    char str_date[13];
+    time_t t = (time_t) getTimestamp();
+    struct tm lt;
+    localtime_r(&t, &lt);
+    strftime(str_date, sizeof(str_date), "(%d/%m/%Y)", &lt);
+    ESP_LOGI(TAG, "Board timestamp  : %lli %s", getTimestamp(), str_date);
     char software_version[32];
     getSoftwareVersion(software_version);
     ESP_LOGI(TAG, "Software version : %s", software_version);
@@ -48,8 +55,9 @@ int Module::init(uint16_t type)
             _type = type; // Save type because the one in eFuse is wrong
         } else {
             char name[16];
+            char local_name[16];
             ESP_LOGE(TAG, "Incorrect board type detected ! You have program the board as an %s and board is an %s", \
-                ModuleUtils::typeToName(type, name), ModuleUtils::typeToName(local_type, name));
+                ModuleUtils::typeToName(type, name), ModuleUtils::typeToName(local_type, local_name));
             err |= -1; // Do not start the code because we are on wrong board
         }
     }
