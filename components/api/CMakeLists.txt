@@ -97,7 +97,7 @@ set(COMPONENT_INCLUDE_DIRS
     "Middleware/Board"
     "Middleware/Sensors/RTD"
     "Middleware/Sensors/Thermocouple"
-    "Middleware/Sensors/WheastoneBridge"
+    "Middleware/Sensors/StrainGauge"
     "CLI"
     "ComBus/Controller"
     "ComBus/Command"

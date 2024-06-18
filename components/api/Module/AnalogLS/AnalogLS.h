@@ -14,7 +14,7 @@
 #include "AnalogInputsLS.h"
 #include "RTD.h"
 #include "Thermocouple.h"
-#include "WheastoneBridge.h"
+#include "StrainGauge.h"
 
 #if (OI_ANALOG_LS)
 

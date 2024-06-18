@@ -10,9 +10,6 @@
 
 #include "Global.h"
 
-#define TWO_WIRE 2
-#define THREE_WIRE 3
-
 class RTD
 {
 public:
