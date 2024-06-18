@@ -26,7 +26,7 @@ public:
 
     static int init(void);
 
-    static std::vector<RTD*> rtd;
+    static std::vector<RTD> rtd;
 
 private:
 

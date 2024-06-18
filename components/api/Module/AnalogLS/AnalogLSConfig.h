@@ -24,7 +24,32 @@
 #define ANALOG_LS_ADC_PIN_RESET         GPIO_NUM_16
 
 /* IO Mux */
+#define ANALOG_LS_MUX_PIN_HS1_A0        GPIO_NUM_7
+#define ANALOG_LS_MUX_PIN_HS1_A1        GPIO_NUM_8
+#define ANALOG_LS_MUX_PIN_HS1_A2        GPIO_NUM_9
+#define ANALOG_LS_MUX_PIN_HS2_A0        GPIO_NUM_10
+#define ANALOG_LS_MUX_PIN_HS2_A1        GPIO_NUM_11
+#define ANALOG_LS_MUX_PIN_HS2_A2        GPIO_NUM_12
+#define ANALOG_LS_MUX_PIN_LS1_A0        GPIO_NUM_13
+#define ANALOG_LS_MUX_PIN_LS1_A1        GPIO_NUM_14
+#define ANALOG_LS_MUX_PIN_LS1_A2        GPIO_NUM_19
+#define ANALOG_LS_MUX_PIN_LS2_A0        GPIO_NUM_20
+#define ANALOG_LS_MUX_PIN_LS2_A1        GPIO_NUM_21
+#define ANALOG_LS_MUX_PIN_LS2_A2        GPIO_NUM_26
 
-/* Digipot - thermometer */
+#define ANALOG_LS_MUX_PIN_5V_SENSOR_FAULT   GPIO_NUM_1
+#define ANALOG_LS_MUX_PIN_3V3_SENSOR_FAULT  GPIO_NUM_2
+
+/* I2C */
+#define ANALOG_LS_I2C_PORT_NUM          I2C_NUM_0
+#define ANALOG_LS_I2C_PIN_SCL           GPIO_NUM_6
+#define ANALOG_LS_I2C_PIN_SDA           GPIO_NUM_5
+
+/* Thermometer */
+#define ANALOG_LS_THERM_PIN_OS_INT      GPIO_NUM_4
+#define ANALOG_LS_THERM_I2C_ADDR        0x90
+
+/* Digipot */
+#define ANALOG_LS_DIGIPOT_I2C_ADDR      0x50
 
 #endif
