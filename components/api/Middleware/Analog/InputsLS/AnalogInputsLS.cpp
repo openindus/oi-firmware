@@ -60,23 +60,19 @@ int ADC_Device::test(void)
     return ret;
 }
 
-ADC_Device* AnalogInputsLS::_adc;
+ADC_Device* AnalogInputsLS::_adcDevice = NULL;
 
-int AnalogInputsLS::init(ADC_Device* adc, Excitation* excit)
+int AnalogInputsLS::init(void)
 {
     int ret = 0;
 
-    if (adc == NULL) {
-        ESP_LOGE(TAG, "NULL ptr");
-        return -1;
-    } else {
-        _adc = adc;
-    }
-
     /* ADC */
-    ret |= _adc->init();
-    // ret |= _adc->test();
-
+    if (_adcDevice != NULL) {
+        ret |= _adcDevice->init();
+        ret |= _adcDevice->test();
+    } else {
+        ESP_LOGE(TAG, "Failed to initialize analog inputs ls");
+    }
 
     /* Excitation Mux (high side/ low side)*/
 

@@ -12,20 +12,6 @@
 
 static const char TAG[] = "AnalogLS";
 
-ADC_Device* AnalogLS::_adcDevice = new ADC_Device {
-    .device = NULL,
-    .config = {
-        .host_id = ANALOG_LS_SPI_HOST,
-        .sclk_freq = ANALOG_LS_ADC_SPI_FREQ/8,
-        .start_sync = ANALOG_LS_ADC_PIN_START_SYNC,
-        .reset = ANALOG_LS_ADC_PIN_RESET,
-        .cs = ANALOG_LS_ADC_PIN_CS,
-        .drdy = ANALOG_LS_ADC_PIN_DRDY
-    }
-};
-
-Excitation* AnalogLS::_excit = new Excitation;
-
 int AnalogLS::init(void)
 {
     int ret = 0;
@@ -55,7 +41,19 @@ int AnalogLS::init(void)
     /* Initialize I2C bus */
 
     /* Initialize analog inputs low signal */
-    ret |= AnalogInputsLS::init(_adcDevice, _excit);
+    _adcDevice = new ADC_Device {
+        .device = NULL,
+        .config = {
+            .host_id = ANALOG_LS_SPI_HOST,
+            .sclk_freq = ANALOG_LS_ADC_SPI_FREQ/8,
+            .start_sync = ANALOG_LS_ADC_PIN_START_SYNC,
+            .reset = ANALOG_LS_ADC_PIN_RESET,
+            .cs = ANALOG_LS_ADC_PIN_CS,
+            .drdy = ANALOG_LS_ADC_PIN_DRDY
+        }
+    };
+
+    ret |= AnalogInputsLS::init();
 
     return ret;
 }

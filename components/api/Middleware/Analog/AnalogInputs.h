@@ -21,8 +21,7 @@ typedef enum {
     AIN_1 = 0,
     AIN_2 = 1,
     AIN_3 = 2,
-    AIN_4 = 3,
-    AIN_MAX
+    AIN_4 = 3
 } AnalogInput_Num_t;
 
 typedef enum {

@@ -11,18 +11,18 @@
 #include "Global.h"
 
 typedef enum {
-    EANA_A_P = 0,
-    EANA_A_N,
-    EANA_B_P,
-    EANA_B_N,
-    EANA_C_P,
-    EANA_C_N,
-    EANA_D_P,
-    EANA_D_N,
-    EANA_E_P,
-    EANA_E_N,
-    EANA_MAX
-} EAna_Num_t;
+    AIN_A_P = 0,
+    AIN_A_N,
+    AIN_B_P,
+    AIN_B_N,
+    AIN_C_P,
+    AIN_C_N,
+    AIN_D_P,
+    AIN_D_N,
+    AIN_E_P,
+    AIN_E_N,
+    AIN_MAX
+} AIn_Num_t;
 
 class ADC_Device
 {
@@ -46,6 +46,10 @@ public:
 
     Multiplexer() {}
 
+    int route(int input, int output);
+
+private:
+
 };
 
 class Digipot
@@ -56,29 +60,18 @@ public:
 
 };
 
-class Excitation
-{
-public:
-
-    Excitation() {}
-
-private:
-
-    Multiplexer* _highSideMux;
-    Multiplexer* _lowSideMux;
-    Digipot* _digipot;
-
-};
-
 class AnalogInputsLS
 {
 protected:
 
-    static int init(ADC_Device* adc, Excitation* excit);
+    static int init(void);
 
-private:
+    /* ADC */
+    static ADC_Device* _adcDevice;
 
-    static ADC_Device* _adc;
-    static Excitation _excit;
+    /* Excitation */
+    static Multiplexer* _highSideMux;
+    static Multiplexer* _lowSideMux;
+    static Digipot* _digipot;
 
 };

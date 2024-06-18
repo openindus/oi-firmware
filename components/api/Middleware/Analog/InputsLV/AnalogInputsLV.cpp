@@ -160,7 +160,7 @@ void AnalogInputsLV::_controlTask(void *pvParameters)
 
 AnalogInputAds866x::AnalogInputAds866x(uint8_t num, gpio_num_t cmdGpio)
 {
-    if (num >= AIN_MAX) {
+    if (num >= 4) {
         ESP_LOGE(TAG, "Invalid Analog Input Number");
     } else {
         _num = num;
