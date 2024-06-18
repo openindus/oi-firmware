@@ -60,7 +60,53 @@ int ADC_Device::test(void)
     return ret;
 }
 
+int Multiplexer::init(void)
+{
+    int ret = 0;
+
+    gpio_config_t config = {
+        .pin_bit_mask = ((1ULL << _inputPins[0]) |
+                        (1ULL << _inputPins[1]) |
+                        (1ULL << _inputPins[2]) |
+                        (1ULL << _outputPins[0]) |
+                        (1ULL << _outputPins[1]) |
+                        (1ULL << _outputPins[2])),
+        .mode = GPIO_MODE_OUTPUT,
+        .pull_up_en = GPIO_PULLUP_DISABLE,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type = GPIO_INTR_DISABLE,
+    };
+
+    ret |= gpio_config(&config);
+
+    return ret;
+}
+
+int Multiplexer::route(int input, int output)
+{
+    int ret = 0;
+
+    if (input < 0 || input > 7 || output < 0 || output > 7) {
+        ESP_LOGE(TAG, "%s: invalid input/output range", __FUNCTION__);
+        return -1; 
+    }
+
+    // Set the input control pins
+    for(int i = 0; i < 3; i++) {
+        ret |= gpio_set_level(_inputPins[i], (input >> i) & 1);
+    }
+
+    // Set the output control pins
+    for(int i = 0; i < 3; i++) {
+        ret |= gpio_set_level(_outputPins[i], (output >> i) & 1);
+    }
+
+    return ret;
+}
+
 ADC_Device* AnalogInputsLS::_adcDevice = NULL;
+Multiplexer* AnalogInputsLS::_highSideMux = NULL;
+Multiplexer* AnalogInputsLS::_lowSideMux = NULL;
 
 int AnalogInputsLS::init(void)
 {
@@ -71,10 +117,18 @@ int AnalogInputsLS::init(void)
         ret |= _adcDevice->init();
         ret |= _adcDevice->test();
     } else {
-        ESP_LOGE(TAG, "Failed to initialize analog inputs ls");
+        ESP_LOGE(TAG, "Failed to initialize ADC device");
+        ret |= -1;
     }
 
-    /* Excitation Mux (high side/ low side)*/
+    /* Multiplexer (high side/ low side)*/
+    if ((_highSideMux != NULL) && (_lowSideMux != NULL)) {
+        ret |= _highSideMux->init();
+        ret |= _lowSideMux->init();
+    } else {
+        ESP_LOGE(TAG, "Failed to initialize multiplexer");
+        ret |= -1;
+    }
 
     /* Digipot */
 

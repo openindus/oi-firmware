@@ -15,19 +15,21 @@
 
 #pragma once
 
-/* Standard library*/
+/* C/C++ - Standard library */
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
 #include <assert.h>
+#include <math.h>
 #include <functional>
 #include <string>
 #include <vector>
 #include <map>
 #include <algorithm>
-#include <math.h>
+#include <array>
+#include <cstring>
 
 /* ESP Components */
 #include "esp_err.h"

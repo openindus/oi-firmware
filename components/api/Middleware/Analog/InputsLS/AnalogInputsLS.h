@@ -44,11 +44,19 @@ class Multiplexer
 {
 public:
 
-    Multiplexer() {}
+    Multiplexer(const std::array<gpio_num_t, 3>& inputPins, 
+                const std::array<gpio_num_t, 3>& outputPins)
+        : _inputPins(inputPins), _outputPins(outputPins) {
+    }
+
+    int init(void);
 
     int route(int input, int output);
 
 private:
+
+    std::array<gpio_num_t, 3> _inputPins; // A0, A1, A2
+    std::array<gpio_num_t, 3> _outputPins; // B0, B1, B2
 
 };
 
