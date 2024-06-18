@@ -81,6 +81,38 @@ error:
 }
 
 /**
+ * @brief Enable evice
+ * 
+ * @param dev Device instance
+ * @return int int 0=success, -1=error
+ */
+int ads114s0x_enable(ads114s0x_device_t* dev)
+{
+    if (dev != NULL) {
+        gpio_set_level(dev->config->reset, 1);
+        return 0;
+    } else {
+        return -1;
+    }
+}
+
+/**
+ * @brief Disable evice
+ * 
+ * @param dev Device instance
+ * @return int int 0=success, -1=error
+ */
+int ads114s0x_disable(ads114s0x_device_t* dev)
+{
+    if (dev != NULL) {
+        gpio_set_level(dev->config->reset, 0);
+        return 0;
+    } else {
+        return -1;
+    }
+}
+
+/**
  * @brief Perform a control or calibration command
  * 
  * @param dev Device instance

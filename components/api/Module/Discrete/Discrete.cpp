@@ -23,7 +23,7 @@ const gpio_num_t _doutGpio[] = {
     DISCRETE_PIN_DOUT_8
 };
 
-const AdcNumChannel_t _doutAdcChannel[] = {
+const adc_num_t _doutAdcChannel[] = {
     DISCRETE_CHANNEL_DOUT_CURRENT_1,
     DISCRETE_CHANNEL_DOUT_CURRENT_2,
     DISCRETE_CHANNEL_DOUT_CURRENT_3,
@@ -47,7 +47,7 @@ const gpio_num_t _dinGpio[] = {
     DISCRETE_PIN_DIN_10
 };
 
-AdcNumChannel_t _ainChannel[] = {
+adc_num_t _ainChannel[] = {
     DISCRETE_CHANNEL_AIN_1,
     DISCRETE_CHANNEL_AIN_2
 };

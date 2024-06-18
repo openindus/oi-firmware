@@ -16,19 +16,17 @@
 #pragma once
 
 #include "Global.h"
+#include "Module.h"
 #include "Core.h"
 #include "Discrete.h"
 #include "Mixed.h"
 #include "Stepper.h"
 #include "RelayHP.h"
-#include "AnalogLs.h"
+#include "AnalogLS.h"
 #include "Brushless.h"
-#include "Module.h"
-#include "ControllerSlave.h"
-#include "Controller.h"
 #include "ControllerMaster.h"
-#include "CLI_Controller.h"
-#include "UsbConsole.h"
+#include "ControllerSlave.h"
+#include "CLI.h"
 
 void setup(void);
 void loop(void);

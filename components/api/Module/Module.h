@@ -56,22 +56,24 @@ public:
             case TYPE_OI_STEPPER_VE:    strcpy(name, "OIStepperVE"); break;
             case TYPE_OI_ANALOG_LS:     strcpy(name, "OIAnalogLS"); break;
             case TYPE_OI_BRUSHLESS:     strcpy(name, "OIBrushless"); break;
-            default:                    strcpy(name, "Unknow"); break;
+            default:                    strcpy(name, "Unknown"); break;
         }
         return name;
     }
 };
 
 class Module: 
-    public Board, 
-    public Led,
-    public Bus
+    private Board, 
+    private Led,
+    private Bus
 {
+protected:
+
+    static int init(uint16_t type);
+
 public:
 
     // Module(uint16_t type) : _type(type) {}
-
-    static int init(uint16_t type);
 
     static inline void ledOn(LedColor_t color) {Led::on(color);};
     static inline void ledOff(void) {Led::off();};

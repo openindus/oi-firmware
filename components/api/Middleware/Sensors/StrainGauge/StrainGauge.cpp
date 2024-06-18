@@ -1,12 +1,9 @@
 /**
- * @file AnalogLs.h
- * @brief Analog LS
+ * @file StrainGauge.cpp
+ * @brief StrainGauge (Strain gauge (voltage / current)))
  * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
  * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
 
-#pragma once
-
-#include "Global.h"
-#include "Module.h"
+#include "StrainGauge.h"

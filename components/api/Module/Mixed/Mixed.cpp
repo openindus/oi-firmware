@@ -26,7 +26,7 @@ static const gpio_num_t _doutGpio[] = {
     MIXED_PIN_DOUT_4
 };
 
-static const AdcNumChannel_t _doutAdcNumChannel[] = {
+static const adc_num_t _doutAdcNumChannel[] = {
     MIXED_CHANNEL_DOUT_CURRENT_1,
     MIXED_CHANNEL_DOUT_CURRENT_2,
     MIXED_CHANNEL_DOUT_CURRENT_3,

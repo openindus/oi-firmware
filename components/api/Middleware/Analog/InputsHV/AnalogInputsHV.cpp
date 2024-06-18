@@ -21,7 +21,7 @@ static const char TAG[] = "AnalogInputsHV";
 uint8_t AnalogInputsHV::_nb;
 AnalogInputEsp32s3** AnalogInputsHV::_ains;
 
-int AnalogInputsHV::init(const AdcNumChannel_t* channel, uint8_t nb) 
+int AnalogInputsHV::init(const adc_num_t* channel, uint8_t nb) 
 {
     ESP_LOGI(TAG, "Initialize Analog Inputs");
 
@@ -112,7 +112,7 @@ void AnalogInputsHV::getAnalogCoeffs(float* as, float* bs)
 
 /******************* Analog Input Esp32s3 **********************/
 
-AnalogInputEsp32s3::AnalogInputEsp32s3(uint8_t num, AdcNumChannel_t channel)
+AnalogInputEsp32s3::AnalogInputEsp32s3(uint8_t num, adc_num_t channel)
 {
     _num = num;
     _channel = channel;
@@ -122,14 +122,14 @@ int AnalogInputEsp32s3::init()
 {
     int err = 0;
 
-    if (_channel.adc_num == ADC_UNIT_1) {
+    if (_channel.unit == ADC_UNIT_1) {
         err |= adc1_config_width(ADC_WIDTH_BIT_12);
         err |= adc1_config_channel_atten((adc1_channel_t)_channel.channel, ADC_ATTEN_DB_11);
-        esp_adc_cal_characterize(_channel.adc_num, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &_adc_characteristic);
+        esp_adc_cal_characterize(_channel.unit, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &_adc_characteristic);
     }
-    else if (_channel.adc_num == ADC_UNIT_2) {
+    else if (_channel.unit == ADC_UNIT_2) {
         err |= adc2_config_channel_atten((adc2_channel_t)_channel.channel, ADC_ATTEN_DB_11);
-        esp_adc_cal_characterize(_channel.adc_num, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &_adc_characteristic);
+        esp_adc_cal_characterize(_channel.unit, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &_adc_characteristic);
     } 
     else {
         ESP_LOGE(TAG, "Wrong ADC unit !");
@@ -143,14 +143,14 @@ int AnalogInputEsp32s3::init()
 float AnalogInputEsp32s3::read(void)
 {
     int voltage_sum = -1;
-    if (_channel.adc_num == ADC_UNIT_1) {
+    if (_channel.unit == ADC_UNIT_1) {
         // Making the mean with voltage and not adc_reading to be more precise
         for (int i = 0; i < ESP_ADC_NO_OF_SAMPLES; i++)
         {
             voltage_sum += (int) esp_adc_cal_raw_to_voltage(adc1_get_raw((adc1_channel_t)_channel.channel), &_adc_characteristic);
         }
     } 
-    else if (_channel.adc_num == ADC_UNIT_2) {
+    else if (_channel.unit == ADC_UNIT_2) {
         int raw = -1;
         for (int i = 0; i < ESP_ADC_NO_OF_SAMPLES; i++)
         {

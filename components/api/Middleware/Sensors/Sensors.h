@@ -1,6 +1,6 @@
 /**
- * @file WheastoneBridge.h
- * @brief WheastoneBridge (Strain gauge (voltage / current)))
+ * @file Sensors.h
+ * @brief Sensors
  * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
  * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
@@ -8,10 +8,11 @@
 
 #pragma once
 
-class WheastoneBridge
-{
-public:
+#include "Global.h"
 
-    WheastoneBridge() {}
-    
-};
+typedef enum {
+    RTD_2_WIRE = 0,
+    RTD_3_WIRE,
+    THERMOCOUPLE,
+    STRAIN_GAUGE,
+} Sensors_Type_t;

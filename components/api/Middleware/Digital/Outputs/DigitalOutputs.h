@@ -42,7 +42,7 @@ class DigitalOutputs
 {
 protected:
 
-    static int init(const gpio_num_t *gpio, const AdcNumChannel_t *adc, int num);
+    static int init(const gpio_num_t *gpio, const adc_num_t *adc, int num);
 
 public:
       
@@ -113,7 +113,7 @@ private:
     static gpio_num_t* _gpio_num;
 
     /* ADC Channel for ouput current */
-    static AdcNumChannel_t* _adc_current;
+    static adc_num_t* _adc_current;
     static esp_adc_cal_characteristics_t _adc1Characteristics;
     static esp_adc_cal_characteristics_t _adc2Characteristics;
 

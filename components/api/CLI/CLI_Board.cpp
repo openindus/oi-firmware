@@ -1,6 +1,6 @@
 /**
  * @file CLI_Board.cpp
- * @brief Command line interface - Module
+ * @brief Command line interface - Board
  * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
  * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com

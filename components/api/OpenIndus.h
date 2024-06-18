@@ -21,6 +21,10 @@
 #define OIDiscrete  Discrete
 #define OIMixed     Mixed
 #define OIStepper   Stepper
-#define OIRelayHP     RelayHP
-#define OIAnalogLs  AnalogLs
+#define OIRelayHP   RelayHP
+#define OIAnalogLS  AnalogLS
 #define OIBrushless Brushless
+
+// namespace OI {
+//     AnalogLS analogls;
+// }

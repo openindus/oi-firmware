@@ -43,6 +43,8 @@ void System::init(void)
     err |= Mixed::init();
 #elif defined(OI_RELAY_HP)
     err |= RelayHP::init();
+#elif defined(OI_ANALOG_LS)
+    err |= AnalogLS::init();
 #endif
 
     /* Controller init */
@@ -51,6 +53,9 @@ void System::init(void)
 #elif defined(MODULE_SLAVE)
     err |= ControllerSlave::init();
 #endif
+
+    /* Command line interface init */
+    CLI::init();
 
     if (err != 0) {
         ESP_LOGE(TAG, "Failed to initialize module");

@@ -34,7 +34,7 @@ class AnalogInputEsp32s3
 {
 public:
 
-    AnalogInputEsp32s3(uint8_t num, AdcNumChannel_t channel);
+    AnalogInputEsp32s3(uint8_t num, adc_num_t channel);
     int init(void);
     float read(void);
     float read(AnalogInput_Unit_t unit);
@@ -44,7 +44,7 @@ public:
 private:
 
     int _num;
-    AdcNumChannel_t _channel;
+    adc_num_t _channel;
     esp_adc_cal_characteristics_t _adc_characteristic;
     AnalogInput_eFuse_Coeff_t _coeff;
 
@@ -55,7 +55,7 @@ class AnalogInputsHV
 {
 public:
 
-    static int init(const AdcNumChannel_t* channel, uint8_t nb);
+    static int init(const adc_num_t* channel, uint8_t nb);
 
     /**
      * @brief Read the value of AIN.
