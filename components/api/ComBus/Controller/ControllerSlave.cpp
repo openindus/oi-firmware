@@ -89,7 +89,7 @@ void ControllerSlave::_busTask(void *pvParameters)
             {
             case CMD_RESTART:
             {
-                Module::restart();
+                Board::restart();
                 break;
             }
             case CMD_PING:
@@ -98,7 +98,7 @@ void ControllerSlave::_busTask(void *pvParameters)
                 uint32_t num; // Serial number
                 memcpy(&type, frame.data, sizeof(uint16_t));
                 memcpy(&num, &frame.data[2], sizeof(uint32_t));
-                if (num ==  Module::getSerialNum() && type == Module::getBoardType()) {
+                if (num ==  Board::getSerialNum() && type == Board::getBoardType()) {
                     frame.dir = 0;
                     frame.ack = false;
                     frame.id = _id; // return our id --> the master can get the id from serialNumber
@@ -110,8 +110,8 @@ void ControllerSlave::_busTask(void *pvParameters)
             {
                 BusCAN::Frame_t discoverFrame;
                 discoverFrame.cmd = CMD_DISCOVER;
-                uint16_t type = Module::getBoardType();
-                uint32_t sn = Module::getSerialNum();
+                uint16_t type = Board::getBoardType();
+                uint32_t sn = Board::getSerialNum();
                 memcpy(discoverFrame.args, &type, sizeof(uint16_t));
                 memcpy(&discoverFrame.args[2], &sn, sizeof(uint32_t));
                 if (BusCAN::write(&discoverFrame, _id, sizeof(uint16_t)+sizeof(uint32_t)+1) == -1)
@@ -122,10 +122,10 @@ void ControllerSlave::_busTask(void *pvParameters)
             {
                 if (frame.id == _id) {
                     Board_Info_t board_info;
-                    board_info.efuse.board_type = Module::getBoardType();
-                    board_info.efuse.serial_number = Module::getSerialNum();
-                    Module::getHardwareVersion(board_info.efuse.hardware_version);
-                    Module::getSoftwareVersion(board_info.software_version);
+                    board_info.efuse.board_type = Board::getBoardType();
+                    board_info.efuse.serial_number = Board::getSerialNum();
+                    Board::getHardwareVersion(board_info.efuse.hardware_version);
+                    Board::getSoftwareVersion(board_info.software_version);
                     memcpy(frame.data, &board_info, sizeof(Board_Info_t));
                     frame.length = sizeof(Board_Info_t);
                     frame.dir = 0;
@@ -248,11 +248,11 @@ void ControllerSlave::_busTask(void *pvParameters)
                     switch (state)
                     {
                     case TOGGLE:
-                        Module::toggleSync();
+                        BusIO::toggleSync();
                         break;
                     case READ:
                     {
-                        uint8_t sync_value = Module::readSync();
+                        uint8_t sync_value = BusIO::readSync();
                         frame.dir = 0;
                         frame.ack = false;
                         frame.length = 1;
@@ -261,7 +261,7 @@ void ControllerSlave::_busTask(void *pvParameters)
                         break;
                     }
                     default:
-                        Module::writeSync(state);
+                        BusIO::writeSync(state);
                         break;
                     }
                 }

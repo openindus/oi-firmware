@@ -54,6 +54,9 @@ void System::init(void)
     err |= ControllerSlave::init();
 #endif
 
+    /* Command line interface init */
+    CLI::init();
+
     if (err != 0) {
         ESP_LOGE(TAG, "Failed to initialize module");
         Module::ledBlink(LED_RED, 250);

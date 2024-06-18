@@ -35,4 +35,11 @@ private:
 
 };
 
+#else
+
+class AnalogLS
+{
+
+};
+
 #endif

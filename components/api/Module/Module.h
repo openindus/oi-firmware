@@ -63,15 +63,17 @@ public:
 };
 
 class Module: 
-    public Board, 
-    public Led,
-    public Bus
+    private Board, 
+    private Led,
+    private Bus
 {
+protected:
+
+    static int init(uint16_t type);
+
 public:
 
     // Module(uint16_t type) : _type(type) {}
-
-    static int init(uint16_t type);
 
     static inline void ledOn(LedColor_t color) {Led::on(color);};
     static inline void ledOff(void) {Led::off();};

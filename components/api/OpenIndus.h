@@ -24,3 +24,7 @@
 #define OIRelayHP   RelayHP
 #define OIAnalogLS  AnalogLS
 #define OIBrushless Brushless
+
+// namespace OI {
+//     AnalogLS analogls;
+// }

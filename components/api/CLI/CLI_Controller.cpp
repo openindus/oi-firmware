@@ -1,6 +1,6 @@
 /**
  * @file CLI_Controller.cpp
- * @brief Command line interface - Module
+ * @brief Command line interface - Board
  * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
  * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
@@ -261,7 +261,7 @@ int CLI_Controller::_registerGetSlaveInfoCmd(void)
 
 /* --- stop --- */
 
-static int moduleStopCmd(int argc, char **argv)
+static int controllerStopCmd(int argc, char **argv)
 {
 #if defined(MODULE_MASTER)
     ControllerMaster::stop();
@@ -275,9 +275,9 @@ int CLI_Controller::_registerStopCmd(void)
 {
     const esp_console_cmd_t cmd = {
         .command = "stop",
-        .help = "Stop module tasks",
+        .help = "Stop controller tasks",
         .hint = NULL,
-        .func = &moduleStopCmd,
+        .func = &controllerStopCmd,
         .argtable = NULL
     };
     
@@ -290,7 +290,7 @@ int CLI_Controller::_registerStopCmd(void)
 
 /* --- start --- */
 
-static int moduleStartCmd(int argc, char **argv)
+static int controllerStartCmd(int argc, char **argv)
 {
 #if defined(MODULE_MASTER)
     ControllerMaster::start();
@@ -304,9 +304,9 @@ int CLI_Controller::_registerStartCmd(void)
 {
     const esp_console_cmd_t cmd = {
         .command = "start",
-        .help = "Start module tasks",
+        .help = "Start controller tasks",
         .hint = NULL,
-        .func = &moduleStartCmd,
+        .func = &controllerStartCmd,
         .argtable = NULL
     };
     
@@ -319,7 +319,7 @@ int CLI_Controller::_registerStartCmd(void)
 
 /* --- get-status --- */
 
-static int moduleGetStatusCmd(int argc, char **argv)
+static int controllerGetStatusCmd(int argc, char **argv)
 {
     int state;
 
@@ -333,16 +333,16 @@ static int moduleGetStatusCmd(int argc, char **argv)
 
     switch (state) {
         case STATE_IDLE:
-            printf("Module state: IDLE\n");
+            printf("Bus controller state: IDLE\n");
             break;
         case STATE_RUNNING:
-            printf("Module state: RUNNING\n");
+            printf("Bus controller state: RUNNING\n");
             break;
         case STATE_ERROR:
-            printf("Module state: ERROR\n");
+            printf("Bus controller state: ERROR\n");
             break;
         default:
-            printf("Module state: UNDEFINED\n");
+            printf("Bus controller state: UNDEFINED\n");
             break;
     }
 
@@ -353,9 +353,9 @@ int CLI_Controller::_registerGetStatusCmd(void)
 {
     const esp_console_cmd_t cmd = {
         .command = "status",
-        .help = "Get module status",
+        .help = "Get controller status",
         .hint = NULL,
-        .func = &moduleGetStatusCmd,
+        .func = &controllerGetStatusCmd,
         .argtable = NULL
     };
     
