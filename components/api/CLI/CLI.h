@@ -19,5 +19,8 @@ public:
 
 private:
 
+#if defined(OI_ANALOG_LS)
+    static int _registerAnalogLSCmd(void);
+#endif
 
 };
