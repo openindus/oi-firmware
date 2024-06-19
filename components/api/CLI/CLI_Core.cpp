@@ -13,23 +13,10 @@
  * @see https://openindus.com
  */
 
-#include "CLI_Core.h"
+#include "CLI.h"
+#include "Core.h"
 
 #if defined(OI_CORE)
-
-int CLI_Core::init(void)
-{
-    int err = 0;
-
-    err |= CLI_AInHV::init();
-    err |= CLI_DOut::init();
-    err |= CLI_DIn::init();
-    err |= _registerDate();
-
-    return err;
-
-    return 0;
-}
 
 /** 'date' */
 
@@ -66,7 +53,7 @@ static int _date(int argc, char **argv)
     return 0;
 }
 
-int CLI_Core::_registerDate(void)
+static int _registerDate(void)
 {
     dateArgs.date = arg_date0("s", "set", "%Y-%m-%d_%H:%M:%S", NULL, NULL);
     dateArgs.end = arg_end(2);
@@ -79,6 +66,15 @@ int CLI_Core::_registerDate(void)
         .argtable = &dateArgs
     };
     return esp_console_cmd_register(&cmd);
+}
+
+int CLI::_registerCoreCmd(void)
+{
+    int err = 0;
+    err |= _registerDate();
+    return err;
+
+    return 0;
 }
 
 #endif

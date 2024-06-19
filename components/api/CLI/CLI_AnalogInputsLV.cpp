@@ -6,23 +6,16 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file CLI_AInLV.h
+ * @file CLI_AanalogInputsLV.h
  *
  * For more information on OpenIndus:
  * @see https://openindus.com
  */
 
-#include "CLI_AInLV.h"
+#include "CLI.h"
+#include "AnalogInputsLV.h"
 
-int CLI_AInLV::init() {
-    int err = 0;
-
-    err |= _registerAnalogInputMode();
-    err |= _registerAnalogInputVoltageRange();
-    err |= _registerAnalogRead();
-
-    return err;
-}
+#if defined(OI_MIXED)
 
 static struct {
     struct arg_int *ain;
@@ -46,7 +39,7 @@ static int _analogInputMode(int argc, char **argv)
     return 0;
 }
 
-int CLI_AInLV::_registerAnalogInputMode()
+static int _registerAnalogInputMode()
 {
     _analogInputModeArgs.ain = arg_int1(NULL, NULL, "<AIN>", "[1-4]");
     _analogInputModeArgs.mode = arg_int1(NULL, NULL, "<MODE>", "0 = Voltage, 1 = Current");
@@ -101,7 +94,7 @@ static int _analogInputVoltageRange(int argc, char **argv)
     return 0;
 }
 
-int CLI_AInLV::_registerAnalogInputVoltageRange()
+static int _registerAnalogInputVoltageRange()
 {
     _analogInputVoltageRangeArgs.ain = arg_int1(NULL, NULL, "<AIN>", "[1-4]");
     _analogInputVoltageRangeArgs.range = arg_int1(NULL, NULL, "<RANGE>", "5 = 0-10.24V, 6 = 0-5.12V, 7 = 0-2.56V, 8 = 0-1.28V");
@@ -160,7 +153,7 @@ static int _AnalogRead(int argc, char **argv)
     return 0;
 }
 
-int CLI_AInLV::_registerAnalogRead()
+static int _registerAnalogRead()
 {
     _analogReadInputReadArgs.ain = arg_int1(NULL, NULL, "<AIN>", "[1-4]");
     _analogReadInputReadArgs.unit = arg_int0(NULL, NULL, "<UNIT>", "0 = Raw, 1 = mV, 2 = mA, 3 = V, 4 = A");
@@ -175,3 +168,14 @@ int CLI_AInLV::_registerAnalogRead()
     };
     return esp_console_cmd_register(&read_cmd);
 }
+
+int CLI::_registerAnalogInputsLVCmd(void) 
+{
+    int err = 0;
+    err |= _registerAnalogInputMode();
+    err |= _registerAnalogInputVoltageRange();
+    err |= _registerAnalogRead();
+    return err;
+}
+
+#endif

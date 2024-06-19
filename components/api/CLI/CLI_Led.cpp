@@ -6,7 +6,7 @@
  * @see https://openindus.com
  */
 
-#include "CLI_Led.h"
+#include "CLI.h"
 #include "Led.h"
 
 /* --- led --- */
@@ -44,7 +44,7 @@ static int ledCmd(int argc, char **argv)
     return 0;
 }
 
-int CLI_Led::_registerLedCmd(void)
+int CLI::_registerLedCmd(void)
 {
     ledArgs.state = arg_str1(NULL, NULL, "<STATE>", "[on, off, blink]");
     ledArgs.color = arg_int0(NULL, NULL, "color", "[0: None, 1: red, 2: green, 3: yellow, 4: blue, 5: purple, 6: cyan, 7; white]");

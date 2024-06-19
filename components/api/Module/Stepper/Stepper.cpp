@@ -46,11 +46,6 @@ int Stepper::init(void)
     /* Parameters */
     err |= MotorStepperParam::initNVSParam();
 
-    /* CLI */
-    err |= CLI_DIn::init();
-    err |= CLI_Stepper::init();
-    err |= CLI_StepperParam::init();
-
 #if defined(MODULE_SLAVE)
     err |= Stepper::init();
     err |= ResponseDIn::init();

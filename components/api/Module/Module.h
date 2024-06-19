@@ -18,12 +18,9 @@
 #include "Global.h"
 #include "Module.h"
 #include "ModulePinout.h"
+#include "Board.h"
 #include "Led.h"
 #include "Bus.h"
-#include "CLI_Led.h"
-#include "CLI_Bus.h"
-#include "CLI_Board.h"
-#include "CLI_Controller.h"
 
 enum Module_Type_e {
     TYPE_OI_CORE            = (uint16_t) 3,

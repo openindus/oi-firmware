@@ -19,14 +19,6 @@ static const gpio_num_t _relayGpio[] = {
     RELAY_HP_PHASE_CMD4
 };
 
-int RelayHPCLI::init(void)
-{
-    int err = 0;
-
-    err |= CLI_Relay::init();
-
-    return err;
-}
 int RelayHPStandalone::init(void)
 {
     int err = 0;
@@ -35,9 +27,6 @@ int RelayHPStandalone::init(void)
 
     err |= Module::init(TYPE_OI_RELAY_HP);
     err |= Relays::init(_relayGpio, sizeof(_relayGpio) / sizeof(gpio_num_t));
-    
-    /* CLI */
-    err |= RelayHPCLI::init();
 
     return err;
 }

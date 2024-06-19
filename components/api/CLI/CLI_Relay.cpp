@@ -6,7 +6,8 @@
  * @see https://openindus.com
  */
 
-#include "CLI_Relay.h"
+#include "CLI.h"
+#include "Relays.h"
 
 #if defined(OI_RELAY_HP) || defined(OI_RELAY_LP)
 
@@ -55,7 +56,7 @@ static int _relay_parse(int argc, char **argv)
     return -1;
 }
 
-int CLI_Relay::_registerDigitalWrite(void)
+static int _registerDigitalWrite(void)
 {
     _digitalWriteArgs.dout = arg_int1(NULL, NULL, "<DOUT>", "[1-4]");
     _digitalWriteArgs.level = arg_int1(NULL, NULL, "<LEVEL>", "0 = LOW, 1 = HIGH");
@@ -73,4 +74,12 @@ int CLI_Relay::_registerDigitalWrite(void)
     };
     return esp_console_cmd_register(&cmd);
 }
+
+int CLI::_registerRelayCmd(void)
+{
+    int err = 0;
+    err |= _registerDigitalWrite();
+    return err;
+};
+
 #endif

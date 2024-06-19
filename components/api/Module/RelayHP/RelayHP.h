@@ -33,16 +33,6 @@ public:
     static int init(void);
 };
 
-#include "CLI_Relay.h"
-
-class RelayHPCLI : 
-    public CLI_Relay
-{
-public:
-
-    static int init(void);
-};
-
 #endif
 
 #if (defined(OI_RELAY_HP)) && defined(MODULE_SLAVE)

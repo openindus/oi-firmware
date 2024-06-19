@@ -6,22 +6,16 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file CLI_AOut.cpp
+ * @file CLI_AanalogOutputs.cpp
  *
  * For more information on OpenIndus:
  * @see https://openindus.com
  */
 
-#include "CLI_AOut.h"
+#include "CLI.h"
+#include "AnalogOutputs.h"
 
-int CLI_AOut::init() {
-    int err = 0;
-
-    err |= _registerAnalogOutputMode();
-    err |= _registerAnalogOutputWrite();
-
-    return err;
-}
+#if defined(OI_MIXED)
 
 static struct {
     struct arg_int *aout;
@@ -45,7 +39,7 @@ static int _analogOutputMode(int argc, char **argv)
     return 0;
 }
 
-int CLI_AOut::_registerAnalogOutputMode()
+static int _registerAnalogOutputMode()
 {
     _analogOutputModeArgs.aout = arg_int1(NULL, NULL, "<AOUT>", "[1-2]");
     _analogOutputModeArgs.mode = arg_int1(NULL, NULL, "<MODE>", "0 = Voltage, 1 = Current");
@@ -83,7 +77,7 @@ static int _analogOutputWrite(int argc, char **argv)
     return 0;
 }
 
-int CLI_AOut::_registerAnalogOutputWrite()
+static int _registerAnalogOutputWrite()
 {
     _analogOutputWriteArgs.aout = arg_int1(NULL, NULL, "<AOUT>", "[1-2]");
     _analogOutputWriteArgs.value = arg_dbl1("v", "value", "<VALUE>", "In V for voltage or mA for current");
@@ -98,3 +92,13 @@ int CLI_AOut::_registerAnalogOutputWrite()
     };
     return esp_console_cmd_register(&cmd);
 }
+
+int CLI::_registerAnalogOutputsCmd(void) 
+{
+    int err = 0;
+    err |= _registerAnalogOutputMode();
+    err |= _registerAnalogOutputWrite();
+    return err;
+}
+
+#endif

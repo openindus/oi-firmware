@@ -6,21 +6,17 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file CLI_DIn.h
+ * @file CLI_DigitalInputs.h
  *
  * For more information on OpenIndus:
  * @see https://openindus.com
  */
 
-#include "CLI_DIn.h"
+#include "CLI.h"
+#include "DigitalInputs.h"
+#include "DigitalInputsExp.h"
 
-int CLI_DIn::init() {
-    int err = 0;
-
-    err |= _registerDigitalRead();
-
-    return err;
-}
+#if defined(OI_CORE) || defined(OI_DISCRETE) || defined(OI_MIXED) || defined(OI_STEPPER)
 
 static struct {
     struct arg_int *din;
@@ -46,7 +42,7 @@ static int _digitalRead(int argc, char **argv)
     return 0;
 }
 
-int CLI_DIn::_registerDigitalRead(void)
+static int _registerDigitalRead(void)
 {
     _digitalReadArgs.din = arg_int1(NULL, NULL, "<DIN>", "[1-4]");
     _digitalReadArgs.end = arg_end(2);
@@ -60,3 +56,12 @@ int CLI_DIn::_registerDigitalRead(void)
     };
     return esp_console_cmd_register(&cmd);
 }
+
+int CLI::_registerDigitalInputsCmd(void)
+{
+    int err = 0;
+    err |= _registerDigitalRead();
+    return err;
+}
+
+#endif

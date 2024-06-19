@@ -6,7 +6,7 @@
  * @see https://openindus.com
  */
 
-#include "CLI_Controller.h"
+#include "CLI.h"
 #include "ControllerMaster.h"
 #include "ControllerSlave.h"
 
@@ -39,7 +39,7 @@ static int programCmd(int argc, char **argv)
     return 0;
 }
 
-int CLI_Controller::_registerProgramCmd(void)
+static int _registerProgramCmd(void)
 {
     programArgs.type = arg_int1(NULL, NULL, "<TYPE>", "Board type");
     programArgs.sn = arg_int1(NULL, NULL, "<SN>", "Board serial number");
@@ -93,7 +93,7 @@ static int pingCmd(int argc, char **argv)
     return 0;
 }
 
-int CLI_Controller::_registerPingCmd(void)
+static int _registerPingCmd(void)
 {
     pingArgs.type = arg_int1(NULL, NULL, "<TYPE>", "Board type");
     pingArgs.sn = arg_int1(NULL, NULL, "<SN>", "Board serial number");
@@ -121,7 +121,7 @@ static int autoId(int argc, char **argv)
     return 0;
 }
 
-int CLI_Controller::_registerAutoIdCmd(void)
+static int _registerAutoIdCmd(void)
 {
     const esp_console_cmd_t cmd = {
         .command = "auto-id",
@@ -164,7 +164,7 @@ static int discoverSlavesCmd(int argc, char **argv)
     return 0;
 }
 
-int CLI_Controller::_registerDiscoverSlavesCmd(void)
+static int _registerDiscoverSlavesCmd(void)
 {
     const esp_console_cmd_t cmd = {
         .command = "discover-slaves",
@@ -229,7 +229,7 @@ static int getSlaveInfoCmd(int argc, char **argv)
     return 0;
 }
 
-int CLI_Controller::_registerGetSlaveInfoCmd(void)
+static int _registerGetSlaveInfoCmd(void)
 {
     getSlaveInfoArgs.type = arg_int1(NULL, NULL, "<TYPE>", "Board type");
     getSlaveInfoArgs.sn = arg_int1(NULL, NULL, "<SN>", "Board serial number");
@@ -271,7 +271,7 @@ static int controllerStopCmd(int argc, char **argv)
     return 0;
 }
 
-int CLI_Controller::_registerStopCmd(void)
+static int _registerStopCmd(void)
 {
     const esp_console_cmd_t cmd = {
         .command = "stop",
@@ -300,7 +300,7 @@ static int controllerStartCmd(int argc, char **argv)
     return 0;
 }
 
-int CLI_Controller::_registerStartCmd(void)
+static int _registerStartCmd(void)
 {
     const esp_console_cmd_t cmd = {
         .command = "start",
@@ -349,7 +349,7 @@ static int controllerGetStatusCmd(int argc, char **argv)
     return 0;
 }
 
-int CLI_Controller::_registerGetStatusCmd(void)
+static int _registerGetStatusCmd(void)
 {
     const esp_console_cmd_t cmd = {
         .command = "status",
@@ -364,6 +364,28 @@ int CLI_Controller::_registerGetStatusCmd(void)
     } else {
         return -1;
     }
+}
+
+#endif
+
+#if defined(MODULE_MASTER) || defined(MODULE_SLAVE)
+
+int CLI::_registerControllerCmd(void)
+{
+    int err = 0;
+#if defined(MODULE_MASTER)
+    err |= _registerPingCmd();
+    err |= _registerProgramCmd();
+    err |= _registerAutoIdCmd();
+    err |= _registerDiscoverSlavesCmd();
+    err |= _registerGetSlaveInfoCmd();
+#endif
+#if !defined(MODULE_STANDALONE)
+    err |= _registerStopCmd();
+    err |= _registerStartCmd();
+    err |= _registerGetStatusCmd();
+#endif
+    return err;
 }
 
 #endif

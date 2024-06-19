@@ -16,7 +16,6 @@
 #include "RTClock.h"
 #include "CAN.h"
 #include "RS.h"
-#include "CLI_Core.h"
 
 #if defined(OI_CORE)
 

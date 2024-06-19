@@ -6,13 +6,17 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file CLI_DOut.h
+ * @file CLI_DigitalOutputs.h
  *
  * For more information on OpenIndus:
  * @see https://openindus.com
  */
 
-#include "CLI_DOut.h"
+#include "CLI.h"
+#include "DigitalOutputs.h"
+#include "DigitalOutputsExp.h"
+
+#if defined(OI_CORE) || defined(OI_DISCRETE) || defined(OI_MIXED)
 
 static struct {
     struct arg_int *dout;
@@ -40,7 +44,7 @@ static int _digitalWrite(int argc, char **argv)
     return 0;
 }
 
-int CLI_DOut::_registerDigitalWrite(void)
+static int _registerDigitalWrite(void)
 {
     _digitalWriteArgs.dout = arg_int1(NULL, NULL, "<DOUT>", "[1-4]");
     _digitalWriteArgs.level = arg_int1(NULL, NULL, "<LEVEL>", "0 = LOW, 1 = HIGH");
@@ -78,7 +82,7 @@ static int _getOutputCurrent(int argc, char **argv)
     return 0;
 }
 
-int CLI_DOut::_registerGetOutputCurrent(void)
+static int _registerGetOutputCurrent(void)
 {
     _digitalGetArgs.dout = arg_int1(NULL, NULL, "<DOUT>", "[1-4]");
     _digitalGetArgs.end = arg_end(2);
@@ -114,7 +118,7 @@ static int _outputIsOvercurrent(int argc, char **argv)
     return 0;
 }
 
-int CLI_DOut::_registerOuputIsOvercurrent(void)
+static int _registerOuputIsOvercurrent(void)
 {
     _digitalGetArgs.dout = arg_int1(NULL, NULL, "<DOUT>", "[1-4]");
     _digitalGetArgs.end = arg_end(2);
@@ -128,3 +132,16 @@ int CLI_DOut::_registerOuputIsOvercurrent(void)
     };
     return esp_console_cmd_register(&cmd);
 }
+
+int CLI::_registerDigitalOutputsCmd(void)
+{
+    int err = 0;
+    err |= _registerDigitalWrite();
+#if !defined(OI_CORE)
+    err |= _registerGetOutputCurrent();
+#endif
+    err |= _registerOuputIsOvercurrent();
+    return err;
+};
+
+#endif
