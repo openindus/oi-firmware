@@ -6,7 +6,8 @@
  * @see https://openindus.com
  */
 
-#include "CLI_Board.h"
+#include "CLI.h"
+#include "Board.h"
 
 /* --- set-board-info --- */
 
@@ -38,7 +39,7 @@ static int setBoardInfoCmd(int argc, char **argv)
     return -1;
 }
 
-int CLI_Board::_registerSetBoardInfoCmd(void)
+static int _registerSetBoardInfoCmd(void)
 {
     setBoardInfoArgs.boardType = arg_int1("t", "type", "TYPE", "Board type");
     setBoardInfoArgs.serialNum = arg_int1("n", "serial-num", "NUM", "Serial number");
@@ -103,7 +104,7 @@ static int getBoardInfoCmd(int argc, char **argv)
     return 0;
 }
 
-int CLI_Board::_registerGetBoardInfoCmd(void)
+static int _registerGetBoardInfoCmd(void)
 {
     getBoardInfoArgs.boardType = arg_lit0("t", "type", "Board type");
     getBoardInfoArgs.serialNum = arg_lit0("n", "serial-num","Serial number");
@@ -135,7 +136,7 @@ static int restartCmd(int argc, char **argv)
     return 0;
 }
 
-int CLI_Board::_registerRestartCmd(void)
+static int _registerRestartCmd(void)
 {
     const esp_console_cmd_t cmd = {
         .command = "restart",
@@ -189,7 +190,7 @@ static int logCmd(int argc, char **argv)
     return 0;
 }
 
-int CLI_Board::_registerLogCmd(void)
+static int _registerLogCmd(void)
 {
     logArgs.level = arg_str1(NULL, NULL, "<LEVEL>", "[NONE, ERROR, WARN, INFO, DEBUG, VERBOSE]");
     logArgs.tag = arg_str0(NULL, NULL, "<TAG>", "specific tag");
@@ -203,4 +204,14 @@ int CLI_Board::_registerLogCmd(void)
         .argtable = &logArgs
     };
     return esp_console_cmd_register(&cmd);
+}
+
+int CLI::_registerBoardCmd(void) 
+{
+    int err = 0;
+    err |= _registerSetBoardInfoCmd();
+    err |= _registerGetBoardInfoCmd();
+    err |= _registerRestartCmd();
+    err |= _registerLogCmd();
+    return err;
 }

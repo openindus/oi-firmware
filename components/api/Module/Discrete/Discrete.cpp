@@ -67,11 +67,6 @@ int Discrete::init(void)
     err |= DigitalInputs::init(_dinGpio, 10);
     err |= AnalogInputsHV::init(_ainChannel, 2);
 
-    /* CLI */
-    err |= CLI_AInHV::init();
-    err |= CLI_DOut::init();
-    err |= CLI_DIn::init();
-
 #if defined(MODULE_SLAVE)
     err |= ResponseAInHV::init();
     err |= ResponseDOut::init();

@@ -253,9 +253,6 @@ int Core::init()
     ESP_LOGI(CORE_TAG, "Create control task");
     xTaskCreate(_controlTask, "Controller task", 4096, NULL, 1, NULL);
 
-    /* CLI */
-    err |= CLI_Core::init();
-
     return err;
 }
 

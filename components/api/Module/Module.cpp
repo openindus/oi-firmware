@@ -67,12 +67,6 @@ int Module::init(uint16_t type)
     Led::install(MODULE_PIN_LED);
     Led::on(LED_BLUE);
 
-    /* CLI */
-    err |= CLI_Board::init();
-    err |= CLI_Led::init();
-    err |= CLI_Bus::init();
-    err |= CLI_Controller::init();
-
 #if defined(MODULE_MASTER) || defined(MODULE_SLAVE)
 
     /* Bus */

@@ -13,25 +13,12 @@
  * @see https://openindus.com
  */
 
-#include "CLI_Stepper.h"
+#include "CLI.h"
+#include "Motor.h"
+#include "MotorStepper.h"
+#include "DigitalInputs.h"
 
 #if defined(OI_STEPPER) || defined(OI_STEPPER_VE)
-
-int CLI_Stepper::init(void)
-{
-    _registerLimitSwitch();
-    _registerStepResolution();
-    _registerSetMaxSpeed();
-    _registerGetPosition();
-    _registerGetSpeed();
-    _registerStop();
-    _registerMoveAbsolute();
-    _registerMoveRelative();
-    _registerRun();
-    _registerHoming();
-
-    return 0;
-}
 
 /** 'limit-switch' */
 
@@ -63,7 +50,7 @@ static int limitSwitch(int argc, char **argv)
     return 0;
 }
 
-void CLI_Stepper::_registerLimitSwitch(void)
+static void _registerLimitSwitch(void)
 {
     limitSwitchArgs.motor   = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
     limitSwitchArgs.din    = arg_int1(NULL, NULL, "DIN", "[1-10]");
@@ -104,7 +91,7 @@ static int stepResolution(int argc, char **argv)
     return 0;
 }
 
-void CLI_Stepper::_registerStepResolution(void)
+static void _registerStepResolution(void)
 {
     stepResolutionArgs.motor    = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
     stepResolutionArgs.res      = arg_int1(NULL, NULL, "RESOLUTION", "[0: Full step, 1: Half step, 2: 1/4 step, 3: 1/8 step, 4: 1/16 step, 5: 1/32 step, 6: 1/64 step, 7: 1/128 step]");
@@ -144,7 +131,7 @@ static int setMaxSpeed(int argc, char **argv)
     return 0;
 }
 
-void CLI_Stepper::_registerSetMaxSpeed(void)
+static void _registerSetMaxSpeed(void)
 {
     setMaxSpeedArgs.motor  = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
     setMaxSpeedArgs.speed  = arg_int1(NULL, NULL, "SPEED", "motor max speed in step/s");
@@ -182,7 +169,7 @@ static int getPosition(int argc, char **argv)
     return 0;
 }
 
-void CLI_Stepper::_registerGetPosition(void)
+static void _registerGetPosition(void)
 {
     getPositionArgs.motor  = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
     getPositionArgs.end    = arg_end(2);
@@ -219,7 +206,7 @@ static int getSpeed(int argc, char **argv)
     return 0;
 }
 
-void CLI_Stepper::_registerGetSpeed(void)
+static void _registerGetSpeed(void)
 {
     getSpeedArgs.motor  = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
     getSpeedArgs.end    = arg_end(2);
@@ -256,7 +243,7 @@ static int stop(int argc, char **argv)
     return 0;
 }
 
-void CLI_Stepper::_registerStop(void)
+static void _registerStop(void)
 {
     stopArgs.motor  = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
     stopArgs.end    = arg_end(2);
@@ -295,7 +282,7 @@ static int moveAbsolute(int argc, char **argv)
     return 0;
 }
 
-void CLI_Stepper::_registerMoveAbsolute(void)
+static void _registerMoveAbsolute(void)
 {
     moveAbsoluteArgs.motor  = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
     moveAbsoluteArgs.pos    = arg_int1(NULL, NULL, "POSITION", "position in step");
@@ -335,7 +322,7 @@ static int moveRelative(int argc, char **argv)
     return 0;
 }
 
-void CLI_Stepper::_registerMoveRelative(void)
+static void _registerMoveRelative(void)
 {
     moveRelativeArgs.motor  = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
     moveRelativeArgs.pos    = arg_int1(NULL, NULL, "POSITION", "position in step");
@@ -377,7 +364,7 @@ static int run(int argc, char **argv)
     return 0;
 }
 
-void CLI_Stepper::_registerRun(void)
+static void _registerRun(void)
 {
     runArgs.motor   = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
     runArgs.dir     = arg_int1(NULL, NULL, "DIRECTION", "[0: Forward, 1: Reverse]");
@@ -418,7 +405,7 @@ static int homing(int argc, char **argv)
     return 0;
 }
 
-void CLI_Stepper::_registerHoming(void)
+static void _registerHoming(void)
 {
     homingArgs.motor    = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
     homingArgs.speed    = arg_int1(NULL, NULL, "SPEED", "speed in step/s");
@@ -432,6 +419,22 @@ void CLI_Stepper::_registerHoming(void)
         .argtable = &homingArgs
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+}
+
+int CLI::_registerStepperCmd(void)
+{
+    _registerLimitSwitch();
+    _registerStepResolution();
+    _registerSetMaxSpeed();
+    _registerGetPosition();
+    _registerGetSpeed();
+    _registerStop();
+    _registerMoveAbsolute();
+    _registerMoveRelative();
+    _registerRun();
+    _registerHoming();
+
+    return 0;
 }
 
 #endif

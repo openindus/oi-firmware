@@ -6,7 +6,7 @@
  * @see https://openindus.com
  */
 
-#include "CLI_Bus.h"
+#include "CLI.h"
 #include "Bus.h"
 
 static const char TAG[] = "CLI_Bus";
@@ -21,7 +21,7 @@ static int readIdCmd(int argc, char **argv)
     return 0;
 }
 
-int CLI_Bus::_registerReadIdCmd(void)
+static int _registerReadIdCmd(void)
 {
     const esp_console_cmd_t cmd = {
         .command = "read-id",
@@ -53,7 +53,7 @@ static int writeSyncCmd(int argc, char **argv)
     return 0;
 }
 
-int CLI_Bus::_registerWriteSyncCmd(void)
+static int _registerWriteSyncCmd(void)
 {
     writeSyncArgs.level = arg_int1(NULL, NULL, "<LEVEL>", "0 = LOW, 1 = HIGH");
     writeSyncArgs.end = arg_end(1);
@@ -76,7 +76,7 @@ static int readSyncCmd(int argc, char **argv)
     return 0;
 }
 
-int CLI_Bus::_registerReadSyncCmd(void)
+static int _registerReadSyncCmd(void)
 {
     const esp_console_cmd_t cmd = {
         .command = "read-sync",
@@ -114,7 +114,7 @@ static int busPowerCmd(int argc, char **argv)
     return 0;
 }
 
-int CLI_Bus::_registerBusPowerCmd(void)
+static int _registerBusPowerCmd(void)
 {
     busPowerArgs.state = arg_str1(NULL, NULL, "<STATE>", "[on/off]");
     busPowerArgs.end = arg_end(2);
@@ -161,7 +161,7 @@ static int CANWriteCmd(int argc, char **argv)
     return 0;
 }
 
-int CLI_Bus::_registerCANWriteCmd(void)
+static int _registerCANWriteCmd(void)
 {
     CANWriteArgs.id = arg_int1(NULL, "id", "ID", "identifier");
     CANWriteArgs.data = arg_intn(NULL, NULL, "<DATA>", 0, 8, "CAN data");
@@ -206,7 +206,7 @@ static int CANReadCmd(int argc, char **argv)
     return 0;
 }
 
-int CLI_Bus::_registerCANReadCmd(void)
+static int _registerCANReadCmd(void)
 {
     const esp_console_cmd_t cmd = {
         .command = "can-read",
@@ -262,7 +262,7 @@ static int RSWriteCmd(int argc, char **argv)
     return 0;
 }
 
-int CLI_Bus::_registerRSWriteCmd(void)
+static int _registerRSWriteCmd(void)
 {
     RSWriteArgs.cmd = arg_int1(NULL, "cmd", "CMD", "command");
     RSWriteArgs.id = arg_int1(NULL, "id", "ID", "identifier");
@@ -314,7 +314,7 @@ static int RSReadCmd(int argc, char **argv)
     return 0;
 }
 
-int CLI_Bus::_registerRSReadCmd(void)
+static int _registerRSReadCmd(void)
 {
     const esp_console_cmd_t cmd = {
         .command = "rs-read",
@@ -329,6 +329,20 @@ int CLI_Bus::_registerRSReadCmd(void)
     } else {
         return -1;
     }
+}
+
+int CLI::_registerBusCmd(void)
+{
+    int err = 0;
+    err |= _registerReadIdCmd();
+    err |= _registerWriteSyncCmd();
+    err |= _registerReadSyncCmd();
+    err |= _registerBusPowerCmd();
+    err |= _registerCANWriteCmd();
+    err |= _registerCANReadCmd();
+    err |= _registerRSWriteCmd();
+    err |= _registerRSReadCmd();
+    return err;
 }
 
 #endif

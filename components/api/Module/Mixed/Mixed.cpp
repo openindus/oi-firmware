@@ -99,12 +99,6 @@ int Mixed::init(void)
     /* Enable analog outputs */
     AnalogOutputs::start();
 
-    /* CLI */
-    err |= CLI_AOut::init();
-    err |= CLI_AInLV::init();
-    err |= CLI_DOut::init();
-    err |= CLI_DIn::init();
-
 #if defined(MODULE_SLAVE)
     err |= ResponseAOut::init();
     err |= ResponseAInLV::init();

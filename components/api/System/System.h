@@ -27,6 +27,7 @@
 #include "ControllerMaster.h"
 #include "ControllerSlave.h"
 #include "CLI.h"
+#include "UsbConsole.h"
 
 void setup(void);
 void loop(void);

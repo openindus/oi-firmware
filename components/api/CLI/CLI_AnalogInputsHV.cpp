@@ -12,17 +12,10 @@
  * @see https://openindus.com
  */
 
-#include "CLI_AInHV.h"
+#include "CLI.h"
+#include "AnalogInputsHV.h"
 
-int CLI_AInHV::init() {
-    int err = 0;
-
-    err |= _registerAnalogRead();
-    err |= _registerSetAnalogCoeffs();
-    err |= _registerGetAnalogCoeffs();
-
-    return err;
-}
+#if defined(OI_CORE) || defined(OI_DISCRETE)
 
 static struct {
     struct arg_int *ain;
@@ -61,7 +54,7 @@ static int _analogRead(int argc, char **argv)
     return 0;
 }
 
-int CLI_AInHV::_registerAnalogRead()
+static int _registerAnalogRead()
 {
     _analogReadArgs.ain = arg_int1(NULL, NULL, "<AIN>", "[1-4]");
     _analogReadArgs.unit = arg_int0(NULL, NULL, "<UNIT>", "0 = Raw, 1 = mV, 3 = V");
@@ -102,7 +95,7 @@ static int _setAnalogCoeffs(int argc, char **argv)
     return AnalogInputsHV::setAnalogCoeffs(a, b);
 }
 
-int CLI_AInHV::_registerSetAnalogCoeffs()
+static int _registerSetAnalogCoeffs()
 {
     _setAnalogCoeffsArgs.a1 = arg_dbl1(NULL, "a1", "<A1>", "[-100;100]");
     _setAnalogCoeffsArgs.a2 = arg_dbl1(NULL, "a2", "<A2>", "[-100;100]");    
@@ -135,7 +128,7 @@ static int _getAnalogCoeffs(int argc, char **argv)
     return 0;
 }
 
-int CLI_AInHV::_registerGetAnalogCoeffs()
+static int _registerGetAnalogCoeffs()
 {
     const esp_console_cmd_t read_cmd = {
         .command = "get-analog-coeffs",
@@ -146,3 +139,18 @@ int CLI_AInHV::_registerGetAnalogCoeffs()
     };
     return esp_console_cmd_register(&read_cmd);
 }
+
+/** */
+
+int CLI::_registerAnalogInputsHVCmd(void)
+{
+    int err = 0;
+
+    err |= _registerAnalogRead();
+    err |= _registerSetAnalogCoeffs();
+    err |= _registerGetAnalogCoeffs();
+
+    return err;
+}
+
+#endif
