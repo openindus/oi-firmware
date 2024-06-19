@@ -10,7 +10,11 @@
 
 int CLI::init(void)
 {
-    int err = 0;
+    int ret = 0;
 
-    return err;
+#if defined(OI_ANALOG_LS)
+    ret |= _registerAnalogLSCmd();
+#endif
+
+    return ret;
 }

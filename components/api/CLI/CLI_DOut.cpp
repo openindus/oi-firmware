@@ -20,7 +20,7 @@ static struct {
     struct arg_end *end;
 } _digitalWriteArgs;
 
-static int _relay_parse(int argc, char **argv)
+static int _digitalWrite(int argc, char **argv)
 {
     int err = arg_parse(argc, argv, (void **) &_digitalWriteArgs);
     if (err != 0) {
@@ -50,7 +50,7 @@ int CLI_DOut::_registerDigitalWrite(void)
         .command = "digital-write",
         .help = "Set DOUT level",
         .hint = NULL,
-        .func = &_relay_parse,
+        .func = &_digitalWrite,
         .argtable = &_digitalWriteArgs
     };
     return esp_console_cmd_register(&cmd);

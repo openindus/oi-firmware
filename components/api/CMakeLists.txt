@@ -33,6 +33,7 @@ set(COMPONENT_SRCS
     "Middleware/RS/RS.cpp"
     "Middleware/Board/Board.cpp"
     "CLI/CLI.cpp"
+    "CLI/CLI_AnalogLS.cpp"
     "CLI/CLI_Board.cpp"
     "CLI/CLI_Controller.cpp"
     "CLI/CLI_Bus.cpp"
