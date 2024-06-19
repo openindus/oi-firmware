@@ -16,13 +16,14 @@
 #if defined(MODULE_MASTER)
 
 #include "ControllerMaster.h"
-#include "Controller.h"
 
 static const char TAG[] = "ControllerMaster";
 
 Controller_State_t ControllerMaster::_state = STATE_IDLE;
 TaskHandle_t ControllerMaster::_taskHandle = NULL;
 std::map<uint16_t, std::pair<uint16_t, uint32_t>, std::greater<uint16_t>> ControllerMaster::_ids;
+std::map<std::pair<uint8_t, uint16_t>, std::function<void(uint8_t)>> ControllerMaster::_eventCallbacks;
+std::vector<Controller*> ControllerMaster::_instances;
 
 int ControllerMaster::init(void)
 {
@@ -67,8 +68,8 @@ bool ControllerMaster::autoId(void)
     int num_id_auto = 0;
     int num_id_sn = 0;
 
-    for (int i=0; i<Controller::_instances.size(); i++) {
-        if (Controller::_instances[i]->getSN() == 0) {
+    for (int i=0; i<_instances.size(); i++) {
+        if (_instances[i]->getSN() == 0) {
             num_id_auto++;
         } else {
             num_id_sn++;
@@ -95,35 +96,35 @@ bool ControllerMaster::autoId(void)
         frame.length = 0;
         BusRS::write(&frame);
 
-        Module::ledOn(LED_YELLOW);
+        Led::on(LED_YELLOW);
 
         /* Wait */
         vTaskDelay(200/portTICK_PERIOD_MS);
     
-        if (Controller::_instances.size() == _ids.size()) {
+        if (_instances.size() == _ids.size()) {
             std::map<uint16_t, std::pair<uint16_t, uint32_t>>::iterator it = _ids.begin();
-            for (int i=0; i<Controller::_instances.size(); i++) {
+            for (int i=0; i<_instances.size(); i++) {
                 // First, check if board type is good
-                if (it->second.first == Controller::_instances[i]->getType()) {
+                if (it->second.first == _instances[i]->getType()) {
                     // If OK, set ID and SN
-                    Controller::_instances[i]->setId(it->first);
-                    Controller::_instances[i]->setSN(it->second.second);
+                    _instances[i]->setId(it->first);
+                    _instances[i]->setSN(it->second.second);
                     ++it;
-                    Controller::_instances[i]->ledOn(LED_YELLOW);
+                    _instances[i]->ledOn(LED_YELLOW);
                     vTaskDelay(50/portTICK_PERIOD_MS);
                 } else {
                     char name1[16];
                     char name2[16];
                     ESP_LOGE(TAG, "Type of module %i is incorrect: you have instantiate an %s and module detected is an %s", \
                                         i+1, \
-                                        ModuleUtils::typeToName(Controller::_instances[i]->getType(), name1), \
-                                        ModuleUtils::typeToName(it->second.first, name2));
+                                        BoardUtils::typeToName(_instances[i]->getType(), name1), \
+                                        BoardUtils::typeToName(it->second.first, name2));
                     ESP_LOGE(TAG, "Check that the order of module in your main.cpp file correspond with the order of modules on the rail");
                     return false;
                 }
             }
         } else {
-            ESP_LOGE(TAG, "Number of instantiated modules: %d",  Controller::_instances.size());
+            ESP_LOGE(TAG, "Number of instantiated modules: %d",  _instances.size());
             ESP_LOGE(TAG, "Number of IDs received: %d",  _ids.size());
             return false;
         }
@@ -131,14 +132,14 @@ bool ControllerMaster::autoId(void)
 
     /* Initialize module with SN */
     else {
-        for (int i=0; i<Controller::_instances.size(); i++) {
-            uint16_t current_id = ControllerMaster::_getIdFromSerialNumAndType(Controller::_instances[i]->getType(), Controller::_instances[i]->getSN());
+        for (int i=0; i<_instances.size(); i++) {
+            uint16_t current_id = ControllerMaster::_getIdFromSerialNumAndType(_instances[i]->getType(), _instances[i]->getSN());
             if (current_id != 0) {
-                Controller::_instances[i]->setId(current_id);
-                Controller::_instances[i]->ledOn(LED_YELLOW);
+                _instances[i]->setId(current_id);
+                _instances[i]->ledOn(LED_YELLOW);
                 vTaskDelay(50/portTICK_PERIOD_MS);
             } else {
-                ESP_LOGE(TAG, "Cannot instantiate module with SN:%i",  Controller::_instances[i]->getSN());
+                ESP_LOGE(TAG, "Cannot instantiate module with SN:%i",  _instances[i]->getSN());
                 return false;
             }
         }
@@ -147,8 +148,8 @@ bool ControllerMaster::autoId(void)
     vTaskDelay(50/portTICK_PERIOD_MS);
 
     /* Success, broadcast message to set all led green */
-    for (int i=0; i<Controller::_instances.size(); i++) {
-        Controller::_instances[i]->ledBlink(LED_GREEN, 1000);
+    for (int i=0; i<_instances.size(); i++) {
+        _instances[i]->ledBlink(LED_GREEN, 1000);
     }
     return true;
 }
@@ -163,7 +164,7 @@ void ControllerMaster::program(uint16_t type, uint32_t sn)
     UsbConsole::end(); // Do not perform in the task
     uint16_t id = _getIdFromSerialNumAndType(type, sn);
     xTaskCreate(_programmingTask, "Module programming task", 4096, (void*)&id, 1, NULL);
-    Module::ledBlink(LED_WHITE, 1000); // Programming mode
+    Led::blink(LED_WHITE, 1000); // Programming mode
 }
 
 bool ControllerMaster::ping(uint16_t type, uint32_t sn) 
@@ -186,7 +187,7 @@ void ControllerMaster::getBoardInfo(uint16_t type, uint32_t sn, Board_Info_t* bo
     uint16_t id = _getIdFromSerialNumAndType(type, sn);
 
     if (id == 0) {
-        Module::ledBlink(LED_RED, 1000); // Error
+        Led::blink(LED_RED, 1000); // Error
         return;
     }
 
@@ -255,8 +256,8 @@ void ControllerMaster::_busTask(void *pvParameters)
             {
                 case CMD_EVENT:
                 {
-                    auto it = Controller::_eventCallbacks.find(std::make_pair(frame.args[0], id));
-                    if (it != Controller::_eventCallbacks.end()) {
+                    auto it = _eventCallbacks.find(std::make_pair(frame.args[0], id));
+                    if (it != _eventCallbacks.end()) {
                         if (it->second != NULL) {
                             it->second(frame.args[1]);
                         }
@@ -279,7 +280,7 @@ void ControllerMaster::_busTask(void *pvParameters)
                 }
             }
         } else {
-            Module::ledBlink(LED_RED, 1000); // Error
+            Led::blink(LED_RED, 1000); // Error
         }
     }
 }
@@ -301,7 +302,7 @@ void ControllerMaster::_programmingTask(void *pvParameters)
     frame.length = 0;
     BusRS::write(&frame, pdMS_TO_TICKS(5000));
     if (BusRS::read(&frame, pdMS_TO_TICKS(5000)) < 0) {
-        Module::ledBlink(LED_RED, 1000); // Error
+        Led::blink(LED_RED, 1000); // Error
         goto end;
     }
 
@@ -309,7 +310,7 @@ void ControllerMaster::_programmingTask(void *pvParameters)
 
     while (1) {
         if (UsbSerialProtocol::read(&packet) < 0) {
-            Module::ledBlink(LED_RED, 1000); // Error
+            Led::blink(LED_RED, 1000); // Error
         } else {
             switch (packet.command)
             {
@@ -325,7 +326,7 @@ void ControllerMaster::_programmingTask(void *pvParameters)
                     memcpy(frame.data, &packet.data[sequence*1024+16], 1024); // data
                     BusRS::write(&frame, pdMS_TO_TICKS(100));
                     if (BusRS::read(&frame, pdMS_TO_TICKS(100)) < 0) {
-                        Module::ledBlink(LED_RED, 1000); // Error
+                        Led::blink(LED_RED, 1000); // Error
                         goto end;
                     }
                     sequence++;
@@ -339,7 +340,7 @@ void ControllerMaster::_programmingTask(void *pvParameters)
                     memcpy(frame.data, &packet.data[sequence*1024+16], packet.size%1024); // data
                     BusRS::write(&frame, pdMS_TO_TICKS(100));
                     if (BusRS::read(&frame, pdMS_TO_TICKS(100)) < 0) {
-                        Module::ledBlink(LED_RED, 1000); // Error
+                        Led::blink(LED_RED, 1000); // Error
                         goto end;
                     }
                 }                
@@ -368,7 +369,7 @@ void ControllerMaster::_programmingTask(void *pvParameters)
                 memcpy(frame.data, packet.data, 4); // addr
                 BusRS::write(&frame, pdMS_TO_TICKS(200));
                 if (BusRS::read(&frame, pdMS_TO_TICKS(200)) < 0) {
-                    Module::ledBlink(LED_RED, 1000); // Error
+                    Led::blink(LED_RED, 1000); // Error
                     goto end;
                 } else {
                     packet.direction = 1;
@@ -388,7 +389,7 @@ void ControllerMaster::_programmingTask(void *pvParameters)
                 memcpy(frame.data, &packet.data[4], 4); // flash size
                 BusRS::write(&frame, pdMS_TO_TICKS(500));
                 if (BusRS::read(&frame, pdMS_TO_TICKS(3000)) < 0) {
-                    Module::ledBlink(LED_RED, 1000); // Error
+                    Led::blink(LED_RED, 1000); // Error
                     goto end;
                 } else {
                     packet.direction = 1;

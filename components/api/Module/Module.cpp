@@ -31,7 +31,7 @@ int Module::init(uint16_t type)
     uint16_t local_type = getBoardType(); // read it only once to avoid multiple warning
     
     char local_name[16];
-    ESP_LOGI(TAG, "Board type       : %u (%s)", local_type, ModuleUtils::typeToName(local_type, local_name));
+    ESP_LOGI(TAG, "Board type       : %u (%s)", local_type, BoardUtils::typeToName(local_type, local_name));
     ESP_LOGI(TAG, "Serial number    : %d", getSerialNum());
     char hardware_version[4];
     getHardwareVersion(hardware_version);
@@ -57,7 +57,7 @@ int Module::init(uint16_t type)
             char name[16];
             char local_name[16];
             ESP_LOGE(TAG, "Incorrect board type detected ! You have program the board as an %s and board is an %s", \
-                ModuleUtils::typeToName(type, name), ModuleUtils::typeToName(local_type, local_name));
+                BoardUtils::typeToName(type, name), BoardUtils::typeToName(local_type, local_name));
             err |= -1; // Do not start the code because we are on wrong board
         }
     }

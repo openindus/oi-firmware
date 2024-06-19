@@ -16,11 +16,15 @@
 #if defined(MODULE_MASTER)
 
 #include "Controller.h"
+#include "ControllerMaster.h"
 
 static const char TAG[] = "Controller";
 
-std::map<std::pair<uint8_t, uint16_t>, std::function<void(uint8_t)>> Controller::_eventCallbacks;
-std::vector<Controller*> Controller::_instances;
+Controller::Controller(uint16_t type, uint32_t sn) : 
+    _id(0xFFFF), _type(type), _sn(sn)
+{
+    ControllerMaster::addControllerInstance(this);
+}
 
 /**
  * Sends a command over the communication bus.
@@ -72,34 +76,12 @@ int Controller::request(std::vector<uint8_t>& msgBytes, bool ackNeeded)
  * @param color Led color
  * @param period Period in ms
  */
-void Controller::_ledStatus(LedState_t state, LedColor_t color, uint32_t period)
+void Controller::_setLed(LedState_t state, LedColor_t color, uint32_t period)
 {
     std::vector<uint8_t> msgBytes = {(uint8_t)state, (uint8_t)color};
     // Add period to message (4 bytes)
     msgBytes.insert(msgBytes.end(), (uint8_t*)&period, (uint8_t*)&period + sizeof(uint32_t));
-    this->command(CMD_LED_STATUS, msgBytes, false);
+    this->command(CMD_SET_LED, msgBytes, false);
 }
 
-void Controller::writeSync(uint8_t level)
-{
-    std::vector<uint8_t> msgBytes = {(uint8_t)level};
-    this->command(CMD_OI_GPIO, msgBytes);
-}
-
-void Controller::toggleSync()
-{
-    std::vector<uint8_t> msgBytes = {TOGGLE};
-    this->command(CMD_OI_GPIO, msgBytes);
-}
-
-
-int Controller::readSync()
-{
-    std::vector<uint8_t> msgBytes = {READ};
-    int err = this->command(CMD_OI_GPIO, msgBytes);
-    if (err < 0) {
-        return -1;
-    }
-    return static_cast<int>(msgBytes[0]);
-}
 #endif

@@ -10,15 +10,18 @@
 
 #include "Global.h"
 
-/* Protocol cmd */
+/* CAN cmd */
+#define CMD_EVENT                   (uint8_t) 0x07
+// #define CMD_HEARTBEAT               (uint8_t) 0x10
+
+/* RS cmd */
 #define CMD_NOP                     (uint8_t) 0x00
 #define CMD_RESTART                 (uint8_t) 0x01
 #define CMD_PING                    (uint8_t) 0x02
-#define CMD_LED_STATUS              (uint8_t) 0x03
+#define CMD_SET_LED                 (uint8_t) 0x03
 #define CMD_DISCOVER                (uint8_t) 0x04
 #define CMD_GET_BOARD_INFO          (uint8_t) 0x05
 #define CMD_REQUEST                 (uint8_t) 0x06
-#define CMD_EVENT                   (uint8_t) 0x07
 #define CMD_FLASH_LOADER_BEGIN      (uint8_t) 0x08
 #define CMD_FLASH_LOADER_WRITE      (uint8_t) 0x09
 #define CMD_FLASH_LOADER_CHECK      (uint8_t) 0x0A
@@ -27,9 +30,7 @@
 // #define CMD_WRITE_REGISTER          (uint8_t) 0x0D
 // #define CMD_READ_NVS                (uint8_t) 0x0E
 // #define CMD_WRITE_NVS               (uint8_t) 0x0F
-// #define CMD_HEARTBEAT               (uint8_t) 0x10
 // #define CMD_AUTO_TEST               (uint8_t) 0x11
-#define CMD_OI_GPIO                 (uint8_t) 0x12
 
 enum Protocol_Request_e {
     /* DIGITAL */
@@ -90,12 +91,4 @@ enum Protocol_Request_e {
 enum Protocol_Event_e {
     EVENT_DIGITAL_INTERRUPT                 = 0x00,
     EVENT_MOTOR_READY                       = 0x01,
-};
-
-enum Protocol_OIGpio
-{
-    SET_LOW = 0,
-    SET_HIGH = 1,
-    TOGGLE = 2,
-    READ = 3
 };
