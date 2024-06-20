@@ -100,10 +100,10 @@ int Mixed::init(void)
     AnalogOutputs::start();
 
 #if defined(MODULE_SLAVE)
-    err |= ResponseAOut::init();
-    err |= ResponseAInLV::init();
-    err |= ResponseDOut::init();
-    err |= ResponseDIn::init();
+    err |= AnalogOutputsRsp::init();
+    err |= AnalogInputsLVRsp::init();
+    err |= DigitalOutputsRsp::init();
+    err |= DigitalInputsRsp::init();
 #endif
 
     return err;

@@ -38,7 +38,7 @@ int RelayHPSlave::init(void)
     int err = 0;
     
     err |= RelayHPStandalone::init();
-    err |= ResponseRelay::init();
+    err |= RelayRsp::init();
 
 
     ESP_LOGI(RELAY_HP_TAG, "RelayHPSlave::init");

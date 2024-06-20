@@ -68,9 +68,9 @@ int Discrete::init(void)
     err |= AnalogInputsHV::init(_ainChannel, 2);
 
 #if defined(MODULE_SLAVE)
-    err |= ResponseAInHV::init();
-    err |= ResponseDOut::init();
-    err |= ResponseDIn::init();
+    err |= AnalogInputsHVRsp::init();
+    err |= DigitalOutputsRsp::init();
+    err |= DigitalInputsRsp::init();
 #endif
 
     return err;

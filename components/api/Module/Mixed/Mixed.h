@@ -15,14 +15,14 @@
 #include "AnalogInputsLV.h"
 #include "DigitalOutputs.h"
 #include "DigitalInputs.h"
-#include "ResponseAOut.h"
-#include "ResponseAInLV.h"
-#include "ResponseDIn.h"
-#include "ResponseDOut.h"
-#include "CommandAOut.h"
-#include "CommandAInLV.h"
-#include "CommandDIn.h"
-#include "CommandDOut.h"
+#include "AnalogOutputsRsp.h"
+#include "AnalogInputsLVRsp.h"
+#include "DigitalInputsRsp.h"
+#include "DigitalOutputsRsp.h"
+#include "AnalogOutputsCmd.h"
+#include "AnalogInputsLVCmd.h"
+#include "DigitalInputsCmd.h"
+#include "DigitalOutputsCmd.h"
 
 #if defined(OI_MIXED)
 
@@ -42,19 +42,19 @@ public:
 
 class Mixed : 
     public Controller, 
-    public CommandAOut, 
-    public CommandAInLV, 
-    public CommandDIn, 
-    public CommandDOut
+    public AnalogOutputsCmd, 
+    public AnalogInputsLVCmd, 
+    public DigitalInputsCmd, 
+    public DigitalOutputsCmd
 {
 public:
 
     Mixed(uint32_t sn = 0) : 
         Controller(TYPE_OI_MIXED , sn),
-        CommandAOut(this),
-        CommandAInLV(this),
-        CommandDIn(this),
-        CommandDOut(this) {}
+        AnalogOutputsCmd(this),
+        AnalogInputsLVCmd(this),
+        DigitalInputsCmd(this),
+        DigitalOutputsCmd(this) {}
 
 };
 

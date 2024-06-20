@@ -38,12 +38,12 @@ public:
 #if (defined(OI_RELAY_HP)) && defined(MODULE_SLAVE)
 
 #include "ControllerSlave.h"
-#include "ResponseRelay.h"
+#include "RelayRsp.h"
 
 class RelayHPSlave : 
     public ControllerSlave, 
     public RelayHPStandalone, 
-    public ResponseRelay
+    public RelayRsp
 {
 public:
 
@@ -53,17 +53,17 @@ public:
 #elif defined(MODULE_MASTER)
 
 #include "Controller.h"
-#include "CommandRelay.h"
+#include "RelayCmd.h"
 
 class RelayHPController : 
     public Controller, 
-    public CommandRelay
+    public RelayCmd
 {
 public:
 
     RelayHPController(uint32_t sn = 0) :
         Controller(TYPE_OI_RELAY_HP, sn),
-        CommandRelay(this){}
+        RelayCmd(this){}
 
     static int init(void);
 };
