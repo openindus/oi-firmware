@@ -11,33 +11,40 @@
 #include "Global.h"
 
 typedef enum {
-    AIN_A_P = 0,
-    AIN_A_N,
-    AIN_B_P,
-    AIN_B_N,
-    AIN_C_P,
-    AIN_C_N,
-    AIN_D_P,
-    AIN_D_N,
-    AIN_E_P,
-    AIN_E_N,
-    AIN_MAX
-} AIn_Num_t;
+    AINLS_A_P = 0,
+    AINLS_A_N,
+    AINLS_B_P,
+    AINLS_B_N,
+    AINLS_C_P,
+    AINLS_C_N,
+    AINLS_D_P,
+    AINLS_D_N,
+    AINLS_E_P,
+    AINLS_E_N,
+    AINLS_MAX
+} AInLS_Num_t;
 
-class ADC_Device
+class ADC
 {
 public:
 
-    ADC_Device(ads114s0x_device_t* device, ads114s0x_config_t config) :
+    ADC(ads114s0x_device_t* device, ads114s0x_config_t config) :
         _device(device), _config(config) {}
 
     int init(void);
-    int test(void);
+
+    int config(void);
+    int startConversion(void);
 
 private:
 
     ads114s0x_device_t* _device;
     ads114s0x_config_t _config;
+
+    static QueueHandle_t _queue;
+    static void IRAM_ATTR _isr(void* arg);
+    static void _task(void* arg);
+
 };
 
 class Multiplexer
@@ -70,12 +77,16 @@ public:
 
 class AnalogInputsLS
 {
+public: 
+
+    static int test2WireRTD(void);
+
 protected:
 
     static int init(void);
 
     /* ADC */
-    static ADC_Device* _adcDevice;
+    static ADC* _adc;
 
     /* Excitation */
     static Multiplexer* _highSideMux;

@@ -10,7 +10,31 @@
 
 static const char TAG[] = "AnalogInputsLS";
 
-int ADC_Device::init(void)
+QueueHandle_t ADC::_queue = NULL;
+
+void IRAM_ATTR ADC::_isr(void* arg)
+{
+    uint32_t buffer = (uint32_t) arg;
+    xQueueSendFromISR(_queue, &buffer, NULL);
+}
+
+void ADC::_task(void* arg)
+{
+    ads114s0x_device_t* device = (ads114s0x_device_t*) arg;
+    uint32_t buffer;
+    while(1) {
+        if (xQueueReceive(_queue, &buffer, portMAX_DELAY)) {
+            uint16_t data;
+            if (ads114s0x_read_data(device, &data) == 0) {
+                printf("data : %d (0x%02x)\n", data, data);
+            } else {
+                printf("read data failed !\n");
+            }
+        }
+    }
+}
+
+int ADC::init(void)
 {
     int ret = 0;
 
@@ -18,7 +42,7 @@ int ADC_Device::init(void)
 
     /* Initialize ADC device */
     ads114s0x_init(&_device, &_config);
-    ads114s0x_enable(_device);
+    ads114s0x_hard_reset(_device);
 
     ads114s0x_wakeup(_device);
 
@@ -32,30 +56,80 @@ int ADC_Device::init(void)
         ESP_LOGE(TAG, "ADC device not found");
     }
 
+    ads114s0x_reg_sys_t sys;
+    ads114s0x_read_register(_device, ADS114S0X_REG_SYS, (uint8_t*)&sys, sizeof(ads114s0x_reg_sys_t));
+    sys.sendstat = 1; // Enable STATUS (data read)
+    sys.crc = 0; // Disable CRC (data read)
+    ads114s0x_write_register(_device, ADS114S0X_REG_SYS, (uint8_t*)&sys, sizeof(ads114s0x_reg_sys_t));
+
+    ads114s0x_reg_datarate_t datarate;
+    ads114s0x_read_register(_device, ADS114S0X_REG_DATARATE, (uint8_t*)&datarate, sizeof(ads114s0x_reg_datarate_t));
+    datarate.mode = 0; //1; // Single shot conversion
+    ads114s0x_write_register(_device, ADS114S0X_REG_DATARATE, (uint8_t*)&datarate, sizeof(ads114s0x_reg_datarate_t));
+
+    /* Data ready */
+    _queue = xQueueCreate(10, sizeof(uint32_t));
+    xTaskCreate(_task, "_task", 2048, this->_device, 10, NULL);
+    ads114s0x_add_data_ready_isr_handler(_device, _isr, NULL);
+
     return ret;
 }
 
-int ADC_Device::test(void)
+int ADC::config(void)
 {
     int ret = 0;
 
-    ESP_LOGI(TAG, "ADC test");
+    /* Reference */
+    ads114s0x_reg_ref_t ref = {
+        .refcon = ADS114S0X_REF_OFF,            // Internal reference off
+        .refsel = ADS114S0X_REF_REFP1_REFN1,    // Select REFP1, REFN1 (input reference)
+        .refn_buf = 0,                          // Enable
+        .refp_buf = 0,                          // Enable
+        .fl_ref_en = 0,                         // Disable reference monitor
+    };
+    ret |= ads114s0x_write_register(_device, ADS114S0X_REG_REF, (uint8_t*)&ref, sizeof(ads114s0x_reg_ref_t));
 
-    /* Test */
-    ads114s0x_reg_inpmux_t inpmux;
-    ads114s0x_read_register(_device, ADS114S0X_REG_INPMUX, (uint8_t*)&inpmux, sizeof(ads114s0x_reg_inpmux_t));
-    printf("%d\n", inpmux.muxn);
+    /* PGA */
+    ads114s0x_reg_pga_t pga = {
+        .gain = ADS114S0X_PGA_GAIN_4,
+        .pga_en = 1,
+        .delay = ADS114S0X_DELAY_14_TMOD
+    };
+    ret |= ads114s0x_write_register(_device, ADS114S0X_REG_PGA, (uint8_t*)&pga, sizeof(ads114s0x_reg_pga_t));
 
-    inpmux.muxn = ADS114S0X_AIN3;
-    ads114s0x_write_register(_device, ADS114S0X_REG_INPMUX, (uint8_t*)&inpmux, sizeof(ads114s0x_reg_inpmux_t));
+    /* Excitation */
+    ads114s0x_reg_idac_t idac = {
+        .imag = ADS114S0X_IDAC_1000_UA,
+        .reserved = 0,
+        .psw = 0,
+        .fl_rail_en = 0,
+        .i1mux = ADS114S0X_AINCOM,              // IDAC1 to AINCOM
+        .i2mux = ADS114S0X_NOT_CONNECTED
+    };
+    ret |= ads114s0x_write_register(_device, ADS114S0X_REG_IDACMAG, (uint8_t*)&idac, sizeof(ads114s0x_reg_idac_t));
 
-    ads114s0x_read_register(_device, ADS114S0X_REG_INPMUX, (uint8_t*)&inpmux, sizeof(ads114s0x_reg_inpmux_t));
-    printf("%d\n", inpmux.muxn);
+    /* Mux */
+    ads114s0x_reg_inpmux_t inpmux = {
+        .muxn = ADS114S0X_AIN0,
+        .muxp = ADS114S0X_AIN5
+    };
+    ret |= ads114s0x_write_register(_device, ADS114S0X_REG_INPMUX, (uint8_t*)&inpmux, sizeof(ads114s0x_reg_inpmux_t));
 
-    /* data rate */
-    printf("sizeof(ads114s0x_reg_datarate_t): %d\n", sizeof(ads114s0x_reg_datarate_t));
-    ads114s0x_reg_datarate_t datarate;
-    ads114s0x_read_register(_device, ADS114S0X_REG_DATARATE, (uint8_t*)&datarate, sizeof(ads114s0x_reg_datarate_t));
+    return ret;
+}
+
+int ADC::startConversion(void)
+{
+    int ret = 0;
+    ret |= ads114s0x_start(_device);
+    // ret |= ads114s0x_self_offset_calib(_device);
+
+    // test 
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+    ret |= ads114s0x_stop(_device);
+
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+    ads114s0x_print_register_map(_device);
 
     return ret;
 }
@@ -104,7 +178,7 @@ int Multiplexer::route(int input, int output)
     return ret;
 }
 
-ADC_Device* AnalogInputsLS::_adcDevice = NULL;
+ADC* AnalogInputsLS::_adc = NULL;
 Multiplexer* AnalogInputsLS::_highSideMux = NULL;
 Multiplexer* AnalogInputsLS::_lowSideMux = NULL;
 
@@ -113,9 +187,8 @@ int AnalogInputsLS::init(void)
     int ret = 0;
 
     /* ADC */
-    if (_adcDevice != NULL) {
-        ret |= _adcDevice->init();
-        ret |= _adcDevice->test();
+    if (_adc != NULL) {
+        ret |= _adc->init();
     } else {
         ESP_LOGE(TAG, "Failed to initialize ADC device");
         ret |= -1;
@@ -133,6 +206,21 @@ int AnalogInputsLS::init(void)
     /* Digipot */
 
     /* Digital thermometer */
+
+    return ret;
+}
+
+int AnalogInputsLS::test2WireRTD(void)
+{
+    int ret = 0;
+
+    /* MUX Excitation */
+    _highSideMux->route(1, 0); // IDAC1 to A+ (AIN5)
+    _lowSideMux->route(0, 3); // A- (AIN0) to RBIAS RTD
+
+    /* ADC */
+    _adc->config();
+    _adc->startConversion();
 
     return ret;
 }
