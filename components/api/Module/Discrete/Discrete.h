@@ -15,13 +15,13 @@
 #include "DigitalOutputs.h"
 #include "AnalogInputsHV.h"
 #include "ControllerSlave.h"
-#include "ResponseDIn.h"
-#include "ResponseDOut.h"
-#include "ResponseAInHV.h"
+#include "DigitalInputsRsp.h"
+#include "DigitalOutputsRsp.h"
+#include "AnalogInputsHVRsp.h"
 #include "Controller.h"
-#include "CommandDIn.h"
-#include "CommandDOut.h"
-#include "CommandAInHV.h"
+#include "DigitalInputsCmd.h"
+#include "DigitalOutputsCmd.h"
+#include "AnalogInputsHVCmd.h"
 
 #if (defined(OI_DISCRETE) || defined(OI_DISCRETE_VE))
 
@@ -40,17 +40,17 @@ public:
 
 class Discrete : 
     public Controller, 
-    public CommandDIn, 
-    public CommandDOut, 
-    public CommandAInHV
+    public DigitalInputsCmd, 
+    public DigitalOutputsCmd, 
+    public AnalogInputsHVCmd
 {
 public:
 
     Discrete(uint32_t sn = 0) : 
         Controller(TYPE_OI_DISCRETE, sn),
-        CommandDIn(this),
-        CommandDOut(this),
-        CommandAInHV(this) {}
+        DigitalInputsCmd(this),
+        DigitalOutputsCmd(this),
+        AnalogInputsHVCmd(this) {}
 };
 
 #endif

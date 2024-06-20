@@ -17,11 +17,11 @@
 #include "MotorStepper.h"
 #include "MotorStepperParam.h"
 #include "ControllerSlave.h"
-#include "ResponseDIn.h"
-#include "ResponseStepper.h"
+#include "DigitalInputsRsp.h"
+#include "StepperRsp.h"
 #include "Controller.h"
-#include "CommandDIn.h"
-#include "CommandStepper.h"
+#include "DigitalInputsCmd.h"
+#include "StepperCmd.h"
 
 #if defined(OI_STEPPER) || defined(OI_STEPPER_VE)
 
@@ -40,15 +40,15 @@ public:
 
 class Stepper : 
     public Controller, 
-    public CommandDIn, 
-    public CommandStepper
+    public DigitalInputsCmd, 
+    public StepperCmd
 {
 public:
 
     Stepper(uint32_t sn = 0) : 
         Controller(TYPE_OI_STEPPER, sn),
-        CommandDIn(this),
-        CommandStepper(this) {}
+        DigitalInputsCmd(this),
+        StepperCmd(this) {}
 };
 #endif
 

@@ -48,8 +48,8 @@ int Stepper::init(void)
 
 #if defined(MODULE_SLAVE)
     err |= Stepper::init();
-    err |= ResponseDIn::init();
-    err |= ResponseStepper::init();
+    err |= DigitalInputsRsp::init();
+    err |= StepperRsp::init();
 #endif
 
     return err;
