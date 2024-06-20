@@ -17,8 +17,8 @@
 
 #include "Global.h"
 #include "Controller.h"
-#include "Module.h"
-#include "ModulePinout.h"
+#include "Board.h"
+#include "Led.h"
 #include "Bus.h"
 #include "FlashLoader.h"
 #include "Protocol.h"

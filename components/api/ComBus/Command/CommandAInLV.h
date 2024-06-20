@@ -22,6 +22,7 @@
 #if defined(MODULE_MASTER)
 
 #include "Controller.h"
+#include "ControllerMaster.h"
 #include "AnalogInputsLV.h"
 
 class CommandAInLV

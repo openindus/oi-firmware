@@ -46,3 +46,40 @@ private:
     static bool _verify_eFuse_checksum(Board_eFuse_Info_t info);
 
 };
+
+enum Board_Type_e {
+    TYPE_OI_CORE            = (uint16_t) 3,
+    TYPE_OI_CORELITE        = (uint16_t) 4,
+    TYPE_OI_DISCRETE        = (uint16_t) 6,
+    TYPE_OI_DISCRETE_VE     = (uint16_t) 7,
+    TYPE_OI_MIXED           = (uint16_t) 8,
+    TYPE_OI_RELAY_LP        = (uint16_t) 9,
+    TYPE_OI_RELAY_HP        = (uint16_t) 10,
+    TYPE_OI_STEPPER         = (uint16_t) 11,
+    TYPE_OI_STEPPER_VE      = (uint16_t) 12,
+    TYPE_OI_ANALOG_LS       = (uint16_t) 13,
+    TYPE_OI_BRUSHLESS       = (uint16_t) 18,
+};
+
+class BoardUtils
+{
+public:
+
+    static inline char* typeToName(uint16_t type, char* name) {
+        switch (type) {
+            case TYPE_OI_CORE:          strcpy(name, "OICore"); break;
+            case TYPE_OI_CORELITE:      strcpy(name, "OICoreLite"); break;
+            case TYPE_OI_DISCRETE:      strcpy(name, "OIDiscrete"); break;
+            case TYPE_OI_DISCRETE_VE:   strcpy(name, "OIDiscreteVE"); break;
+            case TYPE_OI_MIXED:         strcpy(name, "OIMixed");    break;
+            case TYPE_OI_RELAY_LP:      strcpy(name, "OIRelayLP"); break;
+            case TYPE_OI_RELAY_HP:      strcpy(name, "OIRelayHP"); break;
+            case TYPE_OI_STEPPER:       strcpy(name, "OIStepper"); break;
+            case TYPE_OI_STEPPER_VE:    strcpy(name, "OIStepperVE"); break;
+            case TYPE_OI_ANALOG_LS:     strcpy(name, "OIAnalogLS"); break;
+            case TYPE_OI_BRUSHLESS:     strcpy(name, "OIBrushless"); break;
+            default:                    strcpy(name, "Unknown"); break;
+        }
+        return name;
+    }
+};

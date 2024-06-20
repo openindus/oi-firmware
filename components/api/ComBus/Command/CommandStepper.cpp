@@ -138,7 +138,7 @@ void CommandStepper::run(MotorNum_t motor, MotorDirection_t direction, float spe
 void CommandStepper::wait(MotorNum_t motor)
 {
     // Add callback
-    _control->addEventCallback(EVENT_MOTOR_READY, _control->getId(), [this](uint8_t motor) {
+    ControllerMaster::addEventCallback(EVENT_MOTOR_READY, _control->getId(), [this](uint8_t motor) {
         xQueueSend(_motorWaitEvent[motor], NULL, pdMS_TO_TICKS(100));
     });
     // Send a message to slave
@@ -148,7 +148,7 @@ void CommandStepper::wait(MotorNum_t motor)
     xQueueReset(_motorWaitEvent[motor]);
     xQueueReceive(_motorWaitEvent[motor], NULL, portMAX_DELAY);
     // Remove event callback
-    _control->removeEventCallback(EVENT_MOTOR_READY, _control->getId());
+    ControllerMaster::removeEventCallback(EVENT_MOTOR_READY, _control->getId());
 
 }
 

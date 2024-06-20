@@ -83,7 +83,7 @@ void ControllerSlave::_busTask(void *pvParameters)
     frame.data = (uint8_t*)malloc(frame.length);
     while (1) {
         if (BusRS::read(&frame, portMAX_DELAY) < 0) {
-            Module::ledBlink(LED_RED, 1000); // Error
+            Led::blink(LED_RED, 1000); // Error
         } else {
             switch (frame.cmd)
             {
@@ -115,7 +115,7 @@ void ControllerSlave::_busTask(void *pvParameters)
                 memcpy(discoverFrame.args, &type, sizeof(uint16_t));
                 memcpy(&discoverFrame.args[2], &sn, sizeof(uint32_t));
                 if (BusCAN::write(&discoverFrame, _id, sizeof(uint16_t)+sizeof(uint32_t)+1) == -1)
-                    Module::ledBlink(LED_RED, 1000); // Error
+                    Led::blink(LED_RED, 1000); // Error
                 break;
             }
             case CMD_GET_BOARD_INFO:
@@ -138,7 +138,7 @@ void ControllerSlave::_busTask(void *pvParameters)
             case CMD_FLASH_LOADER_BEGIN:
             {
                 if (frame.id == _id) {
-                    Module::ledBlink(LED_WHITE, 1000); // Programming mode
+                    Led::blink(LED_WHITE, 1000); // Programming mode
                     FlashLoader::begin();
                     frame.dir = 0;
                     frame.ack = false;
@@ -220,7 +220,7 @@ void ControllerSlave::_busTask(void *pvParameters)
 
                 break;
             }
-            case CMD_LED_STATUS:
+            case CMD_SET_LED:
             {
                 LedState_t state;
                 LedColor_t color;
@@ -230,39 +230,13 @@ void ControllerSlave::_busTask(void *pvParameters)
                     color = (LedColor_t)frame.data[1];
                     memcpy(&period, &frame.data[2], sizeof(uint32_t));
                     if (state == LED_ON) {
-                        Module::ledOn(color);
+                        Led::on(color);
                     } else if (state == LED_OFF) {
-                        Module::ledOff();
+                        Led::off();
                     } else if (state == LED_BLINK) {
-                        Module::ledBlink(color, period);
+                        Led::blink(color, period);
                     } else {
                         // State error
-                    }
-                }
-                break;
-            }
-            case CMD_OI_GPIO:
-            {
-                uint8_t state = frame.data[0];
-                if (frame.id == _id) {
-                    switch (state)
-                    {
-                    case TOGGLE:
-                        BusIO::toggleSync();
-                        break;
-                    case READ:
-                    {
-                        uint8_t sync_value = BusIO::readSync();
-                        frame.dir = 0;
-                        frame.ack = false;
-                        frame.length = 1;
-                        frame.data[0] = sync_value;
-                        BusRS::write(&frame);
-                        break;
-                    }
-                    default:
-                        BusIO::writeSync(state);
-                        break;
                     }
                 }
                 break;
@@ -270,6 +244,7 @@ void ControllerSlave::_busTask(void *pvParameters)
             default:
                 break;
             }
+
         }
     }
     free(frame.data);

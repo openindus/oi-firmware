@@ -17,6 +17,7 @@
 #if defined(MODULE_MASTER)
 
 #include "Controller.h"
+#include "ControllerMaster.h"
 #include "MotorStepper.h"
 
 class CommandStepper
