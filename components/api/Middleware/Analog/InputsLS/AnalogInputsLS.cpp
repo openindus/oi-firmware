@@ -60,6 +60,7 @@ int ADC::init(void)
     ads114s0x_read_register(_device, ADS114S0X_REG_SYS, (uint8_t*)&sys, sizeof(ads114s0x_reg_sys_t));
     sys.sendstat = 1; // Enable STATUS (data read)
     sys.crc = 0; // Disable CRC (data read)
+    sys.sys_mon = 0b000;
     ads114s0x_write_register(_device, ADS114S0X_REG_SYS, (uint8_t*)&sys, sizeof(ads114s0x_reg_sys_t));
 
     ads114s0x_reg_datarate_t datarate;
@@ -81,11 +82,11 @@ int ADC::config(void)
 
     /* Reference */
     ads114s0x_reg_ref_t ref = {
-        .refcon = ADS114S0X_REF_OFF,            // Internal reference off
+        .refcon = ADS114S0X_REF_ALWAYS_ON,      // Internal always on
         .refsel = ADS114S0X_REF_REFP1_REFN1,    // Select REFP1, REFN1 (input reference)
         .refn_buf = 0,                          // Enable
         .refp_buf = 0,                          // Enable
-        .fl_ref_en = 0,                         // Disable reference monitor
+        .fl_ref_en = 1,                         // Enable reference monitor
     };
     ret |= ads114s0x_write_register(_device, ADS114S0X_REG_REF, (uint8_t*)&ref, sizeof(ads114s0x_reg_ref_t));
 
@@ -122,14 +123,13 @@ int ADC::startConversion(void)
 {
     int ret = 0;
     ret |= ads114s0x_start(_device);
-    // ret |= ads114s0x_self_offset_calib(_device);
+    vTaskDelay(500 / portTICK_PERIOD_MS);
 
-    // test 
+    ret |= ads114s0x_self_offset_calib(_device);
     vTaskDelay(1000 / portTICK_PERIOD_MS);
+
     ret |= ads114s0x_stop(_device);
-
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
-    ads114s0x_print_register_map(_device);
+    vTaskDelay(500 / portTICK_PERIOD_MS);
 
     return ret;
 }
