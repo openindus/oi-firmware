@@ -41,7 +41,12 @@ public:
   int begin(RS& rs485, unsigned long baudrate, uint32_t config = SERIAL_8N1);
 
 private:
-  RS* _rs485 = &Core::rs;
+
+#if defined(OI_CORE)
+  RS* _rs485 = &OICore::rs;
+#else
+  RS* _rs485 = NULL;
+#endif
 
 };
 
