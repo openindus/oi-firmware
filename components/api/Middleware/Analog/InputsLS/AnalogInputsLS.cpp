@@ -10,15 +10,15 @@
 
 static const char TAG[] = "AnalogInputsLS";
 
-QueueHandle_t ADC::_queue = NULL;
+QueueHandle_t ADS114S0X::_queue = NULL;
 
-void IRAM_ATTR ADC::_isr(void* arg)
+void IRAM_ATTR ADS114S0X::_isr(void* arg)
 {
     uint32_t buffer = (uint32_t) arg;
     xQueueSendFromISR(_queue, &buffer, NULL);
 }
 
-void ADC::_task(void* arg)
+void ADS114S0X::_task(void* arg)
 {
     ads114s0x_device_t* device = (ads114s0x_device_t*) arg;
     uint32_t buffer;
@@ -34,13 +34,13 @@ void ADC::_task(void* arg)
     }
 }
 
-int ADC::init(void)
+int ADS114S0X::init(void)
 {
     int ret = 0;
 
-    ESP_LOGI(TAG, "ADC init.");
+    ESP_LOGI(TAG, "ADS114S0X init.");
 
-    /* Initialize ADC device */
+    /* Initialize ADS114S0X device */
     ads114s0x_init(&_device, &_config);
     ads114s0x_hard_reset(_device);
 
@@ -76,7 +76,7 @@ int ADC::init(void)
     return ret;
 }
 
-int ADC::config(void)
+int ADS114S0X::config(void)
 {
     int ret = 0;
 
@@ -119,7 +119,7 @@ int ADC::config(void)
     return ret;
 }
 
-int ADC::startConversion(void)
+int ADS114S0X::startConversion(void)
 {
     int ret = 0;
     ret |= ads114s0x_start(_device);
@@ -178,7 +178,7 @@ int Multiplexer::route(int input, int output)
     return ret;
 }
 
-ADC* AnalogInputsLS::_adc = NULL;
+ADS114S0X* AnalogInputsLS::_adc = NULL;
 Multiplexer* AnalogInputsLS::_highSideMux = NULL;
 Multiplexer* AnalogInputsLS::_lowSideMux = NULL;
 

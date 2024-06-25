@@ -24,11 +24,11 @@ typedef enum {
     AINLS_MAX
 } AInLS_Num_t;
 
-class ADC
+class ADS114S0X
 {
 public:
 
-    ADC(ads114s0x_device_t* device, ads114s0x_config_t config) :
+    ADS114S0X(ads114s0x_device_t* device, ads114s0x_config_t config) :
         _device(device), _config(config) {}
 
     int init(void);
@@ -86,7 +86,7 @@ protected:
     static int init(void);
 
     /* ADC */
-    static ADC* _adc;
+    static ADS114S0X* _adc;
 
     /* Excitation */
     static Multiplexer* _highSideMux;

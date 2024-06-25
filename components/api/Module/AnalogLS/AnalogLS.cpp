@@ -41,7 +41,7 @@ int AnalogLS::init(void)
     /* Initialize I2C bus */
 
     /* Initialize analog inputs low signal */
-    _adc = new ADC {
+    _adc = new ADS114S0X {
         .device = NULL,
         .config = {
             .host_id = ANALOG_LS_SPI_HOST,
