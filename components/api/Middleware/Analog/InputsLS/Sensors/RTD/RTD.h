@@ -9,11 +9,37 @@
 #pragma once
 
 #include "Global.h"
+#include "ADS114S0X.h"
+#include "Multiplexer.h"
 
 class RTD
 {
 public:
 
-    RTD() {}
+    RTD(ADS114S0X* adc, Multiplexer* highSideMux, Multiplexer* lowSideMux,
+        ADC_Input_t adcInputP, ADC_Input_t adcInputN,
+        Multiplexer_IO_t highSideMuxOutput, Multiplexer_IO_t lowSideMuxInput) : 
+            _adc(adc),
+            _highSideMux(highSideMux),
+            _lowSideMux(lowSideMux),
+            _adcInputP(adcInputP),
+            _adcInputN(adcInputN),
+            _highSideMuxOutput(highSideMuxOutput),
+            _lowSideMuxInput(lowSideMuxInput)
+    {}
+
+    int select(void);
+
+    int readTemp(void);
+
+private:
+
+    ADS114S0X* _adc;
+    Multiplexer* _highSideMux;
+    Multiplexer* _lowSideMux;
+    ADC_Input_t _adcInputP;
+    ADC_Input_t _adcInputN;
+    Multiplexer_IO_t _highSideMuxOutput;
+    Multiplexer_IO_t _lowSideMuxInput;
     
 };

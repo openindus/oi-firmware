@@ -31,9 +31,10 @@ class AnalogInputsLS
 {
 public: 
 
-    static int test2WireRTD(void);
-
     static std::vector<RTD> rtd;
+
+    static int addRTD(AInLS_Num_t ainP, AInLS_Num_t ainN);
+    static int addRTD(AInLS_Num_t ainP0, AInLS_Num_t ainN0, AInLS_Num_t ainN1);
 
 protected:
 

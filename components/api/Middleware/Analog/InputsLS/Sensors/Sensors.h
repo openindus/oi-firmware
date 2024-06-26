@@ -11,8 +11,8 @@
 #include "Global.h"
 
 typedef enum {
-    RTD_2_WIRE = 0,
-    RTD_3_WIRE,
+    RTD_TWO_WIRE = 0,
+    RTD_THREE_WIRE,
     THERMOCOUPLE,
     STRAIN_GAUGE,
 } Sensors_Type_t;

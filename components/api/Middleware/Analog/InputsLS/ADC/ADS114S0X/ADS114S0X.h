@@ -10,6 +10,8 @@
 
 #include "Global.h"
 
+typedef enum ads114s0x_adc_input_e ADC_Input_t;
+
 class ADS114S0X
 {
 public:

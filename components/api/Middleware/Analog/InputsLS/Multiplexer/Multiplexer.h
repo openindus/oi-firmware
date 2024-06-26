@@ -10,6 +10,8 @@
 
 #include "Global.h"
 
+typedef int Multiplexer_IO_t;
+
 class Multiplexer
 {
 public:

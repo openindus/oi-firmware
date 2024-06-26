@@ -10,6 +10,23 @@
 
 static const char TAG[] = "AnalogInputsLS";
 
+static const ADC_Input_t AINLS_TO_ADC_INPUT[] = {
+    ADS114S0X_AIN5,     // AINLS_A_P
+    ADS114S0X_AIN0,     // AINLS_A_N
+    ADS114S0X_AIN8,     // AINLS_B_P
+    ADS114S0X_AIN1,     // AINLS_B_N
+    ADS114S0X_AIN9,     // AINLS_C_P
+    ADS114S0X_AIN2,     // AINLS_C_N
+    ADS114S0X_AIN10,    // AINLS_D_P
+    ADS114S0X_AIN3,     // AINLS_D_N
+};
+
+static const Multiplexer_IO_t AINLS_TO_MUX_IO[] = {
+    0, 0, 1, 1, 2, 2, 3, 3, 4, 4
+};
+
+std::vector<RTD> AnalogInputsLS::rtd;
+
 ADS114S0X* AnalogInputsLS::_adc = NULL;
 Multiplexer* AnalogInputsLS::_highSideMux = NULL;
 Multiplexer* AnalogInputsLS::_lowSideMux = NULL;
@@ -42,17 +59,20 @@ int AnalogInputsLS::init(void)
     return ret;
 }
 
-int AnalogInputsLS::test2WireRTD(void)
+int AnalogInputsLS::addRTD(AInLS_Num_t ainP, AInLS_Num_t ainN)
 {
-    int ret = 0;
+    if (ainP < AINLS_MAX && ainN < AINLS_MAX) {
+        rtd.emplace_back(_adc, _highSideMux, _lowSideMux, 
+            AINLS_TO_ADC_INPUT[ainP], AINLS_TO_ADC_INPUT[ainN],
+            AINLS_TO_MUX_IO[ainP], AINLS_TO_MUX_IO[ainN]);
+        return 0;
+    } else {
+        ESP_LOGE(TAG, "Unable to add an RTD");
+        return -1;
+    }    
+}
 
-    /* MUX Excitation */
-    _highSideMux->route(1, 0); // IDAC1 to A+ (AIN5)
-    _lowSideMux->route(0, 3); // A- (AIN0) to RBIAS RTD
-
-    /* ADC */
-    _adc->config();
-    _adc->startConversion();
-
-    return ret;
+int AnalogInputsLS::addRTD(AInLS_Num_t ainP0, AInLS_Num_t ainN0, AInLS_Num_t ainN1)
+{
+    return -1;
 }
