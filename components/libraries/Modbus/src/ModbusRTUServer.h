@@ -47,7 +47,11 @@ public:
   virtual void poll();
 
 private:
+#if defined(OI_CORE)
   RS* _rs485 = &OICore::rs;
+#else
+  RS* _rs485 = NULL;
+#endif
 
 };
 
