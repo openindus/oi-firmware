@@ -49,7 +49,7 @@ int Module::init(uint16_t type)
     if (local_type != type) {
         // Hack because we cannot differentiate OI_CORE and OI_CORELITE for now...
         if (type == TYPE_OI_CORE && local_type == TYPE_OI_CORELITE) {
-            ESP_LOGE(TAG, "OICoreLite type checked");
+            ESP_LOGI(TAG, "OICoreLite type checked");
         } else if (local_type == 0){
             ESP_LOGW(TAG, "Cannot check board type");
             _type = type; // Save type because the one in eFuse is wrong

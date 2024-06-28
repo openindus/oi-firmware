@@ -47,7 +47,6 @@ int Stepper::init(void)
     err |= MotorStepperParam::initNVSParam();
 
 #if defined(MODULE_SLAVE)
-    err |= Stepper::init();
     err |= DigitalInputsRsp::init();
     err |= StepperRsp::init();
 #endif

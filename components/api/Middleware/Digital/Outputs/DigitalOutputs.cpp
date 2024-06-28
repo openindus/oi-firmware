@@ -198,8 +198,8 @@ void DigitalOutputs::setPWMDutyCycle(DOut_Num_t num, uint32_t duty)
 {
     if (num < _nb) {
         if (_mode[num] == DOUT_MODE_PWM) {
-            ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, duty);
-            ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0);
+            ledc_set_duty(LEDC_LOW_SPEED_MODE, (ledc_channel_t)(LEDC_CHANNEL_0 + num), duty);
+            ledc_update_duty(LEDC_LOW_SPEED_MODE, (ledc_channel_t)(LEDC_CHANNEL_0 + num));
         } else {
             ESP_LOGE(TAG, "Invalid output mode");
         }
