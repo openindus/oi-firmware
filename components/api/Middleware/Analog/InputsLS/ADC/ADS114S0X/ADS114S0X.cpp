@@ -10,6 +10,10 @@
 
 static const char TAG[] = "ADS114S0X";
 
+static const int ADC_R_REF = 1000;
+static const int ADC_GAIN = 4;
+static const int ADC_RES = 16;
+
 QueueHandle_t ADS114S0X::_queue = NULL;
 
 void IRAM_ATTR ADS114S0X::_isr(void* arg)
@@ -24,9 +28,10 @@ void ADS114S0X::_task(void* arg)
     uint32_t buffer;
     while(1) {
         if (xQueueReceive(_queue, &buffer, portMAX_DELAY)) {
-            uint16_t data;
-            if (ads114s0x_read_data(device, &data) == 0) {
-                printf("data : %d (0x%02x)\n", data, data);
+            uint16_t adcCode;
+            if (ads114s0x_read_data(device, &adcCode) == 0) {
+                float rRtd = (2 * ADC_R_REF * adcCode) / (float)(ADC_GAIN * (pow(2, ADC_RES) - 1));
+                printf(">Rrtd: %.2f\n", rRtd);
             } else {
                 printf("read data failed !\n");
             }
