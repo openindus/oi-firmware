@@ -15,6 +15,7 @@ static const int ADC_GAIN = 4;
 static const int ADC_RES = 16;
 
 QueueHandle_t ADS114S0X::_queue = NULL;
+std::vector<float> ADS114S0X::_data;
 
 void IRAM_ATTR ADS114S0X::_isr(void* arg)
 {
@@ -30,8 +31,8 @@ void ADS114S0X::_task(void* arg)
         if (xQueueReceive(_queue, &buffer, portMAX_DELAY)) {
             uint16_t adcCode;
             if (ads114s0x_read_data(device, &adcCode) == 0) {
-                float rRtd = (2 * ADC_R_REF * adcCode) / (float)(ADC_GAIN * (pow(2, ADC_RES) - 1));
-                printf(">Rrtd: %.2f\n", rRtd);
+                float resRtd = (2 * ADC_R_REF * adcCode) / (float)(ADC_GAIN * (pow(2, ADC_RES) - 1));
+                _data.push_back(resRtd);
             } else {
                 printf("read data failed !\n");
             }
@@ -126,15 +127,30 @@ int ADS114S0X::config(void)
 
 int ADS114S0X::startConversion(void)
 {
-    int ret = 0;
-    ret |= ads114s0x_start(_device);
-    vTaskDelay(500 / portTICK_PERIOD_MS);
+    return ads114s0x_start(_device);
+}
 
-    ret |= ads114s0x_self_offset_calib(_device);
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
+int ADS114S0X::autoCalibration(void)
+{
+    return ads114s0x_self_offset_calib(_device);
+}
 
-    ret |= ads114s0x_stop(_device);
-    vTaskDelay(500 / portTICK_PERIOD_MS);
+int ADS114S0X::stopConversion(void)
+{
+    return ads114s0x_stop(_device);
+}
 
-    return ret;
+int ADS114S0X::clearData(void)
+{
+    _data.clear();
+    return 0;
+}
+
+int ADS114S0X::readData(std::vector<float>* data)
+{
+    if (data != NULL) {
+        data->resize(_data.size());
+        std::copy(_data.begin(), _data.end(), data->begin());
+    }
+    return 0;
 }

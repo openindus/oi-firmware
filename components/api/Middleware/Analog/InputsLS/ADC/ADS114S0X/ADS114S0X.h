@@ -23,6 +23,10 @@ public:
 
     int config(void);
     int startConversion(void);
+    int autoCalibration(void);
+    int stopConversion(void);
+    int clearData(void);
+    int readData(std::vector<float>* data);
 
 private:
 
@@ -32,5 +36,7 @@ private:
     static QueueHandle_t _queue;
     static void IRAM_ATTR _isr(void* arg);
     static void _task(void* arg);
+
+    static std::vector<float> _data;
 
 };

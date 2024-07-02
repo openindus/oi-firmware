@@ -24,12 +24,30 @@ int RTD::select(void)
     return 0;
 }
 
-int RTD::readTemp(void)
+int RTD::readRTD(std::vector<float>* rtd, uint32_t timeout_ms)
 {
     if (_adc == NULL) {
         return -1;
     }
 
-    _adc->startConversion();
+    int ret = 0;
+    ret |= _adc->clearData();
+    ret |= _adc->startConversion();
+    vTaskDelay(500 / portTICK_PERIOD_MS);
+
+    ret |= _adc->autoCalibration();
+    vTaskDelay(timeout_ms / portTICK_PERIOD_MS);
+
+    ret |= _adc->stopConversion();
+    vTaskDelay(500 / portTICK_PERIOD_MS);
+
+    ret |= _adc->readData(rtd);
+
+    return ret;
+}
+
+
+int RTD::readTemperature(std::vector<float>* temp, uint32_t timeout_ms)
+{
     return 0;
 }
