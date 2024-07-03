@@ -82,7 +82,7 @@ int ADS114S0X::init(void)
     return ret;
 }
 
-int ADS114S0X::config(void)
+int ADS114S0X::config(ADC_Input_t inputP, ADC_Input_t inputN)
 {
     int ret = 0;
 
@@ -117,8 +117,8 @@ int ADS114S0X::config(void)
 
     /* Mux */
     ads114s0x_reg_inpmux_t inpmux = {
-        .muxn = ADS114S0X_AIN0,
-        .muxp = ADS114S0X_AIN5
+        .muxn = inputN,
+        .muxp = inputP
     };
     ret |= ads114s0x_write_register(_device, ADS114S0X_REG_INPMUX, (uint8_t*)&inpmux, sizeof(ads114s0x_reg_inpmux_t));
 

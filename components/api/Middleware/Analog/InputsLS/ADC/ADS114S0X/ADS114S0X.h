@@ -21,7 +21,7 @@ public:
 
     int init(void);
 
-    int config(void);
+    int config(ADC_Input_t inputP, ADC_Input_t inputN);
     int startConversion(void);
     int autoCalibration(void);
     int stopConversion(void);

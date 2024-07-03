@@ -19,6 +19,8 @@ static const ADC_Input_t AINLS_TO_ADC_INPUT[] = {
     ADS114S0X_AIN2,     // AINLS_C_N
     ADS114S0X_AIN10,    // AINLS_D_P
     ADS114S0X_AIN3,     // AINLS_D_N
+    ADS114S0X_AIN11,    // AINLS_E_P
+    ADS114S0X_AIN4,     // AINLS_E_N
 };
 
 static const Multiplexer_IO_t AINLS_TO_MUX_IO[] = {

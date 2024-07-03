@@ -10,6 +10,23 @@
 
 #include "Global.h"
 
+typedef enum {
+    INPUT_OPEN_HS       = (int) 0,
+    INPUT_IDAC1         = (int) 1,
+    INPUT_IDAC2         = (int) 2,
+    INPUT_SENSOR_5V     = (int) 3,
+    INPUT_SENSOR_3V3    = (int) 4,
+    INPUT_VISUP_DIV     = (int) 5
+} Multiplexer_Input_t;
+
+typedef enum {
+    OUTPUT_OPEN_LS      = (int) 0,
+    OUTPUT_W_DIGIPOT    = (int) 1,
+    OUTPUT_RBIAS_GAUGE  = (int) 2,
+    OUTPUT_RBIAS_RTD    = (int) 3,
+    OUTPUT_GND          = (int) 4
+} Multiplexer_Output_t;
+
 typedef int Multiplexer_IO_t;
 
 class Multiplexer

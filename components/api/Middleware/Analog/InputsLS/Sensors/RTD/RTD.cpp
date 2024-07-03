@@ -15,11 +15,11 @@ int RTD::select(void)
     }
 
     /* MUX Excitation */
-    _highSideMux->route(1, _highSideMuxOutput); // IDAC1 to AINLS_P
-    _lowSideMux->route(_lowSideMuxInput, 3); // AINLS_N to RBIAS RTD
+    _highSideMux->route(INPUT_IDAC1, _highSideMuxOutput);
+    _lowSideMux->route(_lowSideMuxInput, OUTPUT_RBIAS_RTD);
 
     /* ADC */
-    _adc->config();
+    _adc->config(_adcInputP, _adcInputN);
 
     return 0;
 }
@@ -34,13 +34,11 @@ int RTD::readRTD(std::vector<float>& rtd, uint32_t timeout_ms)
 
     int ret = 0;
     ret |= _adc->startConversion();
-    vTaskDelay(500 / portTICK_PERIOD_MS);
-
     ret |= _adc->autoCalibration();
+
     vTaskDelay(timeout_ms / portTICK_PERIOD_MS);
 
     ret |= _adc->stopConversion();
-    vTaskDelay(500 / portTICK_PERIOD_MS);
 
     rtd = _adc->readData();
 
