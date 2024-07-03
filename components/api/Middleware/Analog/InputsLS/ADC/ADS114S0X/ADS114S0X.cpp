@@ -140,17 +140,12 @@ int ADS114S0X::stopConversion(void)
     return ads114s0x_stop(_device);
 }
 
-int ADS114S0X::clearData(void)
+void ADS114S0X::clearData(void)
 {
     _data.clear();
-    return 0;
 }
 
-int ADS114S0X::readData(std::vector<float>* data)
+std::vector<float> ADS114S0X::readData(void)
 {
-    if (data != NULL) {
-        data->resize(_data.size());
-        std::copy(_data.begin(), _data.end(), data->begin());
-    }
-    return 0;
+    return _data;
 }

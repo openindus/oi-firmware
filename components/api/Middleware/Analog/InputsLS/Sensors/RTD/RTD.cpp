@@ -24,14 +24,15 @@ int RTD::select(void)
     return 0;
 }
 
-int RTD::readRTD(std::vector<float>* rtd, uint32_t timeout_ms)
+int RTD::readRTD(std::vector<float>& rtd, uint32_t timeout_ms)
 {
     if (_adc == NULL) {
         return -1;
     }
 
+    _adc->clearData();
+
     int ret = 0;
-    ret |= _adc->clearData();
     ret |= _adc->startConversion();
     vTaskDelay(500 / portTICK_PERIOD_MS);
 
@@ -41,13 +42,34 @@ int RTD::readRTD(std::vector<float>* rtd, uint32_t timeout_ms)
     ret |= _adc->stopConversion();
     vTaskDelay(500 / portTICK_PERIOD_MS);
 
-    ret |= _adc->readData(rtd);
+    rtd = _adc->readData();
 
     return ret;
 }
 
-
-int RTD::readTemperature(std::vector<float>* temp, uint32_t timeout_ms)
+int RTD::readTemperature(std::vector<float>& temp, uint32_t timeout_ms)
 {
-    return 0;
+    if (_adc == NULL) {
+        return -1;
+    }
+
+    std::vector<float> rtd;
+    int ret = readRTD(rtd, timeout_ms);
+    temp.resize(rtd.size());
+
+    /* PT100 - Callendar-Van Dusen equation */
+    const float R0 = 100.0;
+    const float A = 3.9083e-3;
+    const float B = -5.775e-7;
+    const float C = -4.183e-12;
+    
+    for (int i=0; i<rtd.size(); i++) {
+        if (rtd[i] < R0) {
+            temp[i] = 9999999;
+        } else {
+            temp[i] = (-A + sqrt(A * A - (4 * B * (1 - (rtd[i] / R0))))) / (2 * B);
+        }
+    }
+
+    return ret;
 }

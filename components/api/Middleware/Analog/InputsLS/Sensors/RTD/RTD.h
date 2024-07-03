@@ -30,8 +30,8 @@ public:
 
     int select(void);
 
-    int readRTD(std::vector<float>* rtd, uint32_t timeout_ms);
-    int readTemperature(std::vector<float>* temp, uint32_t timeout_ms);
+    int readRTD(std::vector<float>& rtd, uint32_t timeout_ms);
+    int readTemperature(std::vector<float>& temp, uint32_t timeout_ms);
 
 private:
 

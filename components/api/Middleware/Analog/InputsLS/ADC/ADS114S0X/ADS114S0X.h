@@ -25,8 +25,8 @@ public:
     int startConversion(void);
     int autoCalibration(void);
     int stopConversion(void);
-    int clearData(void);
-    int readData(std::vector<float>* data);
+    void clearData(void);
+    std::vector<float> readData(void);
 
 private:
 
