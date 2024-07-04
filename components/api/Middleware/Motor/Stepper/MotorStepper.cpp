@@ -27,6 +27,9 @@ static MotorNum_t _motorNums[MOTOR_MAX] = {MOTOR_1, MOTOR_2};
 static xQueueHandle _busyEvent[MOTOR_MAX];
 static xSemaphoreHandle _homingSemaphore[MOTOR_MAX];
 
+static bool _taskHomingStopRequested[MOTOR_MAX] = {false, false};
+static xSemaphoreHandle _taskHomingStopSemaphore[MOTOR_MAX];
+
 static void _digitalInterruptHandler(void* arg);
 static void _homingTask(void* arg);
 static void _busyCallback(uint8_t motor);
@@ -48,6 +51,10 @@ int MotorStepper::init(PS01_Hal_Config_t* config, PS01_Param_t* param)
     xSemaphoreGive(_homingSemaphore[MOTOR_1]);
     _homingSemaphore[MOTOR_2] = xSemaphoreCreateMutex();
     xSemaphoreGive(_homingSemaphore[MOTOR_2]);
+    _taskHomingStopSemaphore[MOTOR_1] = xSemaphoreCreateMutex();
+    xSemaphoreGive(_taskHomingStopSemaphore[MOTOR_1]);
+    _taskHomingStopSemaphore[MOTOR_2] = xSemaphoreCreateMutex();
+    xSemaphoreGive(_taskHomingStopSemaphore[MOTOR_2]);
 
     return err;
 }
@@ -153,6 +160,15 @@ void MotorStepper::stop(MotorNum_t motor, MotorStopMode_t mode)
     default:
         break;
     }
+
+    // Stop homing task if it was in progress
+    if (xSemaphoreTake(_homingSemaphore[motor], 0) == pdFALSE) {
+        xSemaphoreTake(_taskHomingStopSemaphore[motor], portMAX_DELAY);
+        _taskHomingStopRequested[motor] = true;
+        xSemaphoreGive(_taskHomingStopSemaphore[motor]);
+    } else {
+        xSemaphoreGive(_homingSemaphore[motor]);
+    }
 }
 
 void MotorStepper::moveAbsolute(MotorNum_t motor, uint32_t position, bool microStep)
@@ -223,6 +239,9 @@ static void _digitalInterruptHandler(void *arg)
 static void _homingTask(void* arg)
 {
     MotorNum_t motor = *(MotorNum_t*)arg;
+
+    ESP_LOGI(TAG, "Launch homing for MOTOR_%i", motor+1);
+
     xSemaphoreTake(_homingSemaphore[motor], portMAX_DELAY);
 
     if (_limitSwitchDigitalInput[motor].size() == 0) {
@@ -234,11 +253,15 @@ static void _homingTask(void* arg)
     Logic_t logic = _limitSwitchDigitalInput[motor].front().second;
     uint32_t stepPerTick = PS01_Speed_Steps_s_to_RegVal(_homingSpeed[motor]);
 
+    xSemaphoreTake(_taskHomingStopSemaphore[motor], portMAX_DELAY);
+    _taskHomingStopRequested[motor] = false;
+    xSemaphoreGive(_taskHomingStopSemaphore[motor]);
+
     /* Check if motor is at home */
     if (DigitalInputs::digitalRead(din) != logic) {
         /* Perform go until command and wait */
         PS01_Cmd_GoUntil(motor, ACTION_RESET, (motorDir_t)REVERSE, stepPerTick);
-        /* Empty the queue is a precedent interrupt happened */
+        /* Empty the queue if a precedent interrupt happened */
         xQueueReset(_busyEvent[motor]);
         /* Check if status if not already high */
         if (!PS01_Hal_GetBusyLevel(motor)) {
@@ -250,14 +273,23 @@ static void _homingTask(void* arg)
     /* Invert the switch logic to stop the motor when it leaves the sensor */
     DigitalInputs::attachInterrupt(din, _digitalInterruptHandler, (logic == ACTIVE_HIGH) ? FALLING_MODE : RISING_MODE, &_motorNums[motor]);
 
-    /* Perform release SW command and wait */
-    PS01_Cmd_ReleaseSw(motor, ACTION_RESET, (motorDir_t)FORWARD);
-    /* Empty the queue is a precedent interrupt happened */
-    xQueueReset(_busyEvent[motor]);
-    /* Check if status if not already high */
-    if (!PS01_Hal_GetBusyLevel(motor)) {
-        /* Wait for an interrupt (rising edge) on busy pin */
-        xQueueReceive(_busyEvent[motor], NULL, portMAX_DELAY);
+    /* If a stop command was issued, do not launch the second action --> homing is aborted */
+    xSemaphoreTake(_taskHomingStopSemaphore[motor], portMAX_DELAY);
+    bool stop = _taskHomingStopRequested[motor];
+    xSemaphoreGive(_taskHomingStopSemaphore[motor]);
+    
+    if (!stop) {
+        /* Perform release SW command and wait */
+        PS01_Cmd_ReleaseSw(motor, ACTION_RESET, (motorDir_t)FORWARD);
+        /* Empty the queue is a precedent interrupt happened */
+        xQueueReset(_busyEvent[motor]);
+        /* Check if status if not already high */
+        if (!PS01_Hal_GetBusyLevel(motor)) {
+            /* Wait for an interrupt (rising edge) on busy pin */
+            xQueueReceive(_busyEvent[motor], NULL, portMAX_DELAY);
+        }
+    } else {
+        ESP_LOGW(TAG, "Homing aborted for MOTOR_%i", motor+1);    
     }
 
     /* Re-invert the switch logic */
