@@ -44,7 +44,7 @@ public:
   /**
    * Poll interface for requests
    */
-  virtual void poll();
+  virtual int poll();
 
 private:
 #if defined(OI_CORE)
