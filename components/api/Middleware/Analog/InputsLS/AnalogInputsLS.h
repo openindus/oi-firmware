@@ -11,6 +11,7 @@
 #include "Global.h"
 #include "ADS114S0X.h"
 #include "Multiplexer.h"
+#include "Sensor.h"
 #include "RTD.h"
 
 typedef enum {
@@ -33,8 +34,8 @@ public:
 
     static std::vector<RTD> rtd;
 
-    static int addRTD(AInLS_Num_t ainP, AInLS_Num_t ainN);
-    static int addRTD(AInLS_Num_t ainP0, AInLS_Num_t ainN0, AInLS_Num_t ainN1);
+    static int addSensor(Sensor_Type_t sensor, AInLS_Num_t ainP, AInLS_Num_t ainN);
+    static int addSensor(Sensor_Type_t sensor, AInLS_Num_t ainP0, AInLS_Num_t ainN0, AInLS_Num_t ainN1);
 
 protected:
 

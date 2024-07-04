@@ -1,6 +1,6 @@
 /**
- * @file Sensors.h
- * @brief Sensors
+ * @file Sensor.h
+ * @brief Sensor
  * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
  * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
@@ -15,4 +15,4 @@ typedef enum {
     RTD_THREE_WIRE,
     THERMOCOUPLE,
     STRAIN_GAUGE,
-} Sensors_Type_t;
+} Sensor_Type_t;

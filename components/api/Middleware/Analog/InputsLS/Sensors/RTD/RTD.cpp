@@ -8,9 +8,12 @@
 
 #include "RTD.h"
 
+static const char TAG[] = "RTD";
+
 int RTD::select(void)
 {
     if ((_highSideMux == NULL) || (_lowSideMux == NULL) || (_adc == NULL)) {
+        ESP_LOGE(TAG, "%s() error", __func__);
         return -1;
     }
 
@@ -24,10 +27,11 @@ int RTD::select(void)
     return 0;
 }
 
-int RTD::readRTD(std::vector<float>& rtd, uint32_t timeout_ms)
+float RTD::readRTD(uint32_t timeout_ms)
 {
     if (_adc == NULL) {
-        return -1;
+        ESP_LOGE(TAG, "%s() error", __func__);
+        return 0.0f;
     }
 
     _adc->clearData();
@@ -40,34 +44,41 @@ int RTD::readRTD(std::vector<float>& rtd, uint32_t timeout_ms)
 
     ret |= _adc->stopConversion();
 
-    rtd = _adc->readData();
+    std::vector<uint16_t> adcCode;
+    adcCode = _adc->readData();
 
-    return ret;
-}
-
-int RTD::readTemperature(std::vector<float>& temp, uint32_t timeout_ms)
-{
-    if (_adc == NULL) {
-        return -1;
+    /* Calculate RTD resistor values */
+    std::vector<float> rRtd;
+    rRtd.resize(adcCode.size());
+    for (int i=0; i<rRtd.size(); i++) {
+        rRtd[i] = (float)(2 * ADS114S0X_R_REF * adcCode[i]) / 
+            (float)(ADS114S0X_GAIN * (pow(2, ADS114S0X_RES) - 1));
     }
 
-    std::vector<float> rtd;
-    int ret = readRTD(rtd, timeout_ms);
-    temp.resize(rtd.size());
+    /* Calculate the median */
+    std::sort(rRtd.begin(), rRtd.end());
+    size_t size = rRtd.size();
+    if (size % 2 == 0) {
+        return (rRtd[size / 2 - 1] + rRtd[size / 2]) / 2;
+    } else {
+        return rRtd[size / 2];
+    }
+}
 
-    /* PT100 - Callendar-Van Dusen equation */
+float RTD::readTemperature(uint32_t timeout_ms)
+{
+    if (_adc == NULL) {
+        ESP_LOGE(TAG, "%s() error", __func__);
+        return 0.0f;
+    }
+
     const float R0 = 100.0;
     const float A = 3.9083e-3;
     const float B = -5.775e-7;
-    const float C = -4.183e-12;
-    
-    for (int i=0; i<rtd.size(); i++) {
-        if (rtd[i] < R0) {
-            temp[i] = 9999999;
-        } else {
-            temp[i] = (-A + sqrt(A * A - (4 * B * (1 - (rtd[i] / R0))))) / (2 * B);
-        }
-    }
+    // const float C = -4.183e-12;
 
-    return ret;
+    float rRtd = readRTD(timeout_ms);
+
+    /* PT100 - Callendar-Van Dusen equation */
+    return (-A + sqrt(A * A - (4 * B * (1 - (rRtd / R0))))) / (2 * B);
 }

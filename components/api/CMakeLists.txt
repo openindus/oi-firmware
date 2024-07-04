@@ -91,6 +91,7 @@ set(COMPONENT_INCLUDE_DIRS
     "Middleware/Analog/InputsLS"
     "Middleware/Analog/InputsLS/ADC/ADS114S0X"
     "Middleware/Analog/InputsLS/Multiplexer"
+    "Middleware/Analog/InputsLS/Sensors"
     "Middleware/Analog/InputsLS/Sensors/RTD"
     "Middleware/Analog/InputsLS/Sensors/Thermocouple"
     "Middleware/Analog/InputsLS/Sensors/StrainGauge"

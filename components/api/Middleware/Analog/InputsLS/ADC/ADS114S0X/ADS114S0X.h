@@ -10,6 +10,10 @@
 
 #include "Global.h"
 
+#define ADS114S0X_R_REF 1000
+#define ADS114S0X_GAIN 4
+#define ADS114S0X_RES 16
+
 typedef enum ads114s0x_adc_input_e ADC_Input_t;
 
 class ADS114S0X
@@ -26,7 +30,7 @@ public:
     int autoCalibration(void);
     int stopConversion(void);
     void clearData(void);
-    std::vector<float> readData(void);
+    std::vector<uint16_t> readData(void);
 
 private:
 
@@ -37,6 +41,6 @@ private:
     static void IRAM_ATTR _isr(void* arg);
     static void _task(void* arg);
 
-    static std::vector<float> _data;
+    static std::vector<uint16_t> _data;
 
 };

@@ -10,12 +10,8 @@
 
 static const char TAG[] = "ADS114S0X";
 
-static const int ADC_R_REF = 1000;
-static const int ADC_GAIN = 4;
-static const int ADC_RES = 16;
-
 QueueHandle_t ADS114S0X::_queue = NULL;
-std::vector<float> ADS114S0X::_data;
+std::vector<uint16_t> ADS114S0X::_data;
 
 void IRAM_ATTR ADS114S0X::_isr(void* arg)
 {
@@ -31,8 +27,7 @@ void ADS114S0X::_task(void* arg)
         if (xQueueReceive(_queue, &buffer, portMAX_DELAY)) {
             uint16_t adcCode;
             if (ads114s0x_read_data(device, &adcCode) == 0) {
-                float resRtd = (2 * ADC_R_REF * adcCode) / (float)(ADC_GAIN * (pow(2, ADC_RES) - 1));
-                _data.push_back(resRtd);
+                _data.push_back(adcCode);
             } else {
                 printf("read data failed !\n");
             }
@@ -53,7 +48,8 @@ int ADS114S0X::init(void)
     ads114s0x_wakeup(_device);
 
     ads114s0x_reg_id_t id;
-    ads114s0x_read_register(_device, ADS114S0X_REG_ID, (uint8_t*)&id, sizeof(ads114s0x_reg_id_t));
+    ads114s0x_read_register(_device, ADS114S0X_REG_ID, 
+        (uint8_t*)&id, sizeof(ads114s0x_reg_id_t));
     if (id.dev_id == ADS114S0X_DEV_ID_ADS114S08) {
         ESP_LOGI(TAG, "ADC device: ADS114S08");
     } else if (id.dev_id == ADS114S0X_DEV_ID_ADS114S06) {
@@ -63,16 +59,20 @@ int ADS114S0X::init(void)
     }
 
     ads114s0x_reg_sys_t sys;
-    ads114s0x_read_register(_device, ADS114S0X_REG_SYS, (uint8_t*)&sys, sizeof(ads114s0x_reg_sys_t));
+    ads114s0x_read_register(_device, ADS114S0X_REG_SYS, 
+        (uint8_t*)&sys, sizeof(ads114s0x_reg_sys_t));
     sys.sendstat = 1; // Enable STATUS (data read)
     sys.crc = 0; // Disable CRC (data read)
     sys.sys_mon = 0b000;
-    ads114s0x_write_register(_device, ADS114S0X_REG_SYS, (uint8_t*)&sys, sizeof(ads114s0x_reg_sys_t));
+    ads114s0x_write_register(_device, ADS114S0X_REG_SYS, 
+        (uint8_t*)&sys, sizeof(ads114s0x_reg_sys_t));
 
     ads114s0x_reg_datarate_t datarate;
-    ads114s0x_read_register(_device, ADS114S0X_REG_DATARATE, (uint8_t*)&datarate, sizeof(ads114s0x_reg_datarate_t));
+    ads114s0x_read_register(_device, ADS114S0X_REG_DATARATE, 
+        (uint8_t*)&datarate, sizeof(ads114s0x_reg_datarate_t));
     datarate.mode = 0; //1; // Single shot conversion
-    ads114s0x_write_register(_device, ADS114S0X_REG_DATARATE, (uint8_t*)&datarate, sizeof(ads114s0x_reg_datarate_t));
+    ads114s0x_write_register(_device, ADS114S0X_REG_DATARATE, 
+        (uint8_t*)&datarate, sizeof(ads114s0x_reg_datarate_t));
 
     /* Data ready */
     _queue = xQueueCreate(10, sizeof(uint32_t));
@@ -94,7 +94,8 @@ int ADS114S0X::config(ADC_Input_t inputP, ADC_Input_t inputN)
         .refp_buf = 0,                          // Enable
         .fl_ref_en = 1,                         // Enable reference monitor
     };
-    ret |= ads114s0x_write_register(_device, ADS114S0X_REG_REF, (uint8_t*)&ref, sizeof(ads114s0x_reg_ref_t));
+    ret |= ads114s0x_write_register(_device, ADS114S0X_REG_REF, 
+        (uint8_t*)&ref, sizeof(ads114s0x_reg_ref_t));
 
     /* PGA */
     ads114s0x_reg_pga_t pga = {
@@ -102,7 +103,8 @@ int ADS114S0X::config(ADC_Input_t inputP, ADC_Input_t inputN)
         .pga_en = 1,
         .delay = ADS114S0X_DELAY_14_TMOD
     };
-    ret |= ads114s0x_write_register(_device, ADS114S0X_REG_PGA, (uint8_t*)&pga, sizeof(ads114s0x_reg_pga_t));
+    ret |= ads114s0x_write_register(_device, ADS114S0X_REG_PGA, 
+        (uint8_t*)&pga, sizeof(ads114s0x_reg_pga_t));
 
     /* Excitation */
     ads114s0x_reg_idac_t idac = {
@@ -113,14 +115,16 @@ int ADS114S0X::config(ADC_Input_t inputP, ADC_Input_t inputN)
         .i1mux = ADS114S0X_AINCOM,              // IDAC1 to AINCOM
         .i2mux = ADS114S0X_NOT_CONNECTED
     };
-    ret |= ads114s0x_write_register(_device, ADS114S0X_REG_IDACMAG, (uint8_t*)&idac, sizeof(ads114s0x_reg_idac_t));
+    ret |= ads114s0x_write_register(_device, ADS114S0X_REG_IDACMAG, 
+        (uint8_t*)&idac, sizeof(ads114s0x_reg_idac_t));
 
     /* Mux */
     ads114s0x_reg_inpmux_t inpmux = {
         .muxn = inputN,
         .muxp = inputP
     };
-    ret |= ads114s0x_write_register(_device, ADS114S0X_REG_INPMUX, (uint8_t*)&inpmux, sizeof(ads114s0x_reg_inpmux_t));
+    ret |= ads114s0x_write_register(_device, ADS114S0X_REG_INPMUX, 
+        (uint8_t*)&inpmux, sizeof(ads114s0x_reg_inpmux_t));
 
     return ret;
 }
@@ -145,7 +149,7 @@ void ADS114S0X::clearData(void)
     _data.clear();
 }
 
-std::vector<float> ADS114S0X::readData(void)
+std::vector<uint16_t> ADS114S0X::readData(void)
 {
     return _data;
 }
