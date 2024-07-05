@@ -11,8 +11,8 @@ void setup(void)
 
     delay(1000);
 
-    analogls.addSensor(RTD_TWO_WIRE, AINLS_A_P, AINLS_A_N);
-    analogls.addSensor(RTD_TWO_WIRE, AINLS_E_P, AINLS_E_N);
+    analogls.addSensor(RTD_TWO_WIRE, AIN_A_P, AIN_A_N);
+    analogls.addSensor(RTD_TWO_WIRE, AIN_E_P, AIN_E_N);
 
     printf("*** RTD ***\n");
 

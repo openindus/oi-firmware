@@ -10,7 +10,7 @@
 
 static const char TAG[] = "AnalogInputsLS";
 
-static const ADC_Input_t AINLS_TO_ADC_INPUT[] = {
+static const ADC_Input_t AIN_TO_ADC_INPUT[] = {
     ADS114S0X_AIN5,
     ADS114S0X_AIN0,
     ADS114S0X_AIN8,
@@ -23,7 +23,7 @@ static const ADC_Input_t AINLS_TO_ADC_INPUT[] = {
     ADS114S0X_AIN4
 };
 
-static const Multiplexer_IO_t AINLS_TO_MUX_IO[] = {
+static const Multiplexer_IO_t AIN_TO_MUX_IO[] = {
     0, 0, 1, 1, 2, 2, 3, 3, 4, 4
 };
 
@@ -61,13 +61,13 @@ int AnalogInputsLS::init(void)
     return ret;
 }
 
-int AnalogInputsLS::addSensor(Sensor_Type_t sensor, AInLS_Num_t ainP, AInLS_Num_t ainN)
+int AnalogInputsLS::addSensor(Sensor_Type_t sensor, AIn_Num_t aInP, AIn_Num_t aInN)
 {
     if (sensor == RTD_TWO_WIRE) {
-        if (ainP < AINLS_MAX && ainN < AINLS_MAX) {
+        if (aInP < AIN_MAX && aInN < AIN_MAX) {
             rtd.emplace_back(_adc, _highSideMux, _lowSideMux, 
-                AINLS_TO_ADC_INPUT[ainP], AINLS_TO_ADC_INPUT[ainN],
-                AINLS_TO_MUX_IO[ainP], AINLS_TO_MUX_IO[ainN]);
+                AIN_TO_ADC_INPUT[aInP], AIN_TO_ADC_INPUT[aInN],
+                AIN_TO_MUX_IO[aInP], AIN_TO_MUX_IO[aInN]);
         } else {
             ESP_LOGE(TAG, "Unable to add an RTD");
             return -1;
@@ -78,7 +78,7 @@ int AnalogInputsLS::addSensor(Sensor_Type_t sensor, AInLS_Num_t ainP, AInLS_Num_
     return 0;
 }
 
-int AnalogInputsLS::addSensor(Sensor_Type_t sensor, AInLS_Num_t ainP0, AInLS_Num_t ainN0, AInLS_Num_t ainN1)
+int AnalogInputsLS::addSensor(Sensor_Type_t sensor, AIn_Num_t aInP0, AIn_Num_t aInN0, AIn_Num_t aInN1)
 {
     return -1;
 }

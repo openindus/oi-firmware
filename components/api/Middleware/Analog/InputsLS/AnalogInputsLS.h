@@ -15,18 +15,19 @@
 #include "RTD.h"
 
 typedef enum {
-    AINLS_A_P = 0,
-    AINLS_A_N,
-    AINLS_B_P,
-    AINLS_B_N,
-    AINLS_C_P,
-    AINLS_C_N,
-    AINLS_D_P,
-    AINLS_D_N,
-    AINLS_E_P,
-    AINLS_E_N,
-    AINLS_MAX
-} AInLS_Num_t;
+    AIN_UNDEFINED = -1,
+    AIN_A_P = 0,
+    AIN_A_N,
+    AIN_B_P,
+    AIN_B_N,
+    AIN_C_P,
+    AIN_C_N,
+    AIN_D_P,
+    AIN_D_N,
+    AIN_E_P,
+    AIN_E_N,
+    AIN_MAX
+} AIn_Num_t;
 
 class AnalogInputsLS
 {
@@ -34,8 +35,8 @@ public:
 
     static std::vector<RTD> rtd;
 
-    static int addSensor(Sensor_Type_t sensor, AInLS_Num_t ainP, AInLS_Num_t ainN);
-    static int addSensor(Sensor_Type_t sensor, AInLS_Num_t ainP0, AInLS_Num_t ainN0, AInLS_Num_t ainN1);
+    static int addSensor(Sensor_Type_t sensor, AIn_Num_t aInP, AIn_Num_t aInN);
+    static int addSensor(Sensor_Type_t sensor, AIn_Num_t aInP0, AIn_Num_t aInN0, AIn_Num_t aInN1);
 
 protected:
 
