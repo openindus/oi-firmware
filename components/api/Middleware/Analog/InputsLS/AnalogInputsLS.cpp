@@ -61,24 +61,52 @@ int AnalogInputsLS::init(void)
     return ret;
 }
 
-int AnalogInputsLS::addSensor(Sensor_Type_t sensor, AIn_Num_t aInP, AIn_Num_t aInN)
+int AnalogInputsLS::addSensor(Sensor_Type_t sensor, const std::vector<AIn_Num_t>& aIns)
 {
-    if (sensor == RTD_TWO_WIRE) {
-        if (aInP < AIN_MAX && aInN < AIN_MAX) {
-            rtd.emplace_back(_adc, _highSideMux, _lowSideMux, 
-                AIN_TO_ADC_INPUT[aInP], AIN_TO_ADC_INPUT[aInN],
-                AIN_TO_MUX_IO[aInP], AIN_TO_MUX_IO[aInN]);
-        } else {
-            ESP_LOGE(TAG, "Unable to add an RTD");
-            return -1;
-        }  
-    } else {
-        ESP_LOGE(TAG, "Sensor not implemented");
+    if (!std::all_of(aIns.begin(), aIns.end(), [](AIn_Num_t aIn) {
+        return aIn >= AIN_A_P && aIn < AIN_MAX;
+    })) {
+        ESP_LOGE(TAG, "One or more AINs are out of range (0 to AIN_MAX - 1).");
+        return -1;
+    }
+
+    switch (sensor) {
+        case RTD_TWO_WIRE:
+            if (aIns.size() == 2) {
+                rtd.emplace_back(_adc, _highSideMux, _lowSideMux, 
+                    std::vector<ADC_Input_t>{AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]]},
+                    AIN_TO_MUX_IO[aIns[0]], AIN_TO_MUX_IO[aIns[1]]);
+            } else {
+                ESP_LOGE(TAG, "RTD_TWO_WIRE requires 2 AINs.");
+                return -1;
+            }
+            break;
+        case RTD_THREE_WIRE:
+            if (aIns.size() == 3) {
+
+            } else {
+                ESP_LOGE(TAG, "RTD_THREE_WIRE requires 3 AINs.");
+                return -1;
+            }
+            break;
+        case THERMOCOUPLE:
+            if (aIns.size() == 2) {
+
+            } else {
+                ESP_LOGE(TAG, "THERMOCOUPLE requires 2 AINs.");
+                return -1;
+            }
+            break;
+        case STRAIN_GAUGE:
+            if (aIns.size() == 4) {
+
+            } else {
+                ESP_LOGE(TAG, "STRAIN_GAUGE requires 4 AINs.");
+                return -1;
+            }
+            break;
+        default:
+            ESP_LOGE(TAG, "Unknown sensor type.");
     }
     return 0;
-}
-
-int AnalogInputsLS::addSensor(Sensor_Type_t sensor, AIn_Num_t aInP0, AIn_Num_t aInN0, AIn_Num_t aInN1)
-{
-    return -1;
 }

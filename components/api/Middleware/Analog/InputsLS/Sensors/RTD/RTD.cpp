@@ -10,30 +10,25 @@
 
 static const char TAG[] = "RTD";
 
-int RTD::select(void)
+float RTD::readRTD(uint32_t timeout_ms)
 {
     if ((_highSideMux == NULL) || (_lowSideMux == NULL) || (_adc == NULL)) {
         ESP_LOGE(TAG, "%s() error", __func__);
-        return -1;
+        return 0.0f;
     }
 
     /* MUX Excitation */
     _highSideMux->route(INPUT_IDAC1, _highSideMuxOutput);
     _lowSideMux->route(_lowSideMuxInput, OUTPUT_RBIAS_RTD);
 
-    /* ADC */
-    _adc->config(_adcInputP, _adcInputN);
+    if (_nbWires == 2) {
 
-    return 0;
-}
-
-float RTD::readRTD(uint32_t timeout_ms)
-{
-    if (_adc == NULL) {
-        ESP_LOGE(TAG, "%s() error", __func__);
-        return 0.0f;
+    } else if (_nbWires == 3) {
+        
     }
 
+    /* ADC */
+    _adc->config(_adcInputs[0], _adcInputs[1]);
     _adc->clearData();
 
     int ret = 0;
@@ -59,7 +54,7 @@ float RTD::readRTD(uint32_t timeout_ms)
     std::sort(rRtd.begin(), rRtd.end());
     size_t size = rRtd.size();
     if (size % 2 == 0) {
-        return (rRtd[size / 2 - 1] + rRtd[size / 2]) / 2;
+        return (rRtd[size / 2 - 1] + rRtd[size / 2]) / 2.0;
     } else {
         return rRtd[size / 2];
     }
@@ -67,11 +62,6 @@ float RTD::readRTD(uint32_t timeout_ms)
 
 float RTD::readTemperature(uint32_t timeout_ms)
 {
-    if (_adc == NULL) {
-        ESP_LOGE(TAG, "%s() error", __func__);
-        return 0.0f;
-    }
-
     const float R0 = 100.0;
     const float A = 3.9083e-3;
     const float B = -5.775e-7;

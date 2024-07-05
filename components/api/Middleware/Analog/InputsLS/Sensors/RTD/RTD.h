@@ -17,30 +17,29 @@ class RTD
 public:
 
     RTD(ADS114S0X* adc, Multiplexer* highSideMux, Multiplexer* lowSideMux,
-        ADC_Input_t adcInputP, ADC_Input_t adcInputN,
-        Multiplexer_IO_t highSideMuxOutput, Multiplexer_IO_t lowSideMuxInput) : 
+        const std::vector<ADC_Input_t>& adcInputs,
+        const Multiplexer_IO_t& highSideMuxOutput, 
+        const Multiplexer_IO_t& lowSideMuxInput) : 
             _adc(adc),
             _highSideMux(highSideMux),
             _lowSideMux(lowSideMux),
-            _adcInputP(adcInputP),
-            _adcInputN(adcInputN),
+            _adcInputs(adcInputs),
             _highSideMuxOutput(highSideMuxOutput),
-            _lowSideMuxInput(lowSideMuxInput)
+            _lowSideMuxInput(lowSideMuxInput),
+            _nbWires(adcInputs.size())
     {}
 
-    int select(void);
-
-    float readRTD(uint32_t timeout_ms);
-    float readTemperature(uint32_t timeout_ms);
+    float readRTD(uint32_t timeout_ms = 1000);
+    float readTemperature(uint32_t timeout_ms = 1000);
 
 private:
 
     ADS114S0X* _adc;
     Multiplexer* _highSideMux;
     Multiplexer* _lowSideMux;
-    ADC_Input_t _adcInputP;
-    ADC_Input_t _adcInputN;
+    std::vector<ADC_Input_t> _adcInputs;
     Multiplexer_IO_t _highSideMuxOutput;
     Multiplexer_IO_t _lowSideMuxInput;
+    int _nbWires;
     
 };

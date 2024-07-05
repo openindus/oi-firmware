@@ -35,8 +35,7 @@ public:
 
     static std::vector<RTD> rtd;
 
-    static int addSensor(Sensor_Type_t sensor, AIn_Num_t aInP, AIn_Num_t aInN);
-    static int addSensor(Sensor_Type_t sensor, AIn_Num_t aInP0, AIn_Num_t aInN0, AIn_Num_t aInN1);
+    static int addSensor(Sensor_Type_t sensor, const std::vector<AIn_Num_t>& aIns);
 
 protected:
 
