@@ -7,6 +7,7 @@ set(COMPONENT_SRCS
     "Module/Core/Core.cpp"
     "Module/Mixed/Mixed.cpp"
     "Module/AnalogLS/AnalogLS.cpp"
+    "Module/Dc/Dc.cpp"
     "Middleware/Bus/BusIO.cpp"
     "Middleware/Bus/BusRS.cpp"
     "Middleware/Bus/BusCAN.cpp"

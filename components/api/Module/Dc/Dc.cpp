@@ -43,7 +43,7 @@ int Dc::init(void)
     motorsConfig.push_back({DC_MOTOR2_IN1, DC_MOTOR2_IN2, DC_MOTOR2_DISABLE});
     motorsConfig.push_back({DC_MOTOR3_IN1, DC_MOTOR3_IN2, DC_MOTOR3_DISABLE});
     motorsConfig.push_back({DC_MOTOR4_IN1, DC_MOTOR4_IN2, DC_MOTOR4_DISABLE});
-    err |= MotorDc::init(&motorsConfig, DC_MOTOR_FAULT);
+    err |= MotorDc::init(motorsConfig, DC_MOTOR_FAULT);
 
 #if defined(MODULE_SLAVE)
     err |= DigitalInputsRsp::init();
