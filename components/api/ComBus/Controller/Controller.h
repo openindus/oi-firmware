@@ -38,6 +38,7 @@ public:
     inline uint32_t getSN(void) { return _sn; }
     inline uint16_t getType(void) { return _type; }
 
+    void restart(void);
     inline void ledOn(LedColor_t color) {_setLed(LED_ON, color, 0);};
     inline void ledOff(void) {_setLed(LED_OFF, LED_NONE, 0);};
     inline void ledBlink(LedColor_t color, uint32_t period) {_setLed(LED_BLINK, color, period);};
