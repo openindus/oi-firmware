@@ -18,14 +18,13 @@ public:
 
     RTD(ADS114S0X* adc, Multiplexer* highSideMux, Multiplexer* lowSideMux,
         const std::vector<ADC_Input_t>& adcInputs,
-        const Multiplexer_IO_t& highSideMuxOutput, 
-        const Multiplexer_IO_t& lowSideMuxInput) : 
+        const std::array<Multiplexer_IO_t, 2>& muxIO) : 
             _adc(adc),
             _highSideMux(highSideMux),
             _lowSideMux(lowSideMux),
             _adcInputs(adcInputs),
-            _highSideMuxOutput(highSideMuxOutput),
-            _lowSideMuxInput(lowSideMuxInput),
+            _highSideMuxOutput(muxIO[0]),
+            _lowSideMuxInput(muxIO[1]),
             _nbWires(adcInputs.size())
     {}
 
@@ -41,5 +40,7 @@ private:
     Multiplexer_IO_t _highSideMuxOutput;
     Multiplexer_IO_t _lowSideMuxInput;
     int _nbWires;
+
+    float _calculateRTD(const std::vector<uint16_t>& adcCodes);
     
 };

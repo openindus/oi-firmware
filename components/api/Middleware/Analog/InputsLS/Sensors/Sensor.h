@@ -16,3 +16,8 @@ typedef enum {
     THERMOCOUPLE,
     STRAIN_GAUGE,
 } Sensor_Type_t;
+
+typedef struct {
+    Multiplexer_IO_t muxIO;
+    ADC_Input_t adcInput;
+} Sensor_Input_t;

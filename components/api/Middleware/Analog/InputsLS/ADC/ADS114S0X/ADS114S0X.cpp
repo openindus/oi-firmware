@@ -28,8 +28,6 @@ void ADS114S0X::_task(void* arg)
             uint16_t adcCode;
             if (ads114s0x_read_data(device, &adcCode) == 0) {
                 _data.push_back(adcCode);
-            } else {
-                printf("read data failed !\n");
             }
         }
     }
@@ -82,7 +80,7 @@ int ADS114S0X::init(void)
     return ret;
 }
 
-int ADS114S0X::config(ADC_Input_t inputP, ADC_Input_t inputN)
+int ADS114S0X::config(void)
 {
     int ret = 0;
 
@@ -118,6 +116,14 @@ int ADS114S0X::config(ADC_Input_t inputP, ADC_Input_t inputN)
     ret |= ads114s0x_write_register(_device, ADS114S0X_REG_IDACMAG, 
         (uint8_t*)&idac, sizeof(ads114s0x_reg_idac_t));
 
+    return ret;
+}
+
+int ADS114S0X::read(std::vector<uint16_t>* adcCode, 
+    ADC_Input_t inputP, ADC_Input_t inputN, uint32_t timeout_ms)
+{
+    int ret = 0;
+
     /* Mux */
     ads114s0x_reg_inpmux_t inpmux = {
         .muxn = inputN,
@@ -126,30 +132,18 @@ int ADS114S0X::config(ADC_Input_t inputP, ADC_Input_t inputN)
     ret |= ads114s0x_write_register(_device, ADS114S0X_REG_INPMUX, 
         (uint8_t*)&inpmux, sizeof(ads114s0x_reg_inpmux_t));
 
-    return ret;
-}
-
-int ADS114S0X::startConversion(void)
-{
-    return ads114s0x_start(_device);
-}
-
-int ADS114S0X::autoCalibration(void)
-{
-    return ads114s0x_self_offset_calib(_device);
-}
-
-int ADS114S0X::stopConversion(void)
-{
-    return ads114s0x_stop(_device);
-}
-
-void ADS114S0X::clearData(void)
-{
     _data.clear();
-}
 
-std::vector<uint16_t> ADS114S0X::readData(void)
-{
-    return _data;
+    /* Start conversion */
+    ads114s0x_start(_device);
+    ads114s0x_self_offset_calib(_device);
+    vTaskDelay(timeout_ms / portTICK_PERIOD_MS);
+    ads114s0x_stop(_device);
+
+    if (adcCode != NULL) {
+        adcCode->resize(_data.size());
+        std::copy(_data.begin(), _data.end(), adcCode->begin());
+    }
+
+    return ret;
 }

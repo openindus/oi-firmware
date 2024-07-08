@@ -24,13 +24,9 @@ public:
         _device(device), _config(config) {}
 
     int init(void);
+    int config(void);
 
-    int config(ADC_Input_t inputP, ADC_Input_t inputN);
-    int startConversion(void);
-    int autoCalibration(void);
-    int stopConversion(void);
-    void clearData(void);
-    std::vector<uint16_t> readData(void);
+    int read(std::vector<uint16_t>* adcCode, ADC_Input_t inputP, ADC_Input_t inputN, uint32_t timeout_ms);
 
 private:
 

@@ -75,7 +75,7 @@ int AnalogInputsLS::addSensor(Sensor_Type_t sensor, const std::vector<AIn_Num_t>
             if (aIns.size() == 2) {
                 rtd.emplace_back(_adc, _highSideMux, _lowSideMux, 
                     std::vector<ADC_Input_t>{AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]]},
-                    AIN_TO_MUX_IO[aIns[0]], AIN_TO_MUX_IO[aIns[1]]);
+                    std::array<Multiplexer_IO_t, 2>{AIN_TO_MUX_IO[aIns[0]], AIN_TO_MUX_IO[aIns[1]]});
             } else {
                 ESP_LOGE(TAG, "RTD_TWO_WIRE requires 2 AINs.");
                 return -1;
@@ -83,7 +83,9 @@ int AnalogInputsLS::addSensor(Sensor_Type_t sensor, const std::vector<AIn_Num_t>
             break;
         case RTD_THREE_WIRE:
             if (aIns.size() == 3) {
-
+                rtd.emplace_back(_adc, _highSideMux, _lowSideMux, 
+                    std::vector<ADC_Input_t>{AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]], AIN_TO_ADC_INPUT[aIns[2]]},
+                    std::array<Multiplexer_IO_t, 2>{AIN_TO_MUX_IO[aIns[0]], AIN_TO_MUX_IO[aIns[1]]});
             } else {
                 ESP_LOGE(TAG, "RTD_THREE_WIRE requires 3 AINs.");
                 return -1;

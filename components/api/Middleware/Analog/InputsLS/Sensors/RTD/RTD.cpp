@@ -12,6 +12,8 @@ static const char TAG[] = "RTD";
 
 float RTD::readRTD(uint32_t timeout_ms)
 {
+    float rRTD = 0.0;
+
     if ((_highSideMux == NULL) || (_lowSideMux == NULL) || (_adc == NULL)) {
         ESP_LOGE(TAG, "%s() error", __func__);
         return 0.0f;
@@ -21,43 +23,23 @@ float RTD::readRTD(uint32_t timeout_ms)
     _highSideMux->route(INPUT_IDAC1, _highSideMuxOutput);
     _lowSideMux->route(_lowSideMuxInput, OUTPUT_RBIAS_RTD);
 
+    /* ADC Config */
+    _adc->config();
+
+    /* ADC Read */
+    std::vector<uint16_t> adcCodes;
     if (_nbWires == 2) {
-
+        _adc->read(&adcCodes, _adcInputs[0], _adcInputs[1], timeout_ms);
+        rRTD = _calculateRTD(adcCodes);
     } else if (_nbWires == 3) {
-        
-    }
+        _adc->read(&adcCodes, _adcInputs[0], _adcInputs[1], timeout_ms / 2);
+        float rRTD0 = _calculateRTD(adcCodes);
+        _adc->read(&adcCodes, _adcInputs[2], _adcInputs[1], timeout_ms / 2);
+        float rRTD1 = _calculateRTD(adcCodes);
+        rRTD = std::abs(rRTD0 - rRTD1);
+    } 
 
-    /* ADC */
-    _adc->config(_adcInputs[0], _adcInputs[1]);
-    _adc->clearData();
-
-    int ret = 0;
-    ret |= _adc->startConversion();
-    ret |= _adc->autoCalibration();
-
-    vTaskDelay(timeout_ms / portTICK_PERIOD_MS);
-
-    ret |= _adc->stopConversion();
-
-    std::vector<uint16_t> adcCode;
-    adcCode = _adc->readData();
-
-    /* Calculate RTD resistor values */
-    std::vector<float> rRtd;
-    rRtd.resize(adcCode.size());
-    for (int i=0; i<rRtd.size(); i++) {
-        rRtd[i] = (float)(2 * ADS114S0X_R_REF * adcCode[i]) / 
-            (float)(ADS114S0X_GAIN * (pow(2, ADS114S0X_RES) - 1));
-    }
-
-    /* Calculate the median */
-    std::sort(rRtd.begin(), rRtd.end());
-    size_t size = rRtd.size();
-    if (size % 2 == 0) {
-        return (rRtd[size / 2 - 1] + rRtd[size / 2]) / 2.0;
-    } else {
-        return rRtd[size / 2];
-    }
+    return rRTD;
 }
 
 float RTD::readTemperature(uint32_t timeout_ms)
@@ -71,4 +53,24 @@ float RTD::readTemperature(uint32_t timeout_ms)
 
     /* PT100 - Callendar-Van Dusen equation */
     return (-A + sqrt(A * A - (4 * B * (1 - (rRtd / R0))))) / (2 * B);
+}
+
+float RTD::_calculateRTD(const std::vector<uint16_t>& adcCodes)
+{
+    /* Calculate RTD resistor values */
+    std::vector<float> rRtds;
+    rRtds.resize(adcCodes.size());
+    for (int i=0; i<rRtds.size(); i++) {
+        rRtds[i] = (float)(2 * ADS114S0X_R_REF * adcCodes[i]) / 
+            (float)(ADS114S0X_GAIN * (pow(2, ADS114S0X_RES) - 1));
+    }
+
+    /* Calculate the median */
+    std::sort(rRtds.begin(), rRtds.end());
+    size_t size = rRtds.size();
+    if (size % 2 == 0) {
+        return (rRtds[size / 2 - 1] + rRtds[size / 2]) / 2.0;
+    } else {
+        return rRtds[size / 2];
+    }
 }
