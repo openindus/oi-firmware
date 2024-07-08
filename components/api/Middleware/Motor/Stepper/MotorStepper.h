@@ -36,15 +36,6 @@ typedef enum {
 } MotorStepResolution_t;
 
 /**
- * @brief Stepper motors directions
- * 
- */
-typedef enum {
-    FORWARD = 1,
-    REVERSE = 0,
-} MotorDirection_t;
-
-/**
  * @brief Stepper motors stop modes
  * 
  */

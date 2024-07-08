@@ -79,7 +79,12 @@ build:relaylp:
 build:analogls:
   extends: .build
   script:
-    - pio run -e analogls 
+    - pio run -e analogls
+
+build:dc:
+  extends: .build
+  script:
+    - pio run -e dc 
 
 build:examples:
   stage: build:examples
@@ -130,6 +135,7 @@ pkg:bin:
     - job: build:relaylp
     # - job: build:brushless
     - job: build:analogls
+    - job: build:dc
   script:
     - mv .oi/bin/ binary/
   artifacts:

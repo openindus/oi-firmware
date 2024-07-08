@@ -59,6 +59,7 @@ enum Board_Type_e {
     TYPE_OI_STEPPER_VE      = (uint16_t) 12,
     TYPE_OI_ANALOG_LS       = (uint16_t) 13,
     TYPE_OI_BRUSHLESS       = (uint16_t) 18,
+    TYPE_OI_DC              = (uint16_t) 21,
 };
 
 class BoardUtils
@@ -78,6 +79,7 @@ public:
             case TYPE_OI_STEPPER_VE:    strcpy(name, "OIStepperVE"); break;
             case TYPE_OI_ANALOG_LS:     strcpy(name, "OIAnalogLS"); break;
             case TYPE_OI_BRUSHLESS:     strcpy(name, "OIBrushless"); break;
+            case TYPE_OI_DC:            strcpy(name, "OIDc"); break;
             default:                    strcpy(name, "Unknown"); break;
         }
         return name;

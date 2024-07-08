@@ -86,6 +86,11 @@ enum Protocol_Request_e {
     REQUEST_ENCODER_GET_DIRECTION           = 0x81,
     REQUEST_ENCODER_GET_POSITION            = 0x82,
     REQUEST_ENCODER_GET_SPEED               = 0x83,
+
+    /* DC MOTOR */
+    REQUEST_MOTOR_DC_RUN                    = 0xA0,
+    REQUEST_MOTOR_DC_STOP                   = 0xA1,
+
 };
 
 enum Protocol_Event_e {
