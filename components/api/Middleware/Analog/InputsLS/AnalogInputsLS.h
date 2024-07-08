@@ -11,6 +11,7 @@
 #include "Global.h"
 #include "ADS114S0X.h"
 #include "Multiplexer.h"
+#include "Digipot.h"
 #include "Sensor.h"
 #include "RTD.h"
 
@@ -51,6 +52,10 @@ public:
         return _highSideMux;
     }
 
+    static inline Digipot* getDigipot(void) {
+        return _digipot;
+    }
+
 protected:
 
     static int init(void);
@@ -61,6 +66,6 @@ protected:
     /* Excitation */
     static Multiplexer* _highSideMux;
     static Multiplexer* _lowSideMux;
-    // static Digipot* _digipot;
+    static Digipot* _digipot;
 
 };

@@ -39,6 +39,10 @@ float RTD::readRTD(uint32_t timeout_ms)
         rRTD = std::abs(rRTD0 - rRTD1);
     } 
 
+    /* MUX Excitation (disable) */
+    _highSideMux->route(INPUT_OPEN_HS, _highSideMuxOutput);
+    _lowSideMux->route(_lowSideMuxInput, OUTPUT_OPEN_LS);
+
     return rRTD;
 }
 

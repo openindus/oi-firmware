@@ -10,6 +10,7 @@
 
 #include "Global.h"
 
+/* Config */
 #define ADS114S0X_R_REF 1000
 #define ADS114S0X_GAIN 4
 #define ADS114S0X_RES 16
@@ -24,8 +25,8 @@ public:
         _device(device), _config(config) {}
 
     int init(void);
-    int config(void);
 
+    int config(void);
     int read(std::vector<uint16_t>* adcCode, ADC_Input_t inputP, ADC_Input_t inputN, uint32_t timeout_ms);
 
 private:
