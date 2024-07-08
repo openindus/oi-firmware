@@ -7,7 +7,7 @@
  */
 
 #include "CLI.h"
-#include "AnalogLS.h"
+#include "AnalogInputsLS.h"
 
 #if defined(OI_ANALOG_LS)
 
@@ -37,25 +37,22 @@ static int _muxRoute(int argc, char **argv)
     Multiplexer* mux;
 
     if (!strcmp(mode, "HS")) {
-        mux = new Multiplexer {
-            {ANALOG_LS_MUX_PIN_HS1_A0, ANALOG_LS_MUX_PIN_HS1_A1, ANALOG_LS_MUX_PIN_HS1_A2},
-            {ANALOG_LS_MUX_PIN_HS2_A0, ANALOG_LS_MUX_PIN_HS2_A1, ANALOG_LS_MUX_PIN_HS2_A2}
-    };
+        mux = AnalogInputsLS::getHighSideMux();
     } else if (!strcmp(mode, "LS")) {
-        mux = new Multiplexer(
-            {ANALOG_LS_MUX_PIN_LS1_A0, ANALOG_LS_MUX_PIN_LS1_A1, ANALOG_LS_MUX_PIN_LS1_A2},
-            {ANALOG_LS_MUX_PIN_LS2_A0, ANALOG_LS_MUX_PIN_LS2_A1, ANALOG_LS_MUX_PIN_LS2_A2}
-        );
+        mux = AnalogInputsLS::getLowSideMux();
     } else {
         ESP_LOGE(TAG, "Mode must be 'HS' or 'LS'");
         return -1;    
     }
 
-    if (mux->route(input, output) != 0) {
+    if (mux != NULL) {
+        if (mux->route(input, output) != 0) {
+            return -1;
+        }
+    } else {
         return -1;
     }
 
-    delete mux;
     return 0;
 }
 
@@ -76,10 +73,65 @@ static int _registerMuxRoute(void)
     return esp_console_cmd_register(&cmd);
 }
 
+/* --- ADS114S0X --- */
+
+static struct {
+    struct arg_int *inputP;
+    struct arg_int *inputN;
+    struct arg_int *timeout;
+    struct arg_end *end;
+} _adcReadCmdArgs;
+
+static int _adcReadCmdHandler(int argc, char **argv)
+{
+    int err = arg_parse(argc, argv, (void **)&_adcReadCmdArgs);
+    if (err != 0) {
+        arg_print_errors(stderr, _adcReadCmdArgs.end, argv[0]);
+        return -1;
+    }
+
+    int inputP = _adcReadCmdArgs.inputP->ival[0];
+    int inputN = _adcReadCmdArgs.inputN->ival[0];
+    int timeout = _adcReadCmdArgs.timeout->ival[0];
+
+    ADS114S0X* adc = AnalogInputsLS::getAdcDevice();
+    if (adc != NULL) {
+        std::vector<uint16_t> adcCode;
+        adc->config();
+        adc->read(&adcCode, static_cast<ADC_Input_t>(inputP), static_cast<ADC_Input_t>(inputN), timeout);
+        for (int i=0; i<adcCode.size(); i++) {
+            printf("%d\n", adcCode[i]);
+        }
+    } else {
+        return -1;
+    }
+
+    return 0;
+}
+
+static int _registerAdcReadCmd(void)
+{
+    _adcReadCmdArgs.inputP = arg_int1(NULL, NULL, "<inputP>", "Positive ADC input (AINp)");
+    _adcReadCmdArgs.inputN = arg_int1(NULL, NULL, "<inputN>", "Negative ADC input (AINn)");
+    _adcReadCmdArgs.timeout = arg_int1(NULL, NULL, "<timeout>", "ADC conversion time in milliseconds");
+    _adcReadCmdArgs.end = arg_end(3);
+
+    const esp_console_cmd_t cmd = {
+        .command = "adc-read",
+        .help = "Commands for read ADC code",
+        .hint = NULL,
+        .func = &_adcReadCmdHandler,
+        .argtable = &_adcReadCmdArgs
+    };
+    return esp_console_cmd_register(&cmd);
+}
+
+// Register all CLI commands
 int CLI::_registerAnalogLSCmd(void)
 {
     int ret = 0;
     ret |= _registerMuxRoute();
+    ret |= _registerAdcReadCmd();
     return ret;
 }
 

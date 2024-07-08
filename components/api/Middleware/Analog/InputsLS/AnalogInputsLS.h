@@ -37,6 +37,20 @@ public:
 
     static int addSensor(Sensor_Type_t sensor, const std::vector<AIn_Num_t>& aIns);
 
+    /* Assessors */
+
+    static inline ADS114S0X* getAdcDevice(void) {
+        return _adc;
+    }
+
+    static inline Multiplexer* getHighSideMux(void) {
+        return _highSideMux;
+    }
+
+    static inline Multiplexer* getLowSideMux(void) {
+        return _highSideMux;
+    }
+
 protected:
 
     static int init(void);
