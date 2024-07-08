@@ -1,5 +1,5 @@
 /**
- * @file CLI_AnalogLS.cpp
+ * @file CLI_AnalogInputsLS.cpp
  * @brief Command line interface
  * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
  * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
@@ -127,7 +127,7 @@ static int _registerAdcReadCmd(void)
 }
 
 // Register all CLI commands
-int CLI::_registerAnalogLSCmd(void)
+int CLI::_registerAnalogInputsLSCmd(void)
 {
     int ret = 0;
     ret |= _registerMuxRoute();

@@ -28,8 +28,8 @@ public:
             _nbWires(adcInputs.size())
     {}
 
-    float readRTD(uint32_t timeout_ms = 1000);
-    float readTemperature(uint32_t timeout_ms = 1000);
+    float readRTD(uint32_t timeMs = 1000);
+    float readTemperature(uint32_t timeMs = 1000);
 
 private:
 

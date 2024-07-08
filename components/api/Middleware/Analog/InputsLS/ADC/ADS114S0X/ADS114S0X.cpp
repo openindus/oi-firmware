@@ -120,7 +120,7 @@ int ADS114S0X::config(void)
 }
 
 int ADS114S0X::read(std::vector<uint16_t>* adcCode, 
-    ADC_Input_t inputP, ADC_Input_t inputN, uint32_t timeout_ms)
+    ADC_Input_t inputP, ADC_Input_t inputN, uint32_t timeMs)
 {
     int ret = 0;
 
@@ -137,7 +137,7 @@ int ADS114S0X::read(std::vector<uint16_t>* adcCode,
     /* Start conversion */
     ads114s0x_start(_device);
     ads114s0x_self_offset_calib(_device);
-    vTaskDelay(timeout_ms / portTICK_PERIOD_MS);
+    vTaskDelay(timeMs / portTICK_PERIOD_MS);
     ads114s0x_stop(_device);
 
     if (adcCode != NULL) {

@@ -7,3 +7,13 @@
  */
 
 #include "Thermocouple.h"
+
+float Thermocouple::readVoltage(uint32_t timeMs)
+{
+    return 0.0;
+}
+
+float Thermocouple::readTemperature(uint32_t timeMs)
+{
+    return 0.0;
+}

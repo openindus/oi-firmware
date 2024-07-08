@@ -33,7 +33,7 @@ private:
 #endif
 
 #if defined(OI_ANALOG_LS)
-    static int _registerAnalogLSCmd(void);
+    static int _registerAnalogInputsLSCmd(void);
 #endif
 
 #if defined(OI_STEPPER) || defined(OI_STEPPER_VE)

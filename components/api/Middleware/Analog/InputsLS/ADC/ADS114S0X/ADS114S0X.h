@@ -27,7 +27,7 @@ public:
     int init(void);
 
     int config(void);
-    int read(std::vector<uint16_t>* adcCode, ADC_Input_t inputP, ADC_Input_t inputN, uint32_t timeout_ms);
+    int read(std::vector<uint16_t>* adcCode, ADC_Input_t inputP, ADC_Input_t inputN, uint32_t timeMs);
 
 private:
 
