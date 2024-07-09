@@ -33,7 +33,22 @@ typedef enum {
 
 class AnalogInputsLS
 {
+protected:
+
+    static int _init(void);
+
+    /* ADC */
+    static ADS114S0X* _adc;
+
+    /* Excitation */
+    static Multiplexer* _highSideMux;
+    static Multiplexer* _lowSideMux;
+    static Digipot* _digipot;
+
+
 public: 
+
+    /* Sensors */
 
     static std::vector<RTD> rtd;
     static std::vector<Thermocouple> tc;
@@ -57,17 +72,4 @@ public:
     static inline Digipot* getDigipot(void) {
         return _digipot;
     }
-
-protected:
-
-    static int init(void);
-
-    /* ADC */
-    static ADS114S0X* _adc;
-
-    /* Excitation */
-    static Multiplexer* _highSideMux;
-    static Multiplexer* _lowSideMux;
-    static Digipot* _digipot;
-
 };

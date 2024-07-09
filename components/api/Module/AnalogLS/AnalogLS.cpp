@@ -39,13 +39,27 @@ int AnalogLS::init(void)
     ret |= spi_bus_initialize(ANALOG_LS_SPI_HOST, &spiConfig, SPI_DMA_CH_AUTO);
 
     /* Initialize I2C bus */
+    i2c_config_t i2c_cfg = {
+        .mode = I2C_MODE_MASTER,
+        .sda_io_num = ANALOG_LS_I2C_PIN_SDA,
+        .scl_io_num = ANALOG_LS_I2C_PIN_SCL,
+        .sda_pullup_en = GPIO_PULLUP_ENABLE,
+        .scl_pullup_en = GPIO_PULLUP_ENABLE,
+        .master = {
+            .clk_speed = 400000,
+        },
+        .clk_flags = I2C_SCLK_SRC_FLAG_FOR_NOMAL
+    };
+    ret |= i2c_param_config(ANALOG_LS_I2C_PORT_NUM, &i2c_cfg);
+    ret |= i2c_driver_install(ANALOG_LS_I2C_PORT_NUM, i2c_cfg.mode, 0, 0, 0);
+
 
     /* Initialize analog inputs low signal */
     _adc = new ADS114S0X {
         .device = NULL,
         .config = {
             .host_id = ANALOG_LS_SPI_HOST,
-            .sclk_freq = ANALOG_LS_ADC_SPI_FREQ/8,
+            .sclk_freq = ANALOG_LS_ADC_SPI_FREQ / 8,
             .start_sync = ANALOG_LS_ADC_PIN_START_SYNC,
             .reset = ANALOG_LS_ADC_PIN_RESET,
             .cs = ANALOG_LS_ADC_PIN_CS,
@@ -63,7 +77,7 @@ int AnalogLS::init(void)
         {ANALOG_LS_MUX_PIN_LS2_A0, ANALOG_LS_MUX_PIN_LS2_A1, ANALOG_LS_MUX_PIN_LS2_A2}
     );
 
-    ret |= AnalogInputsLS::init();
+    ret |= AnalogInputsLS::_init();
 
     return ret;
 }

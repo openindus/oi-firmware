@@ -34,7 +34,7 @@ ADS114S0X* AnalogInputsLS::_adc = NULL;
 Multiplexer* AnalogInputsLS::_highSideMux = NULL;
 Multiplexer* AnalogInputsLS::_lowSideMux = NULL;
 
-int AnalogInputsLS::init(void)
+int AnalogInputsLS::_init(void)
 {
     int ret = 0;
 
@@ -62,6 +62,13 @@ int AnalogInputsLS::init(void)
     return ret;
 }
 
+/**
+ * @brief Add sensor
+ * 
+ * @param sensor type: [RTD_TWO_WIRE; RTD_THREE_WIRE; THERMOCOUPLE; STRAIN_GAUGE]
+ * @param aIns Analog Inputs (AIN_A_P to AIN_E_N)
+ * @return int 0 if success, -1 if error
+ */
 int AnalogInputsLS::addSensor(Sensor_Type_t sensor, const std::vector<AIn_Num_t>& aIns)
 {
     if (!std::all_of(aIns.begin(), aIns.end(), [](AIn_Num_t aIn) {

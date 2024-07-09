@@ -10,6 +10,12 @@
 
 static const char TAG[] = "RTD";
 
+/**
+ * @brief Read RTD resistor (ohm)
+ * 
+ * @param timeMs Conversion time in milliseconds
+ * @return float R_RTD value
+ */
 float RTD::readRTD(uint32_t timeMs)
 {
     float rRTD = 0.0;
@@ -46,6 +52,12 @@ float RTD::readRTD(uint32_t timeMs)
     return rRTD;
 }
 
+/**
+ * @brief Read temperature (°C)
+ * 
+ * @param timeMs Conversion time in milliseconds
+ * @return float Temperature value
+ */
 float RTD::readTemperature(uint32_t timeMs)
 {
     const float R0 = 100.0;
