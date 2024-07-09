@@ -16,13 +16,8 @@ class Thermocouple
 {
 public:
 
-    Thermocouple(ADS114S0X* adc, Multiplexer* highSideMux, Multiplexer* lowSideMux,
-        const std::array<ADC_Input_t, 2>& adcInputs) : 
-            _adc(adc),
-            _highSideMux(highSideMux),
-            _lowSideMux(lowSideMux),
-            _adcInputs(adcInputs)
-    {}
+    Thermocouple(ADS114S0X* adc, const std::array<ADC_Input_t, 2>& adcInputs) : 
+        _adc(adc), _adcInputs(adcInputs) {}
 
     float readVoltage(uint32_t timeMs = 1000);
     float readTemperature(uint32_t timeMs = 1000);
@@ -30,8 +25,6 @@ public:
 private:
 
     ADS114S0X* _adc;
-    Multiplexer* _highSideMux;
-    Multiplexer* _lowSideMux;
     std::array<ADC_Input_t, 2> _adcInputs;
     
 };

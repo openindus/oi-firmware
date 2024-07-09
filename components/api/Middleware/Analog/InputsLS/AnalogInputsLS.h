@@ -14,6 +14,7 @@
 #include "Digipot.h"
 #include "Sensor.h"
 #include "RTD.h"
+#include "Thermocouple.h"
 
 typedef enum {
     AIN_UNDEFINED = -1,
@@ -35,6 +36,7 @@ class AnalogInputsLS
 public: 
 
     static std::vector<RTD> rtd;
+    static std::vector<Thermocouple> tc;
 
     static int addSensor(Sensor_Type_t sensor, const std::vector<AIn_Num_t>& aIns);
 

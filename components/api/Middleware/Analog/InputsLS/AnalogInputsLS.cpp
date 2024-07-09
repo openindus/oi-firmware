@@ -28,6 +28,7 @@ static const Multiplexer_IO_t AIN_TO_MUX_IO[] = {
 };
 
 std::vector<RTD> AnalogInputsLS::rtd;
+std::vector<Thermocouple> AnalogInputsLS::tc;
 
 ADS114S0X* AnalogInputsLS::_adc = NULL;
 Multiplexer* AnalogInputsLS::_highSideMux = NULL;
@@ -93,7 +94,7 @@ int AnalogInputsLS::addSensor(Sensor_Type_t sensor, const std::vector<AIn_Num_t>
             break;
         case THERMOCOUPLE:
             if (aIns.size() == 2) {
-
+                tc.emplace_back(_adc, std::array<ADC_Input_t, 2>{AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]]});
             } else {
                 ESP_LOGE(TAG, "THERMOCOUPLE requires 2 AINs.");
                 return -1;
@@ -101,7 +102,7 @@ int AnalogInputsLS::addSensor(Sensor_Type_t sensor, const std::vector<AIn_Num_t>
             break;
         case STRAIN_GAUGE:
             if (aIns.size() == 4) {
-
+                ESP_LOGW(TAG, "Not implemented !");
             } else {
                 ESP_LOGE(TAG, "STRAIN_GAUGE requires 4 AINs.");
                 return -1;
