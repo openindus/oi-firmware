@@ -73,12 +73,13 @@ static int _registerMuxRoute(void)
     return esp_console_cmd_register(&cmd);
 }
 
-/* --- ADS114S0X --- */
+/* --- ADS114S0X Read --- */
 
 static struct {
     struct arg_int *inputP;
     struct arg_int *inputN;
     struct arg_int *timeout;
+    struct arg_lit *useVbias;
     struct arg_end *end;
 } _adcReadCmdArgs;
 
@@ -93,13 +94,13 @@ static int _adcReadCmdHandler(int argc, char **argv)
     int inputP = _adcReadCmdArgs.inputP->ival[0];
     int inputN = _adcReadCmdArgs.inputN->ival[0];
     int timeout = _adcReadCmdArgs.timeout->ival[0];
+    bool useVbias = _adcReadCmdArgs.useVbias->count > 0;
 
     ADS114S0X* adc = AnalogInputsLS::getAdcDevice();
     if (adc != NULL) {
         std::vector<uint16_t> adcCode;
-        adc->config(4, REF_EXTERNAL_IDAC1, true);
-        adc->read(&adcCode, static_cast<ADC_Input_t>(inputP), static_cast<ADC_Input_t>(inputN), timeout);
-        for (int i=0; i<adcCode.size(); i++) {
+        adc->read(&adcCode, static_cast<ADC_Input_t>(inputP), static_cast<ADC_Input_t>(inputN), timeout, useVbias);
+        for (int i = 0; i < adcCode.size(); i++) {
             printf("%d\n", adcCode[i]);
         }
     } else {
@@ -114,7 +115,8 @@ static int _registerAdcReadCmd(void)
     _adcReadCmdArgs.inputP = arg_int1(NULL, NULL, "<inputP>", "Positive ADC input (AINp)");
     _adcReadCmdArgs.inputN = arg_int1(NULL, NULL, "<inputN>", "Negative ADC input (AINn)");
     _adcReadCmdArgs.timeout = arg_int1(NULL, NULL, "<timeout>", "ADC conversion time in milliseconds");
-    _adcReadCmdArgs.end = arg_end(3);
+    _adcReadCmdArgs.useVbias = arg_lit0(NULL, "useVbias", "Use bias voltage");
+    _adcReadCmdArgs.end = arg_end(4);
 
     const esp_console_cmd_t cmd = {
         .command = "adc-read",
@@ -126,12 +128,63 @@ static int _registerAdcReadCmd(void)
     return esp_console_cmd_register(&cmd);
 }
 
+/* --- ADS114S0X Config --- */
+
+static struct {
+    struct arg_int *gain;
+    struct arg_int *reference;
+    struct arg_lit *excitation;
+    struct arg_end *end;
+} _adcConfigCmdArgs;
+
+static int _adcConfigCmdHandler(int argc, char **argv)
+{
+    int err = arg_parse(argc, argv, (void **)&_adcConfigCmdArgs);
+    if (err != 0) {
+        arg_print_errors(stderr, _adcConfigCmdArgs.end, argv[0]);
+        return -1;
+    }
+
+    int gain = _adcConfigCmdArgs.gain->ival[0];
+    int reference = _adcConfigCmdArgs.reference->ival[0];
+    bool useExcitation = _adcConfigCmdArgs.excitation->count > 0;
+
+    ADS114S0X* adc = AnalogInputsLS::getAdcDevice();
+    if (adc != NULL) {
+        if (adc->config(gain, reference, useExcitation) != 0) {
+            return -1;
+        }
+    } else {
+        return -1;
+    }
+
+    return 0;
+}
+
+static int _registerAdcConfigCmd(void)
+{
+    _adcConfigCmdArgs.gain = arg_int1(NULL, NULL, "<gain>", "ADC gain (1, 2, 4, 8, 16, 32, 64, 128)");
+    _adcConfigCmdArgs.reference = arg_int1(NULL, NULL, "<reference>", "ADC reference (1 = External, 2 = Internal)");
+    _adcConfigCmdArgs.excitation = arg_lit0(NULL, "excitation", "Use excitation");
+    _adcConfigCmdArgs.end = arg_end(3);
+
+    const esp_console_cmd_t cmd = {
+        .command = "adc-config",
+        .help = "Configure ADC settings",
+        .hint = NULL,
+        .func = &_adcConfigCmdHandler,
+        .argtable = &_adcConfigCmdArgs
+    };
+    return esp_console_cmd_register(&cmd);
+}
+
 // Register all CLI commands
 int CLI::_registerAnalogInputsLSCmd(void)
 {
     int ret = 0;
     ret |= _registerMuxRoute();
     ret |= _registerAdcReadCmd();
+    ret |= _registerAdcConfigCmd();
     return ret;
 }
 

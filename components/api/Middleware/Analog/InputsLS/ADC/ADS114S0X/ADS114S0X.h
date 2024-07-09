@@ -39,7 +39,8 @@ public:
     int init(void);
 
     int config(int gain, int reference, bool useExcitation);
-    int read(std::vector<uint16_t>* adcCode, ADC_Input_t inputP, ADC_Input_t inputN, uint32_t timeMs, bool useVbias=false);
+    int read(std::vector<uint16_t>* adcCode, ADC_Input_t inputP, ADC_Input_t inputN, 
+        uint32_t timeMs=1000, bool useVbias=false);
 
 private:
 
