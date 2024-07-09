@@ -56,21 +56,21 @@ int ADS114S0X::init(void)
         ESP_LOGE(TAG, "ADC device not found");
     }
 
-    ads114s0x_reg_sys_t sys;
+    ads114s0x_reg_sys_t sysReg;
     ads114s0x_read_register(_device, ADS114S0X_REG_SYS, 
-        (uint8_t*)&sys, sizeof(ads114s0x_reg_sys_t));
-    sys.sendstat = 1; // Enable STATUS (data read)
-    sys.crc = 0; // Disable CRC (data read)
-    sys.sys_mon = 0b000;
+        (uint8_t*)&sysReg, sizeof(ads114s0x_reg_sys_t));
+    sysReg.sendstat = 1; // Enable STATUS (data read)
+    sysReg.crc = 0; // Disable CRC (data read)
+    sysReg.sys_mon = 0b000; // Disable
     ads114s0x_write_register(_device, ADS114S0X_REG_SYS, 
-        (uint8_t*)&sys, sizeof(ads114s0x_reg_sys_t));
+        (uint8_t*)&sysReg, sizeof(ads114s0x_reg_sys_t));
 
-    ads114s0x_reg_datarate_t datarate;
+    ads114s0x_reg_datarate_t datarateReg;
     ads114s0x_read_register(_device, ADS114S0X_REG_DATARATE, 
-        (uint8_t*)&datarate, sizeof(ads114s0x_reg_datarate_t));
-    datarate.mode = 0; //1; // Single shot conversion
+        (uint8_t*)&datarateReg, sizeof(ads114s0x_reg_datarate_t));
+    datarateReg.mode = 0; //1; // Single shot conversion
     ads114s0x_write_register(_device, ADS114S0X_REG_DATARATE, 
-        (uint8_t*)&datarate, sizeof(ads114s0x_reg_datarate_t));
+        (uint8_t*)&datarateReg, sizeof(ads114s0x_reg_datarate_t));
 
     /* Data ready */
     _queue = xQueueCreate(10, sizeof(uint32_t));
@@ -80,57 +80,85 @@ int ADS114S0X::init(void)
     return ret;
 }
 
-int ADS114S0X::config(void)
+int ADS114S0X::config(int gain, int reference, bool useExcitation)
 {
     int ret = 0;
 
     /* Reference */
-    ads114s0x_reg_ref_t ref = {
+    ads114s0x_reg_ref_t refReg = {
         .refcon = ADS114S0X_REF_ALWAYS_ON,      // Internal always on
-        .refsel = ADS114S0X_REF_REFP1_REFN1,    // Select REFP1, REFN1 (input reference)
+        .refsel = ADS114S0X_REF_REFP0_REFNO,    // Default ref
         .refn_buf = 0,                          // Enable
         .refp_buf = 0,                          // Enable
         .fl_ref_en = 1,                         // Enable reference monitor
     };
+    if (reference == REF_INTERNAL_2V5) {
+        refReg.refsel = ADS114S0X_REF_INTERNAL_2_5V;
+    } else if (reference == REF_EXTERNAL_IDAC1) {
+        refReg.refsel = ADS114S0X_REF_REFP1_REFN1;
+    } else {
+        ESP_LOGE(TAG, "Invalid reference");
+        return -1;
+    }
     ret |= ads114s0x_write_register(_device, ADS114S0X_REG_REF, 
-        (uint8_t*)&ref, sizeof(ads114s0x_reg_ref_t));
+        (uint8_t*)&refReg, sizeof(ads114s0x_reg_ref_t));
 
     /* PGA */
-    ads114s0x_reg_pga_t pga = {
-        .gain = ADS114S0X_PGA_GAIN_4,
+    ads114s0x_reg_pga_t pgaReg = {
+        .gain = static_cast<ads114s0x_pga_gain_e>(log2(gain)),
         .pga_en = 1,
         .delay = ADS114S0X_DELAY_14_TMOD
     };
     ret |= ads114s0x_write_register(_device, ADS114S0X_REG_PGA, 
-        (uint8_t*)&pga, sizeof(ads114s0x_reg_pga_t));
+        (uint8_t*)&pgaReg, sizeof(ads114s0x_reg_pga_t));
 
     /* Excitation */
-    ads114s0x_reg_idac_t idac = {
-        .imag = ADS114S0X_IDAC_1000_UA,
+    ads114s0x_reg_idac_t idacReg = {
+        .imag = ADS114S0X_IDAC_OFF,
         .reserved = 0,
         .psw = 0,
         .fl_rail_en = 0,
-        .i1mux = ADS114S0X_AINCOM,              // IDAC1 to AINCOM
+        .i1mux = ADS114S0X_NOT_CONNECTED,
         .i2mux = ADS114S0X_NOT_CONNECTED
     };
+    if (useExcitation) {
+        idacReg.imag = ADS114S0X_IDAC_1000_UA;
+        idacReg.i1mux = ADS114S0X_AINCOM; // IDAC1 to AINCOM
+    }
     ret |= ads114s0x_write_register(_device, ADS114S0X_REG_IDACMAG, 
-        (uint8_t*)&idac, sizeof(ads114s0x_reg_idac_t));
+        (uint8_t*)&idacReg, sizeof(ads114s0x_reg_idac_t));
 
     return ret;
 }
 
 int ADS114S0X::read(std::vector<uint16_t>* adcCode, 
-    ADC_Input_t inputP, ADC_Input_t inputN, uint32_t timeMs)
+    ADC_Input_t inputP, ADC_Input_t inputN, uint32_t timeMs, bool useVbias)
 {
     int ret = 0;
 
+    /* VBias */
+    if (useVbias) {
+        ads114s0x_reg_vbias_t vbiasReg = {
+            .vb_ain0 = (uint8_t)((inputP == 0 || inputN == 0) ? 1 : 0),
+            .vb_ain1 = (uint8_t)((inputP == 1 || inputN == 1) ? 1 : 0),
+            .vb_ain2 = (uint8_t)((inputP == 2 || inputN == 2) ? 1 : 0),
+            .vb_ain3 = (uint8_t)((inputP == 3 || inputN == 3) ? 1 : 0),
+            .vb_ain4 = (uint8_t)((inputP == 4 || inputN == 4) ? 1 : 0),
+            .vb_ain5 = (uint8_t)((inputP == 5 || inputN == 5) ? 1 : 0),
+            .vb_ain6 = (uint8_t)((inputP == 6 || inputN == 6) ? 1 : 0),
+            .vb_level = 0
+        };
+        ret |= ads114s0x_write_register(_device, ADS114S0X_REG_VBIAS, 
+            (uint8_t*)&vbiasReg, sizeof(ads114s0x_reg_vbias_t));
+    }
+
     /* Mux */
-    ads114s0x_reg_inpmux_t inpmux = {
-        .muxn = inputN,
-        .muxp = inputP
+    ads114s0x_reg_inpmux_t inpmuxReg = {
+        .muxn = static_cast<ads114s0x_adc_input_e>(inputN),
+        .muxp = static_cast<ads114s0x_adc_input_e>(inputP)
     };
     ret |= ads114s0x_write_register(_device, ADS114S0X_REG_INPMUX, 
-        (uint8_t*)&inpmux, sizeof(ads114s0x_reg_inpmux_t));
+        (uint8_t*)&inpmuxReg, sizeof(ads114s0x_reg_inpmux_t));
 
     _data.clear();
 

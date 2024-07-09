@@ -8,6 +8,9 @@
 
 #include "Thermocouple.h"
 
+#define TC_GAIN 8
+#define TC_V_REF 2.5
+
 static const char TAG[] = "Thermocouple";
 
 /**
@@ -25,7 +28,31 @@ float Thermocouple::readVoltage(uint32_t timeMs)
         return 0.0f;
     }
 
-    return voltage;
+    /* ADC Config */
+    _adc->config(TC_GAIN, REF_INTERNAL_2V5, false);
+
+    /* ADC Read */
+    std::vector<uint16_t> adcCodes;
+    _adc->read(&adcCodes, _adcInputs[0], _adcInputs[1], timeMs, true);
+
+    /* Calculate Voltage values */
+    std::vector<float> values;
+    values.resize(adcCodes.size());
+    for (int i=0; i<values.size(); i++) {
+        values[i] = (float)(2 * TC_V_REF * adcCodes[i]) / 
+            (float)(TC_GAIN * (pow(2, ADS114S0X_RESOLUTION) - 1));
+    }
+
+    /* Calculate the median */
+    std::sort(values.begin(), values.end());
+    size_t size = values.size();
+    if (size % 2 == 0) {
+        voltage = (values[size / 2 - 1] + values[size / 2]) / 2.0;
+    } else {
+        voltage = values[size / 2];
+    }
+
+    return voltage * 1000;
 }
 
 /**

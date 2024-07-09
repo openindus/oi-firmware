@@ -8,6 +8,9 @@
 
 #include "RTD.h"
 
+#define RTD_R_REF 1000
+#define RTD_GAIN 4
+
 static const char TAG[] = "RTD";
 
 /**
@@ -30,7 +33,7 @@ float RTD::readRTD(uint32_t timeMs)
     _lowSideMux->route(_lowSideMuxInput, OUTPUT_RBIAS_RTD);
 
     /* ADC Config */
-    _adc->config();
+    _adc->config(RTD_GAIN, REF_EXTERNAL_IDAC1, true);
 
     /* ADC Read */
     std::vector<uint16_t> adcCodes;
@@ -77,8 +80,8 @@ float RTD::_calculateRTD(const std::vector<uint16_t>& adcCodes)
     std::vector<float> rRtds;
     rRtds.resize(adcCodes.size());
     for (int i=0; i<rRtds.size(); i++) {
-        rRtds[i] = (float)(2 * ADS114S0X_R_REF * adcCodes[i]) / 
-            (float)(ADS114S0X_GAIN * (pow(2, ADS114S0X_RES) - 1));
+        rRtds[i] = (float)(2 * RTD_R_REF * adcCodes[i]) / 
+            (float)(RTD_GAIN * (pow(2, ADS114S0X_RESOLUTION) - 1));
     }
 
     /* Calculate the median */

@@ -97,7 +97,7 @@ static int _adcReadCmdHandler(int argc, char **argv)
     ADS114S0X* adc = AnalogInputsLS::getAdcDevice();
     if (adc != NULL) {
         std::vector<uint16_t> adcCode;
-        adc->config();
+        adc->config(4, REF_EXTERNAL_IDAC1, true);
         adc->read(&adcCode, static_cast<ADC_Input_t>(inputP), static_cast<ADC_Input_t>(inputN), timeout);
         for (int i=0; i<adcCode.size(); i++) {
             printf("%d\n", adcCode[i]);

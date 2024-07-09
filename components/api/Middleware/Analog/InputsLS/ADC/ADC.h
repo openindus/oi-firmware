@@ -1,6 +1,6 @@
 /**
- * @file Sensor.h
- * @brief Sensor
+ * @file ADC.h
+ * @brief ADC
  * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
  * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
@@ -10,9 +10,4 @@
 
 #include "Global.h"
 
-typedef enum {
-    RTD_TWO_WIRE = 0,
-    RTD_THREE_WIRE,
-    THERMOCOUPLE,
-    STRAIN_GAUGE,
-} Sensor_Type_t;
+typedef int ADC_Input_t;

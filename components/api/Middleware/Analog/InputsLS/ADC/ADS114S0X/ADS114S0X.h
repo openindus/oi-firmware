@@ -9,13 +9,25 @@
 #pragma once
 
 #include "Global.h"
+#include "ADC.h"
 
-/* Config */
-#define ADS114S0X_R_REF 1000
-#define ADS114S0X_GAIN 4
-#define ADS114S0X_RES 16
+#define ADS114S0X_RESOLUTION 16
 
-typedef enum ads114s0x_adc_input_e ADC_Input_t;
+enum ADS114S0X_Gain_e {
+    GAIN_1      = (int) 1,
+    Gain_2      = (int) 2,
+    GAIN_4      = (int) 4,
+    GAIN_8      = (int) 8,
+    GAIN_16     = (int) 16,
+    GAIN_32     = (int) 32,
+    GAIN_64     = (int) 64,
+    GAIN_128    = (int) 128
+};
+
+enum ADS114S0X_Reference_e {
+    REF_EXTERNAL_IDAC1  = 1,
+    REF_INTERNAL_2V5    = 2,
+};
 
 class ADS114S0X
 {
@@ -26,8 +38,8 @@ public:
 
     int init(void);
 
-    int config(void);
-    int read(std::vector<uint16_t>* adcCode, ADC_Input_t inputP, ADC_Input_t inputN, uint32_t timeMs);
+    int config(int gain, int reference, bool useExcitation);
+    int read(std::vector<uint16_t>* adcCode, ADC_Input_t inputP, ADC_Input_t inputN, uint32_t timeMs, bool useVbias=false);
 
 private:
 

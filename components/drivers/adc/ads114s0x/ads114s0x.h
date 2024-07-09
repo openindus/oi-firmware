@@ -253,7 +253,7 @@ typedef struct __attribute__((packed)) {
     uint8_t vb_ain3     : 1; // AIN3 VBIAS selection [0: disconnected, 1: connected]
     uint8_t vb_ain4     : 1; // AIN4 VBIAS selection [0: disconnected, 1: connected]
     uint8_t vb_ain5     : 1; // AIN5 VBIAS selection [0: disconnected, 1: connected]
-    uint8_t vb_ainc     : 1; // AIN6 VBIAS selection [0: disconnected, 1: connected]
+    uint8_t vb_ain6     : 1; // AIN6 VBIAS selection [0: disconnected, 1: connected]
     uint8_t vb_level    : 1; // VBIAS level selection [0: (AVDD+AVSS)/2 , 1: (AVDD+AVSS)/12]
 } ads114s0x_reg_vbias_t;
 

@@ -11,16 +11,7 @@
 static const char TAG[] = "AnalogInputsLS";
 
 static const ADC_Input_t AIN_TO_ADC_INPUT[] = {
-    ADS114S0X_AIN5,
-    ADS114S0X_AIN0,
-    ADS114S0X_AIN8,
-    ADS114S0X_AIN1,
-    ADS114S0X_AIN9,
-    ADS114S0X_AIN2,
-    ADS114S0X_AIN10,
-    ADS114S0X_AIN3,
-    ADS114S0X_AIN11,
-    ADS114S0X_AIN4
+    5, 0, 8, 1, 9, 2, 10, 3, 11, 4
 };
 
 static const Multiplexer_IO_t AIN_TO_MUX_IO[] = {
