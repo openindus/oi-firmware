@@ -13,6 +13,11 @@
 #include "Multiplexer.h"
 #include "Sensor.h"
 
+enum RTD_Type_e {
+    TYPE_PT100 = (int) 0,
+    TYPE_PT1000
+};
+
 class RTD
 {
 public:

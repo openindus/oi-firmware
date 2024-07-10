@@ -17,13 +17,4 @@ typedef enum {
     STRAIN_GAUGE,
 } Sensor_t;
 
-enum Sensor_RTD_Type_e {
-    TYPE_PT100 = (int) 0,
-    TYPE_PT1000
-};
-
-enum Sensor_TC_Type_e {
-    TYPE_K = (int) 0,
-};
-
 typedef int Sensor_Type_t;

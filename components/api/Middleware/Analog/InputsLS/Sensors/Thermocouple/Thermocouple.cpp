@@ -13,17 +13,27 @@
 
 static const char TAG[] = "Thermocouple";
 
-// Coefficients for Type K thermocouple
-static const std::vector<float> COEF_K = 
-    {0.0, 2.508355E+01, 7.860106E-02, -2.503131E-01, 8.315270E-02, -1.228034E-02 , 9.804036E-04, -4.413030E-05, 1.057734E-06, -1.052755E-08};
+/* Thermocouple coefficients  */
+static const std::vector<TC_Coefficient_s> COEF_K = {
+    {-200.0, 0.0, -5.891, 0.0, {0.0000000E+00, 2.5173462E+01, -1.1662878E+00, -1.0833638E+00, -8.9773540E-01, -3.7342377E-01, -8.6632643E-02, -1.0450598E-02, -5.1920577E-04, 0.0000000E+00}},
+    {0.0, 500.0, 0.0, 20.644, {0.000000E+00, 2.508355E+01, 7.860106E-02, -2.503131E-01, 8.315270E-02, -1.228034E-02, 9.804036E-04, -4.413030E-05, 1.057734E-06, -1.052755E-08}},
+    {500.0, 1372.0, 20.644, 54.886, {-1.318058E+02, 4.830222E+01, -1.646031E+00, 5.464731E-02, -9.650715E-04, 8.802193E-06, -3.110810E-08, 0.000000E+00, 0.000000E+00, 0.000000E+00}}
+};
 
-float Thermocouple::_calculateTemperature(const std::vector<float>& coefficients, float voltage)
+float Thermocouple::_calculateTemperature(const std::vector<TC_Coefficient_s>& coefficients, float voltage)
 {
-    float temperature = 0.0;
-    for (size_t i = 0; i < coefficients.size(); ++i) {
-        temperature += coefficients[i] * pow(voltage, i);
+    for (const auto& coef : coefficients) {
+        if (voltage >= coef.Ei && voltage <= coef.Ef) {
+            // Calculate temperature using polynomial coefficients
+            float temperature = 0.0;
+            for (size_t i = 0; i < coef.d.size(); ++i) {
+                temperature += coef.d[i] * std::pow(voltage, i);
+            }
+            return temperature;
+        }
     }
-    return temperature;
+    ESP_LOGE(TAG, "Voltage is out of the range covered by the given coefficients.");
+    return 0.0;
 }
 
 /**

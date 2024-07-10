@@ -10,11 +10,11 @@
 
 static const char TAG[] = "AnalogInputsLS";
 
-static const ADC_Input_t AIN_TO_ADC_INPUT[] = {
+static const std::array<ADC_Input_t, 10> AIN_TO_ADC_INPUT = {
     5, 0, 8, 1, 9, 2, 10, 3, 11, 4
 };
 
-static const Multiplexer_IO_t AIN_TO_MUX_IO[] = {
+static const std::array<Multiplexer_IO_t, 10> AIN_TO_MUX_IO = {
     0, 0, 1, 1, 2, 2, 3, 3, 4, 4
 };
 
@@ -110,7 +110,8 @@ int AnalogInputsLS::addSensor(Sensor_t sensor, Sensor_Type_t type, const std::ve
             break;
         case THERMOCOUPLE:
             if (aIns.size() == 2) {
-                tc.emplace_back(type, _adc, std::array<ADC_Input_t, 2>{AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]]});
+                tc.emplace_back(static_cast<TC_Type_e>(type), _adc, 
+                    std::array<ADC_Input_t, 2>{AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]]});
             } else {
                 ESP_LOGE(TAG, "THERMOCOUPLE requires 2 AINs.");
                 return -1;
