@@ -11,6 +11,7 @@
 #include "Global.h"
 #include "ADS114S0X.h"
 #include "Multiplexer.h"
+#include "Sensor.h"
 
 class RTD
 {

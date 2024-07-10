@@ -54,7 +54,7 @@ public:
     static std::vector<Thermocouple> tc;
 
     static int setConversionTime(uint32_t t);
-    static int addSensor(Sensor_Type_t sensor, const std::vector<AIn_Num_t>& aIns);
+    static int addSensor(Sensor_t sensor, Sensor_Type_t type, const std::vector<AIn_Num_t>& aIns);
 
     /* Assessors */
 

@@ -73,11 +73,12 @@ int AnalogInputsLS::setConversionTime(uint32_t t)
 /**
  * @brief Add sensor
  * 
- * @param sensor type: [RTD_TWO_WIRE; RTD_THREE_WIRE; THERMOCOUPLE; STRAIN_GAUGE]
+ * @param sensor [RTD_TWO_WIRE; RTD_THREE_WIRE; THERMOCOUPLE; STRAIN_GAUGE]
+ * @param type Depends on the sensor. RTD: (TYPE_PT100), Thermocouple (TYPE_K, ...)
  * @param aIns Analog Inputs (AIN_A_P to AIN_E_N)
  * @return int 0 if success, -1 if error
  */
-int AnalogInputsLS::addSensor(Sensor_Type_t sensor, const std::vector<AIn_Num_t>& aIns)
+int AnalogInputsLS::addSensor(Sensor_t sensor, Sensor_Type_t type, const std::vector<AIn_Num_t>& aIns)
 {
     if (!std::all_of(aIns.begin(), aIns.end(), [](AIn_Num_t aIn) {
         return aIn >= AIN_A_P && aIn < AIN_MAX;
@@ -109,7 +110,7 @@ int AnalogInputsLS::addSensor(Sensor_Type_t sensor, const std::vector<AIn_Num_t>
             break;
         case THERMOCOUPLE:
             if (aIns.size() == 2) {
-                tc.emplace_back(_adc, std::array<ADC_Input_t, 2>{AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]]});
+                tc.emplace_back(type, _adc, std::array<ADC_Input_t, 2>{AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]]});
             } else {
                 ESP_LOGE(TAG, "THERMOCOUPLE requires 2 AINs.");
                 return -1;

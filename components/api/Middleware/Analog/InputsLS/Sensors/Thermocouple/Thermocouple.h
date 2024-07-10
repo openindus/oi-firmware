@@ -11,29 +11,21 @@
 #include "Global.h"
 #include "ADS114S0X.h"
 #include "Multiplexer.h"
-
-typedef enum {
-    TYPE_R = 0,
-    TYPE_S,
-    TYPE_K,
-    TYPE_E,
-    TYPE_J,
-    TYPE_T,
-    TYPE_B,
-    TYPE_N
-} TC_Type_t;
+#include "Sensor.h"
 
 class Thermocouple
 {
 public:
 
-    Thermocouple(ADS114S0X* adc, const std::array<ADC_Input_t, 2>& adcInputs) : 
-        _adc(adc), _adcInputs(adcInputs) {}
+    Thermocouple(Sensor_Type_t type, ADS114S0X* adc, const std::array<ADC_Input_t, 2>& adcInputs) : 
+        _type(type), _adc(adc), _adcInputs(adcInputs) {}
 
     float readVoltage(void);
     float readTemperature(void);
 
 private:
+
+    Sensor_Type_t _type;
 
     ADS114S0X* _adc;
     std::array<ADC_Input_t, 2> _adcInputs;

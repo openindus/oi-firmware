@@ -74,6 +74,19 @@ float Thermocouple::readVoltage(void)
  */
 float Thermocouple::readTemperature(void)
 {
+    float temperature = 0.0;
     float voltage = readVoltage();
-    return _calculateTemperature(COEF_K, voltage);
+
+    switch (_type)
+    {
+    case TYPE_K:
+        temperature = _calculateTemperature(COEF_K, voltage);
+        break;
+    
+    default:
+        ESP_LOGE(TAG, "Unknown sensor type");
+        break;
+    }
+    
+    return temperature;
 }
