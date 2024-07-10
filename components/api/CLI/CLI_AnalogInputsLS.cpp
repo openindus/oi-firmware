@@ -78,7 +78,6 @@ static int _registerMuxRoute(void)
 static struct {
     struct arg_int *inputP;
     struct arg_int *inputN;
-    struct arg_int *timeout;
     struct arg_lit *useVbias;
     struct arg_end *end;
 } _adcReadCmdArgs;
@@ -93,13 +92,12 @@ static int _adcReadCmdHandler(int argc, char **argv)
 
     int inputP = _adcReadCmdArgs.inputP->ival[0];
     int inputN = _adcReadCmdArgs.inputN->ival[0];
-    int timeout = _adcReadCmdArgs.timeout->ival[0];
     bool useVbias = _adcReadCmdArgs.useVbias->count > 0;
 
     ADS114S0X* adc = AnalogInputsLS::getAdcDevice();
     if (adc != NULL) {
         std::vector<uint16_t> adcCode;
-        adc->read(&adcCode, static_cast<ADC_Input_t>(inputP), static_cast<ADC_Input_t>(inputN), timeout, useVbias);
+        adc->read(&adcCode, static_cast<ADC_Input_t>(inputP), static_cast<ADC_Input_t>(inputN), useVbias);
         for (int i = 0; i < adcCode.size(); i++) {
             printf("%d\n", adcCode[i]);
         }
@@ -114,9 +112,8 @@ static int _registerAdcReadCmd(void)
 {
     _adcReadCmdArgs.inputP = arg_int1(NULL, NULL, "<inputP>", "Positive ADC input (AINp)");
     _adcReadCmdArgs.inputN = arg_int1(NULL, NULL, "<inputN>", "Negative ADC input (AINn)");
-    _adcReadCmdArgs.timeout = arg_int1(NULL, NULL, "<timeout>", "ADC conversion time in milliseconds");
     _adcReadCmdArgs.useVbias = arg_lit0(NULL, "useVbias", "Use bias voltage");
-    _adcReadCmdArgs.end = arg_end(4);
+    _adcReadCmdArgs.end = arg_end(3);
 
     const esp_console_cmd_t cmd = {
         .command = "adc-read",

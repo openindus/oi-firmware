@@ -54,6 +54,23 @@ int AnalogInputsLS::_init(void)
 }
 
 /**
+ * @brief Set conversion time (ms)
+ * 
+ * @param t Time in milliseconds
+ * @return int 0 if success, -1 if error
+ */
+int AnalogInputsLS::setConversionTime(uint32_t t)
+{
+    if (_adc != NULL) {
+        _adc->setConvTimeMs(t);
+        return 0;
+    } else {
+        ESP_LOGE(TAG, "Failed to set conversion time");
+        return -1;
+    }
+}
+
+/**
  * @brief Add sensor
  * 
  * @param sensor type: [RTD_TWO_WIRE; RTD_THREE_WIRE; THERMOCOUPLE; STRAIN_GAUGE]

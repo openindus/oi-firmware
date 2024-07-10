@@ -29,10 +29,9 @@ float Thermocouple::_calculateTemperature(const std::vector<float>& coefficients
 /**
  * @brief Read Voltage (mV)
  * 
- * @param timeMs Conversion time in milliseconds
  * @return float Voltage value
  */
-float Thermocouple::readVoltage(uint32_t timeMs)
+float Thermocouple::readVoltage(void)
 {
     float voltage = 0.0;
 
@@ -46,7 +45,7 @@ float Thermocouple::readVoltage(uint32_t timeMs)
 
     /* ADC Read */
     std::vector<uint16_t> adcCodes;
-    _adc->read(&adcCodes, _adcInputs[0], _adcInputs[1], timeMs, true);
+    _adc->read(&adcCodes, _adcInputs[0], _adcInputs[1], true);
 
     /* Calculate Voltage values */
     std::vector<float> values;
@@ -71,11 +70,10 @@ float Thermocouple::readVoltage(uint32_t timeMs)
 /**
  * @brief Read temperature (°C)
  * 
- * @param timeMs Conversion time in milliseconds
  * @return float Temperature value
  */
-float Thermocouple::readTemperature(uint32_t timeMs)
+float Thermocouple::readTemperature(void)
 {
-    float voltage = readVoltage(timeMs);
+    float voltage = readVoltage();
     return _calculateTemperature(COEF_K, voltage);
 }

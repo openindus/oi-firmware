@@ -132,7 +132,7 @@ int ADS114S0X::config(int gain, int reference, bool useExcitation)
 }
 
 int ADS114S0X::read(std::vector<uint16_t>* adcCode, 
-    ADC_Input_t inputP, ADC_Input_t inputN, uint32_t timeMs, bool useVbias)
+    ADC_Input_t inputP, ADC_Input_t inputN, bool useVbias)
 {
     int ret = 0;
 
@@ -165,7 +165,7 @@ int ADS114S0X::read(std::vector<uint16_t>* adcCode,
     /* Start conversion */
     ads114s0x_start(_device);
     ads114s0x_self_offset_calib(_device);
-    vTaskDelay(timeMs / portTICK_PERIOD_MS);
+    vTaskDelay(_convTimeMs / portTICK_PERIOD_MS);
     ads114s0x_stop(_device);
 
     if (adcCode != NULL) {

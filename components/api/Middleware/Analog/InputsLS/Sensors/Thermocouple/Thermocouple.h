@@ -30,8 +30,8 @@ public:
     Thermocouple(ADS114S0X* adc, const std::array<ADC_Input_t, 2>& adcInputs) : 
         _adc(adc), _adcInputs(adcInputs) {}
 
-    float readVoltage(uint32_t timeMs = 1000);
-    float readTemperature(uint32_t timeMs = 1000);
+    float readVoltage(void);
+    float readTemperature(void);
 
 private:
 

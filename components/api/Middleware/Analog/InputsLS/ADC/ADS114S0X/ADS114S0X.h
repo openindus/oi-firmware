@@ -35,18 +35,24 @@ class ADS114S0X
 public:
 
     ADS114S0X(ads114s0x_device_t* device, ads114s0x_config_t config) :
-        _device(device), _config(config) {}
+        _device(device), _config(config), _convTimeMs(1000) {}
 
     int init(void);
 
+    inline void setConvTimeMs(uint32_t convTimeMs) {
+        _convTimeMs = convTimeMs;
+    };
+
     int config(int gain, int reference, bool useExcitation);
-    int read(std::vector<uint16_t>* adcCode, ADC_Input_t inputP, ADC_Input_t inputN, 
-        uint32_t timeMs=1000, bool useVbias=false);
+    int read(std::vector<uint16_t>* adcCode, 
+        ADC_Input_t inputP, ADC_Input_t inputN, bool useVbias=false);
 
 private:
 
     ads114s0x_device_t* _device;
     ads114s0x_config_t _config;
+
+    uint32_t _convTimeMs;
 
     static QueueHandle_t _queue;
     static void IRAM_ATTR _isr(void* arg);
