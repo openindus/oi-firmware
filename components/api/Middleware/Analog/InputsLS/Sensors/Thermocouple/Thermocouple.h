@@ -12,6 +12,17 @@
 #include "ADS114S0X.h"
 #include "Multiplexer.h"
 
+typedef enum {
+    TYPE_R = 0,
+    TYPE_S,
+    TYPE_K,
+    TYPE_E,
+    TYPE_J,
+    TYPE_T,
+    TYPE_B,
+    TYPE_N
+} TC_Type_t;
+
 class Thermocouple
 {
 public:
@@ -27,4 +38,5 @@ private:
     ADS114S0X* _adc;
     std::array<ADC_Input_t, 2> _adcInputs;
     
+    float _calculateTemperature(const std::vector<float>& coefficients, float voltage);
 };

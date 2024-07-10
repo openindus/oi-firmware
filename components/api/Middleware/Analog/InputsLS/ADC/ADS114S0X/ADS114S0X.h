@@ -9,7 +9,6 @@
 #pragma once
 
 #include "Global.h"
-#include "ADC.h"
 
 #define ADS114S0X_RESOLUTION 16
 
@@ -25,9 +24,11 @@ enum ADS114S0X_Gain_e {
 };
 
 enum ADS114S0X_Reference_e {
-    REF_EXTERNAL_IDAC1  = 1,
-    REF_INTERNAL_2V5    = 2,
+    REF_EXTERNAL_IDAC1  = (int) 1,
+    REF_INTERNAL_2V5    = (int) 2,
 };
+
+typedef int ADC_Input_t;
 
 class ADS114S0X
 {

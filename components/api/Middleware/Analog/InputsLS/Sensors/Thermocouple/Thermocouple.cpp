@@ -13,6 +13,19 @@
 
 static const char TAG[] = "Thermocouple";
 
+// Coefficients for Type K thermocouple
+static const std::vector<float> COEF_K = 
+    {0.0, 2.508355E+01, 7.860106E-02, -2.503131E-01, 8.315270E-02, -1.228034E-02 , 9.804036E-04, -4.413030E-05, 1.057734E-06, -1.052755E-08};
+
+float Thermocouple::_calculateTemperature(const std::vector<float>& coefficients, float voltage)
+{
+    float temperature = 0.0;
+    for (size_t i = 0; i < coefficients.size(); ++i) {
+        temperature += coefficients[i] * pow(voltage, i);
+    }
+    return temperature;
+}
+
 /**
  * @brief Read Voltage (mV)
  * 
@@ -63,5 +76,6 @@ float Thermocouple::readVoltage(uint32_t timeMs)
  */
 float Thermocouple::readTemperature(uint32_t timeMs)
 {
-    return 0.0;
+    float voltage = readVoltage(timeMs);
+    return _calculateTemperature(COEF_K, voltage);
 }

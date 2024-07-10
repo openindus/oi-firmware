@@ -13,6 +13,26 @@
 
 static const char TAG[] = "RTD";
 
+float RTD::_calculateRTD(const std::vector<uint16_t>& adcCodes)
+{
+    /* Calculate RTD resistor values */
+    std::vector<float> rRtds;
+    rRtds.resize(adcCodes.size());
+    for (int i=0; i<rRtds.size(); i++) {
+        rRtds[i] = (float)(2 * RTD_R_REF * adcCodes[i]) / 
+            (float)(RTD_GAIN * (pow(2, ADS114S0X_RESOLUTION) - 1));
+    }
+
+    /* Calculate the median */
+    std::sort(rRtds.begin(), rRtds.end());
+    size_t size = rRtds.size();
+    if (size % 2 == 0) {
+        return (rRtds[size / 2 - 1] + rRtds[size / 2]) / 2.0;
+    } else {
+        return rRtds[size / 2];
+    }
+}
+
 /**
  * @brief Read RTD resistor (ohm)
  * 
@@ -72,24 +92,4 @@ float RTD::readTemperature(uint32_t timeMs)
 
     /* PT100 - Callendar-Van Dusen equation */
     return (-A + sqrt(A * A - (4 * B * (1 - (rRtd / R0))))) / (2 * B);
-}
-
-float RTD::_calculateRTD(const std::vector<uint16_t>& adcCodes)
-{
-    /* Calculate RTD resistor values */
-    std::vector<float> rRtds;
-    rRtds.resize(adcCodes.size());
-    for (int i=0; i<rRtds.size(); i++) {
-        rRtds[i] = (float)(2 * RTD_R_REF * adcCodes[i]) / 
-            (float)(RTD_GAIN * (pow(2, ADS114S0X_RESOLUTION) - 1));
-    }
-
-    /* Calculate the median */
-    std::sort(rRtds.begin(), rRtds.end());
-    size_t size = rRtds.size();
-    if (size % 2 == 0) {
-        return (rRtds[size / 2 - 1] + rRtds[size / 2]) / 2.0;
-    } else {
-        return rRtds[size / 2];
-    }
 }
