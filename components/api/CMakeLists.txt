@@ -53,6 +53,7 @@ set(COMPONENT_SRCS
     "CLI/CLI_Core.cpp"
     "CLI/CLI_Relay.cpp"
     "CLI/CLI_Stepper.cpp"
+    "CLI/CLI_Dc.cpp"
     "CLI/CLI_StepperParam.cpp"
     "CLI/CLI_Controller.cpp"
     "ComBus/Controller/ControllerMaster.cpp"

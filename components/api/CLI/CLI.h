@@ -42,6 +42,11 @@ private:
     static int _registerStepperParamCmd(void);
 #endif
 
+#if defined(OI_DC)
+    static int _registerDigitalInputsCmd(void);
+    static int _registerDcCmd(void);
+#endif
+
 #if defined(OI_RELAY_HP) || defined(OI_RELAY_LP)
     static int _registerRelayCmd(void);
 #endif

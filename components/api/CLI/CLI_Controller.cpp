@@ -274,7 +274,7 @@ static int controllerStopCmd(int argc, char **argv)
 static int _registerStopCmd(void)
 {
     const esp_console_cmd_t cmd = {
-        .command = "stop",
+        .command = "stop-controller",
         .help = "Stop controller tasks",
         .hint = NULL,
         .func = &controllerStopCmd,
@@ -303,7 +303,7 @@ static int controllerStartCmd(int argc, char **argv)
 static int _registerStartCmd(void)
 {
     const esp_console_cmd_t cmd = {
-        .command = "start",
+        .command = "start-controller",
         .help = "Start controller tasks",
         .hint = NULL,
         .func = &controllerStartCmd,
@@ -352,7 +352,7 @@ static int controllerGetStatusCmd(int argc, char **argv)
 static int _registerGetStatusCmd(void)
 {
     const esp_console_cmd_t cmd = {
-        .command = "status",
+        .command = "status-controller",
         .help = "Get controller status",
         .hint = NULL,
         .func = &controllerGetStatusCmd,

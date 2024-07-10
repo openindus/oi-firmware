@@ -16,7 +16,7 @@
 #include "DigitalInputs.h"
 #include "DigitalInputsExp.h"
 
-#if defined(OI_CORE) || defined(OI_DISCRETE) || defined(OI_MIXED) || defined(OI_STEPPER)
+#if defined(OI_CORE) || defined(OI_DISCRETE) || defined(OI_MIXED) || defined(OI_STEPPER) || defined(OI_DC)
 
 static struct {
     struct arg_int *din;
