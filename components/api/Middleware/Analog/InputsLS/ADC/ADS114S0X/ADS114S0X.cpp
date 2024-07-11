@@ -80,7 +80,7 @@ int ADS114S0X::init(void)
     return ret;
 }
 
-int ADS114S0X::config(int gain, int reference, bool useExcitation)
+int ADS114S0X::config(ADS114S0X_Gain_e gain, ADS114S0X_Reference_e reference, bool useExcitation)
 {
     int ret = 0;
 
@@ -105,7 +105,7 @@ int ADS114S0X::config(int gain, int reference, bool useExcitation)
 
     /* PGA */
     ads114s0x_reg_pga_t pgaReg = {
-        .gain = static_cast<ads114s0x_pga_gain_e>(log2(gain)),
+        .gain = static_cast<ads114s0x_pga_gain_e>(log2(static_cast<int>(gain))),
         .pga_en = 1,
         .delay = ADS114S0X_DELAY_14_TMOD
     };
@@ -136,16 +136,22 @@ int ADS114S0X::read(std::vector<uint16_t>* adcCode,
 {
     int ret = 0;
 
+    if (inputP < 0 || inputP > ADS114S0X_INPUT_MAX || 
+        inputN < 0 || inputN > ADS114S0X_INPUT_MAX) {
+        ESP_LOGE(TAG, "%s: invalid input range", __FUNCTION__);
+        return -1; 
+    }
+
     /* VBias */
     if (useVbias) {
         ads114s0x_reg_vbias_t vbiasReg = {
-            .vb_ain0 = (uint8_t)((inputP == 0 || inputN == 0) ? 1 : 0),
-            .vb_ain1 = (uint8_t)((inputP == 1 || inputN == 1) ? 1 : 0),
-            .vb_ain2 = (uint8_t)((inputP == 2 || inputN == 2) ? 1 : 0),
-            .vb_ain3 = (uint8_t)((inputP == 3 || inputN == 3) ? 1 : 0),
-            .vb_ain4 = (uint8_t)((inputP == 4 || inputN == 4) ? 1 : 0),
-            .vb_ain5 = (uint8_t)((inputP == 5 || inputN == 5) ? 1 : 0),
-            .vb_ain6 = (uint8_t)((inputP == 6 || inputN == 6) ? 1 : 0),
+            .vb_ain0 = (uint8_t)(inputP == 0 || inputN == 0),
+            .vb_ain1 = (uint8_t)(inputP == 1 || inputN == 1),
+            .vb_ain2 = (uint8_t)(inputP == 2 || inputN == 2),
+            .vb_ain3 = (uint8_t)(inputP == 3 || inputN == 3),
+            .vb_ain4 = (uint8_t)(inputP == 4 || inputN == 4),
+            .vb_ain5 = (uint8_t)(inputP == 5 || inputN == 5),
+            .vb_ain6 = (uint8_t)(inputP == 6 || inputN == 6),
             .vb_level = 0
         };
         ret |= ads114s0x_write_register(_device, ADS114S0X_REG_VBIAS, 

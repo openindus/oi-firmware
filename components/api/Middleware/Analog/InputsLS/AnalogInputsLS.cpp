@@ -14,12 +14,9 @@ static const std::array<ADC_Input_t, 10> AIN_TO_ADC_INPUT = {
     5, 0, 8, 1, 9, 2, 10, 3, 11, 4
 };
 
-static const std::array<Multiplexer_IO_t, 10> AIN_TO_MUX_IO = {
+static const std::array<Mux_IO_t, 10> AIN_TO_MUX_IO = {
     0, 0, 1, 1, 2, 2, 3, 3, 4, 4
 };
-
-std::vector<RTD> AnalogInputsLS::rtd;
-std::vector<Thermocouple> AnalogInputsLS::tc;
 
 ADS114S0X* AnalogInputsLS::_adc = NULL;
 Multiplexer* AnalogInputsLS::_highSideMux = NULL;
@@ -53,6 +50,10 @@ int AnalogInputsLS::_init(void)
     return ret;
 }
 
+std::vector<RTD> AnalogInputsLS::rtd;
+std::vector<Thermocouple> AnalogInputsLS::tc;
+std::vector<StrainGauge> AnalogInputsLS::sg;
+
 /**
  * @brief Set conversion time (ms)
  * 
@@ -73,12 +74,11 @@ int AnalogInputsLS::setConversionTime(uint32_t t)
 /**
  * @brief Add sensor
  * 
- * @param sensor [RTD_TWO_WIRE; RTD_THREE_WIRE; THERMOCOUPLE; STRAIN_GAUGE]
- * @param type Depends on the sensor. RTD: (TYPE_PT100), Thermocouple (TYPE_K, ...)
+ * @param type [RTD_TWO_WIRE; RTD_THREE_WIRE; THERMOCOUPLE; STRAIN_GAUGE]
  * @param aIns Analog Inputs (AIN_A_P to AIN_E_N)
  * @return int 0 if success, -1 if error
  */
-int AnalogInputsLS::addSensor(Sensor_t sensor, Sensor_Type_t type, const std::vector<AIn_Num_t>& aIns)
+int AnalogInputsLS::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& aIns)
 {
     if (!std::all_of(aIns.begin(), aIns.end(), [](AIn_Num_t aIn) {
         return aIn >= AIN_A_P && aIn < AIN_MAX;
@@ -87,12 +87,14 @@ int AnalogInputsLS::addSensor(Sensor_t sensor, Sensor_Type_t type, const std::ve
         return -1;
     }
 
-    switch (sensor) {
+    switch (type) {
         case RTD_TWO_WIRE:
             if (aIns.size() == 2) {
                 rtd.emplace_back(_adc, _highSideMux, _lowSideMux, 
-                    std::vector<ADC_Input_t>{AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]]},
-                    std::array<Multiplexer_IO_t, 2>{AIN_TO_MUX_IO[aIns[0]], AIN_TO_MUX_IO[aIns[1]]});
+                    RTD_Pinout_s {
+                        {AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]]},
+                        AIN_TO_MUX_IO[aIns[0]], 
+                        AIN_TO_MUX_IO[aIns[1]]});
             } else {
                 ESP_LOGE(TAG, "RTD_TWO_WIRE requires 2 AINs.");
                 return -1;
@@ -101,8 +103,10 @@ int AnalogInputsLS::addSensor(Sensor_t sensor, Sensor_Type_t type, const std::ve
         case RTD_THREE_WIRE:
             if (aIns.size() == 3) {
                 rtd.emplace_back(_adc, _highSideMux, _lowSideMux, 
-                    std::vector<ADC_Input_t>{AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]], AIN_TO_ADC_INPUT[aIns[2]]},
-                    std::array<Multiplexer_IO_t, 2>{AIN_TO_MUX_IO[aIns[0]], AIN_TO_MUX_IO[aIns[1]]});
+                    RTD_Pinout_s {
+                        {AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]], AIN_TO_ADC_INPUT[aIns[2]]},
+                        AIN_TO_MUX_IO[aIns[0]], 
+                        AIN_TO_MUX_IO[aIns[1]]});
             } else {
                 ESP_LOGE(TAG, "RTD_THREE_WIRE requires 3 AINs.");
                 return -1;
@@ -110,8 +114,8 @@ int AnalogInputsLS::addSensor(Sensor_t sensor, Sensor_Type_t type, const std::ve
             break;
         case THERMOCOUPLE:
             if (aIns.size() == 2) {
-                tc.emplace_back(static_cast<TC_Type_e>(type), _adc, 
-                    std::array<ADC_Input_t, 2>{AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]]});
+                tc.emplace_back(_adc, 
+                    TC_Pinout_s {AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]]});
             } else {
                 ESP_LOGE(TAG, "THERMOCOUPLE requires 2 AINs.");
                 return -1;

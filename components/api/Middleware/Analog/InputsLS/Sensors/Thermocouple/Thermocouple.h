@@ -14,7 +14,7 @@
 #include "Sensor.h"
 
 enum TC_Type_e {
-    TYPE_K = (int) 0,
+    TYPE_K,
 };
 
 struct TC_Coefficient_s {
@@ -25,22 +25,29 @@ struct TC_Coefficient_s {
     std::vector<float> d; // Coefficients
 };
 
+struct TC_Pinout_s {
+    std::array<ADC_Input_t, 2> adcInputs;
+};
+
 class Thermocouple
 {
 public:
 
-    Thermocouple(TC_Type_e type, ADS114S0X* adc, const std::array<ADC_Input_t, 2>& adcInputs) : 
-        _type(type), _adc(adc), _adcInputs(adcInputs) {}
+    Thermocouple(ADS114S0X* adc, const TC_Pinout_s& pins) : 
+        _adc(adc), _adcInputs(pins.adcInputs), _type(TYPE_K) {}
+
+    inline void setType(TC_Type_e type) {
+        _type = type;
+    }
 
     float readVoltage(void);
     float readTemperature(void);
 
 private:
 
-    TC_Type_e _type;
-
     ADS114S0X* _adc;
     std::array<ADC_Input_t, 2> _adcInputs;
+    TC_Type_e _type;
     
     float _calculateTemperature(const std::vector<TC_Coefficient_s>& coefficients, float voltage);
 };

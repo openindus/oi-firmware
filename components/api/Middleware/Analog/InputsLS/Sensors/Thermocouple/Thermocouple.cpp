@@ -51,7 +51,7 @@ float Thermocouple::readVoltage(void)
     }
 
     /* ADC Config */
-    _adc->config(TC_GAIN, REF_INTERNAL_2V5, false);
+    _adc->config(static_cast<ADS114S0X_Gain_e>(TC_GAIN), REF_INTERNAL_2V5, false);
 
     /* ADC Read */
     std::vector<uint16_t> adcCodes;

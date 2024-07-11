@@ -15,6 +15,7 @@
 #include "Sensor.h"
 #include "RTD.h"
 #include "Thermocouple.h"
+#include "StrainGauge.h"
 
 typedef enum {
     AIN_UNDEFINED = -1,
@@ -35,8 +36,6 @@ class AnalogInputsLS
 {
 protected:
 
-    static int _init(void);
-
     /* ADC */
     static ADS114S0X* _adc;
 
@@ -45,6 +44,8 @@ protected:
     static Multiplexer* _lowSideMux;
     static Digipot* _digipot;
 
+    static int _init(void);
+
 
 public: 
 
@@ -52,9 +53,10 @@ public:
 
     static std::vector<RTD> rtd;
     static std::vector<Thermocouple> tc;
+    static std::vector<StrainGauge> sg;
 
     static int setConversionTime(uint32_t t);
-    static int addSensor(Sensor_t sensor, Sensor_Type_t type, const std::vector<AIn_Num_t>& aIns);
+    static int addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& aIns);
 
     /* Assessors */
 

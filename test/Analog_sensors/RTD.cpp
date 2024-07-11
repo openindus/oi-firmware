@@ -8,8 +8,8 @@ void setup(void)
     printf("Hello OpenIndus !\n");
     delay(1000);
 
+    analogls.addSensor(RTD_TWO_WIRE, {AIN_A_P, AIN_A_N});
     analogls.setConversionTime(1000);
-    analogls.addSensor(RTD_TWO_WIRE, TYPE_PT100, {AIN_A_P, AIN_A_N});
 }
 
 void loop(void)

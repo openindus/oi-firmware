@@ -148,7 +148,10 @@ static int _adcConfigCmdHandler(int argc, char **argv)
 
     ADS114S0X* adc = AnalogInputsLS::getAdcDevice();
     if (adc != NULL) {
-        if (adc->config(gain, reference, useExcitation) != 0) {
+        if (adc->config(
+                static_cast<ADS114S0X_Gain_e>(gain), 
+                static_cast<ADS114S0X_Reference_e>(reference), 
+                useExcitation) != 0) {
             return -1;
         }
     } else {

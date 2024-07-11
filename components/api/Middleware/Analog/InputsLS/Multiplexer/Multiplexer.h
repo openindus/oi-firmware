@@ -10,24 +10,26 @@
 
 #include "Global.h"
 
-enum Multiplexer_Input_e {
-    INPUT_OPEN_HS       = (int) 0,
-    INPUT_IDAC1         = (int) 1,
-    INPUT_IDAC2         = (int) 2,
-    INPUT_SENSOR_5V     = (int) 3,
-    INPUT_SENSOR_3V3    = (int) 4,
-    INPUT_VISUP_DIV     = (int) 5
+#define MUX_IO_MAX 7
+
+enum Multiplexer_Input_e : int {
+    INPUT_OPEN_HS       = 0,
+    INPUT_IDAC1         = 1,
+    INPUT_IDAC2         = 2,
+    INPUT_SENSOR_5V     = 3,
+    INPUT_SENSOR_3V3    = 4,
+    INPUT_VISUP_DIV     = 5
 };
 
-enum Multiplexer_Output_e {
-    OUTPUT_OPEN_LS      = (int) 0,
-    OUTPUT_W_DIGIPOT    = (int) 1,
-    OUTPUT_RBIAS_GAUGE  = (int) 2,
-    OUTPUT_RBIAS_RTD    = (int) 3,
-    OUTPUT_GND          = (int) 4
+enum Multiplexer_Output_e : int {
+    OUTPUT_OPEN_LS      = 0,
+    OUTPUT_W_DIGIPOT    = 1,
+    OUTPUT_RBIAS_GAUGE  = 2,
+    OUTPUT_RBIAS_RTD    = 3,
+    OUTPUT_GND          = 4
 };
 
-typedef int Multiplexer_IO_t;
+typedef int Mux_IO_t;
 
 class Multiplexer
 {
@@ -40,7 +42,7 @@ public:
 
     int init(void);
 
-    int route(int input, int output);
+    int route(Mux_IO_t input, Mux_IO_t output);
 
 private:
 

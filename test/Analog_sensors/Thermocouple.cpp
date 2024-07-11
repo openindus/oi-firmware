@@ -8,8 +8,10 @@ void setup(void)
     printf("Hello OpenIndus !\n");
     delay(1000);
 
+    analogls.addSensor(THERMOCOUPLE, {AIN_E_P, AIN_E_N});
     analogls.setConversionTime(1000);
-    analogls.addSensor(THERMOCOUPLE, TYPE_K, {AIN_E_P, AIN_E_N});
+
+    analogls.tc[0].setType(TYPE_K);
 }
 
 void loop(void)

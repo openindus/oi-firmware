@@ -34,6 +34,7 @@ set(COMPONENT_SRCS
     "Middleware/Analog/InputsLS/Digipot/Digipot.cpp"
     "Middleware/Analog/InputsLS/Sensors/RTD/RTD.cpp"
     "Middleware/Analog/InputsLS/Sensors/Thermocouple/Thermocouple.cpp"
+    "Middleware/Analog/InputsLS/Sensors/StrainGauge/StrainGauge.cpp"
     "Middleware/CAN/CAN.cpp"
     "Middleware/RS/RS.cpp"
     "Middleware/Board/Board.cpp"

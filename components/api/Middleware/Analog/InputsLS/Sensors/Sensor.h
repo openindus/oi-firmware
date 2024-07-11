@@ -10,11 +10,9 @@
 
 #include "Global.h"
 
-typedef enum {
+enum Sensor_Type_e {
     RTD_TWO_WIRE = 0,
     RTD_THREE_WIRE,
     THERMOCOUPLE,
     STRAIN_GAUGE,
-} Sensor_t;
-
-typedef int Sensor_Type_t;
+};

@@ -14,8 +14,14 @@
 #include "Sensor.h"
 
 enum RTD_Type_e {
-    TYPE_PT100 = (int) 0,
-    TYPE_PT1000
+    PT100 = 0,
+    PT1000,
+};
+
+struct RTD_Pinout_s {
+    std::vector<ADC_Input_t> adcInputs; // 2 or 3 inputs
+    Mux_IO_t hsMuxOutput;
+    Mux_IO_t lsMuxInput;
 };
 
 class RTD
@@ -23,15 +29,14 @@ class RTD
 public:
 
     RTD(ADS114S0X* adc, Multiplexer* highSideMux, Multiplexer* lowSideMux,
-        const std::vector<ADC_Input_t>& adcInputs,
-        const std::array<Multiplexer_IO_t, 2>& muxIO) : 
+        const RTD_Pinout_s& pins) : 
             _adc(adc),
             _highSideMux(highSideMux),
             _lowSideMux(lowSideMux),
-            _adcInputs(adcInputs),
-            _highSideMuxOutput(muxIO[0]),
-            _lowSideMuxInput(muxIO[1]),
-            _nbWires(adcInputs.size())
+            _adcInputs(pins.adcInputs),
+            _hsMuxOutput(pins.hsMuxOutput),
+            _lsMuxInput(pins.lsMuxInput),
+            _type(PT100)
     {}
 
     float readRTD(void);
@@ -43,9 +48,9 @@ private:
     Multiplexer* _highSideMux;
     Multiplexer* _lowSideMux;
     std::vector<ADC_Input_t> _adcInputs;
-    Multiplexer_IO_t _highSideMuxOutput;
-    Multiplexer_IO_t _lowSideMuxInput;
-    int _nbWires;
+    Mux_IO_t _hsMuxOutput;
+    Mux_IO_t _lsMuxInput;
+    RTD_Type_e _type;
 
     float _calculateRTD(const std::vector<uint16_t>& adcCodes);
     

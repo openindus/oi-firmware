@@ -11,21 +11,22 @@
 #include "Global.h"
 
 #define ADS114S0X_RESOLUTION 16
+#define ADS114S0X_INPUT_MAX 12
 
-enum ADS114S0X_Gain_e {
-    GAIN_1      = (int) 1,
-    Gain_2      = (int) 2,
-    GAIN_4      = (int) 4,
-    GAIN_8      = (int) 8,
-    GAIN_16     = (int) 16,
-    GAIN_32     = (int) 32,
-    GAIN_64     = (int) 64,
-    GAIN_128    = (int) 128
+enum ADS114S0X_Gain_e : int {
+    GAIN_1      = 1,
+    Gain_2      = 2,
+    GAIN_4      = 4,
+    GAIN_8      = 8,
+    GAIN_16     = 16,
+    GAIN_32     = 32,
+    GAIN_64     = 64,
+    GAIN_128    = 128
 };
 
-enum ADS114S0X_Reference_e {
-    REF_EXTERNAL_IDAC1  = (int) 1,
-    REF_INTERNAL_2V5    = (int) 2,
+enum ADS114S0X_Reference_e : int {
+    REF_EXTERNAL_IDAC1  = 1,
+    REF_INTERNAL_2V5    = 2,
 };
 
 typedef int ADC_Input_t;
@@ -43,7 +44,7 @@ public:
         _convTimeMs = convTimeMs;
     };
 
-    int config(int gain, int reference, bool useExcitation);
+    int config(ADS114S0X_Gain_e gain, ADS114S0X_Reference_e reference, bool useExcitation);
     int read(std::vector<uint16_t>* adcCode, 
         ADC_Input_t inputP, ADC_Input_t inputN, bool useVbias=false);
 

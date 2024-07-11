@@ -32,11 +32,11 @@ int Multiplexer::init(void)
     return ret;
 }
 
-int Multiplexer::route(int input, int output)
+int Multiplexer::route(Mux_IO_t input, Mux_IO_t output)
 {
     int ret = 0;
 
-    if (input < 0 || input > 7 || output < 0 || output > 7) {
+    if (input < 0 || input > MUX_IO_MAX || output < 0 || output > MUX_IO_MAX) {
         ESP_LOGE(TAG, "%s: invalid input/output range", __FUNCTION__);
         return -1; 
     }

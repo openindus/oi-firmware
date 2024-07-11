@@ -48,18 +48,18 @@ float RTD::readRTD(void)
     }
 
     /* MUX Excitation */
-    _highSideMux->route(INPUT_IDAC1, _highSideMuxOutput);
-    _lowSideMux->route(_lowSideMuxInput, OUTPUT_RBIAS_RTD);
+    _highSideMux->route(INPUT_IDAC1, _hsMuxOutput);
+    _lowSideMux->route(_lsMuxInput, OUTPUT_RBIAS_RTD);
 
     /* ADC Config */
-    _adc->config(RTD_GAIN, REF_EXTERNAL_IDAC1, true);
+    _adc->config(static_cast<ADS114S0X_Gain_e>(RTD_GAIN), REF_EXTERNAL_IDAC1, true);
 
     /* ADC Read */
     std::vector<uint16_t> adcCodes;
-    if (_nbWires == 2) {
+    if (_adcInputs.size() == 2) {
         _adc->read(&adcCodes, _adcInputs[0], _adcInputs[1]);
         rRTD = _calculateRTD(adcCodes);
-    } else if (_nbWires == 3) {
+    } else if (_adcInputs.size() == 3) {
         _adc->read(&adcCodes, _adcInputs[0], _adcInputs[1]);
         float rRTD0 = _calculateRTD(adcCodes);
         _adc->read(&adcCodes, _adcInputs[2], _adcInputs[1]);
@@ -68,8 +68,8 @@ float RTD::readRTD(void)
     } 
 
     /* MUX Excitation (disable) */
-    _highSideMux->route(INPUT_OPEN_HS, _highSideMuxOutput);
-    _lowSideMux->route(_lowSideMuxInput, OUTPUT_OPEN_LS);
+    _highSideMux->route(INPUT_OPEN_HS, _hsMuxOutput);
+    _lowSideMux->route(_lsMuxInput, OUTPUT_OPEN_LS);
 
     return rRTD;
 }

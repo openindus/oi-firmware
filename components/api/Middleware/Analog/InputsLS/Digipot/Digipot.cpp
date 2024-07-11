@@ -1,7 +1,7 @@
 /**
  * @file Digipot.cpp
- * @brief Digipot
- * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
+ * @brief Digital potentiometer
+ * @author 
  * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
