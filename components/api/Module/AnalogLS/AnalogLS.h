@@ -12,9 +12,6 @@
 #include "Module.h"
 #include "AnalogLSConfig.h"
 #include "AnalogInputsLS.h"
-#include "RTD.h"
-#include "Thermocouple.h"
-#include "StrainGauge.h"
 
 #if (OI_ANALOG_LS)
 
@@ -25,8 +22,6 @@ class AnalogLS:
 public:
 
     static int init(void);
-
-    static std::vector<RTD> rtd;
 
 };
 

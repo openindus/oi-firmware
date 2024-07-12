@@ -1,6 +1,6 @@
 /**
- * @file Sensors.h
- * @brief Sensors
+ * @file Sensor.h
+ * @brief Sensor
  * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
  * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
@@ -10,9 +10,9 @@
 
 #include "Global.h"
 
-typedef enum {
-    RTD_2_WIRE = 0,
-    RTD_3_WIRE,
+enum Sensor_Type_e {
+    RTD_TWO_WIRE = 0,
+    RTD_THREE_WIRE,
     THERMOCOUPLE,
     STRAIN_GAUGE,
-} Sensors_Type_t;
+};

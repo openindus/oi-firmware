@@ -9,8 +9,16 @@
 #pragma once
 
 #include "Global.h"
+#include "ADS114S0X.h"
+#include "Multiplexer.h"
+#include "Digipot.h"
+#include "Sensor.h"
+#include "RTD.h"
+#include "Thermocouple.h"
+#include "StrainGauge.h"
 
 typedef enum {
+    AIN_UNDEFINED = -1,
     AIN_A_P = 0,
     AIN_A_N,
     AIN_B_P,
@@ -24,62 +32,69 @@ typedef enum {
     AIN_MAX
 } AIn_Num_t;
 
-class ADC_Device
-{
-public:
-
-    ADC_Device(ads114s0x_device_t* device, ads114s0x_config_t config) :
-        _device(device), _config(config) {}
-
-    int init(void);
-    int test(void);
-
-private:
-
-    ads114s0x_device_t* _device;
-    ads114s0x_config_t _config;
-};
-
-class Multiplexer
-{
-public:
-
-    Multiplexer(const std::array<gpio_num_t, 3>& inputPins, 
-                const std::array<gpio_num_t, 3>& outputPins)
-        : _inputPins(inputPins), _outputPins(outputPins) {
-    }
-
-    int init(void);
-
-    int route(int input, int output);
-
-private:
-
-    std::array<gpio_num_t, 3> _inputPins; // A0, A1, A2
-    std::array<gpio_num_t, 3> _outputPins; // B0, B1, B2
-
-};
-
-class Digipot
-{
-public:
-
-    Digipot() {}
-
-};
-
 class AnalogInputsLS
 {
 protected:
 
-    static int init(void);
-
     /* ADC */
-    static ADC_Device* _adcDevice;
+    static ADS114S0X* _adc;
 
     /* Excitation */
     static Multiplexer* _highSideMux;
     static Multiplexer* _lowSideMux;
     static Digipot* _digipot;
 
+    static int _init(void);
+
+
+public: 
+
+    /* Sensors */
+
+    static std::vector<RTD> rtd;
+    static std::vector<Thermocouple> tc;
+    static std::vector<StrainGauge> sg;
+
+    static int setConversionTime(uint32_t t);
+
+    static int addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& aIns);
+
+    static inline int addRtd2wire(const std::array<AIn_Num_t, 2>& inputs) {
+        return addSensor(RTD_TWO_WIRE, std::vector<AIn_Num_t>(inputs.begin(), inputs.end()));
+    }
+
+    static inline int addRtd3Wire(const std::array<AIn_Num_t, 3>& inputs) {
+        return addSensor(RTD_THREE_WIRE, std::vector<AIn_Num_t>(inputs.begin(), inputs.end()));
+    }
+
+    static inline int addThermocouple(const std::array<AIn_Num_t, 2>& inputs) {
+        return addSensor(THERMOCOUPLE, std::vector<AIn_Num_t>(inputs.begin(), inputs.end()));
+    }
+
+    static inline int addStrainGauge(const std::array<AIn_Num_t, 2>& signalInputs, 
+                                     const std::array<AIn_Num_t, 2>& excitationInputs) {
+        std::vector<AIn_Num_t> inputs;
+        inputs.reserve(signalInputs.size() + excitationInputs.size());
+        inputs.insert(inputs.end(), signalInputs.begin(), signalInputs.end());
+        inputs.insert(inputs.end(), excitationInputs.begin(), excitationInputs.end());
+        return addSensor(STRAIN_GAUGE, inputs);
+    }
+
+    /* Assessors */
+
+    static inline ADS114S0X* getAdcDevice(void) {
+        return _adc;
+    }
+
+    static inline Multiplexer* getHighSideMux(void) {
+        return _highSideMux;
+    }
+
+    static inline Multiplexer* getLowSideMux(void) {
+        return _highSideMux;
+    }
+
+    static inline Digipot* getDigipot(void) {
+        return _digipot;
+    }
 };

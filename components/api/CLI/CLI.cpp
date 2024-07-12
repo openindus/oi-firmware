@@ -27,7 +27,7 @@ int CLI::init(void)
 #endif
 
 #if defined(OI_ANALOG_LS)
-    ret |= _registerAnalogLSCmd();
+    ret |= _registerAnalogInputsLSCmd();
 #endif
 
 #if defined(OI_STEPPER) || defined(OI_STEPPER_VE)

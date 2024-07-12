@@ -10,112 +10,25 @@
 
 static const char TAG[] = "AnalogInputsLS";
 
-int ADC_Device::init(void)
-{
-    int ret = 0;
+static const std::array<ADC_Input_t, 10> AIN_TO_ADC_INPUT = {
+    5, 0, 8, 1, 9, 2, 10, 3, 11, 4
+};
 
-    ESP_LOGI(TAG, "ADC init.");
+static const std::array<Mux_IO_t, 10> AIN_TO_MUX_IO = {
+    0, 0, 1, 1, 2, 2, 3, 3, 4, 4
+};
 
-    /* Initialize ADC device */
-    ads114s0x_init(&_device, &_config);
-    ads114s0x_enable(_device);
-
-    ads114s0x_wakeup(_device);
-
-    ads114s0x_reg_id_t id;
-    ads114s0x_read_register(_device, ADS114S0X_REG_ID, (uint8_t*)&id, sizeof(ads114s0x_reg_id_t));
-    if (id.dev_id == ADS114S0X_DEV_ID_ADS114S08) {
-        ESP_LOGI(TAG, "ADC device: ADS114S08");
-    } else if (id.dev_id == ADS114S0X_DEV_ID_ADS114S06) {
-        ESP_LOGI(TAG, "ADC device: ADS114S06");
-    } else {
-        ESP_LOGE(TAG, "ADC device not found");
-    }
-
-    return ret;
-}
-
-int ADC_Device::test(void)
-{
-    int ret = 0;
-
-    ESP_LOGI(TAG, "ADC test");
-
-    /* Test */
-    ads114s0x_reg_inpmux_t inpmux;
-    ads114s0x_read_register(_device, ADS114S0X_REG_INPMUX, (uint8_t*)&inpmux, sizeof(ads114s0x_reg_inpmux_t));
-    printf("%d\n", inpmux.muxn);
-
-    inpmux.muxn = ADS114S0X_AIN3;
-    ads114s0x_write_register(_device, ADS114S0X_REG_INPMUX, (uint8_t*)&inpmux, sizeof(ads114s0x_reg_inpmux_t));
-
-    ads114s0x_read_register(_device, ADS114S0X_REG_INPMUX, (uint8_t*)&inpmux, sizeof(ads114s0x_reg_inpmux_t));
-    printf("%d\n", inpmux.muxn);
-
-    /* data rate */
-    printf("sizeof(ads114s0x_reg_datarate_t): %d\n", sizeof(ads114s0x_reg_datarate_t));
-    ads114s0x_reg_datarate_t datarate;
-    ads114s0x_read_register(_device, ADS114S0X_REG_DATARATE, (uint8_t*)&datarate, sizeof(ads114s0x_reg_datarate_t));
-
-    return ret;
-}
-
-int Multiplexer::init(void)
-{
-    int ret = 0;
-
-    gpio_config_t config = {
-        .pin_bit_mask = ((1ULL << _inputPins[0]) |
-                        (1ULL << _inputPins[1]) |
-                        (1ULL << _inputPins[2]) |
-                        (1ULL << _outputPins[0]) |
-                        (1ULL << _outputPins[1]) |
-                        (1ULL << _outputPins[2])),
-        .mode = GPIO_MODE_OUTPUT,
-        .pull_up_en = GPIO_PULLUP_DISABLE,
-        .pull_down_en = GPIO_PULLDOWN_DISABLE,
-        .intr_type = GPIO_INTR_DISABLE,
-    };
-
-    ret |= gpio_config(&config);
-
-    return ret;
-}
-
-int Multiplexer::route(int input, int output)
-{
-    int ret = 0;
-
-    if (input < 0 || input > 7 || output < 0 || output > 7) {
-        ESP_LOGE(TAG, "%s: invalid input/output range", __FUNCTION__);
-        return -1; 
-    }
-
-    // Set the input control pins
-    for(int i = 0; i < 3; i++) {
-        ret |= gpio_set_level(_inputPins[i], (input >> i) & 1);
-    }
-
-    // Set the output control pins
-    for(int i = 0; i < 3; i++) {
-        ret |= gpio_set_level(_outputPins[i], (output >> i) & 1);
-    }
-
-    return ret;
-}
-
-ADC_Device* AnalogInputsLS::_adcDevice = NULL;
+ADS114S0X* AnalogInputsLS::_adc = NULL;
 Multiplexer* AnalogInputsLS::_highSideMux = NULL;
 Multiplexer* AnalogInputsLS::_lowSideMux = NULL;
 
-int AnalogInputsLS::init(void)
+int AnalogInputsLS::_init(void)
 {
     int ret = 0;
 
     /* ADC */
-    if (_adcDevice != NULL) {
-        ret |= _adcDevice->init();
-        ret |= _adcDevice->test();
+    if (_adc != NULL) {
+        ret |= _adc->init();
     } else {
         ESP_LOGE(TAG, "Failed to initialize ADC device");
         ret |= -1;
@@ -135,4 +48,93 @@ int AnalogInputsLS::init(void)
     /* Digital thermometer */
 
     return ret;
+}
+
+std::vector<RTD> AnalogInputsLS::rtd;
+std::vector<Thermocouple> AnalogInputsLS::tc;
+std::vector<StrainGauge> AnalogInputsLS::sg;
+
+/**
+ * @brief Set conversion time (ms)
+ * 
+ * @param t Time in milliseconds
+ * @return int 0 if success, -1 if error
+ */
+int AnalogInputsLS::setConversionTime(uint32_t t)
+{
+    if (_adc != NULL) {
+        _adc->setConvTimeMs(t);
+        return 0;
+    } else {
+        ESP_LOGE(TAG, "Failed to set conversion time");
+        return -1;
+    }
+}
+
+/**
+ * @brief Add sensor
+ * 
+ * @param type [RTD_TWO_WIRE; RTD_THREE_WIRE; THERMOCOUPLE; STRAIN_GAUGE]
+ * @param aIns Analog Inputs (AIN_A_P to AIN_E_N)
+ * @return int 0 if success, -1 if error
+ */
+int AnalogInputsLS::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& aIns)
+{
+    if (!std::all_of(aIns.begin(), aIns.end(), [](AIn_Num_t aIn) {
+        return aIn >= AIN_A_P && aIn < AIN_MAX;
+    })) {
+        ESP_LOGE(TAG, "One or more AINs are out of range (0 to AIN_MAX - 1).");
+        return -1;
+    }
+
+    switch (type) {
+        case RTD_TWO_WIRE:
+            if (aIns.size() == 2) {
+                rtd.emplace_back(_adc, _highSideMux, _lowSideMux, 
+                    RTD_Pinout_s {
+                        {AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]]},
+                        AIN_TO_MUX_IO[aIns[0]], 
+                        AIN_TO_MUX_IO[aIns[1]]});
+            } else {
+                ESP_LOGE(TAG, "RTD_TWO_WIRE requires 2 AINs.");
+                return -1;
+            }
+            break;
+        case RTD_THREE_WIRE:
+            if (aIns.size() == 3) {
+                rtd.emplace_back(_adc, _highSideMux, _lowSideMux, 
+                    RTD_Pinout_s {
+                        {AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]], AIN_TO_ADC_INPUT[aIns[2]]},
+                        AIN_TO_MUX_IO[aIns[0]], 
+                        AIN_TO_MUX_IO[aIns[1]]});
+            } else {
+                ESP_LOGE(TAG, "RTD_THREE_WIRE requires 3 AINs.");
+                return -1;
+            }
+            break;
+        case THERMOCOUPLE:
+            if (aIns.size() == 2) {
+                tc.emplace_back(_adc, 
+                    TC_Pinout_s {AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]]});
+            } else {
+                ESP_LOGE(TAG, "THERMOCOUPLE requires 2 AINs.");
+                return -1;
+            }
+            break;
+        case STRAIN_GAUGE:
+            if (aIns.size() == 4) {
+                sg.emplace_back(_adc, _highSideMux, _lowSideMux, 
+                    StrainGauge_Pinout_s {
+                        AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]], 
+                        AIN_TO_ADC_INPUT[aIns[2]], AIN_TO_ADC_INPUT[aIns[2]],
+                        AIN_TO_MUX_IO[aIns[0]], AIN_TO_MUX_IO[aIns[1]]});
+            } else {
+                ESP_LOGE(TAG, "STRAIN_GAUGE requires 4 AINs.");
+                return -1;
+            }
+            break;
+        default:
+            ESP_LOGE(TAG, "Unknown sensor type.");
+    }
+    return 0;
 }

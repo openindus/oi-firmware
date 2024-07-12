@@ -72,6 +72,95 @@ enum ads114s0x_dev_id_e {
     ADS114S0X_DEV_ID_ADS114S06 = 0b101  // ADS114S06 (6 channels, 16 bits)
 };
 
+enum ads114s0x_adc_input_e {
+    ADS114S0X_AIN0              = 0b0000,
+    ADS114S0X_AIN1              = 0b0001,
+    ADS114S0X_AIN2              = 0b0010,
+    ADS114S0X_AIN3              = 0b0011,
+    ADS114S0X_AIN4              = 0b0100,
+    ADS114S0X_AIN5              = 0b0101,
+    ADS114S0X_AIN6              = 0b0110,
+    ADS114S0X_AIN7              = 0b0111,
+    ADS114S0X_AIN8              = 0b1000,
+    ADS114S0X_AIN9              = 0b1001,
+    ADS114S0X_AIN10             = 0b1010,
+    ADS114S0X_AIN11             = 0b1011,
+    ADS114S0X_AINCOM            = 0b1100,
+    ADS114S0X_NOT_CONNECTED     = 0b1111
+};
+
+enum ads114s0x_pga_gain_e {
+    ADS114S0X_PGA_GAIN_1        = 0b000,
+    ADS114S0X_PGA_GAIN_2        = 0b001,
+    ADS114S0X_PGA_GAIN_4        = 0b010,
+    ADS114S0X_PGA_GAIN_8        = 0b011,
+    ADS114S0X_PGA_GAIN_16       = 0b100,
+    ADS114S0X_PGA_GAIN_32       = 0b101,
+    ADS114S0X_PGA_GAIN_64       = 0b110,
+    ADS114S0X_PGA_GAIN_128      = 0b111
+};
+
+enum ads114s0x_delay_e {
+    ADS114S0X_DELAY_14_TMOD     = 0b000,
+    ADS114S0X_DELAY_25_TMOD     = 0b001,
+    ADS114S0X_DELAY_64_TMOD     = 0b010,
+    ADS114S0X_DELAY_256_TMOD    = 0b011,
+    ADS114S0X_DELAY_1024_TMOD   = 0b100,
+    ADS114S0X_DELAY_2048_TMOD   = 0b101,
+    ADS114S0X_DELAY_4096_TMOD   = 0b110,
+    ADS114S0X_DELAY_1_TMOD      = 0b111
+};
+
+enum ads114s0x_data_rate_e {
+    ADS114S0X_DATA_RATE_2_5_SPS     = 0b0000,
+    ADS114S0X_DATA_RATE_5_SPS       = 0b0001,
+    ADS114S0X_DATA_RATE_10_SPS      = 0b0010,
+    ADS114S0X_DATA_RATE_16_6_SPS    = 0b0011,
+    ADS114S0X_DATA_RATE_20_SPS      = 0b0100,
+    ADS114S0X_DATA_RATE_50_SPS      = 0b0101,
+    ADS114S0X_DATA_RATE_60_SPS      = 0b0110,
+    ADS114S0X_DATA_RATE_100_SPS     = 0b0111,
+    ADS114S0X_DATA_RATE_200_SPS     = 0b1000,
+    ADS114S0X_DATA_RATE_400_SPS     = 0b1001,
+    ADS114S0X_DATA_RATE_800_SPS     = 0b1010,
+    ADS114S0X_DATA_RATE_1000_SPS    = 0b1011,
+    ADS114S0X_DATA_RATE_2000_SPS    = 0b1100,
+    ADS114S0X_DATA_RATE_4000_SPS    = 0b1101,
+    ADS114S0X_DATA_RATE_8000_SPS    = 0b1110
+};
+
+enum ads114s0x_ref_config_e {
+    ADS114S0X_REF_OFF           = 0b00,
+    ADS114S0X_REF_ON            = 0b01,
+    ADS114S0X_REF_ALWAYS_ON     = 0b10
+};
+
+enum ads114s0x_ref_selection_e {
+    ADS114S0X_REF_REFP0_REFNO       = 0b00,
+    ADS114S0X_REF_REFP1_REFN1       = 0b01,
+    ADS114S0X_REF_INTERNAL_2_5V     = 0b10
+};
+
+enum ads114s0x_idac_magnitude_e {
+    ADS114S0X_IDAC_OFF              = 0b0000,
+    ADS114S0X_IDAC_10_UA            = 0b0001,
+    ADS114S0X_IDAC_50_UA            = 0b0010,
+    ADS114S0X_IDAC_100_UA           = 0b0011,
+    ADS114S0X_IDAC_250_UA           = 0b0100,
+    ADS114S0X_IDAC_500_UA           = 0b0101,
+    ADS114S0X_IDAC_750_UA           = 0b0110,
+    ADS114S0X_IDAC_1000_UA          = 0b0111,
+    ADS114S0X_IDAC_1500_UA          = 0b1000,
+    ADS114S0X_IDAC_2000_UA          = 0b1001
+};
+
+enum ads114s0x_calib_sample_e {
+    ADS114S0X_CALIB_SAMPLE_1    = 0b00,
+    ADS114S0X_CALIB_SAMPLE_4    = 0b01,
+    ADS114S0X_CALIB_SAMPLE_8    = 0b10,
+    ADS114S0X_CALIB_SAMPLE_16   = 0b11
+};
+
 /**
  * @brief Device ID Register (address = 00h)
  * 
@@ -96,22 +185,6 @@ typedef struct __attribute__((packed)) {
     uint8_t fl_por      : 1; // Power-on reset flag (lag must be cleared by user register write 1)
 } ads114s0x_reg_status_t;
 
-enum ads114s0x_adc_input_e {
-    ADS114S0X_AIN0          = 0b0000,
-    ADS114S0X_AIN1          = 0b0001,
-    ADS114S0X_AIN2          = 0b0010,
-    ADS114S0X_AIN3          = 0b0011,
-    ADS114S0X_AIN4          = 0b0100,
-    ADS114S0X_AIN5          = 0b0101,
-    ADS114S0X_AIN6          = 0b0110,
-    ADS114S0X_AIN7          = 0b0111,
-    ADS114S0X_AIN8          = 0b1000,
-    ADS114S0X_AIN9          = 0b1001,
-    ADS114S0X_AIN10         = 0b1010,
-    ADS114S0X_AIN11         = 0b1011,
-    ADS114S0X_AINCOM        = 0b1100
-};
-
 /**
  * @brief Input Multiplexer Register
  * 
@@ -120,28 +193,6 @@ typedef struct __attribute__((packed)) {
     enum ads114s0x_adc_input_e muxn : 4; // Negative ADC input 
     enum ads114s0x_adc_input_e muxp : 4; // Positive ADC input
 } ads114s0x_reg_inpmux_t;
-
-enum ads114s0x_pga_gain_e {
-    ADS114S0X_PGA_GAIN_1        = 0b000,
-    ADS114S0X_PGA_GAIN_2        = 0b001,
-    ADS114S0X_PGA_GAIN_4        = 0b010,
-    ADS114S0X_PGA_GAIN_8        = 0b011,
-    ADS114S0X_PGA_GAIN_16       = 0b100,
-    ADS114S0X_PGA_GAIN_32       = 0b101,
-    ADS114S0X_PGA_GAIN_64       = 0b110,
-    ADS114S0X_PGA_GAIN_128      = 0b111
-};
-
-enum ads114s0x_delay_e {
-    ADS114S0X_DELAY_14_TMOD     = 0b000,
-    ADS114S0X_DELAY_25_TMOD     = 0b001,
-    ADS114S0X_DELAY_64_TMOD     = 0b010,
-    ADS114S0X_DELAY_256_TMOD    = 0b011,
-    ADS114S0X_DELAY_1024_TMOD   = 0b100,
-    ADS114S0X_DELAY_2048_TMOD   = 0b101,
-    ADS114S0X_DELAY_4096_TMOD   = 0b110,
-    ADS114S0X_DELAY_1_TMOD      = 0b111
-};
 
 /**
  * @brief Gain Setting Register
@@ -152,24 +203,6 @@ typedef struct __attribute__((packed)) {
     uint8_t pga_en                      : 2; // PGA [0: disable, 1: enable]
     enum ads114s0x_delay_e delay        : 3; // PGA delay
 } ads114s0x_reg_pga_t;
-
-enum ads114s0x_data_rate_e {
-    ADS114S0X_DATA_RATE_2_5_SPS     = 0b0000,
-    ADS114S0X_DATA_RATE_5_SPS       = 0b0001,
-    ADS114S0X_DATA_RATE_10_SPS      = 0b0010,
-    ADS114S0X_DATA_RATE_16_6_SPS    = 0b0011,
-    ADS114S0X_DATA_RATE_20_SPS      = 0b0100,
-    ADS114S0X_DATA_RATE_50_SPS      = 0b0101,
-    ADS114S0X_DATA_RATE_60_SPS      = 0b0110,
-    ADS114S0X_DATA_RATE_100_SPS     = 0b0111,
-    ADS114S0X_DATA_RATE_200_SPS     = 0b1000,
-    ADS114S0X_DATA_RATE_400_SPS     = 0b1001,
-    ADS114S0X_DATA_RATE_800_SPS     = 0b1010,
-    ADS114S0X_DATA_RATE_1000_SPS    = 0b1011,
-    ADS114S0X_DATA_RATE_2000_SPS    = 0b1100,
-    ADS114S0X_DATA_RATE_4000_SPS    = 0b1101,
-    ADS114S0X_DATA_RATE_8000_SPS    = 0b1110
-};
 
 /**
  * @brief Data Rate Register
@@ -183,18 +216,6 @@ typedef struct __attribute__((packed)) {
     uint8_t g_chop                  : 1; // Global chop enable [0: disable, 1: enable]
 } ads114s0x_reg_datarate_t;
 
-enum ads114s0x_ref_config_e {
-    ADS114S0X_REF_OFF           = 0b00,
-    ADS114S0X_REF_ON            = 0b01,
-    ADS114S0X_REF_ALWAYS_ON     = 0b10
-};
-
-enum ads114s0x_ref_selection_e {
-    ADS114S0X_REF_REFP0_REFNO       = 0b00,
-    ADS114S0X_REF_REFP1_REFN1       = 0b01,
-    ADS114S0X_REF_INTERNAL_2_5V     = 0b10
-};
-
 /**
  * @brief Reference Control Register
  * 
@@ -207,19 +228,6 @@ typedef struct __attribute__((packed)) {
     /** @todo */
     uint8_t fl_ref_en                       : 2; // Reference monitor configuration
 } ads114s0x_reg_ref_t;
-
-enum ads114s0x_idac_magnitude_e {
-    ADS114S0X_IDAC_OFF              = 0b0000,
-    ADS114S0X_IDAC_10_UA            = 0b0001,
-    ADS114S0X_IDAC_50_UA            = 0b0010,
-    ADS114S0X_IDAC_100_UA           = 0b0011,
-    ADS114S0X_IDAC_250_UA           = 0b0100,
-    ADS114S0X_IDAC_500_UA           = 0b0101,
-    ADS114S0X_IDAC_750_UA           = 0b0110,
-    ADS114S0X_IDAC_1000_UA          = 0b0111,
-    ADS114S0X_IDAC_1500_UA          = 0b1000,
-    ADS114S0X_IDAC_2000_UA          = 0b1001
-};
 
 /**
  * @brief Excitation Current Register
@@ -245,16 +253,9 @@ typedef struct __attribute__((packed)) {
     uint8_t vb_ain3     : 1; // AIN3 VBIAS selection [0: disconnected, 1: connected]
     uint8_t vb_ain4     : 1; // AIN4 VBIAS selection [0: disconnected, 1: connected]
     uint8_t vb_ain5     : 1; // AIN5 VBIAS selection [0: disconnected, 1: connected]
-    uint8_t vb_ainc     : 1; // AIN6 VBIAS selection [0: disconnected, 1: connected]
+    uint8_t vb_ain6     : 1; // AIN6 VBIAS selection [0: disconnected, 1: connected]
     uint8_t vb_level    : 1; // VBIAS level selection [0: (AVDD+AVSS)/2 , 1: (AVDD+AVSS)/12]
 } ads114s0x_reg_vbias_t;
-
-enum ads114s0x_calib_sample_e {
-    ADS114S0X_CALIB_SAMPLE_1    = 0b00,
-    ADS114S0X_CALIB_SAMPLE_4    = 0b01,
-    ADS114S0X_CALIB_SAMPLE_8    = 0b10,
-    ADS114S0X_CALIB_SAMPLE_16   = 0b11
-};
 
 /**
  * @brief System Control Register
@@ -303,10 +304,30 @@ typedef struct __attribute__((packed)) {
     uint8_t unused : 4;
 } ads114s0x_reg_gpiocon_t;
 
+/**
+ * @brief Register map
+ * 
+ */
+typedef struct __attribute__((packed)) {
+    ads114s0x_reg_id_t          id;
+    ads114s0x_reg_status_t      status;
+    ads114s0x_reg_inpmux_t      inpmux;
+    ads114s0x_reg_pga_t         pga;
+    ads114s0x_reg_datarate_t    datarate;
+    ads114s0x_reg_ref_t         ref;
+    ads114s0x_reg_idac_t        idac;
+    ads114s0x_reg_vbias_t       vbias;
+    uint8_t                     reserved1; 
+    ads114s0x_reg_sys_t         sys;
+    ads114s0x_reg_ofcal_t       ofcal;
+    uint8_t                     reserved2;
+    ads114s0x_reg_fscal_t       fscal;
+    ads114s0x_reg_gpiodat_t     gpiodat;
+    ads114s0x_reg_gpiocon_t     gpiocon;
+} ads114s0x_register_map_t;
+
 /* Init */
 int ads114s0x_init(ads114s0x_device_t** dev, ads114s0x_config_t* conf);
-int ads114s0x_enable(ads114s0x_device_t* dev);
-int ads114s0x_disable(ads114s0x_device_t* dev);
 
 /* Control */
 int ads114s0x_wakeup(ads114s0x_device_t* dev);
@@ -330,7 +351,12 @@ int ads114s0x_write_register(ads114s0x_device_t* dev, uint8_t reg_addr, uint8_t*
 /* Hardware */
 int ads114s0x_start_sync(ads114s0x_device_t* dev);
 int ads114s0x_hard_reset(ads114s0x_device_t* dev);
+int ads114s0x_enable(ads114s0x_device_t* dev);
+int ads114s0x_disable(ads114s0x_device_t* dev);
 int ads114s0x_add_data_ready_isr_handler(ads114s0x_device_t* dev, gpio_isr_t isr_handler, void* args);
+
+/* Utils */
+void ads114s0x_print_register_map(ads114s0x_device_t* dev);
 
 #ifdef __cplusplus
 }
