@@ -22,6 +22,12 @@ struct StrainGauge_Pinout_s {
     Mux_IO_t ls; // Low side (input)
 };
 
+enum StrainGauge_Excitation_e {
+    EXCITATION_VOLTAGE = 0,
+    EXCITATION_CURRENT,
+    EXCITATION_HIGH_VOLTAGE
+};
+
 class StrainGauge
 {
 public:
@@ -31,8 +37,13 @@ public:
             _adc(adc),
             _highSideMux(highSideMux),
             _lowSideMux(lowSideMux),
-            _pins(pins)
+            _pins(pins),
+            _excitation(EXCITATION_VOLTAGE)
     {}
+
+    inline void setExcitationMode(StrainGauge_Excitation_e excitation) {
+        _excitation = excitation;
+    }
 
     float read(void);
 
@@ -43,5 +54,7 @@ private:
     Multiplexer* _lowSideMux;
 
     StrainGauge_Pinout_s _pins;
+
+    StrainGauge_Excitation_e _excitation;
     
 };

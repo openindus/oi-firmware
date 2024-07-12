@@ -39,6 +39,10 @@ public:
             _type(PT100)
     {}
 
+    inline void setType(RTD_Type_e type) {
+        _type = type;
+    }
+
     float readRTD(void);
     float readTemperature(void);
 
