@@ -123,7 +123,11 @@ int AnalogInputsLS::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& 
             break;
         case STRAIN_GAUGE:
             if (aIns.size() == 4) {
-                ESP_LOGW(TAG, "Not implemented !");
+                sg.emplace_back(_adc, _highSideMux, _lowSideMux, 
+                    StrainGauge_Pinout_s {
+                        AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]], 
+                        AIN_TO_ADC_INPUT[aIns[2]], AIN_TO_ADC_INPUT[aIns[2]],
+                        AIN_TO_MUX_IO[aIns[0]], AIN_TO_MUX_IO[aIns[1]]});
             } else {
                 ESP_LOGE(TAG, "STRAIN_GAUGE requires 4 AINs.");
                 return -1;
