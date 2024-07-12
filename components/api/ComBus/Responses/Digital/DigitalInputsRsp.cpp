@@ -20,6 +20,12 @@ IsrCallback_t DigitalInputsRsp::_isrCallback[] = {
     [](void*){ControllerSlave::sendEvent({EVENT_DIGITAL_INTERRUPT, DIN_2});},
     [](void*){ControllerSlave::sendEvent({EVENT_DIGITAL_INTERRUPT, DIN_3});},
     [](void*){ControllerSlave::sendEvent({EVENT_DIGITAL_INTERRUPT, DIN_4});},
+    [](void*){ControllerSlave::sendEvent({EVENT_DIGITAL_INTERRUPT, DIN_5});},
+    [](void*){ControllerSlave::sendEvent({EVENT_DIGITAL_INTERRUPT, DIN_6});},
+    [](void*){ControllerSlave::sendEvent({EVENT_DIGITAL_INTERRUPT, DIN_7});},
+    [](void*){ControllerSlave::sendEvent({EVENT_DIGITAL_INTERRUPT, DIN_8});},
+    [](void*){ControllerSlave::sendEvent({EVENT_DIGITAL_INTERRUPT, DIN_9});},
+    [](void*){ControllerSlave::sendEvent({EVENT_DIGITAL_INTERRUPT, DIN_10});},
 };
 
 int DigitalInputsRsp::init() {

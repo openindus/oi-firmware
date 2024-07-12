@@ -29,7 +29,7 @@ void DcCmd::run(MotorNum_t motor, MotorDirection_t direction)
 
 void DcCmd::stop(MotorNum_t motor)
 {
-    std::vector<uint8_t> msgBytes = {REQUEST_MOTOR_DC_RUN, (uint8_t)motor};
+    std::vector<uint8_t> msgBytes = {REQUEST_MOTOR_DC_STOP, (uint8_t)motor};
     _control->request(msgBytes);
 }
 
