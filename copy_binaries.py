@@ -33,4 +33,4 @@ def copy_binaries(source, target, env):
         print(error)
 
 
-env.AddPostAction("checkprogsize", copy_binaries)
+env.AddPostAction("buildprog", copy_binaries)
