@@ -62,13 +62,30 @@ float Board::getTemperature(void)
     return tsens_out;
 }
 
-uint16_t Board::getBoardType(void)
+uint8_t Board::getBoardType(void)
 {
     if (esp_efuse_block_is_empty(EFUSE_BLK_KEY5) == false) {
         Board_eFuse_Info_t data;
         esp_efuse_read_block(EFUSE_BLK_KEY5, &data, 0, sizeof(Board_eFuse_Info_t)*8);
         if (_verify_eFuse_checksum(data)) {
             return data.board_type;
+        } else {
+            ESP_LOGW(TAG, "eFuse BLOCK5 corrupted !");
+            return 0;
+        }
+    } else {
+        ESP_LOGW(TAG, "Board type is not defined !");
+        return 0;
+    }
+}
+
+uint8_t Board::getHardwareVariant(void)
+{
+    if (esp_efuse_block_is_empty(EFUSE_BLK_KEY5) == false) {
+        Board_eFuse_Info_t data;
+        esp_efuse_read_block(EFUSE_BLK_KEY5, &data, 0, sizeof(Board_eFuse_Info_t)*8);
+        if (_verify_eFuse_checksum(data)) {
+            return data.hardware_variant;
         } else {
             ESP_LOGW(TAG, "eFuse BLOCK5 corrupted !");
             return 0;
@@ -96,24 +113,6 @@ uint32_t Board::getSerialNum(void)
     }
 }
 
-void Board::getHardwareVersion(char hardware_version[4])
-{
-    if (esp_efuse_block_is_empty(EFUSE_BLK_KEY5) == false) {
-        Board_eFuse_Info_t data;
-        esp_efuse_read_block(EFUSE_BLK_KEY5, &data, 0, sizeof(Board_eFuse_Info_t)*8);
-        if (_verify_eFuse_checksum(data)) {
-            strcpy(hardware_version, data.hardware_version);
-        } else {
-            ESP_LOGW(TAG, "eFuse BLOCK5 corrupted !");
-            strcpy(hardware_version, "none");
-        }
-    } else {
-        ESP_LOGW(TAG, "Hardware version is not defined !");
-        strcpy(hardware_version, "none");
-    }
-    return;
-}
-
 int64_t Board::getTimestamp(void)
 {
     if (esp_efuse_block_is_empty(EFUSE_BLK_KEY5) == false) {
@@ -138,17 +137,18 @@ void Board::getSoftwareVersion(char software_version[32])
     return;
 }
 
-bool Board::setBoardInfo(uint16_t board_type, uint32_t serial_num, char hardware_version[4], int64_t timestamp)
+bool Board::setBoardInfo(uint8_t board_type, uint8_t hardware_variant, uint32_t serial_num, int64_t timestamp)
 {
     ESP_LOGW(TAG, "This operation can be done only once !");
 
     Board_eFuse_Info_t data;
 
+    data.hardware_variant = hardware_variant;
     data.board_type = board_type;
     data.serial_number = serial_num;
-    strcpy(data.hardware_version, hardware_version);
     data.timestamp = timestamp;
-    memset(&data.reserved, 0, sizeof(data.reserved));
+    memset(&data.reserved_1, 0, sizeof(data.reserved_1));
+    memset(&data.reserved_2, 0, sizeof(data.reserved_2));
     data.checksum = _calculate_eFuse_checksum((uint8_t*)&data);
 
     esp_err_t err = esp_efuse_write_key(EFUSE_BLK_KEY5, ESP_EFUSE_KEY_PURPOSE_USER, &data, sizeof(Board_eFuse_Info_t));

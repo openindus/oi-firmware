@@ -31,7 +31,7 @@ set(COMPONENT_SRCS
     "Middleware/Analog/InputsLV/AnalogInputsLV.cpp"
     "Middleware/Analog/InputsHV/AnalogInputsHV.cpp"
     "Middleware/Analog/InputsLS/AnalogInputsLS.cpp"
-    "Middleware/Analog/InputsLS/ADC/ADS114S0X/ADS114S0X.cpp"
+    "Middleware/Analog/InputsLS/ADC/ADS114S0X/_ADS114S0X.cpp"
     "Middleware/Analog/InputsLS/Multiplexer/Multiplexer.cpp"
     "Middleware/Analog/InputsLS/Digipot/Digipot.cpp"
     "Middleware/Analog/InputsLS/Sensors/RTD/RTD.cpp"

@@ -123,8 +123,8 @@ void ControllerSlave::_busTask(void *pvParameters)
                 if (frame.id == _id) {
                     Board_Info_t board_info;
                     board_info.efuse.board_type = Board::getBoardType();
+                    board_info.efuse.hardware_variant = Board::getHardwareVariant();
                     board_info.efuse.serial_number = Board::getSerialNum();
-                    Board::getHardwareVersion(board_info.efuse.hardware_version);
                     Board::getSoftwareVersion(board_info.software_version);
                     memcpy(frame.data, &board_info, sizeof(Board_Info_t));
                     frame.length = sizeof(Board_Info_t);
