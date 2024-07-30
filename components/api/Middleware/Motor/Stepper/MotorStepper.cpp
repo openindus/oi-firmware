@@ -240,8 +240,6 @@ static void _homingTask(void* arg)
 {
     MotorNum_t motor = *(MotorNum_t*)arg;
 
-    ESP_LOGI(TAG, "Launch homing for MOTOR_%i", motor+1);
-
     xSemaphoreTake(_homingSemaphore[motor], portMAX_DELAY);
 
     if (_limitSwitchDigitalInput[motor].size() == 0) {
@@ -256,7 +254,7 @@ static void _homingTask(void* arg)
     xSemaphoreTake(_taskHomingStopSemaphore[motor], portMAX_DELAY);
     _taskHomingStopRequested[motor] = false;
     xSemaphoreGive(_taskHomingStopSemaphore[motor]);
-
+    
     /* Check if motor is at home */
     if (DigitalInputs::digitalRead(din) != logic) {
         /* Perform go until command and wait */
@@ -281,12 +279,21 @@ static void _homingTask(void* arg)
     if (!stop) {
         /* Perform release SW command and wait */
         PS01_Cmd_ReleaseSw(motor, ACTION_RESET, (motorDir_t)FORWARD);
-        /* Empty the queue is a precedent interrupt happened */
-        xQueueReset(_busyEvent[motor]);
-        /* Check if status if not already high */
-        if (!PS01_Hal_GetBusyLevel(motor)) {
-            /* Wait for an interrupt (rising edge) on busy pin */
-            xQueueReceive(_busyEvent[motor], NULL, portMAX_DELAY);
+        /* Check if motor is not already out of limitswitch (sometimes motor is already out of limitswitch after the releaseSw command and motor will run to infinite) */
+        if (DigitalInputs::digitalRead(din) != logic) {
+            PS01_Hal_SetSwitchLevel((MotorNum_t)motor, 1);
+            vTaskDelay(pdTICKS_TO_MS(1));
+            PS01_Hal_SetSwitchLevel((MotorNum_t)motor, 0);
+        } 
+        /* Else wait for a busy event */
+        else {
+            /* Empty the queue is a precedent interrupt happened */
+            xQueueReset(_busyEvent[motor]);
+            /* Check if status if not already high */
+            if (!PS01_Hal_GetBusyLevel(motor) && DigitalInputs::digitalRead(din) ) {
+                /* Wait for an interrupt (rising edge) on busy pin */
+                xQueueReceive(_busyEvent[motor], NULL, portMAX_DELAY);
+            }
         }
     } else {
         ESP_LOGW(TAG, "Homing aborted for MOTOR_%i", motor+1);    
