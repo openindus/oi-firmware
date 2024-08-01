@@ -40,6 +40,12 @@ int MotorDc::init(std::vector<MotorDC_Config_t> motorsConfig, gpio_num_t faultPi
 
     /* Init motors pins */
     for(auto motorConfig = _motorsConfig.begin(); motorConfig != _motorsConfig.end(); motorConfig++) {
+        
+        // First set disable to 1 to avoid glitch
+        err |= gpio_set_level(motorConfig->disable, 1);
+        err |= gpio_set_level(motorConfig->in1_pwm, 0);
+        err |= gpio_set_level(motorConfig->in2_pwm, 0);
+
         /* Configure IN1 & IN2 and DISABLE pins */
         cfg.pin_bit_mask = (1ULL << motorConfig->in1_pwm) | (1ULL << motorConfig->in2_pwm) | (1ULL << motorConfig->disable);
         cfg.mode = GPIO_MODE_OUTPUT;
@@ -48,9 +54,6 @@ int MotorDc::init(std::vector<MotorDC_Config_t> motorsConfig, gpio_num_t faultPi
         cfg.intr_type = GPIO_INTR_DISABLE;
         err |= gpio_config(&cfg);
 
-        err |= gpio_set_level(motorConfig->in1_pwm, 0);
-        err |= gpio_set_level(motorConfig->in2_pwm, 0);
-        err |= gpio_set_level(motorConfig->disable, 1);
     }
 
     return err;

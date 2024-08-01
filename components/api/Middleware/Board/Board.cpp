@@ -91,7 +91,7 @@ uint8_t Board::getHardwareVariant(void)
             return 0;
         }
     } else {
-        ESP_LOGW(TAG, "Board type is not defined !");
+        ESP_LOGW(TAG, "Hardware variant is not defined !");
         return 0;
     }
 }

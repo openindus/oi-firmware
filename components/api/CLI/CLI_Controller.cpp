@@ -213,11 +213,11 @@ static int getSlaveInfoCmd(int argc, char **argv)
     if (getSlaveInfoArgs.boardType->count > 0) {
         printf("%u\n", boardInfo.efuse.board_type);
     }
+    if (getSlaveInfoArgs.versionHW->count > 0) {
+        printf("%u\n", boardInfo.efuse.hardware_variant);
+    }
     if (getSlaveInfoArgs.serialNum->count > 0) {
         printf("%u\n", boardInfo.efuse.serial_number);
-    }
-    if (getSlaveInfoArgs.versionHW->count > 0) {
-        printf("%.*s\n", 4, boardInfo.efuse.hardware_version);
     }
     if (getSlaveInfoArgs.dateCode->count > 0) {
         printf("%lli\n", boardInfo.efuse.timestamp);

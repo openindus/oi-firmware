@@ -41,7 +41,7 @@ static int setBoardInfoCmd(int argc, char **argv)
 static int _registerSetBoardInfoCmd(void)
 {
     setBoardInfoArgs.boardType = arg_int1("t", "type", "TYPE", "Board type");
-    setBoardInfoArgs.boardType = arg_int1("h", "hardware variant", "VAR", "Hardware variant");
+    setBoardInfoArgs.hardwareVariant = arg_int1("h", "hardware variant", "VAR", "Hardware variant");
     setBoardInfoArgs.serialNum = arg_int1("n", "serial-num", "NUM", "Serial number");
     setBoardInfoArgs.timestamp = arg_str1("d", "date", "DATE", "Board date as a timestamp");
     setBoardInfoArgs.end = arg_end(5);
