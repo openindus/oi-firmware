@@ -262,9 +262,15 @@ static void _homingTask(void* arg)
         /* Empty the queue if a precedent interrupt happened */
         xQueueReset(_busyEvent[motor]);
         /* Check if status if not already high */
-        if (!PS01_Hal_GetBusyLevel(motor)) {
+        while (!PS01_Hal_GetBusyLevel(motor) && (DigitalInputs::digitalRead(din) != logic)) {
             /* Wait for an interrupt (rising edge) on busy pin */
-            xQueueReceive(_busyEvent[motor], NULL, portMAX_DELAY);
+            xQueueReceive(_busyEvent[motor], NULL, pdMS_TO_TICKS(10));
+        }
+        /* If motor was not stopped by interrupt, stop it */
+        if (!PS01_Hal_GetBusyLevel(motor)) {
+            PS01_Hal_SetSwitchLevel((MotorNum_t)motor, 1);
+            vTaskDelay(pdTICKS_TO_MS(1));
+            PS01_Hal_SetSwitchLevel((MotorNum_t)motor, 0);
         }
     }
 
@@ -290,9 +296,15 @@ static void _homingTask(void* arg)
             /* Empty the queue is a precedent interrupt happened */
             xQueueReset(_busyEvent[motor]);
             /* Check if status if not already high */
-            if (!PS01_Hal_GetBusyLevel(motor) && DigitalInputs::digitalRead(din) ) {
+            while (!PS01_Hal_GetBusyLevel(motor) && (DigitalInputs::digitalRead(din) == logic)) {
                 /* Wait for an interrupt (rising edge) on busy pin */
-                xQueueReceive(_busyEvent[motor], NULL, portMAX_DELAY);
+                xQueueReceive(_busyEvent[motor], NULL, pdMS_TO_TICKS(10));
+            }
+            /* If motor was not stopped by interrupt, stop it */
+            if (!PS01_Hal_GetBusyLevel(motor)) {
+                PS01_Hal_SetSwitchLevel((MotorNum_t)motor, 1);
+                vTaskDelay(pdTICKS_TO_MS(1));
+                PS01_Hal_SetSwitchLevel((MotorNum_t)motor, 0);
             }
         }
     } else {
