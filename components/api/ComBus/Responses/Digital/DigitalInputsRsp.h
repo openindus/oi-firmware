@@ -32,7 +32,7 @@ public:
 
 private:
 
-    static IsrCallback_t _isrCallback[4];
+    static IsrCallback_t _isrCallback[DIN_MAX];
 };
 
 #endif

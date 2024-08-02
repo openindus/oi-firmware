@@ -36,6 +36,11 @@ int CLI::init(void)
     ret |= _registerStepperParamCmd();
 #endif
 
+#if defined(OI_DC)
+    ret |= _registerDigitalInputsCmd();
+    ret |= _registerDcCmd();
+#endif
+
 #if defined(OI_RELAY_HP) || defined(OI_RELAY_LP)
     ret |= _registerRelayCmd();
 #endif

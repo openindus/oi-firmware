@@ -367,7 +367,7 @@ static int run(int argc, char **argv)
 static void _registerRun(void)
 {
     runArgs.motor   = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
-    runArgs.dir     = arg_int1(NULL, NULL, "DIRECTION", "[0: Forward, 1: Reverse]");
+    runArgs.dir     = arg_int1(NULL, NULL, "DIRECTION", "[1: Forward, 0: Reverse]");
     runArgs.speed   = arg_int1(NULL, NULL, "SPEED", "speed in step/s");
     runArgs.end     = arg_end(4);
 

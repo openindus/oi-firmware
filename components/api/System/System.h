@@ -24,6 +24,7 @@
 #include "RelayHP.h"
 #include "AnalogLS.h"
 #include "Brushless.h"
+#include "Dc.h"
 #include "ControllerMaster.h"
 #include "ControllerSlave.h"
 #include "CLI.h"

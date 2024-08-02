@@ -271,6 +271,8 @@ void ControllerMaster::_busTask(void *pvParameters)
                     uint16_t* type = reinterpret_cast<uint16_t*>(&frame.args[0]);
                     uint32_t* sn = reinterpret_cast<uint32_t*>(&frame.args[2]);
                     _ids.insert(std::pair<uint16_t, std::pair<uint16_t, uint32_t>>(id, std::pair<uint16_t, uint32_t>(*type, *sn)));
+                    char name[16];
+                    ESP_LOGI(TAG, "Received id from %s\t SN:%i | ID:%i", BoardUtils::typeToName(*type, name), *sn, id);
                     break;
                 }
                 default:

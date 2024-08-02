@@ -33,7 +33,7 @@ protected:
 
 public:
 
-    // Module(uint16_t type) : _type(type) {}
+    static inline void restart(void) {Board::restart();};
 
     static inline void ledOn(LedColor_t color) {Led::on(color);};
     static inline void ledOff(void) {Led::off();};

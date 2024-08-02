@@ -19,9 +19,23 @@ typedef enum {
     MOTOR_1 = 0,
 #if !defined(OI_STEPPER_VE)
     MOTOR_2,
+#if !defined(OI_STEPPER)
+    MOTOR_3,
+    MOTOR_4,
+#endif
 #endif
     MOTOR_MAX,
 } MotorNum_t;
+
+
+/**
+ * @brief Motors directions
+ * 
+ */
+typedef enum {
+    FORWARD = 1,
+    REVERSE = 0,
+} MotorDirection_t;
 
 class Motor
 {

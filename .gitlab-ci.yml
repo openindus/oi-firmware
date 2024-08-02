@@ -21,6 +21,8 @@ setup:
     - if: '($CI_PIPELINE_SOURCE == "merge_request_event") &&
     ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")'
     - if: '$CI_COMMIT_TAG'
+  tags:
+    - oi-firmware
 
 .build:
   stage: build
@@ -30,6 +32,8 @@ setup:
     - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && 
       ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")'
     - if: '$CI_COMMIT_TAG'
+  tags:
+    - oi-firmware
 
 build:core:
   extends: .build
@@ -79,7 +83,12 @@ build:relaylp:
 build:analogls:
   extends: .build
   script:
-    - pio run -e analogls 
+    - pio run -e analogls
+
+build:dc:
+  extends: .build
+  script:
+    - pio run -e dc 
 
 build:examples:
   stage: build:examples
@@ -116,6 +125,8 @@ pkg:library:
       - library/
   rules:
     - if: '$CI_COMMIT_TAG'
+  tags:
+    - oi-firmware
 
 pkg:bin:
   stage: pkg
@@ -130,6 +141,7 @@ pkg:bin:
     - job: build:relaylp
     # - job: build:brushless
     - job: build:analogls
+    - job: build:dc
   script:
     - mv .oi/bin/ binary/
   artifacts:
@@ -138,3 +150,5 @@ pkg:bin:
       - binary/
   rules:
     - if: '$CI_COMMIT_TAG'
+  tags:
+    - oi-firmware

@@ -6,7 +6,7 @@
  * @see https://openindus.com
  */
 
-#include "ADS114S0X.h"
+#include "_ADS114S0X.h"
 
 static const char TAG[] = "ADS114S0X";
 

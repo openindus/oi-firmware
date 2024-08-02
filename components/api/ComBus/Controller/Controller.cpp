@@ -70,6 +70,16 @@ int Controller::request(std::vector<uint8_t>& msgBytes, bool ackNeeded)
 }
 
 /**
+ * @brief Restart the module
+ * 
+ */
+void Controller::restart(void)
+{
+    std::vector<uint8_t> msgBytes;
+    this->command(CMD_RESTART, msgBytes, false);
+}
+
+/**
  * @brief Send Controller to change led status
  * 
  * @param state Led state (On, Off, Blink)
