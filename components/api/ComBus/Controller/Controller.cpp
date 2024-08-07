@@ -54,7 +54,7 @@ int Controller::command(const uint8_t cmd, std::vector<uint8_t>& msgBytes, bool 
     return 0;
 
 error:
-    ESP_LOGE(TAG, "request error");
+    ESP_LOGE(TAG, "Request error: CMD: %x", cmd);
     return -1;
 }
 
