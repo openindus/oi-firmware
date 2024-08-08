@@ -22,3 +22,21 @@
 Board which are ready to use :
 - OI-Core/OI-CoreLite
 - OI-Discrete
+
+# 1.2.0
+
+- Refactor Middleware in API
+- Add board init control
+- Add Middleware and Module for OIMixed
+- Add Middleware and Module for OIAnalogLS
+- Add Middleware and Module for OIDc
+- Add Middleware and Module for OIRelayHP
+- Add Middleware and Module for OIStepper
+
+Board which are ready to use :
+- OI-Core/OI-CoreLite
+- OI-Discrete
+- OI-Mixed
+- OIStepper
+- OIRelayHP
+- OIDc

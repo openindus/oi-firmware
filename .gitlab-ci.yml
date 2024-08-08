@@ -14,8 +14,9 @@ cache:
 setup:
   stage: setup
   script:
-    - pip install -U platformio
-    - pio platform update
+    - curl -fsSL -o get-platformio.py https://raw.githubusercontent.com/platformio/platformio-core-installer/master/get-platformio.py
+    - python3 get-platformio.py
+    - /root/.platformio/penv/bin/pio pkg update  
     - rm -rf .oi/bin/
   rules:
     - if: '($CI_PIPELINE_SOURCE == "merge_request_event") &&
@@ -38,57 +39,57 @@ setup:
 build:core:
   extends: .build
   script:
-    - pio run -e core 
+    - /root/.platformio/penv/bin/pio run -e core 
 
 build:discrete:
   extends: .build
   script:
-    - pio run -e discrete 
+    - /root/.platformio/penv/bin/pio run -e discrete 
 
 # build:discreteve:
 #   extends: .build
 #   script:
-#     - pio run -e discreteve 
+#     - /root/.platformio/penv/bin/pio run -e discreteve 
 
 build:stepper:
   extends: .build
   script:
-    - pio run -e stepper 
+    - /root/.platformio/penv/bin/pio run -e stepper 
 
 build:stepperve:
   extends: .build
   script:
-    - pio run -e stepperve 
+    - /root/.platformio/penv/bin/pio run -e stepperve 
 
 build:mixed:
   extends: .build
   script:
-    - pio run -e mixed 
+    - /root/.platformio/penv/bin/pio run -e mixed 
 
 build:relayhp:
   extends: .build
   script:
-    - pio run -e relayhp 
+    - /root/.platformio/penv/bin/pio run -e relayhp 
 
 build:relaylp:
   extends: .build
   script:
-    - pio run -e relaylp 
+    - /root/.platformio/penv/bin/pio run -e relaylp 
 
 # build:brushless:
 #   extends: .build
 #   script:
-#     - pio run -e brushless 
+#     - /root/.platformio/penv/bin/pio run -e brushless 
 
 build:analogls:
   extends: .build
   script:
-    - pio run -e analogls
+    - /root/.platformio/penv/bin/pio run -e analogls
 
 build:dc:
   extends: .build
   script:
-    - pio run -e dc 
+    - /root/.platformio/penv/bin/pio run -e dc 
 
 build:examples:
   stage: build:examples
@@ -99,11 +100,11 @@ build:examples:
       find examples/ -name "*.cpp" | while read -r f; do
         echo "Build $f"
         cat $f > main/main.cpp
-        pio run -e core || { echo "Error: Build failed for $f"; exit 1; }
+        /root/.platformio/penv/bin/pio run -e core || { echo "Error: Build failed for $f"; exit 1; }
       done
   after_script:
     - git restore main/main.cpp
-    - pio run -e core 
+    - /root/.platformio/penv/bin/pio run -e core 
   rules:
     - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && 
       ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")'
@@ -117,7 +118,7 @@ pkg:library:
     - rm -rf .oi/lib/
     - mkdir .oi/lib/
   script:
-    - pio pkg pack --output=".oi/lib/"
+    - /root/.platformio/penv/bin/pio pkg pack --output=".oi/lib/"
     - mv .oi/lib/ library/
   artifacts:
     name: "library"
