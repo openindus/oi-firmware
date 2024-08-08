@@ -112,15 +112,6 @@
 #define STEPPER_PWM_TIMER_D1             LEDC_TIMER_1
 #define STEPPER_PWM_CHANNEL_D1           LEDC_CHANNEL_0
 
-/* Device 2 GPIOs pins */
-#define STEPPER_GPIO_PIN_D1_SW           GPIO_NUM_NC
-#define STEPPER_GPIO_PIN_D1_STBY_RST     GPIO_NUM_NC
-#define STEPPER_GPIO_PIN_D1_BUSY_SYNC    GPIO_NUM_NC
-#define STEPPER_GPIO_PIN_D1_FLAG         GPIO_NUM_NC
-#define STEPPER_PWM_PIN_D1_STCK          GPIO_NUM_NC
-#define STEPPER_PWM_TIMER_D2             LEDC_TIMER_2
-#define STEPPER_PWM_CHANNEL_D2           LEDC_CHANNEL_1
-
 /* step clock */
 #define STEPPER_PWM_TIMER                LEDC_TIMER_1
 #define STEPPER_PWM_MODE                 LEDC_LOW_SPEED_MODE
@@ -135,13 +126,13 @@
     .spi_pin_miso = STEPPER_SPI_PIN_MISO,                                               \
     .spi_pin_clk = STEPPER_SPI_PIN_CLK,                                                 \
     .spi_pin_cs = STEPPER_SPI_PIN_CS,                                                   \
-    .pin_busy_sync = {STEPPER_GPIO_PIN_D1_BUSY_SYNC, STEPPER_GPIO_PIN_D2_BUSY_SYNC},    \
-    .pin_flag = {STEPPER_GPIO_PIN_D1_FLAG, STEPPER_GPIO_PIN_D2_FLAG},                   \
-    .pin_sw = {STEPPER_GPIO_PIN_D1_SW, STEPPER_GPIO_PIN_D2_SW},                         \
-    .pin_stby_rst = {STEPPER_GPIO_PIN_D1_STBY_RST, STEPPER_GPIO_PIN_D2_STBY_RST},       \
-    .pwm_pin_stck = {STEPPER_PWM_PIN_D1_STCK, STEPPER_PWM_PIN_D2_STCK},                 \
-    .pwm_timer = {STEPPER_PWM_TIMER_D1, STEPPER_PWM_TIMER_D2},                          \
-    .pwm_channel = {STEPPER_PWM_CHANNEL_D1, STEPPER_PWM_CHANNEL_D2},                    \
+    .pin_busy_sync = {STEPPER_GPIO_PIN_D1_BUSY_SYNC},    \
+    .pin_flag = {STEPPER_GPIO_PIN_D1_FLAG},                   \
+    .pin_sw = {STEPPER_GPIO_PIN_D1_SW},                         \
+    .pin_stby_rst = {STEPPER_GPIO_PIN_D1_STBY_RST},       \
+    .pwm_pin_stck = {STEPPER_PWM_PIN_D1_STCK},                 \
+    .pwm_timer = {STEPPER_PWM_TIMER_D1},                          \
+    .pwm_channel = {STEPPER_PWM_CHANNEL_D1},                    \
 }
 
 #endif

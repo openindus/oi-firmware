@@ -123,13 +123,13 @@ int AnalogInputEsp32s3::init()
     int err = 0;
 
     if (_channel.unit == ADC_UNIT_1) {
-        err |= adc1_config_width(ADC_WIDTH_BIT_12);
+        err |= adc1_config_width((adc_bits_width_t) ADC_WIDTH_BIT_DEFAULT);
         err |= adc1_config_channel_atten((adc1_channel_t)_channel.channel, ADC_ATTEN_DB_11);
-        esp_adc_cal_characterize(_channel.unit, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &_adc_characteristic);
+        esp_adc_cal_characterize(_channel.unit, ADC_ATTEN_DB_11, (adc_bits_width_t) ADC_WIDTH_BIT_DEFAULT, 1100, &_adc_characteristic);
     }
     else if (_channel.unit == ADC_UNIT_2) {
         err |= adc2_config_channel_atten((adc2_channel_t)_channel.channel, ADC_ATTEN_DB_11);
-        esp_adc_cal_characterize(_channel.unit, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &_adc_characteristic);
+        esp_adc_cal_characterize(_channel.unit, ADC_ATTEN_DB_11, (adc_bits_width_t) ADC_WIDTH_BIT_DEFAULT, 1100, &_adc_characteristic);
     } 
     else {
         ESP_LOGE(TAG, "Wrong ADC unit !");
@@ -154,7 +154,7 @@ float AnalogInputEsp32s3::read(void)
         int raw = -1;
         for (int i = 0; i < ESP_ADC_NO_OF_SAMPLES; i++)
         {
-            adc2_get_raw((adc2_channel_t)_channel.channel, ADC_WIDTH_12Bit, &raw);
+            adc2_get_raw((adc2_channel_t)_channel.channel, (adc_bits_width_t) ADC_WIDTH_BIT_DEFAULT, &raw);
             voltage_sum += esp_adc_cal_raw_to_voltage(raw, &_adc_characteristic);
         }
     }
