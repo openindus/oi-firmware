@@ -49,25 +49,25 @@ private:
 };
 
 enum Board_Type_e {
-    TYPE_OI_CORE            = (uint16_t) 3,
-    TYPE_OI_CORELITE        = (uint16_t) 4,
-    TYPE_OI_DISCRETE        = (uint16_t) 6,
-    TYPE_OI_DISCRETE_VE     = (uint16_t) 7,
-    TYPE_OI_MIXED           = (uint16_t) 8,
-    TYPE_OI_RELAY_LP        = (uint16_t) 9,
-    TYPE_OI_RELAY_HP        = (uint16_t) 10,
-    TYPE_OI_STEPPER         = (uint16_t) 11,
-    TYPE_OI_STEPPER_VE      = (uint16_t) 12,
-    TYPE_OI_ANALOG_LS       = (uint16_t) 13,
-    TYPE_OI_BRUSHLESS       = (uint16_t) 18,
-    TYPE_OI_DC              = (uint16_t) 21,
+    TYPE_OI_CORE            = (uint8_t) 3,
+    TYPE_OI_CORELITE        = (uint8_t) 4,
+    TYPE_OI_DISCRETE        = (uint8_t) 6,
+    TYPE_OI_DISCRETE_VE     = (uint8_t) 7,
+    TYPE_OI_MIXED           = (uint8_t) 8,
+    TYPE_OI_RELAY_LP        = (uint8_t) 9,
+    TYPE_OI_RELAY_HP        = (uint8_t) 10,
+    TYPE_OI_STEPPER         = (uint8_t) 11,
+    TYPE_OI_STEPPER_VE      = (uint8_t) 12,
+    TYPE_OI_ANALOG_LS       = (uint8_t) 13,
+    TYPE_OI_BRUSHLESS       = (uint8_t) 18,
+    TYPE_OI_DC              = (uint8_t) 21,
 };
 
 class BoardUtils
 {
 public:
 
-    static inline char* typeToName(uint16_t type, char* name) {
+    static inline char* typeToName(uint8_t type, char* name) {
         switch (type) {
             case TYPE_OI_CORE:          strcpy(name, "OICore"); break;
             case TYPE_OI_CORELITE:      strcpy(name, "OICoreLite"); break;
@@ -84,5 +84,22 @@ public:
             default:                    strcpy(name, "Unknown"); break;
         }
         return name;
+    }
+
+    static inline bool areTypeCompatible(uint8_t type1, uint8_t type2) {
+        // Types are equals
+        if (type1 == type2) return true;
+
+        // OICore and OICoreLite
+        if ((type1 == TYPE_OI_CORE && type2 == TYPE_OI_CORELITE) || (type1 == TYPE_OI_CORELITE && type2 == TYPE_OI_CORE)) return true;
+
+        // OICore and OICoreLite
+        if ((type1 == TYPE_OI_DISCRETE && type2 == TYPE_OI_DISCRETE_VE) || (type1 == TYPE_OI_DISCRETE_VE && type2 == TYPE_OI_DISCRETE)) return true;
+
+        // OICore and OICoreLite
+        if ((type1 == TYPE_OI_STEPPER && type2 == TYPE_OI_STEPPER_VE) || (type1 == TYPE_OI_STEPPER_VE && type2 == TYPE_OI_STEPPER)) return true;
+
+        // ELSE
+        return false;
     }
 };

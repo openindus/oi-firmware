@@ -105,7 +105,7 @@ bool ControllerMaster::autoId(void)
             std::map<uint16_t, std::pair<uint16_t, uint32_t>>::iterator it = _ids.begin();
             for (int i=0; i<_instances.size(); i++) {
                 // First, check if board type is good
-                if (it->second.first == _instances[i]->getType()) {
+                if (BoardUtils::areTypeCompatible(it->second.first, _instances[i]->getType())) {
                     // If OK, set ID and SN
                     _instances[i]->setId(it->first);
                     _instances[i]->setSN(it->second.second);
@@ -115,7 +115,7 @@ bool ControllerMaster::autoId(void)
                 } else {
                     char name1[16];
                     char name2[16];
-                    ESP_LOGE(TAG, "Type of module %i is incorrect: you have instantiate an %s and module detected is an %s", \
+                    ESP_LOGE(TAG, "Type of module %i is incorrect: you declared an %s and module detected is an %s", \
                                         i+1, \
                                         BoardUtils::typeToName(_instances[i]->getType(), name1), \
                                         BoardUtils::typeToName(it->second.first, name2));
