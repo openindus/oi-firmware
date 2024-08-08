@@ -15,6 +15,8 @@
 
 #pragma once
 
+#if !defined(MODULE_OLD)
+
 /* ID */
 #define MODULE_OI_ID_ADC_CHANNEL        ADC1_GPIO3_CHANNEL
 #define MODULE_OI_ID_ADC_WIDTH          ADC_WIDTH_BIT_12
@@ -36,3 +38,29 @@
 
 /* CMD ALIM */
 #define MODULE_PIN_CMD_MOSFET_ALIM      GPIO_NUM_46
+
+#else
+
+/* ID */
+#define MODULE_OI_ID_ADC_CHANNEL        ADC1_GPIO1_CHANNEL
+#define MODULE_OI_ID_ADC_WIDTH          ADC_WIDTH_BIT_13
+
+/* GPIO */
+#define MODULE_PIN_OI_GPIO              GPIO_NUM_0
+
+/* CAN */
+#define MODULE_PIN_CAN_TX               GPIO_NUM_5
+#define MODULE_PIN_CAN_RX               GPIO_NUM_4
+
+/* RS */
+#define MODULE_RS_NUM_PORT              UART_NUM_1
+#define MODULE_PIN_RS_UART_TX           GPIO_NUM_17
+#define MODULE_PIN_RS_UART_RX           GPIO_NUM_18
+
+/* LED */
+#define MODULE_PIN_LED                  GPIO_NUM_3
+
+/* CMD ALIM */
+#define MODULE_PIN_CMD_MOSFET_ALIM      GPIO_NUM_2
+
+#endif

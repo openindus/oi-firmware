@@ -55,10 +55,10 @@ build:stepper:
   script:
     - pio run -e stepper 
 
-# build:stepperve:
-#   extends: .build
-#   script:
-#     - pio run -e stepperve 
+build:stepperve:
+  extends: .build
+  script:
+    - pio run -e stepperve 
 
 build:mixed:
   extends: .build
@@ -135,7 +135,7 @@ pkg:bin:
     - job: build:discrete
     # - job: build:discreteve
     - job: build:stepper
-    # - job: build:stepperve
+    - job: build:stepperve
     - job: build:mixed
     - job: build:relayhp
     - job: build:relaylp

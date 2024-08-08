@@ -17,12 +17,10 @@
 
 typedef enum {
     MOTOR_1 = 0,
-#if !defined(OI_STEPPER_VE)
     MOTOR_2,
-#if !defined(OI_STEPPER)
+#if !defined(OI_STEPPER) and !defined(OI_STEPPER_VE)
     MOTOR_3,
     MOTOR_4,
-#endif
 #endif
     MOTOR_MAX,
 } MotorNum_t;
