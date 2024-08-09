@@ -34,7 +34,7 @@ TaskHandle_t intrTaskHandle;
 SemaphoreHandle_t xSemaphoreQueue;
 SemaphoreHandle_t xSemaphoreSpi;
 
-SC16IS750_rxQueue_t rx_queue;
+static SC16IS750_rxQueue_t rx_queue; // do not remove static
 
 static SC16IS750_DeviceConfig_t _deviceConfig;
 static spi_device_handle_t _spiHandler = NULL;
