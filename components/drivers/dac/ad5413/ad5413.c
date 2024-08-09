@@ -222,7 +222,18 @@ int ad5413_init(ad5413_device_t** dev, ad5413_config_t* conf)
         goto error;
     }
 
-    ad5413_spi_init(conf->host_id, conf->sclk_freq, conf->sync, &device->spi_handler);
+    ad5413_spi_init(conf->host_id, conf->sclk_freq, conf->sync_pin, &device->spi_handler);
+
+    /* Configure LDAC pin */
+    gpio_config_t gpio_conf = {
+        .pin_bit_mask = (1ULL << conf->ldac_pin),
+        .mode = GPIO_MODE_OUTPUT,
+        .pull_up_en = GPIO_PULLUP_DISABLE,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,  //An internal pull-down resistor is present into the DAC
+        .intr_type = GPIO_INTR_DISABLE
+    };
+
+    ESP_ERROR_CHECK(gpio_config(&gpio_conf));
 
     device->slip_bit = ~conf->ad1;
     device->address = ((conf->ad1 << 1) | (conf->ad0));
@@ -314,7 +325,7 @@ int ad5413_set_dac_config(ad5413_device_t* dev, uint8_t pos, uint8_t msk, uint16
  * @param range output range
  * @return 0 on success, -1 on error
  */
-int ad5758_set_output_range(ad5413_device_t* dev, ad5413_output_range_t range)
+int ad5413_set_output_range(ad5413_device_t* dev, ad5413_output_range_t range)
 {
 	int ret = 0;
     
@@ -483,4 +494,52 @@ int ad5413_clear_dig_diag_flag(ad5413_device_t* dev, ad5413_dig_diag_flags_t fla
 	}
 
 	return 0;
+}
+
+/**
+ * @brief Set the user gain for the DAC output value
+ * 
+ * @param dev Device instance
+ * @param gain Gain to apply
+ * @return 0 on success, -1 on error 
+**/
+int ad5413_set_user_gain(ad5413_device_t* dev, uint16_t gain)
+{
+    int ret = 0;
+    uint16_t reg_data;
+
+    reg_data = ((gain << AD5413_USER_GAIN_POS) & AD5413_USER_GAIN_MSK);
+
+    ret = ad5413_spi_write_reg(dev, AD5413_REG_USER_GAIN, reg_data);
+
+    if (ret != 0) {
+		ESP_LOGE(TAG, "%s: Failed.", __func__);
+		return -1;
+	}
+
+    return ret;
+}
+
+/**
+ * @brief Set the user offset for the DAC output value
+ * 
+ * @param dev Device instance
+ * @param offset Offset to apply
+ * @return 0 on success, -1 on error
+**/
+int ad5413_set_user_offset(ad5413_device_t* dev, uint16_t offset)
+{
+    int ret = 0;
+    uint16_t reg_data;
+
+    reg_data = ((offset << AD5413_USER_OFFSET_POS) & AD5413_USER_OFFSET_MSK);
+
+    ret = ad5413_spi_write_reg(dev, AD5413_REG_USER_OFFSET, reg_data);
+
+    if (ret != 0) {
+		ESP_LOGE(TAG, "%s: Failed.", __func__);
+		return -1;
+	}
+    
+    return ret;
 }

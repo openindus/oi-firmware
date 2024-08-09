@@ -26,7 +26,7 @@
 class ModbusRTUServerClass : public ModbusServer {
 public:
   ModbusRTUServerClass();
-  ModbusRTUServerClass(OI::RS& rs485);
+  ModbusRTUServerClass(RS& rs485);
   virtual ~ModbusRTUServerClass();
 
   /**
@@ -39,15 +39,19 @@ public:
    * Return 1 on success, 0 on failure
    */
   int begin(int id, unsigned long baudrate, uint32_t config = SERIAL_8N1);
-  int begin(OI::RS& rs485, int id, unsigned long baudrate, uint32_t config = SERIAL_8N1);
+  int begin(RS& rs485, int id, unsigned long baudrate, uint32_t config = SERIAL_8N1);
 
   /**
    * Poll interface for requests
    */
-  virtual void poll();
+  virtual int poll();
 
 private:
-  OI::RS* _rs485 = &OICore::rs;
+#if defined(OI_CORE)
+  RS* _rs485 = &OICore::rs;
+#else
+  RS* _rs485 = NULL;
+#endif
 
 };
 

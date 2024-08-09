@@ -6,83 +6,110 @@ static const char PS01_TAG[] = "powerSTEP01";
 /* Private variables */
 static bool _deviceConfigured = false;
 static bool _spiInitialized = false;
-static bool _pwmInitialized = false;
+static bool _pwmInitialized[NUMBER_OF_DEVICES] = {false, false};
 static bool _gpioInitialized[NUMBER_OF_DEVICES] = {false, false};
+static uint8_t _deviceId[NUMBER_OF_DEVICES] = {0, 1};
 
-static SemaphoreHandle_t _mutex;
 static spi_device_handle_t _spiHandler = NULL;
-PS01_Hal_Config_t _deviceConfig;
+static PS01_Hal_Config_t _deviceConfig;
 
-TaskHandle_t _flagTaskHandle;
-xQueueHandle _flagEvent;
-TaskHandle_t _busyTaskHandle;
-xQueueHandle _busyEvent;
+static xQueueHandle _flagEvent[NUMBER_OF_DEVICES];
+static xQueueHandle _busyEvent[NUMBER_OF_DEVICES];
 
-void IRAM_ATTR _flagIsr(void)
+static void (*_busyCallback)(uint8_t) = NULL;
+
+void IRAM_ATTR _flagIsr(void *arg)
 {
-    uint32_t buffer = 0;
-    xQueueSendFromISR(_flagEvent, &buffer, NULL);
+    uint8_t deviceId = *(uint8_t*)arg;
+    xQueueSendFromISR(_flagEvent[deviceId], NULL, NULL);
 }
 
 void _flagTask(void* arg)
 {
-    uint32_t buffer;
-    uint16_t status;
-    while(1) {
-        if(xQueueReceive(_flagEvent, &buffer, portMAX_DELAY)) {
-            /** @todo disable flag interrupt */
-            for (int i=0; i<POWERSTEP01_NUMBER_OF_DEVICES; i++) {
-                status = PS01_Cmd_GetStatus(i);
-                if (((status & POWERSTEP01_STATUS_CMD_ERROR) >> 7) == 1) {
-                    ESP_LOGW(PS01_TAG, "Flag event (%d) : Command error", i);
-                }
-                if (((status & POWERSTEP01_STATUS_UVLO) >> 9) == 0) {
-                    ESP_LOGW(PS01_TAG, "Flag event (%d) : Undervoltage lockout (UVLO)", i);
-                }
-                if (((status & POWERSTEP01_STATUS_UVLO_ADC) >> 10) == 0) {
-                    ESP_LOGW(PS01_TAG, "Flag event (%d) : VS undervoltage lockout (UVLO_ADC)", i);
-                }
-                if (((status & POWERSTEP01_STATUS_TH_STATUS) >> 11) == 0b01) {
-                    ESP_LOGW(PS01_TAG, "Flag event (%d) : Thermal warning", i);
-                }
-                if (((((status & POWERSTEP01_STATUS_TH_STATUS) >> 11) == 0b10) ||
-                    ((status & POWERSTEP01_STATUS_TH_STATUS) >> 11) == 0b11)) {
-                    ESP_LOGW(PS01_TAG, "Flag event (%d) : Thermal shutdown", i);
-                }
-                if (((status & POWERSTEP01_STATUS_OCD) >> 13) == 0) {
-                    ESP_LOGW(PS01_TAG, "Flag event (%d) : Overcurrent detection", i);
-                }
-                if (((status & POWERSTEP01_STATUS_STALL_A) >> 14) == 0) {
-                    ESP_LOGW(PS01_TAG, "Flag event (%d) : Stall detection (A)", i);
-                }
-                if (((status & POWERSTEP01_STATUS_STALL_B) >> 15) == 0) {
-                    ESP_LOGW(PS01_TAG, "Flag event (%d) : Stall detection (B)", i);
-                }
-            }
-            /** @todo enable flag interrupt */
+    uint16_t status = 0;
+    uint8_t deviceId = *(uint8_t*)arg;
+
+    while(1) 
+    {
+        if (PS01_Hal_GetFlagLevel(deviceId) == 0 && PS01_Cmd_GetParam(deviceId, POWERSTEP01_STATUS) != status) {
+            status = PS01_Cmd_GetStatus(deviceId);
+        }
+        else if(xQueueReceive(_flagEvent[deviceId], NULL, portMAX_DELAY)) {
+            gpio_intr_disable(_deviceConfig.pin_flag[deviceId]);
+            status = PS01_Cmd_GetStatus(deviceId);
+            gpio_intr_enable(_deviceConfig.pin_flag[deviceId]);
+        }
+
+        if (((status & POWERSTEP01_STATUS_CMD_ERROR) >> 7) == 1) {
+            ESP_LOGW(PS01_TAG, "Flag event (%d) : Command error", deviceId);
+        }
+        if (((status & POWERSTEP01_STATUS_UVLO) >> 9) == 0) {
+            ESP_LOGW(PS01_TAG, "Flag event (%d) : Undervoltage lockout (UVLO)", deviceId);
+        }
+        if (((status & POWERSTEP01_STATUS_UVLO_ADC) >> 10) == 0) {
+            ESP_LOGW(PS01_TAG, "Flag event (%d) : VS undervoltage lockout (UVLO_ADC)", deviceId);
+        }
+        if (((status & POWERSTEP01_STATUS_TH_STATUS) >> 11) == 0b01) {
+            ESP_LOGW(PS01_TAG, "Flag event (%d) : Thermal warning", deviceId);
+        }
+        if (((((status & POWERSTEP01_STATUS_TH_STATUS) >> 11) == 0b10) ||
+            ((status & POWERSTEP01_STATUS_TH_STATUS) >> 11) == 0b11)) {
+            ESP_LOGW(PS01_TAG, "Flag event (%d) : Thermal shutdown", deviceId);
+        }
+        if (((status & POWERSTEP01_STATUS_OCD) >> 13) == 0) {
+            ESP_LOGW(PS01_TAG, "Flag event (%d) : Overcurrent detection", deviceId);
+        }
+        if (((status & POWERSTEP01_STATUS_STALL_A) >> 14) == 0) {
+            ESP_LOGW(PS01_TAG, "Flag event (%d) : Stall detection (A)", deviceId);
+        }
+        if (((status & POWERSTEP01_STATUS_STALL_B) >> 15) == 0) {
+            ESP_LOGW(PS01_TAG, "Flag event (%d) : Stall detection (B)", deviceId);
         }
     }
 }
 
-void IRAM_ATTR _busyIsr(void)
+void IRAM_ATTR _busyIsr(void* arg)
 {
-    uint32_t buffer = 0;
-    xQueueSendFromISR(_busyEvent, &buffer, NULL);
+    uint8_t deviceId = *(uint8_t*)arg;
+    xQueueSendFromISR(_busyEvent[deviceId], NULL, NULL);
 }
 
 void _busyTask(void* arg)
 {
-    uint32_t buffer;
+    uint8_t deviceId = *(uint8_t*)arg;
+
     while(1) {
-        if(xQueueReceive(_flagEvent, &buffer, portMAX_DELAY)) {
-            /** @todo disable flag interrupt */
-            /** @todo
-             * 
-            */
-            /** @todo enable flag interrupt */
+        if(xQueueReceive(_busyEvent[deviceId], NULL, portMAX_DELAY)) {
+            gpio_intr_disable(_deviceConfig.pin_busy_sync[deviceId]);
+            if (_busyCallback != NULL) {
+                _busyCallback(deviceId); 
+            }
+            gpio_intr_enable(_deviceConfig.pin_busy_sync[deviceId]);
         }
     }
 }
+
+/**
+ * @brief Attach a busy interrupt for the given motor
+ * 
+ * @param deviceId 
+ * @param callback 
+ */
+void PS01_Hal_AttachBusyInterrupt(void(*callback)(uint8_t))
+{
+    _busyCallback = callback;
+}
+
+/**
+ * @brief Detach busy interrupt callback for the given motor
+ * 
+ * @param deviceId 
+ */
+void PS01_Hal_DetachBusyInterrupt(void)
+{
+    _busyCallback = NULL;
+}
+
 
 /**
  * @brief This function provides an accurate delay in milliseconds
@@ -131,7 +158,7 @@ void PS01_Hal_GpioInit(uint8_t deviceId)
             ESP_LOGI(PS01_TAG, "Initializes the device%u's GPIOs", deviceId+1);
             ESP_LOGI(PS01_TAG, "SW: io%d | STBY/RST: io%d | BUSY/SYNC: io%d | FLAG: io%d", 
                 _deviceConfig.pin_sw[deviceId], _deviceConfig.pin_stby_rst[deviceId], 
-                _deviceConfig.pin_busy_sync, _deviceConfig.pin_flag);
+                _deviceConfig.pin_busy_sync[deviceId], _deviceConfig.pin_flag[deviceId]);
 
             /* SW, STBY/RST */
             cfg.pin_bit_mask = ((1ULL << _deviceConfig.pin_sw[deviceId]) |
@@ -143,29 +170,26 @@ void PS01_Hal_GpioInit(uint8_t deviceId)
 
             ESP_ERROR_CHECK(gpio_config(&cfg));
 
-            /* BUSY/SYNC */
-            if (deviceId == DEVICE1) {                
-                cfg.pin_bit_mask = (1ULL << _deviceConfig.pin_busy_sync);
-                cfg.mode = GPIO_MODE_INPUT;
-                cfg.pull_up_en = GPIO_PULLUP_ENABLE;
-                cfg.pull_down_en = GPIO_PULLDOWN_DISABLE;
-                cfg.intr_type = GPIO_INTR_POSEDGE;
+            /* BUSY/SYNC */      
+            cfg.pin_bit_mask = (1ULL << _deviceConfig.pin_busy_sync[deviceId]);
+            cfg.mode = GPIO_MODE_INPUT;
+            cfg.pull_up_en = GPIO_PULLUP_ENABLE;
+            cfg.pull_down_en = GPIO_PULLDOWN_DISABLE;
+            cfg.intr_type = GPIO_INTR_POSEDGE;
 
-                ESP_ERROR_CHECK(gpio_config(&cfg));
-            }
+            ESP_ERROR_CHECK(gpio_config(&cfg));
 
-            /* Flag */
-            if (deviceId == DEVICE1) {                
-                cfg.pin_bit_mask = (1ULL << _deviceConfig.pin_flag);
-                cfg.mode = GPIO_MODE_INPUT;
-                cfg.pull_up_en = GPIO_PULLUP_ENABLE;
-                cfg.pull_down_en = GPIO_PULLDOWN_DISABLE;
-                cfg.intr_type = GPIO_INTR_NEGEDGE;
+            /* Flag */             
+            cfg.pin_bit_mask = (1ULL << _deviceConfig.pin_flag[deviceId]);
+            cfg.mode = GPIO_MODE_INPUT;
+            cfg.pull_up_en = GPIO_PULLUP_ENABLE;
+            cfg.pull_down_en = GPIO_PULLDOWN_DISABLE;
+            cfg.intr_type = GPIO_INTR_NEGEDGE;
 
-                ESP_ERROR_CHECK(gpio_config(&cfg));
-            }
+            ESP_ERROR_CHECK(gpio_config(&cfg));
 
             _gpioInitialized[deviceId] = true;
+
         } else {
             ESP_LOGE(PS01_TAG, "Device is not configured !!!");
         }
@@ -177,18 +201,18 @@ void PS01_Hal_GpioInit(uint8_t deviceId)
  * corresponding GPIO, Timer, Pwm, ...
  * @retval None
  */
-void PS01_Hal_StepClockInit(void)
+void PS01_Hal_StepClockInit(uint8_t deviceId)
 {
     ESP_LOGV(PS01_TAG, "Initialises the step clock");
 
-    if (_pwmInitialized == false) {
+    if (_pwmInitialized[deviceId] == false) {
         if (_deviceConfigured == true) {
-            ESP_LOGI(PS01_TAG, "Initializes the the step clock");
+            ESP_LOGI(PS01_TAG, "Initializes the step clock");
             
             ledc_timer_config_t pwm_timer = {
-                .speed_mode         = _deviceConfig.pwm_mode,
+                .speed_mode         = LEDC_LOW_SPEED_MODE,
                 .duty_resolution    = LEDC_TIMER_8_BIT,
-                .timer_num          = _deviceConfig.pwm_timer,
+                .timer_num          = _deviceConfig.pwm_timer[deviceId],
                 .freq_hz            = 10000,
                 .clk_cfg            = LEDC_AUTO_CLK,
             };
@@ -196,7 +220,8 @@ void PS01_Hal_StepClockInit(void)
             /* Timer config */
             ESP_ERROR_CHECK(ledc_timer_config(&pwm_timer));
 
-            _pwmInitialized = true;
+            _pwmInitialized[deviceId] = true;
+
         } else {
             ESP_LOGE(PS01_TAG, "Device is not configured !!!");
         }
@@ -209,20 +234,20 @@ void PS01_Hal_StepClockInit(void)
  * @retval None
  * @note The frequency is directly the current speed of the device
  */
-void PS01_Hal_StartStepClock(uint16_t newFreq)
+void PS01_Hal_StartStepClock(uint8_t deviceId, uint16_t newFreq)
 {
     ESP_LOGV(PS01_TAG, "Start the step clock");
 
-    if (_pwmInitialized == true) {
+    if (_pwmInitialized[deviceId] == true) {
         /* Set frequency */
-        ESP_ERROR_CHECK(ledc_set_freq(_deviceConfig.pwm_mode, _deviceConfig.pwm_timer, newFreq));
+        ESP_ERROR_CHECK(ledc_set_freq(LEDC_LOW_SPEED_MODE, _deviceConfig.pwm_timer[deviceId], newFreq));
 
         ledc_channel_config_t pwm_channel = {
-            .gpio_num   = _deviceConfig.pwm_pin_stck,
-            .speed_mode = _deviceConfig.pwm_mode,
-            .channel    = _deviceConfig.pwm_channel,
+            .gpio_num   = _deviceConfig.pwm_pin_stck[deviceId],
+            .speed_mode = LEDC_LOW_SPEED_MODE,
+            .channel    = _deviceConfig.pwm_channel[deviceId],
             .intr_type  = LEDC_INTR_DISABLE,
-            .timer_sel  = _deviceConfig.pwm_timer,
+            .timer_sel  = _deviceConfig.pwm_timer[deviceId],
             .duty       = 127, // (((2^8)/2) - 1)
             .hpoint     = 0,
         };
@@ -238,12 +263,12 @@ void PS01_Hal_StartStepClock(uint16_t newFreq)
  * @brief Stops the PWM uses for the step clock
  * @retval None
  */
-void PS01_Hal_StopStepClock(void)
+void PS01_Hal_StopStepClock(uint8_t deviceId)
 {
     ESP_LOGV(PS01_TAG, "Stop the step clock");
 
-    if (_pwmInitialized == true) {
-        ESP_ERROR_CHECK(ledc_stop(_deviceConfig.pwm_mode, _deviceConfig.pwm_channel, 0));
+    if (_pwmInitialized[deviceId] == true) {
+        ESP_ERROR_CHECK(ledc_stop(LEDC_LOW_SPEED_MODE, _deviceConfig.pwm_channel[deviceId], 0));
     } else {
         ESP_LOGE(PS01_TAG, "Step clock is not initialized !!!");
     }
@@ -330,9 +355,6 @@ uint8_t PS01_Hal_SpiInit(void)
 
             ESP_ERROR_CHECK(spi_bus_add_device(_deviceConfig.spi_host, &devConfig, &_spiHandler));
 
-            _mutex = xSemaphoreCreateMutex();
-            xSemaphoreGive(_mutex);
-
             _spiInitialized = true;
         } else {
             ESP_LOGE(PS01_TAG, "Device is not configured !!!");
@@ -352,7 +374,6 @@ uint8_t PS01_Hal_SpiWriteBytes(uint8_t *pByteToTransmit, uint8_t *pReceivedByte)
     ESP_LOGV(PS01_TAG, "Write and read SPI byte to the powerSTEP01");
 
     if (_spiInitialized == true) {
-        xSemaphoreTake(_mutex, portMAX_DELAY);
 
         spi_transaction_t trans = {
             .flags = 0,
@@ -371,8 +392,6 @@ uint8_t PS01_Hal_SpiWriteBytes(uint8_t *pByteToTransmit, uint8_t *pReceivedByte)
         trans.rx_buffer = pReceivedByte;
 
         ESP_ERROR_CHECK(spi_device_polling_transmit(_spiHandler, &trans));
-
-        xSemaphoreGive(_mutex);
     }
     else {
         ESP_LOGE(PS01_TAG, "SPI is not initialized !!!");
@@ -406,7 +425,7 @@ void PS01_Hal_SetSwitchLevel(uint8_t deviceId, uint32_t level)
         ESP_LOGV(PS01_TAG, "Set switch level device%u: %d", deviceId, level);
         ESP_ERROR_CHECK(gpio_set_level(_deviceConfig.pin_sw[deviceId], level));
     } else {
-        ESP_LOGE(PS01_TAG, "GPIOs are not initialized !!!");
+        ESP_LOGE(PS01_TAG, "GPIOs are not initialized !!!!");
     }
 }
 
@@ -414,13 +433,13 @@ void PS01_Hal_SetSwitchLevel(uint8_t deviceId, uint32_t level)
  * @brief Returns the BUSY pin state.
  * @retval The BUSY pin value.
  */
-uint8_t PS01_Hal_GetBusyLevel(void)
+uint8_t PS01_Hal_GetBusyLevel(uint8_t deviceId)
 {
     uint32_t ret = 0;
     ESP_LOGV(PS01_TAG, "Returns the BUSY pin state");
 
-    if (_gpioInitialized[DEVICE1] == true) {
-        ret = gpio_get_level(_deviceConfig.pin_busy_sync);
+    if (_gpioInitialized[deviceId] == true) {
+        ret = gpio_get_level(_deviceConfig.pin_busy_sync[deviceId]);
         ESP_LOGV(PS01_TAG, "BUSY/Sync pin state : %d", ret);
     } else {
         ESP_LOGE(PS01_TAG, "GPIOs are not initialized !!!");
@@ -432,13 +451,13 @@ uint8_t PS01_Hal_GetBusyLevel(void)
  * @brief Returns the FLAG pin state.
  * @retval The FLAG pin value.
  */
-uint8_t PS01_Hal_GetFlagLevel(void)
+uint8_t PS01_Hal_GetFlagLevel(uint8_t deviceId)
 {
     uint32_t ret = 0;
     ESP_LOGV(PS01_TAG, "Returns the FLAG pin state");
 
-    if (_gpioInitialized[DEVICE1] == true) {
-        ret = gpio_get_level(_deviceConfig.pin_flag);
+    if (_gpioInitialized[deviceId] == true) {
+        ret = gpio_get_level(_deviceConfig.pin_flag[deviceId]);
         // ESP_ERROR_CHECK(ret);
         ESP_LOGV(PS01_TAG, "BUSY/Sync pin state : %d", ret);
     } else {
@@ -451,24 +470,39 @@ void PS01_Hal_Init(uint8_t deviceId)
 {
 	/* Initialise the GPIOs of the just added device */
 	PS01_Hal_GpioInit(deviceId);
-	PS01_Hal_SpiInit();
+
+    /* Init spi only once */
+    if (deviceId == 0) {
+        PS01_Hal_SpiInit();
+        PS01_InitCommands();
+    }
 
 	/* configure the step clock */
-	PS01_Hal_StepClockInit();
+	PS01_Hal_StepClockInit(deviceId);
 
 	/* Standby-reset deactivation */
 	PS01_Hal_ReleaseReset(deviceId);
 
+    /* Reset the SW pin */
+    PS01_Hal_SetSwitchLevel(deviceId, 0);
+
     /* Let a delay after reset */
-	PS01_Hal_Delay(1);
+	PS01_Hal_Delay(10);
+
+    /* Clear status */
+    PS01_Cmd_GetStatus(deviceId);
 
     /* PowerSTEP01 Flag */
-    _flagEvent = xQueueCreate(1, sizeof(uint32_t));
-    xTaskCreate(_flagTask, "Flag task", 2048, NULL, 5, &_flagTaskHandle);
-    gpio_isr_handler_add(_deviceConfig.pin_flag, (gpio_isr_t)_flagIsr, NULL);
+    _flagEvent[deviceId] = xQueueCreate(2, 0);
+    char task_name[14];
+    snprintf(task_name, 14, "Flag task %i", deviceId);        
+    xTaskCreate(_flagTask, task_name, 4096, &deviceId, 5, NULL);
+    gpio_isr_handler_add(_deviceConfig.pin_flag[deviceId], (gpio_isr_t)_flagIsr, &_deviceId[deviceId]);
 
     /* PowerSTEP01 Busy */
-    _busyEvent = xQueueCreate(1, sizeof(uint32_t));
-    xTaskCreate(_busyTask, "Busy task", 2048, NULL, 5, &_busyTaskHandle);
-    gpio_isr_handler_add(_deviceConfig.pin_busy_sync, (gpio_isr_t)_busyIsr, NULL);
+    _busyEvent[deviceId] = xQueueCreate(2, 0);
+    snprintf(task_name, 14, "Busy task %i", deviceId);   
+    xTaskCreate(_busyTask, task_name, 2048, &deviceId, 5, NULL);
+    gpio_isr_handler_add(_deviceConfig.pin_busy_sync[deviceId], (gpio_isr_t)_busyIsr, &_deviceId[deviceId]);
+
 }

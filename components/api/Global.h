@@ -15,19 +15,21 @@
 
 #pragma once
 
-/* Standard library*/
+/* C/C++ - Standard library */
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
 #include <assert.h>
+#include <math.h>
 #include <functional>
 #include <string>
 #include <vector>
 #include <map>
 #include <algorithm>
-#include <math.h>
+#include <array>
+#include <cstring>
 
 /* ESP Components */
 #include "esp_err.h"
@@ -39,6 +41,8 @@
 #include "esp_task_wdt.h"
 #include "esp_ota_ops.h"
 #include "esp_efuse.h"
+#include "esp_intr_alloc.h"
+#include "esp_console.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/event_groups.h"
 #include "freertos/queue.h"
@@ -54,15 +58,12 @@
 #include "driver/sdspi_host.h"
 #include "driver/adc.h"
 #include "driver/usb_serial_jtag.h"
-#if !defined(CONFIG_IDF_TARGET_ESP32)
 #include "driver/temp_sensor.h"
-#endif
 #include "soc/adc_channel.h"
 #include "argtable3/argtable3.h"
 #include "nvs_flash.h"
 #include "nvs.h"
 #include "sdmmc_cmd.h"
-#include "esp_intr_alloc.h"
 
 /* OpenIndus Drivers */
 #include "ads866x.h"
@@ -76,22 +77,5 @@
 #include "DriversComponents/MCP25625.h"
 #include "stds75.h"
 #include "cd74hc4052.h"
-
-/* OpenIndus Middleware */
-#include "Bus.h"
-#include "DigitalOutput.h"
-#include "DigitalInput.h"
-#include "AnalogOutput.h"
-#include "AnalogInput.h"
-#include "Motor.h"
-#include "MotorStepper.h"
-#include "UsbConsole.h"
-#include "UsbSerial.h"
-#include "FlashLoader.h"
-#include "Encoder.h"
-#include "MotorBLDC.h"
-#include "MotorStepperParam.h"
-#include "Led.h"
-#include "RTClock.h"
-#include "CAN.h"
-#include "RS.h"
+#include "ads114s0x.h"
+#include "adc.h"

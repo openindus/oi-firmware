@@ -97,6 +97,14 @@ extern "C"
 #define AD5413_DIGITAL_DIAG_RESULTS_CAL_MEM_UNREFRESHED_MSK		    0x1
 #define AD5413_DIGITAL_DIAG_RESULTS_CAL_MEM_UNREFRESHED_POS		    15
 
+/* AD5413_REG_USER_GAIN */
+#define AD5413_USER_GAIN_MSK			        0xFFFC
+#define AD5413_USER_GAIN_POS			        2
+
+/* AD5413_REG_USER_OFFSET */
+#define AD5413_USER_OFFSET_MSK			        0xFFFC
+#define AD5413_USER_OFFSET_POS			        2
+
 typedef enum {
 	OUTPUT_RANGE_M10V5_10V5 = 0b0011,
 	OUTPUT_RANGE_0mA_20mA = 0b1001
@@ -116,7 +124,8 @@ typedef enum {
 typedef struct {
     spi_host_device_t host_id;  // SPI host Id
     int sclk_freq;              // Clock frequency
-    gpio_num_t sync;            // SYNC pin (Chip select)
+    gpio_num_t sync_pin;            // SYNC pin (Chip select)
+	gpio_num_t ldac_pin;			// LDAC pin
     uint8_t ad0 : 1;            // Address decode 0
     uint8_t ad1 : 1;            // Address decode 1
 } ad5413_config_t;
@@ -133,7 +142,7 @@ int ad5413_init(ad5413_device_t**, ad5413_config_t* conf);
 int ad5413_dac_input_write(ad5413_device_t* dev, uint16_t data);
 int ad5413_dac_output_read(ad5413_device_t* dev, uint16_t* data);
 int ad5413_set_dac_config(ad5413_device_t* dev, uint8_t pos, uint8_t msk, uint16_t data);
-int ad5758_set_output_range(ad5413_device_t* dev, ad5413_output_range_t range);
+int ad5413_set_output_range(ad5413_device_t* dev, ad5413_output_range_t range);
 int ad5413_internal_buffers_en(ad5413_device_t* dev, uint8_t enable);
 int ad5413_dac_out_en(ad5413_device_t* dev, uint8_t enable);
 int ad5413_soft_ldac_cmd(ad5413_device_t* dev);
@@ -142,6 +151,8 @@ int ad5413_calib_mem_refresh(ad5413_device_t* dev);
 int ad5413_wait_for_refresh_cycle(ad5413_device_t* dev);
 
 int ad5413_clear_dig_diag_flag(ad5413_device_t* dev, ad5413_dig_diag_flags_t flag);
+int ad5413_set_user_gain(ad5413_device_t* dev, uint16_t gain);
+int ad5413_set_user_offset(ad5413_device_t* dev, uint16_t offset);
 
 #ifdef __cplusplus
 }

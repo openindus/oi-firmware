@@ -34,45 +34,39 @@ void System::init(void)
 
     /* Module init */
 #if defined(OI_CORE)
-    CoreStandalone::init();
-    CoreMaster::init();
-    CoreCLI::init();
+    err |= Core::init();
 #elif defined(OI_DISCRETE) || defined(OI_DISCRETE_VE)
-    DiscreteStandalone::init();
-    DiscreteSlave::init();
-    DiscreteCLI::init();
+    err |= Discrete::init();
 #elif defined(OI_STEPPER) || defined(OI_STEPPER_VE)
-    StepperStandalone::init();
-    StepperSlave::init();
-    StepperCLI::init();
-    StepperParamCLI::init();
+    err |= Stepper::init();
 #elif defined(OI_MIXED)
-    err |= MixedStandalone::init();
-    err |= MixedSlave::init();
-    err |= MixedCLI::init();
-#elif defined(OI_RELAY_HP) || defined(OI_RELAY_LP)
-    RelayStandalone::init();
-    RelaySlave::init();
-#elif defined(OI_BRUSHLESS)
-    BrushlessStandalone::init();
-    BrushlessSlave::init();
+    err |= Mixed::init();
+#elif defined(OI_RELAY_HP)
+    err |= RelayHP::init();
 #elif defined(OI_ANALOG_LS)
-    err |= AnalogLsStandalone::init();
-    err |= AnalogLsSlave::init();
+    err |= AnalogLS::init();
+#elif defined(OI_DC)
+    err |= Dc::init();
 #endif
-    ModuleCLI::init();
+
+    /* Controller init */
 #if defined(MODULE_MASTER)
-    ModuleMasterCLI::init();
+    err |= ControllerMaster::init();
+#elif defined(MODULE_SLAVE)
+    err |= ControllerSlave::init();
 #endif
+
+    /* Command line interface init */
+    CLI::init();
 
     if (err != 0) {
         ESP_LOGE(TAG, "Failed to initialize module");
-        ModuleStandalone::ledBlink(LED_RED, 250);
+        Module::ledBlink(LED_RED, 250);
         UsbConsole::begin(true); // Force console to start, convenient for debugging
         return;
     } else {
         /* Module Initialized */
-        ModuleStandalone::ledBlink(LED_BLUE, 1000);
+        Module::ledBlink(LED_BLUE, 1000);
     }
 
     /* Check reset reason */
@@ -81,7 +75,7 @@ void System::init(void)
         (reason != ESP_RST_SW) && 
         (reason != ESP_RST_UNKNOWN)) {
         ESP_LOGE(TAG, "Reset reason : %d", reason);
-        ModuleStandalone::ledBlink(LED_RED, 1000); // Error
+        Module::ledBlink(LED_RED, 1000); // Error
         UsbConsole::begin(true); // Force console to start, convenient for debugging
         return;
     }
@@ -97,14 +91,14 @@ void System::init(void)
     UsbConsole::listen();
     
     /* Wait for slaves modules to init and give time to user script to enable console */
-    vTaskDelay(200/portTICK_PERIOD_MS);
+    vTaskDelay(500/portTICK_PERIOD_MS);
 
     /* On master module, call autoId */
 #if defined(MODULE_MASTER)
-    if (ModuleMaster::autoId()) {
-        ModuleStandalone::ledBlink(LED_GREEN, 1000); // Paired
+    if (ControllerMaster::autoId()) {
+        Module::ledBlink(LED_GREEN, 1000); // Paired
     } else {
-        ModuleStandalone::ledBlink(LED_RED, 1000); // Paired error
+        Module::ledBlink(LED_RED, 1000); // Paired error
         UsbConsole::begin(true); // Force console to start, convenient for debugging
         return;
     }
@@ -113,7 +107,7 @@ void System::init(void)
     if (!UsbConsole::begin()) { // console will start only if user input "console" during startup
         /* Start main task if console is not started  */
         ESP_LOGI(TAG, "Create main task");
-        vTaskDelay(1);
+        vTaskDelay(10);
         xTaskCreate(_mainTask, "Main task", 8192, NULL, 1, NULL);
 #if defined(FORCE_CONSOLE)
         UsbConsole::begin(true); // Force console, will failed if Serial.begin() is called in user code

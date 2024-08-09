@@ -15,9 +15,39 @@
 
 #pragma once
 
-#include "ModuleStandalone.h"
-#include "ModuleSlave.h"
-#include "ModuleControl.h"
-#include "ModuleMaster.h"
-#include "ModuleCLI.h"
-#include "ModuleMasterCLI.h"
+#include "Global.h"
+#include "Module.h"
+#include "ModulePinout.h"
+#include "Board.h"
+#include "Led.h"
+#include "Bus.h"
+
+class Module: 
+    private Board, 
+    private Led,
+    private Bus
+{
+protected:
+
+    static int init(uint16_t type);
+
+public:
+
+    static inline void restart(void) {Board::restart();};
+
+    static inline void ledOn(LedColor_t color) {Led::on(color);};
+    static inline void ledOff(void) {Led::off();};
+    static inline void ledBlink(LedColor_t color, uint32_t period) {Led::blink(color, period);};
+
+#if defined(MODULE_MASTER) || defined(MODULE_SLAVE)
+
+    static inline void busPowerOn(void) { BusIO::powerOn(); }
+    static inline void busPowerOff(void) { BusIO::powerOff(); }
+
+#endif
+
+private:
+
+    static uint16_t _type;
+
+};

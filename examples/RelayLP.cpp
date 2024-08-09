@@ -1,7 +1,7 @@
 #include "OpenIndus.h"
 #include "Arduino.h"
 
-OIRelay relay;
+OIRelayHP relay; // TODO: Change to OIRelayLP
 
 void setup(void)
 {

@@ -1,6 +1,7 @@
 .oi
 .pio
 .vscode
+build
 sdkconfig
 sdkconfig.core
 sdkconfig.discrete
@@ -12,4 +13,6 @@ sdkconfig.relaylp
 sdkconfig.relayhp
 sdkconfig.analogls
 sdkconfig.brushless
+sdkconfig.dc
+*.old
 dependencies.lock

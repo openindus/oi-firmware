@@ -21,9 +21,14 @@
 #include "Discrete.h"
 #include "Mixed.h"
 #include "Stepper.h"
-#include "Relay.h"
-#include "AnalogLs.h"
+#include "RelayHP.h"
+#include "AnalogLS.h"
 #include "Brushless.h"
+#include "Dc.h"
+#include "ControllerMaster.h"
+#include "ControllerSlave.h"
+#include "CLI.h"
+#include "UsbConsole.h"
 
 void setup(void);
 void loop(void);

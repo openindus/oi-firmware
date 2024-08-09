@@ -59,6 +59,8 @@ void PS01_FetchAndClearAllStatus(void);
 uint16_t PS01_GetFetchedStatus(uint8_t deviceId);
 void PS01_QueueCommands(uint8_t deviceId, uint8_t command, int32_t value);
 void PS01_SendQueuedCommands(void);
+void PS01_InitCommands(void);
+
 
 #ifdef __cplusplus
 }

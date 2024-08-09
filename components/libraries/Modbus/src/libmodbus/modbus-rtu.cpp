@@ -653,7 +653,7 @@ static int _modbus_rtu_connect(modbus_t *ctx)
         return -1;
     }
 #elif defined(ARDUINO)
-    ctx_rtu->rs485->begin(OI::RS_485, ctx_rtu->baud);
+    ctx_rtu->rs485->begin(RS_485, ctx_rtu->baud);
 #else
     /* The O_NOCTTY flag tells UNIX that this program doesn't want
        to be the "controlling terminal" for that port. If you
@@ -1326,7 +1326,7 @@ const modbus_backend_t _modbus_rtu_backend = {
 };
 
 #ifdef ARDUINO
-modbus_t* modbus_new_rtu(OI::RS *rs485, unsigned long baud, uint16_t config)
+modbus_t* modbus_new_rtu(RS *rs485, unsigned long baud, uint16_t config)
 #else
 modbus_t* modbus_new_rtu(const char *device,
                          int baud, char parity, int data_bit,

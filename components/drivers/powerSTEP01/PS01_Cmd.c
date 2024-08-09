@@ -5,6 +5,8 @@ static uint8_t spiTxBursts[POWERSTEP01_CMD_ARG_MAX_NB_BYTES][POWERSTEP01_NUMBER_
 static uint8_t spiRxBursts[POWERSTEP01_CMD_ARG_MAX_NB_BYTES][POWERSTEP01_NUMBER_OF_DEVICES];
 static volatile bool spiPreemtionByIsr = 0;
 static volatile bool isrFlag = 0;
+static SemaphoreHandle_t _lockSpi;
+
 
 /******************************************************//**
  * @brief  Sends a command to a given device Id via the SPI
@@ -24,6 +26,8 @@ void PS01_SendCommand(uint8_t deviceId, uint8_t param, uint32_t value)
 		uint8_t spiIndex = POWERSTEP01_NUMBER_OF_DEVICES - deviceId - 1;
 		bool itDisable = 0; 
 		
+		xSemaphoreTake(_lockSpi, portMAX_DELAY);
+
 		do
 		{
 		spiPreemtionByIsr = 0;
@@ -80,6 +84,8 @@ void PS01_SendCommand(uint8_t deviceId, uint8_t param, uint32_t value)
 		}
 		/* re-enable PS01_Hal_EnableIrq after SPI transfers*/
 		PS01_Hal_EnableIrq();
+
+		xSemaphoreGive(_lockSpi);
 	}
 }
 
@@ -99,6 +105,8 @@ uint32_t PS01_Cmd_GetParam(uint8_t deviceId, uint32_t param)
 		uint8_t maxArgumentNbBytes = 0;
 		uint8_t spiIndex = POWERSTEP01_NUMBER_OF_DEVICES - deviceId - 1;
 		bool itDisable = 0;
+	
+		xSemaphoreTake(_lockSpi, portMAX_DELAY);
 		
 		do
 		{
@@ -162,6 +170,8 @@ uint32_t PS01_Cmd_GetParam(uint8_t deviceId, uint32_t param)
 					(spiRxBursts[3][spiIndex]);    
 		/* re-enable PS01_Hal_EnableIrq after SPI transfers*/
 		PS01_Hal_EnableIrq();
+
+		xSemaphoreGive(_lockSpi);
 	}
 
 	return (spiRxData);
@@ -180,6 +190,8 @@ uint16_t PS01_Cmd_GetStatus(uint8_t deviceId)
 		uint32_t loop;
 		uint8_t spiIndex = POWERSTEP01_NUMBER_OF_DEVICES - deviceId - 1;
 		bool itDisable = 0; 
+	
+		xSemaphoreTake(_lockSpi, portMAX_DELAY);
 	
 		do
 		{
@@ -214,6 +226,8 @@ uint16_t PS01_Cmd_GetStatus(uint8_t deviceId)
 		status = (spiRxBursts[1][spiIndex] << 8) | (spiRxBursts[2][spiIndex]);
 		/* re-enable PS01_Hal_EnableIrq after SPI transfers*/
 		PS01_Hal_EnableIrq();    
+
+		xSemaphoreGive(_lockSpi);
 	}
 	return (status);
 }
@@ -413,7 +427,9 @@ void PS01_Cmd_SetParam(uint8_t deviceId, uint32_t param, uint32_t value)
 		uint8_t maxArgumentNbBytes = 0;
 		uint8_t spiIndex = POWERSTEP01_NUMBER_OF_DEVICES - deviceId - 1;
 		bool itDisable = 0;
-		
+	
+		xSemaphoreTake(_lockSpi, portMAX_DELAY);
+
 		do
 		{
 		spiPreemtionByIsr = 0;
@@ -471,6 +487,8 @@ void PS01_Cmd_SetParam(uint8_t deviceId, uint32_t param, uint32_t value)
 		}
 		/* re-enable PS01_Hal_EnableIrq after SPI transfers*/
 		PS01_Hal_EnableIrq();
+
+		xSemaphoreGive(_lockSpi);
 	}
 }
 
@@ -540,6 +558,8 @@ void PS01_FetchAndClearAllStatus(void)
 {
 	uint8_t loop;
 
+	xSemaphoreTake(_lockSpi, portMAX_DELAY);
+
 	for (loop = 0; loop < POWERSTEP01_NUMBER_OF_DEVICES; loop++)
 	{
 		spiTxBursts[0][loop] = POWERSTEP01_GET_STATUS;
@@ -558,6 +578,8 @@ void PS01_FetchAndClearAllStatus(void)
 	{
 		PS01_Hal_SpiWriteBytes(&spiTxBursts[loop][0], &spiRxBursts[loop][0]);
 	}
+
+	xSemaphoreGive(_lockSpi);
 }
 
 /******************************************************//**
@@ -631,10 +653,24 @@ void PS01_SendQueuedCommands(void)
 {
 	uint8_t loop;
 	
+	xSemaphoreTake(_lockSpi, portMAX_DELAY);
+
 	for (loop = 0; 
 		loop < POWERSTEP01_CMD_ARG_MAX_NB_BYTES; 
 		loop++)
 	{
 		PS01_Hal_SpiWriteBytes(&spiTxBursts[loop][0], &spiRxBursts[loop][0]);
 	}
+
+	xSemaphoreGive(_lockSpi);
+}
+
+/**
+ * @brief Init mutex for locking spi commands
+ * 
+ */
+void PS01_InitCommands()
+{
+	_lockSpi = xSemaphoreCreateMutex();
+	xSemaphoreGive(_lockSpi);
 }

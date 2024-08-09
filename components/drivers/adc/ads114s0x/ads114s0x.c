@@ -8,6 +8,17 @@
 
 #include "ads114s0x.h"
 
+#define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
+#define BYTE_TO_BINARY(byte) \
+    ((byte) & 0x80 ? '1' : '0'), \
+    ((byte) & 0x40 ? '1' : '0'), \
+    ((byte) & 0x20 ? '1' : '0'), \
+    ((byte) & 0x10 ? '1' : '0'), \
+    ((byte) & 0x08 ? '1' : '0'), \
+    ((byte) & 0x04 ? '1' : '0'), \
+    ((byte) & 0x02 ? '1' : '0'), \
+    ((byte) & 0x01 ? '1' : '0') 
+
 static const char TAG[] = "ads114s0x";
 
 /**
@@ -165,7 +176,7 @@ int ads114s0x_self_offset_calib(ads114s0x_device_t* dev)
  */
 int ads114s0x_read_data(ads114s0x_device_t* dev, uint16_t* data)
 {
-    if (dev == NULL) {
+    if ((dev == NULL) || data == NULL) {
         goto error;
     }
 
@@ -174,22 +185,25 @@ int ads114s0x_read_data(ads114s0x_device_t* dev, uint16_t* data)
      * 
      */
 
+    uint8_t buffer[2] = {0};
+
     spi_transaction_t trans = {
         .flags = 0,
-        .cmd = (uint16_t)(ADS114S0X_CMD_RDATA),
+        .cmd = (uint16_t)(ADS114S0X_CMD_RDATA << 8),
         .addr = 0,
         .length = 16,
         .rxlength = 16,
         .user = NULL,
         .tx_buffer = NULL,
-        .rx_buffer = &data
+        .rx_buffer = buffer
     };
 
     esp_err_t err = spi_device_polling_transmit(dev->spi_handler, &trans);
     if (err != ESP_OK) {
         goto error;
     }
-
+    
+    *data = ((buffer[0] << 8) | buffer[1]);
     return 0;
 
 error:
@@ -286,13 +300,17 @@ error:
 }
 
 /**
- * @brief Perform hardware start/sync
+ * @brief Perform start/sync
  * 
  * @param dev Device instance
  * @return int 0=success, -1=error
  */
 int ads114s0x_start_sync(ads114s0x_device_t* dev)
 {
+    if (dev == NULL) {
+        return -1;
+    }
+
     esp_err_t err = ESP_OK;
     err |= gpio_set_level(dev->config->start_sync, 1);
     vTaskDelay(10 / portTICK_PERIOD_MS);
@@ -312,10 +330,54 @@ int ads114s0x_start_sync(ads114s0x_device_t* dev)
  */
 int ads114s0x_hard_reset(ads114s0x_device_t* dev)
 {
+    if (dev == NULL) {
+        return -1;
+    }
+
     esp_err_t err = ESP_OK;
-    err |= gpio_set_level(dev->config->start_sync, 0);
+    err |= gpio_set_level(dev->config->reset, 0);
     vTaskDelay(10 / portTICK_PERIOD_MS);
-    err |= gpio_set_level(dev->config->start_sync, 1);
+    err |= gpio_set_level(dev->config->reset, 1);
+    if (err != ESP_OK) {
+        return -1;
+    } else {
+        return 0;
+    }
+}
+
+/**
+ * @brief Enable device
+ * 
+ * @param dev Device instance
+ * @return int 0=success, -1=error
+ */
+int ads114s0x_enable(ads114s0x_device_t* dev)
+{
+    if (dev == NULL) {
+        return -1;
+    }
+
+    esp_err_t err = gpio_set_level(dev->config->reset, 1);
+    if (err != ESP_OK) {
+        return -1;
+    } else {
+        return 0;
+    }
+}
+
+/**
+ * @brief Disable device
+ * 
+ * @param dev Device instance
+ * @return int 0=success, -1=error
+ */
+int ads114s0x_disable(ads114s0x_device_t* dev)
+{
+    if (dev == NULL) {
+        return -1;
+    }
+
+    esp_err_t err = gpio_set_level(dev->config->reset, 0);
     if (err != ESP_OK) {
         return -1;
     } else {
@@ -333,10 +395,25 @@ int ads114s0x_hard_reset(ads114s0x_device_t* dev)
  */
 int ads114s0x_add_data_ready_isr_handler(ads114s0x_device_t* dev, gpio_isr_t isr_handler, void* args)
 {
+    if (dev == NULL) {
+        return -1;
+    }
+
     esp_err_t err = gpio_isr_handler_add(dev->config->drdy, isr_handler, args);
     if (err != ESP_OK) {
         return -1;
     } else {
         return 0;
+    }
+}
+
+void ads114s0x_print_register_map(ads114s0x_device_t* dev)
+{
+    ads114s0x_register_map_t map;
+    ads114s0x_read_register(dev, 0x00, (uint8_t*)&map, sizeof(ads114s0x_register_map_t));
+    uint8_t byte[18];
+    memcpy(byte, (uint8_t*)&map, 18);
+    for (int i=0; i<18; i++) {
+        printf("[0x%02x]:\t%c%c%c%c%c%c%c%c\n", i, BYTE_TO_BINARY(byte[i]));
     }
 }

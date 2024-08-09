@@ -27,19 +27,25 @@
 #define MIXED_PIN_DOUT_1                GPIO_NUM_10
 #define MIXED_PIN_DOUT_2                GPIO_NUM_13
 #define MIXED_PIN_DOUT_3                GPIO_NUM_5
-#define MIXED_PIN_DOUT_4                GPIO_NUM_7
+#define MIXED_PIN_DOUT_4                GPIO_NUM_8
 
 /* DOUT_Sensors */
-#define MIXED_CHANNEL_DOUT_CURRENT_1    ADC1_CHANNEL_8
-#define MIXED_CHANNEL_DOUT_CURRENT_2    ADC1_CHANNEL_0 //ADC2_CHANNEL_0
-#define MIXED_CHANNEL_DOUT_CURRENT_3    ADC1_CHANNEL_0
-#define MIXED_CHANNEL_DOUT_CURRENT_4    ADC1_CHANNEL_6
+#define MIXED_CHANNEL_DOUT_CURRENT_1    {ADC_UNIT_1, ADC_CHANNEL_8}
+#define MIXED_CHANNEL_DOUT_CURRENT_2    {ADC_UNIT_2, ADC_CHANNEL_0}
+#define MIXED_CHANNEL_DOUT_CURRENT_3    {ADC_UNIT_1, ADC_CHANNEL_0}
+#define MIXED_CHANNEL_DOUT_CURRENT_4    {ADC_UNIT_1, ADC_CHANNEL_6}
+
+/* EANA */
+#define MIXED_PIN_EANA_1                AIN_NUM_2
+#define MIXED_PIN_EANA_2                AIN_NUM_1
+#define MIXED_PIN_EANA_3                AIN_NUM_3
+#define MIXED_PIN_EANA_4                AIN_NUM_4
 
 /* EANA_Commands */
 #define MIXED_PIN_EANA_CMD_1            GPIO_NUM_16
 #define MIXED_PIN_EANA_CMD_2            GPIO_NUM_18
 #define MIXED_PIN_EANA_CMD_3            GPIO_NUM_20
-#define MIXED_PIN_EANA_CMD_4            GPIO_NUM_21
+#define MIXED_PIN_EANA_CMD_4            GPIO_NUM_26
 
 /* SPI */
 #define MIXED_SPI_HOST                  SPI2_HOST

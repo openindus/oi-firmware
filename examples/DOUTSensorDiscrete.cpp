@@ -23,14 +23,14 @@ void loop(void)
 {
     /* Print value in monitor */
     Serial.printf("DOUT Sensor 1: %.2fA\t 2: %.2fA\t 3: %.2fA\t 4: %.2fA\t 5: %.2fA\t 6: %.2fA\t 7: %.2fA\t 8: %.2fA\n", \
-        discrete.getCurrent(DOUT_1),\
-        discrete.getCurrent(DOUT_2),\
-        discrete.getCurrent(DOUT_3),\
-        discrete.getCurrent(DOUT_4),\
-        discrete.getCurrent(DOUT_5),\
-        discrete.getCurrent(DOUT_6),\
-        discrete.getCurrent(DOUT_7),\
-        discrete.getCurrent(DOUT_8));
+        discrete.getOutputCurrent(DOUT_1),\
+        discrete.getOutputCurrent(DOUT_2),\
+        discrete.getOutputCurrent(DOUT_3),\
+        discrete.getOutputCurrent(DOUT_4),\
+        discrete.getOutputCurrent(DOUT_5),\
+        discrete.getOutputCurrent(DOUT_6),\
+        discrete.getOutputCurrent(DOUT_7),\
+        discrete.getOutputCurrent(DOUT_8));
 
     /* Wait for 200ms before reading value again */
     delay(200);

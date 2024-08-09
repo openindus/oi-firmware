@@ -15,8 +15,6 @@
 
 #pragma once
 
-#if defined(CONFIG_IDF_TARGET_ESP32S3)
-
 /* GPIO Motor control */
 #define BRUSHLESS_PIN_ENABLE_CHIP   GPIO_NUM_10
 #define BRUSHLESS_PIN_DIRECTION     GPIO_NUM_16
@@ -44,5 +42,3 @@
 #define BRUSHLESS_PIN_AIN_2        ADC2_CHANNEL_1    // GPIO_NUM_12
 #define BRUSHLESS_PIN_AIN_3        ADC2_CHANNEL_2    // GPIO_NUM_13
 #define BRUSHLESS_PIN_AIN_4        ADC2_CHANNEL_3    // GPIO_NUM_14
-
-#endif
