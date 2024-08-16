@@ -50,7 +50,7 @@ float RTD::readRTD(void)
     /* MUX Excitation */
     _highSideMux->route(INPUT_IDAC1, _hsMuxOutput);
     _lowSideMux->route(_lsMuxInput, OUTPUT_RBIAS_RTD);
-
+    
     /* ADC Config */
     _adc->config(static_cast<ADS114S0X_Gain_e>(RTD_GAIN), REF_EXTERNAL_IDAC1, true);
 
@@ -62,7 +62,7 @@ float RTD::readRTD(void)
     } else if (_adcInputs.size() == 3) {
         _adc->read(&adcCodes, _adcInputs[0], _adcInputs[1]);
         float rRTD0 = _calculateRTD(adcCodes);
-        _adc->read(&adcCodes, _adcInputs[2], _adcInputs[1]);
+        _adc->read(&adcCodes, _adcInputs[1], _adcInputs[2]);
         float rRTD1 = _calculateRTD(adcCodes);
         rRTD = std::abs(rRTD0 - rRTD1);
     } 
