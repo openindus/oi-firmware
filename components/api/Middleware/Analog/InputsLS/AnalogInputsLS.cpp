@@ -106,7 +106,7 @@ int AnalogInputsLS::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& 
                     RTD_Pinout_s {
                         {AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]], AIN_TO_ADC_INPUT[aIns[2]]},
                         AIN_TO_MUX_IO[aIns[0]], 
-                        AIN_TO_MUX_IO[aIns[1]]});
+                        AIN_TO_MUX_IO[aIns[2]]});
             } else {
                 ESP_LOGE(TAG, "RTD_THREE_WIRE requires 3 AINs.");
                 return -1;
