@@ -89,5 +89,5 @@ float RTD::readTemperature(void)
     float rRtd = readRTD();
 
     /* PT100 - Callendar-Van Dusen equation */
-    return (-A + sqrt(A * A - (4 * B * (1 - (rRtd / R0))))) / (2 * B);
+    return ((-A + sqrt(A * A - (4 * B * (1 - (rRtd / R0))))) / (2 * B));
 }
