@@ -82,6 +82,19 @@ static struct {
     struct arg_end *end;
 } _adcReadCmdArgs;
 
+static struct {
+    struct arg_int *sensorIndex;
+    struct arg_end *end;
+} _rtdReadCmdArgs;
+
+static struct {
+    struct arg_int *sensorType;
+    struct arg_int *inputP;
+    struct arg_int *inputN;
+    struct arg_int *inputM;
+    struct arg_end *end;
+} _AddSensorCmdArgs;
+
 static int _adcReadCmdHandler(int argc, char **argv)
 {
     int err = arg_parse(argc, argv, (void **)&_adcReadCmdArgs);
@@ -108,6 +121,59 @@ static int _adcReadCmdHandler(int argc, char **argv)
     return 0;
 }
 
+
+static int _addSensorCmdHandler(int argc, char **argv)
+{
+    // check if argument are missing
+    int err = arg_parse(argc, argv, (void **)&_AddSensorCmdArgs);
+    if (err != 0) {
+        arg_print_errors(stderr, _AddSensorCmdArgs.end, argv[0]);
+        return -1;
+    }
+
+    // get arguments
+    int sensorType = _AddSensorCmdArgs.sensorType->ival[0];
+    std::vector<AIn_Num_t> inputNum;
+
+    if (_AddSensorCmdArgs.inputP->count == 1) {
+        inputNum.push_back((AIn_Num_t)_AddSensorCmdArgs.inputP->ival[0]);
+    }
+    if (_AddSensorCmdArgs.inputN->count == 1) {
+        inputNum.push_back((AIn_Num_t)_AddSensorCmdArgs.inputN->ival[0]);
+    }
+    //for 3 wires RTD, get 3rd wire pinout info
+    if (_AddSensorCmdArgs.inputM->count == 1) {
+        inputNum.push_back((AIn_Num_t)_AddSensorCmdArgs.inputM->ival[0]);
+    }
+    
+    // add sensor (on a list)
+    AnalogInputsLS::addSensor((Sensor_Type_e) sensorType, inputNum);
+    
+    return 0;
+}
+
+static int _rtdReadCmdHandler(int argc, char **argv)
+{
+    // check if argument are missing
+    int err = arg_parse(argc, argv, (void **)&_rtdReadCmdArgs);
+    if (err != 0) {
+        arg_print_errors(stderr, _rtdReadCmdArgs.end, argv[0]);
+        return -1;
+    }
+
+    // get arguments
+    int sensorIndex = _rtdReadCmdArgs.sensorIndex->ival[0];
+
+    // get RTD value in Ohm at Index position
+    float rRTD = 0.0;
+    rRTD = AnalogInputsLS::rtd[sensorIndex].readRTD();
+    // print value
+    printf("[%d] : %3.4f Ohms\n", sensorIndex, rRTD);
+
+    return 0;
+}
+
+
 static int _registerAdcReadCmd(void)
 {
     _adcReadCmdArgs.inputP = arg_int1(NULL, NULL, "<inputP>", "Positive ADC input (AINp)");
@@ -117,10 +183,43 @@ static int _registerAdcReadCmd(void)
 
     const esp_console_cmd_t cmd = {
         .command = "adc-read",
-        .help = "Commands for read ADC code",
+        .help = "Commands for reading ADC code",
         .hint = NULL,
         .func = &_adcReadCmdHandler,
         .argtable = &_adcReadCmdArgs
+    };
+    return esp_console_cmd_register(&cmd);
+}
+
+static int _registerRtdReadCmd(void)
+{
+    _rtdReadCmdArgs.sensorIndex = arg_int1(NULL, NULL, "<sensorIndex>", "Sensor index");
+    _rtdReadCmdArgs.end = arg_end(3);
+
+    const esp_console_cmd_t cmd = {
+        .command = "rtd-read",
+        .help = "Commands for reading RTD value in Ohms",
+        .hint = NULL,
+        .func = &_rtdReadCmdHandler,
+        .argtable = &_rtdReadCmdArgs
+    };
+    return esp_console_cmd_register(&cmd);
+}
+
+static int _registerAddSensorCmd(void)
+{
+    _AddSensorCmdArgs.sensorType = arg_int1(NULL, NULL, "<sensorType>", "Sensor type");
+    _AddSensorCmdArgs.inputP = arg_int1(NULL, NULL, "<inputP>", "Positive ADC input (AINp)");
+    _AddSensorCmdArgs.inputN = arg_int1(NULL, NULL, "<inputN>", "Negative ADC input (AINn)");
+    _AddSensorCmdArgs.inputM = arg_int0(NULL, NULL, "<inputM>", "3rd wire RTD ADC input (AINn)");
+    _AddSensorCmdArgs.end = arg_end(3);
+
+    const esp_console_cmd_t cmd = {
+        .command = "add-sensor",
+        .help = "Commands for adding sensor",
+        .hint = NULL,
+        .func = &_addSensorCmdHandler,
+        .argtable = &_AddSensorCmdArgs
     };
     return esp_console_cmd_register(&cmd);
 }
@@ -184,6 +283,8 @@ int CLI::_registerAnalogInputsLSCmd(void)
     int ret = 0;
     ret |= _registerMuxRoute();
     ret |= _registerAdcReadCmd();
+    ret |= _registerRtdReadCmd();
+    ret |= _registerAddSensorCmd();
     ret |= _registerAdcConfigCmd();
     return ret;
 }
