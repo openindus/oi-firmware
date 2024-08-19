@@ -38,8 +38,7 @@ void UsbSerial::begin(int baudrate)
 
     ESP_ERROR_CHECK(uart_driver_install(UART_NUM_0, 1024, 1024, 20, &_eventQueue, 0));
     ESP_ERROR_CHECK(uart_param_config(UART_NUM_0, &uart_config));
-    ESP_ERROR_CHECK(uart_set_pin(UART_NUM_0, GPIO_NUM_43, GPIO_NUM_44, 
-        UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
+    ESP_ERROR_CHECK(uart_set_pin(UART_NUM_0, GPIO_NUM_43, GPIO_NUM_44, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
 }
 
 void UsbSerial::setBaudrate(int baudrate)
@@ -76,14 +75,16 @@ void UsbSerialProtocol::setBaudrate(int baudrate)
 void _slipDataUnframing(uint8_t* buffer, size_t* length)
 {
     for (int i=0; i<*length-1; i++) {
-        if (buffer[i] == 0xDB && buffer[i+1] == 0xDC) {
-            buffer[i] = 0xC0;
-            *length = *length-1;
-            memmove(&buffer[i+1], &buffer[i+2], *length-i); 
-        } else if (buffer[i] == 0xDB && buffer[i+1] == 0xDD) {
-            buffer[i] = 0xDB;
-            *length = *length-1;
-            memmove(&buffer[i+1], &buffer[i+2], *length-i); 
+        if (buffer[i] == 0XDB) {
+            if (buffer[i+1] == 0xDC) {
+                buffer[i] = 0xC0;
+                *length = *length-1;
+                memmove(&buffer[i+1], &buffer[i+2], *length-i);
+            } else if (buffer[i+1] == 0xDD) {
+                buffer[i] = 0xDB;
+                *length = *length-1;
+                memmove(&buffer[i+1], &buffer[i+2], *length-i);
+            }
         }
     }
 }
@@ -94,39 +95,47 @@ int UsbSerialProtocol::read(Packet_t* packet, TickType_t timeout)
     uint8_t buffer[1024];
     size_t length = 0;
     int index = 0;
+    bool slip_end_received = false;
     while (1) {
         if (xQueueReceive(_eventQueue, (void*)&event, timeout) == pdTRUE) {
             if (event.type == UART_DATA) {
                 if (event.size > 0 && event.size <= 1024) {
-                    memset(buffer, 0, 1024);
-                    length = event.size;
-                    uart_read_bytes(UART_NUM_0, buffer, length, 1000/portTICK_PERIOD_MS);
+                    length = uart_read_bytes(UART_NUM_0, buffer, event.size, 1000/portTICK_PERIOD_MS);
                     if (buffer[length-1] == 0xC0) {  // SLIP data end
                         length -= 1;
+                        slip_end_received = true;
+                        // Packet was composed of only the end character
+                        if (length == 0) {
+                            return index;
+                        }
                     }
                     if (buffer[0] == 0xC0) { // SLIP data start
                         length -= 1;
-                        memmove(buffer, &buffer[1], length);
-                        _slipDataUnframing(buffer, &length);
-                        memcpy(packet, buffer, 8);
+                        // Remove slip data
+                        _slipDataUnframing(&buffer[1], &length);
+                        // Copy 8 bytes of header
+                        memcpy(packet, &buffer[1], 8);
                         length -= 8;
-                        memcpy(&packet->data[index], &buffer[8], length);
+                        // Copy remaining data
+                        memcpy(&packet->data[index], &buffer[9], length);
                         index += length;
                     } else {
+                        // Remove slip data
                         _slipDataUnframing(buffer, &length);
                         if (packet->data[index-1] == 0xDB && buffer[0] == 0xDC) {
                             packet->data[index-1] = 0xC0;
                             length -= 1;
-                            memmove(buffer, &buffer[1], length);
+                            memcpy(&packet->data[index], &buffer[1], length);
                         } else if (packet->data[index-1] == 0xDB && buffer[0] == 0xDD) {
                             packet->data[index-1] = 0xDB;
                             length -= 1;
-                            memmove(buffer, &buffer[1], length);
+                            memcpy(&packet->data[index], &buffer[1], length);
+                        } else {
+                            memcpy(&packet->data[index], buffer, length);
                         }
-                        memcpy(&packet->data[index], buffer, length);
                         index += length;
                     }
-                    if (index >= packet->size) {
+                    if (index >= packet->size && slip_end_received) {
                         return index;
                     }
                 } else {
