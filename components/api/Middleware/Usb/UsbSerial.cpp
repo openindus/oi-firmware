@@ -157,22 +157,83 @@ void UsbSerialProtocol::write(Packet_t* packet)
     const uint8_t pat = 0xC0;
     const uint8_t esc1[2] = {0xDB, 0xDC};
     const uint8_t esc2[2] = {0xDB, 0xDD};
+    
+    // SLIP Start
     uart_write_bytes(UART_NUM_0, &pat, sizeof(pat));
-    uart_write_bytes(UART_NUM_0, packet, 8);
-    /* Replace occurrences */
-    for (int i=0; i<packet->size; i++) {
+
+    // DIRECTION
+    uart_write_bytes(UART_NUM_0, &packet->direction, sizeof(packet->direction));
+
+    // COMMAND
+    uart_write_bytes(UART_NUM_0, &packet->command, sizeof(packet->command));
+
+
+    /* Replace occurrences in size */
+    uint8_t size[4];
+    uint8_t size_size = 2;
+    memcpy(size, &packet->size, 2);
+
+    for (int i = 0; i < size_size; i++) {
+        if (size[i] == 0xC0) {
+            memmove(&size[i+2], &size[i+1], size_size-i-1);
+            memcpy(&size[i], esc1, 2);
+            i++;
+            size_size++;
+        } else if (size[i] == 0xDB) {
+            memmove(&size[i+2], &size[i+1], size_size-i-1);
+            memcpy(&size[i], esc2, 2);
+            i++;
+            size_size++;
+        }
+    }
+
+    // SIZE
+    uart_write_bytes(UART_NUM_0, size, size_size);
+
+
+    /* Replace occurrences in value */
+    uint8_t value[8];
+    uint8_t value_size = 4;
+    memcpy(value, &packet->value, 4);
+
+    for (int i = 0; i < value_size; i++) {
+        if (value[i] == 0xC0) {
+            memmove(&value[i+2], &value[i+1], value_size-i-1);
+            memcpy(&value[i], esc1, 2);
+            i++;
+            value_size++;
+        } else if (value[i] == 0xDB) {
+            memmove(&value[i+2], &value[i+1], value_size-i-1);
+            memcpy(&value[i], esc2, 2);
+            i++;
+            value_size++;
+        }
+    }
+
+    // VALUE
+    uart_write_bytes(UART_NUM_0, value, value_size);
+
+
+    /* Replace occurrences in data */
+    for (int i = 0; i < packet->size; i++) {
         if (packet->data[i] == 0xC0) {
             memmove(&packet->data[i+2], &packet->data[i+1], packet->size-i-1);
             memcpy(&packet->data[i], esc1, 2);
-            i += 2;
-            packet->size += 1;
+            i++;
+            packet->size++;
         } else if (packet->data[i] == 0xDB) {
             memmove(&packet->data[i+2], &packet->data[i+1], packet->size-i-1);
             memcpy(&packet->data[i], esc2, 2);
-            i += 2;
-            packet->size += 1;  
+            i++;
+            packet->size++;
         }
     }
+
+    // DATA
     uart_write_bytes(UART_NUM_0, packet->data, packet->size);
+
+    // SLIP End
     uart_write_bytes(UART_NUM_0, &pat, sizeof(pat));
+
+    Core::rs.write("\n");
 }
