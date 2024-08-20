@@ -234,6 +234,4 @@ void UsbSerialProtocol::write(Packet_t* packet)
 
     // SLIP End
     uart_write_bytes(UART_NUM_0, &pat, sizeof(pat));
-
-    Core::rs.write("\n");
 }
