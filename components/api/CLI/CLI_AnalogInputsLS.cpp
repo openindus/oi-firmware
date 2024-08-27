@@ -88,6 +88,11 @@ static struct {
 } _rtdReadCmdArgs;
 
 static struct {
+    struct arg_int *sensorIndex;
+    struct arg_end *end;
+} _tcReadCmdArgs;
+
+static struct {
     struct arg_int *sensorType;
     struct arg_int *inputP;
     struct arg_int *inputN;
@@ -173,6 +178,48 @@ static int _rtdReadCmdHandler(int argc, char **argv)
     return 0;
 }
 
+static int _tcReadVCmdHandler(int argc, char **argv)
+{
+    // check if argument are missing
+    int err = arg_parse(argc, argv, (void **)&_tcReadCmdArgs);
+    if (err != 0) {
+        arg_print_errors(stderr, _tcReadCmdArgs.end, argv[0]);
+        return -1;
+    }
+
+    // get arguments
+    int sensorIndex = _tcReadCmdArgs.sensorIndex->ival[0];
+
+    // get TC value in Volt at Index position
+    float rTCv = 0.0;
+    rTCv = AnalogInputsLS::tc[sensorIndex].readVoltage();
+    // print value
+    printf("[%d] : %.4f Volts\n", sensorIndex, rTCv);
+
+    return 0;
+}
+
+static int _tcReadCCmdHandler(int argc, char **argv)
+{
+    // check if argument are missing
+    int err = arg_parse(argc, argv, (void **)&_tcReadCmdArgs);
+    if (err != 0) {
+        arg_print_errors(stderr, _tcReadCmdArgs.end, argv[0]);
+        return -1;
+    }
+
+    // get arguments
+    int sensorIndex = _tcReadCmdArgs.sensorIndex->ival[0];
+
+    // get TC value in °C at Index position
+    float rTCc = 0.0;
+    rTCc = AnalogInputsLS::tc[sensorIndex].readTemperature();
+    // print value
+    printf("[%d] : %.4f degC\n", sensorIndex, rTCc);
+
+    return 0;
+}
+
 
 static int _registerAdcReadCmd(void)
 {
@@ -202,6 +249,36 @@ static int _registerRtdReadCmd(void)
         .hint = NULL,
         .func = &_rtdReadCmdHandler,
         .argtable = &_rtdReadCmdArgs
+    };
+    return esp_console_cmd_register(&cmd);
+}
+
+static int _registerTcReadVCmd(void)
+{
+    _tcReadCmdArgs.sensorIndex = arg_int1(NULL, NULL, "<sensorIndex>", "Sensor index");
+    _tcReadCmdArgs.end = arg_end(3);
+
+    const esp_console_cmd_t cmd = {
+        .command = "tcv-read",
+        .help = "Commands for reading Thermocouple (type K) value in Volts",
+        .hint = NULL,
+        .func = &_tcReadVCmdHandler,
+        .argtable = &_tcReadCmdArgs
+    };
+    return esp_console_cmd_register(&cmd);
+}
+
+static int _registerTcReadCCmd(void)
+{
+    _tcReadCmdArgs.sensorIndex = arg_int1(NULL, NULL, "<sensorIndex>", "Sensor index");
+    _tcReadCmdArgs.end = arg_end(3);
+
+    const esp_console_cmd_t cmd = {
+        .command = "tcc-read",
+        .help = "Commands for reading Thermocouple (type K) value in °C",
+        .hint = NULL,
+        .func = &_tcReadCCmdHandler,
+        .argtable = &_tcReadCmdArgs
     };
     return esp_console_cmd_register(&cmd);
 }
@@ -284,6 +361,8 @@ int CLI::_registerAnalogInputsLSCmd(void)
     ret |= _registerMuxRoute();
     ret |= _registerAdcReadCmd();
     ret |= _registerRtdReadCmd();
+    ret |= _registerTcReadVCmd();
+    ret |= _registerTcReadCCmd();
     ret |= _registerAddSensorCmd();
     ret |= _registerAdcConfigCmd();
     return ret;

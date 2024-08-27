@@ -63,6 +63,8 @@ float Thermocouple::readVoltage(void)
     for (int i=0; i<values.size(); i++) {
         values[i] = (float)(2 * TC_V_REF * adcCodes[i]) / 
             (float)(TC_GAIN * (pow(2, ADS114S0X_RESOLUTION) - 1));
+        printf("%d\r\n",adcCodes[i]);
+        printf("%f\r\n",values[i]);
     }
 
     /* Calculate the median */
