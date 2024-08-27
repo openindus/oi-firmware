@@ -39,7 +39,7 @@ SemaphoreHandle_t xSemaphoreSpi;
 
 gpio_num_t _gpio_isr;
 
-MCP25625_canRxQueue_t rx_queue;
+static MCP25625_canRxQueue_t rx_queue; // do not remove static
 
 ///////////////////////////////INIT & DEINIT FUNCTIONS/////////////////////////////////////////////////////////////////////////
 
