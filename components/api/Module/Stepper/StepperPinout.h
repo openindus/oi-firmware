@@ -82,8 +82,8 @@
 #define STEPPER_DIN_NUM     4
 
 /* SPI pins */
-#define STEPPER_SPI_PIN_MOSI             GPIO_NUM_35
-#define STEPPER_SPI_PIN_MISO             GPIO_NUM_37
+#define STEPPER_SPI_PIN_MOSI             GPIO_NUM_37
+#define STEPPER_SPI_PIN_MISO             GPIO_NUM_35
 #define STEPPER_SPI_PIN_CLK              GPIO_NUM_36
 #define STEPPER_SPI_PIN_CS               GPIO_NUM_34
 
@@ -99,7 +99,7 @@
 
 /* Device 1 GPIOs pins */
 #define STEPPER_GPIO_PIN_D1_SW           GPIO_NUM_42
-#define STEPPER_GPIO_PIN_D1_STBY_RST     GPIO_NUM_16
+#define STEPPER_GPIO_PIN_D1_STBY_RST     GPIO_NUM_11
 #define STEPPER_GPIO_PIN_D1_BUSY_SYNC    GPIO_NUM_12
 #define STEPPER_GPIO_PIN_D1_FLAG         GPIO_NUM_14
 #define STEPPER_PWM_PIN_D1_STCK          GPIO_NUM_13
@@ -108,7 +108,7 @@
 
 /* Device 2 GPIOs pins */
 #define STEPPER_GPIO_PIN_D2_SW           GPIO_NUM_15
-#define STEPPER_GPIO_PIN_D2_STBY_RST     GPIO_NUM_11
+#define STEPPER_GPIO_PIN_D2_STBY_RST     GPIO_NUM_16
 #define STEPPER_GPIO_PIN_D2_BUSY_SYNC    GPIO_NUM_12
 #define STEPPER_GPIO_PIN_D2_FLAG         GPIO_NUM_14
 #define STEPPER_PWM_PIN_D2_STCK          GPIO_NUM_13
