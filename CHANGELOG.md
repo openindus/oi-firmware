@@ -40,3 +40,9 @@ Board which are ready to use :
 - OIStepper
 - OIRelayHP
 - OIDc
+
+# 1.3.0
+
+### Features
+
+- Compatibility with old boards (discrete-s2, stepper-s2).

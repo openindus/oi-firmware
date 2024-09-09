@@ -42,6 +42,8 @@ typedef enum
  */
 typedef enum
 {
+    IOEX_NUM_NC     = -1,    /*!< Use to signal not connected to S/W */
+
     /*!< PORT0 */
     IOEX_NUM_0      = 0,
     IOEX_NUM_1      = 1,

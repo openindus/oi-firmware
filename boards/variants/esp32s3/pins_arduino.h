@@ -40,7 +40,7 @@ static const uint8_t SCK   = 17;
 
 static const uint8_t ETHERNET_SS    = 18;
 static const uint8_t SD_SS          = 47;
-static const uint8_t USBHIST_SS     = 49;
+static const uint8_t USBHOST_SS     = 49;
 
 // static const uint8_t A0 = 1;
 // static const uint8_t A1 = 2;
