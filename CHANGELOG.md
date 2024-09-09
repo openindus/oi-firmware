@@ -46,3 +46,4 @@ Board which are ready to use :
 ### Features
 
 - Compatibility with old boards (discrete-s2, stepper-s2).
+- Fix SLIP packet frame sending errors
