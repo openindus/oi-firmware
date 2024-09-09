@@ -4,7 +4,6 @@
 void setup(void)
 {
     printf("Hello OpenIndus !\n");
-
 }
 
 void loop(void)

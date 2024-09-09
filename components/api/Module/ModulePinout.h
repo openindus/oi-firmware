@@ -15,7 +15,7 @@
 
 #pragma once
 
-#if !defined(MODULE_OLD)
+#if defined(CONFIG_IDF_TARGET_ESP32S3)
 
 /* ID */
 #define MODULE_OI_ID_ADC_CHANNEL        ADC1_GPIO3_CHANNEL
@@ -39,7 +39,7 @@
 /* CMD ALIM */
 #define MODULE_PIN_CMD_MOSFET_ALIM      GPIO_NUM_46
 
-#else
+#elif defined(CONFIG_IDF_TARGET_ESP32S2)
 
 /* ID */
 #define MODULE_OI_ID_ADC_CHANNEL        ADC1_GPIO1_CHANNEL

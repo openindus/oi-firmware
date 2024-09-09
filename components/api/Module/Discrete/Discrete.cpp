@@ -63,9 +63,10 @@ int Discrete::init(void)
 #elif defined(OI_DISCRETE_VE)
     err |= Module::init(TYPE_OI_DISCRETE_VE);
 #endif
-    err |= DigitalOutputs::init(_doutGpio, _doutAdcChannel, 8);
-    err |= DigitalInputs::init(_dinGpio, 10);
-    err |= AnalogInputsHV::init(_ainChannel, 2);
+
+    err |= DigitalOutputs::init(_doutGpio, _doutAdcChannel, DISCRETE_NUMBER_OF_DOUT);
+    err |= DigitalInputs::init(_dinGpio, DISCRETE_NUMBER_OF_DIN);
+    err |= AnalogInputsHV::init(_ainChannel, DISCRETE_NUMBER_OF_AIN);
 
 #if defined(MODULE_SLAVE)
     err |= AnalogInputsHVRsp::init();

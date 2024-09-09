@@ -14,5 +14,8 @@ sdkconfig.relayhp
 sdkconfig.analogls
 sdkconfig.brushless
 sdkconfig.dc
+sdkconfig.discrete-s2
+sdkconfig.stepper-s2
+sdkconfig.stepperve-s2
 *.old
 dependencies.lock
