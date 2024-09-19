@@ -32,6 +32,21 @@ typedef enum {
     AIN_MAX
 } AIn_Num_t;
 
+typedef enum {
+    SAMPLE_400_MS = 0,
+    SAMPLE_200_MS,
+    SAMPLE_100_MS,
+    SAMPLE_60_MS,
+    SAMPLE_50_MS, // Default value
+    SAMPLE_20_MS,
+    SAMPLE_16_6_MS,
+    SAMPLE_10_MS,
+    SAMPLE_5_MS,
+    SAMPLE_2_5MS,
+    SAMPLE_1_25MS,
+    SAMPLE_1MS
+} AcquisitionDuration_e;
+
 class AnalogInputsLS
 {
 protected:
@@ -55,7 +70,7 @@ public:
     static std::vector<Thermocouple> tc;
     static std::vector<StrainGauge> sg;
 
-    static int setConversionTime(uint32_t t);
+    static int setAcquisitionDuration(AcquisitionDuration_e duration);
 
     static int addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& aIns);
 

@@ -9,7 +9,8 @@
 #include "RTD.h"
 
 #define RTD_R_REF                   1000
-#define RTD_GAIN                    ADS114S0X_PGA_GAIN_4
+#define RTD_GAIN                    4
+#define RTD_GAIN_REGISTER           ADS114S0X_PGA_GAIN_4
 #define RTD_EXCITATION_CURRENT      ADS114S0X_IDAC_1000_UA
 #define RTD_ACQUISITION_REFERENCE   ADS114S0X_REF_REFP1_REFN1
 
@@ -47,7 +48,7 @@ float RTD::readRTD(void)
     _adc->setReference(RTD_ACQUISITION_REFERENCE);
   
     /* Set PGA Gain */
-    _adc->setPGAGain(RTD_GAIN);
+    _adc->setPGAGain(RTD_GAIN_REGISTER);
 
     /* Set excitation */
     _adc->setExcitation(RTD_EXCITATION_CURRENT);
@@ -60,7 +61,6 @@ float RTD::readRTD(void)
     {
         /* Set internal mux */
         _adc->setInternalMux(static_cast<ads114s0x_adc_input_e>(_adcInputs[0]), static_cast<ads114s0x_adc_input_e>(_adcInputs[1]));
-        vTaskDelay(1000);
         adcCode = _adc->read();
         printf("ADCcode :%i\n", adcCode);
         rRTD = _calculateRTD(adcCode);

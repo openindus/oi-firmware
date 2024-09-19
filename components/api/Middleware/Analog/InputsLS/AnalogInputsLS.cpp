@@ -55,20 +55,22 @@ std::vector<Thermocouple> AnalogInputsLS::tc;
 std::vector<StrainGauge> AnalogInputsLS::sg;
 
 /**
- * @brief Set conversion time (ms)
+ * @brief Set the acquisition duration
+ * Default value is 50ms. If you set a shorter acquisition duration, the result will be less accurate.
  * 
  * @param t Time in milliseconds
  * @return int 0 if success, -1 if error
  */
-int AnalogInputsLS::setConversionTime(uint32_t t)
+int AnalogInputsLS::setAcquisitionDuration(AcquisitionDuration_e duration)
 {
+    int ret = 0;
     if (_adc != NULL) {
-        // _adc->setConvTimeMs(t);
-        return 0;
+        ret |= _adc->setDataRate(static_cast<ads114s0x_data_rate_e>(duration));
     } else {
         ESP_LOGE(TAG, "Failed to set conversion time");
-        return -1;
+        ret = -1;
     }
+    return ret;
 }
 
 /**
@@ -96,6 +98,7 @@ int AnalogInputsLS::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& 
                         {AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]]},
                         AIN_TO_MUX_IO[aIns[0]], 
                         AIN_TO_MUX_IO[aIns[1]]});
+                return rtd.size()-1;
             } else {
                 ESP_LOGE(TAG, "RTD_TWO_WIRE requires 2 AINs.");
                 return -1;
@@ -108,6 +111,7 @@ int AnalogInputsLS::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& 
                         {AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]], AIN_TO_ADC_INPUT[aIns[2]]},
                         AIN_TO_MUX_IO[aIns[0]], 
                         AIN_TO_MUX_IO[aIns[2]]});
+                return rtd.size()-1;
             } else {
                 ESP_LOGE(TAG, "RTD_THREE_WIRE requires 3 AINs.");
                 return -1;
@@ -117,6 +121,7 @@ int AnalogInputsLS::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& 
             if (aIns.size() == 2) {
                 tc.emplace_back(_adc, _highSideMux, _lowSideMux,
                     TC_Pinout_s {AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]]});
+                return tc.size()-1;
             } else {
                 ESP_LOGE(TAG, "THERMOCOUPLE requires 2 AINs.");
                 return -1;
@@ -129,6 +134,7 @@ int AnalogInputsLS::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& 
                         AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]], 
                         AIN_TO_ADC_INPUT[aIns[2]], AIN_TO_ADC_INPUT[aIns[2]],
                         AIN_TO_MUX_IO[aIns[0]], AIN_TO_MUX_IO[aIns[1]]});
+                return sg.size()-1;
             } else {
                 ESP_LOGE(TAG, "STRAIN_GAUGE requires 4 AINs.");
                 return -1;

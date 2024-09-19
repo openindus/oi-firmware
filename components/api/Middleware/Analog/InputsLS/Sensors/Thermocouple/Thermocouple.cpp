@@ -9,7 +9,8 @@
 #include "Thermocouple.h"
 
 #define TC_V_REF                    2.5
-#define TC_GAIN                     ADS114S0X_PGA_GAIN_8
+#define TC_GAIN                     8
+#define TC_GAIN_REGISTER            ADS114S0X_PGA_GAIN_8
 #define TC_ACQUISITION_REFERENCE    ADS114S0X_REF_INTERNAL_2_5V
 
 static const char TAG[] = "Thermocouple";
@@ -55,14 +56,18 @@ float Thermocouple::readVoltage(void)
     _highSideMux->route(INPUT_OPEN_HS, 7); // 7 is not connected to any channel
     _lowSideMux->route(7, OUTPUT_OPEN_LS); // 7 is not connected to any channel
 
+    /* Set PGA Gain */
+    _adc->setPGAGain(TC_GAIN_REGISTER);
 
-    /* ADC Config */
-    _adc->setPGAGain(TC_GAIN);
+    /* Set Internal reference to 2.5V */
     _adc->setReference(TC_ACQUISITION_REFERENCE);
+
+    /* Set bias on negative input */
     _adc->setBias(static_cast<ads114s0x_adc_input_e>(_adcInputs[1]));
+
+    /* Set Internal mux */
     _adc->setInternalMux(static_cast<ads114s0x_adc_input_e>(_adcInputs[0]), static_cast<ads114s0x_adc_input_e>(_adcInputs[1]));
     
-    vTaskDelay(1000);
     /* ADC Read */
     int adcCode = _adc->read();
     printf("ADCCode: %i\n", adcCode);

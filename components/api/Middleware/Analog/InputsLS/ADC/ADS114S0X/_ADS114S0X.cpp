@@ -83,8 +83,8 @@ int ADS114S0X::setInternalMux(ads114s0x_adc_input_e inputP, ads114s0x_adc_input_
 {
     int ret = 0;
     ads114s0x_reg_inpmux_t inpmuxReg = {
-        .muxn = inputP,
-        .muxp = inputN
+        .muxn = inputN,
+        .muxp = inputP
     };
     ret |= ads114s0x_write_register(_device, ADS114S0X_REG_INPMUX, (uint8_t*)&inpmuxReg, sizeof(ads114s0x_reg_inpmux_t));
     return ret;
@@ -150,7 +150,7 @@ int ADS114S0X::setBias(ads114s0x_adc_input_e input)
 int ADS114S0X::read()
 {
     int ret = 0;
-    int adcCode;
+    uint16_t adcCode;
     
     /* Start conversion */
     ret |= ads114s0x_start(_device);
