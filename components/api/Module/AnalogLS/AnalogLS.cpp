@@ -59,7 +59,7 @@ int AnalogLS::init(void)
         .device = NULL,
         .config = {
             .host_id = ANALOG_LS_SPI_HOST,
-            .sclk_freq = ANALOG_LS_ADC_SPI_FREQ / 8,
+            .sclk_freq = ANALOG_LS_ADC_SPI_FREQ,
             .start_sync = ANALOG_LS_ADC_PIN_START_SYNC,
             .reset = ANALOG_LS_ADC_PIN_RESET,
             .cs = ANALOG_LS_ADC_PIN_CS,

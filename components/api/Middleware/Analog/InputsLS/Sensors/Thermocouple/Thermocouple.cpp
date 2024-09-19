@@ -8,8 +8,9 @@
 
 #include "Thermocouple.h"
 
-#define TC_GAIN 8
-#define TC_V_REF 2.5
+#define TC_V_REF                    2.5
+#define TC_GAIN                     ADS114S0X_PGA_GAIN_8
+#define TC_ACQUISITION_REFERENCE    ADS114S0X_REF_INTERNAL_2_5V
 
 static const char TAG[] = "Thermocouple";
 
@@ -43,40 +44,39 @@ float Thermocouple::_calculateTemperature(const std::vector<TC_Coefficient_s>& c
  */
 float Thermocouple::readVoltage(void)
 {
-    float voltage = 0.0;
-
     if (_adc == NULL) {
         ESP_LOGE(TAG, "%s() error", __func__);
         return 0.0f;
     }
 
-    /* ADC Config */
-    _adc->config(static_cast<ADS114S0X_Gain_e>(TC_GAIN), REF_INTERNAL_2V5, false);
+    /* MUX Configuration:
+     * Disconnect input
+     * Disconnect output */
+    _highSideMux->route(INPUT_OPEN_HS, 7); // 7 is not connected to any channel
+    _lowSideMux->route(7, OUTPUT_OPEN_LS); // 7 is not connected to any channel
 
+
+    /* ADC Config */
+    _adc->setPGAGain(TC_GAIN);
+    _adc->setReference(TC_ACQUISITION_REFERENCE);
+    _adc->setBias(static_cast<ads114s0x_adc_input_e>(_adcInputs[1]));
+    _adc->setInternalMux(static_cast<ads114s0x_adc_input_e>(_adcInputs[0]), static_cast<ads114s0x_adc_input_e>(_adcInputs[1]));
+    
+    vTaskDelay(1000);
     /* ADC Read */
-    std::vector<uint16_t> adcCodes;
-    _adc->read(&adcCodes, _adcInputs[0], _adcInputs[1], true);
+    int adcCode = _adc->read();
+    printf("ADCCode: %i\n", adcCode);
+    
+    /* Stop Vbias */
+    _adc->setBias(ADS114S0X_NOT_CONNECTED);
+
+    /* Reset Internal MUX */
+    _adc->setInternalMux(ADS114S0X_NOT_CONNECTED, ADS114S0X_NOT_CONNECTED);
 
     /* Calculate Voltage values */
-    std::vector<float> values;
-    values.resize(adcCodes.size());
-    for (int i=0; i<values.size(); i++) {
-        values[i] = (float)(2 * TC_V_REF * adcCodes[i]) / 
-            (float)(TC_GAIN * (pow(2, ADS114S0X_RESOLUTION) - 1));
-        printf("%d\r\n",adcCodes[i]);
-        printf("%f\r\n",values[i]);
-    }
+    float value = (float)(2 * TC_V_REF * adcCode) / (float)(TC_GAIN * ADS114S0X_MAX_ADC_CODE);
 
-    /* Calculate the median */
-    std::sort(values.begin(), values.end());
-    size_t size = values.size();
-    if (size % 2 == 0) {
-        voltage = (values[size / 2 - 1] + values[size / 2]) / 2.0;
-    } else {
-        voltage = values[size / 2];
-    }
-
-    return voltage * 1000;
+    return value * 1000;
 }
 
 /**
@@ -88,7 +88,7 @@ float Thermocouple::readTemperature(void)
 {
     float temperature = 0.0;
     float voltage = readVoltage();
-
+    printf("TC voltage :%f\n", voltage);
     switch (_type)
     {
     case TYPE_K:

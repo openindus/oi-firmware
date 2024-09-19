@@ -28,16 +28,14 @@ class RTD
 {
 public:
 
-    RTD(ADS114S0X* adc, Multiplexer* highSideMux, Multiplexer* lowSideMux,
-        const RTD_Pinout_s& pins) : 
+    RTD(ADS114S0X* adc, Multiplexer* highSideMux, Multiplexer* lowSideMux, const RTD_Pinout_s& pins) : 
             _adc(adc),
             _highSideMux(highSideMux),
             _lowSideMux(lowSideMux),
             _adcInputs(pins.adcInputs),
             _hsMuxOutput(pins.hsMuxOutput),
             _lsMuxInput(pins.lsMuxInput),
-            _type(PT100)
-    {}
+            _type(PT100) {}
 
     inline void setType(RTD_Type_e type) {
         _type = type;
@@ -56,6 +54,6 @@ private:
     Mux_IO_t _lsMuxInput;
     RTD_Type_e _type;
 
-    float _calculateRTD(const std::vector<uint16_t>& adcCodes);
+    float _calculateRTD(int adcCode);
     
 };

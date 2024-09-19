@@ -63,7 +63,7 @@ std::vector<StrainGauge> AnalogInputsLS::sg;
 int AnalogInputsLS::setConversionTime(uint32_t t)
 {
     if (_adc != NULL) {
-        _adc->setConvTimeMs(t);
+        // _adc->setConvTimeMs(t);
         return 0;
     } else {
         ESP_LOGE(TAG, "Failed to set conversion time");
@@ -76,7 +76,8 @@ int AnalogInputsLS::setConversionTime(uint32_t t)
  * 
  * @param type [RTD_TWO_WIRE; RTD_THREE_WIRE; THERMOCOUPLE; STRAIN_GAUGE]
  * @param aIns Analog Inputs (AIN_A_P to AIN_E_N)
- * @return int 0 if success, -1 if error
+ * @return int the index of the added element (first call to this function for type RTD will return 0, second call 1, ...).
+ *         return -1 in case of error
  */
 int AnalogInputsLS::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& aIns)
 {
@@ -114,7 +115,7 @@ int AnalogInputsLS::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& 
             break;
         case THERMOCOUPLE:
             if (aIns.size() == 2) {
-                tc.emplace_back(_adc, 
+                tc.emplace_back(_adc, _highSideMux, _lowSideMux,
                     TC_Pinout_s {AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]]});
             } else {
                 ESP_LOGE(TAG, "THERMOCOUPLE requires 2 AINs.");

@@ -174,7 +174,7 @@ int ads114s0x_self_offset_calib(ads114s0x_device_t* dev)
  * @param data ADC data Bytes
  * @return int 0=success, -1=error
  */
-int ads114s0x_read_data(ads114s0x_device_t* dev, uint16_t* data)
+int ads114s0x_read_data(ads114s0x_device_t* dev, int* data)
 {
     if ((dev == NULL) || data == NULL) {
         goto error;

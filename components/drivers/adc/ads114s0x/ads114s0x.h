@@ -342,7 +342,7 @@ int ads114s0x_system_gain_calib(ads114s0x_device_t* dev);
 int ads114s0x_self_offset_calib(ads114s0x_device_t* dev);
 
 /* Read data */
-int ads114s0x_read_data(ads114s0x_device_t* dev, uint16_t* data);
+int ads114s0x_read_data(ads114s0x_device_t* dev, int* data);
 
 /* Read/Write registers */
 int ads114s0x_read_register(ads114s0x_device_t* dev, uint8_t reg_addr, uint8_t* reg_data, size_t reg_size);

@@ -33,8 +33,12 @@ class Thermocouple
 {
 public:
 
-    Thermocouple(ADS114S0X* adc, const TC_Pinout_s& pins) : 
-        _adc(adc), _adcInputs(pins.adcInputs), _type(TYPE_K) {}
+    Thermocouple(ADS114S0X* adc, Multiplexer* highSideMux, Multiplexer* lowSideMux, const TC_Pinout_s& pins) : 
+        _adc(adc),
+        _highSideMux(highSideMux),
+        _lowSideMux(lowSideMux),
+        _adcInputs(pins.adcInputs),
+        _type(TYPE_K) {}
 
     inline void setType(TC_Type_e type) {
         _type = type;
@@ -46,6 +50,9 @@ public:
 private:
 
     ADS114S0X* _adc;
+    Multiplexer* _highSideMux;
+    Multiplexer* _lowSideMux;
+
     std::array<ADC_Input_t, 2> _adcInputs;
     TC_Type_e _type;
     
