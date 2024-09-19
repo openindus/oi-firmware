@@ -117,10 +117,12 @@ int AnalogInputsLS::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& 
                 return -1;
             }
             break;
-        case THERMOCOUPLE:
+        case THERMOCOUPLE_T:
+        case THERMOCOUPLE_K:
             if (aIns.size() == 2) {
                 tc.emplace_back(_adc, _highSideMux, _lowSideMux,
-                    TC_Pinout_s {AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]]});
+                                TC_Pinout_s {AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]]},
+                                type);
                 return tc.size()-1;
             } else {
                 ESP_LOGE(TAG, "THERMOCOUPLE requires 2 AINs.");
@@ -131,7 +133,7 @@ int AnalogInputsLS::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& 
             if (aIns.size() == 4) {
                 sg.emplace_back(_adc, _highSideMux, _lowSideMux, 
                     StrainGauge_Pinout_s {
-                        AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]], 
+                        AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]],
                         AIN_TO_ADC_INPUT[aIns[2]], AIN_TO_ADC_INPUT[aIns[2]],
                         AIN_TO_MUX_IO[aIns[0]], AIN_TO_MUX_IO[aIns[1]]});
                 return sg.size()-1;

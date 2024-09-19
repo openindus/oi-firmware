@@ -13,10 +13,6 @@
 #include "Multiplexer.h"
 #include "Sensor.h"
 
-enum TC_Type_e {
-    TYPE_K,
-};
-
 struct TC_Coefficient_s {
     float Ti; // Initial temperature
     float Tf; // Final temperature
@@ -33,16 +29,12 @@ class Thermocouple
 {
 public:
 
-    Thermocouple(ADS114S0X* adc, Multiplexer* highSideMux, Multiplexer* lowSideMux, const TC_Pinout_s& pins) : 
+    Thermocouple(ADS114S0X* adc, Multiplexer* highSideMux, Multiplexer* lowSideMux, const TC_Pinout_s& pins, Sensor_Type_e type) : 
         _adc(adc),
         _highSideMux(highSideMux),
         _lowSideMux(lowSideMux),
         _adcInputs(pins.adcInputs),
-        _type(TYPE_K) {}
-
-    inline void setType(TC_Type_e type) {
-        _type = type;
-    }
+        _type(type) {}
 
     float readVoltage(void);
     float readTemperature(void);
@@ -54,7 +46,7 @@ private:
     Multiplexer* _lowSideMux;
 
     std::array<ADC_Input_t, 2> _adcInputs;
-    TC_Type_e _type;
+    Sensor_Type_e _type;
     
     float _calculateTemperature(const std::vector<TC_Coefficient_s>& coefficients, float voltage);
 };

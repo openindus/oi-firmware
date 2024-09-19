@@ -82,10 +82,6 @@ public:
         return addSensor(RTD_THREE_WIRE, std::vector<AIn_Num_t>(inputs.begin(), inputs.end()));
     }
 
-    static inline int addThermocouple(const std::array<AIn_Num_t, 2>& inputs) {
-        return addSensor(THERMOCOUPLE, std::vector<AIn_Num_t>(inputs.begin(), inputs.end()));
-    }
-
     static inline int addStrainGauge(const std::array<AIn_Num_t, 2>& signalInputs, 
                                      const std::array<AIn_Num_t, 2>& excitationInputs) {
         std::vector<AIn_Num_t> inputs;

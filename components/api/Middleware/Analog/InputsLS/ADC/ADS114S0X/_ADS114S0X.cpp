@@ -58,7 +58,7 @@ int ADS114S0X::init(void)
     ads114s0x_reg_datarate_t datarateReg;
     ret |= ads114s0x_read_register(_device, ADS114S0X_REG_DATARATE, (uint8_t*)&datarateReg, sizeof(ads114s0x_reg_datarate_t));
     datarateReg.mode = 1; // Single shot conversion
-    datarateReg.dr = ADS114S0X_DATA_RATE_20_SPS;
+    datarateReg.dr = ADS114S0X_DATA_RATE_2_5_SPS;
     ret |= ads114s0x_write_register(_device, ADS114S0X_REG_DATARATE, (uint8_t*)&datarateReg, sizeof(ads114s0x_reg_datarate_t));
 
     /* Data ready */
