@@ -29,10 +29,8 @@ class Thermocouple
 {
 public:
 
-    Thermocouple(ADS114S0X* adc, Multiplexer* highSideMux, Multiplexer* lowSideMux, const TC_Pinout_s& pins, Sensor_Type_e type) : 
+    Thermocouple(ADS114S0X* adc, const TC_Pinout_s& pins, Sensor_Type_e type) : 
         _adc(adc),
-        _highSideMux(highSideMux),
-        _lowSideMux(lowSideMux),
         _adcInputs(pins.adcInputs),
         _type(type) {}
 

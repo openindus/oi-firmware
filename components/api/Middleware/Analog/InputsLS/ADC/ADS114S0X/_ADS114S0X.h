@@ -21,11 +21,13 @@ class ADS114S0X
 public:
 
     ADS114S0X(ads114s0x_device_t* device, ads114s0x_config_t config) :
-        _device(device), _config(config) {}
+        _device(device), _config(config), _stabilizationTime(0) {}
 
     int init(void);
 
     int setDataRate(ads114s0x_data_rate_e dataRate);
+
+    int setStabilizationTime(int t);
 
     int setInternalMux(ads114s0x_adc_input_e inputP, ads114s0x_adc_input_e inputN);
 
@@ -37,13 +39,16 @@ public:
 
     int setBias(ads114s0x_adc_input_e input);
 
-    int read();
+    void waitStabilization();
+
+    int16_t read();
 
 private:
 
     ads114s0x_device_t* _device;
     ads114s0x_config_t _config;
 
+    int _stabilizationTime;
     static QueueHandle_t _queue;
     static void IRAM_ATTR _isr(void* arg);
 };

@@ -55,17 +55,37 @@ std::vector<Thermocouple> AnalogInputsLS::tc;
 std::vector<StrainGauge> AnalogInputsLS::sg;
 
 /**
- * @brief Set the acquisition duration
+ * @brief Set the length of the acquisition in milliseconds
  * Default value is 50ms. If you set a shorter acquisition duration, the result will be less accurate.
  * 
- * @param t Time in milliseconds
+ * @param duration Time in milliseconds
  * @return int 0 if success, -1 if error
  */
-int AnalogInputsLS::setAcquisitionDuration(AcquisitionDuration_e duration)
+int AnalogInputsLS::setAcquisitionTime(AcquisitionDuration_e duration)
 {
     int ret = 0;
     if (_adc != NULL) {
         ret |= _adc->setDataRate(static_cast<ads114s0x_data_rate_e>(duration));
+    } else {
+        ESP_LOGE(TAG, "Failed to set conversion time");
+        ret = -1;
+    }
+    return ret;
+}
+
+/**
+ * @brief Set the stabilization time before doing an acquisition
+ * Default value is 0ms. 
+ * But if your sensors need more time to stabilize before making an acquisition, you can add it with this function.
+ * 
+ * @param t Time in milliseconds
+ * @return int 0 if success, -1 if error
+ */
+int AnalogInputsLS::setStabilizationTime(int t)
+{
+    int ret = 0;
+    if (_adc != NULL) {
+        ret |= _adc->setStabilizationTime(t);
     } else {
         ESP_LOGE(TAG, "Failed to set conversion time");
         ret = -1;
@@ -94,10 +114,11 @@ int AnalogInputsLS::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& 
         case RTD_TWO_WIRE:
             if (aIns.size() == 2) {
                 rtd.emplace_back(_adc, _highSideMux, _lowSideMux, 
-                    RTD_Pinout_s {
-                        {AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]]},
-                        AIN_TO_MUX_IO[aIns[0]], 
-                        AIN_TO_MUX_IO[aIns[1]]});
+                                RTD_Pinout_s {
+                                    {AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]]},
+                                    AIN_TO_MUX_IO[aIns[0]], 
+                                    AIN_TO_MUX_IO[aIns[1]]
+                                });
                 return rtd.size()-1;
             } else {
                 ESP_LOGE(TAG, "RTD_TWO_WIRE requires 2 AINs.");
@@ -107,22 +128,27 @@ int AnalogInputsLS::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& 
         case RTD_THREE_WIRE:
             if (aIns.size() == 3) {
                 rtd.emplace_back(_adc, _highSideMux, _lowSideMux, 
-                    RTD_Pinout_s {
-                        {AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]], AIN_TO_ADC_INPUT[aIns[2]]},
-                        AIN_TO_MUX_IO[aIns[0]], 
-                        AIN_TO_MUX_IO[aIns[2]]});
+                                RTD_Pinout_s {
+                                    {AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]], AIN_TO_ADC_INPUT[aIns[2]]},
+                                    AIN_TO_MUX_IO[aIns[0]], 
+                                    AIN_TO_MUX_IO[aIns[2]]
+                                });
                 return rtd.size()-1;
             } else {
                 ESP_LOGE(TAG, "RTD_THREE_WIRE requires 3 AINs.");
                 return -1;
             }
             break;
-        case THERMOCOUPLE_T:
+        case THERMOCOUPLE_B:
+        case THERMOCOUPLE_E:
+        case THERMOCOUPLE_J:
         case THERMOCOUPLE_K:
+        case THERMOCOUPLE_N:
+        case THERMOCOUPLE_R:
+        case THERMOCOUPLE_S:
+        case THERMOCOUPLE_T:
             if (aIns.size() == 2) {
-                tc.emplace_back(_adc, _highSideMux, _lowSideMux,
-                                TC_Pinout_s {AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]]},
-                                type);
+                tc.emplace_back(_adc, TC_Pinout_s {AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]]}, type);
                 return tc.size()-1;
             } else {
                 ESP_LOGE(TAG, "THERMOCOUPLE requires 2 AINs.");
@@ -132,10 +158,11 @@ int AnalogInputsLS::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& 
         case STRAIN_GAUGE:
             if (aIns.size() == 4) {
                 sg.emplace_back(_adc, _highSideMux, _lowSideMux, 
-                    StrainGauge_Pinout_s {
-                        AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]],
-                        AIN_TO_ADC_INPUT[aIns[2]], AIN_TO_ADC_INPUT[aIns[2]],
-                        AIN_TO_MUX_IO[aIns[0]], AIN_TO_MUX_IO[aIns[1]]});
+                                StrainGauge_Pinout_s { 
+                                    AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]],
+                                    AIN_TO_ADC_INPUT[aIns[2]], AIN_TO_ADC_INPUT[aIns[2]],
+                                    AIN_TO_MUX_IO[aIns[0]], AIN_TO_MUX_IO[aIns[1]]
+                                });
                 return sg.size()-1;
             } else {
                 ESP_LOGE(TAG, "STRAIN_GAUGE requires 4 AINs.");

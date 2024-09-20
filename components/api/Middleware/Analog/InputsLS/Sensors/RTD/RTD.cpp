@@ -18,7 +18,7 @@ static const char TAG[] = "RTD";
 
 // Use this with table ? : https://github.com/drhaney/pt100rtd/blob/master/pt100rtd.cpp
 
-float RTD::_calculateRTD(int adcCode)
+float RTD::_calculateRTD(int16_t adcCode)
 {
     /* Calculate RTD resistor values */
     return (float)(2 * RTD_R_REF * adcCode) / (float)(RTD_GAIN * ADS114S0X_MAX_ADC_CODE);
@@ -53,16 +53,17 @@ float RTD::readRTD(void)
     /* Set excitation */
     _adc->setExcitation(RTD_EXCITATION_CURRENT);
 
-    /* ADC Read */
-    int adcCode;
+    /* Wait for stabilization if needed */
+    _adc->waitStabilization();
 
+    int16_t adcCode;
     /* RTD 2 Wires */
     if (_adcInputs.size() == 2) 
     {
         /* Set internal mux */
         _adc->setInternalMux(static_cast<ads114s0x_adc_input_e>(_adcInputs[0]), static_cast<ads114s0x_adc_input_e>(_adcInputs[1]));
         adcCode = _adc->read();
-        printf("ADCcode :%i\n", adcCode);
+        printf("Adccode:%i\n", adcCode);
         rRTD = _calculateRTD(adcCode);
     } 
     /* RTD 3 Wires */
@@ -71,11 +72,12 @@ float RTD::readRTD(void)
         /* Set internal mux */
         _adc->setInternalMux(static_cast<ads114s0x_adc_input_e>(_adcInputs[0]), static_cast<ads114s0x_adc_input_e>(_adcInputs[1]));
         adcCode = _adc->read();
+        printf("ADCCode1:%i\n", adcCode);
         float rRTD0 = _calculateRTD(adcCode);
-
         /* Set internal mux */
         _adc->setInternalMux(static_cast<ads114s0x_adc_input_e>(_adcInputs[1]), static_cast<ads114s0x_adc_input_e>(_adcInputs[2]));
         adcCode = _adc->read();
+        printf("ADCCode2:%i\n", adcCode);
         float rRTD1 = _calculateRTD(adcCode);
 
         /* Subtract cable resistance to RTD resistance */
@@ -88,11 +90,11 @@ float RTD::readRTD(void)
     /* Reset Internal MUX */
     _adc->setInternalMux(ADS114S0X_NOT_CONNECTED, ADS114S0X_NOT_CONNECTED);
 
-    /* MUX Configuration (IMPORTANT !!):
-     * Input excitation IDAC1 should go to GND for discharge
-     * Output should go to ground for discharge */
-    _highSideMux->route(INPUT_IDAC1, 5); // 5 is connected to GND (since AE02)
-    _lowSideMux->route(_lsMuxInput, OUTPUT_GND);
+    /* MUX Configuration:
+     * Disconnect input
+     * Disconnect output */
+    _highSideMux->route(INPUT_OPEN_HS, _hsMuxOutput);
+    _lowSideMux->route(_lsMuxInput, OUTPUT_OPEN_LS);
 
     return rRTD;
 }

@@ -13,10 +13,13 @@
 enum Sensor_Type_e {
     RTD_TWO_WIRE,
     RTD_THREE_WIRE,
+    THERMOCOUPLE_B, // From 250°C to 1820°C
+    THERMOCOUPLE_E, // From -200°C to 1000°C 
     THERMOCOUPLE_J, // From -210°C to 1200°C
-    THERMOCOUPLE_K, // From -270°C to 1370°C
-    THERMOCOUPLE_T, // From -200°C to 400°C
-    THERMOCOUPLE_E, // From -270°C to 1000°C
+    THERMOCOUPLE_K, // From -270°C to 1372°C
+    THERMOCOUPLE_N, // From -200°C to 1200°C
+    THERMOCOUPLE_R, // From -50°C to 1768°C
     THERMOCOUPLE_S, // From -50°C to 1768°C
+    THERMOCOUPLE_T, // From -200°C to 400°C
     STRAIN_GAUGE,
 };

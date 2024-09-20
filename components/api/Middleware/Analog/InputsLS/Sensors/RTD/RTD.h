@@ -54,6 +54,6 @@ private:
     Mux_IO_t _lsMuxInput;
     RTD_Type_e _type;
 
-    float _calculateRTD(int adcCode);
+    float _calculateRTD(int16_t adcCode);
     
 };

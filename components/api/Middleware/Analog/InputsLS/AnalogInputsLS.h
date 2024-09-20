@@ -42,9 +42,9 @@ typedef enum {
     SAMPLE_16_6_MS,
     SAMPLE_10_MS,
     SAMPLE_5_MS,
-    SAMPLE_2_5MS,
-    SAMPLE_1_25MS,
-    SAMPLE_1MS
+    SAMPLE_2_5_MS,
+    SAMPLE_1_25_MS,
+    SAMPLE_1_MS
 } AcquisitionDuration_e;
 
 class AnalogInputsLS
@@ -70,7 +70,9 @@ public:
     static std::vector<Thermocouple> tc;
     static std::vector<StrainGauge> sg;
 
-    static int setAcquisitionDuration(AcquisitionDuration_e duration);
+    static int setAcquisitionTime(AcquisitionDuration_e duration);
+
+    static int setStabilizationTime(int t);
 
     static int addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& aIns);
 

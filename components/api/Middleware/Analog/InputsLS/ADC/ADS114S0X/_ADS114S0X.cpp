@@ -58,7 +58,10 @@ int ADS114S0X::init(void)
     ads114s0x_reg_datarate_t datarateReg;
     ret |= ads114s0x_read_register(_device, ADS114S0X_REG_DATARATE, (uint8_t*)&datarateReg, sizeof(ads114s0x_reg_datarate_t));
     datarateReg.mode = 1; // Single shot conversion
-    datarateReg.dr = ADS114S0X_DATA_RATE_2_5_SPS;
+    datarateReg.dr = ADS114S0X_DATA_RATE_20_SPS; // default to 20SPS
+    datarateReg.clk = 0; // Internal clock
+    datarateReg.g_chop = 0; // Global chop disable
+    datarateReg.filter = 1; // Low latency filter
     ret |= ads114s0x_write_register(_device, ADS114S0X_REG_DATARATE, (uint8_t*)&datarateReg, sizeof(ads114s0x_reg_datarate_t));
 
     /* Data ready */
@@ -77,6 +80,13 @@ int ADS114S0X::setDataRate(ads114s0x_data_rate_e dataRate)
     datarateReg.dr = dataRate;
     ret |= ads114s0x_write_register(_device, ADS114S0X_REG_DATARATE, (uint8_t*)&datarateReg, sizeof(ads114s0x_reg_datarate_t));
     return ret;
+}
+
+int ADS114S0X::setStabilizationTime(int t) 
+{
+    int ret = 0;
+    _stabilizationTime = t;
+    return ret;    
 }
 
 int ADS114S0X::setInternalMux(ads114s0x_adc_input_e inputP, ads114s0x_adc_input_e inputN)
@@ -147,10 +157,16 @@ int ADS114S0X::setBias(ads114s0x_adc_input_e input)
     ret |= ads114s0x_write_register(_device, ADS114S0X_REG_VBIAS, (uint8_t*)&vbiasReg, sizeof(ads114s0x_reg_vbias_t));
     return ret;
 }
-int ADS114S0X::read()
+
+void ADS114S0X::waitStabilization() 
 {
-    int ret = 0;
-    uint16_t adcCode;
+    vTaskDelay(_stabilizationTime);
+}
+
+int16_t ADS114S0X::read()
+{
+    int16_t ret = 0;
+    int16_t adcCode;
     
     /* Start conversion */
     ret |= ads114s0x_start(_device);
