@@ -53,6 +53,7 @@ int AnalogInputsLS::_init(void)
 std::vector<RTD> AnalogInputsLS::rtd;
 std::vector<Thermocouple> AnalogInputsLS::tc;
 std::vector<StrainGauge> AnalogInputsLS::sg;
+std::vector<RawSensor> AnalogInputsLS::raw;
 
 /**
  * @brief Set the length of the acquisition in milliseconds
@@ -111,6 +112,16 @@ int AnalogInputsLS::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& 
     }
 
     switch (type) {
+        case RAW_SENSOR:
+            if (aIns.size() == 2) {
+                raw.emplace_back(_adc, RawSensor_Pinout_s {AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]]});
+                return raw.size()-1;
+            } else {
+                ESP_LOGE(TAG, "Raw Sensor requires 2 AINs.");
+                return -1;
+            }
+            break;
+
         case RTD_TWO_WIRE:
             if (aIns.size() == 2) {
                 rtd.emplace_back(_adc, _highSideMux, _lowSideMux, 
@@ -125,6 +136,7 @@ int AnalogInputsLS::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& 
                 return -1;
             }
             break;
+
         case RTD_THREE_WIRE:
             if (aIns.size() == 3) {
                 rtd.emplace_back(_adc, _highSideMux, _lowSideMux, 
@@ -139,6 +151,7 @@ int AnalogInputsLS::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& 
                 return -1;
             }
             break;
+
         case THERMOCOUPLE_B:
         case THERMOCOUPLE_E:
         case THERMOCOUPLE_J:
@@ -157,11 +170,11 @@ int AnalogInputsLS::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& 
             break;
         case STRAIN_GAUGE:
             if (aIns.size() == 4) {
-                sg.emplace_back(_adc, _highSideMux, _lowSideMux, 
+                sg.emplace_back(_adc, _highSideMux, _lowSideMux,
                                 StrainGauge_Pinout_s { 
                                     AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]],
-                                    AIN_TO_ADC_INPUT[aIns[2]], AIN_TO_ADC_INPUT[aIns[2]],
-                                    AIN_TO_MUX_IO[aIns[0]], AIN_TO_MUX_IO[aIns[1]]
+                                    AIN_TO_ADC_INPUT[aIns[2]], AIN_TO_ADC_INPUT[aIns[3]],
+                                    AIN_TO_MUX_IO[aIns[2]], AIN_TO_MUX_IO[aIns[3]]
                                 });
                 return sg.size()-1;
             } else {
@@ -169,6 +182,7 @@ int AnalogInputsLS::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& 
                 return -1;
             }
             break;
+
         default:
             ESP_LOGE(TAG, "Unknown sensor type.");
     }

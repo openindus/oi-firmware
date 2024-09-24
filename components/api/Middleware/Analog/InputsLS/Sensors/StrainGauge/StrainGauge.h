@@ -23,38 +23,39 @@ struct StrainGauge_Pinout_s {
 };
 
 enum StrainGauge_Excitation_e {
-    EXCITATION_VOLTAGE = 0,
-    EXCITATION_CURRENT,
-    EXCITATION_HIGH_VOLTAGE
+    EXCITATION_VOLTAGE_3V3 = 0,
+    EXCITATION_VOLTAGE_5V,
+    EXCITATION_VOLTAGE_USER,
+    EXCITATION_CURRENT_10UA,
+    EXCITATION_CURRENT_100UA,
+    EXCITATION_CURRENT_500UA,
+    EXCITATION_CURRENT_1000UA,
+    EXCITATION_CURRENT_2000UA
 };
 
 class StrainGauge
 {
 public:
 
-    StrainGauge(ADS114S0X* adc, Multiplexer* highSideMux, Multiplexer* lowSideMux,
-        const StrainGauge_Pinout_s& pins) : 
-            _adc(adc),
-            _highSideMux(highSideMux),
-            _lowSideMux(lowSideMux),
-            _pins(pins),
-            _excitation(EXCITATION_VOLTAGE)
-    {}
+    StrainGauge(ADS114S0X* adc, Multiplexer* highSideMux, Multiplexer* lowSideMux, const StrainGauge_Pinout_s& pins) : 
+                _adc(adc),
+                _highSideMux(highSideMux),
+                _lowSideMux(lowSideMux),
+                _pins(pins),
+                _excitation(EXCITATION_VOLTAGE_5V) {}
 
     inline void setExcitationMode(StrainGauge_Excitation_e excitation) {
         _excitation = excitation;
     }
 
-    float read(void);
+    int16_t read(void);
+    float readMillivolts(void);
 
 private:
 
     ADS114S0X* _adc;
     Multiplexer* _highSideMux;
     Multiplexer* _lowSideMux;
-
     StrainGauge_Pinout_s _pins;
-
     StrainGauge_Excitation_e _excitation;
-    
 };

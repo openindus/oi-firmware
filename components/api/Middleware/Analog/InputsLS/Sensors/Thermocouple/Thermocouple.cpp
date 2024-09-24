@@ -88,7 +88,7 @@ float Thermocouple::_calculateTemperature(const std::vector<TC_Coefficient_s>& c
  * 
  * @return float Voltage value
  */
-float Thermocouple::readVoltage(void)
+float Thermocouple::readMillivolts(void)
 {
     if (_adc == NULL) {
         ESP_LOGE(TAG, "%s() error", __func__);
@@ -134,7 +134,7 @@ float Thermocouple::readVoltage(void)
 float Thermocouple::readTemperature(void)
 {
     float temperature = 0.0;
-    float voltage = readVoltage();
+    float voltage = readMillivolts();
     printf("TC%i voltage :%f\n", _type, voltage);
     switch (_type)
     {

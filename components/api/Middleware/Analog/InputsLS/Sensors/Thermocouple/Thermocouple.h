@@ -34,7 +34,7 @@ public:
         _adcInputs(pins.adcInputs),
         _type(type) {}
 
-    float readVoltage(void);
+    float readMillivolts(void);
     float readTemperature(void);
 
 private:

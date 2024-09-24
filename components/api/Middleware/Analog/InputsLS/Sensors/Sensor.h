@@ -11,6 +11,7 @@
 #include "Global.h"
 
 enum Sensor_Type_e {
+    RAW_SENSOR, // Read differential input voltage
     RTD_TWO_WIRE,
     RTD_THREE_WIRE,
     THERMOCOUPLE_B, // From 250°C to 1820°C
@@ -22,4 +23,16 @@ enum Sensor_Type_e {
     THERMOCOUPLE_S, // From -50°C to 1768°C
     THERMOCOUPLE_T, // From -200°C to 400°C
     STRAIN_GAUGE,
+};
+
+
+enum Sensor_Gain_e {
+    GAIN_1 = 0,
+    GAIN_2,
+    GAIN_4,
+    GAIN_8,
+    GAIN_16,
+    GAIN_32,
+    GAIN_64,
+    GAIN_128
 };

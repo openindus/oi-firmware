@@ -13,6 +13,7 @@
 #include "Multiplexer.h"
 #include "Digipot.h"
 #include "Sensor.h"
+#include "RawSensor.h"
 #include "RTD.h"
 #include "Thermocouple.h"
 #include "StrainGauge.h"
@@ -69,6 +70,7 @@ public:
     static std::vector<RTD> rtd;
     static std::vector<Thermocouple> tc;
     static std::vector<StrainGauge> sg;
+    static std::vector<RawSensor> raw;
 
     static int setAcquisitionTime(AcquisitionDuration_e duration);
 

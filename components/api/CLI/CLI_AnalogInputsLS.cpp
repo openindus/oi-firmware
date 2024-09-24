@@ -158,7 +158,7 @@ static int _tcReadVCmdHandler(int argc, char **argv)
 
     // get TC value in Volt at Index position
     float rTCv = 0.0;
-    rTCv = AnalogInputsLS::tc[sensorIndex].readVoltage();
+    rTCv = AnalogInputsLS::tc[sensorIndex].readMillivolts();
     // print value
     printf("[%d] : %.4f Volts\n", sensorIndex, rTCv);
 
