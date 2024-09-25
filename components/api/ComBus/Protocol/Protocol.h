@@ -91,6 +91,17 @@ enum Protocol_Request_e {
     REQUEST_MOTOR_DC_RUN                    = 0xA0,
     REQUEST_MOTOR_DC_STOP                   = 0xA1,
 
+    /* ANALOGLS */
+    REQUEST_ADD_SENSOR                      = 0xB0,
+    REQUEST_SET_STABILIZATION_TIME          = 0xB0,
+    REQUEST_SET_ACQUISITION_TIME            = 0xB0,
+    REQUEST_RTD_READ_RESISTOR               = 0xB0,
+    REQUEST_RTD_READ_TEMPERATURE            = 0xB0,
+    REQUEST_TC_READ_MILLIVOLTS              = 0xB0,
+    REQUEST_TC_READ_TEMPERATURE             = 0xB0,
+    REQUEST_SG_READ                         = 0xB0,
+    REQUEST_SG_SET_EXCITATION_MODE          = 0xB0,
+
 };
 
 enum Protocol_Event_e {

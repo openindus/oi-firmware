@@ -53,8 +53,6 @@ class AnalogInputsLS
 
 public: 
 
-    /* Sensors */
-
     /* List of RTDs */
     static std::vector<RTD> rtd;
     /* List of thermocouples */

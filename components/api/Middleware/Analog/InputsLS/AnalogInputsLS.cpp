@@ -64,10 +64,10 @@ void AnalogInputsLS::setAcquisitionTime(AcquisitionDuration_e duration)
     }
 }
 
-void AnalogInputsLS::setStabilizationTime(int t)
+void AnalogInputsLS::setStabilizationTime(int duration)
 {
     if (_adc != NULL) {
-        _adc->setStabilizationTime(t);
+        _adc->setStabilizationTime(duration);
     } else {
         ESP_LOGE(TAG, "Failed to set conversion time");
     }
@@ -82,8 +82,8 @@ int AnalogInputsLS::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& 
         return -1;
     }
 
-    switch (type) {
-
+    switch (type) 
+    {
         case RAW_SENSOR:
             if (aIns.size() == 2) {
                 raw.emplace_back(_adc, RawSensor_Pinout_s {AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]]});
@@ -152,6 +152,6 @@ int AnalogInputsLS::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& 
 
         default:
             ESP_LOGE(TAG, "Unknown sensor type.");
+            return -1;
     }
-    return 0;
 }
