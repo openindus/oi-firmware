@@ -46,7 +46,7 @@ float RTD::_calculateRTD(int16_t adcCode)
  * 
  * @return float R_RTD value
  */
-float RTD::readRTD(void)
+float RTD::readResistor(void)
 {
     float rRTD = 0.0;
 
@@ -128,7 +128,7 @@ float RTD::readRTD(void)
 float RTD::readTemperature(void)
 {
     // Read resistor value
-    float rRtd = readRTD();
+    float rRtd = readResistor();
     float temperature = NAN;
     printf("res:%f\n", rRtd);
 
@@ -145,6 +145,6 @@ float RTD::readTemperature(void)
         float c = pt100_table[integer - 1] / 2;
         temperature = a + decimal * (b - c + decimal * (c + b - a));
     }
-    
+
     return temperature;
 }

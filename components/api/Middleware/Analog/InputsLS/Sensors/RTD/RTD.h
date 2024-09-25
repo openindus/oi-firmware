@@ -37,7 +37,7 @@ public:
             _hsMuxOutput(pins.hsMuxOutput),
             _lsMuxInput(pins.lsMuxInput) {}
 
-    float readRTD(void);
+    float readResistor(void);
     float readTemperature(void);
 
 private:

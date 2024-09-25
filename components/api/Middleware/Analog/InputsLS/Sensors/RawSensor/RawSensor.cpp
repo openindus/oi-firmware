@@ -61,5 +61,5 @@ float RawSensor::readMillivolts(void)
 {
     int16_t adcCode = read();
     printf("adc: %i\n", adcCode);
-    return (V_REF_MILLIVOLTS*(float)adcCode)/(float)(std::pow(2,(int)_gain)*ADS114S0X_MAX_ADC_CODE);
+    return (2 * V_REF_MILLIVOLTS*(float)adcCode)/(float)(std::pow(2,(int)_gain)*ADS114S0X_MAX_ADC_CODE);
 }

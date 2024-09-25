@@ -15,7 +15,7 @@
 
 static const char TAG[] = "StrainGauge";
 
-int16_t StrainGauge::read(void)
+float StrainGauge::read(void)
 {
 
     int16_t adcCode = 0;
@@ -57,7 +57,7 @@ int16_t StrainGauge::read(void)
         
         /* Read adc value */
         adcCode = _adc->read();
-        
+
         /* Reset Internal MUX */
         _adc->setInternalMux(ADS114S0X_NOT_CONNECTED, ADS114S0X_NOT_CONNECTED);
 
@@ -124,10 +124,5 @@ int16_t StrainGauge::read(void)
         break;
     }
 
-    return adcCode;
-}
-
-float StrainGauge::readMillivolts(void)
-{
-    return (float)read()/SG_GAIN;
+    return adcCode/SG_GAIN;
 }

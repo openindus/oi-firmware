@@ -57,7 +57,7 @@ int ADS114S0X::init(void)
     /* Set default data rate to 20SPS */
     ads114s0x_reg_datarate_t datarateReg;
     ret |= ads114s0x_read_register(_device, ADS114S0X_REG_DATARATE, (uint8_t*)&datarateReg, sizeof(ads114s0x_reg_datarate_t));
-    datarateReg.mode = 1; // Single shot conversion
+    datarateReg.mode = 0; // Continous mode conversion for calibration --> then we will put it in single shot
     datarateReg.dr = ADS114S0X_DATA_RATE_20_SPS; // default to 20SPS
     datarateReg.clk = 0; // Internal clock
     datarateReg.g_chop = 0; // Global chop disable
@@ -66,8 +66,20 @@ int ADS114S0X::init(void)
 
     /* Data ready */
     _queue = xQueueCreate(10, 0);
-    // xTaskCreate(_task, "_task", 2048, this->_device, 10, NULL);
     ret |= ads114s0x_add_data_ready_isr_handler(_device, _isr, NULL);
+    
+    // Calibration 
+    ESP_LOGE(TAG, "Calibrating ADC...");
+    ret |= ads114s0x_start(_device);
+    ret |= ads114s0x_self_offset_calib(_device);
+    vTaskDelay(pdMS_TO_TICKS(200));
+    ret |= ads114s0x_stop(_device);
+    xQueueReset(_queue);
+    ESP_LOGE(TAG, "Calibrating ADC Done !");
+    
+    // Now that conversion is done, start in single shot
+    datarateReg.mode = 0; // Single shot conversion
+    ret |= ads114s0x_write_register(_device, ADS114S0X_REG_DATARATE, (uint8_t*)&datarateReg, sizeof(ads114s0x_reg_datarate_t));
 
     return ret;
 }

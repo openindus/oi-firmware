@@ -48,8 +48,7 @@ public:
         _excitation = excitation;
     }
 
-    int16_t read(void);
-    float readMillivolts(void);
+    float read(void);
 
 private:
 

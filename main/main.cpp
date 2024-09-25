@@ -8,7 +8,7 @@ void setup(void)
     printf("Hello OpenIndus !\n");
     delay(1000);
 
-    analogls.addSensor(RTD_PT1000,{AIN_C_P, AIN_C_N});
+    analogls.addSensor(RAW_SENSOR,{AIN_C_P, AIN_C_N});
     // analogls.addSensor(RTD_TWO_WIRE, {AIN_B_P, AIN_B_N});
     // analogls.addSensor(RTD_TWO_WIRE, {AIN_C_P, AIN_C_N});
     // analogls.addSensor(RTD_TWO_WIRE, {AIN_D_P, AIN_D_N});
@@ -23,7 +23,7 @@ void loop(void)
     float data = 0.0;
 
     /* RTD */
-    data = analogls.rtd[0].readTemperature();
+    data = analogls.raw[0].readMillivolts();
     printf(">RTD (CH0): %f\n", data);
     // data = analogls.rtd[1].readTemperature();
     // printf(">RTD (CH1) - Temperature(°C): %f\n", data);

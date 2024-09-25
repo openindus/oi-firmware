@@ -137,7 +137,7 @@ static int _rtdReadCmdHandler(int argc, char **argv)
 
     // get RTD value in Ohm at Index position
     float rRTD = 0.0;
-    rRTD = AnalogInputsLS::rtd[sensorIndex].readRTD();
+    rRTD = AnalogInputsLS::rtd[sensorIndex].readResistor();
     // print value
     printf("[%d] : %3.4f Ohms\n", sensorIndex, rRTD);
 
