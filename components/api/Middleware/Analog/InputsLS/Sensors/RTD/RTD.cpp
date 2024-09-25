@@ -132,22 +132,11 @@ float RTD::readTemperature(void)
     float temperature = NAN;
     printf("res:%f\n", rRtd);
 
-    if (_type == RTD_PT100 && rRtd >= 10 && rRtd <= 390) 
+    if ((_type == RTD_PT100 && rRtd >= 10 && rRtd <= 390) || (_type == RTD_PT1000 && rRtd >= 100 && rRtd <= 2900))
     {
         // Second order interpolation
-        rRtd = rRtd / 10.0;
-        int integer = floor(rRtd);
-        float decimal = rRtd - integer;
-
-        float a = pt100_table[integer];
-        float b = pt100_table[integer + 1] / 2;
-        float c = pt100_table[integer - 1] / 2;
-        temperature = a + decimal * (b - c + decimal * (c + b - a));
-    }
-    else if (_type == RTD_PT1000 && rRtd >= 100 && rRtd <= 2900) 
-    {
-        // Second order interpolation
-        rRtd = rRtd / 100.0;
+        if (_type == RTD_PT100) rRtd = rRtd / 10.0;
+        if (_type == RTD_PT1000) rRtd = rRtd / 100.0;
         int integer = floor(rRtd);
         float decimal = rRtd - integer;
 
