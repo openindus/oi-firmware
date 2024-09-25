@@ -28,18 +28,14 @@ class RTD
 {
 public:
 
-    RTD(ADS114S0X* adc, Multiplexer* highSideMux, Multiplexer* lowSideMux, const RTD_Pinout_s& pins) : 
+    RTD(ADS114S0X* adc, Sensor_Type_e type, Multiplexer* highSideMux, Multiplexer* lowSideMux, const RTD_Pinout_s& pins) : 
             _adc(adc),
+            _type(type),
             _highSideMux(highSideMux),
             _lowSideMux(lowSideMux),
             _adcInputs(pins.adcInputs),
             _hsMuxOutput(pins.hsMuxOutput),
-            _lsMuxInput(pins.lsMuxInput),
-            _type(PT100) {}
-
-    inline void setType(RTD_Type_e type) {
-        _type = type;
-    }
+            _lsMuxInput(pins.lsMuxInput) {}
 
     float readRTD(void);
     float readTemperature(void);
@@ -47,13 +43,13 @@ public:
 private:
 
     ADS114S0X* _adc;
+    Sensor_Type_e _type;
     Multiplexer* _highSideMux;
     Multiplexer* _lowSideMux;
     std::vector<ADC_Input_t> _adcInputs;
     Mux_IO_t _hsMuxOutput;
     Mux_IO_t _lsMuxInput;
-    RTD_Type_e _type;
 
     float _calculateRTD(int16_t adcCode);
-    
+
 };

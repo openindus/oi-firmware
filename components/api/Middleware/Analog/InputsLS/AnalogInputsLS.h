@@ -50,41 +50,47 @@ typedef enum {
 
 class AnalogInputsLS
 {
-protected:
-
-    /* ADC */
-    static ADS114S0X* _adc;
-
-    /* Excitation */
-    static Multiplexer* _highSideMux;
-    static Multiplexer* _lowSideMux;
-    static Digipot* _digipot;
-
-    static int _init(void);
-
 
 public: 
 
     /* Sensors */
 
+    /* List of RTDs */
     static std::vector<RTD> rtd;
+    /* List of thermocouples */
     static std::vector<Thermocouple> tc;
+    /* List of strain gauge*/
     static std::vector<StrainGauge> sg;
+    /* List of raw sensors */
     static std::vector<RawSensor> raw;
 
-    static int setAcquisitionTime(AcquisitionDuration_e duration);
+    /**
+     * @brief Set the Acquisition Time 
+     * By default the adc reading start right after the 
+     * @param duration 
+     * @return int 
+     */
+    static void setAcquisitionTime(AcquisitionDuration_e duration);
+    
+    /**
+     * @brief Set the Stabilization Time 
+     * By default the adc reading start right after a call to read() function.
+     * But if your sensor need some time to stabilize (sensor with an integrated RC filter for example),
+     * you can set up a delay in milliseconds before the reading starts.
+     * 
+     * @param duration
+     */
+    static void setStabilizationTime(int t);
 
-    static int setStabilizationTime(int t);
-
+    /**
+     * @brief Add a new sensor
+     * 
+     * @param type [RAW_SENSOR; RTD_TWO_WIRE; RTD_THREE_WIRE; THERMOCOUPLE[B|E|J|K|N|R|S|T]; STRAIN_GAUGE]
+     * @param aIns Analog Inputs (AIN_A_P to AIN_E_N)
+     * @return int the index of the added element (first call to this function for type RTD will return 0, second call 1, ...).
+     *         return -1 in case of error
+     */
     static int addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& aIns);
-
-    static inline int addRtd2wire(const std::array<AIn_Num_t, 2>& inputs) {
-        return addSensor(RTD_TWO_WIRE, std::vector<AIn_Num_t>(inputs.begin(), inputs.end()));
-    }
-
-    static inline int addRtd3Wire(const std::array<AIn_Num_t, 3>& inputs) {
-        return addSensor(RTD_THREE_WIRE, std::vector<AIn_Num_t>(inputs.begin(), inputs.end()));
-    }
 
     static inline int addStrainGauge(const std::array<AIn_Num_t, 2>& signalInputs, 
                                      const std::array<AIn_Num_t, 2>& excitationInputs) {
@@ -112,4 +118,18 @@ public:
     static inline Digipot* getDigipot(void) {
         return _digipot;
     }
+
+protected:
+
+    /* ADC */
+    static ADS114S0X* _adc;
+
+    /* Excitation */
+    static Multiplexer* _highSideMux;
+    static Multiplexer* _lowSideMux;
+    static Digipot* _digipot;
+
+    static int _init(void);
 };
+
+

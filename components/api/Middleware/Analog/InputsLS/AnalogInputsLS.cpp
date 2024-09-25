@@ -55,53 +55,24 @@ std::vector<Thermocouple> AnalogInputsLS::tc;
 std::vector<StrainGauge> AnalogInputsLS::sg;
 std::vector<RawSensor> AnalogInputsLS::raw;
 
-/**
- * @brief Set the length of the acquisition in milliseconds
- * Default value is 50ms. If you set a shorter acquisition duration, the result will be less accurate.
- * 
- * @param duration Time in milliseconds
- * @return int 0 if success, -1 if error
- */
-int AnalogInputsLS::setAcquisitionTime(AcquisitionDuration_e duration)
+void AnalogInputsLS::setAcquisitionTime(AcquisitionDuration_e duration)
 {
-    int ret = 0;
     if (_adc != NULL) {
-        ret |= _adc->setDataRate(static_cast<ads114s0x_data_rate_e>(duration));
+        _adc->setDataRate(static_cast<ads114s0x_data_rate_e>(duration));
     } else {
         ESP_LOGE(TAG, "Failed to set conversion time");
-        ret = -1;
     }
-    return ret;
 }
 
-/**
- * @brief Set the stabilization time before doing an acquisition
- * Default value is 0ms. 
- * But if your sensors need more time to stabilize before making an acquisition, you can add it with this function.
- * 
- * @param t Time in milliseconds
- * @return int 0 if success, -1 if error
- */
-int AnalogInputsLS::setStabilizationTime(int t)
+void AnalogInputsLS::setStabilizationTime(int t)
 {
-    int ret = 0;
     if (_adc != NULL) {
-        ret |= _adc->setStabilizationTime(t);
+        _adc->setStabilizationTime(t);
     } else {
         ESP_LOGE(TAG, "Failed to set conversion time");
-        ret = -1;
     }
-    return ret;
 }
 
-/**
- * @brief Add sensor
- * 
- * @param type [RTD_TWO_WIRE; RTD_THREE_WIRE; THERMOCOUPLE; STRAIN_GAUGE]
- * @param aIns Analog Inputs (AIN_A_P to AIN_E_N)
- * @return int the index of the added element (first call to this function for type RTD will return 0, second call 1, ...).
- *         return -1 in case of error
- */
 int AnalogInputsLS::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& aIns)
 {
     if (!std::all_of(aIns.begin(), aIns.end(), [](AIn_Num_t aIn) {
@@ -112,6 +83,7 @@ int AnalogInputsLS::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& 
     }
 
     switch (type) {
+
         case RAW_SENSOR:
             if (aIns.size() == 2) {
                 raw.emplace_back(_adc, RawSensor_Pinout_s {AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]]});
@@ -122,24 +94,18 @@ int AnalogInputsLS::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& 
             }
             break;
 
-        case RTD_TWO_WIRE:
+        case RTD_PT100:
+        case RTD_PT1000:
             if (aIns.size() == 2) {
-                rtd.emplace_back(_adc, _highSideMux, _lowSideMux, 
+                rtd.emplace_back(_adc, type, _highSideMux, _lowSideMux, 
                                 RTD_Pinout_s {
                                     {AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]]},
                                     AIN_TO_MUX_IO[aIns[0]], 
                                     AIN_TO_MUX_IO[aIns[1]]
                                 });
                 return rtd.size()-1;
-            } else {
-                ESP_LOGE(TAG, "RTD_TWO_WIRE requires 2 AINs.");
-                return -1;
-            }
-            break;
-
-        case RTD_THREE_WIRE:
-            if (aIns.size() == 3) {
-                rtd.emplace_back(_adc, _highSideMux, _lowSideMux, 
+            } else if (aIns.size() == 3) {
+                rtd.emplace_back(_adc, type, _highSideMux, _lowSideMux, 
                                 RTD_Pinout_s {
                                     {AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]], AIN_TO_ADC_INPUT[aIns[2]]},
                                     AIN_TO_MUX_IO[aIns[0]], 
@@ -147,7 +113,7 @@ int AnalogInputsLS::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& 
                                 });
                 return rtd.size()-1;
             } else {
-                ESP_LOGE(TAG, "RTD_THREE_WIRE requires 3 AINs.");
+                ESP_LOGE(TAG, "RTD type requires 2 or 3 AINs.");
                 return -1;
             }
             break;
@@ -168,6 +134,7 @@ int AnalogInputsLS::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& 
                 return -1;
             }
             break;
+
         case STRAIN_GAUGE:
             if (aIns.size() == 4) {
                 sg.emplace_back(_adc, _highSideMux, _lowSideMux,

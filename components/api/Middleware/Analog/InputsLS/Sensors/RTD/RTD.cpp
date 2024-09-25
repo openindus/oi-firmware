@@ -8,20 +8,37 @@
 
 #include "RTD.h"
 
-#define RTD_R_REF                   1000
-#define RTD_GAIN                    4
-#define RTD_GAIN_REGISTER           ADS114S0X_PGA_GAIN_4
-#define RTD_EXCITATION_CURRENT      ADS114S0X_IDAC_1000_UA
-#define RTD_ACQUISITION_REFERENCE   ADS114S0X_REF_REFP1_REFN1
+#define RTD_R_REF                       3000
+#define RTD_PT100_GAIN                  8
+#define RTD_PT1000_GAIN                 1
+#define RTD_PT100_GAIN_REGISTER         ADS114S0X_PGA_GAIN_8
+#define RTD_PT1000_GAIN_REGISTER        ADS114S0X_PGA_GAIN_1
+#define RTD_PT100_EXCITATION_CURRENT    ADS114S0X_IDAC_750_UA
+#define RTD_PT1000_EXCITATION_CURRENT   ADS114S0X_IDAC_250_UA
+#define RTD_ACQUISITION_REFERENCE       ADS114S0X_REF_REFP1_REFN1
 
 static const char TAG[] = "RTD";
 
-// Use this with table ? : https://github.com/drhaney/pt100rtd/blob/master/pt100rtd.cpp
+// Value of temperature for pt100 by decade
+// First value is the value for 10ohms and last one is the value for 400Ohms
+// A zero is added at the beginning to match index and resistor value
+// Value are taken from online fluke pt100 calculator
+static const float pt100_table[] = {-242.021, -219.539, -196.572, -173.158, -149.335, -125.146, -100.631, -75.828, -50.771, -25.488,
+                                    0.000, 25.684, 51.566, 77.651, 103.943, 130.447, 157.169, 184.115, 211.289, 238.698, 
+                                    266.348, 294.246, 322.397, 350.810, 379.492, 408.450, 437.693, 467.229, 497.067, 527.217, 
+                                    557.688, 588.491, 619.638, 651.140, 683.009, 715.259, 747.903, 780.957, 814.436, 848.357, 
+                                    882.737};
+    
 
 float RTD::_calculateRTD(int16_t adcCode)
 {
     /* Calculate RTD resistor values */
-    return (float)(2 * RTD_R_REF * adcCode) / (float)(RTD_GAIN * ADS114S0X_MAX_ADC_CODE);
+    if (_type == RTD_PT100)
+        return (float)(2 * RTD_R_REF * adcCode) / (float)(RTD_PT100_GAIN * ADS114S0X_MAX_ADC_CODE);
+    else if (_type == RTD_PT1000) {
+        return (float)(2 * RTD_R_REF * adcCode) / (float)(RTD_PT1000_GAIN * ADS114S0X_MAX_ADC_CODE);
+    }
+    return 0.0f;
 }
 
 /**
@@ -48,10 +65,14 @@ float RTD::readRTD(void)
     _adc->setReference(RTD_ACQUISITION_REFERENCE);
   
     /* Set PGA Gain */
-    _adc->setPGAGain(RTD_GAIN_REGISTER);
-
     /* Set excitation */
-    _adc->setExcitation(RTD_EXCITATION_CURRENT);
+    if (_type == RTD_PT100) {
+        _adc->setExcitation(RTD_PT100_EXCITATION_CURRENT);
+        _adc->setPGAGain(RTD_PT100_GAIN_REGISTER);
+    } else if (_type == RTD_PT1000) {
+        _adc->setExcitation(RTD_PT1000_EXCITATION_CURRENT);
+        _adc->setPGAGain(RTD_PT1000_GAIN_REGISTER);
+    }
 
     /* Wait for stabilization if needed */
     _adc->waitStabilization();
@@ -106,13 +127,35 @@ float RTD::readRTD(void)
  */
 float RTD::readTemperature(void)
 {
-    const float R0 = 100.0;
-    const float A = 3.9083e-3;
-    const float B = -5.775e-7;
-    // const float C = -4.183e-12;
-
+    // Read resistor value
     float rRtd = readRTD();
+    float temperature = NAN;
     printf("res:%f\n", rRtd);
-    /* PT100 - Callendar-Van Dusen equation */
-    return ((-A + sqrt(A * A - (4 * B * (1 - (rRtd / R0))))) / (2 * B));
+
+    if (_type == RTD_PT100 && rRtd >= 10 && rRtd <= 390) 
+    {
+        // Second order interpolation
+        rRtd = rRtd / 10.0;
+        int integer = floor(rRtd);
+        float decimal = rRtd - integer;
+
+        float a = pt100_table[integer];
+        float b = pt100_table[integer + 1] / 2;
+        float c = pt100_table[integer - 1] / 2;
+        temperature = a + decimal * (b - c + decimal * (c + b - a));
+    }
+    else if (_type == RTD_PT1000 && rRtd >= 100 && rRtd <= 2900) 
+    {
+        // Second order interpolation
+        rRtd = rRtd / 100.0;
+        int integer = floor(rRtd);
+        float decimal = rRtd - integer;
+
+        float a = pt100_table[integer];
+        float b = pt100_table[integer + 1] / 2;
+        float c = pt100_table[integer - 1] / 2;
+        temperature = a + decimal * (b - c + decimal * (c + b - a));
+    }
+    
+    return temperature;
 }

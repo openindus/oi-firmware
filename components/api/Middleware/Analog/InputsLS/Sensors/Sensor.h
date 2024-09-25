@@ -12,8 +12,8 @@
 
 enum Sensor_Type_e {
     RAW_SENSOR, // Read differential input voltage
-    RTD_TWO_WIRE,
-    RTD_THREE_WIRE,
+    RTD_PT100,
+    RTD_PT1000,
     THERMOCOUPLE_B, // From 250°C to 1820°C
     THERMOCOUPLE_E, // From -200°C to 1000°C 
     THERMOCOUPLE_J, // From -210°C to 1200°C
