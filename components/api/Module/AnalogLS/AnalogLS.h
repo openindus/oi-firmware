@@ -31,7 +31,7 @@ public:
 
 class AnalogLS :
     public Controller, 
-    public AnalogInputsLSCmd,
+    public AnalogInputsLSCmd
 {
 public:
 

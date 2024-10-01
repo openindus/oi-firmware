@@ -20,7 +20,11 @@ int AnalogInputsLSRsp::init(void)
 {
     
     ControllerSlave::addCtrlCallback(REQUEST_ADD_SENSOR, [](std::vector<uint8_t>& data) {
-        const std::vector<AIn_Num_t> aIns = std::vector<AIn_Num_t>(data.begin()+1, data.end());
+        std::vector<AIn_Num_t> aIns;
+        for (auto it = data.begin() + 1; it != data.end(); it++) {
+            printf("%i\n", *it);
+            aIns.push_back((AIn_Num_t)*it);
+        }
         int index = AnalogInputsLS::addSensor((Sensor_Type_e)data[1], aIns);
         data.clear();
         data.push_back(REQUEST_ADD_SENSOR);
@@ -47,42 +51,63 @@ int AnalogInputsLSRsp::init(void)
         int16_t value = AnalogInputsLS::raw[data[1]].read();
         uint8_t* ptr = reinterpret_cast<uint8_t*>(&value);
         data.insert(data.end(), ptr, ptr + sizeof(int16_t));
+        data[0] = EVENT_RAW_SENSOR_READ;
+        // Send response on CAN Bus because no return is needed for this message
+        ControllerSlave::sendEvent(data);
     });
 
     ControllerSlave::addCtrlCallback(REQUEST_RAW_SENSOR_READ_MILLIVOLT, [](std::vector<uint8_t>& data) {
         float value = AnalogInputsLS::raw[data[1]].readMillivolts();
         uint8_t* ptr = reinterpret_cast<uint8_t*>(&value);
         data.insert(data.end(), ptr, ptr + sizeof(float));
+        data[0] = EVENT_RAW_SENSOR_READ_MILLIVOLT;
+        // Send response on CAN Bus because no return is needed for this message
+        ControllerSlave::sendEvent(data);
     });
 
     ControllerSlave::addCtrlCallback(REQUEST_RTD_READ_RESISTOR, [](std::vector<uint8_t>& data) {
         float value = AnalogInputsLS::rtd[data[1]].readResistor();
         uint8_t* ptr = reinterpret_cast<uint8_t*>(&value);
         data.insert(data.end(), ptr, ptr + sizeof(float));
+        data[0] = EVENT_RTD_READ_RESISTOR;
+        // Send response on CAN Bus because no return is needed for this message
+        ControllerSlave::sendEvent(data);
     });
 
     ControllerSlave::addCtrlCallback(REQUEST_RTD_READ_TEMPERATURE, [](std::vector<uint8_t>& data) {
         float value = AnalogInputsLS::rtd[data[1]].readTemperature();
         uint8_t* ptr = reinterpret_cast<uint8_t*>(&value);
         data.insert(data.end(), ptr, ptr + sizeof(float));
+        data[0] = EVENT_RTD_READ_TEMPERATURE;
+        // Send response on CAN Bus because no return is needed for this message
+        ControllerSlave::sendEvent(data);
     });
 
     ControllerSlave::addCtrlCallback(REQUEST_TC_READ_MILLIVOLTS, [](std::vector<uint8_t>& data) {
         float value = AnalogInputsLS::tc[data[1]].readMillivolts();
         uint8_t* ptr = reinterpret_cast<uint8_t*>(&value);
         data.insert(data.end(), ptr, ptr + sizeof(float));
+        data[0] = EVENT_TC_READ_MILLIVOLTS;
+        // Send response on CAN Bus because no return is needed for this message
+        ControllerSlave::sendEvent(data);
     });
 
     ControllerSlave::addCtrlCallback(REQUEST_TC_READ_TEMPERATURE, [](std::vector<uint8_t>& data) {
         float value = AnalogInputsLS::tc[data[1]].readTemperature();
         uint8_t* ptr = reinterpret_cast<uint8_t*>(&value);
         data.insert(data.end(), ptr, ptr + sizeof(float));
+        data[0] = EVENT_TC_READ_TEMPERATURE;
+        // Send response on CAN Bus because no return is needed for this message
+        ControllerSlave::sendEvent(data);
     });
 
     ControllerSlave::addCtrlCallback(REQUEST_SG_READ, [](std::vector<uint8_t>& data) {
         float value = AnalogInputsLS::sg[data[1]].read();
         uint8_t* ptr = reinterpret_cast<uint8_t*>(&value);
         data.insert(data.end(), ptr, ptr + sizeof(float));
+        data[0] = EVENT_SG_READ;
+        // Send response on CAN Bus because no return is needed for this message
+        ControllerSlave::sendEvent(data);
     });
 
     ControllerSlave::addCtrlCallback(REQUEST_SG_SET_EXCITATION_MODE, [](std::vector<uint8_t>& data) {

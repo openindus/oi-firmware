@@ -75,6 +75,7 @@ void AnalogInputsLS::setStabilizationTime(int duration)
 
 int AnalogInputsLS::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& aIns)
 {
+    printf("aIns:%i\n", aIns[0]);
     if (!std::all_of(aIns.begin(), aIns.end(), [](AIn_Num_t aIn) {
         return aIn >= AIN_A_P && aIn < AIN_MAX;
     })) {

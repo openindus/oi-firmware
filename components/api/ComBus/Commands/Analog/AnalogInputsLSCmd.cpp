@@ -32,8 +32,6 @@ void RawSensorCmd::setGain(Sensor_Gain_e gain)
 
 int16_t RawSensorCmd::read(void)
 {
-    int ret = 0;
-
     // Add callback (callback is rewrite at each call of this function)
     ControllerMaster::addEventCallback(REQUEST_RAW_SENSOR_READ, _control->getId(), [this](uint8_t* data) {
         xQueueSend(_readEvent, data, pdMS_TO_TICKS(100));
@@ -41,19 +39,14 @@ int16_t RawSensorCmd::read(void)
 
     // Send a message to slave to request a read
     std::vector<uint8_t> msgBytes = {REQUEST_RAW_SENSOR_READ, _index};
-    ret = _control->request(msgBytes);
+    _control->request(msgBytes, false);
 
-    if (ret == 0) {
-        // Wait for event
-        uint8_t* data = NULL;
-        xQueueReset(_readEvent);
-        xQueueReceive(_readEvent, data, portMAX_DELAY);
-        int16_t* ret = reinterpret_cast<int16_t*>(&data[2]);
-        return *ret;
-    }
-
-    // If command request failed
-    return -1;
+    // Wait for event
+    uint8_t* data = NULL;
+    xQueueReset(_readEvent);
+    xQueueReceive(_readEvent, data, portMAX_DELAY);
+    int16_t* ret = reinterpret_cast<int16_t*>(&data[2]);
+    return *ret;
 }
 
 float RawSensorCmd::readMillivolts(void)
@@ -213,25 +206,7 @@ int AnalogInputsLSCmd::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t
             return -1;
         }
     }
+    return -1;
 }
 
 #endif
-
-
-# Brouillon :
-
-void StepperCmd::wait(MotorNum_t motor)
-{
-    // Add callback (callback is rewrite at each call of wait function)
-    ControllerMaster::addEventCallback(EVENT_MOTOR_READY, _control->getId(), [this](uint8_t motor) {
-        xQueueSend(_motorWaitEvent[motor], NULL, pdMS_TO_TICKS(100));
-    });
-
-    // Send a message to slave
-    std::vector<uint8_t> msgBytes = {REQUEST_MOTOR_WAIT, (uint8_t)motor};
-    _control->request(msgBytes, false);
-    // Wait for event
-    xQueueReset(_motorWaitEvent[motor]);
-    xQueueReceive(_motorWaitEvent[motor], NULL, portMAX_DELAY);
-
-}

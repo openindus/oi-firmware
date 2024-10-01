@@ -95,13 +95,13 @@ class AnalogInputsLSCmd
 public:
 
     /* List of RTDs */
-    std::vector<RTD> rtd;
+    std::vector<RTDCmd> rtd;
     /* List of thermocouples */
-    std::vector<Thermocouple> tc;
+    std::vector<ThermocoupleCmd> tc;
     /* List of strain gauge*/
-    std::vector<StrainGauge> sg;
+    std::vector<StrainGaugeCmd> sg;
     /* List of raw sensors */
-    std::vector<RawSensor> raw;
+    std::vector<RawSensorCmd> raw;
 
     AnalogInputsLSCmd(Controller* control) : _control(control) {}
 

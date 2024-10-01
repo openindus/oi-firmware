@@ -19,7 +19,6 @@
 #include "StrainGauge.h"
 
 typedef enum {
-    AIN_UNDEFINED = -1,
     AIN_A_P = 0,
     AIN_A_N,
     AIN_B_P,

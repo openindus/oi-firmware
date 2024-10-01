@@ -110,4 +110,13 @@ enum Protocol_Request_e {
 enum Protocol_Event_e {
     EVENT_DIGITAL_INTERRUPT                 = 0x00,
     EVENT_MOTOR_READY                       = 0x01,
+
+    /* AnalogLS */
+    EVENT_RAW_SENSOR_READ                   = 0xB0,
+    EVENT_RAW_SENSOR_READ_MILLIVOLT         = 0xB1,
+    EVENT_RTD_READ_RESISTOR                 = 0xB2,
+    EVENT_RTD_READ_TEMPERATURE              = 0xB3,
+    EVENT_TC_READ_MILLIVOLTS                = 0xB4,
+    EVENT_TC_READ_TEMPERATURE               = 0xB5,
+    EVENT_SG_READ                           = 0xB6,
 };

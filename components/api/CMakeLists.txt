@@ -66,6 +66,7 @@ set(COMPONENT_SRCS
     "ComBus/Commands/Stepper/StepperCmd.cpp"
     "ComBus/Commands/Dc/DcCmd.cpp"
     "ComBus/Commands/Analog/AnalogOutputsCmd.cpp"
+    "ComBus/Commands/Analog/AnalogInputsLSCmd.cpp"
     "ComBus/Commands/Analog/AnalogInputsLVCmd.cpp"
     "ComBus/Commands/Analog/AnalogInputsHVCmd.cpp"
     "ComBus/Responses/Digital/DigitalInputsRsp.cpp"

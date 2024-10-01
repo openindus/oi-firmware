@@ -69,13 +69,13 @@ int ADS114S0X::init(void)
     ret |= ads114s0x_add_data_ready_isr_handler(_device, _isr, NULL);
     
     // Calibration 
-    ESP_LOGE(TAG, "Calibrating ADC...");
+    ESP_LOGI(TAG, "Calibrating ADC...");
     ret |= ads114s0x_start(_device);
     ret |= ads114s0x_self_offset_calib(_device);
     vTaskDelay(pdMS_TO_TICKS(200));
     ret |= ads114s0x_stop(_device);
     xQueueReset(_queue);
-    ESP_LOGE(TAG, "Calibrating ADC Done !");
+    ESP_LOGI(TAG, "Calibrating ADC Done !");
     
     // Now that conversion is done, start in single shot
     datarateReg.mode = 0; // Single shot conversion
