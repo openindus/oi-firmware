@@ -18,6 +18,74 @@
 
 static const char TAG[] = "AnalogInputsLSCmd";
 
+void RawSensorCmd::setGain(Sensor_Gain_e gain)
+{
+    std::vector<uint8_t> msgBytes = {REQUEST_RAW_SENSOR_SET_GAIN, _index, (uint8_t)gain};
+    _control->request(msgBytes);
+}
+
+int16_t RawSensorCmd::read(void)
+{
+    std::vector<uint8_t> msgBytes = {REQUEST_RAW_SENSOR_READ, _index};
+    _control->request(msgBytes);
+    int16_t* ret = reinterpret_cast<int16_t*>(&msgBytes[2]);
+    return *ret;
+}
+
+float RawSensorCmd::readMillivolts(void)
+{
+    std::vector<uint8_t> msgBytes = {REQUEST_RAW_SENSOR_READ_MILLIVOLT, _index};
+    _control->request(msgBytes);
+    float* ret = reinterpret_cast<float*>(&msgBytes[2]);
+    return *ret;
+}
+
+float RTDCmd::readResistor(void)
+{
+    std::vector<uint8_t> msgBytes = {REQUEST_RTD_READ_RESISTOR, _index};
+    _control->request(msgBytes);
+    float* ret = reinterpret_cast<float*>(&msgBytes[2]);
+    return *ret;
+}
+
+float RTDCmd::readTemperature(void)
+{
+    std::vector<uint8_t> msgBytes = {REQUEST_RTD_READ_TEMPERATURE, _index};
+    _control->request(msgBytes);
+    float* ret = reinterpret_cast<float*>(&msgBytes[2]);
+    return *ret;
+}
+
+float ThermocoupleCmd::readMillivolts(void)
+{
+    std::vector<uint8_t> msgBytes = {REQUEST_TC_READ_MILLIVOLTS, _index};
+    _control->request(msgBytes);
+    float* ret = reinterpret_cast<float*>(&msgBytes[2]);
+    return *ret;
+}
+
+float ThermocoupleCmd::readTemperature(void)
+{
+    std::vector<uint8_t> msgBytes = {REQUEST_TC_READ_TEMPERATURE, _index};
+    _control->request(msgBytes);
+    float* ret = reinterpret_cast<float*>(&msgBytes[2]);
+    return *ret;
+}
+
+void StrainGaugeCmd::setExcitationMode(StrainGauge_Excitation_e excitation)
+{
+    std::vector<uint8_t> msgBytes = {REQUEST_SG_SET_EXCITATION_MODE, _index, (uint8_t)excitation};
+    _control->request(msgBytes);
+}
+
+float StrainGaugeCmd::read(void)
+{
+    std::vector<uint8_t> msgBytes = {REQUEST_SG_READ, _index};
+    _control->request(msgBytes);
+    float* ret = reinterpret_cast<float*>(&msgBytes[2]);
+    return *ret;
+}
+
 void AnalogInputsLSCmd::setAcquisitionTime(AcquisitionDuration_e duration)
 {
     std::vector<uint8_t> msgBytes = {REQUEST_SET_ACQUISITION_TIME, (uint8_t)duration};
@@ -52,7 +120,7 @@ int AnalogInputsLSCmd::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t
         {
         case RAW_SENSOR:
             if (aIns.size() == 2) {
-                raw.emplace_back(_control);
+                raw.emplace_back(_control, index);
                 return index;
             } else {
                 ESP_LOGE(TAG, "Raw Sensor requires 2 AINs.");
@@ -63,7 +131,7 @@ int AnalogInputsLSCmd::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t
         case RTD_PT100:
         case RTD_PT1000:
             if (aIns.size() == 2 || aIns.size() == 3) {
-                rtd.emplace_back(_control);
+                rtd.emplace_back(_control, index);
                 return index;
             } else {
                 ESP_LOGE(TAG, "RTD type requires 2 or 3 AINs.");
@@ -80,7 +148,7 @@ int AnalogInputsLSCmd::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t
         case THERMOCOUPLE_S:
         case THERMOCOUPLE_T:
             if (aIns.size() == 2) {
-                tc.emplace_back(_control);
+                tc.emplace_back(_control, index);
                 return index;
             } else {
                 ESP_LOGE(TAG, "THERMOCOUPLE requires 2 AINs.");
@@ -90,7 +158,7 @@ int AnalogInputsLSCmd::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t
 
         case STRAIN_GAUGE:
             if (aIns.size() == 4) {
-                sg.emplace_back(_control);
+                sg.emplace_back(_control, index);
                 return index;
             } else {
                 ESP_LOGE(TAG, "STRAIN_GAUGE requires 4 AINs.");

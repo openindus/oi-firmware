@@ -30,7 +30,7 @@ class RawSensorCmd
 
 public:
 
-    RawSensorCmd(Controller* control) : _control(control) {}
+    RawSensorCmd(Controller* control, uint8_t index) : _control(control), _index(index) {}
     void setGain(Sensor_Gain_e gain);
     int16_t read(void);
     float readMillivolts(void);
@@ -38,6 +38,7 @@ public:
 private:
 
     Controller* _control;
+    uint8_t _index;
 };
 
 class RTDCmd
@@ -45,13 +46,14 @@ class RTDCmd
 
 public:
 
-    RTDCmd(Controller* control) : _control(control) {}
+    RTDCmd(Controller* control, uint8_t index) : _control(control), _index(index) {}
     float readResistor(void);
     float readTemperature(void);
     
 private:
 
     Controller* _control;
+    uint8_t _index;
 };
 
 class ThermocoupleCmd
@@ -59,13 +61,14 @@ class ThermocoupleCmd
 
 public:
 
-    ThermocoupleCmd(Controller* control) : _control(control) {}
+    ThermocoupleCmd(Controller* control, uint8_t index) : _control(control), _index(index) {}
     float readMillivolts(void);
     float readTemperature(void);
     
 private:
 
     Controller* _control;
+    uint8_t _index;
 };
 
 class StrainGaugeCmd
@@ -73,13 +76,14 @@ class StrainGaugeCmd
 
 public:
 
-    StrainGaugeCmd(Controller* control) : _control(control) {}
+    StrainGaugeCmd(Controller* control, uint8_t index) : _control(control), _index(index) {}
     void setExcitationMode(StrainGauge_Excitation_e excitation);
     float read(void);
     
 private:
 
     Controller* _control;
+    uint8_t _index;
 };
 
 class AnalogInputsLSCmd
