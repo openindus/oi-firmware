@@ -136,13 +136,14 @@ void AnalogInputsLSCmd::setStabilizationTime(int duration)
 }
 
 int AnalogInputsLSCmd::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& aIns)
-{   
+{
     int index = -1;
 
     /* Send message */
     std::vector<uint8_t> msgBytes = {REQUEST_ADD_SENSOR, (uint8_t)type};
-    const uint8_t *ptr = reinterpret_cast<const uint8_t*>(&aIns);
-    msgBytes.insert(msgBytes.end(), ptr, ptr + aIns.size()*sizeof(AIn_Num_t));
+    for (auto it = aIns.begin(); it != aIns.end(); it++) {
+        msgBytes.push_back((uint8_t)*it);
+    }
     
     /* Create new instance of sensor and return sensor index */
     if (_control->request(msgBytes) == 0) {

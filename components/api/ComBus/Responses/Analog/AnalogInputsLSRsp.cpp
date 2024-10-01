@@ -21,7 +21,7 @@ int AnalogInputsLSRsp::init(void)
     
     ControllerSlave::addCtrlCallback(REQUEST_ADD_SENSOR, [](std::vector<uint8_t>& data) {
         std::vector<AIn_Num_t> aIns;
-        for (auto it = data.begin() + 1; it != data.end(); it++) {
+        for (auto it = data.begin() + 2; it != data.end(); it++) {
             printf("%i\n", *it);
             aIns.push_back((AIn_Num_t)*it);
         }
