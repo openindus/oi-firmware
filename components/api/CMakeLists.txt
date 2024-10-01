@@ -74,6 +74,7 @@ set(COMPONENT_SRCS
     "ComBus/Responses/Stepper/StepperRsp.cpp"
     "ComBus/Responses/Dc/DcRsp.cpp"
     "ComBus/Responses/Analog/AnalogOutputsRsp.cpp"
+    "ComBus/Responses/Analog/AnalogInputsLSRsp.cpp"
     "ComBus/Responses/Analog/AnalogInputsLVRsp.cpp"
     "ComBus/Responses/Analog/AnalogInputsHVRsp.cpp"
 )
