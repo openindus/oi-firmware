@@ -29,7 +29,7 @@ void DigitalInputsCmd::attachInterrupt(DIn_Num_t num, IsrCallback_t callback, In
 {
     std::vector<uint8_t> msgBytes = {REQUEST_ATTACH_INTERRUPT, (uint8_t)num, (uint8_t)mode};
     _isrCallback[num] = callback;
-    ControllerMaster::addEventCallback(EVENT_DIGITAL_INTERRUPT, _control->getId(), [this](uint8_t num) { _isrCallback[num](&dinNumTable[num]); });
+    ControllerMaster::addEventCallback(EVENT_DIGITAL_INTERRUPT, _control->getId(), [this](uint8_t* data) { _isrCallback[*data](&dinNumTable[*data]); });
     _control->request(msgBytes);
 }
 

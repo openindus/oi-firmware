@@ -22,7 +22,7 @@ static const char TAG[] = "ControllerMaster";
 Controller_State_t ControllerMaster::_state = STATE_IDLE;
 TaskHandle_t ControllerMaster::_taskHandle = NULL;
 std::map<uint16_t, std::pair<uint16_t, uint32_t>, std::greater<uint16_t>> ControllerMaster::_ids;
-std::map<std::pair<uint8_t, uint16_t>, std::function<void(uint8_t)>> ControllerMaster::_eventCallbacks;
+std::map<std::pair<uint8_t, uint16_t>, std::function<void(uint8_t*)>> ControllerMaster::_eventCallbacks;
 std::vector<Controller*> ControllerMaster::_instances;
 
 int ControllerMaster::init(void)
@@ -259,7 +259,7 @@ void ControllerMaster::_busTask(void *pvParameters)
                     auto it = _eventCallbacks.find(std::make_pair(frame.args[0], id));
                     if (it != _eventCallbacks.end()) {
                         if (it->second != NULL) {
-                            it->second(frame.args[1]);
+                            it->second(&(frame.args[1]));
                         }
                     } else {
                         ESP_LOGW(TAG, "Command does not exist: command: 0x%02x, id: %d", frame.args[0], id);

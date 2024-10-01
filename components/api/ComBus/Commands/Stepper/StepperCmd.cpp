@@ -138,8 +138,8 @@ void StepperCmd::run(MotorNum_t motor, MotorDirection_t direction, float speed)
 void StepperCmd::wait(MotorNum_t motor)
 {
     // Add callback (callback is rewrite at each call of wait function)
-    ControllerMaster::addEventCallback(EVENT_MOTOR_READY, _control->getId(), [this](uint8_t motor) {
-        xQueueSend(_motorWaitEvent[motor], NULL, pdMS_TO_TICKS(100));
+    ControllerMaster::addEventCallback(EVENT_MOTOR_READY, _control->getId(), [this](uint8_t* data) {
+        xQueueSend(_motorWaitEvent[*data], NULL, pdMS_TO_TICKS(100));
     });
 
     // Send a message to slave

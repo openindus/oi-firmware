@@ -18,6 +18,12 @@
 
 static const char TAG[] = "AnalogInputsLSCmd";
 
+RawSensorCmd::RawSensorCmd(Controller* control, uint8_t index) : _control(control), _index(index)
+{
+    /* Create the queue for wait function and add callback for CAN event */
+    _readEvent = xQueueCreate(1, sizeof(uint8_t*));
+}
+
 void RawSensorCmd::setGain(Sensor_Gain_e gain)
 {
     std::vector<uint8_t> msgBytes = {REQUEST_RAW_SENSOR_SET_GAIN, _index, (uint8_t)gain};
@@ -26,10 +32,28 @@ void RawSensorCmd::setGain(Sensor_Gain_e gain)
 
 int16_t RawSensorCmd::read(void)
 {
+    int ret = 0;
+
+    // Add callback (callback is rewrite at each call of this function)
+    ControllerMaster::addEventCallback(REQUEST_RAW_SENSOR_READ, _control->getId(), [this](uint8_t* data) {
+        xQueueSend(_readEvent, data, pdMS_TO_TICKS(100));
+    });
+
+    // Send a message to slave to request a read
     std::vector<uint8_t> msgBytes = {REQUEST_RAW_SENSOR_READ, _index};
-    _control->request(msgBytes);
-    int16_t* ret = reinterpret_cast<int16_t*>(&msgBytes[2]);
-    return *ret;
+    ret = _control->request(msgBytes);
+
+    if (ret == 0) {
+        // Wait for event
+        uint8_t* data = NULL;
+        xQueueReset(_readEvent);
+        xQueueReceive(_readEvent, data, portMAX_DELAY);
+        int16_t* ret = reinterpret_cast<int16_t*>(&data[2]);
+        return *ret;
+    }
+
+    // If command request failed
+    return -1;
 }
 
 float RawSensorCmd::readMillivolts(void)
@@ -38,6 +62,12 @@ float RawSensorCmd::readMillivolts(void)
     _control->request(msgBytes);
     float* ret = reinterpret_cast<float*>(&msgBytes[2]);
     return *ret;
+}
+
+RTDCmd::RTDCmd(Controller* control, uint8_t index) : _control(control), _index(index)
+{
+    /* Create the queue for wait function and add callback for CAN event */
+    _readEvent = xQueueCreate(1, sizeof(uint8_t*));
 }
 
 float RTDCmd::readResistor(void)
@@ -56,6 +86,12 @@ float RTDCmd::readTemperature(void)
     return *ret;
 }
 
+ThermocoupleCmd::ThermocoupleCmd(Controller* control, uint8_t index) : _control(control), _index(index)
+{
+    /* Create the queue for wait function and add callback for CAN event */
+    _readEvent = xQueueCreate(1, sizeof(uint8_t*));
+}
+
 float ThermocoupleCmd::readMillivolts(void)
 {
     std::vector<uint8_t> msgBytes = {REQUEST_TC_READ_MILLIVOLTS, _index};
@@ -70,6 +106,12 @@ float ThermocoupleCmd::readTemperature(void)
     _control->request(msgBytes);
     float* ret = reinterpret_cast<float*>(&msgBytes[2]);
     return *ret;
+}
+
+StrainGaugeCmd::StrainGaugeCmd(Controller* control, uint8_t index) : _control(control), _index(index)
+{
+    /* Create the queue for wait function and add callback for CAN event */
+    _readEvent = xQueueCreate(1, sizeof(uint8_t*));
 }
 
 void StrainGaugeCmd::setExcitationMode(StrainGauge_Excitation_e excitation)
@@ -174,3 +216,22 @@ int AnalogInputsLSCmd::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t
 }
 
 #endif
+
+
+# Brouillon :
+
+void StepperCmd::wait(MotorNum_t motor)
+{
+    // Add callback (callback is rewrite at each call of wait function)
+    ControllerMaster::addEventCallback(EVENT_MOTOR_READY, _control->getId(), [this](uint8_t motor) {
+        xQueueSend(_motorWaitEvent[motor], NULL, pdMS_TO_TICKS(100));
+    });
+
+    // Send a message to slave
+    std::vector<uint8_t> msgBytes = {REQUEST_MOTOR_WAIT, (uint8_t)motor};
+    _control->request(msgBytes, false);
+    // Wait for event
+    xQueueReset(_motorWaitEvent[motor]);
+    xQueueReceive(_motorWaitEvent[motor], NULL, portMAX_DELAY);
+
+}
