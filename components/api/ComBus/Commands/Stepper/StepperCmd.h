@@ -176,7 +176,7 @@ public:
 private:
 
     Controller* _control;
-    xQueueHandle _motorWaitEvent[MOTOR_MAX];
+    QueueHandle_t _motorWaitEvent[MOTOR_MAX];
 };
 
 #endif

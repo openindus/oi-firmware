@@ -24,11 +24,11 @@ static std::vector<std::pair<DIn_Num_t, Logic_t>> _limitSwitchDigitalInput[MOTOR
 
 static MotorNum_t _motorNums[MOTOR_MAX] = {MOTOR_1, MOTOR_2};
 
-static xQueueHandle _busyEvent[MOTOR_MAX];
-static xSemaphoreHandle _homingSemaphore[MOTOR_MAX];
+static QueueHandle_t _busyEvent[MOTOR_MAX];
+static SemaphoreHandle_t _homingSemaphore[MOTOR_MAX];
 
 static bool _taskHomingStopRequested[MOTOR_MAX] = {false, false};
-static xSemaphoreHandle _taskHomingStopSemaphore[MOTOR_MAX];
+static SemaphoreHandle_t _taskHomingStopSemaphore[MOTOR_MAX];
 
 static void _digitalInterruptHandler(void* arg);
 static void _homingTask(void* arg);

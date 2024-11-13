@@ -39,7 +39,7 @@ private:
 
     Controller* _control;
     uint8_t _index;
-    xQueueHandle _readEvent;
+    QueueHandle_t _readEvent;
 };
 
 class RTDCmd
@@ -55,7 +55,7 @@ private:
 
     Controller* _control;
     uint8_t _index;
-    xQueueHandle _readEvent;
+    QueueHandle_t _readEvent;
 };
 
 class ThermocoupleCmd
@@ -71,7 +71,7 @@ private:
 
     Controller* _control;
     uint8_t _index;
-    xQueueHandle _readEvent;
+    QueueHandle_t _readEvent;
 };
 
 class StrainGaugeCmd
@@ -87,7 +87,7 @@ private:
 
     Controller* _control;
     uint8_t _index;
-    xQueueHandle _readEvent;
+    QueueHandle_t _readEvent;
 };
 
 class AnalogInputsLSCmd

@@ -33,27 +33,38 @@ void RawSensorCmd::setGain(Sensor_Gain_e gain)
 int16_t RawSensorCmd::read(void)
 {
     // Add callback (callback is rewrite at each call of this function)
-    ControllerMaster::addEventCallback(REQUEST_RAW_SENSOR_READ, _control->getId(), [this](uint8_t* data) {
-        xQueueSend(_readEvent, data, pdMS_TO_TICKS(100));
+    ControllerMaster::addEventCallback(EVENT_RAW_SENSOR_READ, _control->getId(), [this](uint8_t* data) {
+        xQueueSend(_readEvent, &data, pdMS_TO_TICKS(100));
     });
 
-    // Send a message to slave to request a read
+    // Send a message to slave to request a read but do not wait a response
     std::vector<uint8_t> msgBytes = {REQUEST_RAW_SENSOR_READ, _index};
     _control->request(msgBytes, false);
 
     // Wait for event
     uint8_t* data = NULL;
     xQueueReset(_readEvent);
-    xQueueReceive(_readEvent, data, portMAX_DELAY);
+    xQueueReceive(_readEvent, &data, portMAX_DELAY);
     int16_t* ret = reinterpret_cast<int16_t*>(&data[2]);
     return *ret;
 }
 
 float RawSensorCmd::readMillivolts(void)
 {
+    // Add callback (callback is rewrite at each call of this function)
+    ControllerMaster::addEventCallback(EVENT_RAW_SENSOR_READ_MILLIVOLT, _control->getId(), [this](uint8_t* data) {
+        xQueueSend(_readEvent, &data, pdMS_TO_TICKS(100));
+    });
+
+    // Send a message to slave to request a read but do not wait a response
     std::vector<uint8_t> msgBytes = {REQUEST_RAW_SENSOR_READ_MILLIVOLT, _index};
-    _control->request(msgBytes);
-    float* ret = reinterpret_cast<float*>(&msgBytes[2]);
+    _control->request(msgBytes, false);
+
+    // Wait for event
+    uint8_t* data = NULL;
+    xQueueReset(_readEvent);
+    xQueueReceive(_readEvent, &data, portMAX_DELAY);
+    float* ret = reinterpret_cast<float*>(&data[2]);
     return *ret;
 }
 
@@ -65,16 +76,30 @@ RTDCmd::RTDCmd(Controller* control, uint8_t index) : _control(control), _index(i
 
 float RTDCmd::readResistor(void)
 {
+    // Add callback (callback is rewrite at each call of this function)
+    printf("add callback\n");
+    ControllerMaster::addEventCallback(EVENT_RTD_READ_RESISTOR, _control->getId(), [this](uint8_t* data) {
+        xQueueSend(_readEvent, &data, pdMS_TO_TICKS(100));
+    });
+
+    // Send a message to slave to request a read but do not wait a response
+    printf("send request\n");
     std::vector<uint8_t> msgBytes = {REQUEST_RTD_READ_RESISTOR, _index};
-    _control->request(msgBytes);
-    float* ret = reinterpret_cast<float*>(&msgBytes[2]);
+    _control->request(msgBytes, false);
+
+    printf("wait event\n");
+    // Wait for event
+    uint8_t* data = NULL;
+    xQueueReset(_readEvent);
+    xQueueReceive(_readEvent, &data, portMAX_DELAY);
+    float* ret = reinterpret_cast<float*>(&data[2]);
     return *ret;
 }
 
 float RTDCmd::readTemperature(void)
 {
     std::vector<uint8_t> msgBytes = {REQUEST_RTD_READ_TEMPERATURE, _index};
-    _control->request(msgBytes);
+    _control->request(msgBytes, false);
     float* ret = reinterpret_cast<float*>(&msgBytes[2]);
     return *ret;
 }
@@ -88,7 +113,7 @@ ThermocoupleCmd::ThermocoupleCmd(Controller* control, uint8_t index) : _control(
 float ThermocoupleCmd::readMillivolts(void)
 {
     std::vector<uint8_t> msgBytes = {REQUEST_TC_READ_MILLIVOLTS, _index};
-    _control->request(msgBytes);
+    _control->request(msgBytes, false);
     float* ret = reinterpret_cast<float*>(&msgBytes[2]);
     return *ret;
 }
@@ -96,7 +121,7 @@ float ThermocoupleCmd::readMillivolts(void)
 float ThermocoupleCmd::readTemperature(void)
 {
     std::vector<uint8_t> msgBytes = {REQUEST_TC_READ_TEMPERATURE, _index};
-    _control->request(msgBytes);
+    _control->request(msgBytes, false);
     float* ret = reinterpret_cast<float*>(&msgBytes[2]);
     return *ret;
 }
@@ -116,7 +141,7 @@ void StrainGaugeCmd::setExcitationMode(StrainGauge_Excitation_e excitation)
 float StrainGaugeCmd::read(void)
 {
     std::vector<uint8_t> msgBytes = {REQUEST_SG_READ, _index};
-    _control->request(msgBytes);
+    _control->request(msgBytes, false);
     float* ret = reinterpret_cast<float*>(&msgBytes[2]);
     return *ret;
 }

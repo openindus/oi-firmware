@@ -13,8 +13,8 @@ static uint8_t _deviceId[NUMBER_OF_DEVICES] = {0, 1};
 static spi_device_handle_t _spiHandler = NULL;
 static PS01_Hal_Config_t _deviceConfig;
 
-static xQueueHandle _flagEvent[NUMBER_OF_DEVICES];
-static xQueueHandle _busyEvent[NUMBER_OF_DEVICES];
+static QueueHandle_t _flagEvent[NUMBER_OF_DEVICES];
+static QueueHandle_t _busyEvent[NUMBER_OF_DEVICES];
 
 static void (*_busyCallback)(uint8_t) = NULL;
 

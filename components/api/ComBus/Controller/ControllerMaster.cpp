@@ -259,7 +259,7 @@ void ControllerMaster::_busTask(void *pvParameters)
                     auto it = _eventCallbacks.find(std::make_pair(frame.args[0], id));
                     if (it != _eventCallbacks.end()) {
                         if (it->second != NULL) {
-                            it->second(&(frame.args[1]));
+                            it->second(frame.args);
                         }
                     } else {
                         ESP_LOGW(TAG, "Command does not exist: command: 0x%02x, id: %d", frame.args[0], id);

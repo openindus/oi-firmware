@@ -15,7 +15,7 @@ ioex_num_t* DigitalInputsExp::_ioex_nums;
 IsrCallback_t* DigitalInputsExp::_callbacks;
 void** DigitalInputsExp::_args;
 ioex_device_t** DigitalInputsExp::_device;
-xQueueHandle DigitalInputsExp::_event;
+QueueHandle_t DigitalInputsExp::_event;
 
 int DigitalInputsExp::init(ioex_device_t **device, const ioex_num_t *num, int nb)
 {

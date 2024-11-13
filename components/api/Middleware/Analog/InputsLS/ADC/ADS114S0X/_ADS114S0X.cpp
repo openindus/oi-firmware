@@ -191,5 +191,5 @@ int16_t ADS114S0X::read()
     }
 
     /* Return adcCode if ret is 0, else return ret */
-    return (ret == 0)?(int)adcCode:ret;
+    return (ret == 0)?adcCode:ret;
 }

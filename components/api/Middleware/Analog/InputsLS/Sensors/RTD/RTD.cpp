@@ -83,6 +83,7 @@ float RTD::readResistor(void)
     {
         /* Set internal mux */
         _adc->setInternalMux(static_cast<ads114s0x_adc_input_e>(_adcInputs[0]), static_cast<ads114s0x_adc_input_e>(_adcInputs[1]));
+        printf("adci1: %i; adci2:%i\n", _adcInputs[0], _adcInputs[1]);
         adcCode = _adc->read();
         printf("Adccode:%i\n", adcCode);
         rRTD = _calculateRTD(adcCode);

@@ -160,7 +160,7 @@ static int _tcReadVCmdHandler(int argc, char **argv)
     float rTCv = 0.0;
     rTCv = AnalogInputsLS::tc[sensorIndex].readMillivolts();
     // print value
-    printf("[%d] : %.4f Volts\n", sensorIndex, rTCv);
+    printf("[%d] : %.4f Millivolts\n", sensorIndex, rTCv);
 
     return 0;
 }

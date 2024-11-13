@@ -58,6 +58,7 @@ std::vector<RawSensor> AnalogInputsLS::raw;
 void AnalogInputsLS::setAcquisitionTime(AcquisitionDuration_e duration)
 {
     if (_adc != NULL) {
+        printf("duration:%i\n", duration);
         _adc->setDataRate(static_cast<ads114s0x_data_rate_e>(duration));
     } else {
         ESP_LOGE(TAG, "Failed to set conversion time");
@@ -67,6 +68,7 @@ void AnalogInputsLS::setAcquisitionTime(AcquisitionDuration_e duration)
 void AnalogInputsLS::setStabilizationTime(int duration)
 {
     if (_adc != NULL) {
+        printf("stab:%i\n", duration);
         _adc->setStabilizationTime(duration);
     } else {
         ESP_LOGE(TAG, "Failed to set conversion time");
@@ -75,7 +77,6 @@ void AnalogInputsLS::setStabilizationTime(int duration)
 
 int AnalogInputsLS::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& aIns)
 {
-    printf("aIns:%i\n", aIns[0]);
     if (!std::all_of(aIns.begin(), aIns.end(), [](AIn_Num_t aIn) {
         return aIn >= AIN_A_P && aIn < AIN_MAX;
     })) {

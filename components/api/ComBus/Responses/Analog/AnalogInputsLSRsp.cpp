@@ -66,7 +66,9 @@ int AnalogInputsLSRsp::init(void)
     });
 
     ControllerSlave::addCtrlCallback(REQUEST_RTD_READ_RESISTOR, [](std::vector<uint8_t>& data) {
+        printf("read resistor of sensor%i\n", data[1]);
         float value = AnalogInputsLS::rtd[data[1]].readResistor();
+        printf("resistor val:%f\n", value);
         uint8_t* ptr = reinterpret_cast<uint8_t*>(&value);
         data.insert(data.end(), ptr, ptr + sizeof(float));
         data[0] = EVENT_RTD_READ_RESISTOR;
