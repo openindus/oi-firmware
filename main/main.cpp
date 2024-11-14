@@ -1,26 +1,26 @@
 #include "OpenIndus.h"
 #include "Arduino.h"
 
-
-AnalogLS ls;
-int rtd_index;
+AnalogLS analogls;
 
 void setup(void)
 {
-    delay(1000);
     // Serial.begin(115200);
-    // Serial.println("Hello World !");
-    rtd_index = ls.addSensor(RTD_PT100, {AIN_A_P, AIN_A_N});
-    rtd_index = ls.addSensor(RTD_PT100, {AIN_B_P, AIN_B_N});
-    rtd_index = ls.addSensor(RTD_PT100, {AIN_C_P, AIN_C_N});
-    ls.setAcquisitionTime(SAMPLE_100_MS);
-    ls.setStabilizationTime(1000);
+    printf("Hello OpenIndus !\n");
+
+    // Add a type K thermocouple
+    analogls.addSensor(THERMOCOUPLE_K, {AIN_B_P, AIN_B_N});
 }
 
 void loop(void)
 {
-    printf("resistor:%f\n",ls.rtd[0].readResistor());
-    printf("resistor:%f\n",ls.rtd[1].readResistor());
-    printf("resistor:%f\n",ls.rtd[2].readResistor());
+    float data = 0.0;
+
+    // data = analogls.tc[0].readMillivolts();
+    // printf(">TC (CH0) - Voltage (mV): %f\n", data);
+
+    data = analogls.tc[0].readTemperature();
+    printf(">TC (CH0) - Temperature (°C): %f\n", data);
+
     delay(1000);
 }

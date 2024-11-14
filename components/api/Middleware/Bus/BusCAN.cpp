@@ -53,6 +53,9 @@ int BusCAN::begin(gpio_num_t txNum, gpio_num_t rxNum)
     ESP_LOGI(TAG, "start twai driver");
     err |= twai_start();
 
+    err |= twai_clear_receive_queue();
+    err |= twai_clear_transmit_queue();
+
     return err;
 }
 

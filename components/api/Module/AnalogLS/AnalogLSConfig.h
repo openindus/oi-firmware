@@ -48,7 +48,7 @@
 
 /* Thermometer */
 #define ANALOG_LS_THERM_PIN_OS_INT      GPIO_NUM_4
-#define ANALOG_LS_THERM_I2C_ADDR        0x90
+#define ANALOG_LS_THERM_I2C_ADDR        0x48
 
 /* Digipot */
 #define ANALOG_LS_DIGIPOT_I2C_ADDR      0x50

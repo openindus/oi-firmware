@@ -12,18 +12,19 @@ extern "C" {
 /* Sensor device address */
 #define SENSOR_ADDRESS  0b1001000
 
-typedef enum{
+typedef enum
+{
     STDS75_TEMP = 0x00,
     STDS75_CONF = 0x01,
     STDS75_OS = 0x02,
     STDS75_HYS = 0x03
-}stds75_register_pointer_t;
+} stds75_register_pointer_t;
 
-void STDS75_i2c_init(gpio_num_t sda, gpio_num_t scl);
+esp_err_t STDS75_i2c_init(void);
 
 float STDS75_get_temperature(void);
 
-void STDS75_init(gpio_num_t sda, gpio_num_t scl, gpio_num_t os_int);
+esp_err_t STDS75_init(i2c_port_t port, uint8_t addr, gpio_num_t os_int);
 
 #ifdef __cplusplus
 }

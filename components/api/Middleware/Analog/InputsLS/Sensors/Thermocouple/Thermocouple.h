@@ -12,12 +12,12 @@
 #include "_ADS114S0X.h"
 #include "Multiplexer.h"
 #include "Sensor.h"
+#include "stds75.h"
+
 
 struct TC_Coefficient_s {
-    float Ti; // Initial temperature
-    float Tf; // Final temperature
-    float Ei; // Initial voltage
-    float Ef; // Final voltage
+    float i; // Initial temperature/voltage
+    float f; // Final temperature/voltage
     std::vector<float> d; // Coefficients
 };
 
@@ -45,6 +45,8 @@ private:
 
     std::array<ADC_Input_t, 2> _adcInputs;
     Sensor_Type_e _type;
-    
-    float _calculateTemperature(const std::vector<TC_Coefficient_s>& coefficients, float voltage);
+
+    float _calculateVoltageFromTemperature(const std::vector<TC_Coefficient_s>& coefficients, const std::vector<float> coeffs_A, float temperature);
+
+    float _calculateTemperatureFromVoltage(const std::vector<TC_Coefficient_s>& coefficients, float voltage);
 };

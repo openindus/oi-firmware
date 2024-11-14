@@ -43,10 +43,6 @@ int AnalogInputsLS::_init(void)
         ret |= -1;
     }
 
-    /* Digipot */
-
-    /* Digital thermometer */
-
     return ret;
 }
 
