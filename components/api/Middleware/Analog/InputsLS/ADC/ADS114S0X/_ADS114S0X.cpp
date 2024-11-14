@@ -78,7 +78,7 @@ int ADS114S0X::init(void)
     ESP_LOGI(TAG, "Calibrating ADC Done !");
     
     // Now that conversion is done, start in single shot
-    datarateReg.mode = 0; // Single shot conversion
+    datarateReg.mode = 1; // Single shot conversion
     ret |= ads114s0x_write_register(_device, ADS114S0X_REG_DATARATE, (uint8_t*)&datarateReg, sizeof(ads114s0x_reg_datarate_t));
 
     return ret;

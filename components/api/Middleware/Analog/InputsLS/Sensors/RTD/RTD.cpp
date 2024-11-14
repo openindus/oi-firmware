@@ -83,9 +83,7 @@ float RTD::readResistor(void)
     {
         /* Set internal mux */
         _adc->setInternalMux(static_cast<ads114s0x_adc_input_e>(_adcInputs[0]), static_cast<ads114s0x_adc_input_e>(_adcInputs[1]));
-        printf("adci1: %i; adci2:%i\n", _adcInputs[0], _adcInputs[1]);
         adcCode = _adc->read();
-        printf("Adccode:%i\n", adcCode);
         rRTD = _calculateRTD(adcCode);
     } 
     /* RTD 3 Wires */
@@ -94,12 +92,10 @@ float RTD::readResistor(void)
         /* Set internal mux */
         _adc->setInternalMux(static_cast<ads114s0x_adc_input_e>(_adcInputs[0]), static_cast<ads114s0x_adc_input_e>(_adcInputs[1]));
         adcCode = _adc->read();
-        printf("ADCCode1:%i\n", adcCode);
         float rRTD0 = _calculateRTD(adcCode);
         /* Set internal mux */
         _adc->setInternalMux(static_cast<ads114s0x_adc_input_e>(_adcInputs[1]), static_cast<ads114s0x_adc_input_e>(_adcInputs[2]));
         adcCode = _adc->read();
-        printf("ADCCode2:%i\n", adcCode);
         float rRTD1 = _calculateRTD(adcCode);
 
         /* Subtract cable resistance to RTD resistance */
@@ -131,7 +127,6 @@ float RTD::readTemperature(void)
     // Read resistor value
     float rRtd = readResistor();
     float temperature = NAN;
-    printf("res:%f\n", rRtd);
 
     if ((_type == RTD_PT100 && rRtd >= 10 && rRtd <= 390) || (_type == RTD_PT1000 && rRtd >= 100 && rRtd <= 2900))
     {

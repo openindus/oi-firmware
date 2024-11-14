@@ -76,18 +76,16 @@ RTDCmd::RTDCmd(Controller* control, uint8_t index) : _control(control), _index(i
 
 float RTDCmd::readResistor(void)
 {
-    // Add callback (callback is rewrite at each call of this function)
-    printf("add callback\n");
+    // Add callback (remove callback if it already exists)
+    ControllerMaster::removeEventCallback(EVENT_RTD_READ_RESISTOR, _control->getId());
     ControllerMaster::addEventCallback(EVENT_RTD_READ_RESISTOR, _control->getId(), [this](uint8_t* data) {
-        xQueueSend(_readEvent, &data, pdMS_TO_TICKS(100));
+        if(xQueueSend(this->_readEvent, &data, pdMS_TO_TICKS(100)) != pdTRUE) printf("error\n");
     });
 
     // Send a message to slave to request a read but do not wait a response
-    printf("send request\n");
     std::vector<uint8_t> msgBytes = {REQUEST_RTD_READ_RESISTOR, _index};
     _control->request(msgBytes, false);
 
-    printf("wait event\n");
     // Wait for event
     uint8_t* data = NULL;
     xQueueReset(_readEvent);

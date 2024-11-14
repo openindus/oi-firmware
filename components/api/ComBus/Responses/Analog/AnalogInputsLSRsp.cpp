@@ -22,7 +22,6 @@ int AnalogInputsLSRsp::init(void)
     ControllerSlave::addCtrlCallback(REQUEST_ADD_SENSOR, [](std::vector<uint8_t>& data) {
         std::vector<AIn_Num_t> aIns;
         for (auto it = data.begin() + 2; it != data.end(); it++) {
-            printf("%i\n", *it);
             aIns.push_back((AIn_Num_t)*it);
         }
         int index = AnalogInputsLS::addSensor((Sensor_Type_e)data[1], aIns);
@@ -66,13 +65,14 @@ int AnalogInputsLSRsp::init(void)
     });
 
     ControllerSlave::addCtrlCallback(REQUEST_RTD_READ_RESISTOR, [](std::vector<uint8_t>& data) {
-        printf("read resistor of sensor%i\n", data[1]);
+        printf("read resistor of %i\n", data[1]);
         float value = AnalogInputsLS::rtd[data[1]].readResistor();
-        printf("resistor val:%f\n", value);
+        printf("val:%f\n", value);
         uint8_t* ptr = reinterpret_cast<uint8_t*>(&value);
         data.insert(data.end(), ptr, ptr + sizeof(float));
         data[0] = EVENT_RTD_READ_RESISTOR;
         // Send response on CAN Bus because no return is needed for this message
+        printf("Send response\n");
         ControllerSlave::sendEvent(data);
     });
 
