@@ -18,27 +18,22 @@
 
 static const char TAG[] = "AnalogInputsLSCmd";
 
-RawSensorCmd::RawSensorCmd(Controller* control, uint8_t index) : _control(control), _index(index)
+GenericSensorCmd::GenericSensorCmd(Controller* control, uint8_t index) : _control(control), _index(index)
 {
     /* Create the queue for wait function and add callback for CAN event */
     _readEvent = xQueueCreate(1, sizeof(uint8_t*));
 }
 
-void RawSensorCmd::setGain(Sensor_Gain_e gain)
+int16_t GenericSensorCmd::getInt16(Protocol_Event_e event, Protocol_Request_e request)
 {
-    std::vector<uint8_t> msgBytes = {REQUEST_RAW_SENSOR_SET_GAIN, _index, (uint8_t)gain};
-    _control->request(msgBytes);
-}
-
-int16_t RawSensorCmd::read(void)
-{
-    // Add callback (callback is rewrite at each call of this function)
-    ControllerMaster::addEventCallback(EVENT_RAW_SENSOR_READ, _control->getId(), [this](uint8_t* data) {
+    // Add callback (remove callback if it already exists)
+    ControllerMaster::removeEventCallback(event, _control->getId());
+    ControllerMaster::addEventCallback(event, _control->getId(), [this](uint8_t* data) {
         xQueueSend(_readEvent, &data, pdMS_TO_TICKS(100));
     });
 
     // Send a message to slave to request a read but do not wait a response
-    std::vector<uint8_t> msgBytes = {REQUEST_RAW_SENSOR_READ, _index};
+    std::vector<uint8_t> msgBytes = {(uint8_t)request, _index};
     _control->request(msgBytes, false);
 
     // Wait for event
@@ -49,15 +44,16 @@ int16_t RawSensorCmd::read(void)
     return *ret;
 }
 
-float RawSensorCmd::readMillivolts(void)
+float GenericSensorCmd::getFloat(Protocol_Event_e event, Protocol_Request_e request)
 {
-    // Add callback (callback is rewrite at each call of this function)
-    ControllerMaster::addEventCallback(EVENT_RAW_SENSOR_READ_MILLIVOLT, _control->getId(), [this](uint8_t* data) {
+    // Add callback (remove callback if it already exists)
+    ControllerMaster::removeEventCallback(event, _control->getId());
+    ControllerMaster::addEventCallback(event, _control->getId(), [this](uint8_t* data) {
         xQueueSend(_readEvent, &data, pdMS_TO_TICKS(100));
     });
 
     // Send a message to slave to request a read but do not wait a response
-    std::vector<uint8_t> msgBytes = {REQUEST_RAW_SENSOR_READ_MILLIVOLT, _index};
+    std::vector<uint8_t> msgBytes = {(uint8_t)request, _index};
     _control->request(msgBytes, false);
 
     // Wait for event
@@ -68,66 +64,40 @@ float RawSensorCmd::readMillivolts(void)
     return *ret;
 }
 
-RTDCmd::RTDCmd(Controller* control, uint8_t index) : _control(control), _index(index)
+void RawSensorCmd::setGain(Sensor_Gain_e gain)
 {
-    /* Create the queue for wait function and add callback for CAN event */
-    _readEvent = xQueueCreate(1, sizeof(uint8_t*));
+    std::vector<uint8_t> msgBytes = {REQUEST_RAW_SENSOR_SET_GAIN, _index, (uint8_t)gain};
+    _control->request(msgBytes);
+}
+
+int16_t RawSensorCmd::read(void)
+{
+    return getInt16(EVENT_RAW_SENSOR_READ, REQUEST_RAW_SENSOR_READ);
+}
+
+float RawSensorCmd::readMillivolts(void)
+{
+    return getFloat(EVENT_RAW_SENSOR_READ_MILLIVOLT, REQUEST_RAW_SENSOR_READ_MILLIVOLT);
 }
 
 float RTDCmd::readResistor(void)
 {
-    // Add callback (remove callback if it already exists)
-    ControllerMaster::removeEventCallback(EVENT_RTD_READ_RESISTOR, _control->getId());
-    ControllerMaster::addEventCallback(EVENT_RTD_READ_RESISTOR, _control->getId(), [this](uint8_t* data) {
-        if(xQueueSend(this->_readEvent, &data, pdMS_TO_TICKS(100)) != pdTRUE) printf("error\n");
-    });
-
-    // Send a message to slave to request a read but do not wait a response
-    std::vector<uint8_t> msgBytes = {REQUEST_RTD_READ_RESISTOR, _index};
-    _control->request(msgBytes, false);
-
-    // Wait for event
-    uint8_t* data = NULL;
-    xQueueReset(_readEvent);
-    xQueueReceive(_readEvent, &data, portMAX_DELAY);
-    float* ret = reinterpret_cast<float*>(&data[2]);
-    return *ret;
+    return getFloat(EVENT_RTD_READ_RESISTOR, REQUEST_RTD_READ_RESISTOR);
 }
 
 float RTDCmd::readTemperature(void)
 {
-    std::vector<uint8_t> msgBytes = {REQUEST_RTD_READ_TEMPERATURE, _index};
-    _control->request(msgBytes, false);
-    float* ret = reinterpret_cast<float*>(&msgBytes[2]);
-    return *ret;
-}
-
-ThermocoupleCmd::ThermocoupleCmd(Controller* control, uint8_t index) : _control(control), _index(index)
-{
-    /* Create the queue for wait function and add callback for CAN event */
-    _readEvent = xQueueCreate(1, sizeof(uint8_t*));
+    return getFloat(EVENT_RTD_READ_TEMPERATURE, REQUEST_RTD_READ_TEMPERATURE);
 }
 
 float ThermocoupleCmd::readMillivolts(void)
 {
-    std::vector<uint8_t> msgBytes = {REQUEST_TC_READ_MILLIVOLTS, _index};
-    _control->request(msgBytes, false);
-    float* ret = reinterpret_cast<float*>(&msgBytes[2]);
-    return *ret;
+    return getFloat(EVENT_TC_READ_MILLIVOLTS, REQUEST_TC_READ_MILLIVOLTS);
 }
 
 float ThermocoupleCmd::readTemperature(void)
 {
-    std::vector<uint8_t> msgBytes = {REQUEST_TC_READ_TEMPERATURE, _index};
-    _control->request(msgBytes, false);
-    float* ret = reinterpret_cast<float*>(&msgBytes[2]);
-    return *ret;
-}
-
-StrainGaugeCmd::StrainGaugeCmd(Controller* control, uint8_t index) : _control(control), _index(index)
-{
-    /* Create the queue for wait function and add callback for CAN event */
-    _readEvent = xQueueCreate(1, sizeof(uint8_t*));
+    return getFloat(EVENT_TC_READ_TEMPERATURE, REQUEST_TC_READ_TEMPERATURE);
 }
 
 void StrainGaugeCmd::setExcitationMode(StrainGauge_Excitation_e excitation)
@@ -138,10 +108,7 @@ void StrainGaugeCmd::setExcitationMode(StrainGauge_Excitation_e excitation)
 
 float StrainGaugeCmd::read(void)
 {
-    std::vector<uint8_t> msgBytes = {REQUEST_SG_READ, _index};
-    _control->request(msgBytes, false);
-    float* ret = reinterpret_cast<float*>(&msgBytes[2]);
-    return *ret;
+    return getFloat(EVENT_SG_READ, REQUEST_SG_READ);
 }
 
 void AnalogInputsLSCmd::setAcquisitionTime(AcquisitionDuration_e duration)

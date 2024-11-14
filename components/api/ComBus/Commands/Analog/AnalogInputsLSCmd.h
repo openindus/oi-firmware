@@ -25,69 +25,49 @@
 #include "ControllerMaster.h"
 #include "AnalogInputsLS.h"
 
-class RawSensorCmd
+class GenericSensorCmd
 {
+protected:
+    GenericSensorCmd(Controller* control, uint8_t index);
+    int16_t getInt16(Protocol_Event_e event, Protocol_Request_e request);
+    float getFloat(Protocol_Event_e event, Protocol_Request_e request);
+    Controller* _control;
+    uint8_t _index;
+private:
+    QueueHandle_t _readEvent;
+};
 
+class RawSensorCmd : private GenericSensorCmd
+{
 public:
-
-    RawSensorCmd(Controller* control, uint8_t index);
+    RawSensorCmd(Controller* control, uint8_t index) : GenericSensorCmd(control, index) {}
     void setGain(Sensor_Gain_e gain);
     int16_t read(void);
     float readMillivolts(void);
-    
-private:
-
-    Controller* _control;
-    uint8_t _index;
-    QueueHandle_t _readEvent;
 };
 
-class RTDCmd
+class RTDCmd : private GenericSensorCmd
 {
-
 public:
-
-    RTDCmd(Controller* control, uint8_t index);
+    RTDCmd(Controller* control, uint8_t index) : GenericSensorCmd(control, index) {}
     float readResistor(void);
     float readTemperature(void);
-    
-private:
-
-    Controller* _control;
-    uint8_t _index;
-    QueueHandle_t _readEvent;
 };
 
-class ThermocoupleCmd
+class ThermocoupleCmd : private GenericSensorCmd
 {
-
 public:
-
-    ThermocoupleCmd(Controller* control, uint8_t index);
+    ThermocoupleCmd(Controller* control, uint8_t index) : GenericSensorCmd(control, index) {}
     float readMillivolts(void);
     float readTemperature(void);
-    
-private:
-
-    Controller* _control;
-    uint8_t _index;
-    QueueHandle_t _readEvent;
 };
 
-class StrainGaugeCmd
+class StrainGaugeCmd : private GenericSensorCmd
 {
-
 public:
-
-    StrainGaugeCmd(Controller* control, uint8_t index);
+    StrainGaugeCmd(Controller* control, uint8_t index) : GenericSensorCmd(control, index) {}
     void setExcitationMode(StrainGauge_Excitation_e excitation);
     float read(void);
-    
-private:
-
-    Controller* _control;
-    uint8_t _index;
-    QueueHandle_t _readEvent;
 };
 
 class AnalogInputsLSCmd
