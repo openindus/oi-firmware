@@ -23,8 +23,6 @@ static const std::vector<TC_Coefficient_s> T_to_V_COEFF_B = {
     {630.615, 1820.000, {-0.389381686210E+01, 0.285717474700E-01, -0.848851047850E-04, 0.157852801640E-06, -0.168353448640E-09, 0.111097940130E-12, -0.445154310330E-16, 0.989756408210E-20, -0.937913302890E-24}}
 };
 
-static const std::vector<float> T_to_V_COEFF_B_A = {NAN, NAN, NAN};
-
 static const std::vector<TC_Coefficient_s> V_to_T_COEFF_B = {
     {-0.291, 2.431, {9.8423321E+01, 6.9971500E+02, -8.4765304E+02, 1.0052644E+03, -8.3345952E+02, 4.5508542E+02, -1.5523037E+02, 2.9886750E+01, -2.4742860E+00}},
     {2.431, 13.820, {2.1315071E+02, 2.8510642E+02, -5.2742887E+01, 2.9198024E+00, -1.2965030E+00, 1.2915072E-01, -6.6625199E-03, 1.8661696E-04, -2.4878585E-06}}
@@ -35,8 +33,6 @@ static const std::vector<TC_Coefficient_s> T_to_V_COEFF_E = {
     {-270.000, 0.000, {0.000000000000E+00, 0.586655087080E-01, 0.454109771240E-04, -0.779980486860E-06, -0.258001608430E-07, -0.594525830570E-09, -0.932140586670E-11, -0.102876055340E-12, -0.803701236210E-15, -0.439794973910E-17, -0.164147763550E-19, -0.396736195160E-22, -0.558273287210E-25, -0.346578420130E-28}},
     {0.000, 1000.000, {0.000000000000E+00, 0.586655087100E-01, 0.450322755820E-04, 0.289084072120E-07, -0.330568966520E-09, 0.650244032700E-12, -0.191974955040E-15, -0.125366004970E-17, 0.214892175690E-20, -0.143880417820E-23, 0.359608994810E-27}}
 };
-
-static const std::vector<float> T_to_V_COEFF_E_A = {NAN, NAN, NAN};
 
 static const std::vector<TC_Coefficient_s> V_to_T_COEFF_E = {
     {-8.825, 0.000, {0.0000000E+00, 1.6977288E+01, -4.3514970E+01, -1.5859697E-01, 9.2502871E-01, -2.6084314E-02, 4.1360199E-04, -3.4034030E-06, -1.1564890E-05}},
@@ -49,8 +45,6 @@ static const std::vector<TC_Coefficient_s> T_to_V_COEFF_J = {
     {760.000, 1200.000, {0.296456256810E+03, -0.149761277860E+01, 0.317871039240E-02, -0.318476867010E-05, 0.157208190040E-08, -0.306913690560E-12}}
 };
 
-static const std::vector<float> T_to_V_COEFF_J_A = {NAN, NAN, NAN};
-
 static const std::vector<TC_Coefficient_s> V_to_T_COEFF_J = {
     {-8.095, 0.000, {0.0000000E+00, 1.9528268E+01, -1.2286185E+00, -1.0752178E+00, -5.9086933E-01, -1.7256713E-01, -2.8131513E-02, -2.3963370E-03, -8.3823321E-05}},
     {0.000, 42.919, {0.0000000E+00, 1.9784250E+01, -2.0012040E-01, 1.0369690E-02, -2.5496870E-04, 3.5851530E-06, -5.3442850E-08, 5.0998900E-10}},
@@ -59,8 +53,8 @@ static const std::vector<TC_Coefficient_s> V_to_T_COEFF_J = {
 
 /* Coeffs for K Type */
 static const std::vector<TC_Coefficient_s> T_to_V_COEFF_K = {
-    {-200.0, 0.0, {0.0000000E+00, 0.394501280250e-1, 0.236223735980e-4, -0.328589067840e-6, -0.499048287770e-8, -0.675090591730e-10, -0.574103274280e-12, -0.310888728940e-14, -0.104516093650e-16, -0.198892668780e-19}},
-    {0.0, 1372.0, {-0.176004136860e-1, 0.389212049750e-1, 0.185587700320e-4, -0.994575928740e-7, 0.318409457190e-9, -0.560728448890e-12, 0.560750590590e-15, -0.320207200030e-18, 0.971511471520e-22, -0.121047212750e-25}},
+    {-200.0, 0.0, {0.0000000E+00, 0.394501280250E-1, 0.236223735980E-4, -0.328589067840E-6, -0.499048287770E-8, -0.675090591730E-10, -0.574103274280E-12, -0.310888728940E-14, -0.104516093650E-16, -0.198892668780E-19}},
+    {0.0, 1372.0, {-0.176004136860E-1, 0.389212049750E-1, 0.185587700320E-4, -0.994575928740E-7, 0.318409457190E-9, -0.560728448890E-12, 0.560750590590E-15, -0.320207200030E-18, 0.971511471520E-22, -0.121047212750E-25}},
 };
 
 static const std::vector<float> T_to_V_COEFF_K_A = {0.1185976, -0.1183432e-3, 0.1269686e+3};
@@ -77,8 +71,6 @@ static const std::vector<TC_Coefficient_s> T_to_V_COEFF_N = {
     {0.000, 1300.000, {0.000000000000E+00, 0.259293946010E-01, 0.157101418800E-04, 0.438256272370E-07, -0.252611697940E-09, 0.643118193390E-12, -0.100634715190E-14, 0.997453389920E-18, -0.608632456070E-21, 0.208492293390E-24, -0.306821961510E-28}}
 };
 
-static const std::vector<float> T_to_V_COEFF_N_A = {NAN, NAN, NAN};
-
 static const std::vector<TC_Coefficient_s> V_to_T_COEFF_N = {
     {-3.990, 0.000, {0.0000000E+00, 3.8436847E+01, 1.1010485E+00, 5.2229312E+00, 7.2060525E+00, 5.8488586E+00, 2.7754916E+00, 7.7075166E-01, 1.1582665E-01, 7.3138868E-03}},
     {0.000, 20.613, {0.0000000E+00, 3.8689600E+01, -1.0826700E+00, 4.7020500E-02, -2.1216900E-06, -1.1727200E-04, 5.3928000E-06, -7.9815600E-08}},
@@ -91,8 +83,6 @@ static const std::vector<TC_Coefficient_s> T_to_V_COEFF_R = {
     {1064.180, 1664.500, {0.295157925316E+01, -0.252061251332E-02, 0.159564501865E-04, -0.764085947576E-08, 0.205305291024E-11, -0.293359668173E-15}},
     {1664.500, 1768.100, {0.152232118209E+03, -0.268819888545E+00, 0.171280280471E-03, -0.345895706453E-07, -0.934633971046E-14}}
 };
-
-static const std::vector<float> T_to_V_COEFF_R_A = {NAN, NAN, NAN};
 
 static const std::vector<TC_Coefficient_s> V_to_T_COEFF_R = {
     {-0.226, 1.923, {0.0000000E+00, 1.8891380E+02, -9.3835290E+01, 1.3068619E+02, -2.2703580E+02, 3.5145659E+02, -3.8953900E+02, 2.8239471E+02, -1.2607281E+02, 3.1353611E+01, -3.3187769E+00}},
@@ -108,8 +98,6 @@ static const std::vector<TC_Coefficient_s> T_to_V_COEFF_S = {
     {1664.500, 1768.100, {0.146628232636E+03, -0.258430516752E+00, 0.163693574641E-03, -0.330439046987E-07, -0.943223690612E-14}}
 };
 
-static const std::vector<float> T_to_V_COEFF_S_A = {NAN, NAN, NAN};
-
 static const std::vector<TC_Coefficient_s> V_to_T_COEFF_S = {
     {-0.235, 1.874, {0.00000000E+00, 1.84949460E+02, -8.00504062E+01, 1.02237430E+02, -1.52248592E+01, 1.88821343E+00, -1.59085941E-01, 8.23027880E-03}},
     {1.874, 11.950, {1.2915072E+01, 4.4668298E+01, -3.539139E+00, 3.149946E-01, -1.813197E-02, 3.187963E-04}},
@@ -123,15 +111,12 @@ static const std::vector<TC_Coefficient_s> T_to_V_COEFF_T = {
     {0.000, 400.000, {0.000000000000E+00, 0.387481063640E-01, 0.332922278800E-04, 0.206182434040E-06, -0.218822568460E-08, 0.109968809280E-10, -0.308157587720E-13, 0.454791352900E-16, -0.275129016730E-19}}
 };
 
-static const std::vector<float> T_to_V_COEFF_T_A = {NAN, NAN, NAN};
-
 static const std::vector<TC_Coefficient_s> V_to_T_COEFF_T = {
     {-5.603, 0.0, {0.0000000E+00, 2.5949192E+1, -2.1316967E-1, 7.9018692E-1, 4.2527777E-1, 1.3304473E-1, 2.0241446E-2, 1.2668171E-3}},
     {0.0, 20.872, {0.000000E+00, 2.5928000E+1, -7.6029610E-1, 4.6377910E-2, -2.1653940E-3, 6.0481440E-5, -7.2934220E-7}}
 };
 
-
-float Thermocouple::_calculateVoltageFromTemperature(const std::vector<TC_Coefficient_s>& coefficients, const std::vector<float> coeffs_A, float temperature)
+float Thermocouple::_calculateVoltageFromTemperature(const std::vector<TC_Coefficient_s>& coefficients, float temperature, const std::vector<float> coeffs_A)
 {
     for (const auto& coef : coefficients) {
         if (temperature >= coef.i && temperature <= coef.f) {
@@ -140,8 +125,8 @@ float Thermocouple::_calculateVoltageFromTemperature(const std::vector<TC_Coeffi
             for (size_t i = 0; i < coef.d.size(); ++i) {
                 voltage += coef.d[i] * std::pow(temperature, i);
             }
-            if ((coeffs_A[0] != NAN) && (temperature >= 0)) {
-                voltage += coeffs_A[0] * exp(coeffs_A[1] * pow(temperature - coeffs_A[2], 2));;
+            if (!isnan(coeffs_A[0]) && (temperature >= 0)) {
+                voltage += coeffs_A[0] * exp(coeffs_A[1] * pow(temperature - coeffs_A[2], 2));
             }
             return voltage;
         }
@@ -222,35 +207,35 @@ float Thermocouple::readTemperature(void)
     switch (_type)
     {
     case THERMOCOUPLE_B:
-        cold_junction_voltage = _calculateVoltageFromTemperature(T_to_V_COEFF_B, T_to_V_COEFF_B_A, STDS75_get_temperature());
+        cold_junction_voltage = _calculateVoltageFromTemperature(T_to_V_COEFF_B, STDS75_get_temperature());
         temperature = _calculateTemperatureFromVoltage(V_to_T_COEFF_B, voltage + cold_junction_voltage);
         break;
     case THERMOCOUPLE_E:
-        cold_junction_voltage = _calculateVoltageFromTemperature(T_to_V_COEFF_E, T_to_V_COEFF_E_A, STDS75_get_temperature());
+        cold_junction_voltage = _calculateVoltageFromTemperature(T_to_V_COEFF_E, STDS75_get_temperature());
         temperature = _calculateTemperatureFromVoltage(V_to_T_COEFF_E, voltage + cold_junction_voltage);
         break;
     case THERMOCOUPLE_J:
-        cold_junction_voltage = _calculateVoltageFromTemperature(T_to_V_COEFF_J, T_to_V_COEFF_J_A, STDS75_get_temperature());
+        cold_junction_voltage = _calculateVoltageFromTemperature(T_to_V_COEFF_J, STDS75_get_temperature());
         temperature = _calculateTemperatureFromVoltage(V_to_T_COEFF_J, voltage + cold_junction_voltage);
         break;
     case THERMOCOUPLE_K:
-        cold_junction_voltage = _calculateVoltageFromTemperature(T_to_V_COEFF_K, T_to_V_COEFF_K_A, STDS75_get_temperature());
+        cold_junction_voltage = _calculateVoltageFromTemperature(T_to_V_COEFF_K, STDS75_get_temperature(), T_to_V_COEFF_K_A);
         temperature = _calculateTemperatureFromVoltage(V_to_T_COEFF_K, voltage + cold_junction_voltage);
         break;
     case THERMOCOUPLE_N:
-        cold_junction_voltage = _calculateVoltageFromTemperature(T_to_V_COEFF_N, T_to_V_COEFF_N_A, STDS75_get_temperature());
+        cold_junction_voltage = _calculateVoltageFromTemperature(T_to_V_COEFF_N, STDS75_get_temperature());
         temperature = _calculateTemperatureFromVoltage(V_to_T_COEFF_N, voltage + cold_junction_voltage);
         break;
     case THERMOCOUPLE_R:
-        cold_junction_voltage = _calculateVoltageFromTemperature(T_to_V_COEFF_R, T_to_V_COEFF_R_A, STDS75_get_temperature());
+        cold_junction_voltage = _calculateVoltageFromTemperature(T_to_V_COEFF_R, STDS75_get_temperature());
         temperature = _calculateTemperatureFromVoltage(V_to_T_COEFF_R, voltage + cold_junction_voltage);
         break;
     case THERMOCOUPLE_S:
-        cold_junction_voltage = _calculateVoltageFromTemperature(T_to_V_COEFF_S, T_to_V_COEFF_S_A, STDS75_get_temperature());
+        cold_junction_voltage = _calculateVoltageFromTemperature(T_to_V_COEFF_S, STDS75_get_temperature());
         temperature = _calculateTemperatureFromVoltage(V_to_T_COEFF_S, voltage + cold_junction_voltage);
         break;
     case THERMOCOUPLE_T:
-        cold_junction_voltage = _calculateVoltageFromTemperature(T_to_V_COEFF_T, T_to_V_COEFF_T_A, STDS75_get_temperature());
+        cold_junction_voltage = _calculateVoltageFromTemperature(T_to_V_COEFF_T, STDS75_get_temperature());
         temperature = _calculateTemperatureFromVoltage(V_to_T_COEFF_T, voltage + cold_junction_voltage);
         break;
     default:

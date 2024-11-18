@@ -46,7 +46,7 @@ private:
     std::array<ADC_Input_t, 2> _adcInputs;
     Sensor_Type_e _type;
 
-    float _calculateVoltageFromTemperature(const std::vector<TC_Coefficient_s>& coefficients, const std::vector<float> coeffs_A, float temperature);
+    float _calculateVoltageFromTemperature(const std::vector<TC_Coefficient_s>& coefficients, float temperature, const std::vector<float> coeffs_A = {NAN, NAN, NAN});
 
     float _calculateTemperatureFromVoltage(const std::vector<TC_Coefficient_s>& coefficients, float voltage);
 };
