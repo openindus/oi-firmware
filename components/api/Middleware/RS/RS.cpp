@@ -14,6 +14,7 @@
  * 
  * @param mode RS_485 or RS_232
  * @param baudrate in bits per second (baud)
+ * @param config 8N1 by default
  */
 void RS::begin(RS_Mode_t mode, unsigned long baudrate, uint16_t config)
 {
@@ -32,9 +33,7 @@ void RS::begin(RS_Mode_t mode, unsigned long baudrate, uint16_t config)
     conf.baudrate = baudrate;
     conf.flow_type = Disabled;
     conf.format_bits = (((config >> 2) & 0x03)+5);
-    // int test = (((0x8000012 >> 2) & 0x03)+5);
     conf.format_stop_bits = (((config >> 5) & 0x01)+1); 
-    //int test = ((0x800003f >> 5) & 0x01)+1; 
     uint8_t parity = (config & 0x03);
     conf.parity = ((parity == 0x00) ? None : (parity == 0x11) ? Odd : Even);
     conf.trigger_halt = TCR_HALT_DEFAULT;
