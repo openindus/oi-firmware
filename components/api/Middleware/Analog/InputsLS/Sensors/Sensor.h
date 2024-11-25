@@ -36,3 +36,4 @@ enum Sensor_Gain_e {
     GAIN_64,
     GAIN_128
 };
+// - [ ] TASK add reference enum

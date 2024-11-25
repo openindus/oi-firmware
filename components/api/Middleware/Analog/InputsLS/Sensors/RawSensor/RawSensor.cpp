@@ -29,6 +29,7 @@ int16_t RawSensor::read(void)
 
     /* Set Internal reference to 2.5V */
     _adc->setReference(ADS114S0X_REF_INTERNAL_2_5V);
+// - [ ] TASK set the right reference
 
     /* Set bias on negative input */
     _adc->setBias(static_cast<ads114s0x_adc_input_e>(_adcInputs[1]));

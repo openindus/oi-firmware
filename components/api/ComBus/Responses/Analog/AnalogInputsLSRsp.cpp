@@ -45,6 +45,7 @@ int AnalogInputsLSRsp::init(void)
         AnalogInputsLS::raw[data[1]].setGain((Sensor_Gain_e)data[2]);
         data.clear();
     });
+// - [ ] TASK add raw sensor set reference command SLAVE
 
     ControllerSlave::addCtrlCallback(REQUEST_RAW_SENSOR_READ, [](std::vector<uint8_t>& data) {
         int16_t value = AnalogInputsLS::raw[data[1]].read();

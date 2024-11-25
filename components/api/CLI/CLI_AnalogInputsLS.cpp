@@ -249,6 +249,8 @@ static int _registerAddSensorCmd(void)
     return esp_console_cmd_register(&cmd);
 }
 
+// - [ ] TASK add raw sensor set reference command CLI
+
 // Register all CLI commands
 int CLI::_registerAnalogInputsLSCmd(void)
 {
