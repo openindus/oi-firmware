@@ -249,7 +249,60 @@ static int _registerAddSensorCmd(void)
     return esp_console_cmd_register(&cmd);
 }
 
-// - [ ] TASK add raw sensor set reference command CLI
+static struct {
+    struct arg_int *sensorIndex;
+    struct arg_int *ref;
+    struct arg_end *end;
+} _rawSetRefCmdArgs;
+
+static int _rawSetRefCmdHandler(int argc, char **argv)
+{
+    // check if argument are missing
+    int err = arg_parse(argc, argv, (void **)&_rawSetRefCmdArgs);
+    if (err != 0) {
+        arg_print_errors(stderr, _rawSetRefCmdArgs.end, argv[0]);
+        return -1;
+    }
+
+    // get arguments
+    int sensorIndex = _rawSetRefCmdArgs.sensorIndex->ival[0];
+    int reference_int = _rawSetRefCmdArgs.ref->ival[0];
+
+    RawSensor sensor = AnalogInputsLS::raw[sensorIndex];
+    switch (reference_int) {
+        case 0:
+            sensor.setReference(REFERENCE_EXCITATION);
+            break;
+        case 1:
+            sensor.setReference(REFERENCE_IDAC_1);
+            break;
+        case 2:
+            sensor.setReference(REFERENCE_INTERNAL_2_5V);
+            break;
+        default:
+            (void) printf("Error: The reference %d does not exist.", reference_int);
+            return 1;
+    };
+    return 0;
+}
+
+static int _registerSetRefCmd(void)
+{
+    _rawSetRefCmdArgs.sensorIndex = arg_int1(NULL, NULL, "<sensorIndex>", "Sensor index");
+    _rawSetRefCmdArgs.ref = arg_int1(NULL, NULL, "<ref>", "Ref (0, 1, 2) = (excitation, idac1, internal)");
+    _rawSetRefCmdArgs.end = arg_end(3);
+
+    const esp_console_cmd_t cmd = {
+        .command = "raw-set-ref",
+        .help = "Command for setting a raw sensor reference",
+        .hint = NULL,
+        .func = &_rawSetRefCmdHandler,
+        .argtable = &_rawSetRefCmdArgs
+    };
+    return esp_console_cmd_register(&cmd);
+}
+
+// - [X] TASK add raw sensor set reference command CLI
 
 // Register all CLI commands
 int CLI::_registerAnalogInputsLSCmd(void)
@@ -260,6 +313,7 @@ int CLI::_registerAnalogInputsLSCmd(void)
     ret |= _registerTcReadVCmd();
     ret |= _registerTcReadCCmd();
     ret |= _registerAddSensorCmd();
+    ret |= _registerSetRefCmd();
     return ret;
 }
 
