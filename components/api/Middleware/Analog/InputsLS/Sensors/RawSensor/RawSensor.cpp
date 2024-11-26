@@ -28,8 +28,8 @@ int16_t RawSensor::read(void)
     _adc->setPGAGain((ads114s0x_pga_gain_e)_gain);
 
     /* Set Internal reference to 2.5V */
-    _adc->setReference(ADS114S0X_REF_INTERNAL_2_5V);
-// - [ ] TASK set the right reference
+    _adc->setReference((ads114s0x_ref_selection_e)_reference);
+// - [X] TASK set the right reference
 
     /* Set bias on negative input */
     _adc->setBias(static_cast<ads114s0x_adc_input_e>(_adcInputs[1]));

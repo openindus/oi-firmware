@@ -36,4 +36,10 @@ enum Sensor_Gain_e {
     GAIN_64,
     GAIN_128
 };
-// - [ ] TASK add reference enum
+
+enum Sensor_Ref_e {
+    REFERENCE_EXCITATION = ADS114S0X_REF_REFP0_REFNO,
+    REFERENCE_IDAC_1 = ADS114S0X_REF_REFP1_REFN1,
+    REFERENCE_INTERNAL_2_5V = ADS114S0X_REF_INTERNAL_2_5V
+};
+// - [X] TASK add reference enum
