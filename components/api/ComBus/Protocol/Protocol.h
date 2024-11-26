@@ -96,14 +96,15 @@ enum Protocol_Request_e {
     REQUEST_SET_STABILIZATION_TIME          = 0xB1,
     REQUEST_SET_ACQUISITION_TIME            = 0xB2,
     REQUEST_RAW_SENSOR_SET_GAIN             = 0xB3,
-    REQUEST_RAW_SENSOR_READ                 = 0xB4,
-    REQUEST_RAW_SENSOR_READ_MILLIVOLT       = 0xB5,
-    REQUEST_RTD_READ_RESISTOR               = 0xB6,
-    REQUEST_RTD_READ_TEMPERATURE            = 0xB7,
-    REQUEST_TC_READ_MILLIVOLTS              = 0xB8,
-    REQUEST_TC_READ_TEMPERATURE             = 0xB9,
-    REQUEST_SG_READ                         = 0xBA,
-    REQUEST_SG_SET_EXCITATION_MODE          = 0xBB,
+    REQUEST_RAW_SENSOR_SET_REFERENCE        = 0xB4,
+    REQUEST_RAW_SENSOR_READ                 = 0xB5,
+    REQUEST_RAW_SENSOR_READ_MILLIVOLT       = 0xB6,
+    REQUEST_RTD_READ_RESISTOR               = 0xB7,
+    REQUEST_RTD_READ_TEMPERATURE            = 0xB8,
+    REQUEST_TC_READ_MILLIVOLTS              = 0xB9,
+    REQUEST_TC_READ_TEMPERATURE             = 0xBA,
+    REQUEST_SG_READ                         = 0xBB,
+    REQUEST_SG_SET_EXCITATION_MODE          = 0xBC,
 
 };
 

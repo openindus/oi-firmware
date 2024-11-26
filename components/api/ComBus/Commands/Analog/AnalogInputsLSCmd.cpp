@@ -69,7 +69,13 @@ void RawSensorCmd::setGain(Sensor_Gain_e gain)
     std::vector<uint8_t> msgBytes = {REQUEST_RAW_SENSOR_SET_GAIN, _index, (uint8_t)gain};
     _control->request(msgBytes);
 }
-// - [ ] TASK add raw sensor set reference command MASTER
+
+void RawSensorCmd::setRef(Sensor_Ref_e ref)
+{
+    std::vector<uint8_t> msgBytes = {REQUEST_RAW_SENSOR_SET_REFERENCE, _index, (uint8_t)ref};
+    _control->request(msgBytes);
+}
+// - [X] TASK add raw sensor set reference command MASTER
 
 int16_t RawSensorCmd::read(void)
 {

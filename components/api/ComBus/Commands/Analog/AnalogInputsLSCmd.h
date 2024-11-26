@@ -42,6 +42,7 @@ class RawSensorCmd : private GenericSensorCmd
 public:
     RawSensorCmd(Controller* control, uint8_t index) : GenericSensorCmd(control, index) {}
     void setGain(Sensor_Gain_e gain);
+    void setRef(Sensor_Ref_e ref);
     int16_t read(void);
     float readMillivolts(void);
 };
