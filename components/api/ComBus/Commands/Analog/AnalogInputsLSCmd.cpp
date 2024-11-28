@@ -77,8 +77,20 @@ void RawSensorCmd::setRef(Sensor_Ref_e ref)
 }
 // - [X] TASK add raw sensor set reference command MASTER
 
-// - [ ] TASK add raw sensor set bias active command MASTER
-// - [ ] TASK add raw sensor set excitation command MASTER
+void RawSensorCmd::setBias(bool bias)
+{
+    std::vector<uint8_t> msgBytes = {REQUEST_RAW_SENSOR_SET_BIAS, _index, bias ? 1 : 0};
+    _control->request(msgBytes);
+}
+// - [X] TASK add raw sensor set bias active command MASTER
+
+
+void RawSensorCmd::setExcitationMode(Sensor_Excitation_e excitation)
+{
+    std::vector<uint8_t> msgBytes = {REQUEST_RAW_SENSOR_SET_EXCITATION_MODE, _index, (uint8_t)excitation};
+    _control->request(msgBytes);
+}
+// - [X] TASK add raw sensor set excitation command MASTER
 
 int16_t RawSensorCmd::read(void)
 {

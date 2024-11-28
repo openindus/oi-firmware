@@ -50,10 +50,23 @@ int AnalogInputsLSRsp::init(void)
         AnalogInputsLS::raw[data[1]].setReference((Sensor_Ref_e)data[2]);
         data.clear();
     });
+
 // - [X] TASK add raw sensor set reference command SLAVE
 
-// - [ ] TASK add raw sensor set bias active command SLAVE
-// - [ ] TASK add raw sensor set excitation command SLAVE
+
+    ControllerSlave::addCtrlCallback(REQUEST_RAW_SENSOR_SET_BIAS, [](std::vector<uint8_t>& data) {
+        AnalogInputsLS::raw[data[1]].setBiasActive((bool)data[2]);
+        data.clear();
+    });
+
+// - [X] TASK add raw sensor set bias active command SLAVE
+
+    ControllerSlave::addCtrlCallback(REQUEST_RAW_SENSOR_SET_EXCITATION_MODE, [](std::vector<uint8_t>& data) {
+        AnalogInputsLS::raw[data[1]].setExcitation((Sensor_Excitation_e)data[2]);
+        data.clear();
+    });
+
+// - [X] TASK add raw sensor set excitation command SLAVE
 
     ControllerSlave::addCtrlCallback(REQUEST_RAW_SENSOR_READ, [](std::vector<uint8_t>& data) {
         int16_t value = AnalogInputsLS::raw[data[1]].read();

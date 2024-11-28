@@ -97,6 +97,8 @@ enum Protocol_Request_e {
     REQUEST_SET_ACQUISITION_TIME            = 0xB2,
     REQUEST_RAW_SENSOR_SET_GAIN             = 0xB3,
     REQUEST_RAW_SENSOR_SET_REFERENCE        = 0xB4,
+    REQUEST_RAW_SENSOR_SET_BIAS             = 0xB4, // - [ ] TASK set the correct request number
+    REQUEST_RAW_SENSOR_SET_EXCITATION_MODE  = 0xB4, // - [ ] TASK set the correct request number
     REQUEST_RAW_SENSOR_READ                 = 0xB5,
     REQUEST_RAW_SENSOR_READ_MILLIVOLT       = 0xB6,
     REQUEST_RTD_READ_RESISTOR               = 0xB7,
