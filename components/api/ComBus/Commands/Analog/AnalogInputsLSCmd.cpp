@@ -64,33 +64,11 @@ float GenericSensorCmd::getFloat(Protocol_Event_e event, Protocol_Request_e requ
     return *ret;
 }
 
-void RawSensorCmd::setGain(Sensor_Gain_e gain)
+void RawSensorCmd::setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Value_u value)
 {
-    std::vector<uint8_t> msgBytes = {REQUEST_RAW_SENSOR_SET_GAIN, _index, (uint8_t)gain};
+    std::vector<uint8_t> msgBytes = {REQUEST_RAW_SENSOR_SET_PARAMETER, _index, (uint8_t) parameter, value.value};
     _control->request(msgBytes);
 }
-
-void RawSensorCmd::setRef(Sensor_Ref_e ref)
-{
-    std::vector<uint8_t> msgBytes = {REQUEST_RAW_SENSOR_SET_REFERENCE, _index, (uint8_t)ref};
-    _control->request(msgBytes);
-}
-// - [X] TASK add raw sensor set reference command MASTER
-
-void RawSensorCmd::setBias(bool bias)
-{
-    std::vector<uint8_t> msgBytes = {REQUEST_RAW_SENSOR_SET_BIAS, _index, bias ? 1 : 0};
-    _control->request(msgBytes);
-}
-// - [X] TASK add raw sensor set bias active command MASTER
-
-
-void RawSensorCmd::setExcitationMode(Sensor_Excitation_e excitation)
-{
-    std::vector<uint8_t> msgBytes = {REQUEST_RAW_SENSOR_SET_EXCITATION_MODE, _index, (uint8_t)excitation};
-    _control->request(msgBytes);
-}
-// - [X] TASK add raw sensor set excitation command MASTER
 
 int16_t RawSensorCmd::read(void)
 {

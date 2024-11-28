@@ -41,32 +41,25 @@ int AnalogInputsLSRsp::init(void)
         data.clear();
     });
 
-    ControllerSlave::addCtrlCallback(REQUEST_RAW_SENSOR_SET_GAIN, [](std::vector<uint8_t>& data) {
-        AnalogInputsLS::raw[data[1]].setGain((Sensor_Gain_e)data[2]);
+    ControllerSlave::addCtrlCallback(REQUEST_RAW_SENSOR_SET_PARAMETER, [](std::vector<uint8_t>& data) {
+        Sensor_Parameter_e parameter = (Sensor_Parameter_e) data[2];
+        Sensor_Parameter_Value_u value = {.value = data[3]};
+
+        switch (parameter) {
+            case PARAMETER_GAIN:
+            AnalogInputsLS::raw[data[1]].setGain(value.gain);
+            break;
+            case PARAMETER_BIAS:
+            AnalogInputsLS::raw[data[1]].setBiasActive(value.bias);
+            break;
+            case PARAMETER_REFERENCE:
+            AnalogInputsLS::raw[data[1]].setReference(value.reference);
+            break;
+            case PARAMETER_EXCITATION_MODE:
+            AnalogInputsLS::raw[data[1]].setExcitation(value.excitation_mode);
+        }
         data.clear();
     });
-
-    ControllerSlave::addCtrlCallback(REQUEST_RAW_SENSOR_SET_REFERENCE, [](std::vector<uint8_t>& data) {
-        AnalogInputsLS::raw[data[1]].setReference((Sensor_Ref_e)data[2]);
-        data.clear();
-    });
-
-// - [X] TASK add raw sensor set reference command SLAVE
-
-
-    ControllerSlave::addCtrlCallback(REQUEST_RAW_SENSOR_SET_BIAS, [](std::vector<uint8_t>& data) {
-        AnalogInputsLS::raw[data[1]].setBiasActive((bool)data[2]);
-        data.clear();
-    });
-
-// - [X] TASK add raw sensor set bias active command SLAVE
-
-    ControllerSlave::addCtrlCallback(REQUEST_RAW_SENSOR_SET_EXCITATION_MODE, [](std::vector<uint8_t>& data) {
-        AnalogInputsLS::raw[data[1]].setExcitation((Sensor_Excitation_e)data[2]);
-        data.clear();
-    });
-
-// - [X] TASK add raw sensor set excitation command SLAVE
 
     ControllerSlave::addCtrlCallback(REQUEST_RAW_SENSOR_READ, [](std::vector<uint8_t>& data) {
         int16_t value = AnalogInputsLS::raw[data[1]].read();

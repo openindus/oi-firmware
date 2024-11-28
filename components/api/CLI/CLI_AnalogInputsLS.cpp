@@ -302,8 +302,6 @@ static int _registerRawSetRefCmd(void)
     return esp_console_cmd_register(&cmd);
 }
 
-// - [X] TASK add raw sensor set reference command CLI
-
 static struct {
     struct arg_int *sensorIndex;
     struct arg_int *gain;
@@ -373,8 +371,6 @@ static int _registerRawSetGainCmd(void)
     return esp_console_cmd_register(&cmd);
 }
 
-// - [X] TASK add raw sensor set gain
-
 static struct {
     struct arg_int *sensorIndex;
     struct arg_end *end;
@@ -418,8 +414,6 @@ static int _registerRawReadCmd(void)
     return esp_console_cmd_register(&cmd);
 }
 
-// - [X] TASK add raw sensor read
-
 static struct {
     struct arg_int *sensorIndex;
     struct arg_int *active;
@@ -460,8 +454,6 @@ static int _registerRawSetBiasCmd(void)
     return esp_console_cmd_register(&cmd);
 }
 
-// - [X] TASK add set bias
-
 static struct {
     struct arg_int *sensorIndex;
     struct arg_int *excitation;
@@ -501,8 +493,6 @@ static int _registerRawSetExcitationCmd(void)
     };
     return esp_console_cmd_register(&cmd);
 }
-
-// - [X] TASK add set excitation
 
 // Register all CLI commands
 int CLI::_registerAnalogInputsLSCmd(void)

@@ -25,7 +25,6 @@ enum Sensor_Type_e {
     STRAIN_GAUGE,
 };
 
-
 enum Sensor_Gain_e {
     GAIN_1 = 0,
     GAIN_2,
@@ -42,7 +41,6 @@ enum Sensor_Ref_e {
     REFERENCE_IDAC_1 = ADS114S0X_REF_REFP1_REFN1,
     REFERENCE_INTERNAL_2_5V = ADS114S0X_REF_INTERNAL_2_5V
 };
-// - [X] TASK add reference enum
 
 enum Sensor_Excitation_e {
     EXCITATION_OFF = ADS114S0X_IDAC_OFF,
@@ -56,4 +54,18 @@ enum Sensor_Excitation_e {
     EXCITATION_1500_UA = ADS114S0X_IDAC_1500_UA,
     EXCITATION_2000_UA = ADS114S0X_IDAC_2000_UA
 };
-// - [X] TASK add excitation enum
+
+enum Sensor_Parameter_e {
+    PARAMETER_GAIN = 0x00,
+    PARAMETER_BIAS = 0x01,
+    PARAMETER_REFERENCE = 0x02,
+    PARAMETER_EXCITATION_MODE = 0x03
+};
+
+union Sensor_Parameter_Value_u {
+    Sensor_Gain_e gain;
+    bool bias;
+    Sensor_Ref_e reference;
+    Sensor_Excitation_e excitation_mode;
+    uint8_t value;
+};
