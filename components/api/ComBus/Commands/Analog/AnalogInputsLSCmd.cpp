@@ -77,6 +77,9 @@ void RawSensorCmd::setRef(Sensor_Ref_e ref)
 }
 // - [X] TASK add raw sensor set reference command MASTER
 
+// - [ ] TASK add raw sensor set bias active command MASTER
+// - [ ] TASK add raw sensor set excitation command MASTER
+
 int16_t RawSensorCmd::read(void)
 {
     return getInt16(EVENT_RAW_SENSOR_READ, REQUEST_RAW_SENSOR_READ);

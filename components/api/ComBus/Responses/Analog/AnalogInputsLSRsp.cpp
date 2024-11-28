@@ -52,6 +52,9 @@ int AnalogInputsLSRsp::init(void)
     });
 // - [X] TASK add raw sensor set reference command SLAVE
 
+// - [ ] TASK add raw sensor set bias active command SLAVE
+// - [ ] TASK add raw sensor set excitation command SLAVE
+
     ControllerSlave::addCtrlCallback(REQUEST_RAW_SENSOR_READ, [](std::vector<uint8_t>& data) {
         int16_t value = AnalogInputsLS::raw[data[1]].read();
         uint8_t* ptr = reinterpret_cast<uint8_t*>(&value);
