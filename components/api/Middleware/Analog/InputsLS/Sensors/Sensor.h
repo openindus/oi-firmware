@@ -43,3 +43,4 @@ enum Sensor_Ref_e {
     REFERENCE_INTERNAL_2_5V = ADS114S0X_REF_INTERNAL_2_5V
 };
 // - [X] TASK add reference enum
+// - [ ] TASK add reference enum

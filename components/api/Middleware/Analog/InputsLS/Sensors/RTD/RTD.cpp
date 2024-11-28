@@ -63,7 +63,7 @@ float RTD::readResistor(void)
     
     /* Set ADC Acquisition reference */
     _adc->setReference(RTD_ACQUISITION_REFERENCE);
-  
+
     /* Set PGA Gain */
     /* Set excitation */
     if (_type == RTD_PT100) {

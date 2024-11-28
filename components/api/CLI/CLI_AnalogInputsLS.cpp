@@ -268,16 +268,16 @@ static int _rawSetRefCmdHandler(int argc, char **argv)
     int sensorIndex = _rawSetRefCmdArgs.sensorIndex->ival[0];
     int reference_int = _rawSetRefCmdArgs.ref->ival[0];
 
-    RawSensor sensor = AnalogInputsLS::raw[sensorIndex];
+    RawSensor *sensor = &AnalogInputsLS::raw[sensorIndex];
     switch (reference_int) {
         case 0:
-            sensor.setReference(REFERENCE_EXCITATION);
+            sensor->setReference(REFERENCE_EXCITATION);
             break;
         case 1:
-            sensor.setReference(REFERENCE_IDAC_1);
+            sensor->setReference(REFERENCE_IDAC_1);
             break;
         case 2:
-            sensor.setReference(REFERENCE_INTERNAL_2_5V);
+            sensor->setReference(REFERENCE_INTERNAL_2_5V);
             break;
         default:
             (void) printf("Error: The reference %d does not exist.", reference_int);
@@ -304,6 +304,9 @@ static int _registerSetRefCmd(void)
 
 // - [X] TASK add raw sensor set reference command CLI
 
+// - [ ] TASK add raw sensor set gain
+// - [ ] TASK add raw sensor read
+// - [ ] TASK add set excitation
 // Register all CLI commands
 int CLI::_registerAnalogInputsLSCmd(void)
 {

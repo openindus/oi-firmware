@@ -33,6 +33,7 @@ int16_t RawSensor::read(void)
 
     /* Set bias on negative input */
     _adc->setBias(static_cast<ads114s0x_adc_input_e>(_adcInputs[1]));
+// - [ ] TASK set the excitation
 
     /* Set Internal mux */
     _adc->setInternalMux(static_cast<ads114s0x_adc_input_e>(_adcInputs[0]), static_cast<ads114s0x_adc_input_e>(_adcInputs[1]));

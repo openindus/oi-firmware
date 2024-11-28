@@ -109,7 +109,7 @@ public:
     }
 
     static inline Multiplexer* getLowSideMux(void) {
-        return _highSideMux;
+        return _lowSideMux;
     }
 
     static inline Digipot* getDigipot(void) {
