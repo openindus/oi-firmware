@@ -34,6 +34,7 @@ set(COMPONENT_SRCS
     "Middleware/Analog/InputsLS/ADC/ADS114S0X/_ADS114S0X.cpp"
     "Middleware/Analog/InputsLS/Multiplexer/Multiplexer.cpp"
     "Middleware/Analog/InputsLS/Digipot/Digipot.cpp"
+    "Middleware/Analog/InputsLS/Sensors/global_sensor.cpp"
     "Middleware/Analog/InputsLS/Sensors/RawSensor/RawSensor.cpp"
     "Middleware/Analog/InputsLS/Sensors/RTD/RTD.cpp"
     "Middleware/Analog/InputsLS/Sensors/Thermocouple/Thermocouple.cpp"
