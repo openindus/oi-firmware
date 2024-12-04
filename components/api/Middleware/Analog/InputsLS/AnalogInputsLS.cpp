@@ -69,10 +69,10 @@ void AnalogInputsLS::setStabilizationTime(int duration)
     }
 }
 
-// - [ ] TASK make this a single array instead of the whole pinout that is half unused
-int AnalogInputsLS::addSensor(Sensor_Type_e type, Sensor_Pinout_s pinout)
+// - [X] TASK make this a single array instead of the whole pinout that is half unused
+int AnalogInputsLS::addSensor(Sensor_Type_e type, std::array<AIn_Num_e, 4> ainPins)
 {
-    if (!std::all_of(pinout.ainPins.begin(), pinout.ainPins.end(), [](AIn_Num_t aIn) {
+    if (!std::all_of(ainPins.begin(), ainPins.end(), [](AIn_Num_t aIn) {
         return (aIn >= AIN_A_P && aIn < AIN_MAX) || aIn == AIN_NULL;
     })) {
         ESP_LOGE(TAG, "One or more AINs are out of range (0 to AIN_MAX - 1).");
@@ -80,12 +80,17 @@ int AnalogInputsLS::addSensor(Sensor_Type_e type, Sensor_Pinout_s pinout)
     }
 
     uint8_t nbr_pin_set = 0;
+    Sensor_Pinout_s pinout = {
+        .ainPins = ainPins,
+        .adcPins = (std::array<ADC_Input_t, 4>) {-1, -1, -1, -1}
+    };
     for (int i = 0; i < pinout.ainPins.size(); i++) {
         if (pinout.ainPins[i] == AIN_NULL) {
             break;
         }
         pinout.adcPins[i] = AIN_TO_ADC_INPUT[pinout.ainPins[i]];
         nbr_pin_set++;
+        // - [ ] TASK remove debug print
         printf("ain pin #%d set to adc #%d. Total pins : %d\n", pinout.ainPins[i], pinout.adcPins[i], nbr_pin_set);
     }
     Sensor *sensor_ptr = NULL;

@@ -105,23 +105,20 @@ static int _addSensorCmdHandler(int argc, char **argv)
 
     // get arguments
     int sensorType = _AddSensorCmdArgs.sensorType->ival[0];
-    // - [ ] TASK make this a single array instead of the whole pinout that is half unused
-    Sensor_Pinout_s pinout = {
-        .ainPins = (std::array<AIn_Num_e, 4>) {AIN_NULL, AIN_NULL, AIN_NULL, AIN_NULL},
-        .adcPins = (std::array<ADC_Input_t, 4>) {-1, -1, -1, -1},
-    };
+    std::array<AIn_Num_e, 4> ainPins = {AIN_NULL, AIN_NULL, AIN_NULL, AIN_NULL};
+    // - [X] TASK make this a single array instead of the whole pinout that is half unused
 
-    pinout.ainPins[0] = (AIn_Num_e) _AddSensorCmdArgs.inputP->ival[0];
-    pinout.ainPins[1] = (AIn_Num_e) _AddSensorCmdArgs.inputN->ival[0];
+    ainPins[0] = (AIn_Num_e) _AddSensorCmdArgs.inputP->ival[0];
+    ainPins[1] = (AIn_Num_e) _AddSensorCmdArgs.inputN->ival[0];
     if (_AddSensorCmdArgs.additionnalPin1->count == 1) {
-        pinout.ainPins[2] = (AIn_Num_e) _AddSensorCmdArgs.additionnalPin1->ival[0];
+        ainPins[2] = (AIn_Num_e) _AddSensorCmdArgs.additionnalPin1->ival[0];
     }
     if (_AddSensorCmdArgs.additionnalPin2->count == 1) {
-        pinout.ainPins[3] = (AIn_Num_e) _AddSensorCmdArgs.additionnalPin2->ival[0];
+        ainPins[3] = (AIn_Num_e) _AddSensorCmdArgs.additionnalPin2->ival[0];
     }
 
     // add sensor (on a list)
-    AnalogInputsLS::addSensor((Sensor_Type_e) sensorType, pinout);
+    AnalogInputsLS::addSensor((Sensor_Type_e) sensorType, ainPins);
     
     return 0;
 }

@@ -63,11 +63,11 @@ public:
      * @brief Add a new sensor
      * 
      * @param type [RAW_SENSOR; RTD_TWO_WIRE; RTD_THREE_WIRE; THERMOCOUPLE[B|E|J|K|N|R|S|T]; STRAIN_GAUGE]
-     * @param pinout Sensor pinout without adc pins
+     * @param ainPins an array initialised with AIN_NULL for unused members, that contains the pins set by the user
      * @return int the index of the added element (first call to this function will return 0, second call 1, ...).
      *         return -1 in case of error
      */
-    static int addSensor(Sensor_Type_e type, Sensor_Pinout_s pinout);
+    static int addSensor(Sensor_Type_e type, std::array<AIn_Num_e, 4> ainPins);
 
     // static inline int addStrainGauge(const std::array<AIn_Num_t, 2>& signalInputs, 
     //                                  const std::array<AIn_Num_t, 2>& excitationInputs) {
