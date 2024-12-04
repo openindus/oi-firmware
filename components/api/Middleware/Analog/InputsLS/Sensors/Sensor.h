@@ -10,6 +10,22 @@
 
 #include "Global.h"
 
+enum AIn_Num_e {
+    AIN_NULL = -1,
+    AIN_A_P = 0,
+    AIN_A_N,
+    AIN_B_P,
+    AIN_B_N,
+    AIN_C_P,
+    AIN_C_N,
+    AIN_D_P,
+    AIN_D_N,
+    AIN_E_P,
+    AIN_E_N,
+    AIN_MAX
+};
+typedef enum AIn_Num_e AIn_Num_t;
+
 enum Sensor_Type_e {
     RAW_SENSOR, // Read differential input voltage
     RTD_PT100,
@@ -59,7 +75,29 @@ enum Sensor_Parameter_e {
     PARAMETER_GAIN = 0x00,
     PARAMETER_BIAS = 0x01,
     PARAMETER_REFERENCE = 0x02,
-    PARAMETER_EXCITATION_MODE = 0x03
+    PARAMETER_EXCITATION_MODE = 0x03,
+    PARAMETER_MUX_HS_INDEX = 0x04,
+    PARAMETER_MUX_HS_INPUT = 0x05,
+    PARAMETER_MUX_LS_INDEX = 0x06,
+    PARAMETER_MUX_LS_OUTPUT = 0x07,
+};
+
+enum StrainGauge_Excitation_e {
+    EXCITATION_VOLTAGE_3V3 = 0,
+    EXCITATION_VOLTAGE_5V,
+    EXCITATION_VOLTAGE_USER,
+    EXCITATION_CURRENT_10UA,
+    EXCITATION_CURRENT_100UA,
+    EXCITATION_CURRENT_500UA,
+    EXCITATION_CURRENT_1000UA,
+    EXCITATION_CURRENT_2000UA
+};
+
+union Mux_Parameter_u {
+    Multiplexer_Input_e input;
+    Multiplexer_Output_e output;
+    uint8_t hs_index;
+    uint8_t ls_index;
 };
 
 union Sensor_Parameter_Value_u {
@@ -67,5 +105,11 @@ union Sensor_Parameter_Value_u {
     bool bias;
     Sensor_Ref_e reference;
     Sensor_Excitation_e excitation_mode;
+    Mux_Parameter_u mux_parameter;
     uint8_t value;
+};
+
+struct Sensor_Pinout_s {
+    std::array<AIn_Num_t, 4> ainPins;
+    std::array<ADC_Input_t, 4> adcPins;
 };

@@ -12,44 +12,41 @@
 #include "_ADS114S0X.h"
 #include "Multiplexer.h"
 #include "Sensor.h"
+#include "RawSensor.h"
 
 enum RTD_Type_e {
     PT100 = 0,
     PT1000,
 };
 
-struct RTD_Pinout_s {
-    std::vector<ADC_Input_t> adcInputs; // 2 or 3 inputs
-    Mux_IO_t hsMuxOutput;
-    Mux_IO_t lsMuxInput;
-};
+#define RTD_R_REF                       3000
+#define RTD_PT100_GAIN                  8
+#define RTD_PT1000_GAIN                 1
+#define RTD_PT100_GAIN_REGISTER         GAIN_8
+#define RTD_PT1000_GAIN_REGISTER        GAIN_1
+#define RTD_PT100_EXCITATION_CURRENT    EXCITATION_750_UA
+#define RTD_PT1000_EXCITATION_CURRENT   EXCITATION_250_UA
+#define RTD_ACQUISITION_REFERENCE       REFERENCE_IDAC_1
 
-class RTD
+class RTD: public Sensor
 {
 public:
 
-    RTD(ADS114S0X* adc, Sensor_Type_e type, Multiplexer* highSideMux, Multiplexer* lowSideMux, const RTD_Pinout_s& pins) : 
-            _adc(adc),
-            _type(type),
-            _highSideMux(highSideMux),
-            _lowSideMux(lowSideMux),
-            _adcInputs(pins.adcInputs),
-            _hsMuxOutput(pins.hsMuxOutput),
-            _lsMuxInput(pins.lsMuxInput) {}
+    RTD(ADS114S0X* adc, Multiplexer* highSideMux, Multiplexer* lowSideMux, Sensor_Pinout_s pinout, RTD_Type_e type, uint32_t index) :
+    Sensor(adc, highSideMux, lowSideMux, pinout, type == PT100 ? RTD_PT100 : RTD_PT1000, index)
+    {
+        _gain = type == PT100 ? RTD_PT100_GAIN_REGISTER : RTD_PT1000_GAIN_REGISTER;
+        _bias_active = false;
+        _mux_config.input = INPUT_IDAC1;
+        _mux_config.output = OUTPUT_RBIAS_RTD;
+        _reference = RTD_ACQUISITION_REFERENCE;
+        _excitation = type == PT100 ? RTD_PT100_EXCITATION_CURRENT : RTD_PT1000_EXCITATION_CURRENT;
+    }
 
     float readResistor(void);
     float readTemperature(void);
+    inline float read(void) { return readResistor(); }
 
 private:
-
-    ADS114S0X* _adc;
-    Sensor_Type_e _type;
-    Multiplexer* _highSideMux;
-    Multiplexer* _lowSideMux;
-    std::vector<ADC_Input_t> _adcInputs;
-    Mux_IO_t _hsMuxOutput;
-    Mux_IO_t _lsMuxInput;
-
     float _calculateRTD(int16_t adcCode);
-
 };

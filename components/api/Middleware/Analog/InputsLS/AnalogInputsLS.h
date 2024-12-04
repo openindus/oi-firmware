@@ -19,20 +19,6 @@
 #include "StrainGauge.h"
 
 typedef enum {
-    AIN_A_P = 0,
-    AIN_A_N,
-    AIN_B_P,
-    AIN_B_N,
-    AIN_C_P,
-    AIN_C_N,
-    AIN_D_P,
-    AIN_D_N,
-    AIN_E_P,
-    AIN_E_N,
-    AIN_MAX
-} AIn_Num_t;
-
-typedef enum {
     SAMPLE_400_MS = 0,
     SAMPLE_200_MS,
     SAMPLE_100_MS,
@@ -52,14 +38,8 @@ class AnalogInputsLS
 
 public: 
 
-    /* List of RTDs */
-    static std::vector<RTD> rtd;
-    /* List of thermocouples */
-    static std::vector<Thermocouple> tc;
-    /* List of strain gauge*/
-    static std::vector<StrainGauge> sg;
-    /* List of raw sensors */
-    static std::vector<RawSensor> raw;
+    /* List of Sensors */
+    static std::vector<Sensor *> sensors;
 
     /**
      * @brief Set the Acquisition Time 
@@ -83,20 +63,20 @@ public:
      * @brief Add a new sensor
      * 
      * @param type [RAW_SENSOR; RTD_TWO_WIRE; RTD_THREE_WIRE; THERMOCOUPLE[B|E|J|K|N|R|S|T]; STRAIN_GAUGE]
-     * @param aIns Analog Inputs (AIN_A_P to AIN_E_N)
-     * @return int the index of the added element (first call to this function for type RTD will return 0, second call 1, ...).
+     * @param pinout Sensor pinout without adc pins
+     * @return int the index of the added element (first call to this function will return 0, second call 1, ...).
      *         return -1 in case of error
      */
-    static int addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& aIns);
+    static int addSensor(Sensor_Type_e type, Sensor_Pinout_s pinout);
 
-    static inline int addStrainGauge(const std::array<AIn_Num_t, 2>& signalInputs, 
-                                     const std::array<AIn_Num_t, 2>& excitationInputs) {
-        std::vector<AIn_Num_t> inputs;
-        inputs.reserve(signalInputs.size() + excitationInputs.size());
-        inputs.insert(inputs.end(), signalInputs.begin(), signalInputs.end());
-        inputs.insert(inputs.end(), excitationInputs.begin(), excitationInputs.end());
-        return addSensor(STRAIN_GAUGE, inputs);
-    }
+    // static inline int addStrainGauge(const std::array<AIn_Num_t, 2>& signalInputs, 
+    //                                  const std::array<AIn_Num_t, 2>& excitationInputs) {
+    //     std::vector<AIn_Num_t> inputs;
+    //     inputs.reserve(signalInputs.size() + excitationInputs.size());
+    //     inputs.insert(inputs.end(), signalInputs.begin(), signalInputs.end());
+    //     inputs.insert(inputs.end(), excitationInputs.begin(), excitationInputs.end());
+    //     return addSensor(STRAIN_GAUGE, inputs);
+    // }
 
     /* Assessors */
 

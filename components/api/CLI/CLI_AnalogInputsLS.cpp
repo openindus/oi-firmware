@@ -89,7 +89,8 @@ static struct {
     struct arg_int *sensorType;
     struct arg_int *inputP;
     struct arg_int *inputN;
-    struct arg_int *inputM;
+    struct arg_int *additionnalPin1;
+    struct arg_int *additionnalPin2;
     struct arg_end *end;
 } _AddSensorCmdArgs;
 
@@ -104,21 +105,23 @@ static int _addSensorCmdHandler(int argc, char **argv)
 
     // get arguments
     int sensorType = _AddSensorCmdArgs.sensorType->ival[0];
-    std::vector<AIn_Num_t> inputNum;
+    // - [ ] TASK make this a single array instead of the whole pinout that is half unused
+    Sensor_Pinout_s pinout = {
+        .ainPins = (std::array<AIn_Num_e, 4>) {AIN_NULL, AIN_NULL, AIN_NULL, AIN_NULL},
+        .adcPins = (std::array<ADC_Input_t, 4>) {-1, -1, -1, -1},
+    };
 
-    if (_AddSensorCmdArgs.inputP->count == 1) {
-        inputNum.push_back((AIn_Num_t)_AddSensorCmdArgs.inputP->ival[0]);
+    pinout.ainPins[0] = (AIn_Num_e) _AddSensorCmdArgs.inputP->ival[0];
+    pinout.ainPins[1] = (AIn_Num_e) _AddSensorCmdArgs.inputN->ival[0];
+    if (_AddSensorCmdArgs.additionnalPin1->count == 1) {
+        pinout.ainPins[2] = (AIn_Num_e) _AddSensorCmdArgs.additionnalPin1->ival[0];
     }
-    if (_AddSensorCmdArgs.inputN->count == 1) {
-        inputNum.push_back((AIn_Num_t)_AddSensorCmdArgs.inputN->ival[0]);
+    if (_AddSensorCmdArgs.additionnalPin2->count == 1) {
+        pinout.ainPins[3] = (AIn_Num_e) _AddSensorCmdArgs.additionnalPin2->ival[0];
     }
-    //for 3 wires RTD, get 3rd wire pinout info
-    if (_AddSensorCmdArgs.inputM->count == 1) {
-        inputNum.push_back((AIn_Num_t)_AddSensorCmdArgs.inputM->ival[0]);
-    }
-    
+
     // add sensor (on a list)
-    AnalogInputsLS::addSensor((Sensor_Type_e) sensorType, inputNum);
+    AnalogInputsLS::addSensor((Sensor_Type_e) sensorType, pinout);
     
     return 0;
 }
@@ -137,7 +140,7 @@ static int _rtdReadCmdHandler(int argc, char **argv)
 
     // get RTD value in Ohm at Index position
     float rRTD = 0.0;
-    rRTD = AnalogInputsLS::rtd[sensorIndex].readResistor();
+    rRTD = AnalogInputsLS::sensors[sensorIndex]->readResistor();
     // print value
     printf("[%d] : %3.4f Ohms\n", sensorIndex, rRTD);
 
@@ -158,7 +161,7 @@ static int _tcReadVCmdHandler(int argc, char **argv)
 
     // get TC value in Volt at Index position
     float rTCv = 0.0;
-    rTCv = AnalogInputsLS::tc[sensorIndex].readMillivolts();
+    rTCv = AnalogInputsLS::sensors[sensorIndex]->readMillivolts();
     // print value
     printf("[%d] : %.4f Millivolts\n", sensorIndex, rTCv);
 
@@ -179,7 +182,7 @@ static int _tcReadCCmdHandler(int argc, char **argv)
 
     // get TC value in °C at Index position
     float rTCc = 0.0;
-    rTCc = AnalogInputsLS::tc[sensorIndex].readTemperature();
+    rTCc = AnalogInputsLS::sensors[sensorIndex]->readTemperature();
     // print value
     printf("[%d] : %.4f degC\n", sensorIndex, rTCc);
 
@@ -236,7 +239,8 @@ static int _registerAddSensorCmd(void)
     _AddSensorCmdArgs.sensorType = arg_int1(NULL, NULL, "<sensorType>", "Sensor type");
     _AddSensorCmdArgs.inputP = arg_int1(NULL, NULL, "<inputP>", "Positive ADC input (AINp)");
     _AddSensorCmdArgs.inputN = arg_int1(NULL, NULL, "<inputN>", "Negative ADC input (AINn)");
-    _AddSensorCmdArgs.inputM = arg_int0(NULL, NULL, "<inputM>", "3rd wire RTD ADC input (AINn)");
+    _AddSensorCmdArgs.additionnalPin1 = arg_int0(NULL, NULL, "<additionnalPin1>", "3rd wire RTD ADC input or excitation output (AINnp)");
+    _AddSensorCmdArgs.additionnalPin2 = arg_int0(NULL, NULL, "<additionnalPin2>", "excitation output (AINnp)");
     _AddSensorCmdArgs.end = arg_end(3);
 
     const esp_console_cmd_t cmd = {
@@ -245,128 +249,6 @@ static int _registerAddSensorCmd(void)
         .hint = NULL,
         .func = &_addSensorCmdHandler,
         .argtable = &_AddSensorCmdArgs
-    };
-    return esp_console_cmd_register(&cmd);
-}
-
-static struct {
-    struct arg_int *sensorIndex;
-    struct arg_int *ref;
-    struct arg_end *end;
-} _rawSetRefCmdArgs;
-
-static int _rawSetRefCmdHandler(int argc, char **argv)
-{
-    // check if argument are missing
-    int err = arg_parse(argc, argv, (void **)&_rawSetRefCmdArgs);
-    if (err != 0) {
-        arg_print_errors(stderr, _rawSetRefCmdArgs.end, argv[0]);
-        return -1;
-    }
-
-    // get arguments
-    int sensorIndex = _rawSetRefCmdArgs.sensorIndex->ival[0];
-    int reference_int = _rawSetRefCmdArgs.ref->ival[0];
-
-    RawSensor *sensor = &AnalogInputsLS::raw[sensorIndex];
-    switch (reference_int) {
-        case 0:
-            sensor->setReference(REFERENCE_EXCITATION);
-            break;
-        case 1:
-            sensor->setReference(REFERENCE_IDAC_1);
-            break;
-        case 2:
-            sensor->setReference(REFERENCE_INTERNAL_2_5V);
-            break;
-        default:
-            (void) printf("Error: The reference %d does not exist.", reference_int);
-            return 1;
-    };
-    return 0;
-}
-
-static int _registerRawSetRefCmd(void)
-{
-    _rawSetRefCmdArgs.sensorIndex = arg_int1(NULL, NULL, "<sensorIndex>", "Sensor index");
-    _rawSetRefCmdArgs.ref = arg_int1(NULL, NULL, "<ref>", "Ref (0, 1, 2) = (excitation, idac1, internal)");
-    _rawSetRefCmdArgs.end = arg_end(3);
-
-    const esp_console_cmd_t cmd = {
-        .command = "raw-set-ref",
-        .help = "Command for setting a raw sensor reference",
-        .hint = NULL,
-        .func = &_rawSetRefCmdHandler,
-        .argtable = &_rawSetRefCmdArgs
-    };
-    return esp_console_cmd_register(&cmd);
-}
-
-static struct {
-    struct arg_int *sensorIndex;
-    struct arg_int *gain;
-    struct arg_end *end;
-} _rawSetGainCmdArgs;
-
-static int8_t _get_max_on_bit(int number)
-{
-    int8_t max_bit = -1;
-
-    for (int i = 0; i < (sizeof(int) * 8); i++) {
-        if ((1 << i) & number) {
-            max_bit = i;
-        }
-    }
-    return max_bit;
-}
-
-static bool _is_power_2(int number)
-{
-    uint8_t nbr_bits = 0;
-
-    for (int i = 0; i < (sizeof(int) * 8); i++) {
-        if ((1 << i) & number) {
-            nbr_bits++;
-        }
-    }
-    return nbr_bits == 1; // if only 1 bit is up, the number is a power of 2
-}
-
-static int _rawSetGainCmdHandler(int argc, char **argv)
-{
-    // check if argument are missing
-    int err = arg_parse(argc, argv, (void **)&_rawSetGainCmdArgs);
-    if (err != 0) {
-        arg_print_errors(stderr, _rawSetGainCmdArgs.end, argv[0]);
-        return -1;
-    }
-
-    // get arguments
-    int sensorIndex = _rawSetGainCmdArgs.sensorIndex->ival[0];
-    int gain_int = _rawSetGainCmdArgs.gain->ival[0];
-
-    RawSensor *sensor = &AnalogInputsLS::raw[sensorIndex];
-    if (gain_int > 128 || !_is_power_2(gain_int)) {
-        printf("The number %d is not a valid gain (1, 2, 4, 8, 16, 32, 64, 128)\n", gain_int);
-        return 1;
-    }
-    sensor->setGain((Sensor_Gain_e) _get_max_on_bit(gain_int));
-    // if 1 -> 0, 2 -> 1, 4 -> 2, 8 -> 3, 16 -> 4, 32 -> 5, 64 -> 6, 128 -> 7
-    return 0;
-}
-
-static int _registerRawSetGainCmd(void)
-{
-    _rawSetGainCmdArgs.sensorIndex = arg_int1(NULL, NULL, "<sensorIndex>", "Sensor index");
-    _rawSetGainCmdArgs.gain = arg_int1(NULL, NULL, "<gain>", "Gain (1, 2, 4, 8, 16, 32, 64, 128)");
-    _rawSetGainCmdArgs.end = arg_end(3);
-
-    const esp_console_cmd_t cmd = {
-        .command = "raw-set-gain",
-        .help = "Command for setting a raw sensor gain",
-        .hint = NULL,
-        .func = &_rawSetGainCmdHandler,
-        .argtable = &_rawSetGainCmdArgs
     };
     return esp_console_cmd_register(&cmd);
 }
@@ -387,7 +269,7 @@ static int _rawReadCmdHandler(int argc, char **argv)
 
     // get arguments
     int sensorIndex = _rawReadCmdArgs.sensorIndex->ival[0];
-    RawSensor *sensor = &AnalogInputsLS::raw[sensorIndex];
+    Sensor *sensor = AnalogInputsLS::sensors[sensorIndex];
     AnalogInputsLS::getHighSideMux()->route(INPUT_SENSOR_5V, 0);
     AnalogInputsLS::getLowSideMux()->route(4, OUTPUT_GND);
     // Read
@@ -416,80 +298,43 @@ static int _registerRawReadCmd(void)
 
 static struct {
     struct arg_int *sensorIndex;
-    struct arg_int *active;
+    struct arg_int *parameter_index;
+    struct arg_int *parameter_value;
     struct arg_end *end;
-} _rawSetBiasCmdArgs;
+} _sensorSetParameterCmdArgs;
 
-static int _rawSetBiasCmdHandler(int argc, char **argv)
+static int _sensorSetParameterCmdHandler(int argc, char **argv)
 {
     // check if argument are missing
-    int err = arg_parse(argc, argv, (void **)&_rawSetBiasCmdArgs);
+    int err = arg_parse(argc, argv, (void **)&_sensorSetParameterCmdArgs);
     if (err != 0) {
-        arg_print_errors(stderr, _rawSetBiasCmdArgs.end, argv[0]);
+        arg_print_errors(stderr, _sensorSetParameterCmdArgs.end, argv[0]);
         return -1;
     }
 
     // get arguments
-    int sensorIndex = _rawSetBiasCmdArgs.sensorIndex->ival[0];
-    int active = _rawSetBiasCmdArgs.active->ival[0];
-    RawSensor *sensor = &AnalogInputsLS::raw[sensorIndex];
+    int sensorIndex = _sensorSetParameterCmdArgs.sensorIndex->ival[0];
+    int parameter_index = _sensorSetParameterCmdArgs.parameter_index->ival[0];
+    uint8_t parameter_value = _sensorSetParameterCmdArgs.parameter_value->ival[0];
+    Sensor *sensor = AnalogInputsLS::sensors[sensorIndex];
     // set
-    sensor->setBiasActive(active);
+    sensor->setParameter((Sensor_Parameter_e) parameter_index, (Sensor_Parameter_Value_u) {.value=parameter_value});
     return 0;
 }
 
-static int _registerRawSetBiasCmd(void)
+static int _registerSensorSetParameterCmd(void)
 {
-    _rawSetBiasCmdArgs.sensorIndex = arg_int1(NULL, NULL, "<sensorIndex>", "Sensor index");
-    _rawSetBiasCmdArgs.active = arg_int1(NULL, NULL, "<active>", "Bias active status");
-    _rawSetBiasCmdArgs.end = arg_end(3);
+    _sensorSetParameterCmdArgs.sensorIndex = arg_int1(NULL, NULL, "<sensorIndex>", "Sensor index");
+    _sensorSetParameterCmdArgs.parameter_index = arg_int1(NULL, NULL, "<parameter>", "Parameter index");
+    _sensorSetParameterCmdArgs.parameter_value = arg_int1(NULL, NULL, "<value>", "Parameter value");
+    _sensorSetParameterCmdArgs.end = arg_end(3);
 
     const esp_console_cmd_t cmd = {
-        .command = "raw-set-bias",
-        .help = "Command for setting the bias activation",
+        .command = "sensor-set-parameter",
+        .help = "Command for setting a parameter in a sensor",
         .hint = NULL,
-        .func = &_rawSetBiasCmdHandler,
-        .argtable = &_rawSetBiasCmdArgs
-    };
-    return esp_console_cmd_register(&cmd);
-}
-
-static struct {
-    struct arg_int *sensorIndex;
-    struct arg_int *excitation;
-    struct arg_end *end;
-} _rawSetExcitationCmdArgs;
-
-static int _rawSetExcitationCmdHandler(int argc, char **argv)
-{
-    // check if argument are missing
-    int err = arg_parse(argc, argv, (void **)&_rawSetExcitationCmdArgs);
-    if (err != 0) {
-        arg_print_errors(stderr, _rawSetExcitationCmdArgs.end, argv[0]);
-        return -1;
-    }
-
-    // get arguments
-    int sensorIndex = _rawSetExcitationCmdArgs.sensorIndex->ival[0];
-    int excitation = _rawSetExcitationCmdArgs.excitation->ival[0];
-    RawSensor *sensor = &AnalogInputsLS::raw[sensorIndex];
-    // set
-    sensor->setExcitation((Sensor_Excitation_e) excitation);
-    return 0;
-}
-
-static int _registerRawSetExcitationCmd(void)
-{
-    _rawSetExcitationCmdArgs.sensorIndex = arg_int1(NULL, NULL, "<sensorIndex>", "Sensor index");
-    _rawSetExcitationCmdArgs.excitation = arg_int1(NULL, NULL, "<excitation>", "Excitation level");
-    _rawSetExcitationCmdArgs.end = arg_end(3);
-
-    const esp_console_cmd_t cmd = {
-        .command = "raw-set-excitation",
-        .help = "Command for setting the excitation",
-        .hint = NULL,
-        .func = &_rawSetExcitationCmdHandler,
-        .argtable = &_rawSetExcitationCmdArgs
+        .func = &_sensorSetParameterCmdHandler,
+        .argtable = &_sensorSetParameterCmdArgs
     };
     return esp_console_cmd_register(&cmd);
 }
@@ -499,10 +344,7 @@ int CLI::_registerAnalogInputsLSCmd(void)
 {
     int ret = 0;
     ret |= _registerMuxRoute();
-    ret |= _registerRawSetRefCmd();
-    ret |= _registerRawSetGainCmd();
-    ret |= _registerRawSetBiasCmd();
-    ret |= _registerRawSetExcitationCmd();
+    ret |= _registerSensorSetParameterCmd();
     ret |= _registerRawReadCmd();
     ret |= _registerRtdReadCmd();
     ret |= _registerTcReadVCmd();

@@ -8,15 +8,6 @@
 
 #include "RTD.h"
 
-#define RTD_R_REF                       3000
-#define RTD_PT100_GAIN                  8
-#define RTD_PT1000_GAIN                 1
-#define RTD_PT100_GAIN_REGISTER         ADS114S0X_PGA_GAIN_8
-#define RTD_PT1000_GAIN_REGISTER        ADS114S0X_PGA_GAIN_1
-#define RTD_PT100_EXCITATION_CURRENT    ADS114S0X_IDAC_750_UA
-#define RTD_PT1000_EXCITATION_CURRENT   ADS114S0X_IDAC_250_UA
-#define RTD_ACQUISITION_REFERENCE       ADS114S0X_REF_REFP1_REFN1
-
 static const char TAG[] = "RTD";
 
 // Value of temperature for pt100 by decade
@@ -49,71 +40,31 @@ float RTD::_calculateRTD(int16_t adcCode)
 float RTD::readResistor(void)
 {
     float rRTD = 0.0;
+    float rRTD0 = 0.0;
+    float rRTD1 = 0.0;
 
-    if ((_highSideMux == NULL) || (_lowSideMux == NULL) || (_adc == NULL)) {
-        ESP_LOGE(TAG, "%s() error", __func__);
-        return 0.0f;
-    }
+    /* MEASURE WITH TWO INPUTS */
 
-    /* MUX Configuration:
-     * Input excitation is IDAC1
-     * Output should go to ground through the bias resistor for voltage offset */
-    _highSideMux->route(INPUT_IDAC1, _hsMuxOutput);
-    _lowSideMux->route(_lsMuxInput, OUTPUT_RBIAS_RTD);
-    
-    /* Set ADC Acquisition reference */
-    _adc->setReference(RTD_ACQUISITION_REFERENCE);
+    _mux_config.hs_index = 0;
+    /* set the output pin to index 1 if 2 wire config and index 2 if 3 wire config */
+    _mux_config.ls_index = _ainPins[2] == -1 ? 1 : 2;
+    int16_t adcCode = raw_read(0, 1);
+    rRTD0 = _calculateRTD(adcCode);
 
-    /* Set PGA Gain */
-    /* Set excitation */
-    if (_type == RTD_PT100) {
-        _adc->setExcitation(RTD_PT100_EXCITATION_CURRENT);
-        _adc->setPGAGain(RTD_PT100_GAIN_REGISTER);
-    } else if (_type == RTD_PT1000) {
-        _adc->setExcitation(RTD_PT1000_EXCITATION_CURRENT);
-        _adc->setPGAGain(RTD_PT1000_GAIN_REGISTER);
-    }
-
-    /* Wait for stabilization if needed */
-    _adc->waitStabilization();
-
-    int16_t adcCode;
     /* RTD 2 Wires */
-    if (_adcInputs.size() == 2) 
-    {
-        /* Set internal mux */
-        _adc->setInternalMux(static_cast<ads114s0x_adc_input_e>(_adcInputs[0]), static_cast<ads114s0x_adc_input_e>(_adcInputs[1]));
-        adcCode = _adc->read();
-        rRTD = _calculateRTD(adcCode);
-    } 
-    /* RTD 3 Wires */
-    else if (_adcInputs.size() == 3) 
-    {
-        /* Set internal mux */
-        _adc->setInternalMux(static_cast<ads114s0x_adc_input_e>(_adcInputs[0]), static_cast<ads114s0x_adc_input_e>(_adcInputs[1]));
-        adcCode = _adc->read();
-        float rRTD0 = _calculateRTD(adcCode);
-        /* Set internal mux */
-        _adc->setInternalMux(static_cast<ads114s0x_adc_input_e>(_adcInputs[1]), static_cast<ads114s0x_adc_input_e>(_adcInputs[2]));
-        adcCode = _adc->read();
-        float rRTD1 = _calculateRTD(adcCode);
+    if (_ainPins[2] == -1) {
+        rRTD = rRTD0;
+        return rRTD;
+    }
 
-        /* Subtract cable resistance to RTD resistance */
-        rRTD = std::abs(rRTD0 - rRTD1);
-    } 
+    /* MEASURE WITH THE OTHER INPUT */
 
-    /* Stop exitation */
-    _adc->setExcitation(ADS114S0X_IDAC_OFF);
+    /* Set internal mux */
+    adcCode = raw_read(1, 2);
+    rRTD1 = _calculateRTD(adcCode);
 
-    /* Reset Internal MUX */
-    _adc->setInternalMux(ADS114S0X_NOT_CONNECTED, ADS114S0X_NOT_CONNECTED);
-
-    /* MUX Configuration:
-     * Disconnect input
-     * Disconnect output */
-    _highSideMux->route(INPUT_OPEN_HS, _hsMuxOutput);
-    _lowSideMux->route(_lsMuxInput, OUTPUT_OPEN_LS);
-
+    /* Subtract cable resistance to RTD resistance */
+    rRTD = std::abs(rRTD0 - rRTD1);
     return rRTD;
 }
 

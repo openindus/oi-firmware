@@ -13,62 +13,58 @@
 static const char TAG[] = "RawSensor";
 
 /**
- * @brief Read raw value
- * 
- * @return int16_t adcCode
- */
-int16_t RawSensor::read(void)
-{
-    if (_adc == NULL) {
-        ESP_LOGE(TAG, "%s() error", __func__);
-        return 0.0f;
-    }
-
-    /* Set bias on negative input */
-    if (_bias_active) {
-        _adc->setBias(static_cast<ads114s0x_adc_input_e>(_adcInputs[1]));
-    } else {
-        _adc->setBias(ADS114S0X_NOT_CONNECTED);
-    }
-
-    /* Set Internal reference to 2.5V */
-    _adc->setReference((ads114s0x_ref_selection_e)_reference);
-
-    /* Set Internal reference to 2.5V */
-    _adc->setExcitation((ads114s0x_idac_magnitude_e)_excitation);
-
-    /* Set PGA Gain */
-    _adc->setPGAGain((ads114s0x_pga_gain_e)_gain);
-
-    /* Wait for stabilization if needed */
-    _adc->waitStabilization();
-
-    /* Set Internal mux */
-    _adc->setInternalMux(static_cast<ads114s0x_adc_input_e>(_adcInputs[0]), static_cast<ads114s0x_adc_input_e>(_adcInputs[1]));
-
-    /* ADC Read */
-    int16_t adcCode = _adc->read();
-    
-    /* Stop Vbias */
-    // _adc->setBias(ADS114S0X_NOT_CONNECTED);
-
-    /* Reset excitation */
-    _adc->setExcitation(ADS114S0X_IDAC_OFF);
-
-    /* Reset Internal MUX */
-    _adc->setInternalMux(ADS114S0X_NOT_CONNECTED, ADS114S0X_NOT_CONNECTED);
-
-    return adcCode;
-}
-
-/**
  * @brief Read differential input voltage
  * 
  * @return float Voltage in millivolts
  */
 float RawSensor::readMillivolts(void)
 {
-    int16_t adcCode = read();
+    int16_t adcCode = raw_read();
     printf("adc: %i\n", adcCode);
     return (2 * V_REF_MILLIVOLTS*(float)adcCode)/(float)(std::pow(2,(int)_gain)*ADS114S0X_MAX_ADC_CODE);
+}
+
+void RawSensor::setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Value_u value)
+{
+    switch (parameter) {
+        case PARAMETER_MUX_HS_INDEX:
+        case PARAMETER_MUX_HS_INPUT:
+        case PARAMETER_MUX_LS_INDEX:
+        case PARAMETER_MUX_LS_OUTPUT:
+        setMuxParameter(parameter, value.mux_parameter);
+        break;
+        case PARAMETER_BIAS:
+        setBiasActive(value.bias);
+        break;
+        case PARAMETER_GAIN:
+        setGain(value.gain);
+        break;
+        case PARAMETER_REFERENCE:
+        setReference(value.reference);
+        break;
+        case PARAMETER_EXCITATION_MODE:
+        setExcitation(value.excitation_mode);
+        break;
+        default:
+        printf("The parameter you tried to modify is not accessible for this type of sensor.");
+    }
+}
+
+void RawSensor::setMuxParameter(Sensor_Parameter_e parameter, Mux_Parameter_u value)
+{
+    switch (parameter) {
+        case PARAMETER_MUX_HS_INDEX:
+        _mux_config.hs_index = value.hs_index;
+        break;
+        case PARAMETER_MUX_HS_INPUT:
+        _mux_config.input = value.input;
+        break;
+        case PARAMETER_MUX_LS_INDEX:
+        _mux_config.ls_index = value.ls_index;
+        break;
+        case PARAMETER_MUX_LS_OUTPUT:
+        _mux_config.output = value.output;
+        default:
+        break;
+    }
 }

@@ -9,52 +9,22 @@
 #pragma once
 
 #include "Global.h"
-#include "_ADS114S0X.h"
-#include "Multiplexer.h"
-#include "Sensor.h"
+#include "global_sensor.hpp"
 
-struct RawSensor_Pinout_s {
-    std::array<ADC_Input_t, 2> adcInputs;
-};
-
-class RawSensor
+class RawSensor: public Sensor
 {
 public:
 
-    RawSensor(ADS114S0X* adc, const RawSensor_Pinout_s& pins) : 
-        _adc(adc),
-        _adcInputs(pins.adcInputs),
-        _gain(GAIN_1),
-        _reference(REFERENCE_INTERNAL_2_5V),
-        _bias_active(true),
-        _excitation(EXCITATION_OFF) {}
+    RawSensor(ADS114S0X* adc, Multiplexer* highSideMux, Multiplexer* lowSideMux, const Sensor_Pinout_s& pins, uint32_t index) :
+    Sensor(adc, highSideMux, lowSideMux, pins, RAW_SENSOR, index) {}
 
-    inline void setGain(Sensor_Gain_e gain) {
-        _gain = gain;
-    }
-
-    inline void setReference(Sensor_Ref_e reference) {
-        _reference = reference;
-    }
-
-    inline void setBiasActive(bool active) {
-        _bias_active = active;
-    }
-
-    inline void setExcitation(Sensor_Excitation_e excitation) {
-        _excitation = excitation;
-    }
-
-    int16_t read(void);
     float readMillivolts(void);
+    void setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Value_u value);
 
-private:
-
-    ADS114S0X* _adc;
-    std::array<ADC_Input_t, 2> _adcInputs;
-
-    Sensor_Gain_e _gain;
-    Sensor_Ref_e _reference;
-    bool _bias_active;
-    Sensor_Excitation_e _excitation;
+    protected:
+    void setMuxParameter(Sensor_Parameter_e parameter, Mux_Parameter_u value);
+    inline void setGain(Sensor_Gain_e gain) { _gain = gain; }
+    inline void setReference(Sensor_Ref_e reference) { _reference = reference; }
+    inline void setBiasActive(bool active) { _bias_active = active; }
+    inline void setExcitation(Sensor_Excitation_e excitation) { _excitation = excitation; }
 };

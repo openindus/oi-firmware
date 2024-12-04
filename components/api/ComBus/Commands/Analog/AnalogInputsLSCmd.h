@@ -24,9 +24,23 @@
 #include "Controller.h"
 #include "ControllerMaster.h"
 #include "AnalogInputsLS.h"
+#include "global_sensor.hpp"
+
+#define SENSOR_TAG "Sensor"
+#define SENSOR_FUNCTIONNALITY_NOT_FOUND_MESSAGE "The sensor you requested doesn't have this functionnality (%s)."
+#define SENSOR_FUNCTIONNALITY_NOT_FOUND ESP_LOGE(SENSOR_TAG, SENSOR_FUNCTIONNALITY_NOT_FOUND_MESSAGE, __PRETTY_FUNCTION__);
+#define SENSOR_FUNCTIONNALITY_NOT_FOUND_RETURN(value) ESP_LOGE(SENSOR_TAG, SENSOR_FUNCTIONNALITY_NOT_FOUND_MESSAGE, __PRETTY_FUNCTION__); return value;
 
 class GenericSensorCmd
 {
+public:
+    virtual inline void setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Value_u value) { SENSOR_FUNCTIONNALITY_NOT_FOUND }
+    virtual inline int16_t raw_read(void) { SENSOR_FUNCTIONNALITY_NOT_FOUND_RETURN(-1) }
+    virtual inline float read(void) { SENSOR_FUNCTIONNALITY_NOT_FOUND_RETURN(NAN) }
+    virtual inline float readMillivolts(void) { SENSOR_FUNCTIONNALITY_NOT_FOUND_RETURN(NAN) }
+    virtual inline float readResistor(void) { SENSOR_FUNCTIONNALITY_NOT_FOUND_RETURN(NAN) }
+    virtual inline float readTemperature(void) { SENSOR_FUNCTIONNALITY_NOT_FOUND_RETURN(NAN) }
+    virtual inline void setSGExcitationMode(StrainGauge_Excitation_e excitation) { SENSOR_FUNCTIONNALITY_NOT_FOUND }
 protected:
     GenericSensorCmd(Controller* control, uint8_t index);
     int16_t getInt16(Protocol_Event_e event, Protocol_Request_e request);
@@ -37,51 +51,55 @@ private:
     QueueHandle_t _readEvent;
 };
 
-class RawSensorCmd : private GenericSensorCmd
+class RawSensorCmd : public GenericSensorCmd
 {
 public:
     RawSensorCmd(Controller* control, uint8_t index) : GenericSensorCmd(control, index) {}
     void setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Value_u value);
-    int16_t read(void);
+    int16_t raw_read(void);
+    inline float read(void) { return (float) raw_read(); }
     float readMillivolts(void);
 };
 
-class RTDCmd : private GenericSensorCmd
+class RTDCmd : public GenericSensorCmd
 {
 public:
     RTDCmd(Controller* control, uint8_t index) : GenericSensorCmd(control, index) {}
+    inline float read(void) { return readResistor(); }
     float readResistor(void);
     float readTemperature(void);
 };
 
-class ThermocoupleCmd : private GenericSensorCmd
+class ThermocoupleCmd : public GenericSensorCmd
 {
 public:
     ThermocoupleCmd(Controller* control, uint8_t index) : GenericSensorCmd(control, index) {}
+    inline float read(void) { return readTemperature(); }
     float readMillivolts(void);
     float readTemperature(void);
 };
 
-class StrainGaugeCmd : private GenericSensorCmd
+class StrainGaugeCmd : public GenericSensorCmd
 {
 public:
     StrainGaugeCmd(Controller* control, uint8_t index) : GenericSensorCmd(control, index) {}
-    void setExcitationMode(StrainGauge_Excitation_e excitation);
+    void setSGExcitationMode(StrainGauge_Excitation_e excitation);
     float read(void);
 };
 
 class AnalogInputsLSCmd
 {
 public:
-
-    /* List of RTDs */
-    std::vector<RTDCmd> rtd;
-    /* List of thermocouples */
-    std::vector<ThermocoupleCmd> tc;
-    /* List of strain gauge*/
-    std::vector<StrainGaugeCmd> sg;
-    /* List of raw sensors */
-    std::vector<RawSensorCmd> raw;
+    /* List of sensors */
+    std::vector<GenericSensorCmd *> sensors;
+    // /* List of RTDs */
+    // std::vector<RTDCmd> rtd;
+    // /* List of thermocouples */
+    // std::vector<ThermocoupleCmd> tc;
+    // /* List of strain gauge*/
+    // std::vector<StrainGaugeCmd> sg;
+    // /* List of raw sensors */
+    // std::vector<RawSensorCmd> raw;
 
     AnalogInputsLSCmd(Controller* control) : _control(control) {}
 

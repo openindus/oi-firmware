@@ -8,11 +8,6 @@
 
 #include "Thermocouple.h"
 
-#define TC_V_REF                    2.5
-#define TC_GAIN                     8
-#define TC_GAIN_REGISTER            ADS114S0X_PGA_GAIN_8
-#define TC_ACQUISITION_REFERENCE    ADS114S0X_REF_INTERNAL_2_5V
-
 static const char TAG[] = "Thermocouple";
 
 /* Thermocouple coefficients  */
@@ -164,34 +159,13 @@ float Thermocouple::readMillivolts(void)
         return 0.0f;
     }
 
-    /* Set PGA Gain */
-    _adc->setPGAGain(TC_GAIN_REGISTER);
-
-    /* Set Internal reference to 2.5V */
-    _adc->setReference(TC_ACQUISITION_REFERENCE);
-
-    /* Set bias on negative input */
-    _adc->setBias(static_cast<ads114s0x_adc_input_e>(_adcInputs[1]));
-
-    /* Set Internal mux */
-    _adc->setInternalMux(static_cast<ads114s0x_adc_input_e>(_adcInputs[0]), static_cast<ads114s0x_adc_input_e>(_adcInputs[1]));
-
-    /* Wait for stabilization if needed */
-    _adc->waitStabilization();
-
     /* ADC Read */
-    int16_t adcCode = _adc->read();
-    
-    /* Stop Vbias */
-    _adc->setBias(ADS114S0X_NOT_CONNECTED);
-
-    /* Reset Internal MUX */
-    _adc->setInternalMux(ADS114S0X_NOT_CONNECTED, ADS114S0X_NOT_CONNECTED);
+    int16_t adcCode = raw_read(0, 1);
 
     /* Calculate Voltage values */
-    float value = (float)(2 * TC_V_REF * adcCode) / (float)(TC_GAIN * ADS114S0X_MAX_ADC_CODE);
+    float value = (float)(2.0 * TC_V_REF * (float) adcCode) / (float)(TC_GAIN * ADS114S0X_MAX_ADC_CODE);
 
-    return value * 1000;
+    return value * 1000.0;
 }
 
 /**
@@ -202,7 +176,8 @@ float Thermocouple::readMillivolts(void)
 float Thermocouple::readTemperature(void)
 {
     float temperature = 0.0f;
-    float cold_junction_voltage = 0.0f, voltage = readMillivolts();
+    float cold_junction_voltage = 0.0f;
+    float voltage = readMillivolts();
 
     switch (_type)
     {

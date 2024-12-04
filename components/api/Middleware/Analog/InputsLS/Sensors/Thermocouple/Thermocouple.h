@@ -13,7 +13,12 @@
 #include "Multiplexer.h"
 #include "Sensor.h"
 #include "stds75.h"
+#include "global_sensor.hpp"
 
+#define TC_V_REF                    2.5
+#define TC_GAIN                     8
+#define TC_GAIN_REGISTER            GAIN_8
+#define TC_ACQUISITION_REFERENCE    REFERENCE_INTERNAL_2_5V
 
 struct TC_Coefficient_s {
     float i; // Initial temperature/voltage
@@ -25,28 +30,23 @@ struct TC_Pinout_s {
     std::array<ADC_Input_t, 2> adcInputs;
 };
 
-class Thermocouple
+class Thermocouple: public Sensor
 {
 public:
 
-    Thermocouple(ADS114S0X* adc, const TC_Pinout_s& pins, Sensor_Type_e type) : 
-        _adc(adc),
-        _adcInputs(pins.adcInputs),
-        _type(type) {}
+    Thermocouple(ADS114S0X* adc, Multiplexer* highSideMux, Multiplexer* lowSideMux, Sensor_Pinout_s pinout, Sensor_Type_e type, uint32_t index) :
+    Sensor(adc, highSideMux, lowSideMux, pinout, type, index)
+    {
+        _gain = TC_GAIN_REGISTER;
+        _reference = TC_ACQUISITION_REFERENCE;
+        _bias_active = true;
+    }
 
     float readMillivolts(void);
     float readTemperature(void);
+    inline float read(void) { return readTemperature(); }
 
-private:
-
-    ADS114S0X* _adc;
-    Multiplexer* _highSideMux;
-    Multiplexer* _lowSideMux;
-
-    std::array<ADC_Input_t, 2> _adcInputs;
-    Sensor_Type_e _type;
-
+protected:
     float _calculateVoltageFromTemperature(const std::vector<TC_Coefficient_s>& coefficients, float temperature, const std::vector<float> coeffs_A = {NAN, NAN, NAN});
-
     float _calculateTemperatureFromVoltage(const std::vector<TC_Coefficient_s>& coefficients, float voltage);
 };

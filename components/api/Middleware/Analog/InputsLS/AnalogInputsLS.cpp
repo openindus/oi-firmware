@@ -7,6 +7,7 @@
  */
 
 #include "AnalogInputsLS.h"
+#include "Sensor.h"
 
 static const char TAG[] = "AnalogInputsLS";
 
@@ -46,10 +47,7 @@ int AnalogInputsLS::_init(void)
     return ret;
 }
 
-std::vector<RTD> AnalogInputsLS::rtd;
-std::vector<Thermocouple> AnalogInputsLS::tc;
-std::vector<StrainGauge> AnalogInputsLS::sg;
-std::vector<RawSensor> AnalogInputsLS::raw;
+std::vector<Sensor *> AnalogInputsLS::sensors;
 
 void AnalogInputsLS::setAcquisitionTime(AcquisitionDuration_e duration)
 {
@@ -71,51 +69,47 @@ void AnalogInputsLS::setStabilizationTime(int duration)
     }
 }
 
-int AnalogInputsLS::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& aIns)
+// - [ ] TASK make this a single array instead of the whole pinout that is half unused
+int AnalogInputsLS::addSensor(Sensor_Type_e type, Sensor_Pinout_s pinout)
 {
-    if (!std::all_of(aIns.begin(), aIns.end(), [](AIn_Num_t aIn) {
-        return aIn >= AIN_A_P && aIn < AIN_MAX;
+    if (!std::all_of(pinout.ainPins.begin(), pinout.ainPins.end(), [](AIn_Num_t aIn) {
+        return (aIn >= AIN_A_P && aIn < AIN_MAX) || aIn == AIN_NULL;
     })) {
         ESP_LOGE(TAG, "One or more AINs are out of range (0 to AIN_MAX - 1).");
         return -1;
     }
 
+    uint8_t nbr_pin_set = 0;
+    for (int i = 0; i < pinout.ainPins.size(); i++) {
+        if (pinout.ainPins[i] == AIN_NULL) {
+            break;
+        }
+        pinout.adcPins[i] = AIN_TO_ADC_INPUT[pinout.ainPins[i]];
+        nbr_pin_set++;
+        printf("ain pin #%d set to adc #%d. Total pins : %d\n", pinout.ainPins[i], pinout.adcPins[i], nbr_pin_set);
+    }
+    Sensor *sensor_ptr = NULL;
+    uint32_t index = sensors.size();
+
     switch (type) 
     {
         case RAW_SENSOR:
-            if (aIns.size() == 2) {
-                raw.emplace_back(_adc, RawSensor_Pinout_s {AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]]});
-                return raw.size()-1;
-            } else {
-                ESP_LOGE(TAG, "Raw Sensor requires 2 AINs.");
+            if (nbr_pin_set < 2) {
+                ESP_LOGE(TAG, "Raw sensor requires at least 2 AIns.");
                 return -1;
             }
-            break;
-
+            sensor_ptr = new RawSensor(_adc, _highSideMux, _lowSideMux, pinout, index);
+            sensors.emplace_back(sensor_ptr);
+            return index;
         case RTD_PT100:
         case RTD_PT1000:
-            if (aIns.size() == 2) {
-                rtd.emplace_back(_adc, type, _highSideMux, _lowSideMux, 
-                                RTD_Pinout_s {
-                                    {AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]]},
-                                    AIN_TO_MUX_IO[aIns[0]], 
-                                    AIN_TO_MUX_IO[aIns[1]]
-                                });
-                return rtd.size()-1;
-            } else if (aIns.size() == 3) {
-                rtd.emplace_back(_adc, type, _highSideMux, _lowSideMux, 
-                                RTD_Pinout_s {
-                                    {AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]], AIN_TO_ADC_INPUT[aIns[2]]},
-                                    AIN_TO_MUX_IO[aIns[0]], 
-                                    AIN_TO_MUX_IO[aIns[2]]
-                                });
-                return rtd.size()-1;
-            } else {
-                ESP_LOGE(TAG, "RTD type requires 2 or 3 AINs.");
+            if (nbr_pin_set < 2) {
+                ESP_LOGE(TAG, "RTD require at least 2 AIns.");
                 return -1;
             }
-            break;
-
+            sensor_ptr = new RTD(_adc, _highSideMux, _lowSideMux, pinout, type == RTD_PT100 ? PT100 : PT1000, index);
+            sensors.emplace_back(sensor_ptr);
+            return index;
         case THERMOCOUPLE_B:
         case THERMOCOUPLE_E:
         case THERMOCOUPLE_J:
@@ -124,30 +118,22 @@ int AnalogInputsLS::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& 
         case THERMOCOUPLE_R:
         case THERMOCOUPLE_S:
         case THERMOCOUPLE_T:
-            if (aIns.size() == 2) {
-                tc.emplace_back(_adc, TC_Pinout_s {AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]]}, type);
-                return tc.size()-1;
-            } else {
+            if (nbr_pin_set < 2) {
                 ESP_LOGE(TAG, "THERMOCOUPLE requires 2 AINs.");
                 return -1;
             }
-            break;
+            sensor_ptr = new Thermocouple(_adc, _highSideMux, _lowSideMux, pinout, type, index);
+            sensors.emplace_back(sensor_ptr);
+            return index;
 
         case STRAIN_GAUGE:
-            if (aIns.size() == 4) {
-                sg.emplace_back(_adc, _highSideMux, _lowSideMux,
-                                StrainGauge_Pinout_s { 
-                                    AIN_TO_ADC_INPUT[aIns[0]], AIN_TO_ADC_INPUT[aIns[1]],
-                                    AIN_TO_ADC_INPUT[aIns[2]], AIN_TO_ADC_INPUT[aIns[3]],
-                                    AIN_TO_MUX_IO[aIns[2]], AIN_TO_MUX_IO[aIns[3]]
-                                });
-                return sg.size()-1;
-            } else {
+            if (nbr_pin_set < 4) {
                 ESP_LOGE(TAG, "STRAIN_GAUGE requires 4 AINs.");
                 return -1;
             }
-            break;
-
+            sensor_ptr = new StrainGauge(_adc, _highSideMux, _lowSideMux, pinout, index);
+            sensors.emplace_back(sensor_ptr);
+            return index;
         default:
             ESP_LOGE(TAG, "Unknown sensor type.");
             return -1;

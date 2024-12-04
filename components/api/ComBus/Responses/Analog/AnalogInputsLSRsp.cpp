@@ -21,10 +21,24 @@ int AnalogInputsLSRsp::init(void)
     
     ControllerSlave::addCtrlCallback(REQUEST_ADD_SENSOR, [](std::vector<uint8_t>& data) {
         std::vector<AIn_Num_t> aIns;
+
+        Sensor_Pinout_s pinout = {
+            .ainPins = (std::array<AIn_Num_e, 4>) {AIN_NULL, AIN_NULL, AIN_NULL, AIN_NULL},
+            .adcPins = (std::array<ADC_Input_t, 4>) {-1, -1, -1, -1},
+        };
+
         for (auto it = data.begin() + 2; it != data.end(); it++) {
             aIns.push_back((AIn_Num_t)*it);
         }
-        int index = AnalogInputsLS::addSensor((Sensor_Type_e)data[1], aIns);
+        pinout.ainPins[0] = aIns[0];
+        pinout.ainPins[1] = aIns[1];
+        if (aIns.size() >= 3) {
+            pinout.ainPins[2] = aIns[2];
+        }
+        if (aIns.size() >= 4) {
+            pinout.ainPins[3] = aIns[3];
+        }
+        int index = AnalogInputsLS::addSensor((Sensor_Type_e)data[1], pinout);
         data.clear();
         data.push_back(REQUEST_ADD_SENSOR);
         data.push_back((uint8_t)index);
@@ -45,24 +59,12 @@ int AnalogInputsLSRsp::init(void)
         Sensor_Parameter_e parameter = (Sensor_Parameter_e) data[2];
         Sensor_Parameter_Value_u value = {.value = data[3]};
 
-        switch (parameter) {
-            case PARAMETER_GAIN:
-            AnalogInputsLS::raw[data[1]].setGain(value.gain);
-            break;
-            case PARAMETER_BIAS:
-            AnalogInputsLS::raw[data[1]].setBiasActive(value.bias);
-            break;
-            case PARAMETER_REFERENCE:
-            AnalogInputsLS::raw[data[1]].setReference(value.reference);
-            break;
-            case PARAMETER_EXCITATION_MODE:
-            AnalogInputsLS::raw[data[1]].setExcitation(value.excitation_mode);
-        }
+        AnalogInputsLS::sensors[data[1]]->setParameter(parameter, value);
         data.clear();
     });
 
     ControllerSlave::addCtrlCallback(REQUEST_RAW_SENSOR_READ, [](std::vector<uint8_t>& data) {
-        int16_t value = AnalogInputsLS::raw[data[1]].read();
+        int16_t value = AnalogInputsLS::sensors[data[1]]->raw_read();
         uint8_t* ptr = reinterpret_cast<uint8_t*>(&value);
         data.insert(data.end(), ptr, ptr + sizeof(int16_t));
         data[0] = EVENT_RAW_SENSOR_READ;
@@ -71,7 +73,7 @@ int AnalogInputsLSRsp::init(void)
     });
 
     ControllerSlave::addCtrlCallback(REQUEST_RAW_SENSOR_READ_MILLIVOLT, [](std::vector<uint8_t>& data) {
-        float value = AnalogInputsLS::raw[data[1]].readMillivolts();
+        float value = AnalogInputsLS::sensors[data[1]]->readMillivolts();
         uint8_t* ptr = reinterpret_cast<uint8_t*>(&value);
         data.insert(data.end(), ptr, ptr + sizeof(float));
         data[0] = EVENT_RAW_SENSOR_READ_MILLIVOLT;
@@ -81,7 +83,7 @@ int AnalogInputsLSRsp::init(void)
 
     ControllerSlave::addCtrlCallback(REQUEST_RTD_READ_RESISTOR, [](std::vector<uint8_t>& data) {
         printf("read resistor of %i\n", data[1]);
-        float value = AnalogInputsLS::rtd[data[1]].readResistor();
+        float value = AnalogInputsLS::sensors[data[1]]->readResistor();
         printf("val:%f\n", value);
         uint8_t* ptr = reinterpret_cast<uint8_t*>(&value);
         data.insert(data.end(), ptr, ptr + sizeof(float));
@@ -92,7 +94,7 @@ int AnalogInputsLSRsp::init(void)
     });
 
     ControllerSlave::addCtrlCallback(REQUEST_RTD_READ_TEMPERATURE, [](std::vector<uint8_t>& data) {
-        float value = AnalogInputsLS::rtd[data[1]].readTemperature();
+        float value = AnalogInputsLS::sensors[data[1]]->readTemperature();
         uint8_t* ptr = reinterpret_cast<uint8_t*>(&value);
         data.insert(data.end(), ptr, ptr + sizeof(float));
         data[0] = EVENT_RTD_READ_TEMPERATURE;
@@ -101,7 +103,7 @@ int AnalogInputsLSRsp::init(void)
     });
 
     ControllerSlave::addCtrlCallback(REQUEST_TC_READ_MILLIVOLTS, [](std::vector<uint8_t>& data) {
-        float value = AnalogInputsLS::tc[data[1]].readMillivolts();
+        float value = AnalogInputsLS::sensors[data[1]]->readMillivolts();
         uint8_t* ptr = reinterpret_cast<uint8_t*>(&value);
         data.insert(data.end(), ptr, ptr + sizeof(float));
         data[0] = EVENT_TC_READ_MILLIVOLTS;
@@ -110,7 +112,7 @@ int AnalogInputsLSRsp::init(void)
     });
 
     ControllerSlave::addCtrlCallback(REQUEST_TC_READ_TEMPERATURE, [](std::vector<uint8_t>& data) {
-        float value = AnalogInputsLS::tc[data[1]].readTemperature();
+        float value = AnalogInputsLS::sensors[data[1]]->readTemperature();
         uint8_t* ptr = reinterpret_cast<uint8_t*>(&value);
         data.insert(data.end(), ptr, ptr + sizeof(float));
         data[0] = EVENT_TC_READ_TEMPERATURE;
@@ -119,7 +121,7 @@ int AnalogInputsLSRsp::init(void)
     });
 
     ControllerSlave::addCtrlCallback(REQUEST_SG_READ, [](std::vector<uint8_t>& data) {
-        float value = AnalogInputsLS::sg[data[1]].read();
+        float value = AnalogInputsLS::sensors[data[1]]->read();
         uint8_t* ptr = reinterpret_cast<uint8_t*>(&value);
         data.insert(data.end(), ptr, ptr + sizeof(float));
         data[0] = EVENT_SG_READ;
@@ -128,7 +130,7 @@ int AnalogInputsLSRsp::init(void)
     });
 
     ControllerSlave::addCtrlCallback(REQUEST_SG_SET_EXCITATION_MODE, [](std::vector<uint8_t>& data) {
-        AnalogInputsLS::sg[data[1]].setExcitationMode((StrainGauge_Excitation_e)data[2]);
+        AnalogInputsLS::sensors[data[1]]->setSGExcitationMode((StrainGauge_Excitation_e)data[2]);
         data.clear();
     });
 

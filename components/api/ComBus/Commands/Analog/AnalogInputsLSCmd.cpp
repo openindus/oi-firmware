@@ -70,7 +70,7 @@ void RawSensorCmd::setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_V
     _control->request(msgBytes);
 }
 
-int16_t RawSensorCmd::read(void)
+int16_t RawSensorCmd::raw_read(void)
 {
     return getInt16(EVENT_RAW_SENSOR_READ, REQUEST_RAW_SENSOR_READ);
 }
@@ -100,7 +100,7 @@ float ThermocoupleCmd::readTemperature(void)
     return getFloat(EVENT_TC_READ_TEMPERATURE, REQUEST_TC_READ_TEMPERATURE);
 }
 
-void StrainGaugeCmd::setExcitationMode(StrainGauge_Excitation_e excitation)
+void StrainGaugeCmd::setSGExcitationMode(StrainGauge_Excitation_e excitation)
 {
     std::vector<uint8_t> msgBytes = {REQUEST_SG_SET_EXCITATION_MODE, _index, (uint8_t)excitation};
     _control->request(msgBytes);
@@ -139,32 +139,30 @@ int AnalogInputsLSCmd::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t
     if (_control->request(msgBytes) == 0) {
         index = static_cast<int>(msgBytes[1]);
     }
-    
+
+    GenericSensorCmd *sensor_ptr = NULL;
+
     if (index >= 0)
     {
         switch(type) 
         {
         case RAW_SENSOR:
-            if (aIns.size() == 2) {
-                raw.emplace_back(_control, index);
-                return index;
-            } else {
-                ESP_LOGE(TAG, "Raw Sensor requires 2 AINs.");
+            if (aIns.size() < 2) {
+                ESP_LOGE(TAG, "Raw sensor require at least 2 AINS.");
                 return -1;
             }
-            break;
-
+            sensor_ptr = new RawSensorCmd(_control, index);
+            sensors.emplace_back(sensor_ptr);
+            return index;
         case RTD_PT100:
         case RTD_PT1000:
-            if (aIns.size() == 2 || aIns.size() == 3) {
-                rtd.emplace_back(_control, index);
-                return index;
-            } else {
-                ESP_LOGE(TAG, "RTD type requires 2 or 3 AINs.");
+            if (aIns.size() < 2) {
+                ESP_LOGE(TAG, "RTD require at least 2 AINS.");
                 return -1;
             }
-            break;
-
+            sensor_ptr = new RTDCmd(_control, index);
+            sensors.emplace_back(sensor_ptr);
+            return index;
         case THERMOCOUPLE_B:
         case THERMOCOUPLE_E:
         case THERMOCOUPLE_J:
@@ -173,30 +171,27 @@ int AnalogInputsLSCmd::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t
         case THERMOCOUPLE_R:
         case THERMOCOUPLE_S:
         case THERMOCOUPLE_T:
-            if (aIns.size() == 2) {
-                tc.emplace_back(_control, index);
-                return index;
-            } else {
-                ESP_LOGE(TAG, "THERMOCOUPLE requires 2 AINs.");
+            if (aIns.size() < 2) {
+                ESP_LOGE(TAG, "Thermocouple require at least 2 AINS.");
                 return -1;
             }
-            break;
-
+            sensor_ptr = new ThermocoupleCmd(_control, index);
+            sensors.emplace_back(sensor_ptr);
+            return index;
         case STRAIN_GAUGE:
-            if (aIns.size() == 4) {
-                sg.emplace_back(_control, index);
-                return index;
-            } else {
-                ESP_LOGE(TAG, "STRAIN_GAUGE requires 4 AINs.");
+            if (aIns.size() < 4) {
+                ESP_LOGE(TAG, "Strain gauge require 4 AINs.");
                 return -1;
             }
-            break;
-
+            sensor_ptr = new StrainGaugeCmd(_control, index);
+            sensors.emplace_back(sensor_ptr);
+            return index;
         default:
             ESP_LOGE(TAG, "Unknown sensor type.");
             return -1;
         }
     }
+    ESP_LOGE(TAG, "The index given by the AnalogLS is describing an error.");
     return -1;
 }
 
