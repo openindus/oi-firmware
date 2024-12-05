@@ -52,7 +52,7 @@ void RawSensor::setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Valu
         setExcitation(value.excitation_current);
         break;
         default:
-        printf("The parameter you tried to modify is not accessible for this type of sensor.");
+        ESP_LOGE(TAG, "The parameter you tried to modify is not accessible for this type of sensor.");
     }
 }
 

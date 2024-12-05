@@ -73,3 +73,15 @@ void StrainGauge::update_strain_gauge_type(void)
         break;
     }
 }
+
+void StrainGauge::setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Value_u value)
+{
+    switch (parameter) {
+        case PARAMETER_SG_EXCITATION:
+            setSGExcitationMode(value.sg_excitation);
+            break;
+        default:
+            ESP_LOGE(TAG, "The parameter you tried to modify is not accessible for this type of sensor.");
+            break;
+    }
+}

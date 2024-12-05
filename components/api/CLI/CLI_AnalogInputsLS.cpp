@@ -416,7 +416,7 @@ static int _registerSensorListCmd(void)
 // - [X] TASK add a sensor-read-temperature command
 // - [X] TASK add a sensor-read-raw command
 // - [X] TASK remove sensor-specific commands.
-// - [ ] TASK add a set SG excitation mode command (or add it to set parameter)
+// - [X] TASK add a set SG excitation mode command (or add it to set parameter)
 // - [X] TASK add a sensor list command
 
 // Register all CLI commands
