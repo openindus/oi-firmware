@@ -89,8 +89,7 @@ int AnalogInputsLS::addSensor(Sensor_Type_e type, std::array<AIn_Num_e, 4> ainPi
         }
         pinout.adcPins[i] = AIN_TO_ADC_INPUT[pinout.ainPins[i]];
         nbr_pin_set++;
-        // - [ ] TASK remove debug print
-        printf("ain pin #%d set to adc #%d. Total pins : %d\n", pinout.ainPins[i], pinout.adcPins[i], nbr_pin_set);
+        // - [X] TASK remove debug print
     }
     Sensor *sensor_ptr = NULL;
     uint32_t index = sensors.size();
