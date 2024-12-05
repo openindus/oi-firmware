@@ -176,12 +176,213 @@ static int _registerSensorSetParameterCmd(void)
     return esp_console_cmd_register(&cmd);
 }
 
-// - [ ] TASK add a sensor-read command that reads no matter what type the sensor is.
-// - [ ] TASK add a sensor-read-tension command
-// - [ ] TASK add a sensor-read-resistance command
-// - [ ] TASK add a sensor-read-temperature command
-// - [ ] TASK add a sensor-read-raw command
+/* SENSOR READ */
+
+static struct
+{
+    struct arg_int *sensorIndex;
+    struct arg_end *end;
+} _sensorReadCmdArgs;
+
+static int _sensorReadCmdHandler(int argc, char **argv)
+{
+    // check if argument are missing
+    int err = arg_parse(argc, argv, (void **)&_sensorReadCmdArgs);
+    if (err != 0)
+    {
+        arg_print_errors(stderr, _sensorReadCmdArgs.end, argv[0]);
+        return -1;
+    }
+
+    // get arguments
+    int sensorIndex = _sensorReadCmdArgs.sensorIndex->ival[0];
+    Sensor *sensor = AnalogInputsLS::sensors[sensorIndex];
+    // read
+    sensor->read(true);
+    return 0;
+}
+
+static int _registerSensorReadCmd(void)
+{
+    _sensorReadCmdArgs.sensorIndex = arg_int1(NULL, NULL, "<sensorIndex>", "Sensor index");
+    _sensorReadCmdArgs.end = arg_end(3);
+
+    const esp_console_cmd_t cmd = {
+        .command = "sensor-read",
+        .help = "Command for reading a sensor value (default function for each sensors)",
+        .hint = NULL,
+        .func = &_sensorReadCmdHandler,
+        .argtable = &_sensorReadCmdArgs};
+    return esp_console_cmd_register(&cmd);
+}
+
+/* SENSOR READ TENSION */
+
+static struct {
+    struct arg_int *sensorIndex;
+    struct arg_end *end;
+} _sensorReadTensionCmdArgs;
+
+static int _sensorReadTensionCmdHandler(int argc, char **argv)
+{
+    // check if argument are missing
+    int err = arg_parse(argc, argv, (void **)&_sensorReadTensionCmdArgs);
+    if (err != 0) {
+        arg_print_errors(stderr, _sensorReadTensionCmdArgs.end, argv[0]);
+        return -1;
+    }
+
+    // get arguments
+    int sensorIndex = _sensorReadTensionCmdArgs.sensorIndex->ival[0];
+    Sensor *sensor = AnalogInputsLS::sensors[sensorIndex];
+    // read
+    sensor->readMillivolts(true);
+    return 0;
+}
+
+static int _registerSensorReadTensionCmd(void)
+{
+    _sensorReadTensionCmdArgs.sensorIndex = arg_int1(NULL, NULL, "<sensorIndex>", "Sensor index");
+    _sensorReadTensionCmdArgs.end = arg_end(3);
+
+    const esp_console_cmd_t cmd = {
+        .command = "sensor-read-tension",
+        .help = "Command for reading a sensor value (default function for each sensors)",
+        .hint = NULL,
+        .func = &_sensorReadTensionCmdHandler,
+        .argtable = &_sensorReadTensionCmdArgs
+    };
+    return esp_console_cmd_register(&cmd);
+}
+
+/* SENSOR READ RESISTANCE */
+
+static struct
+{
+    struct arg_int *sensorIndex;
+    struct arg_end *end;
+} _sensorReadResistanceCmdArgs;
+
+static int _sensorReadResistanceCmdHandler(int argc, char **argv)
+{
+    // check if argument are missing
+    int err = arg_parse(argc, argv, (void **)&_sensorReadResistanceCmdArgs);
+    if (err != 0)
+    {
+        arg_print_errors(stderr, _sensorReadResistanceCmdArgs.end, argv[0]);
+        return -1;
+    }
+
+    // get arguments
+    int sensorIndex = _sensorReadResistanceCmdArgs.sensorIndex->ival[0];
+    Sensor *sensor = AnalogInputsLS::sensors[sensorIndex];
+    // read
+    sensor->readResistor(true);
+    return 0;
+}
+
+static int _registerSensorReadResistanceCmd(void)
+{
+    _sensorReadResistanceCmdArgs.sensorIndex = arg_int1(NULL, NULL, "<sensorIndex>", "Sensor index");
+    _sensorReadResistanceCmdArgs.end = arg_end(3);
+
+    const esp_console_cmd_t cmd = {
+        .command = "sensor-read-resistance",
+        .help = "Command for reading a sensor resistance value",
+        .hint = NULL,
+        .func = &_sensorReadResistanceCmdHandler,
+        .argtable = &_sensorReadResistanceCmdArgs};
+    return esp_console_cmd_register(&cmd);
+}
+
+/* SENSOR READ TEMPERATURE */
+
+static struct
+{
+    struct arg_int *sensorIndex;
+    struct arg_end *end;
+} _sensorReadTemperatureCmdArgs;
+
+static int _sensorReadTemperatureCmdHandler(int argc, char **argv)
+{
+    // check if argument are missing
+    int err = arg_parse(argc, argv, (void **)&_sensorReadTemperatureCmdArgs);
+    if (err != 0)
+    {
+        arg_print_errors(stderr, _sensorReadTemperatureCmdArgs.end, argv[0]);
+        return -1;
+    }
+
+    // get arguments
+    int sensorIndex = _sensorReadTemperatureCmdArgs.sensorIndex->ival[0];
+    Sensor *sensor = AnalogInputsLS::sensors[sensorIndex];
+    // read
+    sensor->readTemperature(true);
+    return 0;
+}
+
+static int _registerSensorReadTemperatureCmd(void)
+{
+    _sensorReadTemperatureCmdArgs.sensorIndex = arg_int1(NULL, NULL, "<sensorIndex>", "Sensor index");
+    _sensorReadTemperatureCmdArgs.end = arg_end(3);
+
+    const esp_console_cmd_t cmd = {
+        .command = "sensor-read-temperature",
+        .help = "Command for reading a sensor temperature value",
+        .hint = NULL,
+        .func = &_sensorReadTemperatureCmdHandler,
+        .argtable = &_sensorReadTemperatureCmdArgs};
+    return esp_console_cmd_register(&cmd);
+}
+
+/* SENSOR READ RAW VALUE */
+
+static struct
+{
+    struct arg_int *sensorIndex;
+    struct arg_end *end;
+} _sensorReadRawCmdArgs;
+
+static int _sensorReadRawCmdHandler(int argc, char **argv)
+{
+    // check if argument are missing
+    int err = arg_parse(argc, argv, (void **)&_sensorReadRawCmdArgs);
+    if (err != 0)
+    {
+        arg_print_errors(stderr, _sensorReadRawCmdArgs.end, argv[0]);
+        return -1;
+    }
+
+    // get arguments
+    int sensorIndex = _sensorReadRawCmdArgs.sensorIndex->ival[0];
+    Sensor *sensor = AnalogInputsLS::sensors[sensorIndex];
+    // read
+    sensor->raw_read(0, 1, true);
+    return 0;
+}
+
+static int _registerSensorReadRawCmd(void)
+{
+    _sensorReadRawCmdArgs.sensorIndex = arg_int1(NULL, NULL, "<sensorIndex>", "Sensor index");
+    _sensorReadRawCmdArgs.end = arg_end(3);
+
+    const esp_console_cmd_t cmd = {
+        .command = "sensor-read-raw",
+        .help = "Command for reading a sensor raw value",
+        .hint = NULL,
+        .func = &_sensorReadRawCmdHandler,
+        .argtable = &_sensorReadRawCmdArgs};
+    return esp_console_cmd_register(&cmd);
+}
+
+// - [X] TASK add a sensor-read command that reads no matter what type the sensor is.
+// - [X] TASK add a sensor-read-tension command
+// - [X] TASK add a sensor-read-resistance command
+// - [X] TASK add a sensor-read-temperature command
+// - [X] TASK add a sensor-read-raw command
 // - [X] TASK remove sensor-specific commands.
+// - [ ] TASK add a set SG excitation mode command (or add it to set parameter)
+// - [ ] TASK add a sensor list command
 
 // Register all CLI commands
 int CLI::_registerAnalogInputsLSCmd(void)
@@ -189,6 +390,11 @@ int CLI::_registerAnalogInputsLSCmd(void)
     int ret = 0;
     ret |= _registerMuxRoute();
     ret |= _registerSensorSetParameterCmd();
+    ret |= _registerSensorReadCmd();
+    ret |= _registerSensorReadRawCmd();
+    ret |= _registerSensorReadTemperatureCmd();
+    ret |= _registerSensorReadTensionCmd();
+    ret |= _registerSensorReadResistanceCmd();
     ret |= _registerAddSensorCmd();
     return ret;
 }
