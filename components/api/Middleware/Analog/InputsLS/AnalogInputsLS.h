@@ -76,15 +76,6 @@ public:
      */
     static int list_sensors(void);
 
-    // static inline int addStrainGauge(const std::array<AIn_Num_t, 2>& signalInputs, 
-    //                                  const std::array<AIn_Num_t, 2>& excitationInputs) {
-    //     std::vector<AIn_Num_t> inputs;
-    //     inputs.reserve(signalInputs.size() + excitationInputs.size());
-    //     inputs.insert(inputs.end(), signalInputs.begin(), signalInputs.end());
-    //     inputs.insert(inputs.end(), excitationInputs.begin(), excitationInputs.end());
-    //     return addSensor(STRAIN_GAUGE, inputs);
-    // }
-
     /* Assessors */
 
     static inline ADS114S0X* getAdcDevice(void) {
