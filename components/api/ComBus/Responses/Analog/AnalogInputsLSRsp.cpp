@@ -54,7 +54,7 @@ int AnalogInputsLSRsp::init(void)
 
     ControllerSlave::addCtrlCallback(REQUEST_RAW_SENSOR_SET_PARAMETER, [](std::vector<uint8_t>& data) {
         Sensor_Parameter_e parameter = (Sensor_Parameter_e) data[2];
-        Sensor_Parameter_Value_u value = {.value = data[3]};
+        Sensor_Parameter_Value_u value = {.value = (int8_t) data[3]};
 
         AnalogInputsLS::sensors[data[1]]->setParameter(parameter, value);
         data.clear();

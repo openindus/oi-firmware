@@ -48,8 +48,8 @@ void RawSensor::setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Valu
         case PARAMETER_REFERENCE:
         setReference(value.reference);
         break;
-        case PARAMETER_EXCITATION_MODE:
-        setExcitation(value.excitation_mode);
+        case PARAMETER_EXCITATION_CURRENT:
+        setExcitation(value.excitation_current);
         break;
         default:
         printf("The parameter you tried to modify is not accessible for this type of sensor.");

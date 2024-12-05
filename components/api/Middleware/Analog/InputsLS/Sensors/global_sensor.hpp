@@ -75,7 +75,7 @@ class Sensor
     virtual inline void setGain(Sensor_Gain_e gain) { SENSOR_FUNCTIONNALITY_NOT_FOUND };
     virtual inline void setReference(Sensor_Ref_e reference) { SENSOR_FUNCTIONNALITY_NOT_FOUND };
     virtual inline void setBiasActive(bool active) { SENSOR_FUNCTIONNALITY_NOT_FOUND };
-    virtual inline void setExcitation(Sensor_Excitation_e excitation) { SENSOR_FUNCTIONNALITY_NOT_FOUND };
+    virtual inline void setExcitation(Sensor_Excitation_Current_e excitation) { SENSOR_FUNCTIONNALITY_NOT_FOUND };
 
     ADS114S0X* _adc;
     Multiplexer* _highSideMux;
@@ -86,7 +86,7 @@ class Sensor
     Sensor_Gain_e _gain;
     Sensor_Ref_e _reference;
     bool _bias_active;
-    Sensor_Excitation_e _excitation;
+    Sensor_Excitation_Current_e _excitation;
     Dual_Mux_Config_s _mux_config;
 
     enum Sensor_Type_e _type;

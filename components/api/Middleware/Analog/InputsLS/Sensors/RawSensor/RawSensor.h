@@ -27,5 +27,5 @@ public:
     inline void setGain(Sensor_Gain_e gain) { _gain = gain; }
     inline void setReference(Sensor_Ref_e reference) { _reference = reference; }
     inline void setBiasActive(bool active) { _bias_active = active; }
-    inline void setExcitation(Sensor_Excitation_e excitation) { _excitation = excitation; }
+    inline void setExcitation(Sensor_Excitation_Current_e excitation) { _excitation = excitation; }
 };

@@ -10,7 +10,7 @@
 
 #include "Global.h"
 
-enum AIn_Num_e {
+enum AIn_Num_e : int8_t {
     AIN_NULL = -1,
     AIN_A_P = 0,
     AIN_A_N,
@@ -26,7 +26,7 @@ enum AIn_Num_e {
 };
 typedef enum AIn_Num_e AIn_Num_t;
 
-enum Sensor_Type_e {
+enum Sensor_Type_e : int8_t {
     RAW_SENSOR, // Read differential input voltage
     RTD_PT100,
     RTD_PT1000,
@@ -41,7 +41,7 @@ enum Sensor_Type_e {
     STRAIN_GAUGE,
 };
 
-enum Sensor_Gain_e {
+enum Sensor_Gain_e : int8_t {
     GAIN_1 = 0,
     GAIN_2,
     GAIN_4,
@@ -52,13 +52,13 @@ enum Sensor_Gain_e {
     GAIN_128
 };
 
-enum Sensor_Ref_e {
+enum Sensor_Ref_e : int8_t {
     REFERENCE_EXCITATION = ADS114S0X_REF_REFP0_REFNO,
     REFERENCE_IDAC_1 = ADS114S0X_REF_REFP1_REFN1,
     REFERENCE_INTERNAL_2_5V = ADS114S0X_REF_INTERNAL_2_5V
 };
 
-enum Sensor_Excitation_e {
+enum Sensor_Excitation_Current_e : int8_t {
     EXCITATION_OFF = ADS114S0X_IDAC_OFF,
     EXCITATION_10_UA = ADS114S0X_IDAC_10_UA,
     EXCITATION_50_UA = ADS114S0X_IDAC_50_UA,
@@ -71,18 +71,7 @@ enum Sensor_Excitation_e {
     EXCITATION_2000_UA = ADS114S0X_IDAC_2000_UA
 };
 
-enum Sensor_Parameter_e {
-    PARAMETER_GAIN = 0x00,
-    PARAMETER_BIAS = 0x01,
-    PARAMETER_REFERENCE = 0x02,
-    PARAMETER_EXCITATION_MODE = 0x03,
-    PARAMETER_MUX_HS_INDEX = 0x04,
-    PARAMETER_MUX_HS_INPUT = 0x05,
-    PARAMETER_MUX_LS_INDEX = 0x06,
-    PARAMETER_MUX_LS_OUTPUT = 0x07,
-};
-
-enum StrainGauge_Excitation_e {
+enum StrainGauge_Excitation_e : int8_t {
     EXCITATION_VOLTAGE_3V3 = 0,
     EXCITATION_VOLTAGE_5V,
     EXCITATION_VOLTAGE_USER,
@@ -91,6 +80,18 @@ enum StrainGauge_Excitation_e {
     EXCITATION_CURRENT_500UA,
     EXCITATION_CURRENT_1000UA,
     EXCITATION_CURRENT_2000UA
+};
+
+enum Sensor_Parameter_e : int8_t {
+    PARAMETER_GAIN = 0x00,
+    PARAMETER_BIAS = 0x01,
+    PARAMETER_REFERENCE = 0x02,
+    PARAMETER_EXCITATION_CURRENT = 0x03,
+    PARAMETER_MUX_HS_INDEX = 0x04,
+    PARAMETER_MUX_HS_INPUT = 0x05,
+    PARAMETER_MUX_LS_INDEX = 0x06,
+    PARAMETER_MUX_LS_OUTPUT = 0x07,
+    PARAMETER_SG_EXCITATION = 0x08,
 };
 
 union Mux_Parameter_u {
@@ -104,9 +105,10 @@ union Sensor_Parameter_Value_u {
     Sensor_Gain_e gain;
     bool bias;
     Sensor_Ref_e reference;
-    Sensor_Excitation_e excitation_mode;
+    Sensor_Excitation_Current_e excitation_current;
+    StrainGauge_Excitation_e sg_excitation;
     Mux_Parameter_u mux_parameter;
-    uint8_t value;
+    int8_t value;
 };
 
 struct Sensor_Pinout_s {
