@@ -95,15 +95,12 @@ enum Protocol_Request_e {
     REQUEST_ADD_SENSOR                      = 0xB0,
     REQUEST_SET_STABILIZATION_TIME          = 0xB1,
     REQUEST_SET_ACQUISITION_TIME            = 0xB2,
-    REQUEST_RAW_SENSOR_SET_PARAMETER        = 0xB3, // - [ ] TASK change to SENSOR_SET_PARAMETER
-    REQUEST_RAW_SENSOR_READ                 = 0xB4, // - [ ] TASK change to SENSOR_READ
-    REQUEST_RAW_SENSOR_READ_MILLIVOLT       = 0xB5, // - [ ] TASK change to SENSOR_READ_MILLIVOLT
-    REQUEST_RTD_READ_RESISTOR               = 0xB6, // - [ ] TASK change to SENSOR_READ_RESISTANCE
-    REQUEST_RTD_READ_TEMPERATURE            = 0xB7, // - [ ] TASK change to SENSOR_READ_TEMPERATURE
-    REQUEST_TC_READ_MILLIVOLTS              = 0xB8, // - [ ] TASK remove
-    REQUEST_TC_READ_TEMPERATURE             = 0xB9, // - [ ] TASK remove
-    REQUEST_SG_READ                         = 0xBA, // - [ ] TASK remove
-    REQUEST_SG_SET_EXCITATION_MODE          = 0xBB, // - [ ] TASK remove
+    REQUEST_SENSOR_SET_PARAMETER            = 0xB3, // - [ ] TASK change to SENSOR_SET_PARAMETER
+    REQUEST_SENSOR_READ                     = 0xB4, // - [ ] TASK change to SENSOR_READ
+    REQUEST_SENSOR_READ_MILLIVOLT           = 0xB5, // - [ ] TASK change to SENSOR_READ_MILLIVOLT
+    REQUEST_SENSOR_READ_RESISTANCE          = 0xB6, // - [ ] TASK change to SENSOR_READ_RESISTANCE
+    REQUEST_SENSOR_READ_TEMPERATURE         = 0xB7, // - [ ] TASK change to SENSOR_READ_TEMPERATURE
+    REQUEST_SENSOR_READ_RAW                 = 0xB8,
     // - [ ] TASK add SENSOR_READ_RAW
 };
 
@@ -112,11 +109,10 @@ enum Protocol_Event_e {
     EVENT_MOTOR_READY                       = 0x01,
 
     /* AnalogLS */
-    EVENT_RAW_SENSOR_READ                   = 0xB0,
-    EVENT_RAW_SENSOR_READ_MILLIVOLT         = 0xB1,
-    EVENT_RTD_READ_RESISTOR                 = 0xB2,
-    EVENT_RTD_READ_TEMPERATURE              = 0xB3,
-    EVENT_TC_READ_MILLIVOLTS                = 0xB4,
-    EVENT_TC_READ_TEMPERATURE               = 0xB5,
-    EVENT_SG_READ                           = 0xB6,
+    EVENT_SENSOR_READ                       = 0xB0, // - [ ] TASK change to SENSOR_READ
+    EVENT_SENSOR_READ_MILLIVOLT             = 0xB1, // - [ ] TASK change to SENSOR_READ_MILLIVOLT
+    EVENT_SENSOR_READ_RESISTANCE            = 0xB2, // - [ ] TASK change to SENSOR_READ_RESISTANCE
+    EVENT_SENSOR_READ_TEMPERATURE           = 0xB3, // - [ ] TASK change to SENSOR_READ_TEMPERATURE
+    EVENT_SENSOR_READ_RAW                   = 0xB4,
+    // - [ ] TASK add SENSOR_READ_RAW
 };
