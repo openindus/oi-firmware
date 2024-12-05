@@ -34,9 +34,9 @@
 class GenericSensorCmd
 {
 public:
+    int16_t raw_read(void);
+    float read(void);
     virtual inline void setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Value_u value) { SENSOR_FUNCTIONNALITY_NOT_FOUND }
-    virtual inline int16_t raw_read(void) { SENSOR_FUNCTIONNALITY_NOT_FOUND_RETURN(-1) }
-    virtual inline float read(void) { SENSOR_FUNCTIONNALITY_NOT_FOUND_RETURN(NAN) }
     virtual inline float readMillivolts(void) { SENSOR_FUNCTIONNALITY_NOT_FOUND_RETURN(NAN) }
     virtual inline float readResistor(void) { SENSOR_FUNCTIONNALITY_NOT_FOUND_RETURN(NAN) }
     virtual inline float readTemperature(void) { SENSOR_FUNCTIONNALITY_NOT_FOUND_RETURN(NAN) }
@@ -56,8 +56,6 @@ class RawSensorCmd : public GenericSensorCmd
 public:
     RawSensorCmd(Controller* control, uint8_t index) : GenericSensorCmd(control, index) {}
     void setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Value_u value);
-    int16_t raw_read(void);
-    inline float read(void) { return (float) raw_read(); }
     float readMillivolts(void);
 };
 
@@ -65,7 +63,6 @@ class RTDCmd : public GenericSensorCmd
 {
 public:
     RTDCmd(Controller* control, uint8_t index) : GenericSensorCmd(control, index) {}
-    inline float read(void) { return readResistor(); }
     float readResistor(void);
     float readTemperature(void);
 };
@@ -74,7 +71,6 @@ class ThermocoupleCmd : public GenericSensorCmd
 {
 public:
     ThermocoupleCmd(Controller* control, uint8_t index) : GenericSensorCmd(control, index) {}
-    inline float read(void) { return readTemperature(); }
     float readMillivolts(void);
     float readTemperature(void);
 };
@@ -83,8 +79,8 @@ class StrainGaugeCmd : public GenericSensorCmd
 {
 public:
     StrainGaugeCmd(Controller* control, uint8_t index) : GenericSensorCmd(control, index) {}
+    void setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Value_u value);
     void setSGExcitationMode(StrainGauge_Excitation_e excitation);
-    float read(void);
 };
 
 class AnalogInputsLSCmd
@@ -92,14 +88,6 @@ class AnalogInputsLSCmd
 public:
     /* List of sensors */
     std::vector<GenericSensorCmd *> sensors;
-    // /* List of RTDs */
-    // std::vector<RTDCmd> rtd;
-    // /* List of thermocouples */
-    // std::vector<ThermocoupleCmd> tc;
-    // /* List of strain gauge*/
-    // std::vector<StrainGaugeCmd> sg;
-    // /* List of raw sensors */
-    // std::vector<RawSensorCmd> raw;
 
     AnalogInputsLSCmd(Controller* control) : _control(control) {}
 

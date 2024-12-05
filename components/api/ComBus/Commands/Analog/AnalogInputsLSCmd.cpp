@@ -64,51 +64,56 @@ float GenericSensorCmd::getFloat(Protocol_Event_e event, Protocol_Request_e requ
     return *ret;
 }
 
-void RawSensorCmd::setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Value_u value)
+int16_t GenericSensorCmd::raw_read(void)
 {
-    std::vector<uint8_t> msgBytes = {REQUEST_RAW_SENSOR_SET_PARAMETER, _index, (uint8_t) parameter, value.value};
-    _control->request(msgBytes);
+    return getInt16(EVENT_SENSOR_READ_RAW, REQUEST_SENSOR_READ_RAW);
 }
 
-int16_t RawSensorCmd::raw_read(void)
+float GenericSensorCmd::read(void)
 {
-    return getInt16(EVENT_RAW_SENSOR_READ, REQUEST_RAW_SENSOR_READ);
+    return getFloat(EVENT_SENSOR_READ, REQUEST_SENSOR_READ);
+}
+
+void RawSensorCmd::setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Value_u value)
+{
+    std::vector<uint8_t> msgBytes = {REQUEST_SENSOR_SET_PARAMETER, _index, (uint8_t) parameter, (uint8_t) value.value};
+    _control->request(msgBytes);
 }
 
 float RawSensorCmd::readMillivolts(void)
 {
-    return getFloat(EVENT_RAW_SENSOR_READ_MILLIVOLT, REQUEST_RAW_SENSOR_READ_MILLIVOLT);
+    return getFloat(EVENT_SENSOR_READ_MILLIVOLT, REQUEST_SENSOR_READ_MILLIVOLT);
 }
 
 float RTDCmd::readResistor(void)
 {
-    return getFloat(EVENT_RTD_READ_RESISTOR, REQUEST_RTD_READ_RESISTOR);
+    return getFloat(EVENT_SENSOR_READ_RESISTANCE, REQUEST_SENSOR_READ_RESISTANCE);
 }
 
 float RTDCmd::readTemperature(void)
 {
-    return getFloat(EVENT_RTD_READ_TEMPERATURE, REQUEST_RTD_READ_TEMPERATURE);
+    return getFloat(EVENT_SENSOR_READ_TEMPERATURE, REQUEST_SENSOR_READ_TEMPERATURE);
 }
 
 float ThermocoupleCmd::readMillivolts(void)
 {
-    return getFloat(EVENT_TC_READ_MILLIVOLTS, REQUEST_TC_READ_MILLIVOLTS);
+    return getFloat(EVENT_SENSOR_READ_MILLIVOLT, REQUEST_SENSOR_READ_MILLIVOLT);
 }
 
 float ThermocoupleCmd::readTemperature(void)
 {
-    return getFloat(EVENT_TC_READ_TEMPERATURE, REQUEST_TC_READ_TEMPERATURE);
+    return getFloat(EVENT_SENSOR_READ_TEMPERATURE, REQUEST_SENSOR_READ_TEMPERATURE);
 }
 
 void StrainGaugeCmd::setSGExcitationMode(StrainGauge_Excitation_e excitation)
 {
-    std::vector<uint8_t> msgBytes = {REQUEST_SG_SET_EXCITATION_MODE, _index, (uint8_t)excitation};
-    _control->request(msgBytes);
+    setParameter(PARAMETER_SG_EXCITATION, (union Sensor_Parameter_Value_u) {.sg_excitation=excitation});
 }
 
-float StrainGaugeCmd::read(void)
+void StrainGaugeCmd::setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Value_u value)
 {
-    return getFloat(EVENT_SG_READ, REQUEST_SG_READ);
+    std::vector<uint8_t> msgBytes = {REQUEST_SENSOR_SET_PARAMETER, _index, (uint8_t) parameter, (uint8_t) value.value};
+    _control->request(msgBytes);
 }
 
 void AnalogInputsLSCmd::setAcquisitionTime(AcquisitionDuration_e duration)
