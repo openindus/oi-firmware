@@ -47,19 +47,19 @@ class Sensor
         _index(index) {}
 
     /* Found on all sensors */
-    // - [ ] TASK make read commands accept a defaulted to false parameter that describes if the return value should be printed
-    virtual inline float read(void) { return (float) raw_read(); };
-    virtual int16_t raw_read(uint8_t positive_index = 0, uint8_t negative_index = 1);
+    // - [X] TASK make read commands accept a defaulted to false parameter that describes if the return value should be printed
+    virtual float read(bool print_result = false);
+    virtual int16_t raw_read(uint8_t positive_index = 0, uint8_t negative_index = 1, bool print_result = false);
 
     /* Sets a parameter */
     virtual inline void setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Value_u value) { SENSOR_FUNCTIONNALITY_NOT_FOUND };
     /* Read the value converted in millivolts */
-    // - [ ] TASK make read commands accept a defaulted to false parameter that describes if the return value should be printed
-    virtual inline float readMillivolts(void) { SENSOR_FUNCTIONNALITY_NOT_FOUND_RETURN(0.0) };
+    // - [X] TASK make read commands accept a defaulted to false parameter that describes if the return value should be printed
+    virtual inline float readMillivolts(bool print_result = false) { SENSOR_FUNCTIONNALITY_NOT_FOUND_RETURN(0.0) };
     /* Read the resistance of an RTD */
-    virtual inline float readResistor(void) { SENSOR_FUNCTIONNALITY_NOT_FOUND_RETURN(0.0) };
+    virtual inline float readResistor(bool print_result = false) { SENSOR_FUNCTIONNALITY_NOT_FOUND_RETURN(0.0) };
     /* Read the temperature */
-    virtual inline float readTemperature(void) { SENSOR_FUNCTIONNALITY_NOT_FOUND_RETURN(0.0) };
+    virtual inline float readTemperature(bool print_result = false) { SENSOR_FUNCTIONNALITY_NOT_FOUND_RETURN(0.0) };
     /* Set the excitation mode for the strain gauge */
     virtual inline void setSGExcitationMode(StrainGauge_Excitation_e excitation) { SENSOR_FUNCTIONNALITY_NOT_FOUND };
 

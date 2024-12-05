@@ -43,10 +43,10 @@ public:
         _excitation = type == PT100 ? RTD_PT100_EXCITATION_CURRENT : RTD_PT1000_EXCITATION_CURRENT;
     }
 
-    // - [ ] TASK make read commands accept a defaulted to false parameter that describes if the return value should be printed
-    float readResistor(void);
-    float readTemperature(void);
-    inline float read(void) { return readResistor(); }
+    // - [X] TASK make read commands accept a defaulted to false parameter that describes if the return value should be printed
+    float readResistor(bool print_result = false);
+    float readTemperature(bool print_result = false);
+    inline float read(bool print_result = false) { return readResistor(print_result); }
 
 private:
     float _calculateRTD(int16_t adcCode);
