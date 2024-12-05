@@ -143,3 +143,81 @@ int AnalogInputsLS::addSensor(Sensor_Type_e type, std::array<AIn_Num_e, 4> ainPi
             return -1;
     }
 }
+
+static void print_sensor_type(enum Sensor_Type_e type)
+{
+    const char *type_str = NULL;
+
+    switch (type) {
+    case RAW_SENSOR:
+        type_str = "raw sensor";
+        break;
+    case RTD_PT100:
+        type_str = "RTD PT100";
+        break;
+    case RTD_PT1000:
+        type_str = "RTD PT1000";
+        break;
+    case THERMOCOUPLE_B:
+        type_str = "thermocouple B";
+        break;
+    case THERMOCOUPLE_E:
+        type_str = "thermocouple E";
+        break;
+    case THERMOCOUPLE_J:
+        type_str = "thermocouple J";
+        break;
+    case THERMOCOUPLE_K:
+        type_str = "thermocouple K";
+        break;
+    case THERMOCOUPLE_N:
+        type_str = "thermocouple N";
+        break;
+    case THERMOCOUPLE_R:
+        type_str = "thermocouple R";
+        break;
+    case THERMOCOUPLE_S:
+        type_str = "thermocouple S";
+        break;
+    case THERMOCOUPLE_T:
+        type_str = "thermocouple T";
+        break;
+    case STRAIN_GAUGE:
+        type_str = "strain gauge";
+        break;
+    default:
+        type_str = "unknown";
+        break;
+    }
+    write(1, type_str, strlen(type_str));
+}
+
+static void print_sensor(Sensor *sensor)
+{
+    uint32_t index = sensor->get_index();
+    enum Sensor_Type_e type = sensor->get_type();
+    std::array<AIn_Num_t, 4> ains = sensor->get_ain_pins();
+    printf("\t %u - ", index);
+    fflush(stdout);
+    print_sensor_type(type);
+    printf(", ains [");
+    for (int i = 0; i < ains.size(); i++) {
+        if (ains[i] == -1) {
+            break;
+        }
+        if (i != 0) {
+            printf(", ");
+        }
+        printf("%hhd", ains[i]);
+    }
+    printf("]\n");
+}
+
+int AnalogInputsLS::list_sensors(void)
+{
+    printf("There are %d sensors : \n", sensors.size());
+    for (size_t i = 0; i < sensors.size(); i++) {
+        print_sensor(sensors[i]);
+    }
+    return 0;
+}

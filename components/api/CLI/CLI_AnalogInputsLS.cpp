@@ -375,6 +375,41 @@ static int _registerSensorReadRawCmd(void)
     return esp_console_cmd_register(&cmd);
 }
 
+/* SENSOR LIST */
+
+static struct
+{
+    struct arg_end *end;
+} _sensorListCmdArgs;
+
+static int _sensorListCmdHandler(int argc, char **argv)
+{
+    // check if argument are missing
+    int err = arg_parse(argc, argv, (void **)&_sensorListCmdArgs);
+    if (err != 0)
+    {
+        arg_print_errors(stderr, _sensorListCmdArgs.end, argv[0]);
+        return -1;
+    }
+
+    // get arguments
+    AnalogInputsLS::list_sensors();
+    return 0;
+}
+
+static int _registerSensorListCmd(void)
+{
+    _sensorListCmdArgs.end = arg_end(3);
+
+    const esp_console_cmd_t cmd = {
+        .command = "sensor-list",
+        .help = "Command for listing all sensors",
+        .hint = NULL,
+        .func = &_sensorListCmdHandler,
+        .argtable = &_sensorListCmdArgs};
+    return esp_console_cmd_register(&cmd);
+}
+
 // - [X] TASK add a sensor-read command that reads no matter what type the sensor is.
 // - [X] TASK add a sensor-read-tension command
 // - [X] TASK add a sensor-read-resistance command
@@ -382,7 +417,7 @@ static int _registerSensorReadRawCmd(void)
 // - [X] TASK add a sensor-read-raw command
 // - [X] TASK remove sensor-specific commands.
 // - [ ] TASK add a set SG excitation mode command (or add it to set parameter)
-// - [ ] TASK add a sensor list command
+// - [X] TASK add a sensor list command
 
 // Register all CLI commands
 int CLI::_registerAnalogInputsLSCmd(void)
@@ -395,6 +430,7 @@ int CLI::_registerAnalogInputsLSCmd(void)
     ret |= _registerSensorReadTemperatureCmd();
     ret |= _registerSensorReadTensionCmd();
     ret |= _registerSensorReadResistanceCmd();
+    ret |= _registerSensorListCmd();
     ret |= _registerAddSensorCmd();
     return ret;
 }

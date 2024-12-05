@@ -69,6 +69,13 @@ public:
      */
     static int addSensor(Sensor_Type_e type, std::array<AIn_Num_e, 4> ainPins);
 
+    /**
+     * @brief Lists all sensors
+     *
+     * @return 0
+     */
+    static int list_sensors(void);
+
     // static inline int addStrainGauge(const std::array<AIn_Num_t, 2>& signalInputs, 
     //                                  const std::array<AIn_Num_t, 2>& excitationInputs) {
     //     std::vector<AIn_Num_t> inputs;

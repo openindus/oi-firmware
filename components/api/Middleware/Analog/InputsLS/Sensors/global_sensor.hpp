@@ -63,6 +63,10 @@ class Sensor
     /* Set the excitation mode for the strain gauge */
     virtual inline void setSGExcitationMode(StrainGauge_Excitation_e excitation) { SENSOR_FUNCTIONNALITY_NOT_FOUND };
 
+    inline uint32_t get_index(void) { return _index; }
+    inline enum Sensor_Type_e get_type(void) { return _type; }
+    inline std::array<AIn_Num_t, 4> get_ain_pins(void) { return _ainPins; }
+
     protected:
     /* Found on all sensors */
     /* Used for the read method */
