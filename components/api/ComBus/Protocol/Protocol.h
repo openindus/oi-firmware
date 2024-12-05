@@ -95,15 +95,16 @@ enum Protocol_Request_e {
     REQUEST_ADD_SENSOR                      = 0xB0,
     REQUEST_SET_STABILIZATION_TIME          = 0xB1,
     REQUEST_SET_ACQUISITION_TIME            = 0xB2,
-    REQUEST_RAW_SENSOR_SET_PARAMETER        = 0xB3,
-    REQUEST_RAW_SENSOR_READ                 = 0xB4,
-    REQUEST_RAW_SENSOR_READ_MILLIVOLT       = 0xB5,
-    REQUEST_RTD_READ_RESISTOR               = 0xB6,
-    REQUEST_RTD_READ_TEMPERATURE            = 0xB7,
-    REQUEST_TC_READ_MILLIVOLTS              = 0xB8,
-    REQUEST_TC_READ_TEMPERATURE             = 0xB9,
-    REQUEST_SG_READ                         = 0xBA,
-    REQUEST_SG_SET_EXCITATION_MODE          = 0xBB,
+    REQUEST_RAW_SENSOR_SET_PARAMETER        = 0xB3, // - [ ] TASK change to SENSOR_SET_PARAMETER
+    REQUEST_RAW_SENSOR_READ                 = 0xB4, // - [ ] TASK change to SENSOR_READ
+    REQUEST_RAW_SENSOR_READ_MILLIVOLT       = 0xB5, // - [ ] TASK change to SENSOR_READ_MILLIVOLT
+    REQUEST_RTD_READ_RESISTOR               = 0xB6, // - [ ] TASK change to SENSOR_READ_RESISTANCE
+    REQUEST_RTD_READ_TEMPERATURE            = 0xB7, // - [ ] TASK change to SENSOR_READ_TEMPERATURE
+    REQUEST_TC_READ_MILLIVOLTS              = 0xB8, // - [ ] TASK remove
+    REQUEST_TC_READ_TEMPERATURE             = 0xB9, // - [ ] TASK remove
+    REQUEST_SG_READ                         = 0xBA, // - [ ] TASK remove
+    REQUEST_SG_SET_EXCITATION_MODE          = 0xBB, // - [ ] TASK remove
+    // - [ ] TASK add SENSOR_READ_RAW
 };
 
 enum Protocol_Event_e {
