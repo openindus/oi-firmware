@@ -69,7 +69,6 @@ void AnalogInputsLS::setStabilizationTime(int duration)
     }
 }
 
-// - [X] TASK make this a single array instead of the whole pinout that is half unused
 int AnalogInputsLS::addSensor(Sensor_Type_e type, std::array<AIn_Num_e, 4> ainPins)
 {
     if (!std::all_of(ainPins.begin(), ainPins.end(), [](AIn_Num_t aIn) {

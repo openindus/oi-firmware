@@ -106,7 +106,6 @@ static int _addSensorCmdHandler(int argc, char **argv)
     // get arguments
     int sensorType = _AddSensorCmdArgs.sensorType->ival[0];
     std::array<AIn_Num_e, 4> ainPins = {AIN_NULL, AIN_NULL, AIN_NULL, AIN_NULL};
-    // - [X] TASK make this a single array instead of the whole pinout that is half unused
 
     ainPins[0] = (AIn_Num_e) _AddSensorCmdArgs.inputP->ival[0];
     ainPins[1] = (AIn_Num_e) _AddSensorCmdArgs.inputN->ival[0];

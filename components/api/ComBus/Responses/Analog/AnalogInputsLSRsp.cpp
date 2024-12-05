@@ -22,7 +22,6 @@ int AnalogInputsLSRsp::init(void)
     ControllerSlave::addCtrlCallback(REQUEST_ADD_SENSOR, [](std::vector<uint8_t>& data) {
         std::vector<AIn_Num_t> aIns;
 
-        // - [X] TASK make this a single array instead of the whole pinout that is half unused
         std::array<AIn_Num_e, 4> ainPins = {AIN_NULL, AIN_NULL, AIN_NULL, AIN_NULL};
 
         for (auto it = data.begin() + 2; it != data.end(); it++) {
