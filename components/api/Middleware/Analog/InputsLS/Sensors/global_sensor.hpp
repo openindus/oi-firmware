@@ -66,9 +66,11 @@ class Sensor
     protected:
     /* Found on all sensors */
     /* Used for the read method */
-    virtual void route(void);
-    virtual void init_read(void);
-    virtual void reset_read(void);
+    void route(void);
+    void init_read(void);
+    void reset_read(void);
+    void print_int16(const int16_t value, const char *unit_str);
+    void print_float(const float value, const char *unit_str);
     /* Used for the setParameter method */
     virtual inline void setGain(Sensor_Gain_e gain) { SENSOR_FUNCTIONNALITY_NOT_FOUND };
     virtual inline void setReference(Sensor_Ref_e reference) { SENSOR_FUNCTIONNALITY_NOT_FOUND };

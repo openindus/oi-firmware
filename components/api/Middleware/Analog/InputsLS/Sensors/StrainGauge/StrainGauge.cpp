@@ -20,6 +20,11 @@ float StrainGauge::read(bool print_result)
         return 0.0f;
     }
     adcCode = raw_read(0, 1);
+    if (print_result) {
+        // value result is a raw value between -256 and +256 (approximatively)
+        // because of the division by SG_GAIN on the int16 
+        print_float(((float) adcCode) / SG_GAIN, "/ 256 (raw value)");
+    }
     return ((float) adcCode) / SG_GAIN;
 }
 

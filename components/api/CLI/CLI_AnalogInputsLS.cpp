@@ -135,11 +135,7 @@ static int _rtdReadCmdHandler(int argc, char **argv)
     int sensorIndex = _rtdReadCmdArgs.sensorIndex->ival[0];
 
     // get RTD value in Ohm at Index position
-    float rRTD = 0.0;
-    rRTD = AnalogInputsLS::sensors[sensorIndex]->readResistor();
-    // print value
-    printf("[%d] : %3.4f Ohms\n", sensorIndex, rRTD);
-
+    AnalogInputsLS::sensors[sensorIndex]->readResistor(true);
     return 0;
 }
 
@@ -156,11 +152,7 @@ static int _tcReadVCmdHandler(int argc, char **argv)
     int sensorIndex = _tcReadCmdArgs.sensorIndex->ival[0];
 
     // get TC value in Volt at Index position
-    float rTCv = 0.0;
-    rTCv = AnalogInputsLS::sensors[sensorIndex]->readMillivolts();
-    // print value
-    printf("[%d] : %.4f Millivolts\n", sensorIndex, rTCv);
-
+    AnalogInputsLS::sensors[sensorIndex]->readMillivolts(true);
     return 0;
 }
 
@@ -266,14 +258,8 @@ static int _rawReadCmdHandler(int argc, char **argv)
     // get arguments
     int sensorIndex = _rawReadCmdArgs.sensorIndex->ival[0];
     Sensor *sensor = AnalogInputsLS::sensors[sensorIndex];
-    AnalogInputsLS::getHighSideMux()->route(INPUT_SENSOR_5V, 0);
-    AnalogInputsLS::getLowSideMux()->route(4, OUTPUT_GND);
     // Read
-    int16_t raw_value = sensor->read();
-    // AnalogInputsLS::getHighSideMux()->route(INPUT_OPEN_HS, 4);
-    // AnalogInputsLS::getLowSideMux()->route(4, OUTPUT_OPEN_LS);
-    // Display
-    printf("[%d] : %hd\n", sensorIndex, raw_value);
+    sensor->read(true);
     return 0;
 }
 

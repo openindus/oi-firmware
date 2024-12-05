@@ -166,6 +166,10 @@ float Thermocouple::readMillivolts(bool print_result)
     /* Calculate Voltage values */
     float value = (float)(2.0 * TC_V_REF * (float) adcCode) / (float)(TC_GAIN * ADS114S0X_MAX_ADC_CODE);
 
+    if (print_result) {
+        // value result is in mV
+        print_float(value * 1000.0, "mV");
+    }
     return value * 1000.0;
 }
 
@@ -219,6 +223,10 @@ float Thermocouple::readTemperature(bool print_result)
         ESP_LOGE(TAG, "Unknown sensor type");
         break;
     }
-    
+
+    if (print_result) {
+        // value result is in mV
+        print_float(temperature, "°c");
+    }
     return temperature;
 }

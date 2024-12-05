@@ -55,6 +55,10 @@ float RTD::readResistor(bool print_result)
     /* RTD 2 Wires */
     if (_ainPins[2] == -1) {
         rRTD = rRTD0;
+        if (print_result) {
+            // result is a resistance
+            print_float(rRTD, "Ω");
+        }
         return rRTD;
     }
 
@@ -66,6 +70,10 @@ float RTD::readResistor(bool print_result)
 
     /* Subtract cable resistance to RTD resistance */
     rRTD = std::abs(rRTD0 - rRTD1);
+    if (print_result) {
+        // result is a resistance
+        print_float(rRTD, "Ω");
+    }
     return rRTD;
 }
 
@@ -95,5 +103,9 @@ float RTD::readTemperature(bool print_result)
         temperature = a + decimal * (b - c + decimal * (c + b - a));
     }
 
+    if (print_result) {
+        // result is a temperature
+        print_float(temperature, "°c");
+    }
     return temperature;
 }

@@ -21,8 +21,13 @@ static const char TAG[] = "RawSensor";
 float RawSensor::readMillivolts(bool print_result)
 {
     int16_t adcCode = raw_read();
-    printf("adc: %i\n", adcCode);
-    return (2 * V_REF_MILLIVOLTS*(float)adcCode)/(float)(std::pow(2,(int)_gain)*ADS114S0X_MAX_ADC_CODE);
+    float value = (2 * V_REF_MILLIVOLTS*(float)adcCode)/(float)(std::pow(2,(int)_gain)*ADS114S0X_MAX_ADC_CODE);
+
+    if (print_result) {
+        // result is a float value
+        print_float(value, "(raw value)");
+    }
+    return value;
 }
 
 void RawSensor::setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Value_u value)

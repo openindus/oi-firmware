@@ -116,5 +116,25 @@ int16_t Sensor::raw_read(uint8_t positive_index, uint8_t negative_index, bool pr
 
     reset_read();
 
+    if (print_result) {
+        // adcCode is a number with maximum at 32767 (MAX_SHORT_INT)
+        print_int16(adcCode, "/ 32767 (raw value)");
+    }
     return adcCode;
+}
+
+/**
+ * @brief prints an int16 (for example adcCode) with suffixed unit_str
+ */
+void Sensor::print_int16(const int16_t value, const char *unit_str)
+{
+    printf("[%d] - %hd %s\n", _index, value, unit_str);
+}
+
+/**
+ * @brief prints a float (for example temperature value) with suffixed unit_str
+ */
+void Sensor::print_float(const float value, const char *unit_str)
+{
+    printf("[%d] - %.3f %s\n", _index, value, unit_str);
 }
