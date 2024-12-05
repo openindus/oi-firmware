@@ -410,14 +410,6 @@ static int _registerSensorListCmd(void)
     return esp_console_cmd_register(&cmd);
 }
 
-// - [X] TASK add a sensor-read command that reads no matter what type the sensor is.
-// - [X] TASK add a sensor-read-tension command
-// - [X] TASK add a sensor-read-resistance command
-// - [X] TASK add a sensor-read-temperature command
-// - [X] TASK add a sensor-read-raw command
-// - [X] TASK remove sensor-specific commands.
-// - [X] TASK add a set SG excitation mode command (or add it to set parameter)
-// - [X] TASK add a sensor list command
 
 // Register all CLI commands
 int CLI::_registerAnalogInputsLSCmd(void)

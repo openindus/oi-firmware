@@ -42,7 +42,6 @@ public:
         _bias_active = true;
     }
 
-    // - [X] TASK make read commands accept a defaulted to false parameter that describes if the return value should be printed
     float readMillivolts(bool print_result = false);
     float readTemperature(bool print_result = false);
     inline float read(bool print_result = false) { return readTemperature(print_result); }

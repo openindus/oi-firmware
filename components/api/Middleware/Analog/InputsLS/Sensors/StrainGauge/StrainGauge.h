@@ -37,7 +37,6 @@ public:
         _gauge_excitation_mode = excitation;
         update_strain_gauge_type();
     }
-    // - [X] TASK make read commands accept a defaulted to false parameter that describes if the return value should be printed
     float read(bool print_result = false);
     void setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Value_u value);
 

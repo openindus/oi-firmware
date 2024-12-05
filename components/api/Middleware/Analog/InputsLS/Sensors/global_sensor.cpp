@@ -85,7 +85,6 @@ void Sensor::reset_read(void)
  *
  * @return adcCode converted to float
  */
-// - [X] TASK make read commands accept a defaulted to false parameter that describes if the return value should be printed
 float Sensor::read(bool print_result)
 {
     int16_t adc_code = raw_read(0, 1, print_result); // read the raw value and print it if asked.
@@ -98,7 +97,6 @@ float Sensor::read(bool print_result)
  * 
  * @return int16_t adcCode
  */
-// - [X] TASK make read commands accept a defaulted to false parameter that describes if the return value should be printed
 int16_t Sensor::raw_read(uint8_t positive_index, uint8_t negative_index, bool print_result)
 {
     if (_adc == NULL) {

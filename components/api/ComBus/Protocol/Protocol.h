@@ -95,13 +95,12 @@ enum Protocol_Request_e {
     REQUEST_ADD_SENSOR                      = 0xB0,
     REQUEST_SET_STABILIZATION_TIME          = 0xB1,
     REQUEST_SET_ACQUISITION_TIME            = 0xB2,
-    REQUEST_SENSOR_SET_PARAMETER            = 0xB3, // - [X] TASK change to SENSOR_SET_PARAMETER
-    REQUEST_SENSOR_READ                     = 0xB4, // - [X] TASK change to SENSOR_READ
-    REQUEST_SENSOR_READ_MILLIVOLT           = 0xB5, // - [X] TASK change to SENSOR_READ_MILLIVOLT
-    REQUEST_SENSOR_READ_RESISTANCE          = 0xB6, // - [X] TASK change to SENSOR_READ_RESISTANCE
-    REQUEST_SENSOR_READ_TEMPERATURE         = 0xB7, // - [X] TASK change to SENSOR_READ_TEMPERATURE
+    REQUEST_SENSOR_SET_PARAMETER            = 0xB3,
+    REQUEST_SENSOR_READ                     = 0xB4,
+    REQUEST_SENSOR_READ_MILLIVOLT           = 0xB5,
+    REQUEST_SENSOR_READ_RESISTANCE          = 0xB6,
+    REQUEST_SENSOR_READ_TEMPERATURE         = 0xB7,
     REQUEST_SENSOR_READ_RAW                 = 0xB8,
-    // - [X] TASK add SENSOR_READ_RAW
 };
 
 enum Protocol_Event_e {
@@ -109,10 +108,9 @@ enum Protocol_Event_e {
     EVENT_MOTOR_READY                       = 0x01,
 
     /* AnalogLS */
-    EVENT_SENSOR_READ                       = 0xB0, // - [X] TASK change to SENSOR_READ
-    EVENT_SENSOR_READ_MILLIVOLT             = 0xB1, // - [X] TASK change to SENSOR_READ_MILLIVOLT
-    EVENT_SENSOR_READ_RESISTANCE            = 0xB2, // - [X] TASK change to SENSOR_READ_RESISTANCE
-    EVENT_SENSOR_READ_TEMPERATURE           = 0xB3, // - [X] TASK change to SENSOR_READ_TEMPERATURE
+    EVENT_SENSOR_READ                       = 0xB0,
+    EVENT_SENSOR_READ_MILLIVOLT             = 0xB1,
+    EVENT_SENSOR_READ_RESISTANCE            = 0xB2,
+    EVENT_SENSOR_READ_TEMPERATURE           = 0xB3,
     EVENT_SENSOR_READ_RAW                   = 0xB4,
-    // - [X] TASK add SENSOR_READ_RAW
 };

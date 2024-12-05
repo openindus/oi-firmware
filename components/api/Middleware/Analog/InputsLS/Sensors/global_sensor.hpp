@@ -47,14 +47,12 @@ class Sensor
         _index(index) {}
 
     /* Found on all sensors */
-    // - [X] TASK make read commands accept a defaulted to false parameter that describes if the return value should be printed
     virtual float read(bool print_result = false);
     virtual int16_t raw_read(uint8_t positive_index = 0, uint8_t negative_index = 1, bool print_result = false);
 
     /* Sets a parameter */
     virtual inline void setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Value_u value) { SENSOR_FUNCTIONNALITY_NOT_FOUND };
     /* Read the value converted in millivolts */
-    // - [X] TASK make read commands accept a defaulted to false parameter that describes if the return value should be printed
     virtual inline float readMillivolts(bool print_result = false) { SENSOR_FUNCTIONNALITY_NOT_FOUND_RETURN(0.0) };
     /* Read the resistance of an RTD */
     virtual inline float readResistor(bool print_result = false) { SENSOR_FUNCTIONNALITY_NOT_FOUND_RETURN(0.0) };
