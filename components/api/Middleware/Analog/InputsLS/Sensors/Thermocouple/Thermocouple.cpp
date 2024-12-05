@@ -152,6 +152,7 @@ float Thermocouple::_calculateTemperatureFromVoltage(const std::vector<TC_Coeffi
  * 
  * @return float Voltage value
  */
+// - [ ] TASK make read commands accept a defaulted to false parameter that describes if the return value should be printed
 float Thermocouple::readMillivolts(void)
 {
     if (_adc == NULL) {
@@ -173,6 +174,7 @@ float Thermocouple::readMillivolts(void)
  * 
  * @return float Temperature value
  */
+// - [ ] TASK make read commands accept a defaulted to false parameter that describes if the return value should be printed
 float Thermocouple::readTemperature(void)
 {
     float temperature = 0.0f;

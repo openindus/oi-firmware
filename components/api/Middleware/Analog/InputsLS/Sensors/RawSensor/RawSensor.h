@@ -18,6 +18,7 @@ public:
     RawSensor(ADS114S0X* adc, Multiplexer* highSideMux, Multiplexer* lowSideMux, const Sensor_Pinout_s& pins, uint32_t index) :
     Sensor(adc, highSideMux, lowSideMux, pins, RAW_SENSOR, index) {}
 
+    // - [ ] TASK make read commands accept a defaulted to false parameter that describes if the return value should be printed
     float readMillivolts(void);
     void setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Value_u value);
 

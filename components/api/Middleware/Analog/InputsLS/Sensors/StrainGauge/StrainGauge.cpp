@@ -10,6 +10,7 @@
 
 static const char TAG[] = "StrainGauge";
 
+// - [ ] TASK make read commands accept a defaulted to false parameter that describes if the return value should be printed
 float StrainGauge::read(void)
 {
     int16_t adcCode = 0;

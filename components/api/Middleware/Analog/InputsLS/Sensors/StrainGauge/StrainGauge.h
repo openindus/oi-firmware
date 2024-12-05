@@ -37,6 +37,7 @@ public:
         _gauge_excitation_mode = excitation;
         update_strain_gauge_type();
     }
+    // - [ ] TASK make read commands accept a defaulted to false parameter that describes if the return value should be printed
     float read(void);
 
 protected:

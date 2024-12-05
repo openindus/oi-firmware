@@ -17,6 +17,7 @@ static const char TAG[] = "RawSensor";
  * 
  * @return float Voltage in millivolts
  */
+// - [ ] TASK make read commands accept a defaulted to false parameter that describes if the return value should be printed
 float RawSensor::readMillivolts(void)
 {
     int16_t adcCode = raw_read();

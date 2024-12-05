@@ -37,6 +37,7 @@ float RTD::_calculateRTD(int16_t adcCode)
  * 
  * @return float R_RTD value
  */
+// - [ ] TASK make read commands accept a defaulted to false parameter that describes if the return value should be printed
 float RTD::readResistor(void)
 {
     float rRTD = 0.0;
@@ -73,6 +74,7 @@ float RTD::readResistor(void)
  * 
  * @return float Temperature value
  */
+// - [ ] TASK make read commands accept a defaulted to false parameter that describes if the return value should be printed
 float RTD::readTemperature(void)
 {
     // Read resistor value

@@ -42,6 +42,7 @@ public:
         _bias_active = true;
     }
 
+    // - [ ] TASK make read commands accept a defaulted to false parameter that describes if the return value should be printed
     float readMillivolts(void);
     float readTemperature(void);
     inline float read(void) { return readTemperature(); }

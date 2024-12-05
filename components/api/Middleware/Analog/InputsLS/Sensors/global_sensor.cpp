@@ -85,6 +85,7 @@ void Sensor::reset_read(void)
  * 
  * @return int16_t adcCode
  */
+// - [ ] TASK make read commands accept a defaulted to false parameter that describes if the return value should be printed
 int16_t Sensor::raw_read(uint8_t positive_index, uint8_t negative_index)
 {
     if (_adc == NULL) {
