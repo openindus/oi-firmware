@@ -34,7 +34,17 @@
 class GenericSensorCmd
 {
 public:
+
     int16_t raw_read(void);
+
+    /**
+     * The read function is a general function. Different sensors produce different units.
+     * Here are the functions called for each sensors :
+     * - RawSensor : raw_read converted to float
+     * - RTD : readTemperature method (the RTD specific one)
+     * - Termocouple : readTemperature method (the thermocouple specific one)
+     * - StrainGauge : specific read method (returns a raw value between -256 and +256)
+     */
     float read(void);
     virtual inline void setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Value_u value) { SENSOR_FUNCTIONNALITY_NOT_FOUND }
     virtual inline float readMillivolts(void) { SENSOR_FUNCTIONNALITY_NOT_FOUND_RETURN(NAN) }
