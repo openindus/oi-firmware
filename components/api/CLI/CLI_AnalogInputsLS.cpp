@@ -107,8 +107,9 @@ static int _addSensorCmdHandler(int argc, char **argv)
     }
 
     // add sensor (on a list)
-    AnalogInputsLS::addSensor((Sensor_Type_e) sensorType, ainPins);
+    int index = AnalogInputsLS::addSensor((Sensor_Type_e) sensorType, ainPins);
     
+    printf("%d\n", index);
     return 0;
 }
 
