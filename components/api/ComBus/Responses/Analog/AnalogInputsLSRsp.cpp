@@ -22,20 +22,11 @@ int AnalogInputsLSRsp::init(void)
     ControllerSlave::addCtrlCallback(REQUEST_ADD_SENSOR, [](std::vector<uint8_t>& data) {
         std::vector<AIn_Num_t> aIns;
 
-        std::array<AIn_Num_e, 4> ainPins = {AIN_NULL, AIN_NULL, AIN_NULL, AIN_NULL};
-
         for (auto it = data.begin() + 2; it != data.end(); it++) {
-            aIns.push_back((AIn_Num_t)*it);
+            aIns.push_back((AIn_Num_t)(int8_t)*it);
         }
-        ainPins[0] = aIns[0];
-        ainPins[1] = aIns[1];
-        if (aIns.size() >= 3) {
-            ainPins[2] = aIns[2];
-        }
-        if (aIns.size() >= 4) {
-            ainPins[3] = aIns[3];
-        }
-        int index = AnalogInputsLS::addSensor((Sensor_Type_e)data[1], ainPins);
+
+        int index = AnalogInputsLS::addSensor((Sensor_Type_e)data[1], aIns);
         data.clear();
         data.push_back(REQUEST_ADD_SENSOR);
         data.push_back((uint8_t)index);

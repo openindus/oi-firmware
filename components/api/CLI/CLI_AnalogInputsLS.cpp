@@ -95,20 +95,20 @@ static int _addSensorCmdHandler(int argc, char **argv)
 
     // get arguments
     int sensorType = _AddSensorCmdArgs.sensorType->ival[0];
-    std::array<AIn_Num_e, 4> ainPins = {AIN_NULL, AIN_NULL, AIN_NULL, AIN_NULL};
+    std::vector<AIn_Num_t> ainPins;
 
-    ainPins[0] = (AIn_Num_e) _AddSensorCmdArgs.inputP->ival[0];
-    ainPins[1] = (AIn_Num_e) _AddSensorCmdArgs.inputN->ival[0];
+    ainPins.push_back((AIn_Num_t) _AddSensorCmdArgs.inputP->ival[0]);
+    ainPins.push_back((AIn_Num_t) _AddSensorCmdArgs.inputN->ival[0]);
     if (_AddSensorCmdArgs.additionnalPin1->count == 1) {
-        ainPins[2] = (AIn_Num_e) _AddSensorCmdArgs.additionnalPin1->ival[0];
+        ainPins.push_back((AIn_Num_t) _AddSensorCmdArgs.additionnalPin1->ival[0]);
     }
     if (_AddSensorCmdArgs.additionnalPin2->count == 1) {
-        ainPins[3] = (AIn_Num_e) _AddSensorCmdArgs.additionnalPin2->ival[0];
+        ainPins.push_back((AIn_Num_t) _AddSensorCmdArgs.additionnalPin2->ival[0]);
     }
 
     // add sensor (on a list)
     int index = AnalogInputsLS::addSensor((Sensor_Type_e) sensorType, ainPins);
-    
+
     printf("%d\n", index);
     return 0;
 }

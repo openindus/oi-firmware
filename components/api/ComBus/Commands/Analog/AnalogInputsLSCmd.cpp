@@ -18,7 +18,11 @@
 
 static const char TAG[] = "AnalogInputsLSCmd";
 
-GenericSensorCmd::GenericSensorCmd(Controller* control, uint8_t index) : _control(control), _index(index)
+GenericSensorCmd::GenericSensorCmd(Controller* control, uint8_t index, Sensor_Type_e type, std::array<AIn_Num_t, 4> ain_pins) :
+_control(control),
+_index(index),
+_type(type),
+_ain_pins(ain_pins)
 {
     /* Create the queue for wait function and add callback for CAN event */
     _readEvent = xQueueCreate(1, sizeof(uint8_t*));
@@ -182,13 +186,31 @@ void StrainGaugeCmd::setParameter(Sensor_Parameter_e parameter, Sensor_Parameter
 int AnalogInputsLSCmd::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& aIns)
 {
     int index = -1;
+    std::array<AIn_Num_t, 4> aInsArray = {AIN_NULL, AIN_NULL, AIN_NULL, AIN_NULL};
+
+    /* Verify aIns validity */
+    if (!std::all_of(aIns.begin(), aIns.end(), [](AIn_Num_t aIn) {
+        return (aIn >= AIN_A_P && aIn < AIN_MAX) || aIn == AIN_NULL;
+    })) {
+        ESP_LOGE(TAG, "One or more AINs are out of range (0 to AIN_MAX - 1).");
+        return -1;
+    }
+
+    uint8_t nbr_pin_set = 0;
+    for (int i = 0; i < aIns.size(); i++) {
+        aInsArray[i] = aIns[i];
+        if (aIns[i] == AIN_NULL) {
+            break;
+        }
+        nbr_pin_set++;
+    }
 
     /* Send message */
     std::vector<uint8_t> msgBytes = {REQUEST_ADD_SENSOR, (uint8_t)type};
     for (auto it = aIns.begin(); it != aIns.end(); it++) {
         msgBytes.push_back((uint8_t)*it);
     }
-    
+
     /* Create new instance of sensor and return sensor index */
     if (_control->request(msgBytes) == 0) {
         index = static_cast<int>(msgBytes[1]);
@@ -201,20 +223,20 @@ int AnalogInputsLSCmd::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t
         switch(type) 
         {
         case RAW_SENSOR:
-            if (aIns.size() < 2) {
+            if (nbr_pin_set < 2) {
                 ESP_LOGE(TAG, "Raw sensor require at least 2 AINS.");
                 return -1;
             }
-            sensor_ptr = new RawSensorCmd(_control, index);
+            sensor_ptr = new RawSensorCmd(_control, index, type, aInsArray);
             sensors.emplace_back(sensor_ptr);
             return index;
         case RTD_PT100:
         case RTD_PT1000:
-            if (aIns.size() < 2) {
+            if (nbr_pin_set < 2) {
                 ESP_LOGE(TAG, "RTD require at least 2 AINS.");
                 return -1;
             }
-            sensor_ptr = new RTDCmd(_control, index);
+            sensor_ptr = new RTDCmd(_control, index, type, aInsArray);
             sensors.emplace_back(sensor_ptr);
             return index;
         case THERMOCOUPLE_B:
@@ -225,19 +247,19 @@ int AnalogInputsLSCmd::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t
         case THERMOCOUPLE_R:
         case THERMOCOUPLE_S:
         case THERMOCOUPLE_T:
-            if (aIns.size() < 2) {
+            if (nbr_pin_set < 2) {
                 ESP_LOGE(TAG, "Thermocouple require at least 2 AINS.");
                 return -1;
             }
-            sensor_ptr = new ThermocoupleCmd(_control, index);
+            sensor_ptr = new ThermocoupleCmd(_control, index, type, aInsArray);
             sensors.emplace_back(sensor_ptr);
             return index;
         case STRAIN_GAUGE:
-            if (aIns.size() < 4) {
+            if (nbr_pin_set < 4) {
                 ESP_LOGE(TAG, "Strain gauge require 4 AINs.");
                 return -1;
             }
-            sensor_ptr = new StrainGaugeCmd(_control, index);
+            sensor_ptr = new StrainGaugeCmd(_control, index, type, aInsArray);
             sensors.emplace_back(sensor_ptr);
             return index;
         default:
@@ -247,6 +269,84 @@ int AnalogInputsLSCmd::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t
     }
     ESP_LOGE(TAG, "The index given by the AnalogLS is describing an error.");
     return -1;
+}
+
+static void print_sensor_type(enum Sensor_Type_e type)
+{
+    const char *type_str = NULL;
+
+    switch (type) {
+    case RAW_SENSOR:
+        type_str = "raw sensor";
+        break;
+    case RTD_PT100:
+        type_str = "RTD PT100";
+        break;
+    case RTD_PT1000:
+        type_str = "RTD PT1000";
+        break;
+    case THERMOCOUPLE_B:
+        type_str = "thermocouple B";
+        break;
+    case THERMOCOUPLE_E:
+        type_str = "thermocouple E";
+        break;
+    case THERMOCOUPLE_J:
+        type_str = "thermocouple J";
+        break;
+    case THERMOCOUPLE_K:
+        type_str = "thermocouple K";
+        break;
+    case THERMOCOUPLE_N:
+        type_str = "thermocouple N";
+        break;
+    case THERMOCOUPLE_R:
+        type_str = "thermocouple R";
+        break;
+    case THERMOCOUPLE_S:
+        type_str = "thermocouple S";
+        break;
+    case THERMOCOUPLE_T:
+        type_str = "thermocouple T";
+        break;
+    case STRAIN_GAUGE:
+        type_str = "strain gauge";
+        break;
+    default:
+        type_str = "unknown";
+        break;
+    }
+    write(1, type_str, strlen(type_str));
+}
+
+static void print_sensor(GenericSensorCmd *sensor)
+{
+    uint32_t index = sensor->get_index();
+    enum Sensor_Type_e type = sensor->get_type();
+    std::array<AIn_Num_t, 4> ains = sensor->get_ain_pins();
+    printf("\t %u - ", index);
+    fflush(stdout);
+    print_sensor_type(type);
+    printf(", ains [");
+    for (int i = 0; i < ains.size(); i++) {
+        if (ains[i] == -1) {
+            break;
+        }
+        if (i != 0) {
+            printf(", ");
+        }
+        printf("%hhd", ains[i]);
+    }
+    printf("]\n");
+}
+
+int AnalogInputsLSCmd::list_sensors(void)
+{
+    printf("There are %d sensors : \n", sensors.size());
+    for (size_t i = 0; i < sensors.size(); i++) {
+        print_sensor(sensors[i]);
+    }
+    return sensors.size();
 }
 
 #endif

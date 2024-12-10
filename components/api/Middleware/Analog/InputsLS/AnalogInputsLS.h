@@ -52,7 +52,7 @@ public:
      * @return int the index of the added element (first call to this function will return 0, second call 1, ...).
      *         return -1 in case of error
      */
-    static int addSensor(Sensor_Type_e type, std::array<AIn_Num_e, 4> ainPins);
+    static int addSensor(Sensor_Type_e type, std::vector<AIn_Num_e> ainPins);
 
     /**
      * @brief Lists all sensors

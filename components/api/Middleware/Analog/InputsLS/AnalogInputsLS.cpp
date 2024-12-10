@@ -49,27 +49,7 @@ int AnalogInputsLS::_init(void)
 
 std::vector<Sensor *> AnalogInputsLS::sensors;
 
-void AnalogInputsLS::setAcquisitionTime(AcquisitionDuration_e duration)
-{
-    if (_adc != NULL) {
-        printf("duration:%i\n", duration);
-        _adc->setDataRate(static_cast<ads114s0x_data_rate_e>(duration));
-    } else {
-        ESP_LOGE(TAG, "Failed to set conversion time");
-    }
-}
-
-void AnalogInputsLS::setStabilizationTime(int duration)
-{
-    if (_adc != NULL) {
-        printf("stab:%i\n", duration);
-        _adc->setStabilizationTime(duration);
-    } else {
-        ESP_LOGE(TAG, "Failed to set conversion time");
-    }
-}
-
-int AnalogInputsLS::addSensor(Sensor_Type_e type, std::array<AIn_Num_e, 4> ainPins)
+int AnalogInputsLS::addSensor(Sensor_Type_e type, std::vector<AIn_Num_t> ainPins)
 {
     if (!std::all_of(ainPins.begin(), ainPins.end(), [](AIn_Num_t aIn) {
         return (aIn >= AIN_A_P && aIn < AIN_MAX) || aIn == AIN_NULL;
@@ -80,10 +60,11 @@ int AnalogInputsLS::addSensor(Sensor_Type_e type, std::array<AIn_Num_e, 4> ainPi
 
     uint8_t nbr_pin_set = 0;
     Sensor_Pinout_s pinout = {
-        .ainPins = ainPins,
+        .ainPins = (std::array<AIn_Num_t, 4>) {AIN_NULL, AIN_NULL, AIN_NULL, AIN_NULL},
         .adcPins = (std::array<ADC_Input_t, 4>) {-1, -1, -1, -1}
     };
-    for (int i = 0; i < pinout.ainPins.size(); i++) {
+    for (int i = 0; i < ainPins.size(); i++) {
+        pinout.ainPins[i] = ainPins[i];
         if (pinout.ainPins[i] == AIN_NULL) {
             break;
         }

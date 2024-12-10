@@ -52,6 +52,10 @@ public:
     virtual inline float readTemperature(void) { SENSOR_FUNCTIONNALITY_NOT_FOUND_RETURN(NAN) }
     virtual inline void setSGExcitationMode(StrainGauge_Excitation_e excitation) { SENSOR_FUNCTIONNALITY_NOT_FOUND }
 
+    inline uint8_t get_index(void) { return _index; }
+    inline Sensor_Type_e get_type(void) { return _type; }
+    inline std::array<AIn_Num_t, 4> get_ain_pins(void) { return _ain_pins; }
+
     /**
      * @brief Set the Acquisition Time
      * By default the adc reading start right after the
@@ -71,11 +75,13 @@ public:
     void setStabilizationTime(int duration);
 
 protected:
-    GenericSensorCmd(Controller* control, uint8_t index);
+    GenericSensorCmd(Controller* control, uint8_t index, Sensor_Type_e type, std::array<AIn_Num_t, 4> ain_pins);
     int16_t getInt16(Protocol_Event_e event, Protocol_Request_e request);
     float getFloat(Protocol_Event_e event, Protocol_Request_e request);
     Controller* _control;
     uint8_t _index;
+    Sensor_Type_e _type;
+    std::array<AIn_Num_t, 4> _ain_pins;
 private:
     QueueHandle_t _readEvent;
 };
@@ -83,7 +89,7 @@ private:
 class RawSensorCmd : public GenericSensorCmd
 {
 public:
-    RawSensorCmd(Controller* control, uint8_t index) : GenericSensorCmd(control, index) {}
+    RawSensorCmd(Controller* control, uint8_t index, Sensor_Type_e type, std::array<AIn_Num_t, 4> ain_pins) : GenericSensorCmd(control, index, type, ain_pins) {}
     void setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Value_u value);
     float readMillivolts(void);
 };
@@ -91,7 +97,7 @@ public:
 class RTDCmd : public GenericSensorCmd
 {
 public:
-    RTDCmd(Controller* control, uint8_t index) : GenericSensorCmd(control, index) {}
+    RTDCmd(Controller* control, uint8_t index, Sensor_Type_e type, std::array<AIn_Num_t, 4> ain_pins) : GenericSensorCmd(control, index, type, ain_pins) {}
     void setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Value_u value);
     float readResistor(void);
     float readTemperature(void);
@@ -100,7 +106,7 @@ public:
 class ThermocoupleCmd : public GenericSensorCmd
 {
 public:
-    ThermocoupleCmd(Controller* control, uint8_t index) : GenericSensorCmd(control, index) {}
+    ThermocoupleCmd(Controller* control, uint8_t index, Sensor_Type_e type, std::array<AIn_Num_t, 4> ain_pins) : GenericSensorCmd(control, index, type, ain_pins) {}
     void setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Value_u value);
     float readMillivolts(void);
     float readTemperature(void);
@@ -109,7 +115,7 @@ public:
 class StrainGaugeCmd : public GenericSensorCmd
 {
 public:
-    StrainGaugeCmd(Controller* control, uint8_t index) : GenericSensorCmd(control, index) {}
+    StrainGaugeCmd(Controller* control, uint8_t index, Sensor_Type_e type, std::array<AIn_Num_t, 4> ain_pins) : GenericSensorCmd(control, index, type, ain_pins) {}
     void setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Value_u value);
     void setSGExcitationMode(StrainGauge_Excitation_e excitation);
 };
@@ -131,6 +137,7 @@ public:
      *         return -1 in case of error
      */
     int addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& aIns);
+    int list_sensors(void);
 
 private:
 
