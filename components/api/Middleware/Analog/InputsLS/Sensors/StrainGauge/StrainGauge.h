@@ -28,9 +28,11 @@ public:
         _gauge_excitation_mode(EXCITATION_VOLTAGE_5V)
     {
         _gain = SG_GAIN_REGISTER;
+        _bias_active = false;
         _mux_config.output = OUTPUT_RBIAS_GAUGE;
         _mux_config.hs_index = 2;
         _mux_config.ls_index = 3;
+        update_strain_gauge_type();
     }
 
     inline void setSGExcitationMode(StrainGauge_Excitation_e excitation) {

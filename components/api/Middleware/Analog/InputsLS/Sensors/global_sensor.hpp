@@ -35,7 +35,7 @@ class Sensor
         _adcPins(pins.adcPins),
         _gain(GAIN_1),
         _reference(REFERENCE_INTERNAL_2_5V),
-        _bias_active(true),
+        _bias_active(false),
         _excitation(EXCITATION_OFF),
         _mux_config({
             .input = INPUT_OPEN_HS,
