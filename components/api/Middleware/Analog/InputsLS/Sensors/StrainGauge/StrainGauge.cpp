@@ -76,6 +76,12 @@ void StrainGauge::update_strain_gauge_type(void)
 void StrainGauge::setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Value_u value)
 {
     switch (parameter) {
+        case PARAMETER_ACQUISITION_TIME:
+            setAcquisitionTime(value.acquisition_time);
+            break;
+        case PARAMETER_STABILIZATION_TIME:
+            setStabilizationTime(value.stabilization_time);
+            break;
         case PARAMETER_SG_EXCITATION:
             setSGExcitationMode(value.sg_excitation);
             break;

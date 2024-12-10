@@ -32,6 +32,12 @@ float RawSensor::readMillivolts(bool print_result)
 void RawSensor::setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Value_u value)
 {
     switch (parameter) {
+        case PARAMETER_ACQUISITION_TIME:
+            setAcquisitionTime(value.acquisition_time);
+            break;
+        case PARAMETER_STABILIZATION_TIME:
+            setStabilizationTime(value.stabilization_time);
+            break;
         case PARAMETER_MUX_HS_INDEX:
         case PARAMETER_MUX_HS_INPUT:
         case PARAMETER_MUX_LS_INDEX:

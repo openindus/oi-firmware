@@ -53,7 +53,7 @@ class Sensor
     virtual int16_t raw_read(uint8_t positive_index = 0, uint8_t negative_index = 1, bool print_result = false);
 
     /* Sets a parameter */
-    virtual inline void setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Value_u value) { SENSOR_FUNCTIONNALITY_NOT_FOUND };
+    virtual void setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Value_u value);
     /* Read the value converted in millivolts */
     virtual inline float readMillivolts(bool print_result = false) { SENSOR_FUNCTIONNALITY_NOT_FOUND_RETURN(0.0) };
     /* Read the resistance of an RTD */
@@ -62,6 +62,10 @@ class Sensor
     virtual inline float readTemperature(bool print_result = false) { SENSOR_FUNCTIONNALITY_NOT_FOUND_RETURN(0.0) };
     /* Set the excitation mode for the strain gauge */
     virtual inline void setSGExcitationMode(StrainGauge_Excitation_e excitation) { SENSOR_FUNCTIONNALITY_NOT_FOUND };
+
+    virtual inline void setAcquisitionTime(AcquisitionDuration_e acquisition_time) { _acquisition_time = acquisition_time; }
+
+    virtual inline void setStabilizationTime(int32_t stabilization_time) { _stabilization_time = stabilization_time; }
 
     inline uint32_t get_index(void) { return _index; }
     inline enum Sensor_Type_e get_type(void) { return _type; }
