@@ -18,21 +18,6 @@
 #include "Thermocouple.h"
 #include "StrainGauge.h"
 
-typedef enum {
-    SAMPLE_400_MS = 0,
-    SAMPLE_200_MS,
-    SAMPLE_100_MS,
-    SAMPLE_60_MS,
-    SAMPLE_50_MS, // Default value
-    SAMPLE_20_MS,
-    SAMPLE_16_6_MS,
-    SAMPLE_10_MS,
-    SAMPLE_5_MS,
-    SAMPLE_2_5_MS,
-    SAMPLE_1_25_MS,
-    SAMPLE_1_MS
-} AcquisitionDuration_e;
-
 class AnalogInputsLS
 {
 

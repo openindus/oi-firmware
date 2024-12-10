@@ -54,6 +54,12 @@ void Sensor::init_read(void)
     /* Set PGA Gain */
     _adc->setPGAGain((ads114s0x_pga_gain_e)_gain);
 
+    /* Set the stabilisation time (that is waited just after) */
+    _adc->setStabilizationTime(_stabilization_time);
+
+    /* Set the data rate (in form on acquisition duration) */
+    _adc->setDataRate((ads114s0x_data_rate_e) _acquisition_time);
+
     /* Wait for stabilization */
     _adc->waitStabilization();
 }

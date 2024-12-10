@@ -43,6 +43,8 @@ class Sensor
             .hs_index = 0,
             .ls_index = 1,
         }),
+        _stabilization_time(0),
+        _acquisition_time(SAMPLE_50_MS),
         _type(type),
         _index(index) {}
 
@@ -90,6 +92,8 @@ class Sensor
     bool _bias_active;
     Sensor_Excitation_Current_e _excitation;
     Dual_Mux_Config_s _mux_config;
+    int32_t _stabilization_time;
+    AcquisitionDuration_e _acquisition_time;
 
     enum Sensor_Type_e _type;
     uint32_t _index;

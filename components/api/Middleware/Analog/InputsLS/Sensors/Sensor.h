@@ -92,6 +92,23 @@ enum Sensor_Parameter_e : int8_t {
     PARAMETER_MUX_LS_INDEX = 0x06,
     PARAMETER_MUX_LS_OUTPUT = 0x07,
     PARAMETER_SG_EXCITATION = 0x08,
+    PARAMETER_ACQUISITION_TIME = 0x09,
+    PARAMETER_STABILIZATION_TIME = 0x0A,
+};
+
+enum AcquisitionDuration_e : int8_t {
+    SAMPLE_400_MS = 0,
+    SAMPLE_200_MS,
+    SAMPLE_100_MS,
+    SAMPLE_60_MS,
+    SAMPLE_50_MS, // Default value
+    SAMPLE_20_MS,
+    SAMPLE_16_6_MS,
+    SAMPLE_10_MS,
+    SAMPLE_5_MS,
+    SAMPLE_2_5_MS,
+    SAMPLE_1_25_MS,
+    SAMPLE_1_MS
 };
 
 union Mux_Parameter_u {
@@ -108,6 +125,8 @@ union Sensor_Parameter_Value_u {
     Sensor_Excitation_Current_e excitation_current;
     StrainGauge_Excitation_e sg_excitation;
     Mux_Parameter_u mux_parameter;
+    AcquisitionDuration_e acquisition_time;
+    int32_t stabilization_time;
     int8_t value;
 };
 
