@@ -15,7 +15,7 @@ void setup(void)
 void loop(void)
 {
     Serial.print(">SG value: ");
-    Serial.println(analogls.sg[0].read());
+    Serial.println(analogls.sensors[0]->read());
 
-    delay(1000);
+    delay(250);
 }
