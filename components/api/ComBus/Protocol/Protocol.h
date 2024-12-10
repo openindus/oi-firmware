@@ -93,14 +93,12 @@ enum Protocol_Request_e {
 
     /* ANALOGLS */
     REQUEST_ADD_SENSOR                      = 0xB0,
-    REQUEST_SET_STABILIZATION_TIME          = 0xB1,
-    REQUEST_SET_ACQUISITION_TIME            = 0xB2,
-    REQUEST_SENSOR_SET_PARAMETER            = 0xB3,
-    REQUEST_SENSOR_READ                     = 0xB4,
-    REQUEST_SENSOR_READ_MILLIVOLT           = 0xB5,
-    REQUEST_SENSOR_READ_RESISTANCE          = 0xB6,
-    REQUEST_SENSOR_READ_TEMPERATURE         = 0xB7,
-    REQUEST_SENSOR_READ_RAW                 = 0xB8,
+    REQUEST_SENSOR_SET_PARAMETER            = 0xB1,
+    REQUEST_SENSOR_READ                     = 0xB2,
+    REQUEST_SENSOR_READ_MILLIVOLT           = 0xB3,
+    REQUEST_SENSOR_READ_RESISTANCE          = 0xB4,
+    REQUEST_SENSOR_READ_TEMPERATURE         = 0xB5,
+    REQUEST_SENSOR_READ_RAW                 = 0xB6,
 };
 
 enum Protocol_Event_e {

@@ -153,7 +153,7 @@ static int _sensorSetParameterCmdHandler(int argc, char **argv)
     // get arguments
     int sensorIndex = _sensorSetParameterCmdArgs.sensorIndex->ival[0];
     int parameter_index = _sensorSetParameterCmdArgs.parameter_index->ival[0];
-    int8_t parameter_value = _sensorSetParameterCmdArgs.parameter_value->ival[0];
+    int32_t parameter_value = _sensorSetParameterCmdArgs.parameter_value->ival[0];
     Sensor *sensor = AnalogInputsLS::sensors[sensorIndex];
     // set
     sensor->setParameter((Sensor_Parameter_e) parameter_index, (Sensor_Parameter_Value_u) {.value=parameter_value});

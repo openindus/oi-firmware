@@ -46,11 +46,30 @@ public:
      * - StrainGauge : specific read method (returns a raw value between -256 and +256)
      */
     float read(void);
-    virtual inline void setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Value_u value) { SENSOR_FUNCTIONNALITY_NOT_FOUND }
+    void setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Value_u value);
     virtual inline float readMillivolts(void) { SENSOR_FUNCTIONNALITY_NOT_FOUND_RETURN(NAN) }
     virtual inline float readResistor(void) { SENSOR_FUNCTIONNALITY_NOT_FOUND_RETURN(NAN) }
     virtual inline float readTemperature(void) { SENSOR_FUNCTIONNALITY_NOT_FOUND_RETURN(NAN) }
     virtual inline void setSGExcitationMode(StrainGauge_Excitation_e excitation) { SENSOR_FUNCTIONNALITY_NOT_FOUND }
+
+    /**
+     * @brief Set the Acquisition Time
+     * By default the adc reading start right after the
+     * @param duration
+     * @return int
+     */
+    void setAcquisitionTime(AcquisitionDuration_e duration);
+
+    /**
+     * @brief Set the Stabilization Time
+     * By default the adc reading start right after a call to read() function.
+     * But if your sensor need some time to stabilize (sensor with an integrated RC filter for example),
+     * you can set up a delay in milliseconds before the reading starts.
+     *
+     * @param duration
+     */
+    void setStabilizationTime(int duration);
+
 protected:
     GenericSensorCmd(Controller* control, uint8_t index);
     int16_t getInt16(Protocol_Event_e event, Protocol_Request_e request);
@@ -73,6 +92,7 @@ class RTDCmd : public GenericSensorCmd
 {
 public:
     RTDCmd(Controller* control, uint8_t index) : GenericSensorCmd(control, index) {}
+    void setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Value_u value);
     float readResistor(void);
     float readTemperature(void);
 };
@@ -81,6 +101,7 @@ class ThermocoupleCmd : public GenericSensorCmd
 {
 public:
     ThermocoupleCmd(Controller* control, uint8_t index) : GenericSensorCmd(control, index) {}
+    void setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Value_u value);
     float readMillivolts(void);
     float readTemperature(void);
 };
@@ -100,24 +121,6 @@ public:
     std::vector<GenericSensorCmd *> sensors;
 
     AnalogInputsLSCmd(Controller* control) : _control(control) {}
-
-    /**
-     * @brief Set the Acquisition Time 
-     * By default the adc reading start right after the 
-     * @param duration 
-     * @return int 
-     */
-    void setAcquisitionTime(AcquisitionDuration_e duration);
-    
-    /**
-     * @brief Set the Stabilization Time 
-     * By default the adc reading start right after a call to read() function.
-     * But if your sensor need some time to stabilize (sensor with an integrated RC filter for example),
-     * you can set up a delay in milliseconds before the reading starts.
-     * 
-     * @param duration
-     */
-    void setStabilizationTime(int duration);
     
     /**
      * @brief Add a new sensor

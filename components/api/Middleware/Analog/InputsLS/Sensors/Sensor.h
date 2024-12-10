@@ -10,7 +10,7 @@
 
 #include "Global.h"
 
-enum AIn_Num_e : int8_t {
+enum AIn_Num_e : int32_t {
     AIN_NULL = -1,
     AIN_A_P = 0,
     AIN_A_N,
@@ -26,7 +26,7 @@ enum AIn_Num_e : int8_t {
 };
 typedef enum AIn_Num_e AIn_Num_t;
 
-enum Sensor_Type_e : int8_t {
+enum Sensor_Type_e : int32_t {
     RAW_SENSOR, // Read differential input voltage
     RTD_PT100,
     RTD_PT1000,
@@ -41,7 +41,7 @@ enum Sensor_Type_e : int8_t {
     STRAIN_GAUGE,
 };
 
-enum Sensor_Gain_e : int8_t {
+enum Sensor_Gain_e : int32_t {
     GAIN_1 = 0,
     GAIN_2,
     GAIN_4,
@@ -52,13 +52,13 @@ enum Sensor_Gain_e : int8_t {
     GAIN_128
 };
 
-enum Sensor_Ref_e : int8_t {
+enum Sensor_Ref_e : int32_t {
     REFERENCE_EXCITATION = ADS114S0X_REF_REFP0_REFNO,
     REFERENCE_IDAC_1 = ADS114S0X_REF_REFP1_REFN1,
     REFERENCE_INTERNAL_2_5V = ADS114S0X_REF_INTERNAL_2_5V
 };
 
-enum Sensor_Excitation_Current_e : int8_t {
+enum Sensor_Excitation_Current_e : int32_t {
     EXCITATION_OFF = ADS114S0X_IDAC_OFF,
     EXCITATION_10_UA = ADS114S0X_IDAC_10_UA,
     EXCITATION_50_UA = ADS114S0X_IDAC_50_UA,
@@ -71,7 +71,7 @@ enum Sensor_Excitation_Current_e : int8_t {
     EXCITATION_2000_UA = ADS114S0X_IDAC_2000_UA
 };
 
-enum StrainGauge_Excitation_e : int8_t {
+enum StrainGauge_Excitation_e : int32_t {
     EXCITATION_VOLTAGE_3V3 = 0,
     EXCITATION_VOLTAGE_5V,
     EXCITATION_VOLTAGE_USER,
@@ -82,7 +82,7 @@ enum StrainGauge_Excitation_e : int8_t {
     EXCITATION_CURRENT_2000UA
 };
 
-enum Sensor_Parameter_e : int8_t {
+enum Sensor_Parameter_e : int32_t {
     PARAMETER_GAIN = 0x00,
     PARAMETER_BIAS = 0x01,
     PARAMETER_REFERENCE = 0x02,
@@ -96,7 +96,7 @@ enum Sensor_Parameter_e : int8_t {
     PARAMETER_STABILIZATION_TIME = 0x0A,
 };
 
-enum AcquisitionDuration_e : int8_t {
+enum AcquisitionDuration_e : int32_t {
     SAMPLE_400_MS = 0,
     SAMPLE_200_MS,
     SAMPLE_100_MS,
@@ -114,8 +114,8 @@ enum AcquisitionDuration_e : int8_t {
 union Mux_Parameter_u {
     Multiplexer_Input_e input;
     Multiplexer_Output_e output;
-    uint8_t hs_index;
-    uint8_t ls_index;
+    uint32_t hs_index;
+    uint32_t ls_index;
 };
 
 union Sensor_Parameter_Value_u {
@@ -127,7 +127,7 @@ union Sensor_Parameter_Value_u {
     Mux_Parameter_u mux_parameter;
     AcquisitionDuration_e acquisition_time;
     int32_t stabilization_time;
-    int8_t value;
+    int32_t value;
 };
 
 struct Sensor_Pinout_s {

@@ -41,20 +41,10 @@ int AnalogInputsLSRsp::init(void)
         data.push_back((uint8_t)index);
     });
 
-    ControllerSlave::addCtrlCallback(REQUEST_SET_STABILIZATION_TIME, [](std::vector<uint8_t>& data) {
-        int* value = reinterpret_cast<int*>(&data[1]);
-        AnalogInputsLS::setStabilizationTime(*value);
-        data.clear();
-    });
-
-    ControllerSlave::addCtrlCallback(REQUEST_SET_ACQUISITION_TIME, [](std::vector<uint8_t>& data) {
-        AnalogInputsLS::setAcquisitionTime((AcquisitionDuration_e)data[1]);
-        data.clear();
-    });
-
     ControllerSlave::addCtrlCallback(REQUEST_SENSOR_SET_PARAMETER, [](std::vector<uint8_t>& data) {
         Sensor_Parameter_e parameter = (Sensor_Parameter_e) data[2];
-        Sensor_Parameter_Value_u value = {.value = (int8_t) data[3]};
+        int32_t* int_value = reinterpret_cast<int32_t *>(&data[3]);
+        Sensor_Parameter_Value_u value = {.value = *int_value};
 
         AnalogInputsLS::sensors[data[1]]->setParameter(parameter, value);
         data.clear();

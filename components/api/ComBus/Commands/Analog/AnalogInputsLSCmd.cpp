@@ -74,15 +74,47 @@ float GenericSensorCmd::read(void)
     return getFloat(EVENT_SENSOR_READ, REQUEST_SENSOR_READ);
 }
 
-void RawSensorCmd::setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Value_u value)
+void GenericSensorCmd::setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Value_u value)
 {
-    std::vector<uint8_t> msgBytes = {REQUEST_SENSOR_SET_PARAMETER, _index, (uint8_t) parameter, (uint8_t) value.value};
+    std::vector<uint8_t> msgBytes = {REQUEST_SENSOR_SET_PARAMETER, _index, *((uint8_t *) &parameter)};
+    uint8_t *ptr = reinterpret_cast<uint8_t*>(&value.value);
+    msgBytes.insert(msgBytes.end(), ptr, ptr + sizeof(int32_t));
     _control->request(msgBytes);
+}
+
+void GenericSensorCmd::setAcquisitionTime(AcquisitionDuration_e duration)
+{
+    setParameter(PARAMETER_ACQUISITION_TIME, (union Sensor_Parameter_Value_u) {.acquisition_time=duration});
+}
+
+void GenericSensorCmd::setStabilizationTime(int duration)
+{
+    setParameter(PARAMETER_STABILIZATION_TIME, (union Sensor_Parameter_Value_u) {.stabilization_time=duration});
 }
 
 float RawSensorCmd::readMillivolts(void)
 {
     return getFloat(EVENT_SENSOR_READ_MILLIVOLT, REQUEST_SENSOR_READ_MILLIVOLT);
+}
+
+void RawSensorCmd::setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Value_u value)
+{
+    switch (parameter) {
+        case PARAMETER_ACQUISITION_TIME:
+        case PARAMETER_STABILIZATION_TIME:
+        case PARAMETER_GAIN:
+        case PARAMETER_BIAS:
+        case PARAMETER_REFERENCE:
+        case PARAMETER_EXCITATION_CURRENT:
+        case PARAMETER_MUX_HS_INDEX:
+        case PARAMETER_MUX_HS_INPUT:
+        case PARAMETER_MUX_LS_INDEX:
+        case PARAMETER_MUX_LS_OUTPUT:
+            GenericSensorCmd::setParameter(parameter, value);
+            return;
+        default:
+            SENSOR_FUNCTIONNALITY_NOT_FOUND
+    }
 }
 
 float RTDCmd::readResistor(void)
@@ -95,6 +127,18 @@ float RTDCmd::readTemperature(void)
     return getFloat(EVENT_SENSOR_READ_TEMPERATURE, REQUEST_SENSOR_READ_TEMPERATURE);
 }
 
+void RTDCmd::setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Value_u value)
+{
+    switch (parameter) {
+        case PARAMETER_ACQUISITION_TIME:
+        case PARAMETER_STABILIZATION_TIME:
+            GenericSensorCmd::setParameter(parameter, value);
+            return;
+        default:
+            SENSOR_FUNCTIONNALITY_NOT_FOUND
+    }
+}
+
 float ThermocoupleCmd::readMillivolts(void)
 {
     return getFloat(EVENT_SENSOR_READ_MILLIVOLT, REQUEST_SENSOR_READ_MILLIVOLT);
@@ -105,6 +149,18 @@ float ThermocoupleCmd::readTemperature(void)
     return getFloat(EVENT_SENSOR_READ_TEMPERATURE, REQUEST_SENSOR_READ_TEMPERATURE);
 }
 
+void ThermocoupleCmd::setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Value_u value)
+{
+    switch (parameter) {
+        case PARAMETER_ACQUISITION_TIME:
+        case PARAMETER_STABILIZATION_TIME:
+            GenericSensorCmd::setParameter(parameter, value);
+            return;
+        default:
+            SENSOR_FUNCTIONNALITY_NOT_FOUND
+    }
+}
+
 void StrainGaugeCmd::setSGExcitationMode(StrainGauge_Excitation_e excitation)
 {
     setParameter(PARAMETER_SG_EXCITATION, (union Sensor_Parameter_Value_u) {.sg_excitation=excitation});
@@ -112,22 +168,15 @@ void StrainGaugeCmd::setSGExcitationMode(StrainGauge_Excitation_e excitation)
 
 void StrainGaugeCmd::setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Value_u value)
 {
-    std::vector<uint8_t> msgBytes = {REQUEST_SENSOR_SET_PARAMETER, _index, (uint8_t) parameter, (uint8_t) value.value};
-    _control->request(msgBytes);
-}
-
-void AnalogInputsLSCmd::setAcquisitionTime(AcquisitionDuration_e duration)
-{
-    std::vector<uint8_t> msgBytes = {REQUEST_SET_ACQUISITION_TIME, (uint8_t)duration};
-    _control->request(msgBytes);
-}
-
-void AnalogInputsLSCmd::setStabilizationTime(int duration)
-{
-    std::vector<uint8_t> msgBytes = {REQUEST_SET_STABILIZATION_TIME};
-    uint8_t *ptr = reinterpret_cast<uint8_t*>(&duration);
-    msgBytes.insert(msgBytes.end(), ptr, ptr + sizeof(int));
-    _control->request(msgBytes);
+    switch (parameter) {
+        case PARAMETER_ACQUISITION_TIME:
+        case PARAMETER_STABILIZATION_TIME:
+        case PARAMETER_SG_EXCITATION:
+            GenericSensorCmd::setParameter(parameter, value);
+            return;
+        default:
+            SENSOR_FUNCTIONNALITY_NOT_FOUND
+    }
 }
 
 int AnalogInputsLSCmd::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& aIns)
