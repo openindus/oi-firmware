@@ -27,28 +27,10 @@ public:
     static std::vector<Sensor *> sensors;
 
     /**
-     * @brief Set the Acquisition Time 
-     * By default the adc reading start right after the 
-     * @param duration 
-     * @return int 
-     */
-    static void setAcquisitionTime(AcquisitionDuration_e duration);
-    
-    /**
-     * @brief Set the Stabilization Time 
-     * By default the adc reading start right after a call to read() function.
-     * But if your sensor need some time to stabilize (sensor with an integrated RC filter for example),
-     * you can set up a delay in milliseconds before the reading starts.
-     * 
-     * @param duration
-     */
-    static void setStabilizationTime(int t);
-
-    /**
      * @brief Add a new sensor
      * 
      * @param type [RAW_SENSOR; RTD_TWO_WIRE; RTD_THREE_WIRE; THERMOCOUPLE[B|E|J|K|N|R|S|T]; STRAIN_GAUGE]
-     * @param ainPins an array initialised with AIN_NULL for unused members, that contains the pins set by the user
+     * @param ainPins a vector that contains the pins set by the user
      * @return int the index of the added element (first call to this function will return 0, second call 1, ...).
      *         return -1 in case of error
      */
@@ -57,7 +39,7 @@ public:
     /**
      * @brief Lists all sensors
      *
-     * @return 0
+     * @return nbr of sensors
      */
     static int list_sensors(void);
 

@@ -127,16 +127,22 @@ public:
     std::vector<GenericSensorCmd *> sensors;
 
     AnalogInputsLSCmd(Controller* control) : _control(control) {}
-    
+
     /**
      * @brief Add a new sensor
-     * 
+     *
      * @param type [RAW_SENSOR; RTD_TWO_WIRE; RTD_THREE_WIRE; THERMOCOUPLE[B|E|J|K|N|R|S|T]; STRAIN_GAUGE]
-     * @param aIns Analog Inputs (AIN_A_P to AIN_E_N)
+     * @param aIns Analog Inputs (vector) (AIN_A_P to AIN_E_N)
      * @return int the index of the added element (first call to this function for type RTD will return 0, second call 1, ...).
      *         return -1 in case of error
      */
     int addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t>& aIns);
+
+    /**
+     * @brief Lists all sensors
+     *
+     * @return nbr of sensors
+     */
     int list_sensors(void);
 
 private:

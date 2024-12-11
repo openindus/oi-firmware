@@ -198,5 +198,5 @@ int AnalogInputsLS::list_sensors(void)
     for (size_t i = 0; i < sensors.size(); i++) {
         print_sensor(sensors[i]);
     }
-    return 0;
+    return sensors.size();
 }
