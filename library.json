@@ -1,6 +1,6 @@
 {
     "name": "OpenIndus",
-    "version": "1.3.0", 
+    "version": "1.4.0",
     "keywords": "OpenIndus",
     "description": "OpenIndus Library",
     "repository": {
@@ -114,7 +114,7 @@
         "includeDir": ".",
         "srcDir": ".",
         "srcFilter": [
-            "-<*>", 
+            "-<*>",
             "+<components/drivers>",
             "+<components/api>",
             "+<components/libraries/Modbus>"
