@@ -797,11 +797,29 @@ static void IRAM_ATTR ioex_isr_handler(void* arg)
     xTaskNotifyFromISR(io->interrupt_handle, 0, eNoAction, NULL);
 }
 
+static uint64_t ioex_get_activated_pin(ioex_device_t *io)
+{
+    i2c_cmd_handle_t cmd;
+    uint8_t data[3] = {0};
+
+    ESP_LOGV(IOEX_TAG, "READ: i2c_port:%#04x; device_address:%#04x; register:%#04x", io->i2c_port, io->address, INTERRUPT_STATUS_PORT_0);
+    cmd = i2c_cmd_link_create();
+    i2c_master_start(cmd);
+    i2c_master_write_byte(cmd, (io->address << 1) | I2C_MASTER_WRITE, ACK_CHECK_EN);
+    i2c_master_write_byte(cmd, INTERRUPT_STATUS_PORT_0, ACK_CHECK_EN);
+    i2c_master_start(cmd);
+    i2c_master_write_byte(cmd, (io->address << 1) | I2C_MASTER_READ, ACK_CHECK_EN);
+    i2c_master_read(cmd, data, 3, I2C_MASTER_LAST_NACK);
+    i2c_master_stop(cmd);
+    i2c_master_cmd_begin(io->i2c_port, cmd, 1000 / portTICK_RATE_MS);
+    i2c_cmd_link_delete(cmd);
+    return data[2] << 16 | data[1] << 8 | data[0];
+}
+
 static void ioex_task_interrupt_handler(void* arg)
 {
     ioex_device_t *io = (ioex_device_t*)arg;
     i2c_cmd_handle_t cmd;
-    uint8_t data[3];
     uint64_t pin;
     uint8_t dataout[] = {0xFF, 0xFF, 0xFF};
     while (1)
@@ -810,56 +828,49 @@ static void ioex_task_interrupt_handler(void* arg)
         xTaskNotifyWait(0, 0, NULL, portMAX_DELAY);
 
         // Check the source of the interrupt (we don't use the generic function because we read all register to improve performance)
-        ESP_LOGV(IOEX_TAG, "READ: i2c_port:%#04x; device_address:%#04x; register:%#04x", io->i2c_port, io->address, INTERRUPT_STATUS_PORT_0);
-        cmd = i2c_cmd_link_create();
-        i2c_master_start(cmd);
-        i2c_master_write_byte(cmd, (io->address << 1) | I2C_MASTER_WRITE, ACK_CHECK_EN);
-        i2c_master_write_byte(cmd, INTERRUPT_STATUS_PORT_0, ACK_CHECK_EN);
-        i2c_master_start(cmd);
-        i2c_master_write_byte(cmd, (io->address << 1) | I2C_MASTER_READ, ACK_CHECK_EN);
-        i2c_master_read(cmd, data, 3, I2C_MASTER_LAST_NACK);
-        i2c_master_stop(cmd);
-        i2c_master_cmd_begin(io->i2c_port, cmd, 1000 / portTICK_RATE_MS);
-        i2c_cmd_link_delete(cmd);
-        pin = data[2] << 16 | data[1] << 8 | data[0];
+        pin = ioex_get_activated_pin(io);
         ESP_LOGV(IOEX_TAG, "raw:0x%08llx", pin);
 
-        if (io->interrupt_list->first == NULL)
-        {
-            ESP_LOGW(IOEX_TAG, "unexpected interrupt from ioexpander");
-            continue;
-        }
-
-        /* List is already in order of priority so we just have to iterate through it */
-        ioex_interrupt_element_t *interrupt_element = io->interrupt_list->first;
-        while (interrupt_element != NULL)
-        {
-            if ((1ULL<<interrupt_element->ioex_num) & pin)
+        // We loop to permit reading of interrupts that appen while we process others
+        while(pin) {
+            if (io->interrupt_list->first == NULL)
             {
-                pin &= ~(1ULL<<interrupt_element->ioex_num);
-                /* Call isr for the gpio */
-                ESP_LOGV(IOEX_TAG, "Interrupt from IOEX_NUM_%u", ioex_num_to_num(interrupt_element->ioex_num));
-                interrupt_element->isr_handler(interrupt_element->args);
-                /* Clear interrupt */
-                i2c_write(io->i2c_port, io->address, INTERRUPT_CLEAR_PORT_0 + (interrupt_element->ioex_num / 8), (1U<<(interrupt_element->ioex_num-(8*(interrupt_element->ioex_num / 8)))));
+                ESP_LOGW(IOEX_TAG, "unexpected interrupt from ioexpander");
+                continue;
             }
-            interrupt_element = interrupt_element->next;
-        }
-        // Some interrupt where not handled
-        if (pin)
-        {
-            ESP_LOGW(IOEX_TAG, "An interrupt appended but not handler was set for it");
-            ESP_LOGV(IOEX_TAG, "Clearing all interrupts");
-            ESP_LOGV(IOEX_TAG, "WRITE: i2c_port:%#04x; device_address:%#04x; register:%#04x; data:0xffffff", io->i2c_port, io->address, INTERRUPT_STATUS_PORT_0);
-            // clear all pending interrupts
-            cmd = i2c_cmd_link_create();
-            i2c_master_start(cmd);
-            i2c_master_write_byte(cmd, (io->address << 1) | I2C_MASTER_WRITE, ACK_CHECK_EN);
-            i2c_master_write_byte(cmd, INTERRUPT_CLEAR_PORT_0, ACK_CHECK_EN);
-            i2c_master_write(cmd, dataout, 3, ACK_CHECK_EN);
-            i2c_master_stop(cmd);
-            i2c_master_cmd_begin(io->i2c_port, cmd, 1000 / portTICK_RATE_MS);
-            i2c_cmd_link_delete(cmd);
+
+            /* List is already in order of priority so we just have to iterate through it */
+            ioex_interrupt_element_t *interrupt_element = io->interrupt_list->first;
+            while (interrupt_element != NULL)
+            {
+                if ((1ULL<<interrupt_element->ioex_num) & pin)
+                {
+                    pin &= ~(1ULL<<interrupt_element->ioex_num);
+                    /* Call isr for the gpio */
+                    ESP_LOGV(IOEX_TAG, "Interrupt from IOEX_NUM_%u", ioex_num_to_num(interrupt_element->ioex_num));
+                    interrupt_element->isr_handler(interrupt_element->args);
+                    /* Clear interrupt */
+                    i2c_write(io->i2c_port, io->address, INTERRUPT_CLEAR_PORT_0 + (interrupt_element->ioex_num / 8), (1U<<(interrupt_element->ioex_num-(8*(interrupt_element->ioex_num / 8)))));
+                }
+                interrupt_element = interrupt_element->next;
+            }
+            // Some interrupt where not handled
+            if (pin)
+            {
+                ESP_LOGW(IOEX_TAG, "An interrupt appended but not handler was set for it");
+                ESP_LOGV(IOEX_TAG, "Clearing all interrupts");
+                ESP_LOGV(IOEX_TAG, "WRITE: i2c_port:%#04x; device_address:%#04x; register:%#04x; data:0xffffff", io->i2c_port, io->address, INTERRUPT_STATUS_PORT_0);
+                // clear all pending interrupts
+                cmd = i2c_cmd_link_create();
+                i2c_master_start(cmd);
+                i2c_master_write_byte(cmd, (io->address << 1) | I2C_MASTER_WRITE, ACK_CHECK_EN);
+                i2c_master_write_byte(cmd, INTERRUPT_CLEAR_PORT_0, ACK_CHECK_EN);
+                i2c_master_write(cmd, dataout, 3, ACK_CHECK_EN);
+                i2c_master_stop(cmd);
+                i2c_master_cmd_begin(io->i2c_port, cmd, 1000 / portTICK_RATE_MS);
+                i2c_cmd_link_delete(cmd);
+            }
+            pin = ioex_get_activated_pin(io);
         }
     }
 }
