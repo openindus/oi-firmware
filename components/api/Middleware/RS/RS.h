@@ -25,7 +25,7 @@ public:
         _pin_cs(cs),
         _pin_intr(intr) {}
 
-    void begin(RS_Mode_t mode, unsigned long baudrate=115200);
+    void begin(RS_Mode_t mode, unsigned long baudrate=115200, uint16_t config=0x001c);// 0x001c = 8N1
     void end(void);
     int available(void);
     int availableForWrite(void);
