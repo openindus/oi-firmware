@@ -47,3 +47,14 @@ Board which are ready to use :
 
 - Compatibility with old boards (discrete-s2, stepper-s2).
 - Fix SLIP packet frame sending errors
+
+# 1.4.0
+
+### Features
+
+- Added the AnalogLS API
+
+### Bugfix
+
+- Solved interrupt crash on OI-Core
+- Wrong init on Modbus RTU

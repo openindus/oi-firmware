@@ -91,9 +91,24 @@ enum Protocol_Request_e {
     REQUEST_MOTOR_DC_RUN                    = 0xA0,
     REQUEST_MOTOR_DC_STOP                   = 0xA1,
 
+    /* ANALOGLS */
+    REQUEST_ADD_SENSOR                      = 0xB0,
+    REQUEST_SENSOR_SET_PARAMETER            = 0xB1,
+    REQUEST_SENSOR_READ                     = 0xB2,
+    REQUEST_SENSOR_READ_MILLIVOLT           = 0xB3,
+    REQUEST_SENSOR_READ_RESISTANCE          = 0xB4,
+    REQUEST_SENSOR_READ_TEMPERATURE         = 0xB5,
+    REQUEST_SENSOR_READ_RAW                 = 0xB6,
 };
 
 enum Protocol_Event_e {
     EVENT_DIGITAL_INTERRUPT                 = 0x00,
     EVENT_MOTOR_READY                       = 0x01,
+
+    /* AnalogLS */
+    EVENT_SENSOR_READ                       = 0xB0,
+    EVENT_SENSOR_READ_MILLIVOLT             = 0xB1,
+    EVENT_SENSOR_READ_RESISTANCE            = 0xB2,
+    EVENT_SENSOR_READ_TEMPERATURE           = 0xB3,
+    EVENT_SENSOR_READ_RAW                   = 0xB4,
 };

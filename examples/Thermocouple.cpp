@@ -16,11 +16,13 @@ void loop(void)
 {
     float data = 0.0;
 
-    data = analogls.tc[0].readMillivolts();
+    data = analogls.sensors[0]->readMillivolts();
     Serial.print(">TC (CH0) - Voltage (mV): ");
     Serial.println(data);
 
-    data = analogls.tc[0].readTemperature();
+    data = analogls.sensors[0]->readTemperature();
     Serial.print(">TC (CH0) - Temperature (°C): ");
     Serial.println(data);
+
+    delay(250);
 }

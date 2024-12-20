@@ -15,7 +15,7 @@ static const uint8_t DAYS_IN_MONTH[] = {31,28,31,30,31,30,31,31,30,31,30,31};
 
 /* Alarm */
 static void (*_alarmCallback)(void);
-static xQueueHandle _alarmEvtQueue = NULL;
+static QueueHandle_t _alarmEvtQueue = NULL;
 static void _AlarmTask(void* arg);
 static void IRAM_ATTR _alarmIsrHandler(void* arg);
 

@@ -49,7 +49,7 @@ public:
         _instances.push_back(controller);
     }
 
-    static inline void addEventCallback(uint8_t event, uint16_t id, std::function<void(uint8_t)>callback) {
+    static inline void addEventCallback(uint8_t event, uint16_t id, std::function<void(uint8_t*)>callback) {
         _eventCallbacks.insert({std::make_pair(event, id), callback});
     }
 
@@ -69,7 +69,7 @@ private:
     static void _busTask(void *pvParameters);
     static void _programmingTask(void *pvParameters);
 
-    static std::map<std::pair<uint8_t,uint16_t>, std::function<void(uint8_t)>> _eventCallbacks;
+    static std::map<std::pair<uint8_t,uint16_t>, std::function<void(uint8_t*)>> _eventCallbacks;
     static std::vector<Controller*> _instances;
 
 };

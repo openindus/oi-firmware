@@ -12,7 +12,7 @@
 
 #define MUX_IO_MAX 7
 
-enum Multiplexer_Input_e : int {
+enum Multiplexer_Input_e : int8_t {
     INPUT_OPEN_HS       = 0,
     INPUT_IDAC1         = 1,
     INPUT_IDAC2         = 2,
@@ -21,7 +21,7 @@ enum Multiplexer_Input_e : int {
     INPUT_VISUP_DIV     = 5
 };
 
-enum Multiplexer_Output_e : int {
+enum Multiplexer_Output_e : int8_t {
     OUTPUT_OPEN_LS      = 0,
     OUTPUT_W_DIGIPOT    = 1,
     OUTPUT_RBIAS_GAUGE  = 2,
@@ -29,7 +29,7 @@ enum Multiplexer_Output_e : int {
     OUTPUT_GND          = 4
 };
 
-typedef int Mux_IO_t;
+typedef int8_t Mux_IO_t;
 
 class Multiplexer
 {

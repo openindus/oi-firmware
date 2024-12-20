@@ -26,7 +26,8 @@
 
 #if defined(OI_MIXED)
 
-class Mixed : public Module, 
+class Mixed : 
+    public Module, 
     public AnalogOutputs, 
     public AnalogInputsLV, 
     public DigitalOutputs, 

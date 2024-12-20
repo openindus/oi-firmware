@@ -653,7 +653,7 @@ static int _modbus_rtu_connect(modbus_t *ctx)
         return -1;
     }
 #elif defined(ARDUINO)
-    ctx_rtu->rs485->begin(RS_485, ctx_rtu->baud);
+    ctx_rtu->rs485->begin(RS_485, ctx_rtu->baud, ctx_rtu->config);
 #else
     /* The O_NOCTTY flag tells UNIX that this program doesn't want
        to be the "controlling terminal" for that port. If you

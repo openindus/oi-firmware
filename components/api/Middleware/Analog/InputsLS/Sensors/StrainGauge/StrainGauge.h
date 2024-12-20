@@ -12,49 +12,39 @@
 #include "_ADS114S0X.h"
 #include "Multiplexer.h"
 #include "Sensor.h"
+#include "global_sensor.hpp"
 
-struct StrainGauge_Pinout_s {
-    ADC_Input_t sP; // Signal +
-    ADC_Input_t sN; // Signal -
-    ADC_Input_t eP; // Excitation +
-    ADC_Input_t eN; // Excitation -
-    Mux_IO_t hs; // Hight side (output)
-    Mux_IO_t ls; // Low side (input)
-};
+#define SG_GAIN                             128.0f
+#define SG_GAIN_REGISTER                    GAIN_128
+#define SG_ACQUISITION_REFERENCE_VOLTAGE    REFERENCE_EXCITATION
+#define SG_ACQUISITION_REFERENCE_CURRENT    REFERENCE_IDAC_1
 
-enum StrainGauge_Excitation_e {
-    EXCITATION_VOLTAGE = 0,
-    EXCITATION_CURRENT,
-    EXCITATION_HIGH_VOLTAGE
-};
-
-class StrainGauge
+class StrainGauge: public Sensor
 {
 public:
 
-    StrainGauge(ADS114S0X* adc, Multiplexer* highSideMux, Multiplexer* lowSideMux,
-        const StrainGauge_Pinout_s& pins) : 
-            _adc(adc),
-            _highSideMux(highSideMux),
-            _lowSideMux(lowSideMux),
-            _pins(pins),
-            _excitation(EXCITATION_VOLTAGE)
-    {}
-
-    inline void setExcitationMode(StrainGauge_Excitation_e excitation) {
-        _excitation = excitation;
+    StrainGauge(ADS114S0X* adc, Multiplexer* highSideMux, Multiplexer* lowSideMux, Sensor_Pinout_s pinout, uint32_t index) :
+        Sensor(adc, highSideMux, lowSideMux, pinout, STRAIN_GAUGE, index),
+        _gauge_excitation_mode(EXCITATION_VOLTAGE_5V)
+    {
+        _gain = SG_GAIN_REGISTER;
+        _bias_active = false;
+        _mux_config.output = OUTPUT_RBIAS_GAUGE;
+        _mux_config.hs_index = 2;
+        _mux_config.ls_index = 3;
+        update_strain_gauge_type();
     }
 
-    float read(void);
+    inline void setSGExcitationMode(StrainGauge_Excitation_e excitation) {
+        _gauge_excitation_mode = excitation;
+        update_strain_gauge_type();
+    }
+    float read(bool print_result = false);
+    void setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Value_u value);
+
+protected:
+    void update_strain_gauge_type(void);
 
 private:
-
-    ADS114S0X* _adc;
-    Multiplexer* _highSideMux;
-    Multiplexer* _lowSideMux;
-
-    StrainGauge_Pinout_s _pins;
-
-    StrainGauge_Excitation_e _excitation;
-    
+    StrainGauge_Excitation_e _gauge_excitation_mode;
 };

@@ -59,7 +59,7 @@ private:
     /* Stor a local copy of the pointer to an initalized ioex_device_t */
     static ioex_device_t** _device;
 
-    static xQueueHandle _event;
+    static QueueHandle_t _event;
     static void IRAM_ATTR _isr(void* pvParameters);
     static void _task(void* pvParameters);
 };

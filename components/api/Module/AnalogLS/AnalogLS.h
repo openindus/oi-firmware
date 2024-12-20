@@ -12,6 +12,8 @@
 #include "Module.h"
 #include "AnalogLSConfig.h"
 #include "AnalogInputsLS.h"
+#include "AnalogInputsLSRsp.h"
+#include "AnalogInputsLSCmd.h"
 
 #if (OI_ANALOG_LS)
 
@@ -25,11 +27,17 @@ public:
 
 };
 
-#else
+#elif defined(MODULE_MASTER) 
 
-class AnalogLS
+class AnalogLS :
+    public Controller, 
+    public AnalogInputsLSCmd
 {
+public:
 
+    AnalogLS(uint32_t sn = 0) : 
+        Controller(TYPE_OI_ANALOG_LS , sn),
+        AnalogInputsLSCmd(this) {}
 };
 
 #endif
