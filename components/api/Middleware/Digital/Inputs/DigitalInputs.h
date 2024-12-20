@@ -106,7 +106,7 @@ private:
     static IsrCallback_t* _callbacks;
     static void** _args;
 
-    static xQueueHandle _event;
+    static QueueHandle_t _event;
     static void IRAM_ATTR _isr(void* pvParameters);
     static void _task(void* pvParameters);
 };

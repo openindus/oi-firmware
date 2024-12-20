@@ -25,6 +25,8 @@
 #define PROMPT_STR "Dc"
 #elif defined(OI_MIXED)
 #define PROMPT_STR "Mixed"
+#elif defined(OI_ANALOG_LS)
+#define PROMPT_STR "AnalogLS"
 #else
 #define PROMPT_STR ""
 #endif

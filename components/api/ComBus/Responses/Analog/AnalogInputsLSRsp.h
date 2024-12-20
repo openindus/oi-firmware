@@ -6,22 +6,28 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file OpenIndus.h
- * @brief OpenIndus
- *
+ * @file AnalogInputsLSRsp.h
+ * @author AFL
+ * @version 0.1
+ * @date 2024-10-01
+ * 
  * For more information on OpenIndus:
  * @see https://openindus.com
+ * 
+ * @copyright Copyright (c) 2024
  */
 
 #pragma once
 
-#include "System.h"
+#if defined(MODULE_SLAVE)
 
-#define OICore      Core
-#define OIDiscrete  Discrete
-#define OIMixed     Mixed
-#define OIStepper   Stepper
-#define OIRelayHP   RelayHP
-#define OIAnalogLS  AnalogLS
-#define OIBrushless Brushless
-#define OIDc        Dc
+#include "ControllerSlave.h"
+#include "AnalogInputsLS.h"
+
+class AnalogInputsLSRsp
+{
+public:
+    static int init(void);
+};
+
+#endif

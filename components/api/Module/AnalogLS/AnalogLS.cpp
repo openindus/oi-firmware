@@ -59,7 +59,7 @@ int AnalogLS::init(void)
         .device = NULL,
         .config = {
             .host_id = ANALOG_LS_SPI_HOST,
-            .sclk_freq = ANALOG_LS_ADC_SPI_FREQ / 8,
+            .sclk_freq = ANALOG_LS_ADC_SPI_FREQ,
             .start_sync = ANALOG_LS_ADC_PIN_START_SYNC,
             .reset = ANALOG_LS_ADC_PIN_RESET,
             .cs = ANALOG_LS_ADC_PIN_CS,
@@ -77,7 +77,14 @@ int AnalogLS::init(void)
         {ANALOG_LS_MUX_PIN_LS2_A0, ANALOG_LS_MUX_PIN_LS2_A1, ANALOG_LS_MUX_PIN_LS2_A2}
     );
 
+    /* Initialize digital temperature sensor */
+    ret |= STDS75_init(ANALOG_LS_I2C_PORT_NUM, ANALOG_LS_THERM_I2C_ADDR, ANALOG_LS_THERM_PIN_OS_INT);
+
     ret |= AnalogInputsLS::_init();
+
+#if defined(MODULE_SLAVE)
+    ret |= AnalogInputsLSRsp::init();
+#endif
 
     return ret;
 }

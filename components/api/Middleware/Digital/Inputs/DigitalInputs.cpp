@@ -21,7 +21,7 @@ uint8_t DigitalInputs::_nb;
 gpio_num_t* DigitalInputs::_gpio_nums;
 IsrCallback_t* DigitalInputs::_callbacks;
 void** DigitalInputs::_args;
-xQueueHandle DigitalInputs::_event;
+QueueHandle_t DigitalInputs::_event;
 
 
 int DigitalInputs::init(const gpio_num_t *gpio, int nb)

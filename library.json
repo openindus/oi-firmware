@@ -59,6 +59,7 @@
             "-I components/api/Middleware/Analog/InputsLS/Multiplexer",
             "-I components/api/Middleware/Analog/InputsLS/Digipot",
             "-I components/api/Middleware/Analog/InputsLS/Sensors",
+            "-I components/api/Middleware/Analog/InputsLS/Sensors/RawSensor",
             "-I components/api/Middleware/Analog/InputsLS/Sensors/RTD",
             "-I components/api/Middleware/Analog/InputsLS/Sensors/Thermocouple",
             "-I components/api/Middleware/Analog/InputsLS/Sensors/StrainGauge",

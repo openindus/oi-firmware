@@ -17,7 +17,7 @@
 #define ANALOG_LS_SPI_PIN_SCLK          GPIO_NUM_15
 
 /* ADC device */
-#define ANALOG_LS_ADC_SPI_FREQ          SPI_MASTER_FREQ_8M
+#define ANALOG_LS_ADC_SPI_FREQ          SPI_MASTER_FREQ_10M
 #define ANALOG_LS_ADC_PIN_CS            GPIO_NUM_17
 #define ANALOG_LS_ADC_PIN_START_SYNC    GPIO_NUM_47
 #define ANALOG_LS_ADC_PIN_DRDY          GPIO_NUM_33
@@ -48,7 +48,7 @@
 
 /* Thermometer */
 #define ANALOG_LS_THERM_PIN_OS_INT      GPIO_NUM_4
-#define ANALOG_LS_THERM_I2C_ADDR        0x90
+#define ANALOG_LS_THERM_I2C_ADDR        0x48
 
 /* Digipot */
 #define ANALOG_LS_DIGIPOT_I2C_ADDR      0x50

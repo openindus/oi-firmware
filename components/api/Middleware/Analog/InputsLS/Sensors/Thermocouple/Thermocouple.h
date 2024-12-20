@@ -12,16 +12,17 @@
 #include "_ADS114S0X.h"
 #include "Multiplexer.h"
 #include "Sensor.h"
+#include "stds75.h"
+#include "global_sensor.hpp"
 
-enum TC_Type_e {
-    TYPE_K,
-};
+#define TC_V_REF                    2.5
+#define TC_GAIN                     8
+#define TC_GAIN_REGISTER            GAIN_8
+#define TC_ACQUISITION_REFERENCE    REFERENCE_INTERNAL_2_5V
 
 struct TC_Coefficient_s {
-    float Ti; // Initial temperature
-    float Tf; // Final temperature
-    float Ei; // Initial voltage
-    float Ef; // Final voltage
+    float i; // Initial temperature/voltage
+    float f; // Final temperature/voltage
     std::vector<float> d; // Coefficients
 };
 
@@ -29,25 +30,23 @@ struct TC_Pinout_s {
     std::array<ADC_Input_t, 2> adcInputs;
 };
 
-class Thermocouple
+class Thermocouple: public Sensor
 {
 public:
 
-    Thermocouple(ADS114S0X* adc, const TC_Pinout_s& pins) : 
-        _adc(adc), _adcInputs(pins.adcInputs), _type(TYPE_K) {}
-
-    inline void setType(TC_Type_e type) {
-        _type = type;
+    Thermocouple(ADS114S0X* adc, Multiplexer* highSideMux, Multiplexer* lowSideMux, Sensor_Pinout_s pinout, Sensor_Type_e type, uint32_t index) :
+    Sensor(adc, highSideMux, lowSideMux, pinout, type, index)
+    {
+        _gain = TC_GAIN_REGISTER;
+        _reference = TC_ACQUISITION_REFERENCE;
+        _bias_active = true;
     }
 
-    float readVoltage(void);
-    float readTemperature(void);
+    float readMillivolts(bool print_result = false);
+    float readTemperature(bool print_result = false);
+    inline float read(bool print_result = false) { return readTemperature(print_result); }
 
-private:
-
-    ADS114S0X* _adc;
-    std::array<ADC_Input_t, 2> _adcInputs;
-    TC_Type_e _type;
-    
-    float _calculateTemperature(const std::vector<TC_Coefficient_s>& coefficients, float voltage);
+protected:
+    float _calculateVoltageFromTemperature(const std::vector<TC_Coefficient_s>& coefficients, float temperature, const std::vector<float> coeffs_A = {NAN, NAN, NAN});
+    float _calculateTemperatureFromVoltage(const std::vector<TC_Coefficient_s>& coefficients, float voltage);
 };
