@@ -15,24 +15,6 @@
 
 #pragma once
 
-#include "Global.h"
-#include "Module.h"
-#include "Core.h"
-#include "Discrete.h"
-#include "Mixed.h"
-#include "Stepper.h"
-#include "RelayHP.h"
-#include "AnalogLS.h"
-#include "Brushless.h"
-#include "Dc.h"
-#include "ControllerMaster.h"
-#include "ControllerSlave.h"
-#include "CLI.h"
-#include "UsbConsole.h"
-
-void setup(void);
-void loop(void);
-
 class System
 {
 public:

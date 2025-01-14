@@ -1,0 +1,91 @@
+set(COMPONENT_SRCS
+    "Bus/BusIO.cpp"
+    "Bus/BusRS.cpp"
+    "Bus/BusCAN.cpp"
+    "Encoder/Encoder.cpp"
+    "Digital/Inputs/DigitalInputs.cpp"
+    "Digital/Inputs/DigitalInputsExp.cpp"
+    "Digital/Outputs/DigitalOutputs.cpp"
+    "Digital/Outputs/DigitalOutputsExp.cpp"
+    "Relays/Relays.cpp"
+    "Motor/Motor.cpp"
+    "Motor/Brushless/MotorBLDC.cpp"
+    "Motor/Stepper/MotorStepper.cpp"
+    "Motor/Stepper/MotorStepperParam.cpp"
+    "Motor/Dc/MotorDc.cpp"
+    "Usb/UsbConsole.cpp"
+    "Usb/UsbSerial.cpp"
+    "FlashLoader/FlashLoader.cpp"
+    "Led/Led.cpp"
+    "RTClock/RTClock.cpp"
+    "Analog/Outputs/AnalogOutputs.cpp"
+    "Analog/InputsLV/AnalogInputsLV.cpp"
+    "Analog/InputsHV/AnalogInputsHV.cpp"
+    "Analog/InputsLS/AnalogInputsLS.cpp"
+    "Analog/InputsLS/ADC/ADS114S0X/_ADS114S0X.cpp"
+    "Analog/InputsLS/Multiplexer/Multiplexer.cpp"
+    "Analog/InputsLS/Digipot/Digipot.cpp"
+    "Analog/InputsLS/Sensors/global_sensor.cpp"
+    "Analog/InputsLS/Sensors/RawSensor/RawSensor.cpp"
+    "Analog/InputsLS/Sensors/RTD/RTD.cpp"
+    "Analog/InputsLS/Sensors/Thermocouple/Thermocouple.cpp"
+    "Analog/InputsLS/Sensors/StrainGauge/StrainGauge.cpp"
+    "CAN/CAN.cpp"
+    "RS/RS.cpp"
+    "Board/Board.cpp"
+)
+
+set(COMPONENT_INCLUDE_DIRS
+    "."
+    "Bus"
+    "Encoder"
+    "Digital/Inputs"
+    "Digital/Outputs"
+    "Relays"
+    "Analog"
+    "Analog/InputsHV"
+    "Analog/InputsLV"
+    "Analog/InputsLS"
+    "Analog/InputsLS/ADC"
+    "Analog/InputsLS/ADC/ADS114S0X"
+    "Analog/InputsLS/Multiplexer"
+    "Analog/InputsLS/Digipot"
+    "Analog/InputsLS/Sensors"
+    "Analog/InputsLS/Sensors/RawSensor"
+    "Analog/InputsLS/Sensors/RTD"
+    "Analog/InputsLS/Sensors/Thermocouple"
+    "Analog/InputsLS/Sensors/StrainGauge"
+    "Analog/Outputs"
+    "Motor"
+    "Motor/Brushless"
+    "Motor/Stepper"
+    "Motor/Dc"
+    "Usb"
+    "FlashLoader"
+    "Led"
+    "RTClock"
+    "CAN"
+    "RS"
+    "Board"
+)
+
+set(COMPONENT_PRIV_REQUIRES
+    "esp_adc_cal"
+    "console"
+    "nvs_flash"
+    "app_update"
+    "fatfs"
+    "sdmmc"
+    "esp_rom"
+)
+
+set(COMPONENT_REQUIRES
+    "drivers"
+)
+
+idf_component_register(
+    SRCS ${COMPONENT_SRCS}
+    INCLUDE_DIRS ${COMPONENT_INCLUDE_DIRS}
+    PRIV_REQUIRES ${COMPONENT_PRIV_REQUIRES}
+    REQUIRES ${COMPONENT_REQUIRES}
+)

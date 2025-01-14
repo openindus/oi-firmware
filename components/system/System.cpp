@@ -18,6 +18,9 @@
 #include "Arduino.h"
 #endif
 
+#include "Global.h"
+#include "OpenIndus.h"
+
 static const char TAG[] = "System";
 
 void System::_mainTask(void *pvParameters)
