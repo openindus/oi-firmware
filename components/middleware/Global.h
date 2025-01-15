@@ -31,6 +31,8 @@
 #include <array>
 #include <cstring>
 
+#ifndef LINUX_ARM
+
 /* ESP Components */
 #include "esp_err.h"
 #include "esp_log.h"
@@ -79,3 +81,5 @@
 #include "cd74hc4052.h"
 #include "ads114s0x.h"
 #include "adc.h"
+
+#endif

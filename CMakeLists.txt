@@ -8,13 +8,24 @@ else()
     add_executable(OI-Firmware main/main.cpp)
 
     target_sources(OI-Firmware PRIVATE
-        components/api/System/System.cpp
+        components/system/System.cpp
     )
 
     target_include_directories(OI-Firmware PRIVATE
+        components/system
         components/api
-        components/api/System
+        components/api/Module
+        components/api/Module/Core
+        components/api/ComBus
+        components/middleware
+        components/middleware/linux_arm/include
     )
+
+    target_compile_definitions(OI-Firmware PRIVATE 
+        LINUX_ARM
+        OI_CORE_PLUS
+    )
+
 endif()
 
 project(OI-Firmware)

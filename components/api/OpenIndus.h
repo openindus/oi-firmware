@@ -17,6 +17,7 @@
 
 #include "Module.h"
 #include "Core.h"
+#ifndef OI_CORE_PLUS
 #include "Discrete.h"
 #include "Mixed.h"
 #include "Stepper.h"
@@ -24,15 +25,14 @@
 #include "AnalogLS.h"
 #include "Brushless.h"
 #include "Dc.h"
-#include "ControllerMaster.h"
-#include "ControllerSlave.h"
-#include "CLI.h"
-#include "UsbConsole.h"
+#endif
 
 void setup(void);
 void loop(void);
 
 #define OICore      Core
+
+#ifndef OI_CORE_PLUS
 #define OIDiscrete  Discrete
 #define OIMixed     Mixed
 #define OIStepper   Stepper
@@ -40,3 +40,4 @@ void loop(void);
 #define OIAnalogLS  AnalogLS
 #define OIBrushless Brushless
 #define OIDc        Dc
+#endif

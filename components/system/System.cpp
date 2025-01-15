@@ -19,6 +19,10 @@
 #endif
 
 #include "Global.h"
+#include "CLI.h"
+#include "UsbConsole.h"
+#include "ControllerMaster.h"
+#include "ControllerSlave.h"
 #include "OpenIndus.h"
 
 static const char TAG[] = "System";
