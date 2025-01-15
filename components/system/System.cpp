@@ -19,8 +19,10 @@
 #endif
 
 #include "Global.h"
+#ifndef LINUX_ARM
 #include "CLI.h"
 #include "UsbConsole.h"
+#endif
 #include "ControllerMaster.h"
 #include "ControllerSlave.h"
 #include "OpenIndus.h"

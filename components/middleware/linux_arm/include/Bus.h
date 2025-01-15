@@ -7,3 +7,8 @@
  */
 
 #pragma once
+
+class Bus
+{
+
+};
