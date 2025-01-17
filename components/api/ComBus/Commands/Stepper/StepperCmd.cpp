@@ -26,19 +26,19 @@ StepperCmd::StepperCmd(Controller* control) : _control(control)
 void StepperCmd::attachLimitSwitch(MotorNum_t motor, DIn_Num_t din, Logic_t logic)
 {
     std::vector<uint8_t> msgBytes = {REQUEST_MOTOR_ATTACH_LIMIT_SWITCH, (uint8_t)motor, (uint8_t)din, (uint8_t)logic};
-    _control->request(msgBytes);
+    _control->sendRequest(msgBytes);
 }
 
 void StepperCmd::detachLimitSwitch(MotorNum_t motor, DIn_Num_t din)
 {
     std::vector<uint8_t> msgBytes = {REQUEST_MOTOR_DETACH_LIMIT_SWITCH, (uint8_t)motor, (uint8_t)din};
-    _control->request(msgBytes);
+    _control->sendRequest(msgBytes);
 }
 
 void StepperCmd::setStepResolution(MotorNum_t motor, MotorStepResolution_t res)
 {
     std::vector<uint8_t> msgBytes = {REQUEST_MOTOR_SET_STEP_RESOLUTION, (uint8_t)motor, (uint8_t)res};
-    _control->request(msgBytes);
+    _control->sendRequest(msgBytes);
 }
 
 void StepperCmd::setAcceleration(MotorNum_t motor, float acc)
@@ -46,7 +46,7 @@ void StepperCmd::setAcceleration(MotorNum_t motor, float acc)
     std::vector<uint8_t> msgBytes = {REQUEST_MOTOR_SET_ACCELERATION, (uint8_t)motor};
     uint8_t *ptr = reinterpret_cast<uint8_t*>(&acc);
     msgBytes.insert(msgBytes.end(), ptr, ptr + sizeof(float));
-    _control->request(msgBytes);
+    _control->sendRequest(msgBytes);
 }
 
 void StepperCmd::setDeceleration(MotorNum_t motor, float dec)
@@ -54,7 +54,7 @@ void StepperCmd::setDeceleration(MotorNum_t motor, float dec)
     std::vector<uint8_t> msgBytes = {REQUEST_MOTOR_SET_ACCELERATION, (uint8_t)motor};
     uint8_t *ptr = reinterpret_cast<uint8_t*>(&dec);
     msgBytes.insert(msgBytes.end(), ptr, ptr + sizeof(float));
-    _control->request(msgBytes);
+    _control->sendRequest(msgBytes);
 }
 
 void StepperCmd::setMaxSpeed(MotorNum_t motor, float speed)
@@ -62,7 +62,7 @@ void StepperCmd::setMaxSpeed(MotorNum_t motor, float speed)
     std::vector<uint8_t> msgBytes = {REQUEST_MOTOR_SET_MAX_SPEED, (uint8_t)motor};
     uint8_t *ptr = reinterpret_cast<uint8_t*>(&speed);
     msgBytes.insert(msgBytes.end(), ptr, ptr + sizeof(float));
-    _control->request(msgBytes);
+    _control->sendRequest(msgBytes);
 }
 
 void StepperCmd::setMinSpeed(MotorNum_t motor, float speed)
@@ -70,7 +70,7 @@ void StepperCmd::setMinSpeed(MotorNum_t motor, float speed)
     std::vector<uint8_t> msgBytes = {REQUEST_MOTOR_SET_MIN_SPEED, (uint8_t)motor};
     uint8_t *ptr = reinterpret_cast<uint8_t*>(&speed);
     msgBytes.insert(msgBytes.end(), ptr, ptr + sizeof(float));
-    _control->request(msgBytes);
+    _control->sendRequest(msgBytes);
 }
 
 void StepperCmd::setFullStepSpeed(MotorNum_t motor, float speed)
@@ -78,13 +78,13 @@ void StepperCmd::setFullStepSpeed(MotorNum_t motor, float speed)
     std::vector<uint8_t> msgBytes = {REQUEST_MOTOR_SET_FULL_STEP_SPEED, (uint8_t)motor};
     uint8_t *ptr = reinterpret_cast<uint8_t*>(&speed);
     msgBytes.insert(msgBytes.end(), ptr, ptr + sizeof(float));
-    _control->request(msgBytes);
+    _control->sendRequest(msgBytes);
 }
 
 int32_t StepperCmd::getPosition(MotorNum_t motor)
 {
     std::vector<uint8_t> msgBytes = {REQUEST_MOTOR_GET_POSITION, (uint8_t)motor};
-    _control->request(msgBytes);
+    _control->sendRequest(msgBytes);
     int32_t* position = reinterpret_cast<int32_t*>(&msgBytes[2]);
     return *position;
 }
@@ -92,7 +92,7 @@ int32_t StepperCmd::getPosition(MotorNum_t motor)
 float StepperCmd::getSpeed(MotorNum_t motor)
 {
     std::vector<uint8_t> msgBytes = {REQUEST_MOTOR_GET_SPEED, (uint8_t)motor};
-    _control->request(msgBytes);
+    _control->sendRequest(msgBytes);
     float* speed = reinterpret_cast<float*>(&msgBytes[2]);
     return *speed;
 }
@@ -100,13 +100,13 @@ float StepperCmd::getSpeed(MotorNum_t motor)
 void StepperCmd::resetHomePosition(MotorNum_t motor)
 {
     std::vector<uint8_t> msgBytes = {REQUEST_MOTOR_RESET_HOME_POSITION, (uint8_t)motor};
-    _control->request(msgBytes);
+    _control->sendRequest(msgBytes);
 }
 
 void StepperCmd::stop(MotorNum_t motor, MotorStopMode_t mode)
 {
     std::vector<uint8_t> msgBytes = {REQUEST_MOTOR_STOP, (uint8_t)motor, (uint8_t)mode};
-    _control->request(msgBytes);
+    _control->sendRequest(msgBytes);
 }
 
 void StepperCmd::moveAbsolute(MotorNum_t motor, uint32_t position, bool microStep)
@@ -115,7 +115,7 @@ void StepperCmd::moveAbsolute(MotorNum_t motor, uint32_t position, bool microSte
     uint8_t* ptr = reinterpret_cast<uint8_t*>(&position);
     msgBytes.insert(msgBytes.end(), ptr, ptr + sizeof(uint32_t));
     msgBytes.push_back((uint8_t)microStep);
-    _control->request(msgBytes);
+    _control->sendRequest(msgBytes);
 }
 
 void StepperCmd::moveRelative(MotorNum_t motor, int32_t position, bool microStep)
@@ -124,7 +124,7 @@ void StepperCmd::moveRelative(MotorNum_t motor, int32_t position, bool microStep
     uint8_t* ptr = reinterpret_cast<uint8_t*>(&position);
     msgBytes.insert(msgBytes.end(), ptr, ptr + sizeof(int32_t));
     msgBytes.push_back((uint8_t)microStep);
-    _control->request(msgBytes);
+    _control->sendRequest(msgBytes);
 }
 
 void StepperCmd::run(MotorNum_t motor, MotorDirection_t direction, float speed)
@@ -132,7 +132,7 @@ void StepperCmd::run(MotorNum_t motor, MotorDirection_t direction, float speed)
     std::vector<uint8_t> msgBytes = {REQUEST_MOTOR_RUN, (uint8_t)motor, (uint8_t)direction};
     uint8_t* ptr = reinterpret_cast<uint8_t*>(&speed);
     msgBytes.insert(msgBytes.end(), ptr, ptr + sizeof(float));
-    _control->request(msgBytes);
+    _control->sendRequest(msgBytes);
 }
 
 void StepperCmd::wait(MotorNum_t motor)
@@ -144,7 +144,7 @@ void StepperCmd::wait(MotorNum_t motor)
 
     // Send a message to slave
     std::vector<uint8_t> msgBytes = {REQUEST_MOTOR_WAIT, (uint8_t)motor};
-    _control->request(msgBytes, false);
+    _control->sendRequest(msgBytes, false);
     // Wait for event
     xQueueReset(_motorWaitEvent[motor]);
     xQueueReceive(_motorWaitEvent[motor], NULL, portMAX_DELAY);
@@ -156,7 +156,7 @@ void StepperCmd::homing(MotorNum_t motor, float speed)
     std::vector<uint8_t> msgBytes = {REQUEST_MOTOR_HOMING, (uint8_t)motor};
     uint8_t* ptr = reinterpret_cast<uint8_t*>(&speed);
     msgBytes.insert(msgBytes.end(), ptr, ptr + sizeof(float));
-    _control->request(msgBytes);
+    _control->sendRequest(msgBytes);
 }
 
 #endif

@@ -22,7 +22,7 @@ static const char TAG[] = "ControllerSlave";
 uint16_t ControllerSlave::_id;
 Controller_State_t ControllerSlave::_state = STATE_IDLE;
 TaskHandle_t ControllerSlave::_taskHandle = NULL;
-std::map<uint8_t, std::function<void(std::vector<uint8_t>&)>> ControllerSlave::_ctrlCallbacks;
+std::map<uint8_t, std::function<void(std::vector<uint8_t>&)>> ControllerSlave::_handlers;
 
 int ControllerSlave::init(void)
 {
@@ -201,8 +201,8 @@ void ControllerSlave::_busTask(void *pvParameters)
 
                     std::vector<uint8_t> msg;
                     msg.assign(frame.data, frame.data + frame.length);
-                    auto it = _ctrlCallbacks.find(frame.data[0]);
-                    if (it != _ctrlCallbacks.end()) {
+                    auto it = _handlers.find(frame.data[0]);
+                    if (it != _handlers.end()) {
                         (*it).second(msg);
                     } else {
                         frame.error = 1;

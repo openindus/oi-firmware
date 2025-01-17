@@ -1,5 +1,5 @@
 /**
- * @file Protocol.h
+ * @file Commands.h
  * @brief Protocol interface
  * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
  * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
@@ -32,7 +32,7 @@
 // #define CMD_WRITE_NVS               (uint8_t) 0x0F
 // #define CMD_AUTO_TEST               (uint8_t) 0x11
 
-enum Protocol_Request_e {
+enum Commands_Request_e {
     /* DIGITAL */
     REQUEST_DIGITAL_WRITE                   = 0x00,
     REQUEST_TOGGLE_OUTPUT                   = 0x01,
@@ -101,7 +101,7 @@ enum Protocol_Request_e {
     REQUEST_SENSOR_READ_RAW                 = 0xB6,
 };
 
-enum Protocol_Event_e {
+enum Commands_Event_e {
     EVENT_DIGITAL_INTERRUPT                 = 0x00,
     EVENT_MOTOR_READY                       = 0x01,
 

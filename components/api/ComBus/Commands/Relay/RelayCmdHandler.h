@@ -13,7 +13,7 @@
 #include "ControllerSlave.h"
 #include "Relays.h"
 
-class RelayRsp
+class RelayCmdHandler
 {
 public:
 

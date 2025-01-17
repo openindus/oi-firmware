@@ -13,12 +13,12 @@
 void RelayCmd::digitalWrite(Relay_Num_t num, uint8_t level)
 {
     std::vector<uint8_t> msgBytes = {REQUEST_DIGITAL_WRITE, (uint8_t)num, (uint8_t)level};
-    _control->request(msgBytes);
+    _control->sendRequest(msgBytes);
 }
 
 void RelayCmd::toggleOutput(Relay_Num_t num)
 {
     std::vector<uint8_t> msgBytes = {REQUEST_TOGGLE_OUTPUT, (uint8_t)num};
-    _control->request(msgBytes);
+    _control->sendRequest(msgBytes);
 }
 #endif

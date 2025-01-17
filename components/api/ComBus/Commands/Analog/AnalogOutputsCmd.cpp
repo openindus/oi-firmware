@@ -19,7 +19,7 @@
 int AnalogOutputsCmd::analogOutputMode(AnalogOutput_Num_t num, AnalogOutput_Mode_t mode)
 {
     std::vector<uint8_t> msgBytes = {REQUEST_ANALOG_OUTPUT_MODE, (uint8_t)num, (uint8_t)mode};
-    return _control->request(msgBytes);
+    return _control->sendRequest(msgBytes);
 }
 
 int AnalogOutputsCmd::analogWrite(AnalogOutput_Num_t num, float value)
@@ -27,7 +27,7 @@ int AnalogOutputsCmd::analogWrite(AnalogOutput_Num_t num, float value)
     std::vector<uint8_t> msgBytes = {REQUEST_ANALOG_WRITE, (uint8_t)num};
     uint8_t* ptr = reinterpret_cast<uint8_t*>(&value);
     msgBytes.insert(msgBytes.end(), ptr, ptr + sizeof(float));
-    return _control->request(msgBytes);
+    return _control->sendRequest(msgBytes);
 }
 
 #endif

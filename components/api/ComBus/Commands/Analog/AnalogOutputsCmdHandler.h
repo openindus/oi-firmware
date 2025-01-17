@@ -6,8 +6,8 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file StepperRsp.h
- * @author AFL
+ * @file AnalogOutputsCmdHandler.h
+ * @author CBA
  * @version 0.1
  * @date 2024-04-29
  * 
@@ -22,17 +22,12 @@
 #if defined(MODULE_SLAVE)
 
 #include "ControllerSlave.h"
-#include "MotorStepper.h"
+#include "AnalogOutputs.h"
 
-class StepperRsp
+class AnalogOutputsCmdHandler
 {
 public:
-
     static int init();
-
-private:
-
-    static void _waitTask(void *pvParameters);
 };
 
 #endif

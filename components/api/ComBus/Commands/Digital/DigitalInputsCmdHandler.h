@@ -6,8 +6,8 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file AnalogInputsHVRsp.h
- * @author CBA
+ * @file DigitalInputsCmdHandler.h
+ * @author AFL
  * @version 0.1
  * @date 2024-04-29
  * 
@@ -22,12 +22,17 @@
 #if defined(MODULE_SLAVE)
 
 #include "ControllerSlave.h"
-#include "AnalogInputsHV.h"
+#include "DigitalInputs.h"
 
-class AnalogInputsHVRsp
+class DigitalInputsCmdHandler
 {
 public:
+
     static int init();
+
+private:
+
+    static IsrCallback_t _isrCallback[DIN_MAX];
 };
 
 #endif

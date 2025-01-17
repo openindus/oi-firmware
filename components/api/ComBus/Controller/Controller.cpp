@@ -34,7 +34,7 @@ Controller::Controller(uint16_t type, uint32_t sn) :
  * @param ackNeeded Indicates whether an acknowledgment is needed for this command.
  * @return 0 if the command was sent successfully, -1 if there was an error.
  */
-int Controller::command(const uint8_t cmd, std::vector<uint8_t>& msgBytes, bool ackNeeded)
+int Controller::sendCmd(const uint8_t cmd, std::vector<uint8_t>& msgBytes, bool ackNeeded)
 {
     BusRS::Frame_t frame;
     frame.cmd = cmd;
@@ -64,9 +64,9 @@ error:
  * @param byte Byte array
  * @return -1: error, 0 success
  */
-int Controller::request(std::vector<uint8_t>& msgBytes, bool ackNeeded)
+int Controller::sendRequest(std::vector<uint8_t>& msgBytes, bool ackNeeded)
 {
-    return command(CMD_REQUEST, msgBytes, ackNeeded);
+    return sendCmd(CMD_REQUEST, msgBytes, ackNeeded);
 }
 
 /**
@@ -76,7 +76,7 @@ int Controller::request(std::vector<uint8_t>& msgBytes, bool ackNeeded)
 void Controller::restart(void)
 {
     std::vector<uint8_t> msgBytes;
-    this->command(CMD_RESTART, msgBytes, false);
+    this->sendCmd(CMD_RESTART, msgBytes, false);
 }
 
 /**
@@ -91,7 +91,7 @@ void Controller::_setLed(LedState_t state, LedColor_t color, uint32_t period)
     std::vector<uint8_t> msgBytes = {(uint8_t)state, (uint8_t)color};
     // Add period to message (4 bytes)
     msgBytes.insert(msgBytes.end(), (uint8_t*)&period, (uint8_t*)&period + sizeof(uint32_t));
-    this->command(CMD_SET_LED, msgBytes, false);
+    this->sendCmd(CMD_SET_LED, msgBytes, false);
 }
 
 #endif

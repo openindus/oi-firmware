@@ -76,8 +76,8 @@ public:
 
 protected:
     GenericSensorCmd(Controller* control, uint8_t index, Sensor_Type_e type, std::array<AIn_Num_t, 4> ain_pins);
-    int16_t getInt16(Protocol_Event_e event, Protocol_Request_e request);
-    float getFloat(Protocol_Event_e event, Protocol_Request_e request);
+    int16_t getInt16(Commands_Event_e event, Commands_Request_e request);
+    float getFloat(Commands_Event_e event, Commands_Request_e request);
     Controller* _control;
     uint8_t _index;
     Sensor_Type_e _type;

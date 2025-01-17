@@ -6,7 +6,7 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file AnalogOutputsRsp.h
+ * @file AnalogInputsLVCmdHandler.h
  * @author CBA
  * @version 0.1
  * @date 2024-04-29
@@ -15,16 +15,16 @@
  * @see https://openindus.com
  * 
  * @copyright Copyright (c) 2024
-**/
+ */
 
 #pragma once
 
 #if defined(MODULE_SLAVE)
 
 #include "ControllerSlave.h"
-#include "AnalogOutputs.h"
+#include "AnalogInputsLV.h"
 
-class AnalogOutputsRsp
+class AnalogInputsLVCmdHandler
 {
 public:
     static int init();
