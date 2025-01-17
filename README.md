@@ -12,35 +12,42 @@
 pio run -t menuconfig
 ```
 
-### Build & flash
+### Build and flash
 
 ```bash
-pio run -t upload
+pio run -t upload --upload-port=/dev/ttyUSB0
 ```
 
 ### Monitor
 
 ```bash
-pio device monitor
+pio device monitor -p /dev/ttyUSB0
 ```
 
 ## Platform: Linux ARM
 
-### Build
+### Toolchain
+
+```bash
+sudo apt install gcc-arm-linux-gnueabihf
+sudo apt install g++-arm-linux-gnueabihf
+```
+
+### Configure and compile with CMake
 
 ```bash
 mkdir .oi/build
 cd .oi/build
-cmake ../..
+cmake ../.. -DCMAKE_TOOLCHAIN_FILE=../../toolchain.cmake
 make
 ```
 
-### Installation
-
-### Run
+### Install and run on OICore+
 
 ```bash
-./OI-Firmware
+scp oi-firmware root@oi-core-plus.local:~/
+ssh root@oi-core-plus.local
+./oi-firmware
 ```
 
 ## PIO Library
