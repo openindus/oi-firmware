@@ -21,6 +21,12 @@ typedef enum {
 	LED_WHITE =     (uint8_t) 0x07  // RED, BLUE and GREEN
 } LedColor_t;
 
+typedef enum {
+    LED_ON      = (uint8_t) 0x00,
+    LED_OFF     = (uint8_t) 0x01,
+    LED_BLINK   = (uint8_t) 0x02,
+} LedState_t;
+
 class Led
 {
 public:

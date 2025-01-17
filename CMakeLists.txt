@@ -17,6 +17,8 @@ else()
         components/api/Module
         components/api/Module/Core
         components/api/ComBus
+        components/api/ComBus/Controller
+        components/api/ComBus/Protocol
         components/middleware
         components/middleware/linux_arm/include
     )
@@ -24,6 +26,7 @@ else()
     target_compile_definitions(OI-Firmware PRIVATE 
         LINUX_ARM
         OI_CORE_PLUS
+        MODULE_MASTER
     )
 
 endif()

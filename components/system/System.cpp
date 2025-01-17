@@ -22,9 +22,9 @@
 #ifndef LINUX_ARM
 #include "CLI.h"
 #include "UsbConsole.h"
+#include "ControllerSlave.h"
 #endif
 #include "ControllerMaster.h"
-#include "ControllerSlave.h"
 #include "OpenIndus.h"
 
 static const char TAG[] = "System";
@@ -65,19 +65,27 @@ void System::init(void)
     err |= ControllerSlave::init();
 #endif
 
+#ifndef LINUX_ARM
     /* Command line interface init */
     CLI::init();
+#endif
 
     if (err != 0) {
+#ifndef LINUX_ARM
         ESP_LOGE(TAG, "Failed to initialize module");
+#endif
         Module::ledBlink(LED_RED, 250);
+
+#ifndef LINUX_ARM
         UsbConsole::begin(true); // Force console to start, convenient for debugging
+#endif
         return;
     } else {
         /* Module Initialized */
         Module::ledBlink(LED_BLUE, 1000);
     }
 
+#ifndef LINUX_ARM
     /* Check reset reason */
     esp_reset_reason_t reason = esp_reset_reason();
     if ((reason != ESP_RST_POWERON) && 
@@ -88,6 +96,7 @@ void System::init(void)
         UsbConsole::begin(true); // Force console to start, convenient for debugging
         return;
     }
+#endif
 
 #if defined(MODULE_SLAVE)
 
@@ -96,11 +105,15 @@ void System::init(void)
 
 #else
 
+#ifndef LINUX_ARM
     /* Start a task which listen for user to input "console" */
     UsbConsole::listen();
-    
+#endif
+
+#ifndef LINUX_ARM
     /* Wait for slaves modules to init and give time to user script to enable console */
     vTaskDelay(500/portTICK_PERIOD_MS);
+#endif
 
     /* On master module, call autoId */
 #if defined(MODULE_MASTER)
@@ -108,11 +121,14 @@ void System::init(void)
         Module::ledBlink(LED_GREEN, 1000); // Paired
     } else {
         Module::ledBlink(LED_RED, 1000); // Paired error
+#ifndef LINUX_ARM
         UsbConsole::begin(true); // Force console to start, convenient for debugging
+#endif
         return;
     }
 #endif
 
+#ifndef LINUX_ARM
     if (!UsbConsole::begin()) { // console will start only if user input "console" during startup
         /* Start main task if console is not started  */
         ESP_LOGI(TAG, "Create main task");
@@ -122,6 +138,7 @@ void System::init(void)
         UsbConsole::begin(true); // Force console, will failed if Serial.begin() is called in user code
 #endif
     }
+#endif
     
 #endif
 }

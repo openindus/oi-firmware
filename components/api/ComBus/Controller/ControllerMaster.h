@@ -22,8 +22,6 @@
 #include "Board.h"
 #include "Led.h"
 #include "Bus.h"
-#include "UsbConsole.h"
-#include "UsbSerial.h"
 #include "Protocol.h"
 #include "Controller.h"
 
@@ -42,7 +40,10 @@ public:
     static void program(uint16_t type, uint32_t sn);
     static bool ping(uint16_t type, uint32_t sn); 
 
+#ifndef LINUX_ARM
     static void getBoardInfo(uint16_t type, uint32_t sn, Board_Info_t* board_info);
+#endif
+
     static std::map<uint16_t,std::pair<uint16_t, uint32_t>,std::greater<uint16_t>> discoverSlaves(void);
 
     static inline void addControllerInstance(Controller* controller) {
@@ -60,7 +61,10 @@ public:
 private:
 
     static Controller_State_t _state;
+
+#ifndef LINUX_ARM
     static TaskHandle_t _taskHandle;
+#endif
 
     // List of ids and serial number received via CMD_DISCOVER < ID < TYPE, SN > >
     static std::map<uint16_t, std::pair<uint16_t, uint32_t>, std::greater<uint16_t>> _ids;
