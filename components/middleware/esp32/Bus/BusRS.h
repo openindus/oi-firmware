@@ -45,9 +45,9 @@ public:
 
     static int begin(uart_port_t port, gpio_num_t tx_num, gpio_num_t rx_num);
     static void end(void);
-    static void write(Frame_t* frame, TickType_t timeout=0);
-    static int read(Frame_t* frame, TickType_t timeout=portMAX_DELAY);
-    static int transfer(Frame_t* frame, TickType_t timeout);
+    static void write(Frame_t* frame, uint32_t timeout=0);
+    static int read(Frame_t* frame, uint32_t timeout=portMAX_DELAY);
+    static int transfer(Frame_t* frame, uint32_t timeout);
 
 private:
 

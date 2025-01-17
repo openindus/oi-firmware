@@ -16,13 +16,18 @@
 #if defined(MODULE_MASTER)
 
 #include "ControllerMaster.h"
+#ifndef LINUX_ARM
 #include "UsbConsole.h"
 #include "UsbSerial.h"
+#endif
+#include "OSAL.h"
 
 static const char TAG[] = "ControllerMaster";
 
 Controller_State_t ControllerMaster::_state = STATE_IDLE;
+#ifndef LINUX_ARM
 TaskHandle_t ControllerMaster::_taskHandle = NULL;
+#endif
 std::map<uint16_t, std::pair<uint16_t, uint32_t>, std::greater<uint16_t>> ControllerMaster::_ids;
 std::map<std::pair<uint8_t, uint16_t>, std::function<void(uint8_t*)>> ControllerMaster::_eventCallbacks;
 std::vector<Controller*> ControllerMaster::_instances;
@@ -33,8 +38,12 @@ int ControllerMaster::init(void)
 
     BusIO::writeSync(0);
 
+#ifndef LINUX_ARM
     ESP_LOGI(TAG, "Create bus task");
     xTaskCreate(_busTask, "Bus task", 4096, NULL, 1, &_taskHandle);
+#else
+    /** @todo */
+#endif
 
     _state = STATE_RUNNING;
 
@@ -43,17 +52,25 @@ int ControllerMaster::init(void)
 
 void ControllerMaster::start(void)
 {
+#ifndef LINUX_ARM
     if (_taskHandle != NULL) {
         vTaskResume(_taskHandle);
     }
+#else
+    /** @todo */
+#endif
     _state = STATE_RUNNING;
 }
 
 void ControllerMaster::stop(void)
 {
+#ifndef LINUX_ARM
     if (_taskHandle != NULL) {
         vTaskSuspend(_taskHandle);
     }
+#else
+    /** @todo */
+#endif
     _state = STATE_IDLE;
 }
 
@@ -64,7 +81,9 @@ int ControllerMaster::getStatus(void)
 
 bool ControllerMaster::autoId(void)
 {
+#ifndef LINUX_ARM
     ESP_LOGI(TAG, "Auto ID");
+#endif
 
     /* Check if IDs are in bus order or by Serial Number */
     int num_id_auto = 0;
@@ -79,9 +98,11 @@ bool ControllerMaster::autoId(void)
     }
 
     if ((num_id_auto > 0) && (num_id_sn > 0)) {
+#ifndef LINUX_ARM
         ESP_LOGE(TAG, "Modules must be initialized using the same constructor. You cannot initialize some module without SN and some modules with SN.");
         ESP_LOGE(TAG, "Number of module with SN:%i", num_id_sn);
         ESP_LOGE(TAG, "Number of module without SN:%i", num_id_auto);
+#endif
         return false;
     }
 
@@ -101,7 +122,7 @@ bool ControllerMaster::autoId(void)
         Led::on(LED_YELLOW);
 
         /* Wait */
-        vTaskDelay(200/portTICK_PERIOD_MS);
+        delay(200);
     
         if (_instances.size() == _ids.size()) {
             std::map<uint16_t, std::pair<uint16_t, uint32_t>>::iterator it = _ids.begin();
@@ -113,21 +134,25 @@ bool ControllerMaster::autoId(void)
                     _instances[i]->setSN(it->second.second);
                     ++it;
                     _instances[i]->ledOn(LED_YELLOW);
-                    vTaskDelay(50/portTICK_PERIOD_MS);
+                    delay(50);
                 } else {
                     char name1[16];
                     char name2[16];
+#ifndef LINUX_ARM
                     ESP_LOGE(TAG, "Type of module %i is incorrect: you declared an %s and module detected is an %s", \
                                         i+1, \
                                         BoardUtils::typeToName(_instances[i]->getType(), name1), \
                                         BoardUtils::typeToName(it->second.first, name2));
                     ESP_LOGE(TAG, "Check that the order of module in your main.cpp file correspond with the order of modules on the rail");
+#endif
                     return false;
                 }
             }
         } else {
+#ifndef LINUX_ARM
             ESP_LOGE(TAG, "Number of instantiated modules: %d",  _instances.size());
             ESP_LOGE(TAG, "Number of IDs received: %d",  _ids.size());
+#endif
             return false;
         }
     }
@@ -139,15 +164,17 @@ bool ControllerMaster::autoId(void)
             if (current_id != 0) {
                 _instances[i]->setId(current_id);
                 _instances[i]->ledOn(LED_YELLOW);
-                vTaskDelay(50/portTICK_PERIOD_MS);
+                delay(50);
             } else {
+#ifndef LINUX_ARM
                 ESP_LOGE(TAG, "Cannot instantiate module with SN:%i",  _instances[i]->getSN());
+#endif
                 return false;
             }
         }
     }
 
-    vTaskDelay(50/portTICK_PERIOD_MS);
+    delay(50);
 
     /* Success, broadcast message to set all led green */
     for (int i=0; i<_instances.size(); i++) {
@@ -163,9 +190,15 @@ void autoTest(void)
 
 void ControllerMaster::program(uint16_t type, uint32_t sn)
 {
+#ifndef LINUX_ARM
     UsbConsole::end(); // Do not perform in the task
+#endif
     uint16_t id = _getIdFromSerialNumAndType(type, sn);
+#ifndef LINUX_ARM
     xTaskCreate(_programmingTask, "Module programming task", 4096, (void*)&id, 1, NULL);
+#else
+    /** @todo */
+#endif
     Led::blink(LED_WHITE, 1000); // Programming mode
 }
 
@@ -180,8 +213,8 @@ bool ControllerMaster::ping(uint16_t type, uint32_t sn)
     frame.data = (uint8_t*)malloc(sizeof(type)+sizeof(sn));
     memcpy(frame.data, &type, sizeof(type)); // Type 
     memcpy(&frame.data[2], &sn, sizeof(sn)); // Serial number
-    BusRS::write(&frame, pdMS_TO_TICKS(10));
-    return (BusRS::read(&frame, pdMS_TO_TICKS(10)) == 0);
+    BusRS::write(&frame, 10);
+    return (BusRS::read(&frame, 10) == 0);
 }
 
 void ControllerMaster::getBoardInfo(uint16_t type, uint32_t sn, Board_Info_t* board_info)
@@ -200,8 +233,8 @@ void ControllerMaster::getBoardInfo(uint16_t type, uint32_t sn, Board_Info_t* bo
     frame.ack = true;
     frame.length = 0;
     frame.data = (uint8_t*)malloc(sizeof(Board_Info_t));
-    BusRS::write(&frame, pdMS_TO_TICKS(100));
-    BusRS::read(&frame, pdMS_TO_TICKS(100));
+    BusRS::write(&frame, 100);
+    BusRS::read(&frame, 100);
     memcpy(board_info, frame.data, sizeof(Board_Info_t));
     free(frame.data);
     return;
@@ -221,7 +254,7 @@ std::map<uint16_t,std::pair<uint16_t, uint32_t>,std::greater<uint16_t>> Controll
     BusRS::write(&frame);
 
     // Wait for slaves to answer
-    vTaskDelay(pdMS_TO_TICKS(200));
+    delay(200);
 
     return _ids;
 }
@@ -239,8 +272,8 @@ uint16_t ControllerMaster::_getIdFromSerialNumAndType(uint16_t type, uint32_t sn
     frame.data = (uint8_t*)malloc(sizeof(type)+sizeof(sn));
     memcpy(frame.data, &type, sizeof(type)); // Type 
     memcpy(&frame.data[2], &sn, sizeof(sn)); // Serial number
-    BusRS::write(&frame, pdMS_TO_TICKS(100));
-    BusRS::read(&frame, pdMS_TO_TICKS(100));
+    BusRS::write(&frame, 100);
+    BusRS::read(&frame, 100);
     id = frame.id;
     free(frame.data);
     return id;
@@ -264,7 +297,9 @@ void ControllerMaster::_busTask(void *pvParameters)
                             it->second(frame.args);
                         }
                     } else {
+#ifndef LINUX_ARM
                         ESP_LOGW(TAG, "Command does not exist: command: 0x%02x, id: %d", frame.args[0], id);
+#endif
                     }
                     break;
                 }
@@ -274,12 +309,16 @@ void ControllerMaster::_busTask(void *pvParameters)
                     uint32_t* sn = reinterpret_cast<uint32_t*>(&frame.args[2]);
                     _ids.insert(std::pair<uint16_t, std::pair<uint16_t, uint32_t>>(id, std::pair<uint16_t, uint32_t>(*type, *sn)));
                     char name[16];
+#ifndef LINUX_ARM
                     ESP_LOGI(TAG, "Received id from %s\t SN:%i | ID:%i", BoardUtils::typeToName(*type, name), *sn, id);
+#endif
                     break;
                 }
                 default:
                 {
+#ifndef LINUX_ARM
                     ESP_LOGW(TAG, "Receive undefined command");
+#endif
                     break;
                 }
             }
@@ -291,6 +330,7 @@ void ControllerMaster::_busTask(void *pvParameters)
 
 void ControllerMaster::_programmingTask(void *pvParameters)
 {
+#ifndef LINUX_ARM
     uint16_t id = *(uint16_t*)pvParameters;
     int sequence = 0;
     UsbSerialProtocol::Packet_t packet;
@@ -443,6 +483,7 @@ end:
     free(frame.data);
     frame.data = NULL;
     vTaskDelete(NULL);
+#endif
 }
 
 #endif

@@ -43,7 +43,7 @@ int Controller::sendCmd(const uint8_t cmd, std::vector<uint8_t>& msgBytes, bool 
     frame.ack = ackNeeded;
     frame.length = msgBytes.size();
     frame.data = msgBytes.data();
-    int err = BusRS::transfer(&frame, pdMS_TO_TICKS(100));
+    int err = BusRS::transfer(&frame, 100);
     if (ackNeeded) {
         if (err < 0) {
             goto error;
@@ -54,7 +54,9 @@ int Controller::sendCmd(const uint8_t cmd, std::vector<uint8_t>& msgBytes, bool 
     return 0;
 
 error:
+#ifndef LINUX_ARM
     ESP_LOGE(TAG, "Request error: CMD: %x", cmd);
+#endif
     return -1;
 }
 

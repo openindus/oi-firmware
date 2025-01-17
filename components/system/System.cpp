@@ -143,10 +143,17 @@ void System::init(void)
 #endif
 }
 
+#ifndef LINUX_ARM
 extern "C" void app_main()
+#else
+int main(void)
+#endif
 {
 #if defined(ARDUINO)
     initArduino();
 #endif
     System::init();
+#ifdef LINUX_ARM
+    return 0;
+#endif
 }

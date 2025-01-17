@@ -48,6 +48,7 @@ set(COMPONENT_SRCS
 
 set(COMPONENT_INCLUDE_DIRS
     "."
+    "OSAL"
     "Module"
     "Module/Discrete"
     "Module/Stepper"
