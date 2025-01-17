@@ -6,7 +6,7 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file DcRsp.h
+ * @file DcCmdHandler.h
  * 
  * For more information on OpenIndus:
  * @see https://openindus.com
@@ -21,7 +21,7 @@
 #include "ControllerSlave.h"
 #include "MotorDc.h"
 
-class DcRsp
+class DcCmdHandler
 {
 public:
 

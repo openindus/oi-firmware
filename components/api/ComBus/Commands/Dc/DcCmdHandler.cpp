@@ -6,7 +6,7 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file DcRsp.h
+ * @file DcCmdHandler.h
  * 
  * For more information on OpenIndus:
  * @see https://openindus.com
@@ -17,20 +17,20 @@
 
 #if defined(MODULE_SLAVE)
 
-#include "DcRsp.h"
+#include "DcCmdHandler.h"
 
-int DcRsp::init() {
+int DcCmdHandler::init() {
     
     int err = 0;
 
-    ControllerSlave::addCtrlCallback(REQUEST_MOTOR_DC_RUN, [](std::vector<uint8_t>& data) {
+    ControllerSlave::addCmdHandler(REQUEST_MOTOR_DC_RUN, [](std::vector<uint8_t>& data) {
         MotorNum_t motor = static_cast<MotorNum_t>(data[1]);
         MotorDirection_t direction = static_cast<MotorDirection_t>(data[2]);
         MotorDc::run(motor, direction);
         data.clear();
     });
 
-    ControllerSlave::addCtrlCallback(REQUEST_MOTOR_DC_STOP, [](std::vector<uint8_t>& data) {
+    ControllerSlave::addCmdHandler(REQUEST_MOTOR_DC_STOP, [](std::vector<uint8_t>& data) {
         MotorNum_t motor = static_cast<MotorNum_t>(data[1]);
         MotorDc::stop(motor);
         data.clear();

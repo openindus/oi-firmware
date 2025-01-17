@@ -10,7 +10,7 @@
 
 #include "Global.h"
 #include "Controller.h"
-#include "Protocol.h"
+#include "Commands.h"
 #include "Bus.h"
 #include "Led.h"
 
@@ -29,8 +29,8 @@ public:
 
     Controller(uint16_t type, uint32_t sn);
 
-    int command(const uint8_t cmd, std::vector<uint8_t>& msgBytes, bool ackNeeded = true);
-    int request(std::vector<uint8_t>& msgBytes, bool ackNeeded = true);
+    int sendCmd(const uint8_t cmd, std::vector<uint8_t>& msgBytes, bool ackNeeded = true);
+    int sendRequest(std::vector<uint8_t>& msgBytes, bool ackNeeded = true);
 
     inline void setId(uint16_t id) { _id = id; }
     inline uint16_t getId(void) { return _id; }

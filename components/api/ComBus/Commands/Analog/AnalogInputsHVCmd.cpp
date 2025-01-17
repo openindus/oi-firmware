@@ -19,7 +19,7 @@
 float AnalogInputsHVCmd::analogRead(AnalogInput_Num_t num)
 {
     std::vector<uint8_t> msgBytes = {REQUEST_ANALOG_READ, (uint8_t)num};
-    _control->request(msgBytes);
+    _control->sendRequest(msgBytes);
     float* ret = reinterpret_cast<float*>(&msgBytes[2]);
     return *ret;
 }
@@ -27,7 +27,7 @@ float AnalogInputsHVCmd::analogRead(AnalogInput_Num_t num)
 float AnalogInputsHVCmd::analogReadVolt(AnalogInput_Num_t num)
 {
     std::vector<uint8_t> msgBytes = {REQUEST_ANALOG_READ_VOLT, (uint8_t)num};
-    _control->request(msgBytes);
+    _control->sendRequest(msgBytes);
     float* ret = reinterpret_cast<float*>(&msgBytes[2]);
     return *ret;
 }
@@ -35,7 +35,7 @@ float AnalogInputsHVCmd::analogReadVolt(AnalogInput_Num_t num)
 float AnalogInputsHVCmd::analogReadMilliVolt(AnalogInput_Num_t num)
 {
     std::vector<uint8_t> msgBytes = {REQUEST_ANALOG_READ_MILLIVOLT, (uint8_t)num};
-    _control->request(msgBytes);
+    _control->sendRequest(msgBytes);
     float* ret = reinterpret_cast<float*>(&msgBytes[2]);
     return *ret;
 }

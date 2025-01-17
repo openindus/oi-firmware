@@ -6,28 +6,28 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file AnalogInputsLSRsp.h
- * @author AFL
+ * @file AnalogInputsHVCmdHandler.h
+ * @author CBA
  * @version 0.1
- * @date 2024-10-01
+ * @date 2024-04-29
  * 
  * For more information on OpenIndus:
  * @see https://openindus.com
  * 
  * @copyright Copyright (c) 2024
- */
+**/
 
 #pragma once
 
 #if defined(MODULE_SLAVE)
 
 #include "ControllerSlave.h"
-#include "AnalogInputsLS.h"
+#include "AnalogInputsHV.h"
 
-class AnalogInputsLSRsp
+class AnalogInputsHVCmdHandler
 {
 public:
-    static int init(void);
+    static int init();
 };
 
 #endif

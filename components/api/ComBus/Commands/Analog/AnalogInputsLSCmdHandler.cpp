@@ -6,20 +6,20 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file AnalogInputsLSRsp.h
+ * @file AnalogInputsLSCmdHandler.h
  *
  * For more information on OpenIndus:
  * @see https://openindus.com
  */
 
-#include "AnalogInputsLSRsp.h"
+#include "AnalogInputsLSCmdHandler.h"
 
 #if defined(MODULE_SLAVE)
 
-int AnalogInputsLSRsp::init(void)
+int AnalogInputsLSCmdHandler::init(void)
 {
     
-    ControllerSlave::addCtrlCallback(REQUEST_ADD_SENSOR, [](std::vector<uint8_t>& data) {
+    ControllerSlave::addCmdHandler(REQUEST_ADD_SENSOR, [](std::vector<uint8_t>& data) {
         std::vector<AIn_Num_t> aIns;
 
         for (auto it = data.begin() + 2; it != data.end(); it++) {
@@ -32,7 +32,7 @@ int AnalogInputsLSRsp::init(void)
         data.push_back((uint8_t)index);
     });
 
-    ControllerSlave::addCtrlCallback(REQUEST_SENSOR_SET_PARAMETER, [](std::vector<uint8_t>& data) {
+    ControllerSlave::addCmdHandler(REQUEST_SENSOR_SET_PARAMETER, [](std::vector<uint8_t>& data) {
         Sensor_Parameter_e parameter = (Sensor_Parameter_e) data[2];
         int32_t* int_value = reinterpret_cast<int32_t *>(&data[3]);
         Sensor_Parameter_Value_u value = {.value = *int_value};
@@ -41,7 +41,7 @@ int AnalogInputsLSRsp::init(void)
         data.clear();
     });
 
-    ControllerSlave::addCtrlCallback(REQUEST_SENSOR_READ, [](std::vector<uint8_t>& data) {
+    ControllerSlave::addCmdHandler(REQUEST_SENSOR_READ, [](std::vector<uint8_t>& data) {
         float value = AnalogInputsLS::sensors[data[1]]->read();
         uint8_t* ptr = reinterpret_cast<uint8_t*>(&value);
         data.insert(data.end(), ptr, ptr + sizeof(float));
@@ -50,7 +50,7 @@ int AnalogInputsLSRsp::init(void)
         ControllerSlave::sendEvent(data);
     });
 
-    ControllerSlave::addCtrlCallback(REQUEST_SENSOR_READ_MILLIVOLT, [](std::vector<uint8_t>& data) {
+    ControllerSlave::addCmdHandler(REQUEST_SENSOR_READ_MILLIVOLT, [](std::vector<uint8_t>& data) {
         float value = AnalogInputsLS::sensors[data[1]]->readMillivolts();
         uint8_t* ptr = reinterpret_cast<uint8_t*>(&value);
         data.insert(data.end(), ptr, ptr + sizeof(float));
@@ -59,7 +59,7 @@ int AnalogInputsLSRsp::init(void)
         ControllerSlave::sendEvent(data);
     });
 
-    ControllerSlave::addCtrlCallback(REQUEST_SENSOR_READ_RESISTANCE, [](std::vector<uint8_t>& data) {
+    ControllerSlave::addCmdHandler(REQUEST_SENSOR_READ_RESISTANCE, [](std::vector<uint8_t>& data) {
         printf("read resistor of %i\n", data[1]);
         float value = AnalogInputsLS::sensors[data[1]]->readResistor();
         printf("val:%f\n", value);
@@ -71,7 +71,7 @@ int AnalogInputsLSRsp::init(void)
         ControllerSlave::sendEvent(data);
     });
 
-    ControllerSlave::addCtrlCallback(REQUEST_SENSOR_READ_TEMPERATURE, [](std::vector<uint8_t>& data) {
+    ControllerSlave::addCmdHandler(REQUEST_SENSOR_READ_TEMPERATURE, [](std::vector<uint8_t>& data) {
         float value = AnalogInputsLS::sensors[data[1]]->readTemperature();
         uint8_t* ptr = reinterpret_cast<uint8_t*>(&value);
         data.insert(data.end(), ptr, ptr + sizeof(float));
@@ -80,7 +80,7 @@ int AnalogInputsLSRsp::init(void)
         ControllerSlave::sendEvent(data);
     });
 
-    ControllerSlave::addCtrlCallback(REQUEST_SENSOR_READ_RAW, [](std::vector<uint8_t>& data) {
+    ControllerSlave::addCmdHandler(REQUEST_SENSOR_READ_RAW, [](std::vector<uint8_t>& data) {
         int16_t value = AnalogInputsLS::sensors[data[1]]->raw_read();
         uint8_t* ptr = reinterpret_cast<uint8_t*>(&value);
         data.insert(data.end(), ptr, ptr + sizeof(int16_t));

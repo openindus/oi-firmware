@@ -46,8 +46,8 @@ int Dc::init(void)
     err |= MotorDc::init(motorsConfig, DC_MOTOR_FAULT);
 
 #if defined(MODULE_SLAVE)
-    err |= DigitalInputsRsp::init();
-    err |= DcRsp::init();
+    err |= DigitalInputsCmdHandler::init();
+    err |= DcCmdHandler::init();
 #endif
 
     return err;

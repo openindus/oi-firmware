@@ -21,7 +21,7 @@
 #include "Led.h"
 #include "Bus.h"
 #include "FlashLoader.h"
-#include "Protocol.h"
+#include "Commands.h"
 
 #if defined(MODULE_SLAVE)
 
@@ -37,8 +37,8 @@ public:
 
     static void sendEvent(std::vector<uint8_t> msgBytes);
 
-    inline static void addCtrlCallback(uint8_t ctrl, std::function<void(std::vector<uint8_t>&)> callback) {
-        _ctrlCallbacks.insert({ctrl, callback});
+    inline static void addCmdHandler(uint8_t ctrl, std::function<void(std::vector<uint8_t>&)> callback) {
+        _handlers.insert({ctrl, callback});
     }
 
 protected:
@@ -50,7 +50,7 @@ private:
     static Controller_State_t _state;
     static TaskHandle_t _taskHandle;
 
-    static std::map<uint8_t, std::function<void(std::vector<uint8_t>&)>> _ctrlCallbacks;
+    static std::map<uint8_t, std::function<void(std::vector<uint8_t>&)>> _handlers;
 
     static void _busTask(void *pvParameters);
     static void _heartbeatTask(void *pvParameters);

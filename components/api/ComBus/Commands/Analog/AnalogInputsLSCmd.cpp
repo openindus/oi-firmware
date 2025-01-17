@@ -28,7 +28,7 @@ _ain_pins(ain_pins)
     _readEvent = xQueueCreate(1, sizeof(uint8_t*));
 }
 
-int16_t GenericSensorCmd::getInt16(Protocol_Event_e event, Protocol_Request_e request)
+int16_t GenericSensorCmd::getInt16(Commands_Event_e event, Commands_Request_e request)
 {
     // Add callback (remove callback if it already exists)
     ControllerMaster::removeEventCallback(event, _control->getId());
@@ -38,7 +38,7 @@ int16_t GenericSensorCmd::getInt16(Protocol_Event_e event, Protocol_Request_e re
 
     // Send a message to slave to request a read but do not wait a response
     std::vector<uint8_t> msgBytes = {(uint8_t)request, _index};
-    _control->request(msgBytes, false);
+    _control->sendRequest(msgBytes, false);
 
     // Wait for event
     uint8_t* data = NULL;
@@ -48,7 +48,7 @@ int16_t GenericSensorCmd::getInt16(Protocol_Event_e event, Protocol_Request_e re
     return *ret;
 }
 
-float GenericSensorCmd::getFloat(Protocol_Event_e event, Protocol_Request_e request)
+float GenericSensorCmd::getFloat(Commands_Event_e event, Commands_Request_e request)
 {
     // Add callback (remove callback if it already exists)
     ControllerMaster::removeEventCallback(event, _control->getId());
@@ -58,7 +58,7 @@ float GenericSensorCmd::getFloat(Protocol_Event_e event, Protocol_Request_e requ
 
     // Send a message to slave to request a read but do not wait a response
     std::vector<uint8_t> msgBytes = {(uint8_t)request, _index};
-    _control->request(msgBytes, false);
+    _control->sendRequest(msgBytes, false);
 
     // Wait for event
     uint8_t* data = NULL;
@@ -83,7 +83,7 @@ void GenericSensorCmd::setParameter(Sensor_Parameter_e parameter, Sensor_Paramet
     std::vector<uint8_t> msgBytes = {REQUEST_SENSOR_SET_PARAMETER, _index, *((uint8_t *) &parameter)};
     uint8_t *ptr = reinterpret_cast<uint8_t*>(&value.value);
     msgBytes.insert(msgBytes.end(), ptr, ptr + sizeof(int32_t));
-    _control->request(msgBytes);
+    _control->sendRequest(msgBytes);
 }
 
 void GenericSensorCmd::setAcquisitionTime(AcquisitionDuration_e duration)
@@ -212,7 +212,7 @@ int AnalogInputsLSCmd::addSensor(Sensor_Type_e type, const std::vector<AIn_Num_t
     }
 
     /* Create new instance of sensor and return sensor index */
-    if (_control->request(msgBytes) == 0) {
+    if (_control->sendRequest(msgBytes) == 0) {
         index = static_cast<int>(msgBytes[1]);
     }
 

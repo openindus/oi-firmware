@@ -6,7 +6,7 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file DigitalOutputsRsp.h
+ * @file DigitalOutputsCmdHandler.h
  * @author AFL
  * @version 0.1
  * @date 2024-04-29
@@ -24,7 +24,7 @@
 #include "ControllerSlave.h"
 #include "DigitalOutputs.h"
 
-class DigitalOutputsRsp
+class DigitalOutputsCmdHandler
 {
 public:
 

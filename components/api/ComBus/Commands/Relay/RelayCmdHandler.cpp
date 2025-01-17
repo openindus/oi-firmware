@@ -6,18 +6,18 @@
  * @see https://openindus.com
  */
 
-#include "RelayRsp.h"
+#include "RelayCmdHandler.h"
 
 #if defined(MODULE_SLAVE)
 
-int RelayRsp::init() {
+int RelayCmdHandler::init() {
     
-    ControllerSlave::addCtrlCallback(REQUEST_DIGITAL_WRITE, [](std::vector<uint8_t>& data) {
+    ControllerSlave::addCmdHandler(REQUEST_DIGITAL_WRITE, [](std::vector<uint8_t>& data) {
         Relays::digitalWrite((Relay_Num_t)data[1], data[2]);
         data.clear();
     });
 
-    ControllerSlave::addCtrlCallback(REQUEST_TOGGLE_OUTPUT, [](std::vector<uint8_t>& data) {
+    ControllerSlave::addCmdHandler(REQUEST_TOGGLE_OUTPUT, [](std::vector<uint8_t>& data) {
         Relays::toggleOutput((Relay_Num_t)data[1]);
         data.clear();
     });
