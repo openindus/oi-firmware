@@ -10,17 +10,30 @@
 
 #include <stdint.h>
 
+typedef struct __attribute__((__packed__)) {
+    uint16_t type;
+    uint32_t serial_number;
+    char name[32];
+    char version[16];
+    char date[16];
+    char time[16];
+} Board_Info_t;
+
 class Board
 {
+private:
+
 public:
 
     static void restart(void);
-    static float getTemperature(void);    
-    static uint8_t getBoardType(void);
-    static uint8_t getHardwareVariant(void);
-    static uint32_t getSerialNum(void);
-    static int64_t getTimestamp(void);
-    static void getSoftwareVersion(char software_version[32]);
-    static bool setBoardInfo(uint8_t board_type, uint8_t hardware_variant, uint32_t serial_num, int64_t timestamp);
 
+};
+
+class BoardUtils
+{
+private:
+
+public:
+    static bool areTypeCompatible(uint16_t type1, uint16_t type2);
+    static void typeToName(uint16_t type, char* name);
 };

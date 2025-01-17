@@ -90,7 +90,7 @@ void BusRS::end(void)
  * 
  * @param frame 
  */
-void BusRS::write(Frame_t* frame, TickType_t timeout)
+void BusRS::write(Frame_t* frame, uint32_t timeout)
 {
     uint8_t* buffer = (uint8_t*)malloc(BUS_RS_FRAME_LENGTH_MAX);
     size_t length;
@@ -104,7 +104,7 @@ void BusRS::write(Frame_t* frame, TickType_t timeout)
             xSemaphoreTake(_writeReadMutex, portMAX_DELAY);
         xSemaphoreTake(_writeMutex, portMAX_DELAY);
         uart_write_bytes(_port, (const char*) buffer, length);
-        uart_wait_tx_done(_port, timeout);
+        uart_wait_tx_done(_port, pdMS_TO_TICKS(timeout));
         xSemaphoreGive(_writeMutex);
     }
     free(buffer);
@@ -121,15 +121,15 @@ void BusRS::write(Frame_t* frame, TickType_t timeout)
  * 
  * @param frame 
  */
-int BusRS::read(Frame_t* frame, TickType_t timeout)
+int BusRS::read(Frame_t* frame, uint32_t timeout)
 {
     uart_event_t event;
     uint8_t* buffer = (uint8_t*)malloc(BUS_RS_FRAME_LENGTH_MAX);
     int index = 0;
     while (1) {
-        if (xQueueReceive(_eventQueue, (void*)&event, timeout) == pdTRUE) {
+        if (xQueueReceive(_eventQueue, (void*)&event, pdMS_TO_TICKS(timeout)) == pdTRUE) {
             if (event.type == UART_DATA) {
-                uart_read_bytes(_port, buffer, event.size, timeout);
+                uart_read_bytes(_port, buffer, event.size, pdMS_TO_TICKS(timeout));
                 if (index == 0) { // Start frame
                     if (event.size >= BUS_RS_HEADER_LENGTH) { // Get header frame
                         memcpy(frame, buffer, BUS_RS_HEADER_LENGTH);
@@ -190,14 +190,14 @@ success:
  * @param timeout 
  * @return int 
  */
-int BusRS::transfer(Frame_t* frame, TickType_t timeout)
+int BusRS::transfer(Frame_t* frame, uint32_t timeout)
 {
     int ret = 0;
     xSemaphoreTake(_transferMutex, portMAX_DELAY);
     if (frame != NULL) {
-        write(frame, timeout);
+        write(frame, pdMS_TO_TICKS(timeout));
         if (frame->ack == true) {
-            ret = read(frame, timeout);
+            ret = read(frame, pdMS_TO_TICKS(timeout));
         }
     }
     xSemaphoreGive(_transferMutex);
