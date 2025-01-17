@@ -16,6 +16,8 @@
 #if defined(MODULE_MASTER)
 
 #include "ControllerMaster.h"
+#include "UsbConsole.h"
+#include "UsbSerial.h"
 
 static const char TAG[] = "ControllerMaster";
 

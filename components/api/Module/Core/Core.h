@@ -10,6 +10,9 @@
 
 #include "Global.h"
 #include "Module.h"
+
+#ifndef OI_CORE_PLUS
+
 #include "DigitalOutputsExp.h"
 #include "DigitalInputsExp.h"
 #include "AnalogInputsHV.h"
@@ -39,5 +42,7 @@ private:
     static ioex_device_t *_ioex;
     static void _controlTask(void *pvParameters);
 };
+
+#endif
 
 #endif
