@@ -29,9 +29,9 @@ pio device monitor
 ### Build
 
 ```bash
-mkdir build
-cd build
-cmake ..
+mkdir .oi/build
+cd .oi/build
+cmake ../..
 make
 ```
 
@@ -46,3 +46,7 @@ make
 ## PIO Library
 
 How to generate PlatformIO librarie.
+```bash
+mkdir .oi/lib
+pio pkg pack --output=".oi/lib/"
+```
