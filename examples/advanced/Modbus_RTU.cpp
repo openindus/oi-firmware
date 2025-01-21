@@ -19,13 +19,13 @@ void loop()
 {
     /* Send request to read the input register */
     if (!ModbusRTUClient.requestFrom(1, INPUT_REGISTERS, 0x0001, 2)) {
-        printf("failed to read registers: %d\n", ModbusRTUClient.lastError());
+        printf("failed to read registers: %s\n", ModbusRTUClient.lastError());
     } else {
         /* Read temperature and humidity */
         float temperature = (ModbusRTUClient.read() / 10.0);
         float humidity = (ModbusRTUClient.read() / 10.0);
-        printf("temperature: %d\n", temperature);
-        printf("humidity: %d\n", humidity);
+        printf("temperature: %f\n", temperature);
+        printf("humidity: %f\n", humidity);
     }
     delay(5000);
 }
