@@ -9,7 +9,7 @@ Discrete discrete;
 void monitor_current(void*)
 {
     while (1) {    
-        printf("Get output current: %d\n", discrete.getOutputCurrent(DOUT_1));
+        printf("Get output current: %f\n", discrete.getOutputCurrent(DOUT_1));
         delay(100);
     }
 }
