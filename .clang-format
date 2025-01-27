@@ -6,4 +6,4 @@ AllowShortIfStatementsOnASingleLine: false
 IndentCaseLabels: false
 ColumnLimit: 100
 AlignConsecutiveAssignments: true
-AlignConsecutiveDeclarations: true
+# AlignConsecutiveDeclarations: true
