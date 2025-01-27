@@ -1,7 +1,7 @@
 /**
  * @file DigitalOutputsCmd.h
  * @brief Digital Outputs Commands
- * @author 
+ * @author
  * @copyright (c) [2025] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
@@ -17,8 +17,8 @@
 
 class DigitalOutputsCmd
 {
-  public:
-    DigitalOutputsCmd(Controller *control) : _control(control) {}
+public:
+    DigitalOutputsCmd(Controller *controllerInst) : _controllerInst(controllerInst) {}
 
     /**
      * @brief Set an output at high or low level.
@@ -26,7 +26,12 @@ class DigitalOutputsCmd
      * @param num DOUT to drive.
      * @param level DOUT level, HIGH or LOW.
      */
-    void digitalWrite(DOut_Num_t num, uint8_t level);
+    void digitalWrite(DOut_Num_t num, bool level);
+
+    template <typename T1, typename T2> 
+    inline void digitalWrite(T1 num, T2 level) {
+        digitalWrite((DOut_Num_t)num, (bool)level);
+    }
 
     /**
      * @brief Toggle a digital output
@@ -67,8 +72,8 @@ class DigitalOutputsCmd
      **/
     float getOutputCurrent(DOut_Num_t num);
 
-  private:
-    Controller *_control;
+private:
+    Controller *_controllerInst;
 };
 
 #endif

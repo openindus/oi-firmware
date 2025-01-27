@@ -1,13 +1,8 @@
 /**
- * Copyright (C) OpenIndus, Inc - All Rights Reserved
- *
- * This file is part of OpenIndus Library.
- *
- * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential
- * 
  * @file DigitalOutputsCmdHandler.cpp
- * For more information on OpenIndus:
+ * @brief Digital outputs commands handler
+ * @author 
+ * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
 
@@ -15,41 +10,41 @@
 
 #if defined(MODULE_SLAVE)
 
-int DigitalOutputsCmdHandler::init() {
-    
-    ControllerSlave::addCmdHandler(REQUEST_DIGITAL_WRITE, [](std::vector<uint8_t>& data) {
-        DigitalOutputs::digitalWrite((DOut_Num_t)data[1], data[2]);
+int DigitalOutputsCmdHandler::init(void)
+{
+    ControllerSlave::addCmdHandler(REQUEST_DIGITAL_WRITE, [](std::vector<uint8_t> &data) {
+        DigitalOutputs::digitalWrite((DOut_Num_t)data[1], (bool)data[2]);
         data.clear();
     });
 
-    ControllerSlave::addCmdHandler(REQUEST_TOGGLE_OUTPUT, [](std::vector<uint8_t>& data) {
+    ControllerSlave::addCmdHandler(REQUEST_TOGGLE_OUTPUT, [](std::vector<uint8_t> &data) {
         DigitalOutputs::toggleOutput((DOut_Num_t)data[1]);
         data.clear();
     });
 
-    ControllerSlave::addCmdHandler(REQUEST_OUTPUT_MODE, [](std::vector<uint8_t>& data) {
+    ControllerSlave::addCmdHandler(REQUEST_OUTPUT_MODE, [](std::vector<uint8_t> &data) {
         DigitalOutputs::outputMode((DOut_Num_t)data[1], (DOut_Mode_t)data[2]);
         data.clear();
     });
 
-    ControllerSlave::addCmdHandler(REQUEST_SET_PWM_FREQUENCY, [](std::vector<uint8_t>& data) {
-        uint32_t* freq = reinterpret_cast<uint32_t*>(&data[2]);
+    ControllerSlave::addCmdHandler(REQUEST_SET_PWM_FREQUENCY, [](std::vector<uint8_t> &data) {
+        uint32_t *freq = reinterpret_cast<uint32_t *>(&data[2]);
         DigitalOutputs::setPWMFrequency((DOut_Num_t)data[1], *freq);
         data.clear();
     });
 
-    ControllerSlave::addCmdHandler(REQUEST_SET_PWM_DUTY_CYCLE, [](std::vector<uint8_t>& data) {
-        uint32_t* duty = reinterpret_cast<uint32_t*>(&data[2]);
+    ControllerSlave::addCmdHandler(REQUEST_SET_PWM_DUTY_CYCLE, [](std::vector<uint8_t> &data) {
+        uint32_t *duty = reinterpret_cast<uint32_t *>(&data[2]);
         DigitalOutputs::setPWMDutyCycle((DOut_Num_t)data[1], *duty);
         data.clear();
     });
 
-    ControllerSlave::addCmdHandler(REQUEST_GET_OUTPUT_CURRENT, [](std::vector<uint8_t>& data) {
+    ControllerSlave::addCmdHandler(REQUEST_GET_OUTPUT_CURRENT, [](std::vector<uint8_t> &data) {
         float current = DigitalOutputs::getOutputCurrent((DOut_Num_t)data[1]);
-        uint8_t* ptr = reinterpret_cast<uint8_t*>(&current);
+        uint8_t *ptr  = reinterpret_cast<uint8_t *>(&current);
         data.insert(data.end(), ptr, ptr + sizeof(float));
     });
-    
+
     return 0;
 }
 
