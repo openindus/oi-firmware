@@ -139,7 +139,7 @@ class StepperCmd
      * @brief Stepper Run command
      *
      * @param[in] motor Motor num
-     * @param[in] direction Movement direction (FORWARD, BACKWARD)
+     * @param[in] direction Movement direction (FORWARD, REVERSE)
      * @param[in] speed in step/s
      * @return None
      */
@@ -165,7 +165,7 @@ class StepperCmd
     void homing(MotorNum_t motor, float speed);
 
   private:
-    Controller *_control;
+    Controller   *_control;
     QueueHandle_t _motorWaitEvent[MOTOR_MAX];
 };
 

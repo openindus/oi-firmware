@@ -32,12 +32,7 @@ typedef enum {
  * @brief Stepper motors stop modes
  *
  */
-typedef enum { 
-    SOFT_STOP = 0, 
-    HARD_STOP = 1, 
-    SOFT_HIZ  = 2, 
-    HARD_HIZ  = 3 
-} MotorStopMode_t;
+typedef enum { SOFT_STOP = 0, HARD_STOP = 1, SOFT_HIZ = 2, HARD_HIZ = 3 } MotorStopMode_t;
 
 class MotorStepper : public Motor
 {
@@ -164,7 +159,7 @@ class MotorStepper : public Motor
      * @brief Stepper Run command
      *
      * @param[in] motor Motor num
-     * @param[in] direction Movement direction (FORWARD, BACKWARD)
+     * @param[in] direction Movement direction (FORWARD, REVERSE)
      * @param[in] speed in step/s
      * @return None
      */
