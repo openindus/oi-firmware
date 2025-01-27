@@ -11,10 +11,7 @@
 
 void setup(void)
 {
-#if defined(ARDUINO_ARCH_ESP32)
-    Serial.begin(115200);
-    Serial.println("Hello Openindus !");
-#endif
+    printf("Hello OpenIndus!\n");
 }
 
 void loop(void)

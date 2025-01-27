@@ -32,6 +32,10 @@ static int _analogRead(int argc, char **argv)
     }
 
     AnalogInput_Num_t ain = (AnalogInput_Num_t)(_analogReadArgs.ain->ival[0] - 1);
+    if (ain < AIN_1) {
+        ESP_LOGE(__func__, "Invalid AIN number");
+        return -1;
+    }
     AnalogInput_Unit_t unit = AIN_UNIT_MILLIVOLT;
     if (_analogReadArgs.unit->count == 1) {
         unit = (AnalogInput_Unit_t)(_analogReadArgs.unit->ival[0]);
