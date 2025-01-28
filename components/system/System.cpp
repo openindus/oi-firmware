@@ -1,15 +1,8 @@
 /**
- * Copyright (C) OpenIndus, Inc - All Rights Reserved
- *
- * This file is part of OpenIndus Library.
- *
- * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential
- * 
  * @file System.cpp
- * @brief 
- *
- * For more information on OpenIndus:
+ * @brief System main
+ * @author
+ * @copyright (c) [2025] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
 
@@ -21,8 +14,8 @@
 #include "Global.h"
 #ifndef LINUX_ARM
 #include "CLI.h"
-#include "UsbConsole.h"
 #include "ControllerSlave.h"
+#include "UsbConsole.h"
 #endif
 #include "ControllerMaster.h"
 #include "OpenIndus.h"
@@ -32,12 +25,12 @@ static const char TAG[] = "System";
 void System::_mainTask(void *pvParameters)
 {
     setup();
-    while(1) {
+    while (1) {
         loop();
     }
 }
 
-void System::init(void)
+int System::init(void)
 {
     int err = 0;
 
@@ -70,7 +63,12 @@ void System::init(void)
     CLI::init();
 #endif
 
-    if (err != 0) {
+    return err;
+}
+
+void System::start(void)
+{
+    if (init() != 0) {
 #ifndef LINUX_ARM
         ESP_LOGE(TAG, "Failed to initialize module");
 #endif
@@ -79,7 +77,10 @@ void System::init(void)
 #ifndef LINUX_ARM
         UsbConsole::begin(true); // Force console to start, convenient for debugging
 #endif
+
+#ifndef FORCED_START
         return;
+#endif
     } else {
         /* Module Initialized */
         Module::ledBlink(LED_BLUE, 1000);
@@ -87,32 +88,37 @@ void System::init(void)
 
 #ifndef LINUX_ARM
     /* Check reset reason */
-    esp_reset_reason_t reason = esp_reset_reason();
-    if ((reason != ESP_RST_POWERON) && 
-        (reason != ESP_RST_SW) && 
-        (reason != ESP_RST_UNKNOWN)) {
+    esp_reset_reason_t reason;
+    reason = esp_reset_reason();
+    if ((reason != ESP_RST_POWERON) && (reason != ESP_RST_SW) && (reason != ESP_RST_UNKNOWN)) {
         ESP_LOGE(TAG, "Reset reason : %d", reason);
         Module::ledBlink(LED_RED, 1000); // Error
-        UsbConsole::begin(true); // Force console to start, convenient for debugging
+        UsbConsole::begin(true);         // Force console to start, convenient for debugging
+
+#ifndef FORCED_START
         return;
+#endif
     }
 #endif
+
+#ifndef LINUX_ARM
 
 #if defined(MODULE_SLAVE)
 
     UsbConsole::begin(true); // Force console on slave module
+
+#ifndef FORCED_START
     return;
+#endif
 
 #else
-
-#ifndef LINUX_ARM
     /* Start a task which listen for user to input "console" */
     UsbConsole::listen();
 #endif
 
 #ifndef LINUX_ARM
     /* Wait for slaves modules to init and give time to user script to enable console */
-    vTaskDelay(500/portTICK_PERIOD_MS);
+    vTaskDelay(500 / portTICK_PERIOD_MS);
 #endif
 
     /* On master module, call autoId */
@@ -124,7 +130,10 @@ void System::init(void)
 #ifndef LINUX_ARM
         UsbConsole::begin(true); // Force console to start, convenient for debugging
 #endif
+
+#ifndef FORCED_START
         return;
+#endif
     }
 #endif
 
@@ -135,11 +144,12 @@ void System::init(void)
         vTaskDelay(10);
         xTaskCreate(_mainTask, "Main task", 8192, NULL, 1, NULL);
 #if defined(FORCE_CONSOLE)
-        UsbConsole::begin(true); // Force console, will failed if Serial.begin() is called in user code
+        UsbConsole::begin(
+            true); // Force console, will failed if Serial.begin() is called in user code
 #endif
     }
 #endif
-    
+
 #endif
 }
 
@@ -152,7 +162,7 @@ int main(void)
 #if defined(ARDUINO)
     initArduino();
 #endif
-    System::init();
+    System::start();
 #ifdef LINUX_ARM
     return 0;
 #endif
