@@ -137,6 +137,11 @@ void MotorStepper::resetHomePosition(MotorNum_t motor)
     PS01_Param_SetAbsPos(motor, pos);
 }
 
+void MotorStepper::setPosition(MotorNum_t motor, int32_t position)
+{
+    PS01_Param_SetAbsPos(motor, position);
+}
+
 void MotorStepper::stop(MotorNum_t motor, MotorStopMode_t mode)
 {
     switch (mode)

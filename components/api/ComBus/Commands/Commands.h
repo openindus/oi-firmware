@@ -76,6 +76,7 @@ enum Commands_Request_e {
     REQUEST_MOTOR_SET_FULL_STEP_SPEED       = 0x4E,
     REQUEST_MOTOR_SET_ACCELERATION          = 0x4F,
     REQUEST_MOTOR_SET_DECELERATION          = 0x50,
+    REQUEST_MOTOR_SET_POSITION              = 0x51,
 
     /* BRUSHLESS MOTOR */
     REQUEST_MOTOR_SET_SPEED                 = 0x60,

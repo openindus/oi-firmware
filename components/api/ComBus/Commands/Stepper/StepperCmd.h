@@ -16,8 +16,8 @@
 
 class StepperCmd
 {
-  public:
-    StepperCmd(Controller *control);
+public:
+    StepperCmd(Controller *controller);
 
     /**
      * @brief Attach a limit switch to the specified motor
@@ -110,6 +110,14 @@ class StepperCmd
     void resetHomePosition(MotorNum_t motor);
 
     /**
+     * @brief Set the absolute position
+     *
+     * @param motor
+     * @param position position in step
+     */
+    void setPosition(MotorNum_t motor, int32_t position);
+
+    /**
      * @brief Stop the motor
      *
      * @param motor Motor num
@@ -164,8 +172,8 @@ class StepperCmd
      */
     void homing(MotorNum_t motor, float speed);
 
-  private:
-    Controller   *_control;
+private:
+    Controller *_controller;
     QueueHandle_t _motorWaitEvent[MOTOR_MAX];
 };
 

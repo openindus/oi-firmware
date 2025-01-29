@@ -36,7 +36,7 @@ typedef enum { SOFT_STOP = 0, HARD_STOP = 1, SOFT_HIZ = 2, HARD_HIZ = 3 } MotorS
 
 class MotorStepper : public Motor
 {
-  public:
+public:
     static int init(PS01_Hal_Config_t *config, PS01_Param_t *param);
 
     /**
@@ -128,6 +128,14 @@ class MotorStepper : public Motor
      * @param motor
      */
     static void resetHomePosition(MotorNum_t motor);
+
+    /**
+     * @brief Set the absolute position
+     *
+     * @param motor
+     * @param position position in step
+     */
+    static void setPosition(MotorNum_t motor, int32_t position);
 
     /**
      * @brief Stop the motor
