@@ -16,7 +16,7 @@
 #include "DigitalInputs.h"
 #include "MotorStepper.h"
 #include "MotorStepperParam.h"
-#include "ControllerSlave.h"
+#include "SlaveController.h"
 #include "DigitalInputsCmdHandler.h"
 #include "StepperCmdHandler.h"
 #include "Controller.h"

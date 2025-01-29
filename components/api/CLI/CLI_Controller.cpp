@@ -7,8 +7,8 @@
  */
 
 #include "CLI.h"
-#include "ControllerMaster.h"
-#include "ControllerSlave.h"
+#include "MasterController.h"
+#include "SlaveController.h"
 
 #if defined(MODULE_MASTER)
 
@@ -34,7 +34,7 @@ static int programCmd(int argc, char **argv)
     type = programArgs.type->ival[0];
     sn = programArgs.sn->ival[0];
 
-    ControllerMaster::program(type, sn);
+    MasterController::program(type, sn);
 
     return 0;
 }
@@ -83,7 +83,7 @@ static int pingCmd(int argc, char **argv)
     sn = pingArgs.sn->ival[0];
 
     t0 = esp_timer_get_time();
-    if (ControllerMaster::ping(type, sn)) {
+    if (MasterController::ping(type, sn)) {
         t = esp_timer_get_time();
         printf("Ping module: %u time: %lld us\n", sn, (t-t0));
     } else {
@@ -117,7 +117,7 @@ static int _registerPingCmd(void)
 
 static int autoId(int argc, char **argv) 
 {
-    ControllerMaster::autoId();
+    MasterController::autoId();
     return 0;
 }
 
@@ -144,7 +144,7 @@ static int _registerAutoIdCmd(void)
 static int discoverSlavesCmd(int argc, char **argv) 
 {
     
-    std::map<uint16_t,std::pair<uint16_t, uint32_t>,std::greater<uint16_t>> _ids = ControllerMaster::discoverSlaves();
+    std::map<uint16_t,std::pair<uint16_t, uint32_t>,std::greater<uint16_t>> _ids = MasterController::discoverSlaves();
 
     printf("[");
             
@@ -205,7 +205,7 @@ static int getSlaveInfoCmd(int argc, char **argv)
     Board_Info_t boardInfo;
 
     if (getSlaveInfoArgs.type->count == 1 && getSlaveInfoArgs.sn->count == 1) {
-        ControllerMaster::getBoardInfo((uint16_t)getSlaveInfoArgs.type->ival[0], (uint32_t)getSlaveInfoArgs.sn->ival[0], &boardInfo);
+        MasterController::getBoardInfo((uint16_t)getSlaveInfoArgs.type->ival[0], (uint32_t)getSlaveInfoArgs.sn->ival[0], &boardInfo);
     } else {
         return -1;
     }
@@ -264,9 +264,9 @@ static int _registerGetSlaveInfoCmd(void)
 static int controllerStopCmd(int argc, char **argv)
 {
 #if defined(MODULE_MASTER)
-    ControllerMaster::stop();
+    MasterController::stop();
 #elif defined(MODULE_SLAVE)
-    ControllerSlave::stop();
+    SlaveController::stop();
 #endif
     return 0;
 }
@@ -293,9 +293,9 @@ static int _registerStopCmd(void)
 static int controllerStartCmd(int argc, char **argv)
 {
 #if defined(MODULE_MASTER)
-    ControllerMaster::start();
+    MasterController::start();
 #elif defined(MODULE_SLAVE)
-    ControllerSlave::start();
+    SlaveController::start();
 #endif
     return 0;
 }
@@ -324,9 +324,9 @@ static int controllerGetStatusCmd(int argc, char **argv)
     int state;
 
 #if defined(MODULE_MASTER)
-    state = ControllerMaster::getStatus();
+    state = MasterController::getStatus();
 #elif defined(MODULE_SLAVE)
-    state = ControllerSlave::getStatus();
+    state = SlaveController::getStatus();
 #else 
     state = STATE_UNDEFINED;
 #endif

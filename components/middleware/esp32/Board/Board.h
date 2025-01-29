@@ -41,6 +41,14 @@ public:
     static void getSoftwareVersion(char software_version[32]);
     static bool setBoardInfo(uint8_t board_type, uint8_t hardware_variant, uint32_t serial_num, int64_t timestamp);
 
+    /**
+     * @brief Check if a boot error occured
+     * 
+     * @return true 
+     * @return false 
+     */
+    static bool checkBootError(void);
+
 private:
 
     static uint8_t _calculate_eFuse_checksum(uint8_t* data);

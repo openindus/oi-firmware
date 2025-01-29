@@ -175,3 +175,17 @@ bool Board::_verify_eFuse_checksum(Board_eFuse_Info_t info)
 {
     return (info.checksum == _calculate_eFuse_checksum((uint8_t*)&info));
 }
+
+bool Board::checkBootError(void)
+{
+    /* Check reset reason */
+    esp_reset_reason_t reason;
+    reason = esp_reset_reason();
+    if ((reason != ESP_RST_POWERON) && (reason != ESP_RST_SW) && (reason != ESP_RST_UNKNOWN)) {
+        ESP_LOGE(TAG, "Reset reason : %d", reason);
+        return true;
+    }
+    else {
+        return false;
+    }
+}

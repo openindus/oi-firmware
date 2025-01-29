@@ -37,11 +37,11 @@ public:
 
 #if (defined(OI_RELAY_HP)) && defined(MODULE_SLAVE)
 
-#include "ControllerSlave.h"
+#include "SlaveController.h"
 #include "RelayCmdHandler.h"
 
 class RelayHPSlave : 
-    public ControllerSlave, 
+    public SlaveController, 
     public RelayHPStandalone, 
     public RelayCmdHandler
 {

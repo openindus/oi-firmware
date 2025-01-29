@@ -22,6 +22,10 @@
 #include "CorePlus.h"
 #endif
 
+/* Abstraction layers */
+// #include "OSAL.h"
+#include "HAL.h"
+
 /* Arduino */
 void setup(void);
 void loop(void);
@@ -40,27 +44,3 @@ void loop(void);
 #else
 #define OICorePlus CorePlus
 #endif
-
-/* Digital outputs num */
-#define DOUT1 DOut_Num_t::DOUT1
-#define DOUT2 DOut_Num_t::DOUT2
-#define DOUT3 DOut_Num_t::DOUT3
-#define DOUT4 DOut_Num_t::DOUT4
-#define DOUT5 DOut_Num_t::DOUT5
-#define DOUT6 DOut_Num_t::DOUT6
-#define DOUT7 DOut_Num_t::DOUT7
-#define DOUT8 DOut_Num_t::DOUT8
-#define DOUT9 DOut_Num_t::DOUT9
-#define DOUT10 DOut_Num_t::DOUT10
-
-/* Digital inputs num */
-#define DIN1 DIn_Num_t::DIN1
-#define DIN2 DIn_Num_t::DIN2
-#define DIN3 DIn_Num_t::DIN3
-#define DIN4 DIn_Num_t::DIN4
-#define DIN5 DIn_Num_t::DIN5
-#define DIN6 DIn_Num_t::DIN6
-#define DIN7 DIn_Num_t::DIN7
-#define DIN8 DIn_Num_t::DIN8
-#define DIN9 DIn_Num_t::DIN9
-#define DIN10 DIn_Num_t::DIN10

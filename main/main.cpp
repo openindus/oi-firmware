@@ -5,9 +5,7 @@
  */
 
 #include "OpenIndus.h"
-#if defined(ARDUINO_ARCH_ESP32)
 #include "Arduino.h"
-#endif
 
 void setup(void)
 {
@@ -16,7 +14,5 @@ void setup(void)
 
 void loop(void)
 {
-#if defined(ARDUINO_ARCH_ESP32)
     delay(1000);
-#endif
 }

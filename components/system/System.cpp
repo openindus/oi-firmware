@@ -14,11 +14,12 @@
 #include "Global.h"
 #ifndef LINUX_ARM
 #include "CLI.h"
-#include "ControllerSlave.h"
+#include "SlaveController.h"
 #include "UsbConsole.h"
 #endif
-#include "ControllerMaster.h"
+#include "MasterController.h"
 #include "OpenIndus.h"
+#include "OSAL.h"
 
 static const char TAG[] = "System";
 
@@ -53,103 +54,73 @@ int System::init(void)
 
     /* Controller init */
 #if defined(MODULE_MASTER)
-    err |= ControllerMaster::init();
+    err |= MasterController::init();
 #elif defined(MODULE_SLAVE)
-    err |= ControllerSlave::init();
+    err |= SlaveController::init();
 #endif
 
-#ifndef LINUX_ARM
-    /* Command line interface init */
-    CLI::init();
+#if !defined(LINUX_ARM)
+    CLI::init(); // Command line interface
 #endif
 
-    return err;
+    return (err == 0);
 }
 
 void System::start(void)
 {
-    if (init() != 0) {
-#ifndef LINUX_ARM
-        ESP_LOGE(TAG, "Failed to initialize module");
-#endif
-        Module::ledBlink(LED_RED, 250);
-
-#ifndef LINUX_ARM
+    /* --- Initialize module --- */
+    if (!System::init() || Board::checkBootError()) {
+        LOGE(TAG, "Failed to initialize module");
+        Module::ledBlink(LED_RED, 1000);
+#if !defined(LINUX_ARM)
         UsbConsole::begin(true); // Force console to start, convenient for debugging
 #endif
-
-#ifndef FORCED_START
+#if !defined(FORCED_START)
         return;
 #endif
     } else {
-        /* Module Initialized */
-        Module::ledBlink(LED_BLUE, 1000);
+        Module::ledBlink(LED_BLUE, 1000); // Module Initialized
     }
 
-#ifndef LINUX_ARM
-    /* Check reset reason */
-    esp_reset_reason_t reason;
-    reason = esp_reset_reason();
-    if ((reason != ESP_RST_POWERON) && (reason != ESP_RST_SW) && (reason != ESP_RST_UNKNOWN)) {
-        ESP_LOGE(TAG, "Reset reason : %d", reason);
-        Module::ledBlink(LED_RED, 1000); // Error
-        UsbConsole::begin(true);         // Force console to start, convenient for debugging
-
-#ifndef FORCED_START
-        return;
-#endif
-    }
-#endif
-
-#ifndef LINUX_ARM
-
+    /* --- Slave Module --- */
 #if defined(MODULE_SLAVE)
-
+#if !defined(LINUX_ARM)
     UsbConsole::begin(true); // Force console on slave module
-
-#ifndef FORCED_START
+#endif
+#if !defined(FORCED_START)
     return;
 #endif
-
 #else
-    /* Start a task which listen for user to input "console" */
-    UsbConsole::listen();
-#endif
+    UsbConsole::listen(); // Start a task which listen for user to input "console"
+#endif 
 
-#ifndef LINUX_ARM
-    /* Wait for slaves modules to init and give time to user script to enable console */
-    vTaskDelay(500 / portTICK_PERIOD_MS);
-#endif
+    delay(500); // Wait for slaves modules to init and give time to user script to enable console
 
-    /* On master module, call autoId */
+    /* --- Master Module --- */
 #if defined(MODULE_MASTER)
-    if (ControllerMaster::autoId()) {
+    if (MasterController::autoId()) {
         Module::ledBlink(LED_GREEN, 1000); // Paired
     } else {
         Module::ledBlink(LED_RED, 1000); // Paired error
-#ifndef LINUX_ARM
+#if !defined(LINUX_ARM)
         UsbConsole::begin(true); // Force console to start, convenient for debugging
 #endif
-
-#ifndef FORCED_START
+#if !defined(FORCED_START)
         return;
 #endif
     }
 #endif
 
-#ifndef LINUX_ARM
+    /* --- Main task --- */
+#if !defined(LINUX_ARM)
     if (!UsbConsole::begin()) { // console will start only if user input "console" during startup
-        /* Start main task if console is not started  */
         ESP_LOGI(TAG, "Create main task");
         vTaskDelay(10);
         xTaskCreate(_mainTask, "Main task", 8192, NULL, 1, NULL);
 #if defined(FORCE_CONSOLE)
-        UsbConsole::begin(
-            true); // Force console, will failed if Serial.begin() is called in user code
+        UsbConsole::begin(true); // Force console, will failed if Serial.begin() is called in user code
 #endif
     }
-#endif
-
 #endif
 }
 
