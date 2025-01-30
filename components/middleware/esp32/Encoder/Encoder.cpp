@@ -1,164 +1,103 @@
 /**
- * Copyright (C) OpenIndus, Inc - All Rights Reserved
- *
- * This file is part of OpenIndus Library.
- *
- * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential
- * 
  * @file Encoder.cpp
- * @brief 
- *
- * For more information on OpenIndus:
+ * @brief Encoder class implementation
+ * @author kévin Lefeuvre (kevin.lefeuvre@openindus.com)
+ * @copyright (c) [2025] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
 
 #include "Encoder.h"
+#include "driver/pcnt.h"
 
-static const float _RpmToRadians = 0.10471975512;
-static const float _RadToDeg = 57.29578;
+static const char TAG[] = "Encoder";
 
-QueueHandle_t Encoder::_PcntEvtQueue;
+// A flag to identify if pcnt isr service has been installed.
+static bool is_pcnt_isr_service_installed = false;
+static int couter = 0;
+static int max_glitch_us = 1;
 
-int Encoder::_position = 0;
-float Encoder::_pos = 0;
-bool Encoder::_direction = 0;
-float Encoder::_speed = 0;
-float Encoder::_pulsePerRevolution = 0;
-Encoder::pcnt_evt_t Encoder::evt;
-pcnt_unit_t Encoder::_PcntUnit = PCNT_UNIT_0;
-
-int Encoder::init(gpio_num_t coderA, gpio_num_t coderB, int16_t ValueMaxPulsePerRevolution, int16_t ValueMinPulsePerRevolution)
+static void pcnt_overflow_handler(void *arg)
 {
-    int err = 0;
+    uint32_t status = 0;
+    pcnt_get_event_status(PCNT_UNIT_0, &status);
 
-    err |= gpio_set_direction(coderA, GPIO_MODE_INPUT);   
-    err |= gpio_set_direction(coderB, GPIO_MODE_INPUT);
+    if (status & PCNT_EVT_H_LIM) {
+        couter++;
+    } else if (status & PCNT_EVT_L_LIM) {
+        couter--;
+    }
+}
 
-    _pulsePerRevolution = ValueMaxPulsePerRevolution;
-    /* Prepare configuration for the PCNT unit */
+int Encoder::begin(DIn_Num_t A, DIn_Num_t B, uint32_t ppr)
+{
+    ESP_LOGI(TAG, "Encoder initialization");
+
+    // Configure channel 0
     pcnt_config_t pcnt_config = {
-        .pulse_gpio_num = coderA,
-        .ctrl_gpio_num = coderB,
-        .lctrl_mode = PCNT_MODE_REVERSE, 
-        .hctrl_mode = PCNT_MODE_KEEP,    
-        .pos_mode = PCNT_COUNT_INC,   
-        .neg_mode = PCNT_COUNT_DIS,   
-        .counter_h_lim = ValueMaxPulsePerRevolution,
-        .counter_l_lim = ValueMinPulsePerRevolution,
-        .unit = _PcntUnit,
+        .pulse_gpio_num = GPIO_NUM_11,
+        .ctrl_gpio_num = GPIO_NUM_12,
+        .lctrl_mode = PCNT_MODE_DISABLE,
+        .hctrl_mode = PCNT_MODE_REVERSE,
+        .pos_mode = PCNT_COUNT_INC, // Count both rising and falling edges
+        .neg_mode = PCNT_COUNT_DEC, // Count both rising and falling edges
+        .counter_h_lim = 1024,
+        .counter_l_lim = -1024,
+        .unit = PCNT_UNIT_0,
         .channel = PCNT_CHANNEL_0,
     };
+    pcnt_unit_config(&pcnt_config);
 
-    /* Initialize PCNT unit */
-    err |= pcnt_unit_config(&pcnt_config);
+    // PCNT pause and reset value
+    pcnt_counter_pause(PCNT_UNIT_0);
+    pcnt_counter_clear(PCNT_UNIT_0);
+
+    // register interrupt handler in a thread-safe way
+    if (!is_pcnt_isr_service_installed) {
+        ESP_ERROR_CHECK(pcnt_isr_service_install(0));
+        // make sure pcnt isr service won't be installed more than one time
+        is_pcnt_isr_service_installed = true;
+    }
+
+    pcnt_isr_handler_add(PCNT_UNIT_0, pcnt_overflow_handler, NULL);
+
+    pcnt_event_enable(PCNT_UNIT_0, PCNT_EVT_H_LIM);
+    pcnt_event_enable(PCNT_UNIT_0, PCNT_EVT_L_LIM);
 
     /* Configure and enable the input filter */
-    err |= pcnt_set_filter_value(_PcntUnit, 100);
-    err |= pcnt_filter_enable(_PcntUnit);
+    ESP_ERROR_CHECK(pcnt_set_filter_value(PCNT_UNIT_0, max_glitch_us * 80));
+    if (max_glitch_us) {
+        pcnt_filter_enable(PCNT_UNIT_0);
+    } else {
+        pcnt_filter_disable(PCNT_UNIT_0);
+    }
 
-    /* Enable events on zero, maximum and minimum limit values */
-    err |= pcnt_event_enable(_PcntUnit, PCNT_EVT_H_LIM);
-    err |= pcnt_event_enable(_PcntUnit, PCNT_EVT_L_LIM);
+    // Start the PCNT unit
+    pcnt_counter_resume(PCNT_UNIT_0);
 
-    /* Initialize PCNT's counter */
-    err |= pcnt_counter_pause(_PcntUnit);
-    err |= pcnt_counter_clear(_PcntUnit);
-
-    /* Install interrupt service and add isr callback handler */
-    //pcnt_isr_service_install(0);
-    err |= pcnt_isr_handler_add(_PcntUnit, _pcntIntrHandler, (void *)_PcntUnit);
-
-    /* Everything is set up, now go to counting */
-    err |= pcnt_counter_resume(_PcntUnit);
-
-    _PcntEvtQueue = xQueueCreate(10, sizeof(pcnt_evt_t));
-
-    //Set-up getRevolution and getDirection task
-    xTaskCreate(&_vTaskFunctionRevolution, "vTaskFunctionRevolution", 4096, NULL, 2, NULL);
-
-    return err;
+    return 0;
 }
 
-bool Encoder::getDirection()
+void Encoder::end(void)
 {
-    // Clockwise revolution (=1) or anti-clockwise revolution (=0)
-    return _direction;
+    ESP_LOGI(TAG, "Encoder end");
 }
 
-float Encoder::getSpeed()
+float Encoder::getPosition(void)
 {
-    // Motor speed in revolution/min
-    return _speed;
+    int16_t val = 0;
+    pcnt_get_counter_value(PCNT_UNIT_0, &val);
+    return (float)(val + (couter * 1024));
 }
 
-float Encoder::getPosition()
+float Encoder::getSpeed(void)
 {
-    // motor position in radians
-    return _pos;    
+    ESP_LOGI(TAG, "Get the speed of the motor");
+    return 0.0;
 }
 
-void IRAM_ATTR Encoder::_pcntIntrHandler(void *arg)
+float Encoder::getAngle(void)
 {
-    pcnt_evt_t evt;
-    evt.unit = _PcntUnit;
-    pcnt_get_event_status(_PcntUnit, &evt.status);
-    xQueueSendFromISR(_PcntEvtQueue, &evt, NULL);
-}
-
-void Encoder::_vTaskFunctionRevolution(void *pvParameters) 
-{
-    portBASE_TYPE res;
-    int64_t Time = 0;
-    int64_t TimeMs = 0;
-    int64_t PreviousTime = 0;
-    int revolution = 0;
-    int16_t count = 0;
-    float deg;
-    float result;
-    float abs_count = 0;
-
-    while(1) 
-    {
-        res = xQueueReceive(_PcntEvtQueue, &evt, 10/portTICK_PERIOD_MS);
-        if (res == pdTRUE){
-            pcnt_get_counter_value(_PcntUnit, &count);
-            vTaskDelay(1 / portTICK_PERIOD_MS);
-            if (evt.status & PCNT_EVT_H_LIM){
-                revolution ++;
-                _position ++;
-            } 
-            else if (evt.status & PCNT_EVT_L_LIM){
-                revolution ++;
-                _position --;
-            }
-            else{};
-        } 
-        else{
-            ESP_ERROR_CHECK(pcnt_get_counter_value(_PcntUnit, &count));
-            vTaskDelay(1 / portTICK_PERIOD_MS);
-            if (count > 0){
-                _direction = 1;
-                vTaskDelay(1 / portTICK_PERIOD_MS);
-            }
-            else if (count < 0){
-                _direction = 0;
-                vTaskDelay(1 / portTICK_PERIOD_MS);
-            }
-            else{};
-        }
-        deg = 0.36; //  360 / 1000 (360 degres divided by 1000 pulses)
-        result = count * deg;
-        _pos = (_position * 6.28319) + (result * 0.01745);
-        Time = esp_timer_get_time();
-        TimeMs = Time/1000; 
-        if (TimeMs - PreviousTime > 1000){
-            PreviousTime = TimeMs;
-            abs_count = abs(count);
-            _speed = (revolution + abs_count / _pulsePerRevolution) * 60;
-            revolution = 0;
-            abs_count = 0;
-        }
-        else{}; 
-    } 
+    int16_t val = 0;
+    pcnt_get_counter_value(PCNT_UNIT_0, &val);
+    return (float)((val / 1024.0) * 2 * 3.141592); // 2 * PI
 }

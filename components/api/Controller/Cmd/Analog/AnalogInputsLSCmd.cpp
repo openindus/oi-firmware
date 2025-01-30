@@ -28,7 +28,7 @@ _ain_pins(ain_pins)
     _readEvent = xQueueCreate(1, sizeof(uint8_t*));
 }
 
-int16_t GenericSensorCmd::getInt16(Cmd_Event_e event, Cmd_Request_e request)
+int16_t GenericSensorCmd::getInt16(ControllerCmd_Event_e event, ControllerCmd_Request_e request)
 {
     // Add callback (remove callback if it already exists)
     MasterController::removeEventCallback(event, _control->getId());
@@ -48,7 +48,7 @@ int16_t GenericSensorCmd::getInt16(Cmd_Event_e event, Cmd_Request_e request)
     return *ret;
 }
 
-float GenericSensorCmd::getFloat(Cmd_Event_e event, Cmd_Request_e request)
+float GenericSensorCmd::getFloat(ControllerCmd_Event_e event, ControllerCmd_Request_e request)
 {
     // Add callback (remove callback if it already exists)
     MasterController::removeEventCallback(event, _control->getId());

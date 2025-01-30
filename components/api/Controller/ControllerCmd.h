@@ -1,6 +1,6 @@
 /**
- * @file Cmd.h
- * @brief Commands definition
+ * @file ControllerCmd.h
+ * @brief Controller command definition
  * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
  * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
@@ -32,7 +32,7 @@
 // #define CMD_WRITE_NVS               (uint8_t) 0x0F
 // #define CMD_AUTO_TEST               (uint8_t) 0x11
 
-enum Cmd_Request_e {
+enum ControllerCmd_Request_e {
     /* DIGITAL */
     REQUEST_DIGITAL_WRITE                   = 0x00,
     REQUEST_TOGGLE_OUTPUT                   = 0x01,
@@ -84,9 +84,11 @@ enum Cmd_Request_e {
     REQUEST_MOTOR_SET_DIRECTION             = 0x62,
 
     /* ENCODER */
-    REQUEST_ENCODER_GET_DIRECTION           = 0x81,
+    REQUEST_ENCODER_BEGIN                   = 0x80,
+    REQUEST_ENCODER_END                     = 0x81,
     REQUEST_ENCODER_GET_POSITION            = 0x82,
     REQUEST_ENCODER_GET_SPEED               = 0x83,
+    REQUEST_ENCODER_GET_ANGLE               = 0x84,
 
     /* DC MOTOR */
     REQUEST_MOTOR_DC_RUN                    = 0xA0,
@@ -102,7 +104,7 @@ enum Cmd_Request_e {
     REQUEST_SENSOR_READ_RAW                 = 0xB6,
 };
 
-enum Cmd_Event_e {
+enum ControllerCmd_Event_e {
     EVENT_DIGITAL_INTERRUPT                 = 0x00,
     EVENT_MOTOR_READY                       = 0x01,
 

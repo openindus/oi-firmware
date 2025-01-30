@@ -22,7 +22,7 @@
 #include "Board.h"
 #include "Led.h"
 #include "Bus.h"
-#include "Cmd.h"
+#include "ControllerCmd.h"
 #include "Controller.h"
 
 class MasterController

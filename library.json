@@ -33,8 +33,8 @@
     },
     "build": {
         "flags": [
-            "-I components/system",
             "-I components/api",
+            "-I components/api/System",
             "-I components/api/CLI",
             "-I components/api/Controller",
             "-I components/api/Controller/Cmd",
@@ -107,7 +107,6 @@
         "srcDir": ".",
         "srcFilter": [
             "-<*>",
-            "+<components/system>",
             "+<components/api>",
             "+<components/middleware>",
             "+<components/drivers>",

@@ -21,7 +21,7 @@
 #include "Led.h"
 #include "Bus.h"
 #include "FlashLoader.h"
-#include "Cmd.h"
+#include "ControllerCmd.h"
 
 #if defined(MODULE_SLAVE)
 
@@ -37,8 +37,8 @@ public:
 
     static void sendEvent(std::vector<uint8_t> msgBytes);
 
-    inline static void addCmdHandler(uint8_t ctrl, std::function<void(std::vector<uint8_t>&)> callback) {
-        _handlers.insert({ctrl, callback});
+    inline static void addCmdHandler(uint8_t cmd, std::function<void(std::vector<uint8_t>&)> callback) {
+        _handlers.insert({cmd, callback});
     }
 
 protected:

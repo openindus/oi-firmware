@@ -1,4 +1,5 @@
 set(COMPONENT_SRCS
+    "System/System.cpp"
     "Module/Module.cpp"
     "Module/Discrete/Discrete.cpp"
     "Module/Stepper/Stepper.cpp"
@@ -44,10 +45,13 @@ set(COMPONENT_SRCS
     "Controller/Cmd/Analog/AnalogInputsLSCmdHandler.cpp"
     "Controller/Cmd/Analog/AnalogInputsLVCmdHandler.cpp"
     "Controller/Cmd/Analog/AnalogInputsHVCmdHandler.cpp"
+    "Controller/Cmd/Encoder/EncoderCmd.cpp"
+    "Controller/Cmd/Encoder/EncoderCmdHandler.cpp"
 )
 
 set(COMPONENT_INCLUDE_DIRS
     "."
+    "System"
     "Module"
     "Module/Discrete"
     "Module/Stepper"
@@ -70,6 +74,7 @@ set(COMPONENT_INCLUDE_DIRS
     "Controller/Cmd/Relay"
     "Controller/Cmd/Stepper"
     "Controller/Cmd/Dc"
+    "Controller/Cmd/Encoder"
 )
 
 set(COMPONENT_PRIV_REQUIRES
