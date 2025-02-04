@@ -8,7 +8,9 @@
 
 #pragma once
 
-#include "Global.h"
+#include "driver/gpio.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/semphr.h"
 
 typedef enum {
     RELAY_1 = 0,

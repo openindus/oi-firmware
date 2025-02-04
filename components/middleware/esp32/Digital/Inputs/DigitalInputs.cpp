@@ -14,6 +14,8 @@
  */
 
 #include "DigitalInputs.h"
+#include <string.h>
+#include "esp_log.h"
 
 static const char DIN_TAG[] = "DigitalInputs";
 

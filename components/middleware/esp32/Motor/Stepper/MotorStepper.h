@@ -9,7 +9,6 @@
 #pragma once
 
 #include "DigitalInputs.h"
-#include "Global.h"
 #include "Motor.h"
 #include "powerSTEP01/PS01.h"
 

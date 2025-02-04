@@ -8,7 +8,9 @@
 
 #pragma once
 
-#include "Global.h"
+#include "ads114s0x.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/queue.h"
 
 #define ADS114S0X_RESOLUTION        16
 #define ADS114S0X_MAX_ADC_CODE      65535

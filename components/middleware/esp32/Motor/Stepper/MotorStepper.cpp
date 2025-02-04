@@ -14,6 +14,10 @@
  */
 
 #include "MotorStepper.h"
+#include <vector>
+#include <algorithm>
+#include "esp_log.h"
+#include "driver/adc.h"
 
 static const char TAG[] = "MotorStepper";
 

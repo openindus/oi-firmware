@@ -7,6 +7,7 @@
  */
 
 #include "Encoder.h"
+#include "esp_log.h"
 #include "driver/pcnt.h"
 
 static const char TAG[] = "Encoder";

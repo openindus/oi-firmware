@@ -7,6 +7,7 @@
  */
 
 #include "RTClock.h"
+#include "m41t62/m41t62.h"
 
 #if defined(OI_CORE)
 

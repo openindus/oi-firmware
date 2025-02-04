@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include "Global.h"
 #include "Motor.h"
+#include <vector>
 #include "driver/gpio.h"
 #include "driver/ledc.h"
 

@@ -70,6 +70,11 @@ set(COMPONENT_INCLUDE_DIRS
 )
 
 set(COMPONENT_PRIV_REQUIRES
+
+)
+
+set(COMPONENT_REQUIRES
+    "drivers"
     "esp_adc_cal"
     "console"
     "nvs_flash"
@@ -77,10 +82,6 @@ set(COMPONENT_PRIV_REQUIRES
     "fatfs"
     "sdmmc"
     "esp_rom"
-)
-
-set(COMPONENT_REQUIRES
-    "drivers"
 )
 
 idf_component_register(

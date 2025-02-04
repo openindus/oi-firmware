@@ -8,6 +8,7 @@
 
 #include "AnalogInputsLS.h"
 #include "Sensor.h"
+#include <algorithm>
 
 static const char TAG[] = "AnalogInputsLS";
 

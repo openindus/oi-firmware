@@ -8,7 +8,8 @@
 
 #pragma once
 
-#include "Global.h"
+#include <stdint.h>
+#include <string.h>
 
 /* Struct can fill an eFusSe block of 32 msgBytes */
 typedef struct __attribute__((__packed__)) {

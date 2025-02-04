@@ -9,6 +9,7 @@
 #pragma once
 
 #include "Global.h"
+#include "argtable3/argtable3.h"
 
 class CLI
 {

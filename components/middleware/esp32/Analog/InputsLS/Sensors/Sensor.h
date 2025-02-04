@@ -8,8 +8,6 @@
 
 #pragma once
 
-#include "Global.h"
-
 enum AIn_Num_e : int32_t {
     AIN_NULL = -1,
     AIN_A_P = 0,

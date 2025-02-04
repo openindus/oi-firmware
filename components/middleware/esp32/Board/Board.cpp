@@ -7,6 +7,15 @@
  */
 
 #include "Board.h"
+#include "esp_log.h"
+#include "esp_system.h"
+#include "esp_efuse.h"
+#include "esp_ota_ops.h"
+#include "nvs_flash.h"
+#include "driver/gpio.h"
+#include "driver/temp_sensor.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 
 static const char TAG[] = "Board";
 

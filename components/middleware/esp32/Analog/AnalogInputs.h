@@ -15,8 +15,6 @@
 
 #pragma once
 
-#include "Global.h"
-
 typedef enum {
     AIN_1 = 0,
     AIN_2 = 1,

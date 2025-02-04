@@ -7,6 +7,7 @@
  */
 
 #include "RTD.h"
+#include <math.h>
 
 static const char TAG[] = "RTD";
 

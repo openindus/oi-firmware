@@ -7,6 +7,9 @@
  */
 
 #include "DigitalOutputs.h"
+#include <string.h>
+#include "esp_log.h"
+#include "driver/ledc.h"
 
 #define DOUT_SENSOR_ADC_NO_OF_SAMPLES 64U
 #define DOUT_SENSOR_RESISTOR_SENSE_VALUE 1200
