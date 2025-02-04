@@ -39,7 +39,7 @@ public:
         union {
             struct { 
                 uint16_t id         : 11;   // 0 --> Broadcast ID
-                uint16_t dir        : 1;    // 1 --> ControllerMaster to ControllerSlave | 0 --> ControllerSlave to ControllerMaster
+                uint16_t dir        : 1;    // 1 --> Master to Slave | 0 --> Slave to Master
                 uint16_t ack        : 1;    // ack needed
                 uint16_t error      : 1;    // Error
                 uint16_t reserved   : 2;

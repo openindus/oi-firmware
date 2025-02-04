@@ -5,21 +5,14 @@
  */
 
 #include "OpenIndus.h"
-#if defined(ARDUINO_ARCH_ESP32)
 #include "Arduino.h"
-#endif
 
 void setup(void)
 {
-#if defined(ARDUINO_ARCH_ESP32)
-    Serial.begin(115200);
-    Serial.println("Hello Openindus !");
-#endif
+    printf("Hello OpenIndus!\n");
 }
 
 void loop(void)
 {
-#if defined(ARDUINO_ARCH_ESP32)
     delay(1000);
-#endif
 }

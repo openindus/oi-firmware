@@ -1,15 +1,8 @@
 /**
- * Copyright (C) OpenIndus, Inc - All Rights Reserved
- *
- * This file is part of OpenIndus Library.
- *
- * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential
- * 
  * @file OpenIndus.h
- * @brief OpenIndus
- *
- * For more information on OpenIndus:
+ * @brief OpenIndus API
+ * @author Kévin Lefeuvre (kevin.lefeuvre@openindus.com)
+ * @copyright (c) [2025] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
 
@@ -17,31 +10,37 @@
 
 #include "Module.h"
 #ifndef OI_CORE_PLUS
-#include "Core.h"
-#include "Discrete.h"
-#include "Mixed.h"
-#include "Stepper.h"
-#include "RelayHP.h"
 #include "AnalogLS.h"
 #include "Brushless.h"
+#include "Core.h"
 #include "Dc.h"
+#include "Discrete.h"
+#include "Mixed.h"
+#include "RelayHP.h"
+#include "Stepper.h"
 #else
 #include "CorePlus.h"
 #endif
 
+/* Abstraction layers */
+// #include "OSAL.h"
+#include "HAL.h"
+
+/* Arduino */
 void setup(void);
 void loop(void);
 
+/* OI-Modules */
 #ifndef OI_CORE_PLUS
-#define OICore      Core
-#define OICoreLite  Core
-#define OIDiscrete  Discrete
-#define OIMixed     Mixed
-#define OIStepper   Stepper
-#define OIRelayHP   RelayHP
-#define OIAnalogLS  AnalogLS
+#define OICore Core
+#define OICoreLite Core
+#define OIDiscrete Discrete
+#define OIMixed Mixed
+#define OIStepper Stepper
+#define OIRelayHP RelayHP
+#define OIAnalogLS AnalogLS
 #define OIBrushless Brushless
-#define OIDc        Dc
+#define OIDc Dc
 #else
-#define OICorePlus  CorePlus
+#define OICorePlus CorePlus
 #endif

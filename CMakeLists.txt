@@ -10,8 +10,8 @@ else()
     target_sources(oi-firmware PRIVATE
         components/system/System.cpp
         components/api/Module/CorePlus/CorePlus.cpp
-        components/api/ComBus/Controller/Controller.cpp
-        components/api/ComBus/Controller/ControllerMaster.cpp
+        components/api/Controller/Controller.cpp
+        components/api/Controller/MasterController.cpp
         components/middleware/linux_arm/Led.cpp
         components/middleware/linux_arm/Bus.cpp
         components/middleware/linux_arm/Board.cpp
@@ -20,12 +20,10 @@ else()
     target_include_directories(oi-firmware PRIVATE
         components/system
         components/api
-        components/api/OSAL
         components/api/Module
         components/api/Module/CorePlus
-        components/api/ComBus
-        components/api/ComBus/Controller
-        components/api/ComBus/Commands
+        components/api/Controller
+        components/api/Controller/Cmd
         components/middleware
         components/middleware/linux_arm/include
     )

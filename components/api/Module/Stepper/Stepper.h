@@ -16,12 +16,14 @@
 #include "DigitalInputs.h"
 #include "MotorStepper.h"
 #include "MotorStepperParam.h"
-#include "ControllerSlave.h"
+#include "SlaveController.h"
 #include "DigitalInputsCmdHandler.h"
 #include "StepperCmdHandler.h"
 #include "Controller.h"
 #include "DigitalInputsCmd.h"
 #include "StepperCmd.h"
+#include "Encoder.h"
+#include "EncoderCmd.h"
 
 #if defined(OI_STEPPER) || defined(OI_STEPPER_VE)
 
@@ -34,6 +36,8 @@ class Stepper :
 public:
 
     static int init(void);
+
+    static Encoder encoder;
 };
 
 #elif defined(MODULE_MASTER)
@@ -48,7 +52,10 @@ public:
     Stepper(uint32_t sn = 0) : 
         Controller(TYPE_OI_STEPPER, sn),
         DigitalInputsCmd(this),
-        StepperCmd(this) {}
+        StepperCmd(this),
+        encoder(this) {}
+    
+    EncoderCmd encoder;
 };
 #endif
 

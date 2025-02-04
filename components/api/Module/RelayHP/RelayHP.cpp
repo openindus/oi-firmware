@@ -12,12 +12,8 @@
 
 static const char RELAY_HP_TAG[] = "RelayHP";
 
-static const gpio_num_t _relayGpio[] = {
-    RELAY_HP_PHASE_CMD1,
-    RELAY_HP_PHASE_CMD2,
-    RELAY_HP_PHASE_CMD3,
-    RELAY_HP_PHASE_CMD4
-};
+static const gpio_num_t _relayGpio[] = {RELAY_HP_PHASE_CMD4, RELAY_HP_PHASE_CMD3,
+                                        RELAY_HP_PHASE_CMD2, RELAY_HP_PHASE_CMD1};
 
 int RelayHPStandalone::init(void)
 {
@@ -36,10 +32,9 @@ int RelayHPStandalone::init(void)
 int RelayHPSlave::init(void)
 {
     int err = 0;
-    
+
     err |= RelayHPStandalone::init();
     err |= RelayCmdHandler::init();
-
 
     ESP_LOGI(RELAY_HP_TAG, "RelayHPSlave::init");
 

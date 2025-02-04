@@ -19,7 +19,7 @@
 #include "DcPinout.h"
 #include "Module.h"
 #include "Controller.h"
-#include "ControllerSlave.h"
+#include "SlaveController.h"
 #include "DigitalInputs.h"
 #include "DigitalInputsCmd.h"
 #include "DigitalInputsCmdHandler.h"

@@ -33,6 +33,7 @@ static SemaphoreHandle_t _taskHomingStopSemaphore[MOTOR_MAX];
 static void _digitalInterruptHandler(void* arg);
 static void _homingTask(void* arg);
 static void _busyCallback(uint8_t motor);
+static void _configProtections(void);
 
 int MotorStepper::init(PS01_Hal_Config_t* config, PS01_Param_t* param)
 {
@@ -40,6 +41,9 @@ int MotorStepper::init(PS01_Hal_Config_t* config, PS01_Param_t* param)
 
     /* Config powerSTEP01 */
     PS01_Init(config, param); // TODO: watch for error
+
+    /* Protections powerSTEP01 */
+    _configProtections();
 
     /* Attach busy pin callbacks */
     _busyEvent[MOTOR_1] = xQueueCreate(1, 0);
@@ -135,6 +139,11 @@ void MotorStepper::resetHomePosition(MotorNum_t motor)
 {
     uint32_t pos = PS01_Param_GetAbsPos(motor);
     PS01_Param_SetAbsPos(motor, pos);
+}
+
+void MotorStepper::setPosition(MotorNum_t motor, int32_t position)
+{
+    PS01_Param_SetAbsPos(motor, position);
 }
 
 void MotorStepper::stop(MotorNum_t motor, MotorStopMode_t mode)
@@ -324,4 +333,31 @@ static void _homingTask(void* arg)
 static void _busyCallback(uint8_t motor)
 {
     xQueueSend(_busyEvent[motor], NULL, pdMS_TO_TICKS(10));
+}
+
+static void _configProtections(void)
+{
+    /* Configure ADC to read power supply voltage */
+    adc1_config_width(ADC_WIDTH_BIT_12);
+    adc1_config_channel_atten(ADC1_CHANNEL_0, ADC_ATTEN_DB_11);
+    int adc_value = adc1_get_raw(ADC1_CHANNEL_0);
+    ESP_LOGD(TAG, "ADC Value on GPIO1: %d", adc_value);
+
+    /* Configure PS01 protections for all motors */
+    for (int i=0; i<MOTOR_MAX; i++) {
+        /* VCCVAL - depends on supply voltage */
+        register_config_t config = PS01_Param_GetConfig((MotorNum_t)i);
+        if (adc_value < 1911) { // Power supply volatge < 15V
+            config.vm.vccval = 0;
+        } else { // Power supply volatge > 15V
+            config.vm.vccval = 1;
+        }
+        PS01_Param_SetConfig(MOTOR_1, config);
+
+        /* TVAL - must not exceed 0.3V */
+        if (PS01_Param_GetTvalAcc((MotorNum_t)i) > 0.3) PS01_Param_SetTvalAcc((MotorNum_t)i, 0.3);
+        if (PS01_Param_GetTvalDec((MotorNum_t)i) > 0.3) PS01_Param_SetTvalDec((MotorNum_t)i, 0.3);
+        if (PS01_Param_GetTvalRun((MotorNum_t)i) > 0.3) PS01_Param_SetTvalRun((MotorNum_t)i, 0.3);
+        if (PS01_Param_GetTvalHold((MotorNum_t)i) > 0.3) PS01_Param_SetTvalHold((MotorNum_t)i, 0.3);
+    }    
 }
