@@ -32,8 +32,9 @@ public:
      * 
      * @param motor 
      * @param direction
+     * @param dutyCycle
      */
-    void run(MotorNum_t motor, MotorDirection_t direction);
+    void run(MotorNum_t motor, MotorDirection_t direction, float dutyCycle);
 
     /**
      * @brief Send a command to stop the motor

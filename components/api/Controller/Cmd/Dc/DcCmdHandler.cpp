@@ -26,7 +26,8 @@ int DcCmdHandler::init() {
     SlaveController::addCmdHandler(REQUEST_MOTOR_DC_RUN, [](std::vector<uint8_t>& data) {
         MotorNum_t motor = static_cast<MotorNum_t>(data[1]);
         MotorDirection_t direction = static_cast<MotorDirection_t>(data[2]);
-        MotorDc::run(motor, direction);
+        float *dutyCycle = reinterpret_cast<float *>(&data[3]);
+        MotorDc::run(motor, direction, *dutyCycle);
         data.clear();
     });
 
