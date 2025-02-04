@@ -7,9 +7,9 @@
  */
 
 #include "System.h"
-#if defined(ARDUINO)
-#include "Arduino.h"
-#endif
+// #if defined(ARDUINO)
+// #include "Arduino.h"
+// #endif
 
 #include "Global.h"
 #ifndef LINUX_ARM
@@ -130,9 +130,9 @@ extern "C" void app_main()
 int main(void)
 #endif
 {
-#if defined(ARDUINO)
-    initArduino();
-#endif
+// #if defined(ARDUINO)
+//     initArduino();
+// #endif
     System::start();
 #ifdef LINUX_ARM
     return 0;

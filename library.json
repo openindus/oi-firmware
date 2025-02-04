@@ -43,6 +43,7 @@
             "-I components/api/Controller/Cmd/Relay",
             "-I components/api/Controller/Cmd/Stepper",
             "-I components/api/Controller/Cmd/Dc",
+            "-I components/api/Controller/Cmd/Encoder",
             "-I components/api/Module",
             "-I components/api/Module/AnalogLS",
             "-I components/api/Module/Brushless",
@@ -108,8 +109,8 @@
         "srcFilter": [
             "-<*>",
             "+<components/api>",
-            "+<components/middleware>",
-            "+<components/drivers>",
+            "+<components/middleware/esp32>",
+            "+<components/drivers/esp32>",
             "+<components/libraries/Modbus>"
         ]
     }
