@@ -1477,6 +1477,9 @@ int MotorStepperParam::initNVSParam() {
         }
     }
 
+    /* CLI */
+    _registerCLI();
+
     return err;
 }
 

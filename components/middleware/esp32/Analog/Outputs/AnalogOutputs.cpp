@@ -60,6 +60,8 @@ int AnalogOutputs::init(uint8_t nb, ad5413_config_t* configs)
         _devicesInitialized[i] = true;
     }
 
+    _registerCLI();
+
     return err;
 }
 

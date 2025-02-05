@@ -110,6 +110,8 @@ private:
     static void IRAM_ATTR _rmt_adapter(const void *src, rmt_item32_t *dest, size_t src_size,
         size_t wanted_num, size_t *translated_size, size_t *item_num);
 
+    static int _registerCLI(void);
+
 };
 
 #ifdef __cplusplus

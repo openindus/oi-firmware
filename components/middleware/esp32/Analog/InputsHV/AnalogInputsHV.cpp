@@ -34,6 +34,8 @@ int AnalogInputsHV::init(const adc_num_t* channel, uint8_t nb)
         _ains[i]->init();
     }
 
+    _registerCLI();
+
     return 0;
 }
 

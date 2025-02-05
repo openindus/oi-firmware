@@ -45,6 +45,8 @@ int AnalogInputsLS::_init(void)
         ret |= -1;
     }
 
+    _registerCLI();
+
     return ret;
 }
 

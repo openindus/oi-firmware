@@ -107,6 +107,8 @@ int DigitalOutputs::init(const gpio_num_t *gpio, const adc_num_t *adc, int nb)
     ESP_LOGI(TAG, "Create control task");
     xTaskCreate(_controlTask, "Control task", 4096, NULL, 1, NULL);
 
+    _registerCLI();
+
     return err;
 }
 

@@ -97,5 +97,7 @@ int Module::init(uint16_t type)
     err |= BusIO::init(&config);
 #endif
 
+    Bus::init();
+
     return err;
 }

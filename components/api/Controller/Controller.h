@@ -8,11 +8,31 @@
 
 #pragma once
 
-#include "Bus.h"
-#include "ControllerCmd.h"
-#include "Controller.h"
 #include "Global.h"
+#include "Bus.h"
 #include "Led.h"
+
+/* CAN */
+#define CMD_EVENT                   (uint8_t) 0x07
+// #define CMD_HEARTBEAT               (uint8_t) 0x10
+
+/* RS */
+#define CMD_NOP                     (uint8_t) 0x00
+#define CMD_RESTART                 (uint8_t) 0x01
+#define CMD_PING                    (uint8_t) 0x02
+#define CMD_SET_LED                 (uint8_t) 0x03
+#define CMD_DISCOVER                (uint8_t) 0x04
+#define CMD_GET_BOARD_INFO          (uint8_t) 0x05
+#define CMD_REQUEST                 (uint8_t) 0x06
+#define CMD_FLASH_LOADER_BEGIN      (uint8_t) 0x08
+#define CMD_FLASH_LOADER_WRITE      (uint8_t) 0x09
+#define CMD_FLASH_LOADER_CHECK      (uint8_t) 0x0A
+#define CMD_FLASH_LOADER_END        (uint8_t) 0x0B 
+#define CMD_READ_REGISTER           (uint8_t) 0x0C
+// #define CMD_WRITE_REGISTER          (uint8_t) 0x0D
+// #define CMD_READ_NVS                (uint8_t) 0x0E
+// #define CMD_WRITE_NVS               (uint8_t) 0x0F
+// #define CMD_AUTO_TEST               (uint8_t) 0x11
 
 typedef enum {
     STATE_UNDEFINED = (int)-1,

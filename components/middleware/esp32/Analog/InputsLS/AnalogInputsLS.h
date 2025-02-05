@@ -71,6 +71,8 @@ protected:
     static Digipot* _digipot;
 
     static int _init(void);
+
+    static int _registerCLI(void);
 };
 
 

@@ -64,6 +64,9 @@ int MotorStepper::init(PS01_Hal_Config_t* config, PS01_Param_t* param)
     _taskHomingStopSemaphore[MOTOR_2] = xSemaphoreCreateMutex();
     xSemaphoreGive(_taskHomingStopSemaphore[MOTOR_2]);
 
+    /* CLI */
+    _registerCLI();
+
     return err;
 }
 

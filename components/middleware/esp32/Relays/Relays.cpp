@@ -1,3 +1,11 @@
+/**
+ * @file Relays.cpp
+ * @brief Relays
+ * @author Georges de Massol
+ * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
+ * @see https://openindus.com
+ */
+
 #include "Relays.h"
 #include "esp_log.h"
 
@@ -33,10 +41,11 @@ int Relays::init(const gpio_num_t *gpio, int nb)
     }
     err |= gpio_config(&doutConf);
     
-
     /* Create mutex */
     _mutex = xSemaphoreCreateMutex();
     xSemaphoreGive(_mutex);
+
+    _registerCLI();
 
     return err;
 }

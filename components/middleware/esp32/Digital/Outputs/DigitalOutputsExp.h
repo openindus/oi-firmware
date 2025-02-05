@@ -56,4 +56,6 @@ private:
     static SemaphoreHandle_t _mutex;
 
     static void _controlTask(void *pvParameters);
+
+    static int _registerCLI(void);
 };

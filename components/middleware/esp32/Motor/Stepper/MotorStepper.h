@@ -190,4 +190,8 @@ public:
      * @param speed
      */
     static void homing(MotorNum_t motor, float speed);
+
+private:
+
+    static int _registerCLI(void);
 };

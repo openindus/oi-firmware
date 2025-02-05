@@ -103,4 +103,6 @@ private:
     static AnalogInputEsp32s3 **_ains;
 
     static float read(AnalogInput_Num_t num, AnalogInput_Unit_t unit);
+
+    static int _registerCLI(void);
 };

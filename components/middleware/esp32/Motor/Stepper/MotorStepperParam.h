@@ -255,4 +255,6 @@ public:
 private:
 
     static int setAdvancedParamWithoutNvs(MotorNum_t motor, AdvancedParameter_t advParam, void* value);
+
+    static int _registerCLI(void);
 };

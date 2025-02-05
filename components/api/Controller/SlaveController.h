@@ -21,7 +21,6 @@
 #include "Led.h"
 #include "Bus.h"
 #include "FlashLoader.h"
-#include "ControllerCmd.h"
 
 #if defined(MODULE_SLAVE)
 
@@ -54,6 +53,8 @@ private:
 
     static void _busTask(void *pvParameters);
     static void _heartbeatTask(void *pvParameters);
+
+    static int _registerCLI(void);
 };
 
 #endif

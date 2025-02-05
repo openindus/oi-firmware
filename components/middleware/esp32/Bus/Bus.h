@@ -16,4 +16,15 @@ class Bus :
     public BusRS,
     public BusCAN,
     public BusIO
-{};
+{
+private:
+
+    static int _registerCLI(void);
+
+public:
+
+    static inline int init(void) {
+        return _registerCLI();
+    }
+
+};

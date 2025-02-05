@@ -50,6 +50,8 @@ int DigitalInputsExp::init(ioex_device_t **device, const ioex_num_t *num, int nb
     ESP_LOGI(TAG, "Create interrupt task");
     xTaskCreate(_task, "DIN intr task", 4096, NULL, 10, NULL);
 
+    _registerCLI();
+
     return err;
 }
 

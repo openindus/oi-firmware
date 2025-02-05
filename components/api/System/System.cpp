@@ -13,7 +13,6 @@
 
 #include "Global.h"
 #ifndef LINUX_ARM
-#include "CLI.h"
 #include "SlaveController.h"
 #include "UsbConsole.h"
 #endif
@@ -57,10 +56,6 @@ int System::init(void)
     err |= MasterController::init();
 #elif defined(MODULE_SLAVE)
     err |= SlaveController::init();
-#endif
-
-#if !defined(LINUX_ARM)
-    CLI::init(); // Command line interface
 #endif
 
     return (err == 0);

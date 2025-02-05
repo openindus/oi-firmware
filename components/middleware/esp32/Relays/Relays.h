@@ -43,7 +43,8 @@ private:
     /* GPIOs */
     static const gpio_num_t *_gpio_num;
 
-    
     static uint8_t* _level;
     static SemaphoreHandle_t _mutex;
+
+    static int _registerCLI(void);
 };

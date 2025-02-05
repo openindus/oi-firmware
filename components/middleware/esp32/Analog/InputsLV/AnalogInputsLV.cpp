@@ -49,6 +49,8 @@ int AnalogInputsLV::init(ads866x_config_t *ads866xConfig, const ain_num_t* num, 
     /* Create control task for overcurrent */
     ESP_LOGI(TAG, "Create AIN control task");
     xTaskCreate(_controlTask, "Control ain task", 4096, NULL, 1, NULL);
+
+    _registerCLI();
     
     return err;
 

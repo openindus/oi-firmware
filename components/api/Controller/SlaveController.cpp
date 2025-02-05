@@ -38,6 +38,8 @@ int SlaveController::init(void)
 
     _state = STATE_RUNNING;
 
+    _registerCLI();
+
     return err;
 }
 

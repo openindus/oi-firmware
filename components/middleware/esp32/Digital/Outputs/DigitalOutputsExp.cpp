@@ -74,6 +74,8 @@ int DigitalOutputsExp::init(ioex_device_t **ioex, const ioex_num_t *ioex_num,
     ESP_LOGI(TAG, "Create control task");
     xTaskCreate(_controlTask, "Control task", 4096, NULL, 1, NULL);
 
+    _registerCLI();
+
     return err;
 }
 

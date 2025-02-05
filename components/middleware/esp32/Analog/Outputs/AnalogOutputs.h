@@ -79,4 +79,6 @@ private:
     static AnalogOutput_Mode_t *_modes;
     static ad5413_device_t **_devices;
     static bool *_devicesInitialized;
+
+    static int _registerCLI(void);
 };
