@@ -78,13 +78,7 @@ set(COMPONENT_INCLUDE_DIRS
 )
 
 set(COMPONENT_PRIV_REQUIRES
-    "esp_adc_cal"
-    "console"
-    "nvs_flash"
-    "app_update"
-    "fatfs"
-    "sdmmc"
-    "esp_rom"
+
 )
 
 set(COMPONENT_REQUIRES

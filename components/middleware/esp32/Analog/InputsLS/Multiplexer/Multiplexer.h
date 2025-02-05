@@ -8,7 +8,9 @@
 
 #pragma once
 
-#include "Global.h"
+#include <stdint.h>
+#include <array>
+#include "driver/gpio.h"
 
 #define MUX_IO_MAX 7
 

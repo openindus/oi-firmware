@@ -8,10 +8,10 @@
 
 #pragma once
 
+#include <string.h>
 #include "esp_adc_cal.h"
 #include "esp_efuse.h"
-#include <string.h>
-
+#include "adc.h"
 #include "AnalogInputs.h"
 
 #define ESP_ADC_NO_OF_SAMPLES 10U

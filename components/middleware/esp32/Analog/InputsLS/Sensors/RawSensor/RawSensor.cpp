@@ -7,6 +7,7 @@
  */
 
 #include "RawSensor.h"
+#include <math.h>
 
 #define V_REF_MILLIVOLTS    2500.0f
 

@@ -1,80 +1,120 @@
 /**
- * Copyright (C) OpenIndus, Inc - All Rights Reserved
- *
- * This file is part of OpenIndus Library.
- *
- * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential
- * 
  * @file MotorDc.cpp
- * @brief 
- *
- * For more information on OpenIndus:
+ * @brief MotorDc class implementation
+ * @author 
+ * @copyright (c) [2025] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
 
 #include "MotorDc.h"
 
-std::vector<MotorDC_Config_t> MotorDc::_motorsConfig;
+#define LEDC_TIMER              LEDC_TIMER_0
+#define LEDC_MODE               LEDC_LOW_SPEED_MODE
+#define LEDC_DUTY_RES           LEDC_TIMER_13_BIT // Set duty resolution to 13 bits
+#define LEDC_DUTY_MAX           (8191) // Duty cycle max. ((2 ** 13) - 1)
+#define LEDC_FREQUENCY          (5000) // Frequency in Hertz. Set frequency at 5 kHz
+
+std::vector<MotorDC_PinConfig_t> MotorDc::_motorsConfig;
 gpio_num_t MotorDc::_faultPin;
 
-int MotorDc::init(std::vector<MotorDC_Config_t> motorsConfig, gpio_num_t faultPin)
+int MotorDc::init(std::vector<MotorDC_PinConfig_t> motorsConfig, gpio_num_t faultPin)
 {    
     int err = 0;
 
-    /* Save config */
+    // Save config
     _faultPin = faultPin;
     _motorsConfig = motorsConfig;
 
-    /* Init fault pin */
-    gpio_config_t cfg;
-        
-    /* Configure Cmd pin */
-    cfg.pin_bit_mask = (1ULL << _faultPin);
-    cfg.mode = GPIO_MODE_INPUT;
-    cfg.pull_up_en = GPIO_PULLUP_DISABLE;
-    cfg.pull_down_en = GPIO_PULLDOWN_DISABLE;
-    cfg.intr_type = GPIO_INTR_DISABLE;
+    // Configure fault pin
+    gpio_config_t input_conf;
+    input_conf.pin_bit_mask = (1ULL << _faultPin);
+    input_conf.mode = GPIO_MODE_INPUT;
+    input_conf.pull_up_en = GPIO_PULLUP_DISABLE;
+    input_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
+    input_conf.intr_type = GPIO_INTR_DISABLE;
+    err |= gpio_config(&input_conf);
 
-    err |= gpio_config(&cfg);
+    // Configure LEDC timer to generate PWM
+    ledc_timer_config_t ledc_timer = {
+        .speed_mode       = LEDC_MODE,
+        .duty_resolution  = LEDC_DUTY_RES,
+        .timer_num        = LEDC_TIMER,
+        .freq_hz          = LEDC_FREQUENCY,  // Set output frequency at 5 kHz
+        .clk_cfg          = LEDC_AUTO_CLK
+    };
+    err |= ledc_timer_config(&ledc_timer);
 
-    /* Init motors pins */
+    /* Configure all outputs */
     for(auto motorConfig = _motorsConfig.begin(); motorConfig != _motorsConfig.end(); motorConfig++) {
-        
-        // First set disable to 1 to avoid glitch
-        err |= gpio_set_level(motorConfig->disable, 1);
-        err |= gpio_set_level(motorConfig->in1_pwm, 0);
-        err |= gpio_set_level(motorConfig->in2_pwm, 0);
+        // Configure disable pin
+        gpio_config_t output_conf;
+        output_conf.pin_bit_mask = (1ULL << motorConfig->disable);
+        output_conf.mode = GPIO_MODE_OUTPUT;
+        output_conf.pull_up_en = GPIO_PULLUP_DISABLE;
+        output_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
+        output_conf.intr_type = GPIO_INTR_DISABLE;
+        err |= gpio_config(&output_conf);
 
-        /* Configure IN1 & IN2 and DISABLE pins */
-        cfg.pin_bit_mask = (1ULL << motorConfig->in1_pwm) | (1ULL << motorConfig->in2_pwm) | (1ULL << motorConfig->disable);
-        cfg.mode = GPIO_MODE_OUTPUT;
-        cfg.pull_up_en = GPIO_PULLUP_DISABLE;
-        cfg.pull_down_en = GPIO_PULLDOWN_DISABLE;
-        cfg.intr_type = GPIO_INTR_DISABLE;
-        err |= gpio_config(&cfg);
+        // Configure LEDC PWM channel
+        ledc_channel_config_t ledc_channel;
+        ledc_channel.speed_mode = LEDC_MODE;
+        ledc_channel.intr_type = LEDC_INTR_DISABLE;
+        ledc_channel.timer_sel = LEDC_TIMER;
+        ledc_channel.duty = 0;
+        ledc_channel.hpoint = 0;
 
+        // Config IN1
+        ledc_channel.gpio_num = motorConfig->in1.gpio;
+        ledc_channel.channel = motorConfig->in1.channel;
+        err |= ledc_channel_config(&ledc_channel);
+
+        // Config IN2
+        ledc_channel.gpio_num = motorConfig->in2.gpio;
+        ledc_channel.channel = motorConfig->in2.channel;
+        err |= ledc_channel_config(&ledc_channel);
     }
 
     return err;
 }
 
-void MotorDc::run(MotorNum_t motor, MotorDirection_t direction)
+void MotorDc::run(MotorNum_t motor, MotorDirection_t direction, float dutyCycle)
 {
+    // Check duty cycle
+    if (dutyCycle < 0) dutyCycle = 0;
+    if (dutyCycle > 100) dutyCycle = 100;
+
+    // Enable motor
     gpio_set_level(_motorsConfig.at(motor).disable, 0);
 
     if (direction == FORWARD) {
-        gpio_set_level(_motorsConfig.at(motor).in1_pwm, 1);
-        gpio_set_level(_motorsConfig.at(motor).in2_pwm, 0);
+        // IN1
+        ledc_set_duty(LEDC_MODE, _motorsConfig.at(motor).in1.channel, LEDC_DUTY_MAX);
+        ledc_update_duty(LEDC_MODE, _motorsConfig.at(motor).in1.channel);
+        // IN2
+        ledc_set_duty(LEDC_MODE, _motorsConfig.at(motor).in2.channel, 
+            (uint32_t)(((100 - dutyCycle) * LEDC_DUTY_MAX) / 100));
+        ledc_update_duty(LEDC_MODE, _motorsConfig.at(motor).in2.channel);
     } else {
-        gpio_set_level(_motorsConfig.at(motor).in1_pwm, 0);
-        gpio_set_level(_motorsConfig.at(motor).in2_pwm, 1);
+        // IN1
+        ledc_set_duty(LEDC_MODE, _motorsConfig.at(motor).in1.channel, 
+            (uint32_t)(((100 - dutyCycle) * LEDC_DUTY_MAX) / 100));
+        ledc_update_duty(LEDC_MODE, _motorsConfig.at(motor).in1.channel);
+        // IN2
+        ledc_set_duty(LEDC_MODE, _motorsConfig.at(motor).in2.channel, LEDC_DUTY_MAX);
+        ledc_update_duty(LEDC_MODE, _motorsConfig.at(motor).in2.channel);
     }
 }
 
 void MotorDc::stop(MotorNum_t motor)
 {
-    gpio_set_level(_motorsConfig.at(motor).in1_pwm, 0);
-    gpio_set_level(_motorsConfig.at(motor).in2_pwm, 0);
+    // IN1
+    ledc_set_duty(LEDC_MODE, _motorsConfig.at(motor).in1.channel, 0);
+    ledc_update_duty(LEDC_MODE, _motorsConfig.at(motor).in1.channel);
+
+    // IN2
+    ledc_set_duty(LEDC_MODE, _motorsConfig.at(motor).in2.channel, 0);
+    ledc_update_duty(LEDC_MODE, _motorsConfig.at(motor).in2.channel);
+
+    // Disable motor
     gpio_set_level(_motorsConfig.at(motor).disable, 1);
 }

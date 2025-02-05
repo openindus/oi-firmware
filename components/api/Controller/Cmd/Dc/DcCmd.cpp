@@ -21,9 +21,11 @@ DcCmd::DcCmd(Controller* control) : _control(control)
 
 }
 
-void DcCmd::run(MotorNum_t motor, MotorDirection_t direction)
+void DcCmd::run(MotorNum_t motor, MotorDirection_t direction, float dutyCycle)
 {
     std::vector<uint8_t> msgBytes = {REQUEST_MOTOR_DC_RUN, (uint8_t)motor, (uint8_t)direction};
+    uint8_t *ptr = reinterpret_cast<uint8_t *>(&dutyCycle);
+    msgBytes.insert(msgBytes.end(), ptr, ptr + sizeof(float));
     _control->sendRequest(msgBytes);
 }
 

@@ -8,7 +8,6 @@
 
 #pragma once
 
-#include "Global.h"
 #include "global_sensor.hpp"
 
 class RawSensor: public Sensor

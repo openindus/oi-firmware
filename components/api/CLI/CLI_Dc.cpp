@@ -38,7 +38,7 @@ static int run(int argc, char **argv)
     MotorNum_t motor = (MotorNum_t)(runArgs.motor->ival[0] - 1);
     MotorDirection_t direction = (MotorDirection_t)(runArgs.dir->ival[0]);
 
-    MotorDc::run(motor, direction);
+    MotorDc::run(motor, direction, 100);
 
     return 0;
 }

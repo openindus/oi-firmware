@@ -7,6 +7,7 @@
  */
 
 #include "DigitalOutputsExp.h"
+#include <string.h>
 
 static const char TAG[] = "DigitalOutputsExp";
 

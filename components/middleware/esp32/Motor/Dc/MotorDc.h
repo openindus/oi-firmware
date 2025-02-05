@@ -1,44 +1,63 @@
 /**
- * Copyright (C) OpenIndus, Inc - All Rights Reserved
- *
- * This file is part of OpenIndus Library.
- *
- * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential
- * 
  * @file MotorDc.h
- * @brief 
- *
- * For more information on OpenIndus:
+ * @brief MotorDc class definition
+ * @author 
+ * @copyright (c) [2025] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
 
-
 #pragma once
 
-#include "Global.h"
 #include "Motor.h"
-#include "DigitalInputs.h"
+#include <vector>
 #include "driver/gpio.h"
+#include "driver/ledc.h"
 
 typedef struct {
-    gpio_num_t in1_pwm;
-    gpio_num_t in2_pwm;
+    struct {
+        gpio_num_t gpio;
+        ledc_channel_t channel; 
+    } in1;
+    struct {
+        gpio_num_t gpio;
+        ledc_channel_t channel; 
+    } in2;
     gpio_num_t disable;
-} MotorDC_Config_t;
+} MotorDC_PinConfig_t;
 
 class MotorDc : public Motor
 {
-public:
-
-    static int init(std::vector<MotorDC_Config_t> motorsConfig, gpio_num_t faultPin);
-    
-    static void run(MotorNum_t motor, MotorDirection_t direction);
-
-    static void stop(MotorNum_t motor); 
-
 private:
 
-    static std::vector<MotorDC_Config_t> _motorsConfig;
+    static std::vector<MotorDC_PinConfig_t> _motorsConfig;
     static gpio_num_t _faultPin;
-};
+
+protected:
+
+    /**
+     * @brief 
+     * 
+     * @param motorsConfig 
+     * @param faultPin 
+     * @return int 
+     */
+    static int init(std::vector<MotorDC_PinConfig_t> motorsConfig, gpio_num_t faultPin);
+
+public:
+
+    /**
+     * @brief 
+     * 
+     * @param motor 
+     * @param direction 
+     * @param dutyCycle 
+     */
+    static void run(MotorNum_t motor, MotorDirection_t direction, float dutyCycle);
+
+    /**
+     * @brief 
+     * 
+     * @param motor 
+     */
+    static void stop(MotorNum_t motor); 
+};;

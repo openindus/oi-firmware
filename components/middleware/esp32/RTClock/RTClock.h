@@ -8,7 +8,8 @@
 
 #pragma once
 
-#include "Global.h"
+#include <stdint.h>
+#include "driver/i2c.h"
 
 #define SECONDS_FROM_1970_TO_2000 946684800
 

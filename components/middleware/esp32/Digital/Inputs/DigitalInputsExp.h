@@ -9,7 +9,7 @@
 #pragma once
 
 #include "DigitalInputs.h"
-#include "Global.h"
+#include "pcal6524.h"
 
 class DigitalInputsExp
 {

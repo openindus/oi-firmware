@@ -14,6 +14,9 @@
  */
 
 #include "BusCAN.h"
+#include <string.h>
+#include "esp_log.h"
+#include "driver/twai.h"
 
 static const char TAG[] = "BusCAN";
 

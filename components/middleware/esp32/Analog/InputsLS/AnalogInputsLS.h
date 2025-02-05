@@ -8,7 +8,6 @@
 
 #pragma once
 
-#include "Global.h"
 #include "_ADS114S0X.h"
 #include "Multiplexer.h"
 #include "Digipot.h"

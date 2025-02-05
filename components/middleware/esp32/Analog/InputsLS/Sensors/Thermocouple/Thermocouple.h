@@ -8,7 +8,8 @@
 
 #pragma once
 
-#include "Global.h"
+#include <math.h>
+#include <vector>
 #include "_ADS114S0X.h"
 #include "Multiplexer.h"
 #include "Sensor.h"

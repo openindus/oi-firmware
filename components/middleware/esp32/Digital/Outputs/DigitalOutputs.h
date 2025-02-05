@@ -8,7 +8,11 @@
 
 #pragma once
 
-#include "Global.h"
+#include "esp_adc_cal.h"
+#include "driver/gpio.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/semphr.h"
+#include "adc.h"
 
 /**
  * @brief Digital Outputs Numbers

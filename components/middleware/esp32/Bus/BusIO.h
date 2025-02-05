@@ -19,6 +19,7 @@
 #include "esp_err.h"
 #include "esp_log.h"
 #include "driver/gpio.h"
+#include "driver/adc.h"
 #include "esp_adc_cal.h"
 
 class BusIO
