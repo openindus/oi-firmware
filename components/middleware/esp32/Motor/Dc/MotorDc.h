@@ -32,6 +32,8 @@ private:
     static std::vector<MotorDC_PinConfig_t> _motorsConfig;
     static gpio_num_t _faultPin;
 
+    static int _registerCLI(void);
+
 protected:
 
     /**

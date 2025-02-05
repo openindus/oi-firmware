@@ -54,6 +54,7 @@ private:
 
     static uint8_t _calculate_eFuse_checksum(uint8_t* data);
     static bool _verify_eFuse_checksum(Board_eFuse_Info_t info);
+    static int _registerCLI(void);
 
 };
 

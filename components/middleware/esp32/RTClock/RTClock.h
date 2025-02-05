@@ -128,4 +128,6 @@ private:
     i2c_port_t _i2c_num;
     gpio_num_t _intr_pin;
 
+    static int _registerCLI(void);
+
 };

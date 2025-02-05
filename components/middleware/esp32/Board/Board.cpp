@@ -45,6 +45,9 @@ int Board::init(void)
     err |= temp_sensor_set_config(temp_sensor);
     err |= temp_sensor_start();
 
+    /* CLI */
+    _registerCLI();
+
     return err;
 }
 

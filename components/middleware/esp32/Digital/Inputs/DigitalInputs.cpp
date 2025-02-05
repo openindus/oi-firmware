@@ -58,6 +58,8 @@ int DigitalInputs::init(const gpio_num_t *gpio, int nb)
     ESP_LOGI(DIN_TAG, "Create interrupt task");
     xTaskCreate(_task, "DIN intr task", 4096, NULL, 10, NULL);
 
+    _registerCLI();
+
     return err;
 }
 

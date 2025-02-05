@@ -47,6 +47,9 @@ int MasterController::init(void)
 
     _state = STATE_RUNNING;
 
+    /* CLI */
+    _registerCLI();
+
     return err;
 }
 

@@ -74,6 +74,9 @@ int MotorDc::init(std::vector<MotorDC_PinConfig_t> motorsConfig, gpio_num_t faul
         err |= ledc_channel_config(&ledc_channel);
     }
 
+    /* CLI */
+    _registerCLI();
+
     return err;
 }
 

@@ -143,4 +143,6 @@ private:
 
     static float read(AnalogInput_Num_t num, AnalogInput_Unit_t unit);
     static void _controlTask(void *pvParameters);
+
+    static int _registerCLI(void);
 };

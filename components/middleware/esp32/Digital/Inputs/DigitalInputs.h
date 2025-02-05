@@ -107,4 +107,6 @@ private:
     static QueueHandle_t _event;
     static void IRAM_ATTR _isr(void *pvParameters);
     static void _task(void *pvParameters);
+
+    static int _registerCLI(void);
 };

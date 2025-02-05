@@ -22,7 +22,6 @@
 #include "Board.h"
 #include "Led.h"
 #include "Bus.h"
-#include "ControllerCmd.h"
 #include "Controller.h"
 
 class MasterController
@@ -73,6 +72,8 @@ private:
 
     static std::map<std::pair<uint8_t,uint16_t>, std::function<void(uint8_t*)>> _eventCallbacks;
     static std::vector<Controller*> _instances;
+
+    static int _registerCLI(void);
 
 };
 
