@@ -10,15 +10,17 @@
 
 #if defined(MODULE_SLAVE)
 
-#include "SlaveController.h"
+#include "Cmds.h"
 #include "Encoder.h"
+#include "SlaveController.h"
 
 class EncoderCmdHandler
 {
 public:
+    static int init(Encoder **encoder);
 
-    static int init(void);
-
+private:
+    static Encoder **_encoder;
 };
 
 #endif

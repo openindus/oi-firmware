@@ -64,9 +64,11 @@ enum Cmds_Request_e {
     /* ENCODER */
     REQUEST_ENCODER_BEGIN                   = 0x80,
     REQUEST_ENCODER_END                     = 0x81,
-    REQUEST_ENCODER_GET_POSITION            = 0x82,
-    REQUEST_ENCODER_GET_SPEED               = 0x83,
-    REQUEST_ENCODER_GET_ANGLE               = 0x84,
+    REQUEST_ENCODER_RESET                   = 0x82,
+    REQUEST_ENCODER_GET_REVOLUTIONS         = 0x83,
+    REQUEST_ENCODER_GET_PULSES              = 0x84,
+    REQUEST_ENCODER_GET_ANGLE               = 0x85,
+    REQUEST_ENCODER_GET_SPEED               = 0x86,
 
     /* DC MOTOR */
     REQUEST_MOTOR_DC_RUN                    = 0xA0,

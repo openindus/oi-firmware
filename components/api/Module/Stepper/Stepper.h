@@ -1,62 +1,55 @@
 /**
  * @file Stepper.h
- * @brief Stepper
- * @author
- * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
+ * @brief Stepper class definition
+ * @author  Kévin Lefeuvre (kevin.lefeuvre@openindus.com)
+ * @copyright (c) [2025] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
 
 #pragma once
 
+#include "Controller.h"
+#include "DigitalInputs.h"
+#include "DigitalInputsCmd.h"
+#include "DigitalInputsCmdHandler.h"
+#include "Encoder.h"
+#include "EncoderCmd.h"
+#include "EncoderCmdHandler.h"
 #include "Global.h"
 #include "Module.h"
-#include "StepperPinout.h"
-#include "StepperParam.h"
-#include "Module.h"
-#include "DigitalInputs.h"
 #include "MotorStepper.h"
 #include "MotorStepperParam.h"
 #include "SlaveController.h"
-#include "DigitalInputsCmdHandler.h"
-#include "StepperCmdHandler.h"
-#include "Controller.h"
-#include "DigitalInputsCmd.h"
 #include "StepperCmd.h"
-#include "Encoder.h"
-#include "EncoderCmd.h"
+#include "StepperCmdHandler.h"
+#include "StepperParam.h"
+#include "StepperPinout.h"
+
+#define STEPPER_ENCODER_MAX 2
 
 #if defined(OI_STEPPER) || defined(OI_STEPPER_VE)
 
-class Stepper : 
-    public Module, 
-    public DigitalInputs, 
-    public MotorStepper,
-    public MotorStepperParam
+class Stepper : public Module, public DigitalInputs, public MotorStepper, public MotorStepperParam
 {
 public:
-
     static int init(void);
 
-    static Encoder encoder;
+    static Encoder *encoder[STEPPER_ENCODER_MAX];
 };
 
 #elif defined(MODULE_MASTER)
 
-class Stepper : 
-    public Controller, 
-    public DigitalInputsCmd, 
-    public StepperCmd
+class Stepper : public Controller, public DigitalInputsCmd, public StepperCmd
 {
 public:
+    Stepper(uint32_t sn = 0)
+        : Controller(TYPE_OI_STEPPER, sn), DigitalInputsCmd(this), StepperCmd(this)
+    {
+        for (int i = 0; i < STEPPER_ENCODER_MAX; i++) {
+            encoder[i] = new EncoderCmd(this, i);
+        }
+    }
 
-    Stepper(uint32_t sn = 0) : 
-        Controller(TYPE_OI_STEPPER, sn),
-        DigitalInputsCmd(this),
-        StepperCmd(this),
-        encoder(this) {}
-    
-    EncoderCmd encoder;
+    EncoderCmd *encoder[STEPPER_ENCODER_MAX];
 };
 #endif
-
-

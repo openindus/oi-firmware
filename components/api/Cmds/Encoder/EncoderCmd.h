@@ -10,55 +10,31 @@
 
 #if defined(MODULE_MASTER)
 
+#include "Cmds.h"
 #include "Controller.h"
-#include "MasterController.h"
 #include "Encoder.h"
+#include "MasterController.h"
 
 class EncoderCmd
 {
 private:
     Controller *_controller;
+    int _instance;
 
 public:
-    EncoderCmd(Controller *controller) : _controller(controller) {}
+    EncoderCmd(Controller *controller, int instance) : 
+        _controller(controller), _instance(instance) {}
+    
     ~EncoderCmd() {}
 
-    /**
-     * @brief Encoder initialization
-     *
-     * @param A Digital input number A
-     * @param B Digital input number B
-     * @param ppr Pulse per revolution
-     * @return int
-     */
-    int begin(DIn_Num_t A, DIn_Num_t B, uint32_t ppr);
-
-    /**
-     * @brief Encoder end
-     *
-     */
+    int begin(DIn_Num_t A, DIn_Num_t B, int16_t ppr);
     void end(void);
 
-    /**
-     * @brief Get the position of the motor
-     *
-     * @return float
-     */
-    float getPosition(void);
-
-    /**
-     * @brief Get the speed of the motor
-     *
-     * @return float
-     */
-    float getSpeed(void);
-
-    /**
-     * @brief Get the angle of the motor
-     *
-     * @return float
-     */
+    void reset(void);
+    int getRevolutions(void);
+    int getPulses(void);
     float getAngle(void);
+    float getSpeed(void);
 };
 
 #endif
