@@ -58,3 +58,21 @@ Board which are ready to use :
 
 - Solved interrupt crash on OI-Core
 - Wrong init on Modbus RTU
+
+# 1.5.0
+
+### Features
+
+- Architecture update for Linux ARM/
+- Added Encoder API.
+- Added function to protect stepper motor driver.
+- Added stepper function to set absolute position.
+- Added option to force start the application.
+- Overloads discrete inputs/outputs functions.
+- Added module function to get temperature.
+
+### Bugfix
+
+- Fixed analog-read error (CLI).
+- Change the USB host slave select pin.
+- Inversion oƒ relay numbers on RelayHP.
