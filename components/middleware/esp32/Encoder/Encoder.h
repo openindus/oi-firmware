@@ -8,51 +8,46 @@
 
 #pragma once
 
-#include <stdio.h>
 #include "DigitalInputs.h"
+#include "driver/gpio.h"
+#include "driver/pcnt.h"
+#include "esp_log.h"
+#include <map>
+#include <math.h>
+#include <stdio.h>
+
+#define ENCODER_NB_INSTANCE_MAX PCNT_UNIT_MAX
 
 class Encoder
 {
-protected:
-    Encoder() {}
+public:
+    Encoder(int index, std::map<DIn_Num_t, gpio_num_t> dinGpioMap)
+        : _ppr(0), _revolutionCnt(0), _index(index), _speed(0), _dinGpioMap(dinGpioMap)
+    {
+        _pcntUnit = static_cast<pcnt_unit_t>((int)PCNT_UNIT_0 + index);
+    }
+
     ~Encoder() {}
 
-public:
+    int begin(DIn_Num_t A, DIn_Num_t B, int16_t ppr);
+    void end(void);
 
-    /**
-     * @brief Encoder initialization
-     *
-     * @param A Digital input number A
-     * @param B Digital input number B
-     * @param ppr Pulse per revolution
-     * @return int
-     */
-    static int begin(DIn_Num_t A, DIn_Num_t B, uint32_t ppr);
+    void reset(void);
+    int getRevolutions(void);
+    int getPulses(void);
+    float getAngle(void);
+    float getSpeed(void);
 
-    /**
-     * @brief Encoder end
-     *
-     */
-    static void end(void);
+private:
+    int16_t _ppr;
+    int _revolutionCnt;
+    int _index;
+    float _speed;
 
-    /**
-     * @brief Get the position of the motor
-     *
-     * @return float position in number of pulses
-     */
-    static float getPosition(void);
+    std::map<DIn_Num_t, gpio_num_t> _dinGpioMap;
+    pcnt_unit_t _pcntUnit;
 
-    /**
-     * @brief Get the speed of the motor
-     *
-     * @return float
-     */
-    static float getSpeed(void);
+    static void _pcntIsrHandler(void *arg);
 
-    /**
-     * @brief Get the angle of the motor
-     *
-     * @return float angle in radians
-     */
-    static float getAngle(void);
+    static void _speedTask(void *pvParameter);
 };
