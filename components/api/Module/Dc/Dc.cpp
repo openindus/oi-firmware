@@ -38,16 +38,16 @@ int Dc::init(void)
     err |= DigitalInputs::init(_dinGpio, 4);
 
     /* Stepper motor */
-    std::vector<MotorDC_Config_t> motorsConfig;
-    motorsConfig.push_back({DC_MOTOR1_IN1, DC_MOTOR1_IN2, DC_MOTOR1_DISABLE});
-    motorsConfig.push_back({DC_MOTOR2_IN1, DC_MOTOR2_IN2, DC_MOTOR2_DISABLE});
-    motorsConfig.push_back({DC_MOTOR3_IN1, DC_MOTOR3_IN2, DC_MOTOR3_DISABLE});
-    motorsConfig.push_back({DC_MOTOR4_IN1, DC_MOTOR4_IN2, DC_MOTOR4_DISABLE});
+    std::vector<MotorDC_PinConfig_t> motorsConfig;
+    motorsConfig.push_back({DC_MOTOR1_IN1, LEDC_CHANNEL_0, DC_MOTOR1_IN2, LEDC_CHANNEL_1, DC_MOTOR1_DISABLE});
+    motorsConfig.push_back({DC_MOTOR2_IN1, LEDC_CHANNEL_2, DC_MOTOR2_IN2, LEDC_CHANNEL_3, DC_MOTOR2_DISABLE});
+    motorsConfig.push_back({DC_MOTOR3_IN1, LEDC_CHANNEL_4, DC_MOTOR3_IN2, LEDC_CHANNEL_5, DC_MOTOR3_DISABLE});
+    motorsConfig.push_back({DC_MOTOR4_IN1, LEDC_CHANNEL_6, DC_MOTOR4_IN2, LEDC_CHANNEL_7, DC_MOTOR4_DISABLE});
     err |= MotorDc::init(motorsConfig, DC_MOTOR_FAULT);
 
 #if defined(MODULE_SLAVE)
-    err |= DigitalInputsRsp::init();
-    err |= DcRsp::init();
+    err |= DigitalInputsCmdHandler::init();
+    err |= DcCmdHandler::init();
 #endif
 
     return err;

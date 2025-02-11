@@ -19,12 +19,12 @@
 #include "DcPinout.h"
 #include "Module.h"
 #include "Controller.h"
-#include "ControllerSlave.h"
+#include "SlaveController.h"
 #include "DigitalInputs.h"
 #include "DigitalInputsCmd.h"
-#include "DigitalInputsRsp.h"
+#include "DigitalInputsCmdHandler.h"
 #include "MotorDc.h"
-#include "DcRsp.h"
+#include "DcCmdHandler.h"
 #include "DcCmd.h"
 
 #if defined(OI_DC)

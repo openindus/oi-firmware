@@ -100,10 +100,10 @@ int Mixed::init(void)
     AnalogOutputs::start();
 
 #if defined(MODULE_SLAVE)
-    err |= AnalogOutputsRsp::init();
-    err |= AnalogInputsLVRsp::init();
-    err |= DigitalOutputsRsp::init();
-    err |= DigitalInputsRsp::init();
+    err |= AnalogOutputsCmdHandler::init();
+    err |= AnalogInputsLVCmdHandler::init();
+    err |= DigitalOutputsCmdHandler::init();
+    err |= DigitalInputsCmdHandler::init();
 #endif
 
     return err;

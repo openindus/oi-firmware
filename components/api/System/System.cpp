@@ -1,34 +1,36 @@
 /**
- * Copyright (C) OpenIndus, Inc - All Rights Reserved
- *
- * This file is part of OpenIndus Library.
- *
- * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential
- * 
  * @file System.cpp
- * @brief 
- *
- * For more information on OpenIndus:
+ * @brief System main
+ * @author Kévin Lefeuvre (kevin.lefeuvre@openindus.com)
+ * @copyright (c) [2025] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
 
 #include "System.h"
-#if defined(ARDUINO)
-#include "Arduino.h"
+// #if defined(ARDUINO)
+// #include "Arduino.h"
+// #endif
+
+#include "Global.h"
+#ifndef LINUX_ARM
+#include "SlaveController.h"
+#include "UsbConsole.h"
 #endif
+#include "MasterController.h"
+#include "OpenIndus.h"
+#include "OSAL.h"
 
 static const char TAG[] = "System";
 
 void System::_mainTask(void *pvParameters)
 {
     setup();
-    while(1) {
+    while (1) {
         loop();
     }
 }
 
-void System::init(void)
+int System::init(void)
 {
     int err = 0;
 
@@ -51,61 +53,62 @@ void System::init(void)
 
     /* Controller init */
 #if defined(MODULE_MASTER)
-    err |= ControllerMaster::init();
+    err |= MasterController::init();
 #elif defined(MODULE_SLAVE)
-    err |= ControllerSlave::init();
+    err |= SlaveController::init();
 #endif
 
-    /* Command line interface init */
-    CLI::init();
+    return (err == 0);
+}
 
-    if (err != 0) {
-        ESP_LOGE(TAG, "Failed to initialize module");
-        Module::ledBlink(LED_RED, 250);
+void System::start(void)
+{
+    /* --- Initialize module --- */
+    if (!System::init() || Board::checkBootError()) {
+        LOGE(TAG, "Failed to initialize module");
+        Module::ledBlink(LED_RED, 1000);
+#if !defined(LINUX_ARM)
         UsbConsole::begin(true); // Force console to start, convenient for debugging
+#endif
+#if !defined(FORCED_START)
         return;
+#endif
     } else {
-        /* Module Initialized */
-        Module::ledBlink(LED_BLUE, 1000);
+        Module::ledBlink(LED_BLUE, 1000); // Module Initialized
     }
 
-    /* Check reset reason */
-    esp_reset_reason_t reason = esp_reset_reason();
-    if ((reason != ESP_RST_POWERON) && 
-        (reason != ESP_RST_SW) && 
-        (reason != ESP_RST_UNKNOWN)) {
-        ESP_LOGE(TAG, "Reset reason : %d", reason);
-        Module::ledBlink(LED_RED, 1000); // Error
-        UsbConsole::begin(true); // Force console to start, convenient for debugging
-        return;
-    }
-
+    /* --- Slave Module --- */
 #if defined(MODULE_SLAVE)
-
+#if !defined(LINUX_ARM)
     UsbConsole::begin(true); // Force console on slave module
+#endif
+#if !defined(FORCED_START)
     return;
-
+#endif
 #else
+    UsbConsole::listen(); // Start a task which listen for user to input "console"
+#endif 
 
-    /* Start a task which listen for user to input "console" */
-    UsbConsole::listen();
-    
-    /* Wait for slaves modules to init and give time to user script to enable console */
-    vTaskDelay(500/portTICK_PERIOD_MS);
+    delay(500); // Wait for slaves modules to init and give time to user script to enable console
 
-    /* On master module, call autoId */
+    /* --- Master Module --- */
 #if defined(MODULE_MASTER)
-    if (ControllerMaster::autoId()) {
+    if (MasterController::autoId()) {
         Module::ledBlink(LED_GREEN, 1000); // Paired
     } else {
         Module::ledBlink(LED_RED, 1000); // Paired error
+#if !defined(LINUX_ARM)
         UsbConsole::begin(true); // Force console to start, convenient for debugging
+#endif
+#if !defined(FORCED_START)
         return;
+#endif
     }
 #endif
 
+    /* --- Main task --- */
+#if !defined(LINUX_ARM)
     if (!UsbConsole::begin()) { // console will start only if user input "console" during startup
-        /* Start main task if console is not started  */
         ESP_LOGI(TAG, "Create main task");
         vTaskDelay(10);
         xTaskCreate(_mainTask, "Main task", 8192, NULL, 1, NULL);
@@ -113,14 +116,20 @@ void System::init(void)
         UsbConsole::begin(true); // Force console, will failed if Serial.begin() is called in user code
 #endif
     }
-    
 #endif
 }
 
+#ifndef LINUX_ARM
 extern "C" void app_main()
-{
-#if defined(ARDUINO)
-    initArduino();
+#else
+int main(void)
 #endif
-    System::init();
+{
+// #if defined(ARDUINO)
+//     initArduino();
+// #endif
+    System::start();
+#ifdef LINUX_ARM
+    return 0;
+#endif
 }

@@ -83,7 +83,7 @@ int AnalogLS::init(void)
     ret |= AnalogInputsLS::_init();
 
 #if defined(MODULE_SLAVE)
-    ret |= AnalogInputsLSRsp::init();
+    ret |= AnalogInputsLSCmdHandler::init();
 #endif
 
     return ret;

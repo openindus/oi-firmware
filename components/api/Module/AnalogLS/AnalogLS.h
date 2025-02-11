@@ -12,7 +12,7 @@
 #include "Module.h"
 #include "AnalogLSConfig.h"
 #include "AnalogInputsLS.h"
-#include "AnalogInputsLSRsp.h"
+#include "AnalogInputsLSCmdHandler.h"
 #include "AnalogInputsLSCmd.h"
 
 #if (OI_ANALOG_LS)

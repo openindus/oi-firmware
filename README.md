@@ -4,20 +4,56 @@
 
 [See our online documentation](https://openindus.com/oi-content/doc/index.html)
 
+## Platform: ESP32
+
 ### Configuration
 
-```
+```bash
 pio run -t menuconfig
 ```
 
-### Build, flash
+### Build and flash
 
-```
-pio run -t upload
+```bash
+pio run -t upload --upload-port=/dev/ttyUSB0
 ```
 
-### monitor
+### Monitor
 
+```bash
+pio device monitor -p /dev/ttyUSB0
 ```
-pio device monitor
+
+## Platform: Linux ARM
+
+### Toolchain
+
+```bash
+sudo apt install gcc-arm-linux-gnueabihf
+sudo apt install g++-arm-linux-gnueabihf
+```
+
+### Configure and compile with CMake
+
+```bash
+mkdir .oi/build
+cd .oi/build
+cmake ../.. -DCMAKE_TOOLCHAIN_FILE=../../toolchain.cmake
+make
+```
+
+### Install and run on OICore+
+
+```bash
+scp oi-firmware root@oi-core-plus.local:~/
+ssh root@oi-core-plus.local
+./oi-firmware
+```
+
+## PIO Library
+
+How to generate PlatformIO librarie.
+```bash
+mkdir .oi/lib
+pio pkg pack --output=".oi/lib/"
 ```

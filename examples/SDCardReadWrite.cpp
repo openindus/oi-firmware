@@ -1,5 +1,5 @@
 /**
- * @file EthernetUdpTime.cpp
+ * @file SDCardReadWrite.cpp
  * @brief SD card read/write
 
  * This example shows how to read and write data to and from an SD card file
