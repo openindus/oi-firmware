@@ -49,6 +49,11 @@ set(COMPONENT_SRCS
     "esp32/RS/RS.cpp"
     "esp32/Board/Board.cpp"
     "esp32/Board/Board_CLI.cpp"
+    "esp32/Netif/Ethenet.c"
+    "esp32/Netif/Event.c"
+    "esp32/Netif/LTE.c"
+    "esp32/Netif/Mac.c"
+    "esp32/Netif/Wifi.c"
 )
 
 set(COMPONENT_INCLUDE_DIRS
@@ -83,6 +88,7 @@ set(COMPONENT_INCLUDE_DIRS
     "esp32/CAN"
     "esp32/RS"
     "esp32/Board"
+    "esp32/Netif"
 )
 
 set(COMPONENT_PRIV_REQUIRES
@@ -98,6 +104,7 @@ set(COMPONENT_REQUIRES
     "fatfs"
     "sdmmc"
     "esp_rom"
+    "esp_modem"
 )
 
 idf_component_register(

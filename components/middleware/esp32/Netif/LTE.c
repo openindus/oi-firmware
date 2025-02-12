@@ -7,7 +7,7 @@
 #include "esp_netif_ppp.h"
 #include "esp_event.h"
 #include "esp_log.h"
-#include "esp32-hal-uart.h"
+#include "driver/uart.h"
 #include "driver/gpio.h"
 #include "esp_modem_api.h"
 

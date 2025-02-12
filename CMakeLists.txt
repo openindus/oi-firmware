@@ -5,7 +5,7 @@ if(DEFINED ENV{IDF_PATH})
     list(APPEND EXTRA_COMPONENT_DIRS components/drivers)
     list(APPEND EXTRA_COMPONENT_DIRS components/middleware)
     list(APPEND EXTRA_COMPONENT_DIRS components/api)
-    list(APPEND EXTRA_COMPONENT_DIRS components/libraries/esp_modem)
+    list(APPEND EXTRA_COMPONENT_DIRS external_components/espressif/esp_modem)
     
 else()
     add_executable(oi-firmware main/main.cpp)
