@@ -15,7 +15,6 @@
 
 #include "generate/esp_modem_command_declare_helper.inc"
 
-struct PdpContext; // HERE
 
 #define DECLARE_ALL_COMMAND_APIS(...) \
 /**
@@ -26,8 +25,8 @@ ESP_MODEM_DECLARE_DCE_COMMAND(sync, command_result, 0) \
     \
 /**
  * @brief Reads the operator name
- * @param[out] operator name
- * @param[out] access technology
+ * @param[out] name operator name
+ * @param[out] act access technology
  * @return OK, FAIL or TIMEOUT
  */ \
 ESP_MODEM_DECLARE_DCE_COMMAND(get_operator_name, command_result, 2, STRING_OUT(p1, name), INT_OUT(p2, act)) \
@@ -46,8 +45,19 @@ ESP_MODEM_DECLARE_DCE_COMMAND(store_profile, command_result, 0) \
 ESP_MODEM_DECLARE_DCE_COMMAND(set_pin, command_result, 1, STRING_IN(p1, pin)) \
     \
 /**
+ * @brief Execute the supplied AT command in raw mode (doesn't append '\r' to command, returns everything)
+ * @param[in] cmd String command that's send to DTE
+ * @param[out] out Raw output from DTE
+ * @param[in] pass Pattern in response for the API to return OK
+ * @param[in] fail Pattern in response for the API to return FAIL
+ * @param[in] timeout AT command timeout in milliseconds
+ * @return OK, FAIL or TIMEOUT
+ */\
+ESP_MODEM_DECLARE_DCE_COMMAND(at_raw, command_result, 5, STRING_IN(p1, cmd), STRING_OUT(p2, out), STRING_IN(p3, pass), STRING_IN(p4, fail), INT_IN(p5, timeout)) \
+    \
+/**
  * @brief Execute the supplied AT command
- * @param[in] at AT command
+ * @param[in] cmd AT command
  * @param[out] out Command output string
  * @param[in] timeout AT command timeout in milliseconds
  * @return OK, FAIL or TIMEOUT
@@ -253,6 +263,8 @@ ESP_MODEM_DECLARE_DCE_COMMAND(set_preferred_mode, command_result, 1, INT_IN(p1, 
 /**
  * @brief Set network bands for CAT-M or NB-IoT
  * @param[in] mode CAT-M or NB-IoT
+ * @param[in] bands bitmap in hex representing bands
+ * @param[in] size size of teh bands bitmap
  * @return OK, FAIL or TIMEOUT
  */ \
 ESP_MODEM_DECLARE_DCE_COMMAND(set_network_bands, command_result, 3, STRING_IN(p1, mode), INTEGER_LIST_IN(p2, bands), INT_IN(p3, size)) \

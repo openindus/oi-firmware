@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2021-2022 Espressif Systems (Shanghai) CO LTD
+ * SPDX-FileCopyrightText: 2021-2024 Espressif Systems (Shanghai) CO LTD
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -51,7 +51,35 @@ command_result generic_command(CommandableIf *t, const std::string &command,
     return generic_command(t, command, pass, fail, timeout_ms);
 }
 
-static command_result generic_get_string(CommandableIf *t, const std::string &command, std::string_view &output, uint32_t timeout_ms = 500)
+/*
+ * Purpose of this namespace is to provide different means of assigning the result to a string-like parameter.
+ * By default we assign strings, which comes with an allocation. Alternatively we could take `std::span`
+ * with user's buffer and directly copy the result, thus avoiding allocations (this is not used as of now)
+ */
+namespace str_copy {
+
+bool set(std::string &dest, std::string_view &src)
+{
+    dest = src;
+    return true;
+}
+
+/* This is an example of using std::span output in generic_get_string()
+bool set(std::span<char> &dest, std::string_view &src)
+{
+    if (dest.size() >= src.size()) {
+        std::copy(src.begin(), src.end(), dest.data());
+        dest = dest.subspan(0, src.size());
+        return true;
+    }
+    ESP_LOGE(TAG, "Cannot set result of size %d (to span of size %d)", dest.size(), src.size());
+    return false;
+}
+*/
+
+} // str_copy
+
+template <typename T> command_result generic_get_string(CommandableIf *t, const std::string &command, T &output, uint32_t timeout_ms)
 {
     ESP_LOGV(TAG, "%s", __func__ );
     return t->command(command, [&](uint8_t *data, size_t len) {
@@ -70,25 +98,15 @@ static command_result generic_get_string(CommandableIf *t, const std::string &co
             } else if (token.find("ERROR") != std::string::npos) {
                 return command_result::FAIL;
             } else if (token.size() > 2) {
-                output = token;
+                if (!str_copy::set(output, token)) {
+                    return command_result::FAIL;
+                }
             }
             response = response.substr(pos + 1);
         }
         return command_result::TIMEOUT;
     }, timeout_ms);
 }
-
-command_result generic_get_string(CommandableIf *t, const std::string &command, std::string &output, uint32_t timeout_ms)
-{
-    ESP_LOGV(TAG, "%s", __func__ );
-    std::string_view out;
-    auto ret = generic_get_string(t, command, out, timeout_ms);
-    if (ret == command_result::OK) {
-        output = out;
-    }
-    return ret;
-}
-
 
 command_result generic_command_common(CommandableIf *t, const std::string &command, uint32_t timeout_ms)
 {
@@ -153,7 +171,7 @@ command_result hang_up(CommandableIf *t)
 command_result get_battery_status(CommandableIf *t, int &voltage, int &bcs, int &bcl)
 {
     ESP_LOGV(TAG, "%s", __func__ );
-    std::string_view out;
+    std::string out;
     auto ret = generic_get_string(t, "AT+CBC\r", out);
     if (ret != command_result::OK) {
         return ret;
@@ -189,7 +207,7 @@ command_result get_battery_status(CommandableIf *t, int &voltage, int &bcs, int 
 command_result get_battery_status_sim7xxx(CommandableIf *t, int &voltage, int &bcs, int &bcl)
 {
     ESP_LOGV(TAG, "%s", __func__ );
-    std::string_view out;
+    std::string out;
     auto ret = generic_get_string(t, "AT+CBC\r", out);
     if (ret != command_result::OK) {
         return ret;
@@ -224,7 +242,7 @@ command_result set_flow_control(CommandableIf *t, int dce_flow, int dte_flow)
 command_result get_operator_name(CommandableIf *t, std::string &operator_name, int &act)
 {
     ESP_LOGV(TAG, "%s", __func__ );
-    std::string_view out;
+    std::string out;
     auto ret = generic_get_string(t, "AT+COPS?\r", out, 75000);
     if (ret != command_result::OK) {
         return ret;
@@ -261,24 +279,29 @@ command_result set_echo(CommandableIf *t, bool on)
     return generic_command_common(t, "ATE0\r");
 }
 
-command_result set_pdp_context(CommandableIf *t, PdpContext &pdp)
+command_result set_pdp_context(CommandableIf *t, PdpContext &pdp, uint32_t timeout_ms)
 {
     ESP_LOGV(TAG, "%s", __func__ );
     std::string pdp_command = "AT+CGDCONT=" + std::to_string(pdp.context_id) +
                               ",\"" + pdp.protocol_type + "\",\"" + pdp.apn + "\"\r";
-    return generic_command_common(t, pdp_command, 150000);
+    return generic_command_common(t, pdp_command, timeout_ms);
+}
+
+command_result set_pdp_context(CommandableIf *t, PdpContext &pdp)
+{
+    return set_pdp_context(t, pdp, 1000);
 }
 
 command_result set_data_mode(CommandableIf *t)
 {
     ESP_LOGV(TAG, "%s", __func__ );
-    return generic_command(t, "ATD*99##\r", "CONNECT", "ERROR", 5000);
+    return generic_command(t, "ATD*99#\r", "CONNECT", "ERROR", 5000);
 }
 
-command_result set_data_mode_sim8xx(CommandableIf *t)
+command_result set_data_mode_alt(CommandableIf *t)
 {
     ESP_LOGV(TAG, "%s", __func__ );
-    return generic_command(t, "ATD*99#\r", "CONNECT", "ERROR", 5000);
+    return generic_command(t, "ATD*99##\r", "CONNECT", "ERROR", 5000);
 }
 
 command_result resume_data_mode(CommandableIf *t)
@@ -356,7 +379,7 @@ command_result set_cmux(CommandableIf *t)
 command_result read_pin(CommandableIf *t, bool &pin_ok)
 {
     ESP_LOGV(TAG, "%s", __func__ );
-    std::string_view out;
+    std::string out;
     auto ret = generic_get_string(t, "AT+CPIN?\r", out);
     if (ret != command_result::OK) {
         return ret;
@@ -389,10 +412,26 @@ command_result at(CommandableIf *t, const std::string &cmd, std::string &out, in
     return generic_get_string(t, at_command, out, timeout);
 }
 
+command_result at_raw(CommandableIf *t, const std::string &cmd, std::string &out, const std::string &pass, const std::string &fail, int timeout = 500)
+{
+    ESP_LOGV(TAG, "%s", __func__ );
+    return t->command(cmd, [&](uint8_t *data, size_t len) {
+        out.assign(reinterpret_cast<char *>(data), len);
+
+        if (out.find(pass) != std::string::npos) {
+            return command_result::OK;
+        } else if (out.find(fail) != std::string::npos) {
+            return command_result::FAIL;
+        }
+
+        return command_result::TIMEOUT;
+    }, timeout);
+}
+
 command_result get_signal_quality(CommandableIf *t, int &rssi, int &ber)
 {
     ESP_LOGV(TAG, "%s", __func__ );
-    std::string_view out;
+    std::string out;
     auto ret = generic_get_string(t, "AT+CSQ\r", out);
     if (ret != command_result::OK) {
         return ret;
@@ -430,7 +469,7 @@ command_result set_network_attachment_state(CommandableIf *t, int state)
 command_result get_network_attachment_state(CommandableIf *t, int &state)
 {
     ESP_LOGV(TAG, "%s", __func__ );
-    std::string_view out;
+    std::string out;
     auto ret = generic_get_string(t, "AT+CGATT?\r", out);
     if (ret != command_result::OK) {
         return ret;
@@ -457,7 +496,7 @@ command_result set_radio_state(CommandableIf *t, int state)
 command_result get_radio_state(CommandableIf *t, int &state)
 {
     ESP_LOGV(TAG, "%s", __func__ );
-    std::string_view out;
+    std::string out;
     auto ret = generic_get_string(t, "AT+CFUN?\r", out);
     if (ret != command_result::OK) {
         return ret;
@@ -522,7 +561,7 @@ command_result set_network_bands_sim76xx(CommandableIf *t, const std::string &mo
 command_result get_network_system_mode(CommandableIf *t, int &mode)
 {
     ESP_LOGV(TAG, "%s", __func__ );
-    std::string_view out;
+    std::string out;
     auto ret = generic_get_string(t, "AT+CNSMOD?\r", out);
     if (ret != command_result::OK) {
         return ret;
@@ -550,7 +589,7 @@ command_result set_gnss_power_mode(CommandableIf *t, int mode)
 command_result get_gnss_power_mode(CommandableIf *t, int &mode)
 {
     ESP_LOGV(TAG, "%s", __func__ );
-    std::string_view out;
+    std::string out;
     auto ret = generic_get_string(t, "AT+CGNSPWR?\r", out);
     if (ret != command_result::OK) {
         return ret;

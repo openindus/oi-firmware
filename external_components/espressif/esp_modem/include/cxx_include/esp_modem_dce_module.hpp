@@ -77,7 +77,9 @@ public:
                 if (set_command_mode() == command_result::OK) {
                     return true;
                 }
-                Task::Delay(1000); // Mandatory 1s pause after escape
+                // send a newline to delimit the escape from the upcoming sync command
+                uint8_t delim = '\n';
+                dte->write(&delim, 1);
                 if (sync() == command_result::OK) {
                     return true;
                 }
@@ -144,6 +146,8 @@ class SIM7070: public GenericModule {
     using GenericModule::GenericModule;
 public:
     command_result power_down() override;
+    command_result set_data_mode() override;
+
 };
 
 /**
@@ -162,7 +166,6 @@ class SIM800: public GenericModule {
     using GenericModule::GenericModule;
 public:
     command_result power_down() override;
-    command_result set_data_mode() override;
 };
 
 /**
@@ -170,6 +173,8 @@ public:
  */
 class BG96: public GenericModule {
     using GenericModule::GenericModule;
+public:
+    command_result set_pdp_context(PdpContext &pdp) override;
 };
 
 /**

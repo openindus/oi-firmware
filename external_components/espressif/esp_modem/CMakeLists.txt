@@ -1,11 +1,18 @@
 idf_build_get_property(target IDF_TARGET)
 
-set(platform_srcs src/esp_modem_primitives_freertos.cpp
-                    src/esp_modem_api_target.cpp
-                    src/esp_modem_uart.cpp
-                    src/esp_modem_term_uart.cpp
-                    src/esp_modem_netif.cpp)
-set(dependencies driver esp_event esp_netif)
+if(${target} STREQUAL "linux")
+    set(platform_srcs src/esp_modem_primitives_linux.cpp
+        src/esp_modem_uart_linux.cpp
+        src/esp_modem_netif_linux.cpp)
+    set(dependencies esp_system_protocols_linux)
+else()
+    set(platform_srcs src/esp_modem_primitives_freertos.cpp
+                      src/esp_modem_api_target.cpp
+                      src/esp_modem_uart.cpp
+                      src/esp_modem_term_uart.cpp
+                      src/esp_modem_netif.cpp)
+    set(dependencies driver esp_event esp_netif)
+endif()
 
 
 set(srcs ${platform_srcs}
@@ -25,7 +32,16 @@ set(include_dirs "include")
 
 idf_component_register(SRCS "${srcs}"
                     INCLUDE_DIRS "${include_dirs}"
-                    PRIV_INCLUDE_DIRS "private_include"
+                    PRIV_INCLUDE_DIRS private_include
                     REQUIRES ${dependencies})
 
-target_compile_options(${COMPONENT_LIB} PUBLIC -std=gnu++17)
+
+set_target_properties(${COMPONENT_LIB} PROPERTIES
+    CXX_STANDARD 17
+    CXX_STANDARD_REQUIRED ON
+    CXX_EXTENSIONS ON
+)
+
+if(CONFIG_ESP_MODEM_ADD_CUSTOM_MODULE)
+    idf_component_optional_requires(PUBLIC main)
+endif()
