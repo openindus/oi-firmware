@@ -1,11 +1,21 @@
-set(srcs
-    "src"
+set(COMPONENT_SRCS
+    "src/Ethernet.c"
+    "src/Event.c"
+    "src/LTE.c"
+    "src/Mac.c"
+    "src/Wifi.c"
 )
 
-set(inc_dirs
-    "include",
+set(COMPONENT_INCLUDE_DIRS
+    "include"
 )
 
-idf_component_register(SRCS "${srcs}"
-                    INCLUDE_DIRS "${inc_dirs}"
-                    REQUIRES Modem)
+set(COMPONENT_REQUIRES
+    "esp_modem"
+)
+
+idf_component_register(
+    SRCS ${COMPONENT_SRCS}
+    INCLUDE_DIRS ${COMPONENT_INCLUDE_DIRS}
+    REQUIRES ${COMPONENT_REQUIRES}
+)
