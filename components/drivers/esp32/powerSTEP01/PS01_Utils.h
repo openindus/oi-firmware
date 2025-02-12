@@ -22,10 +22,10 @@ extern "C"
 {
 #endif
 
-/* Convert the float formatted acceleration or deceleration into respectively an ACC or DEC register value */
+/* Convert the float formatted acceleration or deceleration into respectively an ACCELERATION or DECELERATION register value */
 uint16_t PS01_AccDec_Steps_s2_to_RegVal(float steps_s2);
 
-/* Convert the ACC or DEC register value into step/s^2 */
+/* Convert the ACCELERATION or DECELERATION register value into step/s^2 */
 float PS01_AccDec_RegVal_to_Steps_s2(uint32_t regVal);
 
 /* Convert BEMF compensation slope to values for ST_SLP, FN_SLP_ACC or FN_SLP_DEC register */

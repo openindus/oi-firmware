@@ -498,7 +498,7 @@ void PS01_Cmd_SetParam(uint8_t deviceId, uint32_t param, uint32_t value)
  * @retval None
  * @note The SoftHiZ command disables the power bridges
  * (high impedance state) after a deceleration to zero.
- * The deceleration value used is the one stored in the DEC register.
+ * The deceleration value used is the one stored in the DECELERATION register.
  * When bridges are disabled, the HiZ flag is raised.
  * When the motor is stopped, a SoftHiZ command forces the bridges
  * to enter high impedance state.
@@ -516,7 +516,7 @@ void PS01_Cmd_SoftHiZ(uint8_t deviceId)
  * @retval None
  * @note The SoftStop command causes an immediate deceleration
  * to zero speed and a consequent motor stop.
- * The deceleration value used is the one stored in the DEC register.
+ * The deceleration value used is the one stored in the DECELERATION register.
  * When the motor is in high impedance state, a SoftStop
  * command forces the bridges to exit from high impedance state.
  * No motion is performed.
