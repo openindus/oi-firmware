@@ -1,13 +1,18 @@
 #pragma once
 #include "Cloud.hpp"
 
-#if defined(OI_CORE)
-    #include "ModuleStandalone.h"
-    #define CLOUD_CONNECTED() ModuleStandalone::ledOn(LED_GREEN)
-    #define CLOUD_OTA() ModuleStandalone::ledOn(LED_BLUE)
-    #define CLOUD_AUTHENTICATING() ModuleStandalone::ledBlink(LED_GREEN, 500)
-    #define CLOUD_DISCONNECTED() 
-#endif
+// #if defined(OI_CORE)
+//     #include "ModuleStandalone.h"
+//     #define CLOUD_CONNECTED() ModuleStandalone::ledOn(LED_GREEN)
+//     #define CLOUD_OTA() ModuleStandalone::ledOn(LED_BLUE)
+//     #define CLOUD_AUTHENTICATING() ModuleStandalone::ledBlink(LED_GREEN, 500)
+//     #define CLOUD_DISCONNECTED() 
+// #endif
+
+#define CLOUD_CONNECTED()
+#define CLOUD_OTA()
+#define CLOUD_AUTHENTICATING()
+#define CLOUD_DISCONNECTED()
 
 #define Cloud_LogTag "Cloud"
 

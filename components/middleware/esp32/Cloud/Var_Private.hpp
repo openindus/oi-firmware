@@ -184,5 +184,5 @@ class Var: public VarMaster {
         void resetDeltaTemp(void) override;
 };
 
-#include "../src/Var_basics.tpp"
-#include "../src/Var_operator.tpp"
+#include "Var_basics.tpp"
+#include "Var_operator.tpp"
