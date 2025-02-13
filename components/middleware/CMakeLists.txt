@@ -49,6 +49,17 @@ set(COMPONENT_SRCS
     "esp32/RS/RS.cpp"
     "esp32/Board/Board.cpp"
     "esp32/Board/Board_CLI.cpp"
+    "esp32/Netif/Ethenet.c"
+    "esp32/Netif/Event.c"
+    "esp32/Netif/LTE.c"
+    "esp32/Netif/Mac.c"
+    "esp32/Netif/Wifi.c"
+    "esp32/Cloud/Cloud_authentication.cpp"
+    "esp32/Cloud/Cloud_http.cpp"
+    "esp32/Cloud/Cloud_NTP.cpp"
+    "esp32/Cloud/Cloud.cpp"
+    "esp32/Cloud/CloudTasks.cpp"
+    "esp32/Cloud/Var.cpp"
 )
 
 set(COMPONENT_INCLUDE_DIRS
@@ -83,6 +94,8 @@ set(COMPONENT_INCLUDE_DIRS
     "esp32/CAN"
     "esp32/RS"
     "esp32/Board"
+    "esp32/Netif"
+    "esp32/Cloud"
 )
 
 set(COMPONENT_PRIV_REQUIRES
@@ -98,6 +111,10 @@ set(COMPONENT_REQUIRES
     "fatfs"
     "sdmmc"
     "esp_rom"
+    "esp_modem"
+    "mqtt"
+    "esp_http_client"
+    "esp_https_ota"
 )
 
 idf_component_register(

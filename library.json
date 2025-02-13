@@ -20,15 +20,13 @@
         "include": [
             "boards",
             "components",
+            "external_components",
             "examples",
             "README.md"
         ],
         "exclude": [
-            "components/libraries/Cloud",
-            "components/libraries/Modem",
-            "components/libraries/Netif",
-            "components/libraries/Ethernet",
-            "components/libraries/USBHost"
+            "external_components/Arduino/Ethernet",
+            "external_components/Arduino/USBHost"
         ]
     },
     "build": {
@@ -102,8 +100,7 @@
             "-I components/drivers/esp32/powerSTEP01",
             "-I components/drivers/esp32/sc16is750",
             "-I components/drivers/esp32/stds75",
-            "-I components/libraries",
-            "-I components/libraries/Modbus"
+            "-I external_components/Arduino/Modbus"
         ],
         "includeDir": ".",
         "srcDir": ".",
@@ -112,7 +109,7 @@
             "+<components/api>",
             "+<components/middleware/esp32>",
             "+<components/drivers/esp32>",
-            "+<components/libraries/Modbus>"
+            "+<external_components/Arduino/Modbus>"
         ]
     }
 }

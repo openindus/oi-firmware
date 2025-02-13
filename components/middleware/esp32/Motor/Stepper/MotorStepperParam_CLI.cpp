@@ -160,12 +160,12 @@ int deviceSetAdvancedParameter(uint8_t motorId, const char* parameter, double *a
     } else if (eq(parameter, POWERSTEP01_PARAM_ACC) && nargs == 1) {
         printf("set acc\n");
         float acc = (float) args[0];
-        MotorStepperParam::setAdvancedParam((MotorNum_t) deviceId, ACC, &acc);
+        MotorStepperParam::setAdvancedParam((MotorNum_t) deviceId, ACCELERATION, &acc);
 
     } else if (eq(parameter, POWERSTEP01_PARAM_DEC) && nargs == 1) {
         printf("set dec\n");
         float dec = (float) args[0];
-        MotorStepperParam::setAdvancedParam((MotorNum_t) deviceId, DEC, &dec);
+        MotorStepperParam::setAdvancedParam((MotorNum_t) deviceId, DECELERATION, &dec);
 
     } else if (eq(parameter, POWERSTEP01_PARAM_MAX_SPEED) && nargs == 1) {
         printf("set max speed\n");
@@ -423,12 +423,12 @@ int deviceGetAdvancedParameter(uint8_t motorId, const char* parameter) {
 
     } else if (eq(parameter, POWERSTEP01_PARAM_ACC)) {
         float acc = 0;
-        errorCode = MotorStepperParam::getAdvancedParam((MotorNum_t) deviceId, ACC, &acc);
+        errorCode = MotorStepperParam::getAdvancedParam((MotorNum_t) deviceId, ACCELERATION, &acc);
         printf("%f\n", acc);
 
     } else if (eq(parameter, POWERSTEP01_PARAM_DEC)) {
         float dec = 0;
-        errorCode = MotorStepperParam::getAdvancedParam((MotorNum_t) deviceId, DEC, &dec);
+        errorCode = MotorStepperParam::getAdvancedParam((MotorNum_t) deviceId, DECELERATION, &dec);
         printf("%f\n", dec);
 
     } else if (eq(parameter, POWERSTEP01_PARAM_MAX_SPEED)) {

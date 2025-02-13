@@ -39,12 +39,12 @@ int MotorStepperParam::setAdvancedParam(MotorNum_t motor, AdvancedParameter_t ad
             param.mark = *((int32_t*) value);
             break;
         }
-        case ACC:
+        case ACCELERATION:
         {
             param.acc = *((float*) value);
             break;
         }
-        case DEC:
+        case DECELERATION:
         {
             param.dec = *((float*) value);
             break;
@@ -349,12 +349,12 @@ int MotorStepperParam::setAdvancedParamWithoutNvs(MotorNum_t motor, AdvancedPara
         errorCode = PS01_Param_SetMark(motor, *((int32_t*) value));
         break;
     }
-    case ACC:
+    case ACCELERATION:
     {
         errorCode = PS01_Param_SetAcc(motor, *((float*) value));
         break;
     }
-    case DEC:
+    case DECELERATION:
     {
         errorCode = PS01_Param_SetDec(motor,  *((float*) value));
         break;
@@ -992,13 +992,13 @@ int MotorStepperParam::getAdvancedParam(MotorNum_t motor, AdvancedParameter_t ad
             memcpy(value, &speed, sizeof(speed));
             break;
         }
-        case ACC:
+        case ACCELERATION:
         {
             float acc = PS01_Param_GetAcc(motor);
             memcpy(value, &acc, sizeof(acc));
             break;
         }
-        case DEC:
+        case DECELERATION:
         {
             float dec = PS01_Param_GetDec(motor);
             memcpy(value, &dec, sizeof(dec));
@@ -1303,8 +1303,8 @@ PS01_AdvancedParam_t MotorStepperParam::getAllAdvancedParamPS01(MotorNum_t motor
     MotorStepperParam::getAdvancedParam(motor, ABS_POS, &advancedParam.absPos);
     // MotorStepperParam::getAdvancedParam(motor, EL_POS, &advancedParam.elPos);
     MotorStepperParam::getAdvancedParam(motor, MARK, &advancedParam.mark);
-    MotorStepperParam::getAdvancedParam(motor, ACC, &advancedParam.acc);
-    MotorStepperParam::getAdvancedParam(motor, DEC, &advancedParam.dec);
+    MotorStepperParam::getAdvancedParam(motor, ACCELERATION, &advancedParam.acc);
+    MotorStepperParam::getAdvancedParam(motor, DECELERATION, &advancedParam.dec);
     MotorStepperParam::getAdvancedParam(motor, MAX_SPEED, &advancedParam.maxSpeed);
     MotorStepperParam::getAdvancedParam(motor, MIN_SPEED, &advancedParam.minSpeed);
     MotorStepperParam::getAdvancedParam(motor, MIN_SPEED_LSPD_OPT, &advancedParam.minSpeedLspdOpt);
@@ -1389,8 +1389,8 @@ int MotorStepperParam::setAllAdvancedParamPS01(MotorNum_t motor, PS01_AdvancedPa
     int errorCode = 0;
     errorCode += MotorStepperParam::setAdvancedParamWithoutNvs(motor, ABS_POS, &advancedParam.absPos);
     errorCode += MotorStepperParam::setAdvancedParamWithoutNvs(motor, MARK, &advancedParam.mark);
-    errorCode += MotorStepperParam::setAdvancedParamWithoutNvs(motor, ACC, &advancedParam.acc);
-    errorCode += MotorStepperParam::setAdvancedParamWithoutNvs(motor, DEC, &advancedParam.dec);
+    errorCode += MotorStepperParam::setAdvancedParamWithoutNvs(motor, ACCELERATION, &advancedParam.acc);
+    errorCode += MotorStepperParam::setAdvancedParamWithoutNvs(motor, DECELERATION, &advancedParam.dec);
     errorCode += MotorStepperParam::setAdvancedParamWithoutNvs(motor, MAX_SPEED, &advancedParam.maxSpeed);
     errorCode += MotorStepperParam::setAdvancedParamWithoutNvs(motor, MIN_SPEED, &advancedParam.minSpeed);
     errorCode += MotorStepperParam::setAdvancedParamWithoutNvs(motor, MIN_SPEED_LSPD_OPT, &advancedParam.minSpeedLspdOpt);

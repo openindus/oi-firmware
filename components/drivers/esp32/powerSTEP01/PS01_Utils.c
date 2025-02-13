@@ -2,7 +2,7 @@
 
 /**********************************************************
  * @brief Convert the float formatted acceleration or
- * deceleration into respectively an ACC or DEC register value
+ * deceleration into respectively an ACCELERATION or DECELERATION register value
  * @param[in] steps_s2 the acceleration or deceleration as
  * steps/s^2, range 14.55 to 59590 steps/s^2
  * @retval The acceleration or deceleration as steps/tick^2
@@ -13,8 +13,8 @@ uint16_t PS01_AccDec_Steps_s2_to_RegVal(float steps_s2)
 }
 
 /**********************************************************
- * @brief Convert the ACC or DEC register value into step/s^2
- * @param[in] regVal The ACC or DEC register value
+ * @brief Convert the ACCELERATION or DECELERATION register value into step/s^2
+ * @param[in] regVal The ACCELERATION or DECELERATION register value
  * @retval The speed as steps/s
  **********************************************************/
 float PS01_AccDec_RegVal_to_Steps_s2(uint32_t regVal)
