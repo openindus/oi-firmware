@@ -1,35 +1,18 @@
-menu "OpenIndus Configuration"
+menu "OpenIndus middleware Configuration"
 
-    choice STEPPER_DRIVER
-        bool "Stepper driver"
-        default POWERSTEP01
-        help
-            driver used
+    menu "Stepper motor Configuration"
+        choice STEPPER_MODE
+            bool "Stepper mode"
+            default VOLTAGE_MODE
+            help
+                powerSTEP01 mode
 
-        config POWERSTEP01
-            bool "POWERSTEP01"
-        config L6470
-            bool "L6470"
-    endchoice
-
-    choice STEPPER_MODE
-        bool "Stepper mode"
-        default VOLTAGE_MODE
-        help
-            powerSTEP01 mode
-
-        config VOLTAGE_MODE
-            bool "voltage mode"
-        config CURRENT_MODE
-            bool "current mode"
-    endchoice
-
-    config STEPPER_NUMBER_OF_DEVICES
-        int "Number of powerSTEP01 devices"
-        default 2
-        range 1 2
-        help
-            Number of powerSTEP01 devices
+            config VOLTAGE_MODE
+                bool "voltage mode"
+            config CURRENT_MODE
+                bool "current mode"
+        endchoice
+    endmenu
 
     menu "Cloud Configuration"
         menu "MQTT Configuration"
@@ -127,7 +110,6 @@ menu "OpenIndus Configuration"
                 int "Delay between system time updates from NTP"
                 default 14400
         endmenu
-
     endmenu
 
     menu "Netif Configuration"
@@ -182,5 +164,4 @@ menu "OpenIndus Configuration"
             int "Callback Task Priority"
             default 10
     endmenu
-
 endmenu
