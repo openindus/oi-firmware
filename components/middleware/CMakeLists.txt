@@ -60,6 +60,7 @@ set(COMPONENT_SRCS
     "esp32/Cloud/Cloud.cpp"
     "esp32/Cloud/CloudTasks.cpp"
     "esp32/Cloud/Var.cpp"
+    "esp32/Modem/Modem.cpp"
 )
 
 set(COMPONENT_INCLUDE_DIRS
@@ -96,6 +97,7 @@ set(COMPONENT_INCLUDE_DIRS
     "esp32/Board"
     "esp32/Netif"
     "esp32/Cloud"
+    "esp32/Modem"
 )
 
 set(COMPONENT_PRIV_REQUIRES
