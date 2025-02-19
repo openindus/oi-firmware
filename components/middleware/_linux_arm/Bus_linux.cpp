@@ -1,14 +1,12 @@
 /**
- * @file Bus.cpp
- * @brief 
+ * @file Bus_linux.cpp
+ * @brief Bus interface for Linux
  * @author 
  * @copyright (c) [2025] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
 
-#include "Bus.h"
-
-#include <cstddef>
+#include "../Bus/Bus.h"
 
 void BusIO::writeSync(uint8_t sync)
 {
@@ -27,10 +25,9 @@ int BusRS::read(Frame_t *frame, uint32_t timeout)
     return 0;
 }
 
-int BusRS::write(Frame_t *frame, uint32_t timeout)
+void BusRS::write(Frame_t *frame, uint32_t timeout)
 {
     /** @todo */
-    return 0;
 }
 
 int BusRS::transfer(Frame_t *frame, uint32_t timeout)

@@ -11,13 +11,13 @@ else()
     add_executable(oi-firmware main/main.cpp)
 
     target_sources(oi-firmware PRIVATE
-        components/system/System.cpp
+        components/api/System/System.cpp
         components/api/Module/CorePlus/CorePlus.cpp
         components/api/Controller/Controller.cpp
-        components/api/Controller/MasterController.cpp
-        components/middleware/linux_arm/Led.cpp
-        components/middleware/linux_arm/Bus.cpp
-        components/middleware/linux_arm/Board.cpp
+        components/api/Controller/Master/MasterController.cpp
+        components/middleware/_linux_arm/Led_linux.cpp
+        components/middleware/_linux_arm/Bus_linux.cpp
+        components/middleware/_linux_arm/Board_linux.cpp
     )
 
     target_include_directories(oi-firmware PRIVATE
@@ -28,7 +28,9 @@ else()
         components/api/Controller
         components/api/Controller/Cmd
         components/middleware
-        components/middleware/linux_arm/include
+        components/middleware/Board
+        components/middleware/Bus
+        components/middleware/Led
     )
 
     target_compile_definitions(oi-firmware PRIVATE 
