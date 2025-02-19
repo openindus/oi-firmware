@@ -134,6 +134,12 @@ int Core::init()
         return err;
     }
 
+    /**
+     * @brief Modem Init
+     * 
+     */
+    err |= ioex_set_level(_ioex, CORE_PIN_4G_RESET, IOEX_LOW);
+
     
     /**
      * @brief Command mosfet alim Init
