@@ -1,6 +1,6 @@
 {
     "name": "OpenIndus",
-    "version": "1.5.0",
+    "version": "1.6.0-dev",
     "keywords": "OpenIndus",
     "description": "OpenIndus Library",
     "repository": {
@@ -76,6 +76,7 @@
             "-I components/middleware/Encoder",
             "-I components/middleware/FlashLoader",
             "-I components/middleware/Led",
+            "-I components/middleware/Modem",
             "-I components/middleware/Motor",
             "-I components/middleware/Motor/Brushless",
             "-I components/middleware/Motor/Stepper",

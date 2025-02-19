@@ -50,8 +50,9 @@ ioex_device_t* Core::_ioex = NULL;
 CAN Core::can(CORE_SPI_USER_HOST, CORE_PIN_CAN_SPI_CS, CORE_PIN_CAN_INTERRUPT);
 RS Core::rs(CORE_SPI_USER_HOST, CORE_PIN_RS_SPI_CS, CORE_PIN_RS_INTERRUPT);
 RTClock Core::rtc(CORE_I2C_PORT_NUM, CORE_PIN_RTC_INTERRUPT);
+Modem *Core::modem = NULL;
 
-int Core::init()
+int Core::init(void)
 {
     int err = Module::init(TYPE_OI_CORE);
 
@@ -138,8 +139,14 @@ int Core::init()
      * @brief Modem Init
      * 
      */
-    err |= ioex_set_level(_ioex, CORE_PIN_4G_RESET, IOEX_LOW);
-
+    ioex_config_t Modem_resetn_config;
+    Modem_resetn_config.mode = IOEX_OUTPUT;
+    Modem_resetn_config.pull_mode = IOEX_PULLUP;
+    Modem_resetn_config.interrupt_type = IOEX_INTERRUPT_DISABLE;
+    Modem_resetn_config.pin_bit_mask = (1ULL << CORE_MODEM_PIN_RESET);
+    err |= ioex_config(_ioex, &Modem_resetn_config);
+    err |= ioex_set_level(_ioex, CORE_MODEM_PIN_RESET, IOEX_LOW);
+    Modem::setHwConfig(CORE_MODEM_UART, CORE_MODEM_PIN_TX, CORE_MODEM_PIN_RX, CORE_MODEM_PIN_POWER_ON);
     
     /**
      * @brief Command mosfet alim Init
