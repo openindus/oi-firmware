@@ -7,7 +7,7 @@
  */
 
 #include "MasterController.h"
-#include "Global.h"
+#include "Common.h"
 #include "argtable3/argtable3.h"
 
 #if defined(MODULE_MASTER)
