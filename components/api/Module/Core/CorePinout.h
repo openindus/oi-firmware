@@ -64,10 +64,11 @@
 #define CORE_PIN_SD_SPI_CS              GPIO_NUM_47
 
 /* 4G pins */
-#define CORE_PIN_4G_TX                  GPIO_NUM_20
-#define CORE_PIN_4G_RX                  GPIO_NUM_19
-#define CORE_PIN_4G_PWR_ON              GPIO_NUM_21
-#define CORE_PIN_4G_RESET               IOEX_NUM_23
+#define CORE_MODEM_UART                 UART_NUM_2
+#define CORE_MODEM_PIN_TX               GPIO_NUM_19
+#define CORE_MODEM_PIN_RX               GPIO_NUM_20
+#define CORE_MODEM_PIN_POWER_ON         GPIO_NUM_21
+#define CORE_MODEM_PIN_RESET            IOEX_NUM_23
 
 /* DIN Interrupt */
 #define CORE_PIN_DIGITAL_INTERRUPT      GPIO_NUM_4
@@ -93,12 +94,6 @@
 #define CORE_IOEX_PIN_DIN_2           IOEX_NUM_11
 #define CORE_IOEX_PIN_DIN_3           IOEX_NUM_12
 #define CORE_IOEX_PIN_DIN_4           IOEX_NUM_13
-
-/* MODULE EXT */
-#define CORE_IOEX_PIN_MODULE_EXT_0    IOEX_NUM_14
-#define CORE_IOEX_PIN_MODULE_EXT_1    IOEX_NUM_15
-#define CORE_IOEX_PIN_MODULE_EXT_2    IOEX_NUM_16
-#define CORE_IOEX_PIN_MODULE_EXT_3    IOEX_NUM_17
 
 /* Command mosfet alim ext */
 #define CORE_IOEX_PIN_ALIM_AUX        IOEX_NUM_22

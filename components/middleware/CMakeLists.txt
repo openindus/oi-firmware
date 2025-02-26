@@ -61,6 +61,7 @@ set(COMPONENT_SRCS
     "Cloud/CloudTasks.cpp"
     "Cloud/Var.cpp"
     "Modem/Modem.cpp"
+    "Modem/Modem_private.cpp"
 )
 
 set(COMPONENT_INCLUDE_DIRS

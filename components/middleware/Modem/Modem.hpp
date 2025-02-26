@@ -11,24 +11,43 @@
 #include <string.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/event_groups.h"
+#include "esp_log.h"
 #include "esp_netif.h"
 #include "esp_netif_ppp.h"
+#include "esp_modem_config.h"
 #include "cxx_include/esp_modem_api.hpp"
-#include "esp_modem_c_api_types.h"
-#include "esp_log.h"
+#include "cxx_include/esp_modem_dte.hpp"
 #include "driver/gpio.h"
 #include "driver/uart.h"
 
 class Modem
 {
-private:
-
 public:
     Modem() {}
     ~Modem() {}
 
-    static void init(uart_port_t port, int txPin, int rxPin, gpio_num_t powerPin);
+    friend class Core;
 
-    void connect(const char *apn, const char *sim_pin);
+    void begin(const char *apn, const char *sim_pin = nullptr);
+    void end(void);
+
+    void connect(void);
     void disconnect(void);
+
+    void sendSMS(const std::string &number, const std::string &message);
+    void getSignalQuality(int &rssi, int &ber);
+    // void getTime(std::string &time);
+
+protected:
+
+    static void setHwConfig(uart_port_t port, int txPin, int rxPin, gpio_num_t powerPin);
+
+private:
+    static uart_port_t _port;
+    static int _txPin;
+    static int _rxPin;
+    static gpio_num_t _powerPin;
+
+    static void _registerEvent(void);
+    static void _waitEvent(void);
 };

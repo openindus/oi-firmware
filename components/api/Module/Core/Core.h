@@ -19,6 +19,7 @@
 #include "RTClock.h"
 #include "CAN.h"
 #include "RS.h"
+#include "Modem.hpp"
 
 #if defined(OI_CORE)
 
@@ -36,6 +37,8 @@ public:
     static CAN can;
     static RS rs;
     static RTClock rtc;
+
+    static Modem *modem;
 
 private:
 
