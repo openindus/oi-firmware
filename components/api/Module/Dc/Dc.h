@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include "Global.h"
+#include "Common.h"
 #include "DcPinout.h"
 #include "Module.h"
 #include "Controller.h"

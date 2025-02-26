@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "Global.h"
+#include "Common.h"
 #include "Module.h"
 #include "DiscretePinout.h"
 #include "DigitalInputs.h"
