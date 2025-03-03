@@ -15,7 +15,7 @@
 #include "Encoder.h"
 #include "EncoderCmd.h"
 #include "EncoderCmdHandler.h"
-#include "Global.h"
+#include "Common.h"
 #include "Module.h"
 #include "MotorStepper.h"
 #include "MotorStepperParam.h"

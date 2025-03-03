@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "Global.h"
+#include "Common.h"
 #include "Module.h"
 
 #if (defined(OI_RELAY_HP)) && defined(MODULE_STANDALONE)

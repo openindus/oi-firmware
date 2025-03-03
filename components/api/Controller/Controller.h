@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "Global.h"
+#include "Common.h"
 #include "Bus.h"
 #include "Led.h"
 

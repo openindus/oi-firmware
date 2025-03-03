@@ -11,7 +11,7 @@
 // #include "Arduino.h"
 // #endif
 
-#include "Global.h"
+#include "Common.h"
 #ifndef LINUX_ARM
 #include "SlaveController.h"
 #include "UsbConsole.h"

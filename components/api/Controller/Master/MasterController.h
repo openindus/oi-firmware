@@ -10,7 +10,7 @@
 
 #if defined(MODULE_MASTER)
 
-#include "Global.h"
+#include "Common.h"
 #include "Controller.h"
 #include "Board.h"
 #include "Led.h"
