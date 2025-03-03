@@ -1,6 +1,6 @@
 {
     "name": "OpenIndus",
-    "version": "1.6.0-dev",
+    "version": "1.6.0",
     "keywords": "OpenIndus",
     "description": "OpenIndus Library",
     "repository": {
