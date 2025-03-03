@@ -63,7 +63,7 @@ Board which are ready to use :
 
 ### Features
 
-- Architecture update for Linux ARM/
+- Architecture update for Linux ARM.
 - Added Encoder API.
 - Added function to protect stepper motor driver.
 - Added stepper function to set absolute position.
@@ -76,3 +76,10 @@ Board which are ready to use :
 - Fixed analog-read error (CLI).
 - Change the USB host slave select pin.
 - Inversion oƒ relay numbers on RelayHP.
+
+# 1.6.0
+
+### Features
+
+- Updated architecture.
+- Added Modem (4G LTE) API.
