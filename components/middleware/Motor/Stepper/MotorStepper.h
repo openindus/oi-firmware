@@ -1,7 +1,7 @@
 /**
  * @file MotorStepper.h
- * @brief Stepper motor control functions
- * @author
+ * @brief MotorStepper class definition
+ * @author Kévin Lefeuvre (kevin.lefeuvre@openindus.com)
  * @copyright (c) [2025] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */

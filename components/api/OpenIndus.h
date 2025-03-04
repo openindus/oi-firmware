@@ -41,26 +41,26 @@ void loop(void);
 #define OICorePlus CorePlus
 #endif
 
-/* Digital outputs num */
-#define DOUT1  DOut_Num_t::DOUT_1
-#define DOUT2  DOut_Num_t::DOUT_2
-#define DOUT3  DOut_Num_t::DOUT_3
-#define DOUT4  DOut_Num_t::DOUT_4
-#define DOUT5  DOut_Num_t::DOUT_5
-#define DOUT6  DOut_Num_t::DOUT_6
-#define DOUT7  DOut_Num_t::DOUT_7
-#define DOUT8  DOut_Num_t::DOUT_8
-#define DOUT9  DOut_Num_t::DOUT_9
-#define DOUT10 DOut_Num_t::DOUT_10
+/* Digital intputs num */
+#define DIN1    (DIn_Num_t) 0x01
+#define DIN2    (DIn_Num_t) 0x02
+#define DIN3    (DIn_Num_t) 0x03
+#define DIN4    (DIn_Num_t) 0x04
+#define DIN5    (DIn_Num_t) 0x05
+#define DIN6    (DIn_Num_t) 0x06
+#define DIN7    (DIn_Num_t) 0x07
+#define DIN8    (DIn_Num_t) 0x08
+#define DIN9    (DIn_Num_t) 0x09
+#define DIN10   (DIn_Num_t) 0x0A
 
-/* Digital inputs num */
-#define DIN1  DIn_Num_t::DIN_1
-#define DIN2  DIn_Num_t::DIN_2
-#define DIN3  DIn_Num_t::DIN_3
-#define DIN4  DIn_Num_t::DIN_4
-#define DIN5  DIn_Num_t::DIN_5
-#define DIN6  DIn_Num_t::DIN_6
-#define DIN7  DIn_Num_t::DIN_7
-#define DIN8  DIn_Num_t::DIN_8
-#define DIN9  DIn_Num_t::DIN_9
-#define DIN10 DIn_Num_t::DIN_10
+/* Digital outtputs num */
+#define DOUT1   (DOut_Num_t) 0x01
+#define DOUT2   (DOut_Num_t) 0x02
+#define DOUT3   (DOut_Num_t) 0x03
+#define DOUT4   (DOut_Num_t) 0x04
+#define DOUT5   (DOut_Num_t) 0x05
+#define DOUT6   (DOut_Num_t) 0x06
+#define DOUT7   (DOut_Num_t) 0x07
+#define DOUT8   (DOut_Num_t) 0x08
+#define DOUT9   (DOut_Num_t) 0x09
+#define DOUT10  (DOut_Num_t) 0x0A

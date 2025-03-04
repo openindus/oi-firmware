@@ -17,10 +17,10 @@
 
 class Module : private Board, private Led, private Bus
 {
-  protected:
+protected:
     static int init(uint16_t type);
 
-  public:
+public:
     static inline void restart(void) { Board::restart(); };
     static inline float getTemperature(void) { return Board::getTemperature(); };
 
@@ -37,6 +37,6 @@ class Module : private Board, private Led, private Bus
 #endif
 #endif
 
-  private:
+private:
     static uint16_t _type;
 };

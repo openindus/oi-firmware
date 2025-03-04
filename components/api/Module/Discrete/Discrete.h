@@ -14,7 +14,7 @@
 #include "DigitalInputs.h"
 #include "DigitalOutputs.h"
 #include "AnalogInputsHV.h"
-#include "SlaveController.h"
+#include "Slave.h"
 #include "DigitalInputsCmdHandler.h"
 #include "DigitalOutputsCmdHandler.h"
 #include "AnalogInputsHVCmdHandler.h"

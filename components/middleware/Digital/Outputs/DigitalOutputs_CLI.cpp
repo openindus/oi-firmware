@@ -119,5 +119,6 @@ int DigitalOutputs::_registerCLI(void)
     int err = 0;
     err |= _registerDigitalWrite();
     err |= _registerGetOutputCurrent();
+    err |= _registerOuputIsOvercurrent();
     return err;
 };

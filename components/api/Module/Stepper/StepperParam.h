@@ -1,15 +1,8 @@
 /**
- * Copyright (C) OpenIndus, Inc - All Rights Reserved
- *
- * This file is part of OpenIndus Library.
- *
- * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential
- * 
  * @file StepperParam.h
- * @brief Functions for stepper module
- *
- * For more information on OpenIndus:
+ * @brief Stepper parameters
+ * @author  Kévin Lefeuvre (kevin.lefeuvre@openindus.com)
+ * @copyright (c) [2025] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
 
