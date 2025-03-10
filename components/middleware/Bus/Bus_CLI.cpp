@@ -13,8 +13,6 @@
 
 static const char TAG[] = "Bus_CLI";
 
-#if !defined(MODULE_STANDALONE)
-
 /* --- read-id --- */
 
 static int readIdCmd(int argc, char **argv) 
@@ -346,5 +344,3 @@ int Bus::_registerCLI(void)
     err |= _registerRSReadCmd();
     return err;
 }
-
-#endif

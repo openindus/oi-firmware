@@ -6,7 +6,7 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * 
- * @file DiscreteStandalone.h
+ * @file BrushlessConfig.h
  * @brief Functions for discrete module
  *
  * For more information on OpenIndus:

@@ -30,12 +30,6 @@ void BusRS::write(Frame_t *frame, uint32_t timeout)
     /** @todo */
 }
 
-int BusRS::transfer(Frame_t *frame, uint32_t timeout)
-{
-    /** @todo */
-    return 0;
-}
-
 int BusCAN::read(Frame_t* frame, uint16_t* id, uint8_t* size, uint32_t timeout)
 {
     /** @todo */

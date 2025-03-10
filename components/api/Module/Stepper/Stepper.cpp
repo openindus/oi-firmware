@@ -60,7 +60,7 @@ int Stepper::init(void)
 
 #if defined(MODULE_SLAVE)
     err |= DigitalInputsCmdHandler::init();
-    err |= StepperCmdHandler::init();
+    err |= MotorStepperCmdHandler::init();
     err |= EncoderCmdHandler::init(encoder);
 #endif
 

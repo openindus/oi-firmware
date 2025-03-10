@@ -13,10 +13,10 @@
 
 #include "Common.h"
 #ifndef LINUX_ARM
-#include "SlaveController.h"
+#include "Slave.h"
 #include "UsbConsole.h"
 #endif
-#include "MasterController.h"
+#include "Master.h"
 #include "OpenIndus.h"
 #include "OSAL.h"
 
@@ -51,11 +51,11 @@ int System::init(void)
     err |= Dc::init();
 #endif
 
-    /* Controller init */
+    /* Slave init */
 #if defined(MODULE_MASTER)
-    err |= MasterController::init();
+    err |= Master::init();
 #elif defined(MODULE_SLAVE)
-    err |= SlaveController::init();
+    err |= Slave::init();
 #endif
 
     return (err == 0);
@@ -70,7 +70,7 @@ void System::start(void)
 #if !defined(LINUX_ARM)
         UsbConsole::begin(true); // Force console to start, convenient for debugging
 #endif
-#if !defined(FORCED_START)
+#if !defined(FORCE_START)
         return;
 #endif
     } else {
@@ -82,7 +82,7 @@ void System::start(void)
 #if !defined(LINUX_ARM)
     UsbConsole::begin(true); // Force console on slave module
 #endif
-#if !defined(FORCED_START)
+#if !defined(FORCE_START)
     return;
 #endif
 #else
@@ -93,14 +93,18 @@ void System::start(void)
 
     /* --- Master Module --- */
 #if defined(MODULE_MASTER)
-    if (MasterController::autoId()) {
+    /* Reset all modules */
+    Master::resetModules();
+
+    /* Auto pairing */
+    if (Master::autoId()) {
         Module::ledBlink(LED_GREEN, 1000); // Paired
     } else {
         Module::ledBlink(LED_RED, 1000); // Paired error
 #if !defined(LINUX_ARM)
         UsbConsole::begin(true); // Force console to start, convenient for debugging
 #endif
-#if !defined(FORCED_START)
+#if !defined(FORCE_START)
         return;
 #endif
     }
