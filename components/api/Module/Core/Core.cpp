@@ -264,12 +264,12 @@ int Core::init(void)
     err |= gpio_config(&io_rtc_conf);
 
     ESP_LOGI(CORE_TAG, "Create control task");
-    xTaskCreate(_controlTask, "Controller task", 4096, NULL, 1, NULL);
+    xTaskCreate(_controllerTask, "Slave task", 4096, NULL, 1, NULL);
 
     return err;
 }
 
-void Core::_controlTask(void *pvParameters)
+void Core::_controllerTask(void *pvParameters)
 {
 
     /* Every 500ms check if there is a power error (5V User or 5V USB)

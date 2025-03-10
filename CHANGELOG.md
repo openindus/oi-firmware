@@ -83,3 +83,15 @@ Board which are ready to use :
 
 - Updated architecture.
 - Added Modem (4G LTE) API.
+
+# 1.6.1
+
+### Features
+
+- Updated Controller and  Master/Slave architecture.
+- Added a function to reset slave modules when the master starts.
+- Added functions to set/get advanced stepper motor parameter.
+
+### Bugfix
+
+- Fixed OI-Library compilation errors.

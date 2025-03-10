@@ -1,6 +1,6 @@
 {
     "name": "OpenIndus",
-    "version": "1.6.0",
+    "version": "1.6.1",
     "keywords": "OpenIndus",
     "description": "OpenIndus Library",
     "repository": {
@@ -25,6 +25,9 @@
             "README.md"
         ],
         "exclude": [
+            "components/middleware/_linux_arm",
+            "components/middleware/Netif",
+            "components/middleware/Cloud",
             "external_components/Arduino/Ethernet",
             "external_components/Arduino/USBHost"
         ]
@@ -33,16 +36,15 @@
         "flags": [
             "-I components/api",
             "-I components/api/System",
+            "-I components/api/Master",
+            "-I components/api/Slave",
             "-I components/api/Controller",
-            "-I components/api/Controller/Master",
-            "-I components/api/Controller/Slave",
-            "-I components/api/Controller/Cmd",
-            "-I components/api/Controller/Cmd/Analog",
-            "-I components/api/Controller/Cmd/Digital",
-            "-I components/api/Controller/Cmd/Relay",
-            "-I components/api/Controller/Cmd/Stepper",
-            "-I components/api/Controller/Cmd/Dc",
-            "-I components/api/Controller/Cmd/Encoder",
+            "-I components/api/Controller/AnalogCmd",
+            "-I components/api/Controller/DigitalCmd",
+            "-I components/api/Controller/RelayCmd",
+            "-I components/api/Controller/MotorCmd",
+            "-I components/api/Controller/DcCmd",
+            "-I components/api/Controller/EncoderCmd",
             "-I components/api/Module",
             "-I components/api/Module/AnalogLS",
             "-I components/api/Module/Brushless",
@@ -101,7 +103,7 @@
             "-I components/drivers/powerSTEP01",
             "-I components/drivers/sc16is750",
             "-I components/drivers/stds75",
-            "-I external_components/Arduino/Modbus"
+            "-I external_components/Arduino/Modbus/src"
         ],
         "includeDir": ".",
         "srcDir": ".",
@@ -109,6 +111,9 @@
             "-<*>",
             "+<components/api>",
             "+<components/middleware>",
+            "-<components/middleware/_linux_arm>",
+            "-<components/middleware/Netif>",
+            "-<components/middleware/Cloud>",
             "+<components/drivers>",
             "+<external_components/Arduino/Modbus>"
         ]

@@ -27,7 +27,6 @@ uart_port_t BusRS::_port;
 QueueHandle_t BusRS::_eventQueue;
 SemaphoreHandle_t BusRS::_writeMutex;
 SemaphoreHandle_t BusRS::_writeReadMutex;
-SemaphoreHandle_t BusRS::_transferMutex;
 
 /**
  * @brief initialization of RS communication
@@ -46,8 +45,6 @@ int BusRS::begin(uart_port_t port, gpio_num_t tx_num, gpio_num_t rx_num)
     xSemaphoreGive(_writeMutex);
     _writeReadMutex = xSemaphoreCreateMutex();
     xSemaphoreGive(_writeReadMutex);
-    _transferMutex = xSemaphoreCreateMutex();
-    xSemaphoreGive(_transferMutex);
 
     ESP_LOGI(TAG, "Configure uart parameters");
     uart_config_t uart_config = {
@@ -181,27 +178,6 @@ success:
     ESP_LOG_BUFFER_HEX_LEVEL(TAG, frame->data, frame->length, ESP_LOG_INFO);
 #endif
     return 0;
-}
-
-/**
- * @brief Write and read RS frame
- * 
- * @param frame 
- * @param timeout 
- * @return int 
- */
-int BusRS::transfer(Frame_t* frame, uint32_t timeout)
-{
-    int ret = 0;
-    xSemaphoreTake(_transferMutex, portMAX_DELAY);
-    if (frame != NULL) {
-        write(frame, pdMS_TO_TICKS(timeout));
-        if (frame->ack == true) {
-            ret = read(frame, pdMS_TO_TICKS(timeout));
-        }
-    }
-    xSemaphoreGive(_transferMutex);
-    return ret;
 }
 
 /**

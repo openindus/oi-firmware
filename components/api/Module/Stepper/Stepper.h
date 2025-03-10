@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include "Common.h"
 #include "Controller.h"
 #include "DigitalInputs.h"
 #include "DigitalInputsCmd.h"
@@ -15,13 +16,13 @@
 #include "Encoder.h"
 #include "EncoderCmd.h"
 #include "EncoderCmdHandler.h"
-#include "Common.h"
 #include "Module.h"
 #include "MotorStepper.h"
+#include "MotorStepperCmd.h"
+#include "MotorStepperCmdHandler.h"
 #include "MotorStepperParam.h"
-#include "SlaveController.h"
-#include "StepperCmd.h"
-#include "StepperCmdHandler.h"
+#include "Slave.h"
+#include "StepperConfig.h"
 #include "StepperParam.h"
 #include "StepperPinout.h"
 
@@ -39,11 +40,11 @@ public:
 
 #elif defined(MODULE_MASTER)
 
-class Stepper : public Controller, public DigitalInputsCmd, public StepperCmd
+class Stepper : public Controller, public DigitalInputsCmd, public MotorStepperCmd
 {
 public:
     Stepper(uint32_t sn = 0)
-        : Controller(TYPE_OI_STEPPER, sn), DigitalInputsCmd(this), StepperCmd(this)
+        : Controller(TYPE_OI_STEPPER, sn), DigitalInputsCmd(this), MotorStepperCmd(this)
     {
         for (int i = 0; i < STEPPER_ENCODER_MAX; i++) {
             encoder[i] = new EncoderCmd(this, i);

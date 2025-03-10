@@ -43,7 +43,7 @@ public:
 private:
 
     static ioex_device_t *_ioex;
-    static void _controlTask(void *pvParameters);
+    static void _controllerTask(void *pvParameters);
 };
 
 #endif

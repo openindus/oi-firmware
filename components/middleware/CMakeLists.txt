@@ -68,6 +68,7 @@ set(COMPONENT_INCLUDE_DIRS
     "."
     "Bus"
     "Encoder"
+    "Digital"
     "Digital/Inputs"
     "Digital/Outputs"
     "Relays"

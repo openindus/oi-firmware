@@ -13,8 +13,8 @@ else()
     target_sources(oi-firmware PRIVATE
         components/api/System/System.cpp
         components/api/Module/CorePlus/CorePlus.cpp
+        components/api/Master/Master.cpp
         components/api/Controller/Controller.cpp
-        components/api/Controller/Master/MasterController.cpp
         components/middleware/_linux_arm/Led_linux.cpp
         components/middleware/_linux_arm/Bus_linux.cpp
         components/middleware/_linux_arm/Board_linux.cpp
@@ -25,8 +25,8 @@ else()
         components/api
         components/api/Module
         components/api/Module/CorePlus
+        components/api/Master
         components/api/Controller
-        components/api/Controller/Cmd
         components/middleware
         components/middleware/Board
         components/middleware/Bus
