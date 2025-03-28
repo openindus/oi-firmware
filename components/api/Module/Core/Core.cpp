@@ -15,6 +15,7 @@
 
 #include "Core.h"
 #include "CorePinout.h"
+#include "MotorStepperCmd.h"
 
 #if defined(OI_CORE)
 
@@ -265,6 +266,9 @@ int Core::init(void)
 
     ESP_LOGI(CORE_TAG, "Create control task");
     xTaskCreate(_controllerTask, "Slave task", 4096, NULL, 1, NULL);
+
+    /* Command line interface */
+    MotorStepperCmd::_registerCLI();
 
     return err;
 }

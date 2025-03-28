@@ -24,6 +24,7 @@
 #include <algorithm>
 #include <array>
 #include <cstring>
+#include <regex.h>
 
 #ifndef LINUX_ARM
 
@@ -31,6 +32,7 @@
 #include "esp_err.h"
 #include "esp_log.h"
 #include "esp_console.h"
+#include "argtable3/argtable3.h"
 
 /* FreeRTOS Components */
 #include "freertos/FreeRTOS.h"

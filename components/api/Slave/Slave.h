@@ -14,7 +14,7 @@
 #include "Board.h"
 #include "Led.h"
 #include "Bus.h"
-#include "BusCmdTypes.h"
+#include "Types.h"
 #include "FlashLoader.h"
 
 class Slave

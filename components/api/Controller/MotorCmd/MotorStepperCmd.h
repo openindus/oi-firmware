@@ -197,6 +197,13 @@ public:
 private:
     Controller* _controller;
     QueueHandle_t _motorWaitEvent[MOTOR_MAX];
+
+protected:
+
+    friend class Core;
+
+    /* Command line interface */
+    static void _registerCLI(void);
 };
 
 #endif

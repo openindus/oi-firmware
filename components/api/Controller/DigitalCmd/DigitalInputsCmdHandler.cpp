@@ -44,6 +44,12 @@ int DigitalInputsCmdHandler::init() {
         DigitalInputs::detachInterrupt((DIn_Num_t)data[1]);
         data.clear();
     });
+
+    Slave::addResetFunction([]() {
+        for (int i = 0; i < DIN_MAX; ++i) {
+            DigitalInputs::detachInterrupt((DIn_Num_t)i);
+        }
+    });
     
     return 0;
 }
