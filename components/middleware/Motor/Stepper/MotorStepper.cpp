@@ -15,15 +15,10 @@
 static const char TAG[] = "MotorStepper";
 
 static float _homingSpeed[MOTOR_MAX];
-
-
 static std::vector<std::pair<DIn_Num_t, Logic_t>> _limitSwitchDigitalInput[MOTOR_MAX]; 
-
 static MotorNum_t _motorNums[MOTOR_MAX] = {MOTOR_1, MOTOR_2};
-
 static QueueHandle_t _busyEvent[MOTOR_MAX];
 static SemaphoreHandle_t _homingSemaphore[MOTOR_MAX];
-
 static bool _taskHomingStopRequested[MOTOR_MAX] = {false, false};
 static SemaphoreHandle_t _taskHomingStopSemaphore[MOTOR_MAX];
 
@@ -235,6 +230,16 @@ void MotorStepper::homing(MotorNum_t motor, float speed)
     char task_name[16];
     snprintf(task_name, 16, "Homing task %i", motor);   
     xTaskCreate(_homingTask, task_name, 4096, &_motorNums[motor], 7, NULL);
+}
+
+float MotorStepper::getSupplyVoltage(void)
+{
+    float voltage = 0.0f;
+    int adc_value = adc1_get_raw(ADC1_CHANNEL_0);
+    if (adc_value > 0) {
+        voltage = (float)adc_value * 3.3f / 4095.0f;
+    }
+    return ((voltage * (510.0f + 4300.0f)) / 510.0f); // R1 = 510 Ohm, R2 = 4300 Ohm
 }
 
 static void _digitalInterruptHandler(void *arg)

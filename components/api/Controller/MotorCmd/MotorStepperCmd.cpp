@@ -179,4 +179,12 @@ int MotorStepperCmd::getAdvancedParam(MotorNum_t motor, AdvancedParameter_t advP
     return ret;
 }
 
+float MotorStepperCmd::getSupplyVoltage(void)
+{
+    std::vector<uint8_t> msgBytes = {REQUEST_MOTOR_GET_SUPPLY_VOLTAGE};
+    _controller->performRequest(msgBytes);
+    float *voltage = reinterpret_cast<float *>(&msgBytes[1]);
+    return *voltage;
+}
+
 #endif

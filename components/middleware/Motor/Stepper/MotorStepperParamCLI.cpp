@@ -1,5 +1,5 @@
 /**
- * @file MotorStepperParam_CLI.cpp
+ * @file MotorStepperParamCLI.cpp
  * @brief Command line interface - Motor Stepper
  * @author Bastien Boudet
  * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.

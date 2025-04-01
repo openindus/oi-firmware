@@ -170,6 +170,12 @@ public:
             MotorStepperParam::getAdvancedParam(args.motor, args.advParam, args.value);
         });
 
+        Slave::addRequestProcessCallback(REQUEST_MOTOR_GET_SUPPLY_VOLTAGE, [](std::vector<uint8_t> &data) {
+            float voltage    = MotorStepper::getSupplyVoltage();
+            uint8_t *ptr     = reinterpret_cast<uint8_t *>(&voltage);
+            data.insert(data.end(), ptr, ptr + sizeof(float));
+        });
+
         Slave::addResetFunction([]() {
             for (int i = 0; i < STEPPER_MOTOR_MAX; ++i) {
                 // Detach all limit switches

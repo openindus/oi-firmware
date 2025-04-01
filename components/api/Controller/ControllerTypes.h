@@ -61,6 +61,7 @@ enum Controller_Request_e {
     REQUEST_MOTOR_SET_POSITION               = 0x51,
     REQUEST_MOTOR_SET_ADVANCED_PARAM         = 0x52,
     REQUEST_MOTOR_GET_ADVANCED_PARAM         = 0x53,
+    REQUEST_MOTOR_GET_SUPPLY_VOLTAGE         = 0x54,
 
     /* BRUSHLESS MOTOR */
     REQUEST_MOTOR_SET_SPEED                  = 0x60,

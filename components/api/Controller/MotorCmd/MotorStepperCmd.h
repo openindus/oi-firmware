@@ -194,6 +194,13 @@ public:
      */
     int getAdvancedParam(MotorNum_t motor, AdvancedParameter_t advParam, void* value);
 
+    /**
+     * @brief Get the supply voltage
+     *
+     * @return float Supply voltage in V
+     */
+    float getSupplyVoltage(void);
+
 private:
     Controller* _controller;
     QueueHandle_t _motorWaitEvent[MOTOR_MAX];

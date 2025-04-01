@@ -191,6 +191,13 @@ public:
      */
     static void homing(MotorNum_t motor, float speed);
 
+    /**
+     * @brief Get the supply voltage
+     *
+     * @return float Supply voltage in volts
+     */
+    static float getSupplyVoltage(void);
+
 private:
 
     static int _registerCLI(void);

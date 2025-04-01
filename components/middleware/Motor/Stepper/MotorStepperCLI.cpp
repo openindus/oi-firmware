@@ -1,5 +1,5 @@
 /**
- * @file MotorStepper_CLI.cpp
+ * @file MotorStepperCLI.cpp
  * @brief Command line interface - Motor Stepper
  * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
  * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
@@ -414,6 +414,39 @@ static void _registerHoming(void)
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
 }
 
+/** 'getSupplyVoltage' */
+
+static struct {
+    struct arg_end *end;
+} getSupplyVoltageArgs;
+
+static int getSupplyVoltage(int argc, char **argv)
+{
+    int nerrors = arg_parse(argc, argv, (void **) &getSupplyVoltageArgs);
+    if (nerrors != 0) {
+        arg_print_errors(stderr, getSupplyVoltageArgs.end, argv[0]);
+        return 1;
+    }
+
+    printf("%f\n", MotorStepper::getSupplyVoltage());
+
+    return 0;
+}
+
+static void _registerGetSupplyVoltage(void)
+{
+    getSupplyVoltageArgs.end = arg_end(0);
+
+    const esp_console_cmd_t cmd = {
+        .command = "get-supply-voltage",
+        .help = "get supply voltage",
+        .hint = NULL,
+        .func = &getSupplyVoltage,
+        .argtable = &getSupplyVoltageArgs
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+}
+
 int MotorStepper::_registerCLI(void)
 {
     _registerLimitSwitch();
@@ -426,6 +459,7 @@ int MotorStepper::_registerCLI(void)
     _registerMoveRelative();
     _registerRun();
     _registerHoming();
+    _registerGetSupplyVoltage();
 
     return 0;
 }
