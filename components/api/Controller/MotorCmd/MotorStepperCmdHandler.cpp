@@ -11,6 +11,7 @@
 #include "MotorStepperCmdHandler.h"
 
 MotorNum_t MotorStepperCmdHandler::_motorNums[MOTOR_MAX] = {MOTOR_1, MOTOR_2};
+TaskHandle_t MotorStepperCmdHandler::_waitTaskHandler[MOTOR_MAX] = {NULL, NULL};
 
 void MotorStepperCmdHandler::_waitTask(void *pvParameters)
 {

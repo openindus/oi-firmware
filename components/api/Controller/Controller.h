@@ -19,6 +19,7 @@
 class Controller
 {
 public:
+    Controller(uint16_t id);
     Controller(uint16_t type, uint32_t sn);
 
     inline void setId(uint16_t id) { _id = id; }

@@ -1,6 +1,6 @@
 /**
- * @file BusCmdTypes.h
- * @brief BusCmdTypes definition file for the API
+ * @file Types.h
+ * @brief Types definition file for the API
  * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
  * @copyright (c) [2025] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
@@ -11,10 +11,10 @@
 #include "Common.h"
 
 /**
- * @brief Bus Command Type Enumeration
+ * @brief Command enumeration
  * 
  */
-enum Bus_Cmd_e {
+enum Cmd_e {
     CMD_NOP                 = (uint8_t) 0x00,
     CMD_RESTART             = (uint8_t) 0x01,
     CMD_PING                = (uint8_t) 0x02,

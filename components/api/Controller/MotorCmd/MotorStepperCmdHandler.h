@@ -145,7 +145,7 @@ public:
             MotorNum_t motor = static_cast<MotorNum_t>(data[1]);
             char task_name[14];
             snprintf(task_name, 14, "Wait task %i", motor);
-            xTaskCreate(_waitTask, task_name, 4096, &_motorNums[motor], 9, NULL);
+            xTaskCreate(_waitTask, task_name, 4096, (void *)&_motorNums[motor], 9, &_waitTaskHandler[motor]);
             data.clear();
         });
 
@@ -172,8 +172,14 @@ public:
 
         Slave::addResetFunction([]() {
             for (int i = 0; i < STEPPER_MOTOR_MAX; ++i) {
+                // Detach all limit switches
                 for (int j = 0; j < STEPPER_DIN_MAX; ++j) {
                     MotorStepper::detachLimitSwitch(static_cast<MotorNum_t>(i), static_cast<DIn_Num_t>(j));
+                }
+                // Delete wait task
+                if (_waitTaskHandler[i] != nullptr) {
+                    vTaskDelete(_waitTaskHandler[i]);
+                    _waitTaskHandler[i] = nullptr;
                 }
             }
         });
@@ -184,6 +190,7 @@ public:
 private:
     static MotorNum_t _motorNums[MOTOR_MAX];
     static void _waitTask(void *pvParameters);
+    static TaskHandle_t _waitTaskHandler[MOTOR_MAX];
 };
 
 #endif

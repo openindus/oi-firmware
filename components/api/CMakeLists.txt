@@ -29,6 +29,7 @@ set(COMPONENT_SRCS
     "Controller/AnalogCmd/AnalogInputsHVCmdHandler.cpp"
     "Controller/MotorCmd/MotorStepperCmd.cpp"
     "Controller/MotorCmd/MotorStepperCmdHandler.cpp"
+    "Controller/MotorCmd/MotorStepperCmdCLI.cpp"
     "Controller/DcCmd/DcCmd.cpp"
     "Controller/DcCmd/DcCmdHandler.cpp"
     "Controller/EncoderCmd/EncoderCmd.cpp"
