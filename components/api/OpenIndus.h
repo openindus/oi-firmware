@@ -25,6 +25,7 @@
 /* Arduino */
 void setup(void);
 void loop(void);
+void error(int);
 
 /* OI-Modules */
 #ifndef OI_CORE_PLUS

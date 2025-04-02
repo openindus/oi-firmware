@@ -8,12 +8,19 @@
 
 #pragma once
 
+#include "Common.h"
+
 class System
 {
 public:
     static int init(void);
     static void start(void);
+    static void stop(void);
+    static void handleError(int errorCode);
 
 private:
     static void _mainTask(void *pvParameters);
+    static void _handleErrorTask(void *pvParameters);
+    static TaskHandle_t _mainTaskHandle;
+    static TaskHandle_t _handleErrorTaskHandle;
 };

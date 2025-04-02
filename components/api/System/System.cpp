@@ -7,20 +7,17 @@
  */
 
 #include "System.h"
-// #if defined(ARDUINO)
-// #include "Arduino.h"
-// #endif
 
-#include "Common.h"
-#ifndef LINUX_ARM
+#include "Master.h"
+#include "OSAL.h"
+#include "OpenIndus.h"
 #include "Slave.h"
 #include "UsbConsole.h"
-#endif
-#include "Master.h"
-#include "OpenIndus.h"
-#include "OSAL.h"
 
 static const char TAG[] = "System";
+
+TaskHandle_t System::_mainTaskHandle = NULL;
+TaskHandle_t System::_handleErrorTaskHandle = NULL;
 
 void System::_mainTask(void *pvParameters)
 {
@@ -28,6 +25,13 @@ void System::_mainTask(void *pvParameters)
     while (1) {
         loop();
     }
+}
+
+void System::_handleErrorTask(void *pvParameters)
+{
+    int errorCode = (int)pvParameters;
+    error(errorCode);
+    vTaskDelete(NULL); // Delete the task after handling the error
 }
 
 int System::init(void)
@@ -51,11 +55,10 @@ int System::init(void)
     err |= Dc::init();
 #endif
 
-    /* Slave init */
 #if defined(MODULE_MASTER)
-    err |= Master::init();
+    err |= Master::init(); // Initialize master
 #elif defined(MODULE_SLAVE)
-    err |= Slave::init();
+    err |= Slave::init(); // Initialize slave
 #endif
 
     return (err == 0);
@@ -63,77 +66,81 @@ int System::init(void)
 
 void System::start(void)
 {
-    /* --- Initialize module --- */
-    if (!System::init() || Board::checkBootError()) {
-        LOGE(TAG, "Failed to initialize module");
-        Module::ledBlink(LED_RED, 1000);
-#if !defined(LINUX_ARM)
-        UsbConsole::begin(true); // Force console to start, convenient for debugging
-#endif
-#if !defined(FORCE_START)
-        return;
-#endif
-    } else {
-        Module::ledBlink(LED_BLUE, 1000); // Module Initialized
+    if (_mainTaskHandle == NULL) {
+        xTaskCreate(_mainTask, "Main task", 8192, NULL, 1, &_mainTaskHandle);
     }
-
-    /* --- Slave Module --- */
-#if defined(MODULE_SLAVE)
-#if !defined(LINUX_ARM)
-    UsbConsole::begin(true); // Force console on slave module
-#endif
-#if !defined(FORCE_START)
-    return;
-#endif
-#else
-    UsbConsole::listen(); // Start a task which listen for user to input "console"
-#endif 
-
-    delay(500); // Wait for slaves modules to init and give time to user script to enable console
-
-    /* --- Master Module --- */
-#if defined(MODULE_MASTER)
-    /* Reset all modules */
-    Master::resetModules();
-
-    /* Auto pairing */
-    if (Master::autoId()) {
-        Module::ledBlink(LED_GREEN, 1000); // Paired
-    } else {
-        Module::ledBlink(LED_RED, 1000); // Paired error
-#if !defined(LINUX_ARM)
-        UsbConsole::begin(true); // Force console to start, convenient for debugging
-#endif
-#if !defined(FORCE_START)
-        return;
-#endif
-    }
-#endif
-
-    /* --- Main task --- */
-#if !defined(LINUX_ARM)
-    if (!UsbConsole::begin()) { // console will start only if user input "console" during startup
-        ESP_LOGI(TAG, "Create main task");
-        vTaskDelay(10);
-        xTaskCreate(_mainTask, "Main task", 8192, NULL, 1, NULL);
-#if defined(FORCE_CONSOLE)
-        UsbConsole::begin(true); // Force console, will failed if Serial.begin() is called in user code
-#endif
-    }
-#endif
 }
 
-#ifndef LINUX_ARM
-extern "C" void app_main()
-#else
-int main(void)
-#endif
+void System::handleError(int errorCode)
 {
-// #if defined(ARDUINO)
-//     initArduino();
-// #endif
-    System::start();
-#ifdef LINUX_ARM
-    return 0;
+    if (_handleErrorTaskHandle == NULL) {
+        xTaskCreate(_handleErrorTask, "Handle error task", 4096, (void *)errorCode, 4, &_handleErrorTaskHandle);
+    }
+}
+
+void System::stop(void)
+{
+    if (_mainTaskHandle != NULL) {
+        vTaskDelete(_mainTaskHandle);
+        _mainTaskHandle = NULL;
+    }
+}
+
+extern "C" void app_main(void)
+{
+    /*--- Boot ---*/
+    if (Module::checkBootError()) {
+        LOGE(TAG, "Boot error detected");
+        System::handleError(ERROR_BOOT);
+        goto error;
+    }
+
+    /*--- Harware init ---*/
+    if (System::init()) {                 // Initialize modules
+        Module::ledBlink(LED_BLUE, 1000); // Module Initialized
+    } else {
+        LOGE(TAG, "Failed to initialize module");
+        System::handleError(ERROR_MODULE_INIT);
+        goto error;
+    }
+
+    /*--- Master management ---*/
+#if defined(MODULE_MASTER)
+    delay(500);                            // Wait for modules to be ready
+    Master::resetModules();                // Reset all modules
+    if (Master::autoId()) {                // Auto ID modules
+        Module::ledBlink(LED_GREEN, 1000); // Auto pairing done
+    } else {
+        LOGE(TAG, "Failed to auto ID modules");
+        System::handleError(ERROR_AUTO_ID);
+        goto error;
+    }
 #endif
+
+    /*--- Console and main task ---*/
+#if defined(MODULE_MASTER)
+    if (UsbConsole::checkUserActivation(500)) { // Check if user wants to activate console
+        UsbConsole::begin();                    // Start console
+    } else {
+#if defined(FORCE_CONSOLE)
+        UsbConsole::begin(); // Start console
+#endif
+        System::start(); // Start main task
+    }
+#elif defined(MODULE_SLAVE)
+    UsbConsole::begin(); // Start console
+#else
+    System::start(); // Start main task
+#endif
+
+    return;
+
+error:
+    /*--- Error ---*/
+    Module::ledBlink(LED_RED, 1000); // Error
+    UsbConsole::begin();             // Start console
+#if defined(FORCE_START)
+    System::start(); // Start main task
+#endif
+    return;
 }

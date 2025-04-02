@@ -34,3 +34,14 @@ enum Cmd_e {
     CMD_HEARTBEAT           = (uint8_t) 0x10,
     CMD_RESET               = (uint8_t) 0x11 // Reset Module
 };
+
+/**
+ * @brief Error code enumeration
+ * 
+ */
+enum ErrorCode_e {
+    ERROR_NONE          = (int) 0,
+    ERROR_BOOT          = (int) 1,
+    ERROR_MODULE_INIT   = (int) 2,
+    ERROR_AUTO_ID       = (int) 3,
+};
