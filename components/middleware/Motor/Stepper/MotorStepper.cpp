@@ -26,6 +26,7 @@ static void _digitalInterruptHandler(void* arg);
 static void _homingTask(void* arg);
 static void _busyCallback(uint8_t motor);
 static void _configProtections(void);
+static void(*_flagIsrCallback)(MotorNum_t, MotoStepperFlag_t) = nullptr;
 
 int MotorStepper::init(PS01_Hal_Config_t* config, PS01_Param_t* param)
 {
@@ -240,6 +241,47 @@ float MotorStepper::getSupplyVoltage(void)
         voltage = (float)adc_value * 3.3f / 4095.0f;
     }
     return ((voltage * (510.0f + 4300.0f)) / 510.0f); // R1 = 510 Ohm, R2 = 4300 Ohm
+}
+
+void MotorStepper::attachFlagInterrupt(void(*callback)(MotorNum_t, MotoStepperFlag_t))
+{
+    _flagIsrCallback = callback;
+    
+    auto wrapper = [](uint8_t motor, uint16_t status) {
+        if (!_flagIsrCallback) return;
+
+        if (((status & POWERSTEP01_STATUS_CMD_ERROR) >> 7) == 1) {
+            _flagIsrCallback((MotorNum_t)motor, FLAG_CMD_ERROR);
+        }
+        if (((status & POWERSTEP01_STATUS_UVLO) >> 9) == 0) {
+            _flagIsrCallback((MotorNum_t)motor, FLAG_UVLO);
+        }
+        if (((status & POWERSTEP01_STATUS_UVLO_ADC) >> 10) == 0) {
+            _flagIsrCallback((MotorNum_t)motor, FLAG_UVLO_ADC);
+        }
+        if (((status & POWERSTEP01_STATUS_TH_STATUS) >> 11) == 0b01) {
+            _flagIsrCallback((MotorNum_t)motor, FLAG_TH_WARNING);
+        }
+        if (((((status & POWERSTEP01_STATUS_TH_STATUS) >> 11) == 0b10) ||
+            ((status & POWERSTEP01_STATUS_TH_STATUS) >> 11) == 0b11)) {
+            _flagIsrCallback((MotorNum_t)motor, FLAG_TH_SHUTDOWN);
+        }
+        if (((status & POWERSTEP01_STATUS_OCD) >> 13) == 0) {
+            _flagIsrCallback((MotorNum_t)motor, FLAG_OCD);
+        }
+        if (((status & POWERSTEP01_STATUS_STALL_A) >> 14) == 0) {
+            _flagIsrCallback((MotorNum_t)motor, FLAG_STALL_A);
+        }
+        if (((status & POWERSTEP01_STATUS_STALL_B) >> 15) == 0) {
+            _flagIsrCallback((MotorNum_t)motor, FLAG_STALL_B);
+        }
+    };
+
+    PS01_Hal_AttachFlagInterrupt((void(*)(uint8_t, uint16_t))wrapper);
+}
+void MotorStepper::detachFlagInterrupt(void)
+{
+    PS01_Hal_DetachFlagInterrupt();
 }
 
 static void _digitalInterruptHandler(void *arg)

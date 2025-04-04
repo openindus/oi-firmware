@@ -176,6 +176,14 @@ public:
             data.insert(data.end(), ptr, ptr + sizeof(float));
         });
 
+        Slave::addRequestProcessCallback(REQUEST_MOTOR_ATTACH_FLAG_INTERRUPT, [](std::vector<uint8_t>& data) { 
+            MotorStepper::attachFlagInterrupt(_flagIsrCallback);
+        });
+    
+        Slave::addRequestProcessCallback(REQUEST_MOTOR_DETACH_FLAG_INTERRUPT, [](std::vector<uint8_t>& data) { 
+            MotorStepper::detachFlagInterrupt();
+        });
+
         Slave::addResetFunction([]() {
             for (int i = 0; i < STEPPER_MOTOR_MAX; ++i) {
                 // Detach all limit switches
@@ -197,6 +205,7 @@ private:
     static MotorNum_t _motorNums[MOTOR_MAX];
     static void _waitTask(void *pvParameters);
     static TaskHandle_t _waitTaskHandler[MOTOR_MAX];
+    static void (*_flagIsrCallback)(MotorNum_t, MotoStepperFlag_t);
 };
 
 #endif

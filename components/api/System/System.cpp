@@ -12,6 +12,7 @@
 #include "OSAL.h"
 #include "OpenIndus.h"
 #include "Slave.h"
+#include "Types.h"
 #include "UsbConsole.h"
 
 static const char TAG[] = "System";

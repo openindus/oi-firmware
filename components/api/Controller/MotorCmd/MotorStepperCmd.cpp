@@ -187,4 +187,23 @@ float MotorStepperCmd::getSupplyVoltage(void)
     return *voltage;
 }
 
+void MotorStepperCmd::attachFlagInterrupt(void(*callback)(MotorNum_t, MotoStepperFlag_t))
+{
+    _flagIsrCallback = callback;
+    Master::addEventProcessCallback(
+        EVENT_MOTOR_FLAG_INTERRUPT, _controller->getId(), [this](uint8_t *data) { 
+            _flagIsrCallback((MotorNum_t)data[1], (MotoStepperFlag_t)data[2]); 
+        });
+
+    std::vector<uint8_t> msgBytes = {REQUEST_MOTOR_ATTACH_FLAG_INTERRUPT};
+    _controller->performRequest(msgBytes);
+}
+
+void MotorStepperCmd::detachFlagInterrupt(void)
+{
+    _flagIsrCallback = nullptr;
+    std::vector<uint8_t> msgBytes = {REQUEST_MOTOR_DETACH_FLAG_INTERRUPT};
+    _controller->performRequest(msgBytes);
+}
+
 #endif

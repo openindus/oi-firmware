@@ -27,6 +27,17 @@ typedef enum {
     STEP_1_128 = 7
 } MotorStepResolution_t;
 
+typedef enum {
+    FLAG_CMD_ERROR   = 0, // Command error
+    FLAG_UVLO        = 1, // Undervoltage lockout
+    FLAG_UVLO_ADC    = 2, // VS undervoltage lockout
+    FLAG_TH_WARNING  = 3, // Thermal warning
+    FLAG_TH_SHUTDOWN = 4, // Thermal shutdown
+    FLAG_OCD         = 5, // Overcurrent detection
+    FLAG_STALL_A     = 6, // Stall detection (A)
+    FLAG_STALL_B     = 7, // Stall detection (B)
+} MotoStepperFlag_t;
+
 /**
  * @brief Stepper motors stop modes
  *
@@ -197,6 +208,19 @@ public:
      * @return float Supply voltage in volts
      */
     static float getSupplyVoltage(void);
+
+    /**
+     * @brief Attach a flag interrupt for the given motor
+     * 
+     * @param callback Callback function
+     */
+    static void attachFlagInterrupt(void (*callback)(MotorNum_t, MotoStepperFlag_t));
+
+    /**
+     * @brief Detach flag interrupt callback for the given motor
+     *
+     */
+    static void detachFlagInterrupt(void);
 
 private:
 

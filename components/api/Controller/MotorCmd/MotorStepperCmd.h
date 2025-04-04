@@ -201,9 +201,23 @@ public:
      */
     float getSupplyVoltage(void);
 
+    /**
+     * @brief Attach a flag interrupt for the given motor
+     * 
+     * @param callback Callback function
+     */
+    void attachFlagInterrupt(void (*callback)(MotorNum_t, MotoStepperFlag_t));
+
+    /**
+     * @brief Detach flag interrupt callback for the given motor
+     *
+     */
+    void detachFlagInterrupt(void);
+
 private:
     Controller* _controller;
     QueueHandle_t _motorWaitEvent[MOTOR_MAX];
+    void (*_flagIsrCallback)(MotorNum_t, MotoStepperFlag_t);
 
 protected:
 

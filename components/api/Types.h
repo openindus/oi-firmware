@@ -11,10 +11,10 @@
 #include "Common.h"
 
 /**
- * @brief Bus command enumeration
+ * @brief Command enumeration
  * 
  */
-enum BusCommand_e {
+enum Cmd_e {
     CMD_NOP                 = (uint8_t) 0x00,
     CMD_RESTART             = (uint8_t) 0x01,
     CMD_PING                = (uint8_t) 0x02,

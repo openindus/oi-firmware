@@ -13,6 +13,12 @@
 MotorNum_t MotorStepperCmdHandler::_motorNums[MOTOR_MAX] = {MOTOR_1, MOTOR_2};
 TaskHandle_t MotorStepperCmdHandler::_waitTaskHandler[MOTOR_MAX] = {NULL, NULL};
 
+void (*MotorStepperCmdHandler::_flagIsrCallback)(MotorNum_t, MotoStepperFlag_t) = {
+    [](MotorNum_t motor, MotoStepperFlag_t flag) {
+        Slave::sendEvent({EVENT_MOTOR_FLAG_INTERRUPT, (uint8_t)motor, (uint8_t)flag});
+    }
+};
+
 void MotorStepperCmdHandler::_waitTask(void *pvParameters)
 {
     MotorNum_t motor = *(MotorNum_t *)pvParameters;    

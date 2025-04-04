@@ -8,29 +8,12 @@
 
 #pragma once
 
+#include "DigitalOutputsTypes.h"
 #include "esp_adc_cal.h"
 #include "driver/gpio.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
 #include "adc.h"
-
-/**
- * @brief Digital Outputs Numbers
- *
- */
-typedef enum {
-    DOUT_1 = 0,
-    DOUT_2,
-    DOUT_3,
-    DOUT_4,
-    DOUT_5,
-    DOUT_6,
-    DOUT_7,
-    DOUT_8,
-    DOUT_MAX
-} DOut_Num_t;
-
-typedef enum { DOUT_MODE_DIGITAL = 0, DOUT_MODE_PWM } DOut_Mode_t;
 
 class DigitalOutputs
 {

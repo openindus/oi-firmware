@@ -20,12 +20,14 @@ IsrCallback_t DigitalInputsCmdHandler::_isrCallback[] = {
     [](void*){Slave::sendEvent({EVENT_DIGITAL_INTERRUPT, DIN_2});},
     [](void*){Slave::sendEvent({EVENT_DIGITAL_INTERRUPT, DIN_3});},
     [](void*){Slave::sendEvent({EVENT_DIGITAL_INTERRUPT, DIN_4});},
+#if !defined(OI_STEPPER) and !defined(OI_STEPPER_VE)
     [](void*){Slave::sendEvent({EVENT_DIGITAL_INTERRUPT, DIN_5});},
     [](void*){Slave::sendEvent({EVENT_DIGITAL_INTERRUPT, DIN_6});},
     [](void*){Slave::sendEvent({EVENT_DIGITAL_INTERRUPT, DIN_7});},
     [](void*){Slave::sendEvent({EVENT_DIGITAL_INTERRUPT, DIN_8});},
     [](void*){Slave::sendEvent({EVENT_DIGITAL_INTERRUPT, DIN_9});},
     [](void*){Slave::sendEvent({EVENT_DIGITAL_INTERRUPT, DIN_10});},
+#endif
 };
 
 int DigitalInputsCmdHandler::init() {
