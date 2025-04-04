@@ -37,8 +37,8 @@ public:
     static std::map<uint16_t,std::pair<uint16_t, uint32_t>,std::greater<uint16_t>> discoverSlaves(void);
     static void getBoardInfo(uint16_t type, uint32_t sn, Board_Info_t* board_info);
 
-    template <typename... Args> 
-    static int performRequest(const uint16_t id, const uint8_t request, Args... args);
+    // template <typename... Args> 
+    // static int performRequest(const uint16_t id, const uint8_t request, Args... args);
     static int performRequest(const uint16_t id, const uint8_t request, std::vector<uint8_t> &msgBytes, bool ackNeeded = true);
     static int performRequest(const uint16_t id, std::vector<uint8_t> &msgBytes, bool ackNeeded = true);
 

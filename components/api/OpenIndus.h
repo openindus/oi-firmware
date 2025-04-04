@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include "System.h"
 #include "Module.h"
 #ifndef OI_CORE_PLUS
 #include "AnalogLS.h"
@@ -25,9 +26,8 @@
 /* Arduino */
 void setup(void);
 void loop(void);
-void error(int);
 
-/* OI-Modules */
+/* OpenIndus modules */
 #ifndef OI_CORE_PLUS
 #define OICore Core
 #define OICoreLite Core

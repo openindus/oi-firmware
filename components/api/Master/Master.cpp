@@ -261,19 +261,19 @@ std::map<uint16_t,std::pair<uint16_t, uint32_t>,std::greater<uint16_t>> Master::
     return _ids;
 }
 
-template <typename T>
-void appendToVector(std::vector<uint8_t>& vec, const T& value) {
-    const uint8_t* bytePtr = reinterpret_cast<uint8_t*>(&value);
-    vec.insert(vec.end(), bytePtr, bytePtr + sizeof(T));
-}
+// template <typename T>
+// void appendToVector(std::vector<uint8_t>& vec, const T& value) {
+//     const uint8_t* bytePtr = reinterpret_cast<uint8_t*>(&value);
+//     vec.insert(vec.end(), bytePtr, bytePtr + sizeof(T));
+// }
 
-template <typename... Args>
-int Master::performRequest(const uint16_t id, const uint8_t request, Args... args)
-{
-    std::vector<uint8_t> msgBytes;
-    (appendToVector(msgBytes, args), ...);
-    return performRequest(id, request, msgBytes, true);
-}
+// template <typename... Args>
+// int Master::performRequest(const uint16_t id, const uint8_t request, Args... args)
+// {
+//     std::vector<uint8_t> msgBytes;
+//     (appendToVector(msgBytes, args), ...);
+//     return performRequest(id, request, msgBytes, true);
+// }
 
 int Master::performRequest(const uint16_t id, const uint8_t request, std::vector<uint8_t> &msgBytes, bool ackNeeded)
 {

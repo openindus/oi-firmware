@@ -17,7 +17,6 @@
 static const char TAG[] = "System";
 
 TaskHandle_t System::_mainTaskHandle = NULL;
-TaskHandle_t System::_handleErrorTaskHandle = NULL;
 
 void System::_mainTask(void *pvParameters)
 {
@@ -25,13 +24,6 @@ void System::_mainTask(void *pvParameters)
     while (1) {
         loop();
     }
-}
-
-void System::_handleErrorTask(void *pvParameters)
-{
-    int errorCode = (int)pvParameters;
-    error(errorCode);
-    vTaskDelete(NULL); // Delete the task after handling the error
 }
 
 int System::init(void)
@@ -71,11 +63,12 @@ void System::start(void)
     }
 }
 
-void System::handleError(int errorCode)
+__attribute__((weak)) void System::handleError(int errorCode)
 {
-    if (_handleErrorTaskHandle == NULL) {
-        xTaskCreate(_handleErrorTask, "Handle error task", 4096, (void *)errorCode, 4, &_handleErrorTaskHandle);
-    }
+    UsbConsole::begin(); // Start console
+#if defined(FORCE_START)
+    System::start(); // Start main task
+#endif
 }
 
 void System::stop(void)
@@ -91,8 +84,9 @@ extern "C" void app_main(void)
     /*--- Boot ---*/
     if (Module::checkBootError()) {
         LOGE(TAG, "Boot error detected");
+        Module::ledBlink(LED_RED, 1000); // Error
         System::handleError(ERROR_BOOT);
-        goto error;
+        return;
     }
 
     /*--- Harware init ---*/
@@ -100,8 +94,9 @@ extern "C" void app_main(void)
         Module::ledBlink(LED_BLUE, 1000); // Module Initialized
     } else {
         LOGE(TAG, "Failed to initialize module");
+        Module::ledBlink(LED_RED, 1000); // Error
         System::handleError(ERROR_MODULE_INIT);
-        goto error;
+        return;
     }
 
     /*--- Master management ---*/
@@ -112,8 +107,9 @@ extern "C" void app_main(void)
         Module::ledBlink(LED_GREEN, 1000); // Auto pairing done
     } else {
         LOGE(TAG, "Failed to auto ID modules");
+        Module::ledBlink(LED_RED, 1000); // Error
         System::handleError(ERROR_AUTO_ID);
-        goto error;
+        return;
     }
 #endif
 
@@ -132,15 +128,4 @@ extern "C" void app_main(void)
 #else
     System::start(); // Start main task
 #endif
-
-    return;
-
-error:
-    /*--- Error ---*/
-    Module::ledBlink(LED_RED, 1000); // Error
-    UsbConsole::begin();             // Start console
-#if defined(FORCE_START)
-    System::start(); // Start main task
-#endif
-    return;
 }
