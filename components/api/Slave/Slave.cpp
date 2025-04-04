@@ -72,6 +72,19 @@ void Slave::sendEvent(std::vector<uint8_t> msgBytes)
     BusCAN::write(&frame, _id, size);
 }
 
+/**
+ * @brief Send an error on the CAN bus
+ * 
+ * @param errorCode 
+ */
+void Slave::sendError(uint8_t errorCode)
+{
+    BusCAN::Frame_t frame;
+    frame.cmd = CMD_ERROR;
+    frame.args[0] = errorCode;
+    BusCAN::write(&frame, _id, 1);
+}
+
 void Slave::_busRsTask(void *pvParameters) 
 {
     BusRS::Frame_t frame;

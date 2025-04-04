@@ -56,6 +56,10 @@ public:
         _eventProcessCallbacks.erase(std::make_pair(event, id));
     }
 
+    static void addErrorCallback(std::function<void(int)> callback) {
+        _errorCallback = callback;
+    }
+
     enum State_e{
         STATE_UNDEFINED = (int)-1,
         STATE_IDLE      = (int)0,
@@ -84,6 +88,7 @@ private:
 
     static std::map<std::pair<uint8_t,uint16_t>, std::function<void(uint8_t*)>> _eventProcessCallbacks;
     static std::vector<Controller*> _controllerInstances;
+    static std::function<void(int)> _errorCallback;
 
     static int _registerCLI(void);
 

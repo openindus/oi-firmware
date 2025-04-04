@@ -27,6 +27,8 @@ public:
     static int getStatus(void);
 
     static void sendEvent(std::vector<uint8_t> msgBytes);
+    /** @todo heartbeat(); */
+    static void sendError(uint8_t errorCode);
 
     static inline void addRequestProcessCallback(uint8_t request, std::function<void(std::vector<uint8_t> &)> callback) {
         _requestProcessCallbacks.insert({request, callback});

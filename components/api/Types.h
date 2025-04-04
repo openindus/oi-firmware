@@ -11,10 +11,10 @@
 #include "Common.h"
 
 /**
- * @brief Command enumeration
+ * @brief Bus command enumeration
  * 
  */
-enum Cmd_e {
+enum BusCommand_e {
     CMD_NOP                 = (uint8_t) 0x00,
     CMD_RESTART             = (uint8_t) 0x01,
     CMD_PING                = (uint8_t) 0x02,
@@ -32,7 +32,8 @@ enum Cmd_e {
     // CMD_READ_NVS            = (uint8_t) 0x0E,
     // CMD_WRITE_NVS           = (uint8_t) 0x0F,
     CMD_HEARTBEAT           = (uint8_t) 0x10,
-    CMD_RESET               = (uint8_t) 0x11 // Reset Module
+    CMD_RESET               = (uint8_t) 0x11, // Reset Module
+    CMD_ERROR               = (uint8_t) 0x12,
 };
 
 /**

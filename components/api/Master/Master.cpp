@@ -24,6 +24,7 @@ SemaphoreHandle_t Master::_requestMutex = NULL;
 #endif
 std::map<uint16_t, std::pair<uint16_t, uint32_t>, std::greater<uint16_t>> Master::_ids;
 std::map<std::pair<uint8_t, uint16_t>, std::function<void(uint8_t*)>> Master::_eventProcessCallbacks;
+std::function<void(int)> Master::_errorCallback = NULL;
 std::vector<Controller*> Master::_controllerInstances;
 
 int Master::init(void)
@@ -408,6 +409,14 @@ void Master::_busCanTask(void *pvParameters)
 #ifndef LINUX_ARM
                     ESP_LOGI(TAG, "Received id from %s\t SN:%i | ID:%i", BoardUtils::typeToName(*type, name), *sn, id);
 #endif
+                    break;
+                }
+                case CMD_ERROR:
+                {
+                    uint8_t errorCode = frame.args[0];
+                    if (_errorCallback) {
+                        _errorCallback(errorCode);
+                    }
                     break;
                 }
                 default:
