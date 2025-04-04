@@ -36,7 +36,7 @@ void DigitalOutputsCmd::setPWMFrequency(DOut_Num_t num, uint32_t freq)
     _controllerInst->performRequest(msgBytes);
 }
 
-void DigitalOutputsCmd::setPWMDutyCycle(DOut_Num_t num, uint32_t duty)
+void DigitalOutputsCmd::setPWMDutyCycle(DOut_Num_t num, float duty)
 {
     std::vector<uint8_t> msgBytes = {REQUEST_SET_PWM_DUTY_CYCLE, (uint8_t)num};
     uint8_t *ptr                  = reinterpret_cast<uint8_t *>(&duty);

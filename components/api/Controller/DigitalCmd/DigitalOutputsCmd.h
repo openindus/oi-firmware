@@ -61,9 +61,9 @@ public:
      * @brief Set the duty cycle value of PWM for a digital output
      *
      * @param num DOUT to set
-     * @param duty Duty cycle, resolution is 14 bits : [0-16.383]
+     * @param duty Duty cycle in percentage [0-100] 
      **/
-    void setPWMDutyCycle(DOut_Num_t num, uint32_t duty);
+    void setPWMDutyCycle(DOut_Num_t num, float duty);
 
     /**
      * @brief Get the current of a digital output

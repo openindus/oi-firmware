@@ -1,7 +1,7 @@
 /**
  * @file DigitalOutputsCmdHandler.cpp
  * @brief Digital outputs commands handler
- * @author 
+ * @author
  * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
@@ -34,8 +34,9 @@ int DigitalOutputsCmdHandler::init(void)
     });
 
     Slave::addRequestProcessCallback(REQUEST_SET_PWM_DUTY_CYCLE, [](std::vector<uint8_t> &data) {
-        uint32_t *duty = reinterpret_cast<uint32_t *>(&data[2]);
-        DigitalOutputs::setPWMDutyCycle((DOut_Num_t)data[1], *duty);
+        DOut_Num_t num = (DOut_Num_t)data[1];
+        float *duty    = reinterpret_cast<float *>(&data[2]);
+        DigitalOutputs::setPWMDutyCycle(num, *duty);
         data.clear();
     });
 

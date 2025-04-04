@@ -193,11 +193,12 @@ void DigitalOutputs::setPWMFrequency(DOut_Num_t num, uint32_t freq)
     }
 }
 
-void DigitalOutputs::setPWMDutyCycle(DOut_Num_t num, uint32_t duty)
+void DigitalOutputs::setPWMDutyCycle(DOut_Num_t num, float duty)
 {
     if (num < _nb) {
         if (_mode[num] == DOUT_MODE_PWM) {
-            ledc_set_duty(LEDC_LOW_SPEED_MODE, (ledc_channel_t)(LEDC_CHANNEL_0 + num), duty);
+            ledc_set_duty(LEDC_LOW_SPEED_MODE, (ledc_channel_t)(LEDC_CHANNEL_0 + num), 
+                (uint32_t)(duty * 16383.0f / 100.0f));
             ledc_update_duty(LEDC_LOW_SPEED_MODE, (ledc_channel_t)(LEDC_CHANNEL_0 + num));
         } else {
             ESP_LOGE(TAG, "Invalid output mode");
