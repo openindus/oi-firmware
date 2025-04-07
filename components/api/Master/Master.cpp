@@ -23,7 +23,7 @@ TaskHandle_t Master::_taskHandle = NULL;
 SemaphoreHandle_t Master::_requestMutex = NULL;
 #endif
 std::map<uint16_t, std::pair<uint16_t, uint32_t>, std::greater<uint16_t>> Master::_ids;
-std::map<std::pair<uint8_t, uint16_t>, std::function<void(uint8_t*)>> Master::_eventProcessCallbacks;
+std::map<std::pair<uint8_t, uint16_t>, std::function<void(uint8_t*)>> Master::_eventCallbacks;
 std::function<void(int)> Master::_errorCallback = NULL;
 std::vector<Controller*> Master::_controllerInstances;
 
@@ -388,8 +388,8 @@ void Master::_busCanTask(void *pvParameters)
             {
                 case CMD_CONTROLLER_EVENT:
                 {
-                    auto it = _eventProcessCallbacks.find(std::make_pair(frame.args[0], id));
-                    if (it != _eventProcessCallbacks.end()) {
+                    auto it = _eventCallbacks.find(std::make_pair(frame.args[0], id));
+                    if (it != _eventCallbacks.end()) {
                         if (it->second != NULL) {
                             it->second(frame.args);
                         }

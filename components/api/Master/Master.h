@@ -48,12 +48,12 @@ public:
         _controllerInstances.push_back(controller);
     }
 
-    static inline void addEventProcessCallback(uint8_t event, uint16_t id, std::function<void(uint8_t*)>callback) {
-        _eventProcessCallbacks.insert({std::make_pair(event, id), callback});
+    static inline void addEventCallback(uint8_t event, uint16_t id, std::function<void(uint8_t*)>callback) {
+        _eventCallbacks.insert({std::make_pair(event, id), callback});
     }
 
-    static inline void removeEventProcessCallback(uint8_t event, uint16_t id) {
-        _eventProcessCallbacks.erase(std::make_pair(event, id));
+    static inline void removeEventCallback(uint8_t event, uint16_t id) {
+        _eventCallbacks.erase(std::make_pair(event, id));
     }
 
     static void addErrorCallback(std::function<void(int)> callback) {
@@ -86,7 +86,7 @@ private:
     static void _programmingTask(void *pvParameters);
     static SemaphoreHandle_t _requestMutex;
 
-    static std::map<std::pair<uint8_t,uint16_t>, std::function<void(uint8_t*)>> _eventProcessCallbacks;
+    static std::map<std::pair<uint8_t,uint16_t>, std::function<void(uint8_t*)>> _eventCallbacks;
     static std::vector<Controller*> _controllerInstances;
     static std::function<void(int)> _errorCallback;
 

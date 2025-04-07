@@ -1,0 +1,52 @@
+/**
+ * @file DigitalOutputsCmdHandler.cpp
+ * @brief Digital outputs commands handler
+ * @author
+ * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
+ * @see https://openindus.com
+ */
+
+#include "DigitalOutputsCmdHandler.h"
+
+#if defined(MODULE_SLAVE)
+
+int DigitalOutputsCmdHandler::init(void)
+{
+    Slave::addRequestCallback(REQUEST_DIGITAL_WRITE, [](std::vector<uint8_t> &data) {
+        DigitalOutputs::digitalWrite((DOut_Num_t)data[1], (bool)data[2]);
+        data.clear();
+    });
+
+    Slave::addRequestCallback(REQUEST_TOGGLE_OUTPUT, [](std::vector<uint8_t> &data) {
+        DigitalOutputs::toggleOutput((DOut_Num_t)data[1]);
+        data.clear();
+    });
+
+    Slave::addRequestCallback(REQUEST_OUTPUT_MODE, [](std::vector<uint8_t> &data) {
+        DigitalOutputs::outputMode((DOut_Num_t)data[1], (DOut_Mode_t)data[2]);
+        data.clear();
+    });
+
+    Slave::addRequestCallback(REQUEST_SET_PWM_FREQUENCY, [](std::vector<uint8_t> &data) {
+        uint32_t *freq = reinterpret_cast<uint32_t *>(&data[2]);
+        DigitalOutputs::setPWMFrequency((DOut_Num_t)data[1], *freq);
+        data.clear();
+    });
+
+    Slave::addRequestCallback(REQUEST_SET_PWM_DUTY_CYCLE, [](std::vector<uint8_t> &data) {
+        DOut_Num_t num = (DOut_Num_t)data[1];
+        float *duty    = reinterpret_cast<float *>(&data[2]);
+        DigitalOutputs::setPWMDutyCycle(num, *duty);
+        data.clear();
+    });
+
+    Slave::addRequestCallback(REQUEST_GET_OUTPUT_CURRENT, [](std::vector<uint8_t> &data) {
+        float current = DigitalOutputs::getOutputCurrent((DOut_Num_t)data[1]);
+        uint8_t *ptr  = reinterpret_cast<uint8_t *>(&current);
+        data.insert(data.end(), ptr, ptr + sizeof(float));
+    });
+
+    return 0;
+}
+
+#endif
