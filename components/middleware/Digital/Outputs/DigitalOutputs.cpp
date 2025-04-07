@@ -1,15 +1,15 @@
 /**
  * @file DigitalOutputs.cpp
  * @brief Digital outputs
- * @author 
+ * @author
  * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
 
 #include "DigitalOutputs.h"
-#include <string.h>
-#include "esp_log.h"
 #include "driver/ledc.h"
+#include "esp_log.h"
+#include <string.h>
 
 #define DOUT_SENSOR_ADC_NO_OF_SAMPLES 64U
 #define DOUT_SENSOR_RESISTOR_SENSE_VALUE 1200
@@ -20,7 +20,6 @@
 #define DOUT_SENSOR_COEFF_BELOW_2A 1800
 #define DOUT_SENSOR_VOLTAGE_BELOW_2A_mV 1.33f
 #define DOUT_SENSOR_COEFF_ABOVE_2A 1750
-
 #define DOUT_PWM_MAX_FREQUENCY_HZ 1000
 #define DOUT_PWM_MIN_FREQUENCY_HZ 50
 
@@ -34,6 +33,9 @@ esp_adc_cal_characteristics_t DigitalOutputs::_adc1Characteristics;
 esp_adc_cal_characteristics_t DigitalOutputs::_adc2Characteristics;
 uint8_t *DigitalOutputs::_level;
 SemaphoreHandle_t DigitalOutputs::_mutex;
+float DigitalOutputs::_overcurrentThreshold = 4.0f;
+float DigitalOutputs::_overcurrentThresholdSum = 8.0f;
+void (*DigitalOutputs::_overcurrentCallback)(void) = NULL;
 
 int DigitalOutputs::init(const gpio_num_t *gpio, const adc_num_t *adc, int nb)
 {
@@ -197,8 +199,8 @@ void DigitalOutputs::setPWMDutyCycle(DOut_Num_t num, float duty)
 {
     if (num < _nb) {
         if (_mode[num] == DOUT_MODE_PWM) {
-            ledc_set_duty(LEDC_LOW_SPEED_MODE, (ledc_channel_t)(LEDC_CHANNEL_0 + num), 
-                (uint32_t)(duty * 16383.0f / 100.0f));
+            ledc_set_duty(LEDC_LOW_SPEED_MODE, (ledc_channel_t)(LEDC_CHANNEL_0 + num),
+                          (uint32_t)(duty * 16383.0f / 100.0f));
             ledc_update_duty(LEDC_LOW_SPEED_MODE, (ledc_channel_t)(LEDC_CHANNEL_0 + num));
         } else {
             ESP_LOGE(TAG, "Invalid output mode");
@@ -266,7 +268,7 @@ int DigitalOutputs::outputIsOvercurrent(DOut_Num_t num)
 {
     if (num < _nb) {
         ESP_LOGW(TAG, "For current sensor with adc reading, call 'getOutputCurrent' function");
-        return (getOutputCurrent(num) > 4.0f) ? 1 : 0;
+        return (getOutputCurrent(num) > _overcurrentThreshold) ? 1 : 0;
     } else {
         ESP_LOGE(TAG, "Invalid DOUT_%d", num + 1);
         return 0.0f;
@@ -279,11 +281,11 @@ int DigitalOutputs::outputIsOvercurrent(DOut_Num_t num)
  */
 void DigitalOutputs::_controlTask(void *pvParameters)
 {
-    uint8_t *state;
-    state            = (uint8_t *)calloc(DigitalOutputs::_nb, sizeof(uint8_t));
-    float currentSum = 0;
-    float current;
-    int currentSumState = 0;
+    uint8_t *state           = (uint8_t *)calloc(DigitalOutputs::_nb, sizeof(uint8_t));
+    float currentSum         = 0.0f;
+    float current            = 0.0f;
+    int currentSumState      = 0;
+    bool overcurrentDetected = false;
 
     while (1) {
         /* Reset currentSum */
@@ -294,14 +296,14 @@ void DigitalOutputs::_controlTask(void *pvParameters)
             current = DigitalOutputs::getOutputCurrent((DOut_Num_t)i);
             currentSum += current;
             // If error happened
-            if (current > 4.0f) {
+            if (current > _overcurrentThreshold) {
                 ESP_LOGE(TAG, "Current on DOUT_%u is too high: %.2fA", i + 1, current);
                 gpio_set_level(DigitalOutputs::_gpio_num[i], 0);
                 state[i] = 1;
+                overcurrentDetected = true;
             } else if (state[i] == 10) { // Retry after 10 loops
                 state[i] = 0;
-                // Set output at user choice (do not set HIGH if user setted this pin LOW during
-                // error)
+                // Set output at user choice (do not set HIGH if user setted this pin LOW duringverror)
                 xSemaphoreTake(_mutex, portMAX_DELAY);
                 gpio_set_level(DigitalOutputs::_gpio_num[i], DigitalOutputs::_level[i]);
                 xSemaphoreGive(_mutex);
@@ -310,10 +312,20 @@ void DigitalOutputs::_controlTask(void *pvParameters)
             }
         }
 
-        if (currentSum > 8.0f) {
+        if (currentSum > _overcurrentThresholdSum) {
             currentSumState = (currentSumState + 1) % 1000;
+            overcurrentDetected = true;
         } else {
             currentSumState--;
+        }
+
+        /* If overcurrent detected */
+        if (overcurrentDetected) {
+            /* Call user callback if set */
+            if (_overcurrentCallback != NULL) {
+                _overcurrentCallback();
+            }
+            overcurrentDetected = false;
         }
 
         // Total current is above 8A for more than a minute

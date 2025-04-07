@@ -37,7 +37,7 @@ enum Cmd_e {
 };
 
 /**
- * @brief Command request
+ * @brief Command controller request enumeration
  * 
  */
 enum CmdControllerRequest_e {
@@ -52,6 +52,9 @@ enum CmdControllerRequest_e {
     REQUEST_DIGITAL_READ                    = 0x07,
     REQUEST_ATTACH_INTERRUPT                = 0x08,
     REQUEST_DETACH_INTERRUPT                = 0x09,
+    REQUEST_SET_OVERCURRENT_THRESHOLD       = 0x0A,
+    REQUEST_ATTACH_OVERCURRENT_CALLBACK     = 0x0B,
+    REQUEST_DETACH_OVERCURRENT_CALLBACK     = 0x0C,
 
     /* ANALOG */
     REQUEST_ANALOG_INPUT_MODE               = 0x20,
@@ -109,7 +112,7 @@ enum CmdControllerRequest_e {
     REQUEST_MOTOR_DC_RUN                    = 0xA0,
     REQUEST_MOTOR_DC_STOP                   = 0xA1,
 
-    /* ANALOGLS */
+    /* SENSOR */
     REQUEST_ADD_SENSOR                      = 0xB0,
     REQUEST_SENSOR_SET_PARAMETER            = 0xB1,
     REQUEST_SENSOR_READ                     = 0xB2,
@@ -120,18 +123,19 @@ enum CmdControllerRequest_e {
 };
 
 /**
- * @brief Command event
+ * @brief Command controller event enumeration
  * 
  */
 enum CmdControllerEvent_e {
     /* DIGITAL */
     EVENT_DIGITAL_INTERRUPT                 = 0x00,
+    EVENT_OVERCURRENT                       = 0x01,
 
     /* MOTOR */
     EVENT_MOTOR_READY                       = 0x01,
     EVENT_MOTOR_FLAG_INTERRUPT              = 0x02,
 
-    /* AnalogLS */
+    /* SENSOR */
     EVENT_SENSOR_READ                       = 0xB0,
     EVENT_SENSOR_READ_MILLIVOLT             = 0xB1,
     EVENT_SENSOR_READ_RESISTANCE            = 0xB2,

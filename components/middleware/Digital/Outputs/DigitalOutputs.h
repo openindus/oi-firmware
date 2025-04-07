@@ -81,6 +81,33 @@ public:
      **/
     static int outputIsOvercurrent(DOut_Num_t num);
 
+    /**
+     * @brief Set the Overcurrent Threshold
+     * 
+     * @param threshold 
+     * @param totalThreshold 
+     */
+    static void setOvercurrentThreshold(float threshold, float thresholdSum = 8.0f) {
+        _overcurrentThreshold = threshold;
+        _overcurrentThresholdSum = thresholdSum;
+    }
+
+    /**
+     * @brief Attach a callback function to be called when an overcurrent is detected
+     * 
+     * @param callback Function pointer to the callback function
+     */
+    static void attachOvercurrentCallback(void (*callback)(void)) {
+        _overcurrentCallback = callback;
+    }
+
+    /**
+     * @brief Detach the overcurrent callback function
+     */
+    static void detachOvercurrentCallback(void) {
+        _overcurrentCallback = NULL;
+    }
+
 private:
     /* Mode of each output (digital or PWM) */
     static DOut_Mode_t *_mode;
@@ -98,6 +125,11 @@ private:
 
     static uint8_t *_level;
     static SemaphoreHandle_t _mutex;
+
+    /* Overcurrent threshold */
+    static float _overcurrentThreshold;
+    static float _overcurrentThresholdSum;
+    static void (*_overcurrentCallback)(void);
 
     static void _controlTask(void *pvParameters);
 

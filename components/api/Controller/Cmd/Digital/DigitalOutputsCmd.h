@@ -1,7 +1,7 @@
 /**
  * @file DigitalOutputsCmd.h
- * @brief Digital Outputs Cmd
- * @author
+ * @brief Digital Outputs commands
+ * @author Kévin Lefeuvre (kevin.lefeuvre@openindus.com)
  * @copyright (c) [2025] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
@@ -10,15 +10,15 @@
 
 #if defined(MODULE_MASTER)
 
-#include "Slave.h"
-#include "Master.h"
 #include "DigitalInputs.h"
 #include "DigitalOutputs.h"
+#include "Master.h"
+#include "Slave.h"
 
 class DigitalOutputsCmd
 {
 public:
-    DigitalOutputsCmd(Controller* controllerInst) : _controllerInst(controllerInst) {}
+    DigitalOutputsCmd(Controller *controller) : _controller(controller) {}
 
     /**
      * @brief Set an output at high or low level.
@@ -27,9 +27,8 @@ public:
      * @param level DOUT level, HIGH or LOW.
      */
     void digitalWrite(DOut_Num_t num, bool level);
-
-    template <typename T1, typename T2> 
-    inline void digitalWrite(T1 num, T2 level) {
+    
+    template <typename T1, typename T2> inline void digitalWrite(T1 num, T2 level) {
         digitalWrite((DOut_Num_t)num, (bool)level);
     }
 
@@ -60,7 +59,7 @@ public:
      * @brief Set the duty cycle value of PWM for a digital output
      *
      * @param num DOUT to set
-     * @param duty Duty cycle in percentage [0-100] 
+     * @param duty Duty cycle in percentage [0-100]
      **/
     void setPWMDutyCycle(DOut_Num_t num, float duty);
 
@@ -72,8 +71,30 @@ public:
      **/
     float getOutputCurrent(DOut_Num_t num);
 
+    /**
+     * @brief Set the Overcurrent Threshold
+     *
+     * @param threshold
+     * @param totalThreshold
+     */
+    void setOvercurrentThreshold(float threshold, float thresholdSum = 8.0f);
+
+    /**
+     * @brief Attach a callback function to be called when an overcurrent is detected
+     *
+     * @param callback Function pointer to the callback function
+     */
+    void attachOvercurrentCallback(void (*callback)(void));
+
+    /**
+     * @brief Detach the overcurrent callback function
+     */
+    void detachOvercurrentCallback(void);
+
 private:
-    Controller* _controllerInst;
+    Controller *_controller;
+
+    void (*_overcurrentCallback)(void) = NULL;
 };
 
 #endif

@@ -1,7 +1,7 @@
 /**
  * @file DigitalInputsCmd.h
- * @brief Digital Inputs Cmd
- * @author
+ * @brief Digital Inputs commands
+ * @author Kévin Lefeuvre (kevin.lefeuvre@openindus.com)
  * @copyright (c) [2025] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
@@ -10,17 +10,14 @@
 
 #if defined(MODULE_MASTER)
 
-#include "Slave.h"
-#include "Master.h"
 #include "DigitalInputs.h"
+#include "Master.h"
+#include "Slave.h"
 
 class DigitalInputsCmd
 {
 public:
-    DigitalInputsCmd(Controller* controllerInst)
-        : _controllerInst(controllerInst), _isrCallback{NULL}
-    {
-    }
+    DigitalInputsCmd(Controller *controller) : _controller(controller), _isrCallback{NULL} {}
 
     /**
      * @brief Read an input level. Argument is the DIN to read.
@@ -31,8 +28,7 @@ public:
      */
     int digitalRead(DIn_Num_t num);
 
-    template <typename T, typename R> 
-    inline R digitalRead(T num) {
+    template <typename T, typename R> inline R digitalRead(T num) {
         return static_cast<R>(digitalRead((DIn_Num_t)num));
     }
 
@@ -53,7 +49,7 @@ public:
     void detachInterrupt(DIn_Num_t num);
 
 private:
-    Controller* _controllerInst;
+    Controller *_controller;
     IsrCallback_t _isrCallback[DIN_MAX];
 };
 
