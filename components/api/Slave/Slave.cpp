@@ -15,7 +15,7 @@ static const char TAG[] = "Slave";
 uint16_t Slave::_id;
 Slave::State_e Slave::_state = STATE_IDLE;
 TaskHandle_t Slave::_taskHandle = NULL;
-std::map<uint8_t, std::function<void(std::vector<uint8_t>&)>> Slave::_requestProcessCallbacks;
+std::map<uint8_t, std::function<void(std::vector<uint8_t>&)>> Slave::_requestCallbacks;
 std::list<std::function<void(void)>> Slave::_resetFunctions;
 
 int Slave::init(void)
@@ -70,6 +70,19 @@ void Slave::sendEvent(std::vector<uint8_t> msgBytes)
     std::copy(msgBytes.begin(), msgBytes.end(), frame.args);
     uint8_t size = msgBytes.size() + 1;
     BusCAN::write(&frame, _id, size);
+}
+
+/**
+ * @brief Send an error on the CAN bus
+ * 
+ * @param errorCode 
+ */
+void Slave::sendError(uint8_t errorCode)
+{
+    BusCAN::Frame_t frame;
+    frame.cmd = CMD_ERROR;
+    frame.args[0] = errorCode;
+    BusCAN::write(&frame, _id, 1);
 }
 
 void Slave::_busRsTask(void *pvParameters) 
@@ -197,8 +210,8 @@ void Slave::_busRsTask(void *pvParameters)
 
                     std::vector<uint8_t> msg;
                     msg.assign(frame.data, frame.data + frame.length);
-                    auto it = _requestProcessCallbacks.find(frame.data[0]);
-                    if (it != _requestProcessCallbacks.end()) {
+                    auto it = _requestCallbacks.find(frame.data[0]);
+                    if (it != _requestCallbacks.end()) {
                         (*it).second(msg);
                     } else {
                         frame.error = 1;

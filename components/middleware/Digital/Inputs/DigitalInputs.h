@@ -8,53 +8,10 @@
 
 #pragma once
 
+#include "DigitalInputsTypes.h"
 #include "driver/gpio.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
-
-/**
- * @brief Digital Inputs Numbers
- *
- */
-typedef enum {
-    DIN_1 = 0,
-    DIN_2,
-    DIN_3,
-    DIN_4,
-    DIN_5,
-    DIN_6,
-    DIN_7,
-    DIN_8,
-    DIN_9,
-    DIN_10,
-    DIN_MAX
-} DIn_Num_t;
-
-/**
- * @brief Digital Inputs Logic (for configuring sensors)
- *
- */
-typedef enum { 
-    ACTIVE_LOW = 0, 
-    ACTIVE_HIGH = 1 
-} Logic_t;
-
-/**
- * @brief Digital Inputs Interrupts Modes
- *
- */
-typedef enum { 
-    NONE_MODE = 0, 
-    RISING_MODE, 
-    FALLING_MODE, 
-    CHANGE_MODE 
-} InterruptMode_t;
-
-/**
- * @brief Function prototype for attachInterrupt callbacks
- *
- */
-typedef void (*IsrCallback_t)(void *);
 
 class DigitalInputs
 {

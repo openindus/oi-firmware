@@ -10,6 +10,7 @@
 
 #include "Common.h"
 #include "Controller.h"
+#include "DigitalDefs.h"
 #include "DigitalInputs.h"
 #include "DigitalInputsCmd.h"
 #include "DigitalInputsCmdHandler.h"

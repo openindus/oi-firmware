@@ -17,6 +17,7 @@ static QueueHandle_t _flagEvent[NUMBER_OF_DEVICES];
 static QueueHandle_t _busyEvent[NUMBER_OF_DEVICES];
 
 static void (*_busyCallback)(uint8_t) = NULL;
+static void (*_flagCallback)(uint8_t, uint16_t) = NULL;
 
 void IRAM_ATTR _flagIsr(void *arg)
 {
@@ -37,6 +38,12 @@ void _flagTask(void* arg)
         else if(xQueueReceive(_flagEvent[deviceId], NULL, portMAX_DELAY)) {
             gpio_intr_disable(_deviceConfig.pin_flag[deviceId]);
             status = PS01_Cmd_GetStatus(deviceId);
+
+            /* Run the callback */
+            if (_flagCallback != NULL) {
+                _flagCallback(deviceId, status); 
+            }
+
             gpio_intr_enable(_deviceConfig.pin_flag[deviceId]);
         }
 
@@ -92,7 +99,6 @@ void _busyTask(void* arg)
 /**
  * @brief Attach a busy interrupt for the given motor
  * 
- * @param deviceId 
  * @param callback 
  */
 void PS01_Hal_AttachBusyInterrupt(void(*callback)(uint8_t))
@@ -100,16 +106,33 @@ void PS01_Hal_AttachBusyInterrupt(void(*callback)(uint8_t))
     _busyCallback = callback;
 }
 
-/**
- * @brief Detach busy interrupt callback for the given motor
- * 
- * @param deviceId 
- */
+ /**
+  * @brief Detach busy interrupt callback for the given motor
+  * 
+  */
 void PS01_Hal_DetachBusyInterrupt(void)
 {
     _busyCallback = NULL;
 }
 
+/**
+ * @brief Attach a flag interrupt for the given motor
+ * 
+ * @param callback 
+ */
+void PS01_Hal_AttachFlagInterrupt(void(*callback)(uint8_t, uint16_t))
+{
+    _flagCallback = callback;
+}
+
+/**
+ * @brief Detach flag interrupt callback for the given motor
+ * 
+ */
+void PS01_Hal_DetachFlagInterrupt(void)
+{
+    _flagCallback = NULL;
+}
 
 /**
  * @brief This function provides an accurate delay in milliseconds

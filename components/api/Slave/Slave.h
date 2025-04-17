@@ -27,9 +27,11 @@ public:
     static int getStatus(void);
 
     static void sendEvent(std::vector<uint8_t> msgBytes);
+    /** @todo heartbeat(); */
+    static void sendError(uint8_t errorCode);
 
-    static inline void addRequestProcessCallback(uint8_t request, std::function<void(std::vector<uint8_t> &)> callback) {
-        _requestProcessCallbacks.insert({request, callback});
+    static inline void addRequestCallback(uint8_t request, std::function<void(std::vector<uint8_t> &)> callback) {
+        _requestCallbacks.insert({request, callback});
     }
 
     static inline void addResetFunction(std::function<void(void)> resetFunction) {
@@ -50,7 +52,7 @@ private:
     static State_e _state;
     static TaskHandle_t _taskHandle;
 
-    static std::map<uint8_t, std::function<void(std::vector<uint8_t> &)>> _requestProcessCallbacks;
+    static std::map<uint8_t, std::function<void(std::vector<uint8_t> &)>> _requestCallbacks;
     static std::list<std::function<void(void)>> _resetFunctions;
 
     /** @todo _processRequest() */

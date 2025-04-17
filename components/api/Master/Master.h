@@ -37,8 +37,8 @@ public:
     static std::map<uint16_t,std::pair<uint16_t, uint32_t>,std::greater<uint16_t>> discoverSlaves(void);
     static void getBoardInfo(uint16_t type, uint32_t sn, Board_Info_t* board_info);
 
-    template <typename... Args> 
-    static int performRequest(const uint16_t id, const uint8_t request, Args... args);
+    // template <typename... Args> 
+    // static int performRequest(const uint16_t id, const uint8_t request, Args... args);
     static int performRequest(const uint16_t id, const uint8_t request, std::vector<uint8_t> &msgBytes, bool ackNeeded = true);
     static int performRequest(const uint16_t id, std::vector<uint8_t> &msgBytes, bool ackNeeded = true);
 
@@ -48,12 +48,16 @@ public:
         _controllerInstances.push_back(controller);
     }
 
-    static inline void addEventProcessCallback(uint8_t event, uint16_t id, std::function<void(uint8_t*)>callback) {
-        _eventProcessCallbacks.insert({std::make_pair(event, id), callback});
+    static inline void addEventCallback(uint8_t event, uint16_t id, std::function<void(uint8_t*)>callback) {
+        _eventCallbacks.insert({std::make_pair(event, id), callback});
     }
 
-    static inline void removeEventProcessCallback(uint8_t event, uint16_t id) {
-        _eventProcessCallbacks.erase(std::make_pair(event, id));
+    static inline void removeEventCallback(uint8_t event, uint16_t id) {
+        _eventCallbacks.erase(std::make_pair(event, id));
+    }
+
+    static void addErrorCallback(std::function<void(int)> callback) {
+        _errorCallback = callback;
     }
 
     enum State_e{
@@ -82,8 +86,9 @@ private:
     static void _programmingTask(void *pvParameters);
     static SemaphoreHandle_t _requestMutex;
 
-    static std::map<std::pair<uint8_t,uint16_t>, std::function<void(uint8_t*)>> _eventProcessCallbacks;
+    static std::map<std::pair<uint8_t,uint16_t>, std::function<void(uint8_t*)>> _eventCallbacks;
     static std::vector<Controller*> _controllerInstances;
+    static std::function<void(int)> _errorCallback;
 
     static int _registerCLI(void);
 

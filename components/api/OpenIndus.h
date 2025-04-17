@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include "System.h"
 #include "Module.h"
 #ifndef OI_CORE_PLUS
 #include "AnalogLS.h"
@@ -26,7 +27,7 @@
 void setup(void);
 void loop(void);
 
-/* OI-Modules */
+/* OpenIndus modules */
 #ifndef OI_CORE_PLUS
 #define OICore Core
 #define OICoreLite Core
@@ -40,27 +41,3 @@ void loop(void);
 #else
 #define OICorePlus CorePlus
 #endif
-
-/* Digital intputs num */
-#define DIN1    (DIn_Num_t) 0x01
-#define DIN2    (DIn_Num_t) 0x02
-#define DIN3    (DIn_Num_t) 0x03
-#define DIN4    (DIn_Num_t) 0x04
-#define DIN5    (DIn_Num_t) 0x05
-#define DIN6    (DIn_Num_t) 0x06
-#define DIN7    (DIn_Num_t) 0x07
-#define DIN8    (DIn_Num_t) 0x08
-#define DIN9    (DIn_Num_t) 0x09
-#define DIN10   (DIn_Num_t) 0x0A
-
-/* Digital outtputs num */
-#define DOUT1   (DOut_Num_t) 0x01
-#define DOUT2   (DOut_Num_t) 0x02
-#define DOUT3   (DOut_Num_t) 0x03
-#define DOUT4   (DOut_Num_t) 0x04
-#define DOUT5   (DOut_Num_t) 0x05
-#define DOUT6   (DOut_Num_t) 0x06
-#define DOUT7   (DOut_Num_t) 0x07
-#define DOUT8   (DOut_Num_t) 0x08
-#define DOUT9   (DOut_Num_t) 0x09
-#define DOUT10  (DOut_Num_t) 0x0A
