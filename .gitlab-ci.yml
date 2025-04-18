@@ -4,6 +4,7 @@ stages:
   - setup
   - build
   - build:examples
+  - build:docs
   - pkg
   - deploy
 
@@ -20,8 +21,7 @@ setup:
     - /root/.platformio/penv/bin/pio pkg update  
     - rm -rf .oi/bin/
   rules:
-    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") &&
-    ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")'
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")'
     - if: '$CI_COMMIT_TAG'
   tags:
     - oi-firmware
@@ -31,8 +31,7 @@ setup:
   needs:
     - job: setup
   rules:
-    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && 
-      ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")'
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")'
     - if: '$CI_COMMIT_TAG'
   tags:
     - oi-firmware
@@ -94,8 +93,6 @@ build:dc:
 
 build:examples:
   stage: build:examples
-  needs:
-    - job: build:core
   script:
     - |
       find examples/ -name "*.cpp" | while read -r f; do
@@ -107,8 +104,23 @@ build:examples:
     - git restore main/main.cpp
     - /root/.platformio/penv/bin/pio run -e core 
   rules:
-    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && 
-      ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")'
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")'
+    - if: '$CI_COMMIT_TAG'
+  tags:
+    - oi-firmware
+
+build:docs:
+  stage: build:docs
+  before_script:
+    - apt update && apt install -y doxygen
+    - pip3 install -r docs/requirements.txt
+  script:
+    - cd docs
+    - make clean
+    - doxygen doxygen/Doxyfile
+    - make html
+  rules:
+    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")'
     - if: '$CI_COMMIT_TAG'
   tags:
     - oi-firmware
@@ -122,7 +134,7 @@ pkg:library:
     - mkdir .oi/lib/
   script:
     - /root/.platformio/penv/bin/pio pkg pack --output=".oi/lib/"
-    - mv .oi/lib/ library/
+    - cp -r .oi/lib/ library/
   artifacts:
     name: "library"
     paths:
@@ -147,7 +159,7 @@ pkg:bin:
     - job: build:analogls
     - job: build:dc
   script:
-    - mv .oi/bin/ binary/
+    - cp -r .oi/bin/ binary/
   artifacts:
     name: "binary"
     paths:
@@ -165,7 +177,7 @@ deploy:
   before_script:
     - apt update && apt install -y lftp
   script:
-    - lftp FTP_SERVER -u 'FTP_USERNAME','FTP_PASSWORD' -e "set ssl:verify-certificate no; mirror -R ./.oi/bin/ bin/; exit;"
+    - lftp $FTP_SERVER -u '$FTP_USERNAME','$FTP_PASSWORD' -e "set ssl:verify-certificate no; mirror -R ./.oi/bin/ bin/; exit;"
   rules:
     - if: '$CI_COMMIT_TAG'
   tags:

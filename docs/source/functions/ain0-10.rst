@@ -1,0 +1,124 @@
+.. _ain0-10_s:
+
+Analog Input 0-10V or 4-20mA
+============================
+
+Description
+-----------
+
+This feature is present on :ref:`OI-Mixed` module (x4).
+
+With these inputs, you can measure any voltage within the specified range. These inputs are especially suitable for applications with industrial sensors.
+
+There are two modes available for reading industrial sensors: 
+
+* Sensors with a 0-10V output
+* Sensors with a 4-20mA output.
+
+It's feasible to integrate both types of sensors, accommodating both current and voltage inputs, on the same board.
+
+.. list-table:: Analog input specifications
+   :widths: 33 33 33
+   :header-rows: 1
+   :align: center
+
+   * - Requirements
+     - Value
+     - Remark
+   * - Resolution
+     - 12 bits
+     - 
+   * - Sampling frequency
+     - 4.8kHz
+     - Only 'oneshot' reading is supported
+
+
+Characteristics
+---------------
+
+Voltage mode
+************
+
+You have the option to define the voltage range directly in the code. 
+
+Below are available voltage range and the precision associated. Precision is ±5 step.
+
+.. list-table:: Voltage mode specifications
+   :widths: 50 50
+   :header-rows: 1
+   :align: center
+
+   * - Requirements
+     - Value
+   * - Minimum input voltage
+     - 0V
+   * - Maximum input voltage
+     - 12V
+   * - Input impedance
+     - 1MΩ
+
+.. list-table:: Voltage mode available ranges
+   :widths: 33 33 33
+   :header-rows: 1
+   :align: center
+
+   * - Range
+     - Precision
+     - Step
+   * - 0 to 1.28V
+     - ± 1.56mV
+     - 0.3125mV
+   * - 0 à 2.56V
+     - ± 3.12 mV
+     - 0.625mV
+   * - 0 à 5.12 V
+     - ± 6.25mV
+     - 1.25mV
+   * - 0 à 10.24V
+     - ± 12.5mV
+     - 2.5mV
+
+For example, if you want an optimal resolution when reading a sensor value within the 0-5V range, it is recommended to set the range from 0 to 5.12V. 
+This adjustment will result in improved precision compared to the default range of 0 to 10.24V.
+
+Current mode
+************
+
+.. list-table:: Current mode specifications
+   :widths: 50 50
+   :header-rows: 1
+   :align: center
+
+   * - Requirements
+     - Value
+   * - Minimum input current
+     - 0mA
+   * - Maximum input current
+     - 24mA
+   * - Input impedance
+     - 100Ω
+   * - Precision
+     - ±30µA
+   * - Step
+     - 6.25µA
+
+If the input current is greater than 24mA, the module will automatically switch to voltage mode to preserve hardware.
+
+Code examples
+-------------
+
+The example code above demonstrates how to read the voltage of an input on an :ref:`OI-Mixed` module.
+
+.. literalinclude:: ../../examples/AINMixedVoltage.cpp
+    :language: cpp
+
+The example code above demonstrates how to read the current of an input on an :ref:`OI-Mixed` module.
+
+.. literalinclude:: ../../examples/AINMixedCurrent.cpp
+    :language: cpp
+
+Software API
+------------
+
+.. doxygenclass:: AnalogInputsLV
+   :members:

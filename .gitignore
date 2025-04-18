@@ -2,6 +2,7 @@
 .pio
 .vscode
 build
+venv
 sdkconfig
 sdkconfig.core
 sdkconfig.discrete

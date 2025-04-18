@@ -1,4 +1,4 @@
-# OpenIndus Firmware
+# OpenIndus Framework
 
 ## Get started
 
@@ -48,12 +48,4 @@ make
 scp oi-firmware root@oi-core-plus.local:~/
 ssh root@oi-core-plus.local
 ./oi-firmware
-```
-
-## PIO Library
-
-How to generate PlatformIO librarie.
-```bash
-mkdir .oi/lib
-pio pkg pack --output=".oi/lib/"
 ```
