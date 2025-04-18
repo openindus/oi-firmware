@@ -35,31 +35,34 @@ static const char TAG[] = "UsbConsole";
 
 esp_console_repl_t* UsbConsole::_repl = NULL;
 
-/* By default do not keep console after init */
-bool UsbConsole::keepFlag = false;
-bool UsbConsole::continueListenTask = true;
-TaskHandle_t UsbConsole::listenTaskHandle = NULL;
-
-void UsbConsole::listen()
+bool UsbConsole::checkUserActivation(uint32_t timeoutMs)
 {
-    xTaskCreate(_listenTask, "Listen console task", 2048, NULL, 1, &listenTaskHandle);
-}
+    int64_t startTime = esp_timer_get_time();
+    char buff[10];
+    int c;
+    int i = 0;
 
-bool UsbConsole::begin(bool force)
-{
-    /* stop listen task */
-    if (listenTaskHandle != NULL) {
-        continueListenTask = false;
-        while(eTaskGetState(listenTaskHandle) == eReady) {
-            vTaskDelay(pdMS_TO_TICKS(10));
+    while((esp_timer_get_time() - startTime) < (timeoutMs * 1000)) { // Convert ms to µs
+        c = fgetc(stdin);
+        if(c != EOF) {
+            buff[i] = (char) c;
+            if(i == 6) {
+                buff[i+1] = '\0';
+                if(strcmp("console", buff) == 0) {
+                    ESP_LOGI(TAG, "Activating console");
+                    return true;
+                } else {
+                    i = 0;
+                }
+            }
+            i++;
         }
     }
+    return false;
+}
 
-    /* If force and keep flag are false, do not start console */
-    if (!force && !keepFlag) {
-        return false;
-    }
-
+void UsbConsole::begin(void)
+{
     esp_console_repl_config_t repl_config = ESP_CONSOLE_REPL_CONFIG_DEFAULT();
     repl_config.prompt = PROMPT_STR ">";
     repl_config.max_cmdline_length = 1024;
@@ -81,38 +84,9 @@ bool UsbConsole::begin(bool force)
     };
     ESP_ERROR_CHECK(esp_console_new_repl_uart(&hw_config, &repl_config, &_repl));
     ESP_ERROR_CHECK(esp_console_start_repl(_repl));
-
-    return true;
 }
 
 void UsbConsole::end(void)
 {
     ESP_ERROR_CHECK(_repl->del(_repl));
-}
-
-void UsbConsole::_listenTask(void *pvParameters)
-{
-    char buff[10];
-    int c;
-    int i = 0;
-
-    while(continueListenTask) {
-        vTaskDelay(10);
-        c = fgetc(stdin);
-        if(c != EOF) {
-            buff[i] = (char) c;
-            if(i == 6) {
-                buff[i+1] = '\0';
-                if(strcmp("console", buff) ==  0) {
-                    keepFlag = true;
-                    ESP_LOGI(TAG, "Activating console");
-                    break;
-                } else {
-                    i = 0;
-                }
-            }
-            i++;
-        }
-    }
-    vTaskDelete(NULL);
 }

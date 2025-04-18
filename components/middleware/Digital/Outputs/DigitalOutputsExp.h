@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "DigitalOutputs.h"
+#include "DigitalOutputsTypes.h"
 #include "pcal6524.h"
 
 class DigitalOutputsExp

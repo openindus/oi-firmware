@@ -23,6 +23,7 @@ protected:
 public:
     static inline void restart(void) { Board::restart(); };
     static inline float getTemperature(void) { return Board::getTemperature(); };
+    static inline bool checkBootError(void) { return Board::checkBootError(); };
 
     static inline void ledOn(LedColor_t color) { Led::on(color); };
     static inline void ledOff(void) { Led::off(); };

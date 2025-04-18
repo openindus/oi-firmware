@@ -76,6 +76,8 @@ void PS01_Hal_Init(uint8_t deviceId);
 void PS01_Hal_AttachBusyInterrupt(void(*callback)(uint8_t));
 void PS01_Hal_DetachBusyInterrupt(void);
 
+void PS01_Hal_AttachFlagInterrupt(void(*callback)(uint8_t, uint16_t));
+void PS01_Hal_DetachFlagInterrupt(void);
 
 #ifdef __cplusplus
 }

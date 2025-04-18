@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "DigitalInputs.h"
+#include "DigitalInputsTypes.h"
 #include "pcal6524.h"
 
 class DigitalInputsExp

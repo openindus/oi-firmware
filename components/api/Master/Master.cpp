@@ -23,7 +23,8 @@ TaskHandle_t Master::_taskHandle = NULL;
 SemaphoreHandle_t Master::_requestMutex = NULL;
 #endif
 std::map<uint16_t, std::pair<uint16_t, uint32_t>, std::greater<uint16_t>> Master::_ids;
-std::map<std::pair<uint8_t, uint16_t>, std::function<void(uint8_t*)>> Master::_eventProcessCallbacks;
+std::map<std::pair<uint8_t, uint16_t>, std::function<void(uint8_t*)>> Master::_eventCallbacks;
+std::function<void(int)> Master::_errorCallback = NULL;
 std::vector<Controller*> Master::_controllerInstances;
 
 int Master::init(void)
@@ -260,19 +261,19 @@ std::map<uint16_t,std::pair<uint16_t, uint32_t>,std::greater<uint16_t>> Master::
     return _ids;
 }
 
-template <typename T>
-void appendToVector(std::vector<uint8_t>& vec, const T& value) {
-    const uint8_t* bytePtr = reinterpret_cast<uint8_t*>(&value);
-    vec.insert(vec.end(), bytePtr, bytePtr + sizeof(T));
-}
+// template <typename T>
+// void appendToVector(std::vector<uint8_t>& vec, const T& value) {
+//     const uint8_t* bytePtr = reinterpret_cast<uint8_t*>(&value);
+//     vec.insert(vec.end(), bytePtr, bytePtr + sizeof(T));
+// }
 
-template <typename... Args>
-int Master::performRequest(const uint16_t id, const uint8_t request, Args... args)
-{
-    std::vector<uint8_t> msgBytes;
-    (appendToVector(msgBytes, args), ...);
-    return performRequest(id, request, msgBytes, true);
-}
+// template <typename... Args>
+// int Master::performRequest(const uint16_t id, const uint8_t request, Args... args)
+// {
+//     std::vector<uint8_t> msgBytes;
+//     (appendToVector(msgBytes, args), ...);
+//     return performRequest(id, request, msgBytes, true);
+// }
 
 int Master::performRequest(const uint16_t id, const uint8_t request, std::vector<uint8_t> &msgBytes, bool ackNeeded)
 {
@@ -387,8 +388,8 @@ void Master::_busCanTask(void *pvParameters)
             {
                 case CMD_CONTROLLER_EVENT:
                 {
-                    auto it = _eventProcessCallbacks.find(std::make_pair(frame.args[0], id));
-                    if (it != _eventProcessCallbacks.end()) {
+                    auto it = _eventCallbacks.find(std::make_pair(frame.args[0], id));
+                    if (it != _eventCallbacks.end()) {
                         if (it->second != NULL) {
                             it->second(frame.args);
                         }
@@ -408,6 +409,14 @@ void Master::_busCanTask(void *pvParameters)
 #ifndef LINUX_ARM
                     ESP_LOGI(TAG, "Received id from %s\t SN:%i | ID:%i", BoardUtils::typeToName(*type, name), *sn, id);
 #endif
+                    break;
+                }
+                case CMD_ERROR:
+                {
+                    uint8_t errorCode = frame.args[0];
+                    if (_errorCallback) {
+                        _errorCallback(errorCode);
+                    }
                     break;
                 }
                 default:

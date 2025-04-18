@@ -25,9 +25,9 @@ class UsbConsole
 {
 public:
 
-    static void listen(void); // call this fonction before begin
-    static bool begin(bool force = false);
+    static void begin(void);
     static void end(void);
+    static bool checkUserActivation(uint32_t timeoutMs);
 
 private:
 
