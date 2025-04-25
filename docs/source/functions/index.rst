@@ -25,3 +25,4 @@ Functions list
    usbhost.rst
    rtc.rst
    motorstepper.rst
+   encoder.rst

@@ -26,6 +26,8 @@ INPUT += ./../components/middleware/RTClock/RTClock.h
 INPUT += ./../components/middleware/Digital/Inputs/DigitalInputs.h
 INPUT += ./../components/middleware/Digital/Outputs/DigitalOutputs.h
 INPUT += ./../components/middleware/Motor/Stepper/MotorStepper.h
+INPUT += ./../components/middleware/Encoder/Encoder.h
+INPUT += ./../components/middleware/Encoder/Encoder.cpp
 
 ENABLE_PREPROCESSING   = NO
 
