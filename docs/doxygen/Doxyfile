@@ -28,6 +28,14 @@ INPUT += ./../components/middleware/Digital/Outputs/DigitalOutputs.h
 INPUT += ./../components/middleware/Motor/Stepper/MotorStepper.h
 INPUT += ./../components/middleware/Encoder/Encoder.h
 INPUT += ./../components/middleware/Encoder/Encoder.cpp
+INPUT += ./../components/middleware/Analog/InputsLS/AnalogInputsLS.h
+INPUT += ./../components/middleware/Analog/InputsLS/AnalogInputsLS.cpp
+INPUT += ./../components/middleware/Analog/InputsLS/Sensors/RTD/RTD.h
+INPUT += ./../components/middleware/Analog/InputsLS/Sensors/RTD/RTD.cpp
+INPUT += ./../components/middleware/Analog/InputsLS/Sensors/StrainGauge/StrainGauge.h
+INPUT += ./../components/middleware/Analog/InputsLS/Sensors/StrainGauge/StrainGauge.cpp
+INPUT += ./../components/middleware/Analog/InputsLS/Sensors/Thermocouple/Thermocouple.h
+INPUT += ./../components/middleware/Analog/InputsLS/Sensors/Thermocouple/Thermocouple.cpp
 
 ENABLE_PREPROCESSING   = NO
 
