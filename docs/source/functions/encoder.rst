@@ -53,4 +53,4 @@ Software API
 ------------
 
 .. doxygenclass:: Encoder
-   :members:
+    :members:

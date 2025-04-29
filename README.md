@@ -36,9 +36,9 @@ sudo apt install g++-arm-linux-gnueabihf
 ### Configure and compile with CMake
 
 ```bash
-mkdir .oi/build
-cd .oi/build
-cmake ../.. -DCMAKE_TOOLCHAIN_FILE=../../toolchain.cmake
+mkdir build
+cd build
+cmake .. -DCMAKE_TOOLCHAIN_FILE=../../toolchain.cmake
 make
 ```
 
