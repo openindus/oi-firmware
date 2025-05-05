@@ -250,7 +250,7 @@ deploy:docs:
     - apt update
     - apt install -y lftp
   script:
-    - lftp $FTP_SERVER -u $FTP_USERNAME,$FTP_PASSWORD -e "set ssl:verify-certificate no; mirror -R ./.oi/docs/html/ docs/; exit;"
+    - lftp $FTP_SERVER -u $FTP_USERNAME,$FTP_PASSWORD -e "set ssl:verify-certificate no; mirror -R ./.oi/docs/html/ doc/; exit;"
   artifacts:
     name: "docs"
     paths:

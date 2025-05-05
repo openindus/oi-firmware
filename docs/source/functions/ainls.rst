@@ -46,6 +46,16 @@ The matrix is optimized to allow simultaneous reading of:
 
 Reading different types of sensors simultaneously is possible if the sensor assignment on the terminal block is compatible with the existing matrix.
 
+Connection example:
+~~~~~~~~~~~~~~~~~~~
+
+.. image:: ../_static/analogls_connection.png
+    :width: 500
+    :alt: Example of connection for an Analog Inputs Low Signal module
+    :align: center
+
+|
+
 Characteristics
 ---------------
 
@@ -78,6 +88,12 @@ Characteristics
 
 Code examples
 -------------
+
+Example: Reading RTD, Thermocouple and Strain Gauge Simultaneously
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. literalinclude:: ../../examples/AINSensor.cpp
+    :language: cpp
 
 Example 1: Reading a PT1000 RTD sensor
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -112,6 +128,12 @@ RTD Class
 .. doxygenclass:: RTD
    :members:
 
+Raw Sensor Class
+~~~~~~~~~~~~~~~~
+
+.. doxygenclass:: RawSensor
+  :members:
+
 Thermocouple Class
 ~~~~~~~~~~~~~~~~~~
 
@@ -129,7 +151,12 @@ Available Sensor Types
 
 - RTD_PT100: Platinum RTD with 100Ω resistance at 0°C
 - RTD_PT1000: Platinum RTD with 1000Ω resistance at 0°C
-- THERMOCOUPLE_J: Type J thermocouple
-- THERMOCOUPLE_K: Type K thermocouple
-- THERMOCOUPLE_T: Type T thermocouple
+- THERMOCOUPLE_B: Type B thermocouple (250°C to 1820°C)
+- THERMOCOUPLE_E: Type E thermocouple (-200°C to 1000°C)
+- THERMOCOUPLE_J: Type J thermocouple (-210°C to 1200°C)
+- THERMOCOUPLE_K: Type K thermocouple (-270°C to 1372°C)
+- THERMOCOUPLE_N: Type N thermocouple (-200°C to 1200°C)
+- THERMOCOUPLE_R: Type R thermocouple (-50°C to 1768°C)
+- THERMOCOUPLE_S: Type S thermocouple (-50°C to 1768°C)
+- THERMOCOUPLE_T: Type T thermocouple (-200°C to 400°C)
 - STRAIN_GAUGE: Strain gauge sensor

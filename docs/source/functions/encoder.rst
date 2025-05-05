@@ -6,7 +6,7 @@ Encoder
 Description
 -----------
 
-Encoders are available on the following modules:
+Encoders are available on the following module:
 
 * :ref:`OI-Stepper` (x2)
 

@@ -88,7 +88,7 @@ void Encoder::end(void)
 }
 
 /**
- * @brief Reset the pulses of the encoder
+ * @brief Reset the number of pulses and revolutions
  *
  */
 void Encoder::reset(void)
@@ -98,9 +98,9 @@ void Encoder::reset(void)
 }
 
 /**
- * @brief Get the revolutions of the encoder
+ * @brief Get the number of revolutions
  *
- * @return int
+ * @return int number of revolutions
  */
 int Encoder::getRevolutions(void)
 {
@@ -108,9 +108,9 @@ int Encoder::getRevolutions(void)
 }
 
 /**
- * @brief Get the pulses of the encoder
+ * @brief Get the number of pulses
  *
- * @return int
+ * @return int number of pulses
  */
 int Encoder::getPulses(void)
 {
@@ -120,7 +120,7 @@ int Encoder::getPulses(void)
 }
 
 /**
- * @brief Get the angle of the encoder
+ * @brief Get the angle
  *
  * @return float angle in radians
  */
@@ -134,7 +134,7 @@ float Encoder::getAngle(void)
 }
 
 /**
- * @brief Get the speed of the encoder
+ * @brief Get the speed
  *
  * @return float speed in pulses per second
  */
