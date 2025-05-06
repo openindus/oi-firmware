@@ -41,3 +41,6 @@ void loop(void);
 #else
 #define OICorePlus CorePlus
 #endif
+
+/* Arduino RS485 */
+class RS485Class : public RS {};

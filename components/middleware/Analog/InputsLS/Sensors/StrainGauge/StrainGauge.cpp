@@ -10,6 +10,12 @@
 
 static const char TAG[] = "StrainGauge";
 
+/**
+ * @brief Read the strain gauge value
+ * 
+ * @param print_result true to print the result 
+ * @return float the strain gauge value
+ */
 float StrainGauge::read(bool print_result)
 {
     int16_t adcCode = 0;
@@ -73,6 +79,12 @@ void StrainGauge::update_strain_gauge_type(void)
     }
 }
 
+/**
+ * @brief Set the parameter of the strain gauge
+ * 
+ * @param parameter the parameter to set
+ * @param value the value to set
+ */
 void StrainGauge::setParameter(Sensor_Parameter_e parameter, Sensor_Parameter_Value_u value)
 {
     switch (parameter) {

@@ -1,0 +1,62 @@
+.. _ain0-30_s:
+
+Analog Input 0-30V
+==================
+
+Description
+-----------
+
+This feature is present on all several modules:
+
+* :ref:`OI-Core<OI-Core>`/:ref:`OI-CoreLite<OI-CoreLite>` (x2)
+* :ref:`OI-Discrete` (x2)
+
+It enables the reading of conditioned voltage within the range of 0 to 30V, making it especially handy for monitoring supply voltage or sensor outputs.
+
+.. note::
+  When using these analog input, you have to take into account the low input impedance (4.8kΩ). 
+  If the application need an a analog reading with high impedance and better precision, please check spec of :ref:`OI-AnalogLS` or :ref:`OI-Mixed`.
+
+Characteristics
+---------------
+
+.. list-table:: Analog input specifications
+   :widths: 33 33 33
+   :header-rows: 1
+   :align: center
+
+   * - Requirements
+     - Value
+     - Remark
+   * - Resolution
+     - 12 bits
+     - 
+   * - Sampling frequency
+     - 500Hz
+     - Only 'oneshot' reading is supported
+   * - Minimum input voltage
+     - 0V
+     - 
+   * - Maximum input voltage
+     - 30V
+     - 
+   * - Input impedance (Voltage mode)
+     - 4.8kΩ
+     - 
+   * - Precision
+     - 100mV
+     -
+
+Code examples
+-------------
+
+The example code above demonstrates how to read the voltage of an input on an :ref:`OI-Discrete` module.
+
+.. literalinclude:: ../../examples/AINCore.cpp
+    :language: cpp
+
+Software API
+------------
+
+.. doxygenclass:: AnalogInputsHV
+   :members:
