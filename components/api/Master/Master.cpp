@@ -20,6 +20,7 @@ static const char TAG[] = "Master";
 Master::State_e Master::_state = STATE_IDLE;
 #ifndef LINUX_ARM
 TaskHandle_t Master::_taskHandle = NULL;
+TaskHandle_t Master::_ledSyncTaskHandle = NULL;
 SemaphoreHandle_t Master::_requestMutex = NULL;
 #endif
 std::map<uint16_t, std::pair<uint16_t, uint32_t>, std::greater<uint16_t>> Master::_ids;
@@ -40,6 +41,9 @@ int Master::init(void)
 #ifndef LINUX_ARM
     ESP_LOGI(TAG, "Create BusCAN task");
     xTaskCreate(_busCanTask, "BusCAN task", 4096, NULL, 1, &_taskHandle);
+    
+    ESP_LOGI(TAG, "Create LED synchronization task");
+    xTaskCreate(_ledSyncTask, "LED Sync task", 2048, NULL, 1, &_ledSyncTaskHandle);
 #else
     /** @todo */
 #endif
@@ -429,6 +433,31 @@ void Master::_busCanTask(void *pvParameters)
             }
         } else {
             Led::blink(LED_RED, 1000); // Error
+        }
+    }
+}
+
+void Master::_ledSyncTask(void *pvParameters)
+{
+    const TickType_t xDelay = pdMS_TO_TICKS(60 * 60 * 1000); // 1 hour in milliseconds
+    
+#ifndef LINUX_ARM
+    ESP_LOGI(TAG, "LED sync task started");
+#endif
+    
+    while (1) {
+        // Wait for one hour
+        vTaskDelay(xDelay);
+        
+#ifndef LINUX_ARM
+        ESP_LOGI(TAG, "Resynchronizing LEDs");
+#endif
+
+        Led::sync(); // Resynchronize the LED state
+        
+        // Iterate through all controllers and resynchronize their LEDs
+        for (int i = 0; i < _controllerInstances.size(); i++) {
+            _controllerInstances[i]->ledSync();
         }
     }
 }

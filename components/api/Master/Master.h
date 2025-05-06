@@ -33,7 +33,7 @@ public:
     /* Cmd */
     static void restart(const uint16_t id);
     static bool ping(uint16_t type, uint32_t sn);
-    static void setLed(const uint16_t id, const uint8_t state, const uint8_t color, const uint32_t period);
+    static void setLed(const uint16_t id, const uint8_t state, const uint8_t color = LED_NONE, const uint32_t period = 0);
     static std::map<uint16_t,std::pair<uint16_t, uint32_t>,std::greater<uint16_t>> discoverSlaves(void);
     static void getBoardInfo(uint16_t type, uint32_t sn, Board_Info_t* board_info);
 
@@ -73,6 +73,7 @@ private:
 
 #ifndef LINUX_ARM
     static TaskHandle_t _taskHandle;
+    static TaskHandle_t _ledSyncTaskHandle;
 #endif
 
     // List of ids and serial number received via CMD_DISCOVER < ID < TYPE, SN > >
@@ -84,6 +85,7 @@ private:
 
     static void _busCanTask(void *pvParameters);
     static void _programmingTask(void *pvParameters);
+    static void _ledSyncTask(void *pvParameters);
     static SemaphoreHandle_t _requestMutex;
 
     static std::map<std::pair<uint8_t,uint16_t>, std::function<void(uint8_t*)>> _eventCallbacks;

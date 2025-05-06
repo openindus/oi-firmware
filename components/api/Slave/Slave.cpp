@@ -244,6 +244,8 @@ void Slave::_busRsTask(void *pvParameters)
                         Led::off();
                     } else if (state == LED_BLINK) {
                         Led::blink(color, period);
+                    } else if (state == LED_SYNC) {
+                        Led::sync();
                     } else {
                         // State error
                     }

@@ -145,6 +145,19 @@ void Led::blink(LedColor_t color, uint32_t period)
     }
 }
 
+/**
+ * @brief Resync the led state
+ * 
+ */
+void Led::sync(void)
+{
+    if (_control.installed == true)
+    {
+        ESP_LOGV(TAG, "led sync");
+        xTaskNotify(_taskHandle, 0, eNoAction);
+    }
+}
+
 void Led::_task(void *pvParameters)
 {
     uint8_t red, green, blue;

@@ -37,17 +37,22 @@ void Controller::restart(void)
 
 void Controller::ledOn(LedColor_t color)
 {
-    Master::setLed(_id, LED_ON, color, 0);
+    Master::setLed(_id, LED_ON, color);
 }
 
 void Controller::ledOff(void)
 {
-    Master::setLed(_id, LED_OFF, LED_NONE, 0);
+    Master::setLed(_id, LED_OFF);
 }
 
 void Controller::ledBlink(LedColor_t color, uint32_t period)
 {
     Master::setLed(_id, LED_BLINK, color, period);
 };
+
+void Controller::ledSync(void)
+{
+    Master::setLed(_id, LED_SYNC);
+}
 
 #endif

@@ -34,6 +34,7 @@ public:
     void ledOn(LedColor_t color);
     void ledOff(void);
     void ledBlink(LedColor_t color, uint32_t period);
+    void ledSync(void);
 
     void restart(void);
 
