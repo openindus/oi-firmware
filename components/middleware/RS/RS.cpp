@@ -12,11 +12,11 @@
  * @brief Initialize the RS communication
  * @note You must use a standard baudrate: [9600; 57600; 115200; 921600]
  * 
- * @param mode RS_485 or RS_232
  * @param baudrate in bits per second (baud)
  * @param config 8N1 by default
+ * @param mode RS_485 or RS_232
  */
-void RS::begin(RS_Mode_t mode, unsigned long baudrate, uint16_t config)
+void RS::begin(unsigned long baudrate, uint16_t config, RS_Mode_e mode)
 {
     _mode = mode;
     
@@ -51,8 +51,6 @@ void RS::begin(RS_Mode_t mode, unsigned long baudrate, uint16_t config)
     else if (_mode == RS_232) {
         SC16IS750_ioSetState(0x00);
     }
-    
-    
 }
 
 /**
@@ -124,12 +122,14 @@ size_t RS::write(uint8_t byte)
 /**
  * @brief Writes binary data to the serial port.
  * 
- * @param data an array to send as a series of bytes.
- * @param len the number of bytes to be sent from the array.
+ * @param buffer an array to send as a series of bytes.
+ * @param size the number of bytes to be sent from the array.
  * @return The number of bytes written.
  */
-size_t RS::write(uint8_t* data, size_t len)
+size_t RS::write(const uint8_t* buffer, size_t size)
 {
-    SC16IS750_writeBytes(data, len);
-    return len;
+    uint8_t buf[size];
+    memcpy(buf, buffer, size);
+    SC16IS750_writeBytes(buf, size);
+    return size;
 }

@@ -13,6 +13,8 @@
 
 static const char TAG[] = "Controller";
 
+Controller::Controller(uint16_t id) : _id(id), _type(0), _sn(0) {}
+
 Controller::Controller(uint16_t type, uint32_t sn) : _id(0xFFFF), _type(type), _sn(sn)
 {
     Master::addControllerInstance(this);

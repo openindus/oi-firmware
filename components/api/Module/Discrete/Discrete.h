@@ -11,6 +11,7 @@
 #include "Common.h"
 #include "Module.h"
 #include "DiscretePinout.h"
+#include "DigitalDefs.h"
 #include "DigitalInputs.h"
 #include "DigitalOutputs.h"
 #include "AnalogInputsHV.h"

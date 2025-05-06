@@ -1,0 +1,82 @@
+.. _rs232-485_s:
+
+RS232/485 Half Duplex
+=====================
+
+Description
+-----------
+
+This feature, present ton :ref:`OI-Core<OI-Core>`/:ref:`OI-CoreLite<OI-CoreLite>` allow you to use two different protocol on same physical interface: RS485 half duplex or RS232.
+
+There is no terminaison resistance. If you use RS485 bus and place the module at end of line you will need to add a 120Ohms resistance.
+
+Characteristics
+---------------
+
+.. list-table:: RS232 specifications
+   :widths: 33 33 33
+   :header-rows: 1
+
+   * - Requirements
+     - Type
+     - Value
+   * - Driver output voltage (min)
+     - ±5V
+     - loaded with 3kΩ to Ground
+   * - Receiver input voltage high
+     - 2.2V 
+     - above this value, a logic '1' is guaranteed
+   * - Receiver input voltage low
+     - 0.8V 
+     - below this value, a logic '0 ' is guaranteed
+   * - Receiver maximum input voltage
+     - 25V 
+     -
+   * - Receiver minimum input voltage
+     - -25V 
+     - 
+
+.. list-table:: RS485 specifications
+   :widths: 33 33 33
+   :header-rows: 1
+
+   * - Requirements
+     - Type
+     - Value
+   * - Driver differential voltage (typical)
+     - 2V
+     -
+   * - Driver differential voltage (min)
+     - 1.5V
+     -
+   * - Driver differential voltage (max)
+     - 5V
+     -
+   * -
+     -
+     -
+   * -
+     -
+     - 
+
+
+Code examples
+-------------
+
+The example code above demonstrates how to use RS232 on :ref:`OI-Core<OI-Core>`/:ref:`OI-CoreLite<OI-CoreLite>`.
+
+.. literalinclude:: ../../examples/RS232.cpp
+    :language: cpp
+
+The example code above demonstrates how to use RS485 on :ref:`OI-Core<OI-Core>`/:ref:`OI-CoreLite<OI-CoreLite>`.
+
+.. literalinclude:: ../../examples/RS485.cpp
+    :language: cpp
+
+
+
+Software API
+------------
+
+.. doxygenclass:: RS
+   :members:

@@ -8,29 +8,12 @@
 
 #pragma once
 
+#include "DigitalOutputsTypes.h"
 #include "esp_adc_cal.h"
 #include "driver/gpio.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
 #include "adc.h"
-
-/**
- * @brief Digital Outputs Numbers
- *
- */
-typedef enum {
-    DOUT_1 = 0,
-    DOUT_2,
-    DOUT_3,
-    DOUT_4,
-    DOUT_5,
-    DOUT_6,
-    DOUT_7,
-    DOUT_8,
-    DOUT_MAX
-} DOut_Num_t;
-
-typedef enum { DOUT_MODE_DIGITAL = 0, DOUT_MODE_PWM } DOut_Mode_t;
 
 class DigitalOutputs
 {
@@ -78,9 +61,9 @@ public:
      * @brief Set the duty cycle value of PWM for a digital output
      *
      * @param num DOUT to set
-     * @param duty Duty cycle, resolution is 14 bits : [0-16.383]
+     * @param duty Duty cycle in percentage [0-100] 
      **/
-    static void setPWMDutyCycle(DOut_Num_t num, uint32_t duty);
+    static void setPWMDutyCycle(DOut_Num_t num, float duty);
 
     /**
      * @brief Get the current of a digital output
@@ -97,6 +80,33 @@ public:
      * @return 1 if overcurrent, 0 if not
      **/
     static int outputIsOvercurrent(DOut_Num_t num);
+
+    /**
+     * @brief Set the Overcurrent Threshold
+     * 
+     * @param threshold 
+     * @param totalThreshold 
+     */
+    static void setOvercurrentThreshold(float threshold, float thresholdSum = 8.0f) {
+        _overcurrentThreshold = threshold;
+        _overcurrentThresholdSum = thresholdSum;
+    }
+
+    /**
+     * @brief Attach a callback function to be called when an overcurrent is detected
+     * 
+     * @param callback Function pointer to the callback function
+     */
+    static void attachOvercurrentCallback(void (*callback)(void)) {
+        _overcurrentCallback = callback;
+    }
+
+    /**
+     * @brief Detach the overcurrent callback function
+     */
+    static void detachOvercurrentCallback(void) {
+        _overcurrentCallback = NULL;
+    }
 
 private:
     /* Mode of each output (digital or PWM) */
@@ -115,6 +125,11 @@ private:
 
     static uint8_t *_level;
     static SemaphoreHandle_t _mutex;
+
+    /* Overcurrent threshold */
+    static float _overcurrentThreshold;
+    static float _overcurrentThresholdSum;
+    static void (*_overcurrentCallback)(void);
 
     static void _controlTask(void *pvParameters);
 
