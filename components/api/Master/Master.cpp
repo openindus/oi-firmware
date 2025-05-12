@@ -9,24 +9,21 @@
 #if defined(MODULE_MASTER)
 
 #include "Master.h"
-#ifndef LINUX_ARM
 #include "UsbConsole.h"
 #include "UsbSerial.h"
-#endif
 #include "OSAL.h"
 
 static const char TAG[] = "Master";
 
-Master::State_e Master::_state = STATE_IDLE;
-#ifndef LINUX_ARM
-TaskHandle_t Master::_taskHandle = NULL;
+State_e Master::_state = STATE_IDLE;
+TaskHandle_t Master::_busTaskHandle = NULL;
 TaskHandle_t Master::_ledSyncTaskHandle = NULL;
-SemaphoreHandle_t Master::_requestMutex = NULL;
-#endif
-std::map<uint16_t, std::pair<uint16_t, uint32_t>, std::greater<uint16_t>> Master::_ids;
-std::map<std::pair<uint8_t, uint16_t>, std::function<void(uint8_t*)>> Master::_eventCallbacks;
+SemaphoreHandle_t Master::_callbackMutex = NULL;
+
+std::vector<ModuleControl*> Master::_modules;
+std::map<uint16_t, Master::SlaveInfo, std::greater<uint16_t>> Master::_slaveInfos;
+std::map<Master::EventKey, Master::EventCallback> Master::_eventCallbacks;
 std::function<void(int)> Master::_errorCallback = NULL;
-std::vector<Controller*> Master::_controllerInstances;
 
 int Master::init(void)
 {
@@ -34,19 +31,15 @@ int Master::init(void)
 
     BusIO::writeSync(0);
 
-    /* Initialize mutex to perform request */
-    _requestMutex = xSemaphoreCreateMutex();
-    xSemaphoreGive(_requestMutex);
+    /* Initialize mutex to call function */
+    _callbackMutex = xSemaphoreCreateMutex();
+    xSemaphoreGive(_callbackMutex);
 
-#ifndef LINUX_ARM
     ESP_LOGI(TAG, "Create BusCAN task");
-    xTaskCreate(_busCanTask, "BusCAN task", 4096, NULL, 1, &_taskHandle);
+    xTaskCreate(_busCanTask, "BusCAN task", 4096, NULL, 1, &_busTaskHandle);
     
     ESP_LOGI(TAG, "Create LED synchronization task");
     xTaskCreate(_ledSyncTask, "LED Sync task", 2048, NULL, 1, &_ledSyncTaskHandle);
-#else
-    /** @todo */
-#endif
 
     _state = STATE_RUNNING;
 
@@ -58,25 +51,17 @@ int Master::init(void)
 
 void Master::start(void)
 {
-#ifndef LINUX_ARM
-    if (_taskHandle != NULL) {
-        vTaskResume(_taskHandle);
+    if (_busTaskHandle != NULL) {
+        vTaskResume(_busTaskHandle);
     }
-#else
-    /** @todo */
-#endif
     _state = STATE_RUNNING;
 }
 
 void Master::stop(void)
 {
-#ifndef LINUX_ARM
-    if (_taskHandle != NULL) {
-        vTaskSuspend(_taskHandle);
+    if (_busTaskHandle != NULL) {
+        vTaskSuspend(_busTaskHandle);
     }
-#else
-    /** @todo */
-#endif
     _state = STATE_IDLE;
 }
 
@@ -87,38 +72,34 @@ int Master::getStatus(void)
 
 bool Master::autoId(void)
 {
-#ifndef LINUX_ARM
     ESP_LOGI(TAG, "Auto ID");
-#endif
 
     /* Check if IDs are in bus order or by Serial Number */
-    int num_id_auto = 0;
-    int num_id_sn = 0;
+    int numIdAuto = 0;
+    int numIdSN = 0;
 
-    for (int i=0; i<_controllerInstances.size(); i++) {
-        if (_controllerInstances[i]->getSN() == 0) {
-            num_id_auto++;
+    for (int i=0; i<_modules.size(); i++) {
+        if (_modules[i]->getSN() == 0) {
+            numIdAuto++;
         } else {
-            num_id_sn++;
+            numIdSN++;
         }
     }
 
-    if ((num_id_auto > 0) && (num_id_sn > 0)) {
-#ifndef LINUX_ARM
-        ESP_LOGE(TAG, "Modules must be initialized using the same constructor. You cannot initialize some module without SN and some modules with SN.");
-        ESP_LOGE(TAG, "Number of module with SN:%i", num_id_sn);
-        ESP_LOGE(TAG, "Number of module without SN:%i", num_id_auto);
-#endif
+    if ((numIdAuto > 0) && (numIdSN > 0)) {
+        ESP_LOGE(TAG, "Modules must be initialized using the same constructor. \
+            You cannot initialize some module without SN and some modules with SN.");
+        ESP_LOGE(TAG, "Number of module with SN:%i", numIdSN);
+        ESP_LOGE(TAG, "Number of module without SN:%i", numIdAuto);
         return false;
     }
 
     /* Initialize module with auto id (bus order) */
-    if (num_id_auto) {
-        
-        _ids.clear();
+    if (numIdAuto) {
+        _slaveInfos.clear();
 
         BusRS::Frame_t frame;
-        frame.cmd = CMD_DISCOVER;
+        frame.cmd = CMD_DISCOVER_SLAVES;
         frame.id = 0;
         frame.dir = 1;
         frame.ack = false;
@@ -130,51 +111,45 @@ bool Master::autoId(void)
         /* Wait */
         delay(200);
     
-        if (_controllerInstances.size() == _ids.size()) {
-            std::map<uint16_t, std::pair<uint16_t, uint32_t>>::iterator it = _ids.begin();
-            for (int i=0; i<_controllerInstances.size(); i++) {
+        if (_modules.size() == _slaveInfos.size()) {
+            std::map<uint16_t, SlaveInfo>::iterator it = _slaveInfos.begin();
+            for (int i=0; i<_modules.size(); i++) {
                 // First, check if board type is good
-                if (BoardUtils::areTypeCompatible(it->second.first, _controllerInstances[i]->getType())) {
+                if (BoardUtils::areTypeCompatible(it->second.first, _modules[i]->getType())) {
                     // If OK, set ID and SN
-                    _controllerInstances[i]->setId(it->first);
-                    _controllerInstances[i]->setSN(it->second.second);
+                    _modules[i]->setId(it->first);
+                    _modules[i]->setSN(it->second.second);
                     ++it;
-                    _controllerInstances[i]->ledOn(LED_YELLOW);
+                    _modules[i]->ledOn(LED_YELLOW);
                     delay(50);
                 } else {
                     char name1[16];
                     char name2[16];
-#ifndef LINUX_ARM
                     ESP_LOGE(TAG, "Type of module %i is incorrect: you declared an %s and module detected is an %s", \
-                                        i+1, \
-                                        BoardUtils::typeToName(_controllerInstances[i]->getType(), name1), \
-                                        BoardUtils::typeToName(it->second.first, name2));
+                        i+1, \
+                        BoardUtils::typeToName(_modules[i]->getType(), name1), \
+                        BoardUtils::typeToName(it->second.first, name2));
                     ESP_LOGE(TAG, "Check that the order of module in your main.cpp file correspond with the order of modules on the rail");
-#endif
                     return false;
                 }
             }
         } else {
-#ifndef LINUX_ARM
-            ESP_LOGE(TAG, "Number of instantiated modules: %d",  _controllerInstances.size());
-            ESP_LOGE(TAG, "Number of IDs received: %d",  _ids.size());
-#endif
+            ESP_LOGE(TAG, "Number of instantiated modules: %d",  _modules.size());
+            ESP_LOGE(TAG, "Number of IDs received: %d",  _slaveInfos.size());
             return false;
         }
     }
 
     /* Initialize module with SN */
     else {
-        for (int i=0; i<_controllerInstances.size(); i++) {
-            uint16_t current_id = Master::_getIdFromSerialNumAndType(_controllerInstances[i]->getType(), _controllerInstances[i]->getSN());
-            if (current_id != 0) {
-                _controllerInstances[i]->setId(current_id);
-                _controllerInstances[i]->ledOn(LED_YELLOW);
+        for (int i=0; i<_modules.size(); i++) {
+            uint16_t id = Master::getSlaveId(_modules[i]->getType(), _modules[i]->getSN());
+            if (id != 0) {
+                _modules[i]->setId(id);
+                _modules[i]->ledOn(LED_YELLOW);
                 delay(50);
             } else {
-#ifndef LINUX_ARM
-                ESP_LOGE(TAG, "Cannot instantiate module with SN:%i",  _controllerInstances[i]->getSN());
-#endif
+                ESP_LOGE(TAG, "Cannot instantiate module with SN:%i",  _modules[i]->getSN());
                 return false;
             }
         }
@@ -183,8 +158,8 @@ bool Master::autoId(void)
     delay(50);
 
     /* Success, broadcast message to set all led green */
-    for (int i=0; i<_controllerInstances.size(); i++) {
-        _controllerInstances[i]->ledBlink(LED_GREEN, 1000);
+    for (int i=0; i<_modules.size(); i++) {
+        _modules[i]->ledBlink(LED_GREEN, 1000);
     }
     return true;
 }
@@ -194,38 +169,32 @@ void autoTest(void)
     /** @todo: auto test when starting the module */
 }
 
-void Master::program(uint16_t type, uint32_t sn)
+void Master::program(uint16_t boardType, uint32_t boardSN)
 {
-#ifndef LINUX_ARM
     UsbConsole::end(); // Do not perform in the task
-#endif
-    uint16_t id = _getIdFromSerialNumAndType(type, sn);
-#ifndef LINUX_ARM
+    uint16_t id = getSlaveId(boardType, boardSN);
     xTaskCreate(_programmingTask, "Module programming task", 4096, (void*)&id, 1, NULL);
-#else
-    /** @todo */
-#endif
     Led::blink(LED_WHITE, 1000); // Programming mode
 }
 
-bool Master::ping(uint16_t type, uint32_t sn) 
+bool Master::ping(uint16_t boardType, uint32_t boardSN) 
 {
     BusRS::Frame_t frame;
     frame.cmd = CMD_PING;
     frame.id = 0;
     frame.dir = 1;
     frame.ack = true;
-    frame.length = sizeof(type)+sizeof(sn);
-    frame.data = (uint8_t*)malloc(sizeof(type)+sizeof(sn));
-    memcpy(frame.data, &type, sizeof(type)); // Type 
-    memcpy(&frame.data[2], &sn, sizeof(sn)); // Serial number
+    frame.length = sizeof(boardType)+sizeof(boardSN);
+    frame.data = (uint8_t*)malloc(sizeof(boardType)+sizeof(boardSN));
+    memcpy(frame.data, &boardType, sizeof(boardType)); // Type 
+    memcpy(&frame.data[2], &boardSN, sizeof(boardSN)); // Serial number
     BusRS::write(&frame, 10);
     return (BusRS::read(&frame, 10) == 0);
 }
 
-void Master::getBoardInfo(uint16_t type, uint32_t sn, Board_Info_t* board_info)
+void Master::getBoardInfo(uint16_t boardType, uint32_t boardSN, Board_Info_t* info)
 {
-    uint16_t id = _getIdFromSerialNumAndType(type, sn);
+    uint16_t id = getSlaveId(boardType, boardSN);
 
     if (id == 0) {
         Led::blink(LED_RED, 1000); // Error
@@ -241,18 +210,18 @@ void Master::getBoardInfo(uint16_t type, uint32_t sn, Board_Info_t* board_info)
     frame.data = (uint8_t*)malloc(sizeof(Board_Info_t));
     BusRS::write(&frame, 100);
     BusRS::read(&frame, 100);
-    memcpy(board_info, frame.data, sizeof(Board_Info_t));
+    memcpy(info, frame.data, sizeof(Board_Info_t));
     free(frame.data);
     return;
 }
 
-std::map<uint16_t,std::pair<uint16_t, uint32_t>,std::greater<uint16_t>> Master::discoverSlaves(void)
+std::map<uint16_t, Master::SlaveInfo, std::greater<uint16_t>> Master::discoverSlaves(void)
 {
     // Delete previous id list
-    _ids.clear();
+    _slaveInfos.clear();
 
     BusRS::Frame_t frame;
-    frame.cmd = CMD_DISCOVER;
+    frame.cmd = CMD_DISCOVER_SLAVES;
     frame.id = 0;
     frame.dir = 1;
     frame.ack = false;
@@ -262,45 +231,31 @@ std::map<uint16_t,std::pair<uint16_t, uint32_t>,std::greater<uint16_t>> Master::
     // Wait for slaves to answer
     delay(200);
 
-    return _ids;
+    return _slaveInfos;
 }
 
-// template <typename T>
-// void appendToVector(std::vector<uint8_t>& vec, const T& value) {
-//     const uint8_t* bytePtr = reinterpret_cast<uint8_t*>(&value);
-//     vec.insert(vec.end(), bytePtr, bytePtr + sizeof(T));
-// }
-
-// template <typename... Args>
-// int Master::performRequest(const uint16_t id, const uint8_t request, Args... args)
-// {
-//     std::vector<uint8_t> msgBytes;
-//     (appendToVector(msgBytes, args), ...);
-//     return performRequest(id, request, msgBytes, true);
-// }
-
-int Master::performRequest(const uint16_t id, const uint8_t request, std::vector<uint8_t> &msgBytes, bool ackNeeded)
+int Master::runCallback(const uint16_t slaveId, const uint8_t callbackId, std::vector<uint8_t> &args, bool ackNeeded)
 {
-    msgBytes.insert(msgBytes.begin(), request);
-    int ret = performRequest(id, msgBytes, ackNeeded);
-    if (!msgBytes.empty()) {
-        msgBytes.erase(msgBytes.begin());
+    args.insert(args.begin(), callbackId);
+    int ret = runCallback(slaveId, args, ackNeeded);
+    if (!args.empty()) {
+        args.erase(args.begin());
     }
     return ret;
 }
 
-int Master::performRequest(const uint16_t id, std::vector<uint8_t> &msgBytes, bool ackNeeded)
+int Master::runCallback(const uint16_t slaveId, std::vector<uint8_t> &msgBytes, bool ackNeeded)
 {
     BusRS::Frame_t frame;
-    frame.cmd = CMD_CONTROLLER_REQUEST;
-    frame.id = id;
+    frame.cmd = CMD_RUN_CALLBACK;
+    frame.id = slaveId;
     frame.dir = 1;
     frame.ack = ackNeeded;
     frame.length = msgBytes.size();
     frame.data = msgBytes.data();
 
     int err = 0;
-    xSemaphoreTake(_requestMutex, portMAX_DELAY);
+    xSemaphoreTake(_callbackMutex, portMAX_DELAY);
     BusRS::write(&frame, pdMS_TO_TICKS(100));
     if (ackNeeded) {
         err = BusRS::read(&frame, pdMS_TO_TICKS(100));
@@ -313,21 +268,21 @@ int Master::performRequest(const uint16_t id, std::vector<uint8_t> &msgBytes, bo
     }
 
 success:
-    xSemaphoreGive(_requestMutex);
+    xSemaphoreGive(_callbackMutex);
     return 0;
 
 error:
-    xSemaphoreGive(_requestMutex);
+    xSemaphoreGive(_callbackMutex);
     return -1;
 }
 
-void Master::setLed(const uint16_t id, const uint8_t state, const uint8_t color, const uint32_t period)
+void Master::ledCtrl(const uint16_t slaveId, const uint8_t state, const uint8_t color, const uint32_t period)
 {
     std::vector<uint8_t> args = {state, color};
     args.insert(args.end(), (uint8_t *)&period, (uint8_t *)&period + sizeof(uint32_t));
     BusRS::Frame_t frame;
-    frame.cmd = CMD_SET_LED;
-    frame.id = id;
+    frame.cmd = CMD_LED_CTRL;
+    frame.id = slaveId;
     frame.dir = 1;
     frame.ack = false;
     frame.length = args.size();
@@ -335,12 +290,12 @@ void Master::setLed(const uint16_t id, const uint8_t state, const uint8_t color,
     BusRS::write(&frame, 100);
 }
 
-void Master::restart(const uint16_t id)
+void Master::restart(const uint16_t slaveId)
 {
     std::vector<uint8_t> args;
     BusRS::Frame_t frame;
     frame.cmd = CMD_RESTART;
-    frame.id = id;
+    frame.id = slaveId;
     frame.dir = 1;
     frame.ack = false;
     frame.length = args.size();
@@ -360,19 +315,40 @@ void Master::resetModules(void)
     BusRS::write(&frame);
 }
 
-uint16_t Master::_getIdFromSerialNumAndType(uint16_t type, uint32_t sn)
+void Master::registerEventCallback(uint16_t slaveId, ModuleControl* module, 
+    uint8_t eventId, uint8_t eventArg, 
+    uint8_t callbackId, std::vector<uint8_t> callbackArgs)
+{
+    BusRS::Frame_t frame;
+    frame.cmd = CMD_REGISTER_EVENT_CALLBACK;
+    frame.id = slaveId;
+    frame.dir = 1;
+    frame.ack = false;
+    frame.length = 5 + callbackArgs.size();
+    frame.data = (uint8_t*)malloc(frame.length);
+    frame.data[0] = module->getId() & 0xFF;
+    frame.data[1] = (module->getId() >> 8) & 0xFF;
+    frame.data[2] = eventId;
+    frame.data[3] = eventArg;
+    frame.data[4] = callbackId;
+    memcpy(&frame.data[5], callbackArgs.data(), callbackArgs.size());
+    BusRS::write(&frame, 100);
+    free(frame.data);
+}
+
+uint16_t Master::getSlaveId(uint16_t boardType, uint32_t boardSN)
 {
     uint16_t id = 0;
 
     BusRS::Frame_t frame;
-    frame.cmd = CMD_PING;
+    frame.cmd = CMD_PING; // CMD_GET_SLAVE_ID
     frame.id = 0;
     frame.dir = 1;
     frame.ack = true;
-    frame.length = sizeof(type)+sizeof(sn);
-    frame.data = (uint8_t*)malloc(sizeof(type)+sizeof(sn));
-    memcpy(frame.data, &type, sizeof(type)); // Type 
-    memcpy(&frame.data[2], &sn, sizeof(sn)); // Serial number
+    frame.length = sizeof(boardType)+sizeof(boardSN);
+    frame.data = (uint8_t*)malloc(sizeof(boardType)+sizeof(boardSN));
+    memcpy(frame.data, &boardType, sizeof(boardType)); // Type 
+    memcpy(&frame.data[2], &boardSN, sizeof(boardSN)); // Serial number
     BusRS::write(&frame, 100);
     BusRS::read(&frame, 100);
     id = frame.id;
@@ -390,7 +366,7 @@ void Master::_busCanTask(void *pvParameters)
         if (BusCAN::read(&frame, &id, &size) != -1) { 
             switch (frame.cmd)
             {
-                case CMD_CONTROLLER_EVENT:
+                case CMD_SEND_EVENT:
                 {
                     auto it = _eventCallbacks.find(std::make_pair(frame.args[0], id));
                     if (it != _eventCallbacks.end()) {
@@ -398,24 +374,20 @@ void Master::_busCanTask(void *pvParameters)
                             it->second(frame.args);
                         }
                     } else {
-#ifndef LINUX_ARM
                         ESP_LOGW(TAG, "Command does not exist: command: 0x%02x, id: %d", frame.args[0], id);
-#endif
                     }
                     break;
                 }
-                case CMD_DISCOVER:
+                case CMD_DISCOVER_SLAVES:
                 {
                     uint16_t* type = reinterpret_cast<uint16_t*>(&frame.args[0]);
                     uint32_t* sn = reinterpret_cast<uint32_t*>(&frame.args[2]);
-                    _ids.insert(std::pair<uint16_t, std::pair<uint16_t, uint32_t>>(id, std::pair<uint16_t, uint32_t>(*type, *sn)));
+                    _slaveInfos.insert(std::pair<uint16_t, std::pair<uint16_t, uint32_t>>(id, std::pair<uint16_t, uint32_t>(*type, *sn)));
                     char name[16];
-#ifndef LINUX_ARM
                     ESP_LOGI(TAG, "Received id from %s\t SN:%i | ID:%i", BoardUtils::typeToName(*type, name), *sn, id);
-#endif
                     break;
                 }
-                case CMD_ERROR:
+                case CMD_SEND_ERROR:
                 {
                     uint8_t errorCode = frame.args[0];
                     if (_errorCallback) {
@@ -425,9 +397,7 @@ void Master::_busCanTask(void *pvParameters)
                 }
                 default:
                 {
-#ifndef LINUX_ARM
                     ESP_LOGW(TAG, "Receive undefined command");
-#endif
                     break;
                 }
             }
@@ -441,30 +411,25 @@ void Master::_ledSyncTask(void *pvParameters)
 {
     const TickType_t xDelay = pdMS_TO_TICKS(60 * 60 * 1000); // 1 hour in milliseconds
     
-#ifndef LINUX_ARM
     ESP_LOGI(TAG, "LED sync task started");
-#endif
     
     while (1) {
         // Wait for one hour
         vTaskDelay(xDelay);
         
-#ifndef LINUX_ARM
         ESP_LOGI(TAG, "Resynchronizing LEDs");
-#endif
 
         Led::sync(); // Resynchronize the LED state
         
-        // Iterate through all controllers and resynchronize their LEDs
-        for (int i = 0; i < _controllerInstances.size(); i++) {
-            _controllerInstances[i]->ledSync();
+        // Iterate through all modules and resynchronize their LEDs
+        for (int i = 0; i < _modules.size(); i++) {
+            _modules[i]->ledSync();
         }
     }
 }
 
 void Master::_programmingTask(void *pvParameters)
 {
-#ifndef LINUX_ARM
     uint16_t id = *(uint16_t*)pvParameters;
     int sequence = 0;
     UsbSerialProtocol::Packet_t packet;
@@ -617,7 +582,6 @@ end:
     free(frame.data);
     frame.data = NULL;
     vTaskDelete(NULL);
-#endif
 }
 
 #endif

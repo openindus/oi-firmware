@@ -7,7 +7,7 @@
  * Proprietary and confidential
  * 
  * @file Dc.h
- * @brief Functions for dc module
+ * @brief Callbacks for dc module
  *
  * For more information on OpenIndus:
  * @see https://openindus.com
@@ -19,7 +19,7 @@
 #include "DcPinout.h"
 #include "Module.h"
 #include "Slave.h"
-#include "Controller.h"
+#include "ModuleControl.h"
 #include "DigitalDefs.h"
 #include "DigitalInputs.h"
 #include "DigitalInputsCmd.h"
@@ -43,14 +43,14 @@ public:
 #elif defined(MODULE_MASTER)
 
 class Dc : 
-    public Controller, 
+    public ModuleControl, 
     public DigitalInputsCmd, 
     public DcCmd
 {
 public:
 
     Dc(uint32_t sn = 0) : 
-        Controller(TYPE_OI_DC, sn),
+        ModuleControl(TYPE_OI_DC, sn),
         DigitalInputsCmd(this),
         DcCmd(this) {}
 };

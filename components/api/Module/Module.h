@@ -29,13 +29,11 @@ public:
     static inline void ledOff(void) { Led::off(); };
     static inline void ledBlink(LedColor_t color, uint32_t period) { Led::blink(color, period); };
 
-#ifndef LINUX_ARM
 #if defined(MODULE_MASTER) || defined(MODULE_SLAVE)
 
     static inline void busPowerOn(void) { BusIO::powerOn(); }
     static inline void busPowerOff(void) { BusIO::powerOff(); }
 
-#endif
 #endif
 
 private:

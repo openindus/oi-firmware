@@ -30,13 +30,13 @@ public:
 #elif defined(MODULE_MASTER) 
 
 class AnalogLS :
-    public Controller, 
+    public ModuleControl, 
     public AnalogInputsLSCmd
 {
 public:
 
     AnalogLS(uint32_t sn = 0) : 
-        Controller(TYPE_OI_ANALOG_LS , sn),
+        ModuleControl(TYPE_OI_ANALOG_LS , sn),
         AnalogInputsLSCmd(this) {}
 };
 

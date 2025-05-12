@@ -7,7 +7,7 @@
  * Proprietary and confidential
  * 
  * @file ModulePinout.h
- * @brief Functions for modules
+ * @brief Callbacks for modules
  *
  * For more information on OpenIndus:
  * @see https://openindus.com

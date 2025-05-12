@@ -13,10 +13,12 @@
 static const char TAG[] = "Slave";
 
 uint16_t Slave::_id;
-Slave::State_e Slave::_state = STATE_IDLE;
-TaskHandle_t Slave::_taskHandle = NULL;
-std::map<uint8_t, std::function<void(std::vector<uint8_t>&)>> Slave::_requestCallbacks;
-std::list<std::function<void(void)>> Slave::_resetFunctions;
+State_e Slave::_state = STATE_IDLE;
+TaskHandle_t Slave::_busTaskHandle = NULL;
+std::map<uint8_t, std::function<void(std::vector<uint8_t>&)>> Slave::_callbacks;
+std::list<std::function<void(void)>> Slave::_resetCallbacks;
+std::map<uint8_t, std::function<void(std::vector<uint8_t> &)>> Slave::_eventCallbacks;
+std::vector<EventCallbackConfig_s> Slave::_eventCallbackConfigs;
 
 int Slave::init(void)
 {
@@ -28,7 +30,10 @@ int Slave::init(void)
 
     /* Bus task */
     ESP_LOGI(TAG, "Create BusRS task");
-    xTaskCreate(_busRsTask, "BusRS task", 4096, NULL, 1, &_taskHandle);
+    xTaskCreate(_busRsTask, "BusRS task", 4096, NULL, 1, &_busTaskHandle);
+
+    ESP_LOGI(TAG, "Create BusCAN task");
+    xTaskCreate(_busCanTask, "BusCAN task", 4096, NULL, 1, &_busTaskHandle);
 
     _state = STATE_RUNNING;
 
@@ -39,16 +44,16 @@ int Slave::init(void)
 
 void Slave::start(void)
 {
-    if (_taskHandle != NULL) {
-        vTaskResume(_taskHandle);
+    if (_busTaskHandle != NULL) {
+        vTaskResume(_busTaskHandle);
     }
     _state = STATE_RUNNING;
 }
 
 void Slave::stop(void)
 {
-    if (_taskHandle != NULL) {
-        vTaskSuspend(_taskHandle);
+    if (_busTaskHandle != NULL) {
+        vTaskSuspend(_busTaskHandle);
     }
     _state = STATE_IDLE;
 }
@@ -66,7 +71,7 @@ int Slave::getStatus(void)
 void Slave::sendEvent(std::vector<uint8_t> msgBytes)
 {
     BusCAN::Frame_t frame;
-    frame.cmd = CMD_CONTROLLER_EVENT;
+    frame.cmd = CMD_SEND_EVENT;
     std::copy(msgBytes.begin(), msgBytes.end(), frame.args);
     uint8_t size = msgBytes.size() + 1;
     BusCAN::write(&frame, _id, size);
@@ -80,7 +85,7 @@ void Slave::sendEvent(std::vector<uint8_t> msgBytes)
 void Slave::sendError(uint8_t errorCode)
 {
     BusCAN::Frame_t frame;
-    frame.cmd = CMD_ERROR;
+    frame.cmd = CMD_SEND_ERROR;
     frame.args[0] = errorCode;
     BusCAN::write(&frame, _id, 1);
 }
@@ -98,11 +103,15 @@ void Slave::_busRsTask(void *pvParameters)
             {
             case CMD_RESTART:
             {
+                ESP_LOGI(TAG, "Restart");
+
                 Board::restart();
                 break;
             }
             case CMD_PING:
             {
+                ESP_LOGI(TAG, "Ping");
+
                 uint16_t type; // Board type
                 uint32_t num; // Serial number
                 memcpy(&type, frame.data, sizeof(uint16_t));
@@ -115,10 +124,12 @@ void Slave::_busRsTask(void *pvParameters)
                 }
                 break;
             }
-            case CMD_DISCOVER:
+            case CMD_DISCOVER_SLAVES:
             {
+                ESP_LOGI(TAG, "Discover slaves");
+
                 BusCAN::Frame_t discoverFrame;
-                discoverFrame.cmd = CMD_DISCOVER;
+                discoverFrame.cmd = CMD_DISCOVER_SLAVES;
                 uint16_t type = Board::getBoardType();
                 uint32_t sn = Board::getSerialNum();
                 memcpy(discoverFrame.args, &type, sizeof(uint16_t));
@@ -129,6 +140,8 @@ void Slave::_busRsTask(void *pvParameters)
             }
             case CMD_GET_BOARD_INFO:
             {
+                ESP_LOGI(TAG, "Get board info");
+
                 if (frame.id == _id) {
                     Board_Info_t board_info;
                     board_info.efuse.board_type = Board::getBoardType();
@@ -204,18 +217,17 @@ void Slave::_busRsTask(void *pvParameters)
                 }
                 break;
             }
-            case CMD_CONTROLLER_REQUEST:
+            case CMD_RUN_CALLBACK:
             {
                 if (frame.id == _id) {
-
                     std::vector<uint8_t> msg;
                     msg.assign(frame.data, frame.data + frame.length);
-                    auto it = _requestCallbacks.find(frame.data[0]);
-                    if (it != _requestCallbacks.end()) {
+                    auto it = _callbacks.find(frame.data[0]);
+                    if (it != _callbacks.end()) {
                         (*it).second(msg);
                     } else {
                         frame.error = 1;
-                        ESP_LOGW(TAG, "CTRL Request does not exist: 0x%02x", frame.data[0]);
+                        ESP_LOGW(TAG, "Callback does not exist: %d", frame.data[0]);
                     }
 
                     if (frame.ack == true) {
@@ -229,11 +241,12 @@ void Slave::_busRsTask(void *pvParameters)
 
                 break;
             }
-            case CMD_SET_LED:
+            case CMD_LED_CTRL:
             {
                 LedState_t state;
                 LedColor_t color;
                 uint32_t period;
+
                 if (frame.id == _id) {
                     state = (LedState_t)frame.data[0];
                     color = (LedColor_t)frame.data[1];
@@ -247,15 +260,32 @@ void Slave::_busRsTask(void *pvParameters)
                     } else if (state == LED_SYNC) {
                         Led::sync();
                     } else {
-                        // State error
+                        // Invalid state
                     }
                 }
                 break;
             }
             case CMD_RESET:
             {
-                for (const auto& resetFunction : _resetFunctions) {
-                    resetFunction();
+                ESP_LOGI(TAG, "Reset module");
+
+                for (const auto& resetCallback : _resetCallbacks) {
+                    resetCallback();
+                }
+                break;
+            }
+            case CMD_REGISTER_EVENT_CALLBACK:
+            {
+                if (frame.id == _id) {
+                    ESP_LOGI(TAG, "Config event callback");
+
+                    EventCallbackConfig_s eventConfig;
+                    eventConfig.moduleId = (frame.data[1] << 8) | frame.data[0];
+                    eventConfig.eventId = frame.data[2];
+                    eventConfig.eventArg = frame.data[3];
+                    eventConfig.callbackId = frame.data[4];
+                    eventConfig.callbackArgs = std::vector<uint8_t>(frame.data + 5, frame.data + frame.length);
+                    _eventCallbackConfigs.push_back(eventConfig); // Store the event callback config
                 }
                 break;
             }
@@ -266,6 +296,38 @@ void Slave::_busRsTask(void *pvParameters)
     }
     free(frame.data);
     frame.data = NULL;
+}
+
+void Slave::_busCanTask(void *pvParameters) 
+{
+    BusCAN::Frame_t frame;
+    uint16_t id;
+    uint8_t size;
+
+    while (1) {
+        if (BusCAN::read(&frame, &id, &size) != -1) { 
+            switch (frame.cmd)
+            {
+                case CMD_SEND_EVENT:
+                {                    
+                    for (auto it = _eventCallbackConfigs.begin(); it != _eventCallbackConfigs.end(); ++it) {
+                        if ((it->moduleId == id) && 
+                            (it->eventId == frame.args[0]) &&
+                            (it->eventArg == frame.args[1])) {
+                                auto callbackIt = _eventCallbacks.find(it->callbackId);
+                                if (callbackIt != _eventCallbacks.end()) {
+                                    callbackIt->second(it->callbackArgs);
+                                }
+                        }
+                    }
+
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+    }
 }
 
 void Slave::_heartbeatTask(void *pvParameters)

@@ -14,13 +14,12 @@
 #include "Board.h"
 #include "Led.h"
 #include "Bus.h"
-#include "Types.h"
-#include "Controller.h"
+#include "Definitions.h"
+#include "ModuleControl.h"
 
 class Master
 {
 public:
-
     static int init(void);
 
     static void start(void);
@@ -28,72 +27,62 @@ public:
     static int getStatus(void);
 
     static bool autoId(void);
-    static void program(uint16_t type, uint32_t sn);
+    static void program(uint16_t boardType, uint32_t boardSN);
 
-    /* Cmd */
-    static void restart(const uint16_t id);
-    static bool ping(uint16_t type, uint32_t sn);
-    static void setLed(const uint16_t id, const uint8_t state, const uint8_t color = LED_NONE, const uint32_t period = 0);
-    static std::map<uint16_t,std::pair<uint16_t, uint32_t>,std::greater<uint16_t>> discoverSlaves(void);
-    static void getBoardInfo(uint16_t type, uint32_t sn, Board_Info_t* board_info);
+    static void restart(const uint16_t slaveId);
+    static bool ping(uint16_t boardType, uint32_t boardSN);
+    static void ledCtrl(const uint16_t slaveId, const uint8_t state, const uint8_t color = LED_NONE, const uint32_t period = 0);
 
-    // template <typename... Args> 
-    // static int performRequest(const uint16_t id, const uint8_t request, Args... args);
-    static int performRequest(const uint16_t id, const uint8_t request, std::vector<uint8_t> &msgBytes, bool ackNeeded = true);
-    static int performRequest(const uint16_t id, std::vector<uint8_t> &msgBytes, bool ackNeeded = true);
+    using SlaveInfo = std::pair<uint16_t, uint32_t>; // Slave ID and serial number
+    static std::map<uint16_t, SlaveInfo, std::greater<uint16_t>> discoverSlaves(void);
+    static void getBoardInfo(uint16_t boardType, uint32_t boardSN, Board_Info_t* info);
+
+    static int runCallback(const uint16_t slaveId, const uint8_t callbackId, std::vector<uint8_t> &args, bool ackNeeded = true);
+    static int runCallback(const uint16_t slaveId, std::vector<uint8_t> &msgBytes, bool ackNeeded = true);
 
     static void resetModules(void);
 
-    static inline void addControllerInstance(Controller* controller) {
-        _controllerInstances.push_back(controller);
+    static void registerEventCallback(uint16_t slaveId, ModuleControl* module, 
+        uint8_t eventId, uint8_t eventArg, 
+        uint8_t callbackId, std::vector<uint8_t> callbackArgs);
+
+    static uint16_t getSlaveId(uint16_t boardType, uint32_t boardSN);
+
+    static inline void addModuleControlInstance(ModuleControl* module) {
+        _modules.push_back(module);
     }
 
-    static inline void addEventCallback(uint8_t event, uint16_t id, std::function<void(uint8_t*)>callback) {
-        _eventCallbacks.insert({std::make_pair(event, id), callback});
+    static inline void addEventCallback(uint8_t eventId, uint16_t slaveId, std::function<void(uint8_t*)>callback) {
+        _eventCallbacks.insert({std::make_pair(eventId, slaveId), callback});
     }
 
-    static inline void removeEventCallback(uint8_t event, uint16_t id) {
-        _eventCallbacks.erase(std::make_pair(event, id));
+    static inline void removeEventCallback(uint8_t eventId, uint16_t slaveId) {
+        _eventCallbacks.erase(std::make_pair(eventId, slaveId));
     }
 
     static void addErrorCallback(std::function<void(int)> callback) {
         _errorCallback = callback;
     }
 
-    enum State_e{
-        STATE_UNDEFINED = (int)-1,
-        STATE_IDLE      = (int)0,
-        STATE_RUNNING   = (int)1,
-        STATE_ERROR     = (int)2
-    };
-
 private:
-
     static State_e _state;
-
-#ifndef LINUX_ARM
-    static TaskHandle_t _taskHandle;
+    static TaskHandle_t _busTaskHandle;
     static TaskHandle_t _ledSyncTaskHandle;
-#endif
-
-    // List of ids and serial number received via CMD_DISCOVER < ID < TYPE, SN > >
-    static std::map<uint16_t, std::pair<uint16_t, uint32_t>, std::greater<uint16_t>> _ids;
-
-    static uint16_t _getIdFromSerialNumAndType(uint16_t type, uint32_t sn);
-
-    /** @todo _processEvent() */
+    static SemaphoreHandle_t _callbackMutex;
 
     static void _busCanTask(void *pvParameters);
     static void _programmingTask(void *pvParameters);
     static void _ledSyncTask(void *pvParameters);
-    static SemaphoreHandle_t _requestMutex;
 
-    static std::map<std::pair<uint8_t,uint16_t>, std::function<void(uint8_t*)>> _eventCallbacks;
-    static std::vector<Controller*> _controllerInstances;
+    using EventKey = std::pair<uint8_t, uint16_t>; // Event ID and Module ID
+    using EventCallback = std::function<void(uint8_t*)>;
+
+    static std::vector<ModuleControl*> _modules;
+    static std::map<uint16_t, SlaveInfo, std::greater<uint16_t>> _slaveInfos;
+    static std::map<EventKey, EventCallback> _eventCallbacks;
     static std::function<void(int)> _errorCallback;
 
     static int _registerCLI(void);
-
 };
 
 #endif
