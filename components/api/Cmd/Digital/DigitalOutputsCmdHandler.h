@@ -75,6 +75,11 @@ public:
             DigitalOutputs::digitalWrite(num, level);
         });
 
+        Slave::addEventCallback(EVENT_CALLBACK_TOGGLE_OUTPUT, [](std::vector<uint8_t> &args) {
+            DOut_Num_t num = (DOut_Num_t)args[0];
+            DigitalOutputs::toggleOutput(num);
+        });
+
         return 0;
     }
 private:

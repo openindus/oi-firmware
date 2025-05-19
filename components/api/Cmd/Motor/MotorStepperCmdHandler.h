@@ -197,6 +197,12 @@ public:
             }
         });
 
+        Slave::addEventCallback(EVENT_CALLBACK_MOTOR_STOP, [](std::vector<uint8_t> &args) {
+            MotorNum_t num       = static_cast<MotorNum_t>(args[0]);
+            MotorStopMode_t mode = static_cast<MotorStopMode_t>(args[1]);
+            MotorStepper::stop(num, mode);
+        });
+
         return 0;
     }
 
