@@ -111,3 +111,11 @@ Board which are ready to use :
 - Updated CI/CD to push the library, binaries, and documentation.
 
 # 1.7.1
+
+### Features
+
+- API refactoring.
+- Added function to syncronize the led state.
+- Added function to register module event callback.
+- Reset AnalogInputsLS sensor list when the Master starts.
+- Added function to trigger the limit switch.
