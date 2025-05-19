@@ -394,7 +394,7 @@ static int _sensorListCmdHandler(int argc, char **argv)
     }
 
     // get arguments
-    AnalogInputsLS::list_sensors();
+    AnalogInputsLS::listSensors();
     return 0;
 }
 

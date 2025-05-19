@@ -26,7 +26,7 @@ struct Dual_Mux_Config_s {
 
 class Sensor
 {
-    public:
+public:
     Sensor(ADS114S0X* adc, Multiplexer* highSideMux, Multiplexer* lowSideMux, const Sensor_Pinout_s& pins, Sensor_Type_e type, uint32_t index) :
         _adc(adc),
         _highSideMux(highSideMux),
@@ -47,6 +47,8 @@ class Sensor
         _acquisition_time(SAMPLE_50_MS),
         _type(type),
         _index(index) {}
+    
+    virtual ~Sensor() {}
 
     /* Found on all sensors */
     virtual float read(bool print_result = false);
@@ -71,7 +73,7 @@ class Sensor
     inline enum Sensor_Type_e get_type(void) { return _type; }
     inline std::array<AIn_Num_t, 4> get_ain_pins(void) { return _ainPins; }
 
-    protected:
+protected:
     /* Found on all sensors */
     /* Used for the read method */
     void route(void);

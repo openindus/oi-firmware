@@ -89,6 +89,10 @@ int AnalogInputsLSCmdHandler::init(void)
         Slave::sendEvent(data);
     });
 
+    Slave::addResetCallback([](void) {
+        AnalogInputsLS::resetSensors();
+    });
+
     return 0;
 }
 

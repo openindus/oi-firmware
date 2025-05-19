@@ -138,7 +138,7 @@ public:
      *
      * @return nbr of sensors
      */
-    int list_sensors(void);
+    int listSensors(void);
 
 private:
 

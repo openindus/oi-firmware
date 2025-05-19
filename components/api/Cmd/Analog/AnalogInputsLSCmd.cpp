@@ -340,7 +340,7 @@ static void print_sensor(GenericSensorCmd *sensor)
     printf("]\n");
 }
 
-int AnalogInputsLSCmd::list_sensors(void)
+int AnalogInputsLSCmd::listSensors(void)
 {
     printf("There are %d sensors : \n", sensors.size());
     for (size_t i = 0; i < sensors.size(); i++) {
