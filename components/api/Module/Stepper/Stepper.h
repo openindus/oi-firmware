@@ -9,7 +9,7 @@
 #pragma once
 
 #include "Common.h"
-#include "Controller.h"
+#include "ModuleControl.h"
 #include "DigitalDefs.h"
 #include "DigitalInputs.h"
 #include "DigitalInputsCmd.h"
@@ -41,11 +41,11 @@ public:
 
 #elif defined(MODULE_MASTER)
 
-class Stepper : public Controller, public DigitalInputsCmd, public MotorStepperCmd
+class Stepper : public ModuleControl, public DigitalInputsCmd, public MotorStepperCmd
 {
 public:
     Stepper(uint32_t sn = 0)
-        : Controller(TYPE_OI_STEPPER, sn), DigitalInputsCmd(this), MotorStepperCmd(this)
+        : ModuleControl(TYPE_OI_STEPPER, sn), DigitalInputsCmd(this), MotorStepperCmd(this)
     {
         for (int i = 0; i < STEPPER_ENCODER_MAX; i++) {
             encoder[i] = new EncoderCmd(this, i);

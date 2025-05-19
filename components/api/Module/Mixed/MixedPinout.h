@@ -7,7 +7,7 @@
  * Proprietary and confidential
  * 
  * @file MixedPinout.h
- * @brief Functions for mixed module
+ * @brief Callbacks for mixed module
  *
  * For more information on OpenIndus:
  * @see https://openindus.com

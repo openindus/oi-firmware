@@ -12,7 +12,7 @@
 #include "OSAL.h"
 #include "OpenIndus.h"
 #include "Slave.h"
-#include "Types.h"
+#include "Definitions.h"
 #include "UsbConsole.h"
 
 static const char TAG[] = "System";
@@ -82,14 +82,6 @@ void System::stop(void)
 
 extern "C" void app_main(void)
 {
-    /*--- Boot ---*/
-    if (Module::checkBootError()) {
-        LOGE(TAG, "Boot error detected");
-        Module::ledBlink(LED_RED, 1000); // Error
-        System::handleError(ERROR_BOOT);
-        return;
-    }
-
     /*--- Harware init ---*/
     if (System::init()) {                 // Initialize modules
         Module::ledBlink(LED_BLUE, 1000); // Module Initialized
@@ -97,6 +89,14 @@ extern "C" void app_main(void)
         LOGE(TAG, "Failed to initialize module");
         Module::ledBlink(LED_RED, 1000); // Error
         System::handleError(ERROR_MODULE_INIT);
+        return;
+    }
+
+    /*--- Boot ---*/
+    if (Module::checkBootError()) {
+        LOGE(TAG, "Boot error detected");
+        Module::ledBlink(LED_RED, 1000); // Error
+        System::handleError(ERROR_BOOT);
         return;
     }
 

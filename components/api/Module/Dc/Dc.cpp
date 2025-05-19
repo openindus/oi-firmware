@@ -7,7 +7,7 @@
  * Proprietary and confidential
  * 
  * @file Dc.cpp
- * @brief Functions for dc module
+ * @brief Callbacks for dc module
  *
  * For more information on OpenIndus:
  * @see https://openindus.com

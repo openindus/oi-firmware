@@ -123,7 +123,7 @@ private:
     static esp_adc_cal_characteristics_t _adc1Characteristics;
     static esp_adc_cal_characteristics_t _adc2Characteristics;
 
-    static uint8_t *_level;
+    static bool *_level;
     static SemaphoreHandle_t _mutex;
 
     /* Overcurrent threshold */

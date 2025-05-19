@@ -7,7 +7,7 @@
  * Proprietary and confidential
  * 
  * @file Core.cpp
- * @brief Functions for core module
+ * @brief Callbacks for core module
  *
  * For more information on OpenIndus:
  * @see https://openindus.com
@@ -264,8 +264,8 @@ int Core::init(void)
     io_rtc_conf.pin_bit_mask = (1ULL << CORE_PIN_RTC_INTERRUPT);
     err |= gpio_config(&io_rtc_conf);
 
-    ESP_LOGI(CORE_TAG, "Create control task");
-    xTaskCreate(_controllerTask, "Slave task", 4096, NULL, 1, NULL);
+    ESP_LOGI(CORE_TAG, "Create module task");
+    xTaskCreate(_moduleTask, "Slave task", 4096, NULL, 1, NULL);
 
     /* Command line interface */
     MotorStepperCmd::_registerCLI();
@@ -273,7 +273,7 @@ int Core::init(void)
     return err;
 }
 
-void Core::_controllerTask(void *pvParameters)
+void Core::_moduleTask(void *pvParameters)
 {
 
     /* Every 500ms check if there is a power error (5V User or 5V USB)

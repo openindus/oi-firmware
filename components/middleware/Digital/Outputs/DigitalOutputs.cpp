@@ -31,7 +31,7 @@ gpio_num_t *DigitalOutputs::_gpio_num;
 adc_num_t *DigitalOutputs::_adc_current;
 esp_adc_cal_characteristics_t DigitalOutputs::_adc1Characteristics;
 esp_adc_cal_characteristics_t DigitalOutputs::_adc2Characteristics;
-uint8_t *DigitalOutputs::_level;
+bool *DigitalOutputs::_level;
 SemaphoreHandle_t DigitalOutputs::_mutex;
 float DigitalOutputs::_overcurrentThreshold = 4.0f;
 float DigitalOutputs::_overcurrentThresholdSum = 8.0f;
@@ -60,7 +60,7 @@ int DigitalOutputs::init(const gpio_num_t *gpio, const adc_num_t *adc, int nb)
     memcpy(_adc_current, adc, nb * sizeof(adc_num_t));
 
     /* Init memory of _level */
-    _level = (uint8_t *)calloc(nb, sizeof(uint8_t));
+    _level = (bool*)calloc(nb, sizeof(bool));
 
     /* Init DOUT */
     ESP_LOGI(TAG, "Init DOUT");
@@ -119,9 +119,9 @@ void DigitalOutputs::digitalWrite(DOut_Num_t num, bool level)
     if (num < _nb) {
         if (_mode[num] == DOUT_MODE_DIGITAL) {
             xSemaphoreTake(_mutex, portMAX_DELAY);
-            _level[num] = level; // Stor level
+            _level[num] = level;
             xSemaphoreGive(_mutex);
-            gpio_set_level(_gpio_num[num], level); // Set level
+            gpio_set_level(_gpio_num[num], level);
         } else {
             ESP_LOGE(TAG, "Invalid output mode");
         }
@@ -134,11 +134,10 @@ void DigitalOutputs::toggleOutput(DOut_Num_t num)
 {
     if (num < _nb) {
         if (_mode[num] == DOUT_MODE_DIGITAL) {
-            int level = (gpio_get_level(_gpio_num[num]) == 1 ? 0 : 1); // Read level
             xSemaphoreTake(_mutex, portMAX_DELAY);
-            _level[num] = level; // Stor level
+            _level[num] = !_level[num];
             xSemaphoreGive(_mutex);
-            digitalWrite(num, level); // Write level
+            gpio_set_level(_gpio_num[num], _level[num]);
         } else {
             ESP_LOGE(TAG, "Invalid output mode");
         }

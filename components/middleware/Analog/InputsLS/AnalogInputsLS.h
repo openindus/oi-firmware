@@ -40,7 +40,19 @@ public:
      *
      * @return nbr of sensors
      */
-    static int list_sensors(void);
+    static int listSensors(void);
+
+    /**
+     * @brief Reset the sensor list
+     * 
+     * @return void
+     */
+    static void resetSensors(void) {
+        for (auto sensor : sensors) {
+            delete sensor;
+        }
+        sensors.clear();
+    }
 
     /* Assessors */
 

@@ -7,7 +7,7 @@
  * Proprietary and confidential
  * 
  * @file RelayPinout.h
- * @brief Functions for relay module
+ * @brief Callbacks for relay module
  *
  * For more information on OpenIndus:
  * @see https://openindus.com

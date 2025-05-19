@@ -314,13 +314,13 @@ static int masterGetStatusCmd(int argc, char **argv)
     status = Master::getStatus();
 
     switch (status) {
-        case Master::STATE_IDLE:
+        case STATE_IDLE:
             printf("Master status: IDLE\n");
             break;
-        case Master::STATE_RUNNING:
+        case STATE_RUNNING:
             printf("Master status: RUNNING\n");
             break;
-        case Master::STATE_ERROR:
+        case STATE_ERROR:
             printf("Master status: ERROR\n");
             break;
         default:
@@ -348,48 +348,48 @@ static int _registerGetStatusCmd(void)
     }
 }
 
-/* --- perform-request --- */
+/* --- run-callback --- */
 
 static struct {
     struct arg_int *id;
-    struct arg_int *request;
+    struct arg_int *callback;
     struct arg_int *args;
     struct arg_end *end;
-} performRequestArgs;
+} runCallbackArgs;
 
-static int performRequestCmd(int argc, char **argv)
+static int runCallbackCmd(int argc, char **argv)
 {
     uint16_t id;
-    uint8_t request;
+    uint8_t callback;
     std::vector<uint8_t> args;
 
-    int nerrors = arg_parse(argc, argv, (void **) &performRequestArgs);
+    int nerrors = arg_parse(argc, argv, (void **) &runCallbackArgs);
     if (nerrors != 0) {
-        arg_print_errors(stderr, performRequestArgs.end, argv[0]);
+        arg_print_errors(stderr, runCallbackArgs.end, argv[0]);
         return 1;
     }
 
-    id = performRequestArgs.id->ival[0];
-    request = performRequestArgs.request->ival[0];
-    args.push_back(performRequestArgs.args->ival[0]);
+    id = runCallbackArgs.id->ival[0];
+    callback = runCallbackArgs.callback->ival[0];
+    args.push_back(runCallbackArgs.args->ival[0]);
 
-    Master::performRequest(id, request, args);
+    Master::runCallback(id, callback, args);
 
     return 0;
 }
 
-static int _registerPerformRequest(void)
+static int _registerRunCallback(void)
 {
-    performRequestArgs.id = arg_int1(NULL, NULL, "<ID>", "Slave ID");
-    performRequestArgs.request = arg_int1(NULL, NULL, "<REQUEST>", "Request");
-    performRequestArgs.args = arg_int1(NULL, NULL, "<ARGS>", "Arguments");
-    performRequestArgs.end = arg_end(1);
+    runCallbackArgs.id = arg_int1(NULL, NULL, "<ID>", "Slave ID");
+    runCallbackArgs.callback = arg_int1(NULL, NULL, "<CB>", "Callback ID");
+    runCallbackArgs.args = arg_int1(NULL, NULL, "<ARGS>", "Arguments");
+    runCallbackArgs.end = arg_end(1);
     const esp_console_cmd_t cmd = {
-        .command = "perform-request",
-        .help = "Send a request and receive response",
+        .command = "run-callback",
+        .help = "Run a callback function on a slave",
         .hint = NULL,
-        .func = &performRequestCmd,
-        .argtable = &performRequestArgs
+        .func = &runCallbackCmd,
+        .argtable = &runCallbackArgs
     };
 
     if (esp_console_cmd_register(&cmd) == ESP_OK) {
@@ -410,7 +410,7 @@ int Master::_registerCLI(void)
     err |= _registerStopCmd();
     err |= _registerStartCmd();
     err |= _registerGetStatusCmd();
-    err |= _registerPerformRequest();
+    err |= _registerRunCallback();
     return err;
 }
 
