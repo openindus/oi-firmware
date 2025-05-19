@@ -52,17 +52,17 @@ public:
 
 #elif defined(MODULE_MASTER)
 
-#include "Controller.h"
+#include "ModuleControl.h"
 #include "RelayCmd.h"
 
 class RelayHPSlave : 
-    public Controller, 
+    public ModuleControl, 
     public RelayCmd
 {
 public:
 
     RelayHPSlave(uint32_t sn = 0) :
-        Controller(TYPE_OI_RELAY_HP, sn),
+        ModuleControl(TYPE_OI_RELAY_HP, sn),
         RelayCmd(this){}
 
     static int init(void);

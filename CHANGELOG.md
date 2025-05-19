@@ -95,3 +95,27 @@ Board which are ready to use :
 ### Bugfix
 
 - Fixed OI-Library compilation errors.
+
+# 1.7.0
+
+### Features
+
+- Added CLI for advanced stepper motor parameters.
+- Added reset function.
+- Added function to get the supply voltage.
+- Added handle error function.
+- Set duty cycle in the range of 0-100%.
+- Added function to attach flag interrupt.
+- Added overcurrent threshold callback function.
+- Added documentation for the API.
+- Updated CI/CD to push the library, binaries, and documentation.
+
+# 1.7.1
+
+### Features
+
+- API refactoring.
+- Added function to syncronize the led state.
+- Added function to register module event callback.
+- Reset AnalogInputsLS sensor list when the Master starts.
+- Added function to trigger the limit switch.

@@ -7,7 +7,7 @@
  * Proprietary and confidential
  * 
  * @file DcPinout.h
- * @brief Functions for stepper module
+ * @brief Callbacks for stepper module
  *
  * For more information on OpenIndus:
  * @see https://openindus.com

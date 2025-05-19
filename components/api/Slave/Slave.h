@@ -14,7 +14,7 @@
 #include "Board.h"
 #include "Led.h"
 #include "Bus.h"
-#include "Types.h"
+#include "Definitions.h"
 #include "FlashLoader.h"
 
 class Slave
@@ -27,37 +27,34 @@ public:
     static int getStatus(void);
 
     static void sendEvent(std::vector<uint8_t> msgBytes);
-    /** @todo heartbeat(); */
     static void sendError(uint8_t errorCode);
 
-    static inline void addRequestCallback(uint8_t request, std::function<void(std::vector<uint8_t> &)> callback) {
-        _requestCallbacks.insert({request, callback});
+    static inline void addCallback(uint8_t callbackId, std::function<void(std::vector<uint8_t> &)> callback) {
+        _callbacks.insert({callbackId, callback});
     }
 
-    static inline void addResetFunction(std::function<void(void)> resetFunction) {
-        _resetFunctions.push_back(resetFunction);
+    static inline void addResetCallback(std::function<void(void)> callback) {
+        _resetCallbacks.push_back(callback);
     }
 
-    enum State_e {
-        STATE_UNDEFINED = (int)-1,
-        STATE_IDLE      = (int)0,
-        STATE_RUNNING   = (int)1,
-        STATE_ERROR     = (int)2
-    };
+    static inline void addEventCallback(uint8_t callbackId, std::function<void(std::vector<uint8_t> &)> callback) {
+        _eventCallbacks.insert({callbackId, callback});
+    }
 
 protected:
     static uint16_t _id;
 
 private:
     static State_e _state;
-    static TaskHandle_t _taskHandle;
+    static TaskHandle_t _busTaskHandle;
 
-    static std::map<uint8_t, std::function<void(std::vector<uint8_t> &)>> _requestCallbacks;
-    static std::list<std::function<void(void)>> _resetFunctions;
-
-    /** @todo _processRequest() */
+    static std::map<uint8_t, std::function<void(std::vector<uint8_t> &)>> _callbacks;
+    static std::list<std::function<void(void)>> _resetCallbacks;
+    static std::map<uint8_t, std::function<void(std::vector<uint8_t> &)>> _eventCallbacks;
+    static std::vector<EventCallbackConfig_s> _eventCallbackConfigs;
 
     static void _busRsTask(void *pvParameters);
+    static void _busCanTask(void *pvParameters);
     static void _heartbeatTask(void *pvParameters);
 
     static int _registerCLI(void);

@@ -7,7 +7,7 @@
  * Proprietary and confidential
  * 
  * @file DiscretePinout.h
- * @brief Functions for discrete module
+ * @brief Callbacks for discrete module
  *
  * For more information on OpenIndus:
  * @see https://openindus.com

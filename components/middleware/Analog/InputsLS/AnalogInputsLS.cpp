@@ -195,7 +195,7 @@ static void print_sensor(Sensor *sensor)
     printf("]\n");
 }
 
-int AnalogInputsLS::list_sensors(void)
+int AnalogInputsLS::listSensors(void)
 {
     printf("There are %d sensors : \n", sensors.size());
     for (size_t i = 0; i < sensors.size(); i++) {

@@ -7,7 +7,7 @@
  * Proprietary and confidential
  * 
  * @file BrushlessPinout.h
- * @brief Functions for Brushless module
+ * @brief Callbacks for Brushless module
  *
  * For more information on OpenIndus:
  * @see https://openindus.com
@@ -15,7 +15,7 @@
 
 #pragma once
 
-/* GPIO Motor control */
+/* GPIO Motor module */
 #define BRUSHLESS_PIN_ENABLE_CHIP   GPIO_NUM_10
 #define BRUSHLESS_PIN_DIRECTION     GPIO_NUM_16
 #define BRUSHLESS_PIN_BRAKE         GPIO_NUM_17
@@ -31,7 +31,7 @@
 #define BRUSHLESS_PIN_CODEURA       GPIO_NUM_8
 #define BRUSHLESS_PIN_CODEURB       GPIO_NUM_9
 
-/* DOUT control */
+/* DOUT module */
 #define BRUSHLESS_PIN_DOUT_1        GPIO_NUM_26
 #define BRUSHLESS_PIN_DOUT_2        GPIO_NUM_33
 #define BRUSHLESS_PIN_ST_DOUT_1     GPIO_NUM_34

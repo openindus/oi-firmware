@@ -7,7 +7,7 @@
  * Proprietary and confidential
  * 
  * @file CorePinout.h
- * @brief Functions for core module
+ * @brief Callbacks for core module
  *
  * For more information on OpenIndus:
  * @see https://openindus.com

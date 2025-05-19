@@ -71,13 +71,13 @@ static int slaveGetStatusCmd(int argc, char **argv)
     status = Slave::getStatus();
 
     switch (status) {
-        case Slave::STATE_IDLE:
+        case STATE_IDLE:
             printf("Slave status: IDLE\n");
             break;
-        case Slave::STATE_RUNNING:
+        case STATE_RUNNING:
             printf("Slave status: RUNNING\n");
             break;
-        case Slave::STATE_ERROR:
+        case STATE_ERROR:
             printf("Slave status: ERROR\n");
             break;
         default:

@@ -19,7 +19,7 @@
 #include "DigitalInputsCmdHandler.h"
 #include "DigitalOutputsCmdHandler.h"
 #include "AnalogInputsHVCmdHandler.h"
-#include "Controller.h"
+#include "ModuleControl.h"
 #include "DigitalInputsCmd.h"
 #include "DigitalOutputsCmd.h"
 #include "AnalogInputsHVCmd.h"
@@ -40,7 +40,7 @@ public:
 #elif defined(MODULE_MASTER) 
 
 class Discrete : 
-    public Controller, 
+    public ModuleControl, 
     public DigitalInputsCmd, 
     public DigitalOutputsCmd, 
     public AnalogInputsHVCmd
@@ -48,7 +48,7 @@ class Discrete :
 public:
 
     Discrete(uint32_t sn = 0) : 
-        Controller(TYPE_OI_DISCRETE, sn),
+        ModuleControl(TYPE_OI_DISCRETE, sn),
         DigitalInputsCmd(this),
         DigitalOutputsCmd(this),
         AnalogInputsHVCmd(this) {}

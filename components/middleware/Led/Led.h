@@ -47,6 +47,7 @@ typedef enum {
     LED_ON      = (uint8_t) 0x00,
     LED_OFF     = (uint8_t) 0x01,
     LED_BLINK   = (uint8_t) 0x02,
+    LED_SYNC    = (uint8_t) 0x03,
 } LedState_t;
 
 class Led
@@ -94,6 +95,12 @@ public:
      * 
      */
     static void blink(LedColor_t color, uint32_t period);
+
+    /**
+     * @brief resync led state
+     * 
+     */
+    static void sync(void);
 
 private:
 

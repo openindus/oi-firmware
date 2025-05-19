@@ -43,7 +43,7 @@ public:
 #elif defined(MODULE_MASTER) 
 
 class Mixed : 
-    public Controller, 
+    public ModuleControl, 
     public AnalogOutputsCmd, 
     public AnalogInputsLVCmd, 
     public DigitalInputsCmd, 
@@ -52,7 +52,7 @@ class Mixed :
 public:
 
     Mixed(uint32_t sn = 0) : 
-        Controller(TYPE_OI_MIXED , sn),
+        ModuleControl(TYPE_OI_MIXED , sn),
         AnalogOutputsCmd(this),
         AnalogInputsLVCmd(this),
         DigitalInputsCmd(this),
