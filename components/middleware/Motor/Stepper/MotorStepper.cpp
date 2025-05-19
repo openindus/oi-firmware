@@ -22,7 +22,7 @@ static SemaphoreHandle_t _homingSemaphore[MOTOR_MAX];
 static bool _taskHomingStopRequested[MOTOR_MAX] = {false, false};
 static SemaphoreHandle_t _taskHomingStopSemaphore[MOTOR_MAX];
 
-static void _digitalInterruptHandler(void* arg);
+static void _triggerLimitSwitch(void* arg);
 static void _homingTask(void* arg);
 static void _busyCallback(uint8_t motor);
 static void _configProtections(void);
@@ -71,7 +71,7 @@ void MotorStepper::attachLimitSwitch(MotorNum_t motor, DIn_Num_t din, Logic_t lo
     _limitSwitchDigitalInput[motor].push_back({din, logic});
 
     /* Attach interrupt to limit switch */
-    DigitalInputs::attachInterrupt(din, _digitalInterruptHandler, (logic == ACTIVE_HIGH) ? RISING_MODE : FALLING_MODE, &_motorNums[motor]);
+    DigitalInputs::attachInterrupt(din, _triggerLimitSwitch, (logic == ACTIVE_HIGH) ? RISING_MODE : FALLING_MODE, &_motorNums[motor]);
 }
 
 void MotorStepper::detachLimitSwitch(MotorNum_t motor, DIn_Num_t din) 
@@ -284,12 +284,17 @@ void MotorStepper::detachFlagInterrupt(void)
     PS01_Hal_DetachFlagInterrupt();
 }
 
-static void _digitalInterruptHandler(void *arg)
+void MotorStepper::triggerLimitSwitch(MotorNum_t motor)
+{
+    PS01_Hal_SetSwitchLevel(motor, 1);
+    vTaskDelay(pdTICKS_TO_MS(1));
+    PS01_Hal_SetSwitchLevel(motor, 0);
+}
+
+static void _triggerLimitSwitch(void *arg)
 {
     MotorNum_t motor = *(MotorNum_t*)arg;
-    PS01_Hal_SetSwitchLevel((MotorNum_t)motor, 1);
-    vTaskDelay(pdTICKS_TO_MS(1));
-    PS01_Hal_SetSwitchLevel((MotorNum_t)motor, 0);
+    MotorStepper::triggerLimitSwitch(motor);
 }
 
 static void _homingTask(void* arg)
@@ -331,7 +336,7 @@ static void _homingTask(void* arg)
     }
 
     /* Invert the switch logic to stop the motor when it leaves the sensor */
-    DigitalInputs::attachInterrupt(din, _digitalInterruptHandler, (logic == ACTIVE_HIGH) ? FALLING_MODE : RISING_MODE, &_motorNums[motor]);
+    DigitalInputs::attachInterrupt(din, _triggerLimitSwitch, (logic == ACTIVE_HIGH) ? FALLING_MODE : RISING_MODE, &_motorNums[motor]);
 
     /* If a stop command was issued, do not launch the second action --> homing is aborted */
     xSemaphoreTake(_taskHomingStopSemaphore[motor], portMAX_DELAY);
@@ -368,7 +373,7 @@ static void _homingTask(void* arg)
     }
 
     /* Re-invert the switch logic */
-    DigitalInputs::attachInterrupt(din, _digitalInterruptHandler, (logic == ACTIVE_HIGH) ? RISING_MODE : FALLING_MODE, &_motorNums[motor]);
+    DigitalInputs::attachInterrupt(din, _triggerLimitSwitch, (logic == ACTIVE_HIGH) ? RISING_MODE : FALLING_MODE, &_motorNums[motor]);
 
     /* Release semaphore */
     xSemaphoreGive(_homingSemaphore[motor]);

@@ -203,6 +203,11 @@ public:
             MotorStepper::stop(num, mode);
         });
 
+        Slave::addEventCallback(EVENT_CALLBACK_TRIGGER_LIMIT_SWITCH, [](std::vector<uint8_t> &args) {
+            MotorNum_t num = static_cast<MotorNum_t>(args[0]);
+            MotorStepper::triggerLimitSwitch(num);
+        });
+
         return 0;
     }
 

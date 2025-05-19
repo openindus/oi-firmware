@@ -161,10 +161,11 @@ enum ErrorCode_e {
  * 
  */
 enum EventCallback_e {
-    EVENT_CALLBACK_NONE             = 0x00,
-    EVENT_CALLBACK_DIGITAL_WRITE    = 0x01,
-    EVENT_CALLBACK_TOGGLE_OUTPUT    = 0x02,
-    EVENT_CALLBACK_MOTOR_STOP       = 0x03,
+    EVENT_CALLBACK_NONE                 = 0x00,
+    EVENT_CALLBACK_DIGITAL_WRITE        = 0x01,
+    EVENT_CALLBACK_TOGGLE_OUTPUT        = 0x02,
+    EVENT_CALLBACK_MOTOR_STOP           = 0x03,
+    EVENT_CALLBACK_TRIGGER_LIMIT_SWITCH = 0x04,
 };
 
 /**

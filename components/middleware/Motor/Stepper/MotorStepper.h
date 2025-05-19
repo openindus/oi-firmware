@@ -222,6 +222,13 @@ public:
      */
     static void detachFlagInterrupt(void);
 
+    /**
+     * @brief Trigger the limit switch
+     * 
+     * @param motor 
+     */
+    static void triggerLimitSwitch(MotorNum_t motor);
+
 private:
 
     static int _registerCLI(void);
