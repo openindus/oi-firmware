@@ -14,11 +14,15 @@
 #include "Master.h"
 #include "MotorStepper.h"
 #include "MotorStepperParam.h"
+#include "Utils.h"
 
 class MotorStepperCmd
 {
 public:
+    /* Constructor and destructor */
     MotorStepperCmd(ModuleControl* module);
+    MotorStepperCmd(uint16_t id) : _module(new ModuleControl(id)) {}
+    ~MotorStepperCmd() { delete _module; }
 
     /**
      * @brief Attach a limit switch to the specified motor
@@ -219,7 +223,6 @@ private:
     void (*_flagIsrCallback)(MotorNum_t, MotoStepperFlag_t);
 
 protected:
-
     friend class Core;
 
     /* Command line interface */
