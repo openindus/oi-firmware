@@ -451,8 +451,9 @@ int deviceGetAdvancedParameter(uint8_t motorId, const char* parameter) {
         printf("not implemented\n");
 
     } else if (eq(parameter, POWERSTEP01_PARAM_OCD_TH)) {
-        errorCode = 1;
-        printf("not implemented\n");
+        float ocdTh = 0;
+        errorCode = MotorStepperParam::getAdvancedParam((MotorNum_t) deviceId, OCD_TH, &ocdTh);
+        printf("%f\n", ocdTh);
 
     } else if (eq(parameter, POWERSTEP01_PARAM_FS_SPD)) {
         float fsSpd = 0;

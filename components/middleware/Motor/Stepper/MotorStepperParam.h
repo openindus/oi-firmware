@@ -98,7 +98,7 @@ typedef struct {
     float maxSpeed;
     float minSpeed;
     bool minSpeedLspdOpt;
-
+    float ocdTh;
     float fsSpd;
     bool fsSpdBoostMode;
 
@@ -173,6 +173,7 @@ const PS01_AdvancedParam_t defaultParameters = {
     .minSpeed = 0,
     .minSpeedLspdOpt = false,
 
+    .ocdTh = 156.25,
     .fsSpd = 991.821,
     .fsSpdBoostMode = false,
 
@@ -199,10 +200,10 @@ const PS01_AdvancedParam_t defaultParameters = {
     .gateCfg2Tblank = 2,
 
     .configOscSel = 0,
-    .configExtClk = 1,
+    .configExtClk = 0,
     .configSwMode = 0,
 
-    .configOcSd = 0,
+    .configOcSd = 1,
     .configUvloval = 0,
     .configVccval = 1,
 
@@ -221,7 +222,7 @@ const PS01_AdvancedParam_t defaultParameters = {
 #else
     .vmConfigEnVscomp = 0,
     .vmConfigFPwmDec = 7,
-    .vmConfigFPwmInt = 1,
+    .vmConfigFPwmInt = 0,
 
     .vmKvalHold = 16.02,
     .vmKvalRun = 16.02,
@@ -232,7 +233,7 @@ const PS01_AdvancedParam_t defaultParameters = {
     .vmFnSlpAcc = 0.06256,
     .vmFnSlpDec = 0.06256,
     .vmKTherm = 1,
-    .vmStallTh = 531.25,
+    .vmStallTh = 468.75,
 
 #endif
     .isInit = false
@@ -250,7 +251,7 @@ public:
 
     static PS01_AdvancedParam_t getNVSParam(MotorNum_t motor);
     static int setNVSParam(MotorNum_t motor, PS01_AdvancedParam_t param);
-    static int initNVSParam();
+    static int initNVSParam(void);
 
 private:
 

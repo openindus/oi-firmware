@@ -64,6 +64,11 @@ int MotorStepperParam::setAdvancedParam(MotorNum_t motor, AdvancedParameter_t ad
             param.minSpeedLspdOpt = *((bool*) value);
             break;
         }
+        case OCD_TH:
+        {
+            param.ocdTh = *((float*) value);
+            break;
+        }
         case FS_SPD:
         {
             param.fsSpd = *((float*) value);
@@ -1029,7 +1034,8 @@ int MotorStepperParam::getAdvancedParam(MotorNum_t motor, AdvancedParameter_t ad
         }
         case OCD_TH:
         {
-            errorCode = 1;
+            float ocdTh = PS01_Param_GetOCDThreshold(motor);
+            memcpy(value, &ocdTh, sizeof(ocdTh));
             break;
         }
         case FS_SPD:
@@ -1308,6 +1314,7 @@ PS01_AdvancedParam_t MotorStepperParam::getAllAdvancedParamPS01(MotorNum_t motor
     MotorStepperParam::getAdvancedParam(motor, MAX_SPEED, &advancedParam.maxSpeed);
     MotorStepperParam::getAdvancedParam(motor, MIN_SPEED, &advancedParam.minSpeed);
     MotorStepperParam::getAdvancedParam(motor, MIN_SPEED_LSPD_OPT, &advancedParam.minSpeedLspdOpt);
+    MotorStepperParam::getAdvancedParam(motor, OCD_TH, &advancedParam.ocdTh);
     MotorStepperParam::getAdvancedParam(motor, FS_SPD, &advancedParam.fsSpd);
     MotorStepperParam::getAdvancedParam(motor, FS_SPD_BOOST_MODE, &advancedParam.fsSpdBoostMode);
     
@@ -1394,6 +1401,7 @@ int MotorStepperParam::setAllAdvancedParamPS01(MotorNum_t motor, PS01_AdvancedPa
     errorCode += MotorStepperParam::setAdvancedParamWithoutNvs(motor, MAX_SPEED, &advancedParam.maxSpeed);
     errorCode += MotorStepperParam::setAdvancedParamWithoutNvs(motor, MIN_SPEED, &advancedParam.minSpeed);
     errorCode += MotorStepperParam::setAdvancedParamWithoutNvs(motor, MIN_SPEED_LSPD_OPT, &advancedParam.minSpeedLspdOpt);
+    errorCode += MotorStepperParam::setAdvancedParamWithoutNvs(motor, OCD_TH, &advancedParam.ocdTh);
     errorCode += MotorStepperParam::setAdvancedParamWithoutNvs(motor, FS_SPD, &advancedParam.fsSpd);
     errorCode += MotorStepperParam::setAdvancedParamWithoutNvs(motor, FS_SPD_BOOST_MODE, &advancedParam.fsSpdBoostMode);
 
@@ -1457,8 +1465,8 @@ int MotorStepperParam::setAllAdvancedParamPS01(MotorNum_t motor, PS01_AdvancedPa
     return errorCode;
 }
 
-int MotorStepperParam::initNVSParam() {
-        
+int MotorStepperParam::initNVSParam(void) 
+{        
     int err = 0;
 
     /* Initialize NVS */
