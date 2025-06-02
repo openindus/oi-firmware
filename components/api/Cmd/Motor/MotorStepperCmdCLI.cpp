@@ -509,6 +509,68 @@ static int getSpeedFunc(int argc, char **argv)
 static struct {
     struct arg_int *id;
     struct arg_int *motor;
+    struct arg_lit *raw;
+    struct arg_end *end;
+} getStatusArgs;
+
+static int getStatusFunc(int argc, char **argv)
+{
+    PARSE_ARGS_OR_RETURN(argc, argv, getStatusArgs);
+
+    uint16_t id = getStatusArgs.id->ival[0];
+    MotorNum_t motor = (MotorNum_t)(getStatusArgs.motor->ival[0] - 1);
+
+    if (motor >= MOTOR_MAX_NUM) {
+        ESP_LOGE(TAG, "Invalid motor number: %d. Must be between %d and %d", 
+                 getStatusArgs.motor->ival[0], 0, MOTOR_MAX_NUM);
+        return 1;
+    }
+
+    MotorStepperCmd *stepper = new MotorStepperCmd(id);
+    if (stepper == nullptr) {
+        ESP_LOGE(TAG, "Failed to create MotorStepperCmd instance");
+        return 1;
+    }
+
+    MotorStepperStatus_t status = stepper->getStatus(motor);
+    
+    if (getStatusArgs.raw->count > 0) {
+        uint16_t statusReg = *reinterpret_cast<uint16_t*>(&status);
+        printf("0x%04X\n", statusReg);
+        delete stepper;
+        return 0;
+    }
+
+    printf("Motor %d Status:\n", getStatusArgs.motor->ival[0]);
+    printf("  HiZ (High Impedance): %s\n", status.hiz ? "YES" : "NO");
+    printf("  Motor busy: %s\n", !status.busy ? "YES" : "NO");
+    printf("  Switch input status: %s\n", status.sw_f ? "HIGH" : "LOW");
+    printf("  Switch Turn-on Event: %s\n", status.sw_evn ? "YES" : "NO");
+    printf("  Direction: %s\n", status.dir ? "FORWARD" : "REVERSE");
+    
+    const char* mot_status_str[] = {"STOPPED", "ACCELERATION", "DECELERATION", "CONSTANT_SPEED"};
+    printf("  Motor Status: %s\n", mot_status_str[status.mot_status & 0x03]);
+    
+    printf("  Command Error: %s\n", status.cmd_error ? "YES" : "NO");
+    printf("  Step-Clock Mode: %s\n", status.stck_mod ? "YES" : "NO");
+    printf("  Undervoltage Lockout: %s\n", !status.uvlo ? "YES" : "NO");
+    printf("  VS Undervoltage Lockout: %s\n", !status.uvlo_adc ? "YES" : "NO");
+    
+    const char* th_status_str[] = {"NORMAL", "WARNING", "BRIDGE_SHUTDOWN", "DEVICE_SHUTDOWN"};
+    printf("  Thermal Status: %s\n", th_status_str[status.th_status & 0x03]);
+    
+    printf("  Overcurrent Detection: %s\n", !status.ocd ? "YES" : "NO");
+    printf("  Stall Detection A: %s\n", !status.stall_a ? "YES" : "NO");
+    printf("  Stall Detection B: %s\n", !status.stall_b ? "YES" : "NO");
+
+    delete stepper;
+
+    return 0;
+}
+
+static struct {
+    struct arg_int *id;
+    struct arg_int *motor;
     struct arg_end *end;
 } resetHomePositionArgs;
 
@@ -660,6 +722,7 @@ static struct {
     struct arg_int *motor;
     struct arg_int *position;
     struct arg_lit *microstep;
+    struct arg_int *dir;
     struct arg_end *end;
 } moveRelativeArgs;
 
@@ -676,6 +739,18 @@ static int moveRelativeFunc(int argc, char **argv)
         ESP_LOGE(TAG, "Invalid motor number: %d. Must be between %d and %d", 
                  moveRelativeArgs.motor->ival[0], 0, MOTOR_MAX_NUM);
         return 1;
+    }
+
+    // Handle optional direction argument
+    if (moveRelativeArgs.dir->count > 0) {
+        int direction = moveRelativeArgs.dir->ival[0];
+        if (direction == 0) {
+            // Reverse direction: make position negative
+            position = -abs(position);
+        } else {
+            // Forward direction: make position positive
+            position = abs(position);
+        }
     }
 
     MotorStepperCmd *stepper = new MotorStepperCmd(id);
@@ -954,6 +1029,20 @@ void MotorStepperCmd::_registerCLI(void)
     };
     esp_console_cmd_register(&getSpdCmd);
 
+    /* Get status command */
+    getStatusArgs.id    = arg_int1("i", "id", "<id>", "ModuleControl ID");
+    getStatusArgs.motor = arg_int1("m", "motor", "<motor>", "Motor number");
+    getStatusArgs.raw   = arg_lit0("r", "raw", "Output raw register value as uint16_t");
+    getStatusArgs.end   = arg_end(3);
+    const esp_console_cmd_t getStatusCmd = {
+        .command  = "stepper-get-status",
+        .help     = "Get motor status information",
+        .hint     = NULL,
+        .func     = &getStatusFunc,
+        .argtable = &getStatusArgs
+    };
+    esp_console_cmd_register(&getStatusCmd);
+
     /* Reset home position command */
     resetHomePositionArgs.id    = arg_int1("i", "id", "<id>", "ModuleControl ID");
     resetHomePositionArgs.motor = arg_int1("m", "motor", "<motor>", "Motor number");
@@ -1015,10 +1104,11 @@ void MotorStepperCmd::_registerCLI(void)
     moveRelativeArgs.motor = arg_int1("m", "motor", "<motor>", "Motor number");
     moveRelativeArgs.position = arg_int1("p", "position", "<position>", "Position (int)");
     moveRelativeArgs.microstep = arg_lit0("ms", "microstep", "Enable microstepping");
-    moveRelativeArgs.end   = arg_end(4);
+    moveRelativeArgs.dir   = arg_int0("d", "direction", "<direction>", "[0: Reverse/negative, 1: Forward/positive] (optional position sign)");
+    moveRelativeArgs.end   = arg_end(5);
     const esp_console_cmd_t moveRelCmd = {
         .command  = "stepper-move-relative",
-        .help     = "Move motor to relative position",
+        .help     = "Move motor to relative position (optional direction sign)",
         .hint     = NULL,
         .func     = &moveRelativeFunc,
         .argtable = &moveRelativeArgs

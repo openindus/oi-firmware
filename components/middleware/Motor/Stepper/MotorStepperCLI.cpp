@@ -9,6 +9,7 @@
 #include "Motor.h"
 #include "MotorStepper.h"
 #include "DigitalInputs.h"
+#include "PS01_Cmd.h"
 #include "esp_log.h"
 #include "esp_console.h"
 #include "argtable3/argtable3.h"
@@ -218,6 +219,7 @@ static void _registerGetSpeed(void)
 
 static struct {
     struct arg_int *motor;
+    struct arg_str *mode;
     struct arg_end *end;
 } stopArgs;
 
@@ -230,8 +232,25 @@ static int stop(int argc, char **argv)
     }
 
     MotorNum_t motor = (MotorNum_t)(stopArgs.motor->ival[0] - 1);
+    MotorStopMode_t stopMode = SOFT_HIZ; // Default mode
 
-    MotorStepper::stop(motor);
+    if (stopArgs.mode->count > 0) {
+        const char *mode_str = stopArgs.mode->sval[0];
+        if (strcmp(mode_str, "soft-stop") == 0) {
+            stopMode = SOFT_STOP;
+        } else if (strcmp(mode_str, "hard-stop") == 0) {
+            stopMode = HARD_STOP;
+        } else if (strcmp(mode_str, "soft-hiz") == 0) {
+            stopMode = SOFT_HIZ;
+        } else if (strcmp(mode_str, "hard-hiz") == 0) {
+            stopMode = HARD_HIZ;
+        } else {
+            printf("Invalid stop mode: %s. Valid modes are: soft-stop, hard-stop, soft-hiz, hard-hiz\n", mode_str);
+            return 1;
+        }
+    }
+
+    MotorStepper::stop(motor, stopMode);
 
     return 0;
 }
@@ -239,11 +258,12 @@ static int stop(int argc, char **argv)
 static void _registerStop(void)
 {
     stopArgs.motor  = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
-    stopArgs.end    = arg_end(2);
+    stopArgs.mode   = arg_str0(NULL, NULL, "MODE", "[soft-stop, hard-stop, soft-hiz, hard-hiz]");
+    stopArgs.end    = arg_end(3);
 
     const esp_console_cmd_t cmd = {
         .command = "stop",
-        .help = "stop the motor",
+        .help = "stop the motor with specified mode",
         .hint = NULL,
         .func = &stop,
         .argtable = &stopArgs
@@ -296,6 +316,7 @@ static void _registerMoveAbsolute(void)
 static struct {
     struct arg_int *motor;
     struct arg_int *pos;
+    struct arg_int *dir;
     struct arg_end *end;
 } moveRelativeArgs;
 
@@ -308,7 +329,16 @@ static int moveRelative(int argc, char **argv)
     }
 
     MotorNum_t motor = (MotorNum_t)(moveRelativeArgs.motor->ival[0] - 1);
-    uint32_t position = (uint32_t)(moveRelativeArgs.pos->ival[0]);
+    int32_t position = (int32_t)(moveRelativeArgs.pos->ival[0]);
+    
+    if (moveRelativeArgs.dir->count > 0) {
+        int direction = moveRelativeArgs.dir->ival[0];
+        if (direction == 0) {
+            position = -abs(position);
+        } else {
+            position = abs(position);
+        }
+    }
 
     MotorStepper::moveRelative(motor, position);
 
@@ -319,7 +349,8 @@ static void _registerMoveRelative(void)
 {
     moveRelativeArgs.motor  = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
     moveRelativeArgs.pos    = arg_int1(NULL, NULL, "POSITION", "position in step");
-    moveRelativeArgs.end    = arg_end(3);
+    moveRelativeArgs.dir    = arg_int0(NULL, NULL, "DIRECTION", "[1: Forward, 0: Reverse] (optional, position sign)");
+    moveRelativeArgs.end    = arg_end(4);
 
     const esp_console_cmd_t cmd = {
         .command = "move-relative",
@@ -447,6 +478,72 @@ static void _registerGetSupplyVoltage(void)
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
 }
 
+/** 'get-status' */
+
+static struct {
+    struct arg_int *motor;
+    struct arg_lit *raw;
+    struct arg_end *end;
+} getStatusArgs;
+
+static int getStatus(int argc, char **argv)
+{
+    int nerrors = arg_parse(argc, argv, (void **) &getStatusArgs);
+    if (nerrors != 0) {
+        arg_print_errors(stderr, getStatusArgs.end, argv[0]);
+        return 1;
+    }
+
+    MotorNum_t motor = (MotorNum_t)(getStatusArgs.motor->ival[0] - 1);
+    MotorStepperStatus_t status = MotorStepper::getStatus(motor);
+
+    if (getStatusArgs.raw->count > 0) {
+        uint16_t statusReg = *reinterpret_cast<uint16_t*>(&status);
+        printf("0x%04X\n", statusReg);
+        return 0;
+    }
+
+    printf("Motor %d Status:\n", getStatusArgs.motor->ival[0]);
+    printf("  HiZ (High Impedance): %s\n", status.hiz ? "YES" : "NO");
+    printf("  Motor busy: %s\n", !status.busy ? "YES" : "NO");
+    printf("  Switch input status: %s\n", status.sw_f ? "HIGH" : "LOW");
+    printf("  Switch Turn-on Event: %s\n", status.sw_evn ? "YES" : "NO");
+    printf("  Direction: %s\n", status.dir ? "FORWARD" : "REVERSE");
+    
+    const char* mot_status_str[] = {"STOPPED", "ACCELERATION", "DECELERATION", "CONSTANT_SPEED"};
+    printf("  Motor Status: %s\n", mot_status_str[status.mot_status & 0x03]);
+    
+    printf("  Command Error: %s\n", status.cmd_error ? "YES" : "NO");
+    printf("  Step-Clock Mode: %s\n", status.stck_mod ? "YES" : "NO");
+    printf("  Undervoltage Lockout: %s\n", !status.uvlo ? "YES" : "NO");
+    printf("  VS Undervoltage Lockout: %s\n", !status.uvlo_adc ? "YES" : "NO");
+    
+    const char* th_status_str[] = {"NORMAL", "WARNING", "BRIDGE_SHUTDOWN", "DEVICE_SHUTDOWN"};
+    printf("  Thermal Status: %s\n", th_status_str[status.th_status & 0x03]);
+    
+    printf("  Overcurrent Detection: %s\n", !status.ocd ? "YES" : "NO");
+    printf("  Stall Detection A: %s\n", !status.stall_a ? "YES" : "NO");
+    printf("  Stall Detection B: %s\n", !status.stall_b ? "YES" : "NO");
+
+    return 0;
+}
+
+static void _registerGetStatus(void)
+{
+    getStatusArgs.motor = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
+    getStatusArgs.raw   = arg_lit0(NULL, "raw", "output raw register value as uint16_t");
+    getStatusArgs.end   = arg_end(3);
+
+    const esp_console_cmd_t cmd = {
+        .command = "get-status",
+        .help = "get motor status information",
+        .hint = NULL,
+        .func = &getStatus,
+        .argtable = &getStatusArgs
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+}
+
 int MotorStepper::_registerCLI(void)
 {
     _registerLimitSwitch();
@@ -460,6 +557,7 @@ int MotorStepper::_registerCLI(void)
     _registerRun();
     _registerHoming();
     _registerGetSupplyVoltage();
+    _registerGetStatus();
 
     return 0;
 }
