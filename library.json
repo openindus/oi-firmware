@@ -1,6 +1,6 @@
 {
     "name": "OpenIndus",
-    "version": "1.7.1",
+    "version": "1.7.2-dev",
     "keywords": "OpenIndus",
     "description": "OpenIndus Library",
     "repository": {
@@ -23,11 +23,9 @@
             "external_components",
             "examples",
             "README.md"
-        ],
-        "exclude": [
-            "components/middleware/_linux_arm",
-            "components/middleware/Netif",
-            "components/middleware/Cloud"
         ]
-    }
+    },
+    "build": {
+        "srcDir": "components"
+  }
 }
