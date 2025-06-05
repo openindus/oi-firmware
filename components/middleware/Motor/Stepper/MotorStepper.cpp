@@ -131,6 +131,12 @@ float MotorStepper::getSpeed(MotorNum_t motor)
     return PS01_Param_GetSpeed(motor);
 }
 
+MotorStepperStatus_t MotorStepper::getStatus(MotorNum_t motor)
+{
+    uint16_t statusReg = PS01_Cmd_GetStatus(motor);
+    return *reinterpret_cast<MotorStepperStatus_t*>(&statusReg);
+}
+
 void MotorStepper::resetHomePosition(MotorNum_t motor) 
 {
     uint32_t pos = PS01_Param_GetAbsPos(motor);

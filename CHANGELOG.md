@@ -119,3 +119,9 @@ Board which are ready to use :
 - Added function to register module event callback.
 - Reset AnalogInputsLS sensor list when the Master starts.
 - Added function to trigger the limit switch.
+
+# 1.7.2
+
+- Added Stepper motor CLI commands.
+- Fix Stepper errors.
+- Fix Library compilation error.

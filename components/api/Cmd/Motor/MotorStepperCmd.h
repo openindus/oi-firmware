@@ -14,11 +14,15 @@
 #include "Master.h"
 #include "MotorStepper.h"
 #include "MotorStepperParam.h"
+#include "Utils.h"
 
 class MotorStepperCmd
 {
 public:
+    /* Constructor and destructor */
     MotorStepperCmd(ModuleControl* module);
+    MotorStepperCmd(uint16_t id) : _module(new ModuleControl(id)) {}
+    ~MotorStepperCmd() { delete _module; }
 
     /**
      * @brief Attach a limit switch to the specified motor
@@ -104,6 +108,14 @@ public:
     float getSpeed(MotorNum_t motor);
 
     /**
+     * @brief Get the motor status
+     *
+     * @param motor Motor num
+     * @return MotorStepperStatus_t Structure containing parsed motor status information
+     */
+    MotorStepperStatus_t getStatus(MotorNum_t motor);
+
+    /**
      * @brief Reset home position without perform homing
      *
      * @param motor
@@ -155,7 +167,7 @@ public:
     void run(MotorNum_t motor, MotorDirection_t direction, float speed);
 
     /**
-     * @brief Wait for motor to finish is action
+     * @brief Await end of motor movement.
      * If motor is moving with a 'run' command, wait will return as soon as the required speed is
      * reach.
      *
@@ -219,7 +231,6 @@ private:
     void (*_flagIsrCallback)(MotorNum_t, MotoStepperFlag_t);
 
 protected:
-
     friend class Core;
 
     /* Command line interface */

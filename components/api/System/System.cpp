@@ -126,6 +126,9 @@ extern "C" void app_main(void)
     }
 #elif defined(MODULE_SLAVE)
     UsbConsole::begin(); // Start console
+#if defined(FORCE_START)
+    System::start(); // Start main task
+#endif
 #else
     System::start(); // Start main task
 #endif

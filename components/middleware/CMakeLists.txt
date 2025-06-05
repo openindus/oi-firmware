@@ -49,17 +49,6 @@ set(COMPONENT_SRCS
     "RS/RS.cpp"
     "Board/Board.cpp"
     "Board/Board_CLI.cpp"
-    "Netif/Ethenet.c"
-    "Netif/Event.c"
-    "Netif/LTE.c"
-    "Netif/Mac.c"
-    "Netif/Wifi.c"
-    "Cloud/Cloud_authentication.cpp"
-    "Cloud/Cloud_http.cpp"
-    "Cloud/Cloud_NTP.cpp"
-    "Cloud/Cloud.cpp"
-    "Cloud/CloudTasks.cpp"
-    "Cloud/Var.cpp"
     "Modem/Modem.cpp"
     "Modem/Modem_private.cpp"
 )
@@ -97,8 +86,6 @@ set(COMPONENT_INCLUDE_DIRS
     "CAN"
     "RS"
     "Board"
-    "Netif"
-    "Cloud"
     "Modem"
 )
 

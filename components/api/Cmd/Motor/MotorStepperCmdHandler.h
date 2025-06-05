@@ -96,6 +96,13 @@ public:
             data.insert(data.end(), ptr, ptr + sizeof(float));
         });
 
+        Slave::addCallback(CALLBACK_MOTOR_GET_STATUS, [](std::vector<uint8_t> &data) {
+            MotorNum_t motor            = static_cast<MotorNum_t>(data[1]);
+            MotorStepperStatus_t status = MotorStepper::getStatus(motor);
+            uint8_t *ptr                = reinterpret_cast<uint8_t *>(&status);
+            data.insert(data.end(), ptr, ptr + sizeof(MotorStepperStatus_t));
+        });
+
         Slave::addCallback(CALLBACK_MOTOR_RESET_HOME_POSITION, [](std::vector<uint8_t> &data) {
             MotorNum_t motor = static_cast<MotorNum_t>(data[1]);
             MotorStepper::resetHomePosition(motor);
