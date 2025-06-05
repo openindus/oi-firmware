@@ -94,6 +94,14 @@ float MotorStepperCmd::getSpeed(MotorNum_t motor)
     return *speed;
 }
 
+MotorStepperStatus_t MotorStepperCmd::getStatus(MotorNum_t motor)
+{
+    std::vector<uint8_t> msgBytes = {CALLBACK_MOTOR_GET_STATUS, (uint8_t)motor};
+    _module->runCallback(msgBytes);
+    MotorStepperStatus_t *status = reinterpret_cast<MotorStepperStatus_t *>(&msgBytes[2]);
+    return *status;
+}
+
 void MotorStepperCmd::resetHomePosition(MotorNum_t motor)
 {
     std::vector<uint8_t> msgBytes = {CALLBACK_MOTOR_RESET_HOME_POSITION, (uint8_t)motor};

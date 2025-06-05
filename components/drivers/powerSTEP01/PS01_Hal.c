@@ -30,21 +30,17 @@ void _flagTask(void* arg)
     uint16_t status = 0;
     uint8_t deviceId = *(uint8_t*)arg;
 
-    while(1) 
-    {
-        if (PS01_Hal_GetFlagLevel(deviceId) == 0 && PS01_Cmd_GetParam(deviceId, POWERSTEP01_STATUS) != status) {
-            status = PS01_Cmd_GetStatus(deviceId);
-        }
-        else if(xQueueReceive(_flagEvent[deviceId], NULL, portMAX_DELAY)) {
-            gpio_intr_disable(_deviceConfig.pin_flag[deviceId]);
-            status = PS01_Cmd_GetStatus(deviceId);
+    while(1) {
+        if (xQueueReceive(_flagEvent[deviceId], NULL, portMAX_DELAY)) {
+            // gpio_intr_disable(_deviceConfig.pin_flag[deviceId]);
+            status = PS01_Cmd_GetParam(deviceId, POWERSTEP01_STATUS);
 
             /* Run the callback */
             if (_flagCallback != NULL) {
                 _flagCallback(deviceId, status); 
             }
 
-            gpio_intr_enable(_deviceConfig.pin_flag[deviceId]);
+            // gpio_intr_enable(_deviceConfig.pin_flag[deviceId]);
         }
 
         if (((status & POWERSTEP01_STATUS_CMD_ERROR) >> 7) == 1) {

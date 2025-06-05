@@ -39,6 +39,26 @@ typedef enum {
 } MotoStepperFlag_t;
 
 /**
+ * @brief Motor status structure representing PowerStep01 status register
+ */
+typedef struct {
+    uint16_t hiz : 1;           // High impedance state (bit 0)
+    uint16_t busy : 1;          // Motor busy (bit 1)
+    uint16_t sw_f : 1;          // Switch input status (bit 2)
+    uint16_t sw_evn : 1;        // Switch turn-on event (bit 3)
+    uint16_t dir : 1;           // Direction of last movement (bit 4)
+    uint16_t mot_status : 2;    // Motor status (bits 5-6): 0=stopped, 1=acceleration, 2=deceleration, 3=constant speed
+    uint16_t cmd_error : 1;     // Command error (bit 7)
+    uint16_t stck_mod : 1;      // Step-clock mode (bit 8)
+    uint16_t uvlo : 1;          // Undervoltage lockout (bit 9)
+    uint16_t uvlo_adc : 1;      // VS undervoltage lockout (bit 10)
+    uint16_t th_status : 2;     // Thermal status (bits 11-12): 0=normal, 1=warning, 2=bridge shutdown, 3=device shutdown
+    uint16_t ocd : 1;           // Overcurrent detection (bit 13)
+    uint16_t stall_a : 1;       // Stall detection on bridge A (bit 14)
+    uint16_t stall_b : 1;       // Stall detection on bridge B (bit 15)
+} MotorStepperStatus_t;
+
+/**
  * @brief Stepper motors stop modes
  *
  */
@@ -133,6 +153,14 @@ public:
     static float getSpeed(MotorNum_t motor);
 
     /**
+     * @brief Get the motor status
+     *
+     * @param motor Motor num
+     * @return MotorStepperStatus_t Structure containing parsed motor status information
+     */
+    static MotorStepperStatus_t getStatus(MotorNum_t motor);
+
+    /**
      * @brief Reset home position without perform homing
      *
      * @param motor
@@ -184,7 +212,7 @@ public:
     static void run(MotorNum_t motor, MotorDirection_t direction, float speed);
 
     /**
-     * @brief Wait for motor to finish is action
+     * @brief Await end of motor movement.
      * If motor is moving with a 'run' command, wait will return as soon as the required speed is
      * reach.
      *

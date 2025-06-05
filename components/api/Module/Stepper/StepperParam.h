@@ -21,7 +21,7 @@
             .lowSpeedOptimization = POWERSTEP01_LSPD_OPT_OFF,                   \
             .fullStepSpeed = 595.09,                                            \
             .boostMode = POWERSTEP01_BOOST_MODE_OFF,                            \
-            .ocdThreshold = POWERSTEP01_OCD_TH_281_25mV,                        \
+            .ocdThreshold = POWERSTEP01_OCD_TH_156_25mV,                        \
             .stepMode = STEP_MODE_1_16,                                         \
             .syncClockSelection = POWERSTEP01_SYNC_SEL_DISABLED,                \
             .alarmsSelection = (POWERSTEP01_ALARM_EN_OVERCURRENT |              \
@@ -47,11 +47,11 @@
         .accelerationFinalSlope = 0.06256,                                      \
         .decelerationFinalSlope = 0.06256,                                      \
         .thermalCompensationFactor = 1,                                         \
-        .stallThreshold = 531.25,                                               \
-        .oscClkSel = POWERSTEP01_CONFIG_INT_16MHZ_OSCOUT_2MHZ,                  \
+        .stallThreshold = 468.75,                                               \
+        .oscClkSel = POWERSTEP01_CONFIG_INT_16MHZ,                              \
         .swMode = POWERSTEP01_CONFIG_SW_HARD_STOP,                              \
         .enVsComp = POWERSTEP01_CONFIG_VS_COMP_DISABLE,                         \
-        .ocSd = POWERSTEP01_CONFIG_OC_SD_DISABLE,                               \
+        .ocSd = POWERSTEP01_CONFIG_OC_SD_ENABLE,                                \
         .uvloVal = POWERSTEP01_CONFIG_UVLOVAL_LOW,                              \
         .vccVal = POWERSTEP01_CONFIG_VCCVAL_15V,                                \
         .fPwmInt = POWERSTEP01_CONFIG_PWM_DIV_1,                                \
@@ -71,7 +71,7 @@
             .lowSpeedOptimization = POWERSTEP01_LSPD_OPT_OFF,                   \
             .fullStepSpeed = 595.09,                                            \
             .boostMode = POWERSTEP01_BOOST_MODE_OFF,                            \
-            .ocdThreshold = POWERSTEP01_OCD_TH_281_25mV,                        \
+            .ocdThreshold = POWERSTEP01_OCD_TH_156_25mV,                        \
             .stepMode = STEP_MODE_1_16,                                         \
             .syncClockSelection = POWERSTEP01_SYNC_SEL_DISABLED,                \
             .alarmsSelection = (POWERSTEP01_ALARM_EN_OVERCURRENT |              \
@@ -96,11 +96,11 @@
         .fastStep = POWERSTEP01_FAST_STEP_12us,                                 \
         .tonMin = 3.0,                                                          \
         .toffMin = 21.0,                                                        \
-        .oscClkSel = POWERSTEP01_CONFIG_INT_16MHZ_OSCOUT_2MHZ,                  \
+        .oscClkSel = POWERSTEP01_CONFIG_INT_16MHZ,                              \
         .swMode = POWERSTEP01_CONFIG_SW_HARD_STOP,                              \
         .tqReg = POWERSTEP01_CONFIG_TQ_REG_TVAL_USED,                           \
         .enVsComp = POWERSTEP01_CONFIG_VS_COMP_DISABLE,                         \
-        .ocSd = POWERSTEP01_CONFIG_OC_SD_DISABLE,                               \
+        .ocSd = POWERSTEP01_CONFIG_OC_SD_ENABLE,                                \
         .uvloVal = POWERSTEP01_CONFIG_UVLOVAL_LOW,                              \
         .vccVal = POWERSTEP01_CONFIG_VCCVAL_15V,                                \
         .tsw = POWERSTEP01_CONFIG_TSW_048us,                                    \
