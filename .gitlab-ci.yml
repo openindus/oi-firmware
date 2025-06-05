@@ -30,6 +30,7 @@ setup:
   needs:
     - job: setup
   after_script:
+    - rm -rf .oi/bin/
     - mkdir -p .oi/bin/oi-firmware-$(cat version.txt)
     - cp .pio/build/${PIOENV}/firmware.bin .oi/bin/oi-firmware-$(cat version.txt)/${PIOENV}_firmware-$(cat version.txt).bin
     - cp .pio/build/${PIOENV}/ota_data_initial.bin .oi/bin/oi-firmware-$(cat version.txt)/${PIOENV}_ota_data_initial-$(cat version.txt).bin
@@ -152,6 +153,7 @@ build:docs:
     - make html
     - cd ..
   after_script:
+    - rm -rf .oi/docs/
     - mkdir .oi/docs/
     - cp -r docs/build/html/ .oi/docs/
   rules:
@@ -187,6 +189,7 @@ pkg:library:
   needs:
     - job: setup
   before_script:
+    - rm -rf .oi/lib/
     - mkdir .oi/lib/
   script:
     - /root/.platformio/penv/bin/pio pkg pack --output=".oi/lib/"
