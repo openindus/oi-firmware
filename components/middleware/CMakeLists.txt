@@ -4,22 +4,14 @@ set(COMPONENT_SRCS
     "Bus/BusCAN.cpp"
     "Bus/Bus_CLI.cpp"
     "Encoder/Encoder.cpp"
-    "Digital/Inputs/DigitalInputs.cpp"
-    "Digital/Inputs/DigitalInputs_CLI.cpp"
-    "Digital/Inputs/DigitalInputsExp.cpp"
-    "Digital/Inputs/DigitalInputsExp_CLI.cpp"
-    "Digital/Outputs/DigitalOutputs.cpp"
-    "Digital/Outputs/DigitalOutputs_CLI.cpp"
-    "Digital/Outputs/DigitalOutputsExp.cpp"
-    "Digital/Outputs/DigitalOutputsExp_CLI.cpp"
     "Relays/Relays.cpp"
     "Relays/Relays_CLI.cpp"
     "Motor/Motor.cpp"
     "Motor/Brushless/MotorBLDC.cpp"
-    "Motor/Stepper/MotorStepper.cpp"
-    "Motor/Stepper/MotorStepperCLI.cpp"
-    "Motor/Stepper/MotorStepperParam.cpp"
-    "Motor/Stepper/MotorStepperParamCLI.cpp"
+    # "Motor/Stepper/MotorStepper.cpp"
+    # "Motor/Stepper/MotorStepperCLI.cpp"
+    # "Motor/Stepper/MotorStepperParam.cpp"
+    # "Motor/Stepper/MotorStepperParamCLI.cpp"
     "Motor/Dc/MotorDc.cpp"
     "Motor/Dc/MotorDc_CLI.cpp"
     "Usb/UsbConsole.cpp"
@@ -57,9 +49,6 @@ set(COMPONENT_INCLUDE_DIRS
     "."
     "Bus"
     "Encoder"
-    "Digital"
-    "Digital/Inputs"
-    "Digital/Outputs"
     "Relays"
     "Analog"
     "Analog/InputsHV"
@@ -90,7 +79,7 @@ set(COMPONENT_INCLUDE_DIRS
 )
 
 set(COMPONENT_PRIV_REQUIRES
-
+    "api"
 )
 
 set(COMPONENT_REQUIRES

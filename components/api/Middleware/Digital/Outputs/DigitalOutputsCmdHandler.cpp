@@ -10,7 +10,7 @@
 
 #if defined(MODULE_SLAVE)
 
-void (*DigitalOutputsCmdHandler::_overcurrentCallback)(void) = [](void) {
+void (*DigitalOutputsCmdHandler::_overcurrentCallback)(void*) = [](void*) {
     Slave::sendEvent({EVENT_OVERCURRENT});
 };
 

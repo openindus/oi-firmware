@@ -113,6 +113,61 @@ static int _registerPingCmd(void)
     }
 }
 
+/* --- get-slave-id --- */
+
+static struct {
+    struct arg_int *type;
+    struct arg_int *sn;
+    struct arg_end *end;
+} getSlaveIdArgs;
+
+static int getSlaveIdCmd(int argc, char **argv)
+{
+    uint16_t type;
+    uint32_t sn;
+    uint16_t id;
+
+    int nerrors = arg_parse(argc, argv, (void **) &getSlaveIdArgs);
+    if (nerrors != 0) {
+        arg_print_errors(stderr, getSlaveIdArgs.end, argv[0]);
+        return 1;
+    }
+
+    type = getSlaveIdArgs.type->ival[0];
+    sn = getSlaveIdArgs.sn->ival[0];
+
+    id = Master::getSlaveId(type, sn);
+    
+    if (id != 0) {
+        printf("Slave ID: %u\n", id);
+    } else {
+        printf("No slave found for board type %u with SN %u\n", type, sn);
+        return 2;
+    }
+    
+    return 0;
+}
+
+static int _registerGetSlaveIdCmd(void)
+{
+    getSlaveIdArgs.type = arg_int1(NULL, NULL, "<TYPE>", "Board type");
+    getSlaveIdArgs.sn = arg_int1(NULL, NULL, "<SN>", "Board serial number");
+    getSlaveIdArgs.end = arg_end(1);
+    const esp_console_cmd_t cmd = {
+        .command = "get-slave-id",
+        .help = "Get slave ID from board type and serial number",
+        .hint = NULL,
+        .func = &getSlaveIdCmd,
+        .argtable = &getSlaveIdArgs
+    };
+
+    if (esp_console_cmd_register(&cmd) == ESP_OK) {
+        return 0;
+    } else {
+        return -1;
+    }
+}
+
 /* --- auto-id --- */
 
 static int autoId(int argc, char **argv) 
@@ -404,6 +459,7 @@ int Master::_registerCLI(void)
     int err = 0;
     err |= _registerPingCmd();
     err |= _registerProgramCmd();
+    err |= _registerGetSlaveIdCmd();
     err |= _registerAutoIdCmd();
     err |= _registerDiscoverSlavesCmd();
     err |= _registerGetSlaveInfoCmd();

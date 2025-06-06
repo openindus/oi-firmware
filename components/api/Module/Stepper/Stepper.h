@@ -10,7 +10,6 @@
 
 #include "Common.h"
 #include "ModuleControl.h"
-#include "DigitalDefs.h"
 #include "DigitalInputs.h"
 #include "DigitalInputsCmd.h"
 #include "DigitalInputsCmdHandler.h"

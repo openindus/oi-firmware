@@ -54,13 +54,24 @@ int System::init(void)
     err |= Slave::init(); // Initialize slave
 #endif
 
-    return (err == 0);
+    if (err != 0) {
+        LOGE(TAG, "System initialization failed with error code: %d", err);
+        return 0;
+    } else {
+        LOGI(TAG, "System initialized successfully");
+        return 1;
+    }
 }
 
 void System::start(void)
 {
     if (_mainTaskHandle == NULL) {
-        xTaskCreate(_mainTask, "Main task", 8192, NULL, 1, &_mainTaskHandle);
+        BaseType_t ret = xTaskCreate(_mainTask, "Main task", 8192, NULL, 1, &_mainTaskHandle);
+        if (ret != pdPASS) {
+            LOGE(TAG, "Failed to create main task");
+        } else {
+            LOGI(TAG, "Main task started successfully");
+        }
     }
 }
 
@@ -83,8 +94,8 @@ void System::stop(void)
 extern "C" void app_main(void)
 {
     /*--- Harware init ---*/
-    if (System::init()) {                 // Initialize modules
-        Module::ledBlink(LED_BLUE, 1000); // Module Initialized
+    if (System::init()) {
+        Module::ledBlink(LED_BLUE, 1000); // System Initialized
     } else {
         LOGE(TAG, "Failed to initialize module");
         Module::ledBlink(LED_RED, 1000); // Error

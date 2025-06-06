@@ -7,6 +7,8 @@
  */
 
 #include "Discrete.h"
+#include "DigitalInputsCLI.h"
+#include "DigitalOutputsCLI.h"
 
 #if (defined(OI_DISCRETE) || defined(OI_DISCRETE_VE))
 
@@ -73,6 +75,10 @@ int Discrete::init(void)
     err |= DigitalOutputsCmdHandler::init();
     err |= DigitalInputsCmdHandler::init();
 #endif
+
+    /* CLI */
+    DigitalInputsCLI::init();
+    DigitalOutputsCLI::init();
 
     return err;
 }

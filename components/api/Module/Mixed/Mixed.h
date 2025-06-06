@@ -14,7 +14,6 @@
 #include "AnalogOutputs.h"
 #include "AnalogInputsLV.h"
 #include "DigitalOutputs.h"
-#include "DigitalDefs.h"
 #include "DigitalInputs.h"
 #include "AnalogOutputsCmdHandler.h"
 #include "AnalogInputsLVCmdHandler.h"

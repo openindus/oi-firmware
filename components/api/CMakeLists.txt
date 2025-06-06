@@ -1,6 +1,12 @@
 set(COMPONENT_SRCS
     "System/System.cpp"
+    "System/Master/Master.cpp"
+    "System/Master/MasterCLI.cpp"
+    "System/Slave/Slave.cpp"
+    "System/Slave/SlaveCLI.cpp"
+
     "Module/Module.cpp"
+    "Module/ModuleControl.cpp"
     "Module/Discrete/Discrete.cpp"
     "Module/Stepper/Stepper.cpp"
     "Module/RelayHP/RelayHP.cpp"
@@ -8,15 +14,16 @@ set(COMPONENT_SRCS
     "Module/Mixed/Mixed.cpp"
     "Module/AnalogLS/AnalogLS.cpp"
     "Module/Dc/Dc.cpp"
-    "Master/Master.cpp"
-    "Master/MasterCLI.cpp"
-    "Slave/Slave.cpp"
-    "Slave/SlaveCLI.cpp"
-    "Module/ModuleControl.cpp"
-    "Cmd/Digital/DigitalInputsCmd.cpp"
-    "Cmd/Digital/DigitalOutputsCmd.cpp"
-    "Cmd/Digital/DigitalInputsCmdHandler.cpp"
-    "Cmd/Digital/DigitalOutputsCmdHandler.cpp"
+
+    "Middleware/Digital/Inputs/DigitalInputs.cpp"
+    "Middleware/Digital/Inputs/DigitalInputsCLI.cpp"
+    "Middleware/Digital/Inputs/DigitalInputsCmdHandler.cpp"
+    "Middleware/Digital/Inputs/DigitalInputsCmd.cpp"
+    "Middleware/Digital/Outputs/DigitalOutputs.cpp"
+    "Middleware/Digital/Outputs/DigitalOutputsCLI.cpp"
+    "Middleware/Digital/Outputs/DigitalOutputsCmd.cpp"
+    "Middleware/Digital/Outputs/DigitalOutputsCmdHandler.cpp"
+
     "Cmd/Relay/RelayCmd.cpp"
     "Cmd/Relay/RelayCmdHandler.cpp"
     "Cmd/Analog/AnalogOutputsCmd.cpp"
@@ -39,6 +46,9 @@ set(COMPONENT_SRCS
 set(COMPONENT_INCLUDE_DIRS
     "."
     "System"
+    "System/Master"
+    "System/Slave"
+
     "Module"
     "Module/Discrete"
     "Module/Stepper"
@@ -48,15 +58,16 @@ set(COMPONENT_INCLUDE_DIRS
     "Module/Brushless"
     "Module/AnalogLS"
     "Module/Dc"
-    "Master"
-    "Slave"
+
+    "Middleware/Digital"
+    "Middleware/Digital/Inputs"
+    "Middleware/Digital/Outputs"
+
     "Cmd"
     "Cmd/Analog"
-    "Cmd/Digital"
     "Cmd/Relay"
     "Cmd/Dc"
     "Cmd/Analog"
-    "Cmd/Digital"
     "Cmd/Relay"
     "Cmd/Motor"
     "Cmd/Dc"
@@ -69,6 +80,7 @@ set(COMPONENT_PRIV_REQUIRES
 
 set(COMPONENT_REQUIRES
     "middleware"
+    "drivers"
 )
 
 idf_component_register(

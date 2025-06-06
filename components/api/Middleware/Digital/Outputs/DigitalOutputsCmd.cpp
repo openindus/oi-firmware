@@ -1,6 +1,6 @@
 /**
  * @file DigitalOutputsCmd.cpp
- * @brief Digital outputs commands
+ * @brief Digital Outputs commands
  * @author Kévin Lefeuvre (kevin.lefeuvre@openindus.com)
  * @copyright (c) [2025] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
@@ -9,6 +9,12 @@
 #include "DigitalOutputsCmd.h"
 
 #if defined(MODULE_MASTER)
+
+DOut_Num_t doutNumTable[DOUT_MAX] = {DOUT_1, DOUT_2, DOUT_3, DOUT_4, 
+#if !defined(OI_CORE) and !defined(OI_CORE_LITE)
+                                     DOUT_5, DOUT_6, DOUT_7, DOUT_8
+#endif
+                                    };
 
 void DigitalOutputsCmd::digitalWrite(DOut_Num_t num, bool level)
 {
@@ -52,6 +58,13 @@ float DigitalOutputsCmd::getOutputCurrent(DOut_Num_t num)
     return *current;
 }
 
+int DigitalOutputsCmd::outputIsOvercurrent(DOut_Num_t num)
+{
+    std::vector<uint8_t> msgBytes = {CALLBACK_OUTPUT_IS_OVERCURRENT, (uint8_t)num};
+    _module->runCallback(msgBytes);
+    return static_cast<int>(msgBytes[2]);
+}
+
 void DigitalOutputsCmd::setOvercurrentThreshold(float threshold, float thresholdSum)
 {
     std::vector<uint8_t> msgBytes = {CALLBACK_SET_OVERCURRENT_THRESHOLD};
@@ -62,12 +75,15 @@ void DigitalOutputsCmd::setOvercurrentThreshold(float threshold, float threshold
     _module->runCallback(msgBytes);
 }
 
-void DigitalOutputsCmd::attachOvercurrentCallback(void (*callback)(void))
+void DigitalOutputsCmd::attachOvercurrentCallback(void (*callback)(void*), void *arg)
 {
     std::vector<uint8_t> msgBytes = {CALLBACK_ATTACH_OVERCURRENT_CALLBACK};
     _overcurrentCallback          = callback;
     Master::addEventCallback(EVENT_OVERCURRENT, _module->getId(),
-                             [this](uint8_t *data) { _overcurrentCallback(); });
+                             [this](uint8_t *data) { 
+                                if (_overcurrentCallback != NULL) 
+                                    _overcurrentCallback(&doutNumTable[data[1]]); 
+                             });
     _module->runCallback(msgBytes);
 }
 

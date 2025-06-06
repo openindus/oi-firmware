@@ -16,6 +16,9 @@
 #include "Core.h"
 #include "CorePinout.h"
 #include "MotorStepperCmd.h"
+#include "DigitalOutputsCmd.h"
+#include "DigitalInputsCLI.h"
+#include "DigitalOutputsCLI.h"
 
 #if defined(OI_CORE)
 
@@ -168,14 +171,14 @@ int Core::init(void)
      * @brief DIN Init
      * 
      */
-    err |= DigitalInputsExp::init(&_ioex, _dinGpio, 4);
+    err |= DigitalInputs::init(&_ioex, _dinGpio, 4);
 
 
     /**
      * @brief DOUT Init
      * 
      */
-    err |= DigitalOutputsExp::init(&_ioex, _doutGpio, _doutCurrentGpio, 4);
+    err |= DigitalOutputs::init(&_ioex, _doutGpio, _doutCurrentGpio, 4);
 
     /**
      * @brief AIN Init 
@@ -268,6 +271,8 @@ int Core::init(void)
     xTaskCreate(_moduleTask, "Slave task", 4096, NULL, 1, NULL);
 
     /* Command line interface */
+    DigitalInputsCLI::init();
+    DigitalOutputsCLI::init();
     MotorStepperCmd::_registerCLI();
 
     return err;
