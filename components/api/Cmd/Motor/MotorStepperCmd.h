@@ -206,6 +206,14 @@ public:
     int getAdvancedParam(MotorNum_t motor, AdvancedParameter_t advParam, void* value);
 
     /**
+     * @brief Reset all advanced parameters to default values
+     *
+     * @param motor Motor num
+     * @return int 0 if success, -1 if error
+     */
+    int MotorStepperCmd::resetAllAdvancedParam(MotorNum_t motor);
+
+    /**
      * @brief Get the supply voltage
      *
      * @return float Supply voltage in V

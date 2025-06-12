@@ -14,28 +14,28 @@
 #include "esp_console.h"
 #include "argtable3/argtable3.h"
 
-/** 'limit-switch' */
+/** 'attach-limit-switch' */
 
 static struct {
     struct arg_int *motor;
     struct arg_int *din;
     struct arg_int *logic;
     struct arg_end *end;
-} limitSwitchArgs;
+} attachLimitSwitchArgs;
 
-static int limitSwitch(int argc, char **argv)
+static int attachLimitSwitch(int argc, char **argv)
 {
-    int nerrors = arg_parse(argc, argv, (void **) &limitSwitchArgs);
+    int nerrors = arg_parse(argc, argv, (void **) &attachLimitSwitchArgs);
     if (nerrors != 0) {
-        arg_print_errors(stderr, limitSwitchArgs.end, argv[0]);
+        arg_print_errors(stderr, attachLimitSwitchArgs.end, argv[0]);
         return 1;
     }
 
-    MotorNum_t motor = (MotorNum_t)(limitSwitchArgs.motor->ival[0] - 1);
-    DIn_Num_t din = (DIn_Num_t)(limitSwitchArgs.din->ival[0] - 1);
+    MotorNum_t motor = (MotorNum_t)(attachLimitSwitchArgs.motor->ival[0] - 1);
+    DIn_Num_t din = (DIn_Num_t)(attachLimitSwitchArgs.din->ival[0] - 1);
 
-    if (limitSwitchArgs.logic->count > 0) {
-        Logic_t logic = (Logic_t)(limitSwitchArgs.logic->ival[0]);
+    if (attachLimitSwitchArgs.logic->count > 0) {
+        Logic_t logic = (Logic_t)(attachLimitSwitchArgs.logic->ival[0]);
         MotorStepper::attachLimitSwitch(motor, din, logic);
     } else {
         MotorStepper::attachLimitSwitch(motor, din);
@@ -44,19 +44,60 @@ static int limitSwitch(int argc, char **argv)
     return 0;
 }
 
-static void _registerLimitSwitch(void)
+static void _registerAttachLimitSwitch(void)
 {
-    limitSwitchArgs.motor   = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
-    limitSwitchArgs.din    = arg_int1(NULL, NULL, "DIN", "[1-10]");
-    limitSwitchArgs.logic   = arg_int0(NULL, NULL, "logic", "[0: Active low, 1: Active high]");
-    limitSwitchArgs.end     = arg_end(4);
+    attachLimitSwitchArgs.motor   = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
+    attachLimitSwitchArgs.din    = arg_int1(NULL, NULL, "DIN", "[1-4]");
+    attachLimitSwitchArgs.logic   = arg_int0(NULL, NULL, "logic", "[0: Active low, 1: Active high]");
+    attachLimitSwitchArgs.end     = arg_end(4);
 
     const esp_console_cmd_t cmd = {
         .command = "attach-limit-switch",
         .help = "set limit switch",
         .hint = NULL,
-        .func = &limitSwitch,
-        .argtable = &limitSwitchArgs
+        .func = &attachLimitSwitch,
+        .argtable = &attachLimitSwitchArgs
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+}
+
+/** 'detach-limit-switch' */
+
+static struct {
+    struct arg_int *motor;
+    struct arg_int *din;
+    struct arg_int *logic;
+    struct arg_end *end;
+} detachLimitSwitchArgs;
+
+static int detachLimitSwitch(int argc, char **argv)
+{
+    int nerrors = arg_parse(argc, argv, (void **) &detachLimitSwitchArgs);
+    if (nerrors != 0) {
+        arg_print_errors(stderr, detachLimitSwitchArgs.end, argv[0]);
+        return 1;
+    }
+
+    MotorNum_t motor = (MotorNum_t)(detachLimitSwitchArgs.motor->ival[0] - 1);
+    DIn_Num_t din = (DIn_Num_t)(detachLimitSwitchArgs.din->ival[0] - 1);
+
+    MotorStepper::detachLimitSwitch(motor, din);
+
+    return 0;
+}
+
+static void _registerDetachLimitSwitch(void)
+{
+    detachLimitSwitchArgs.motor   = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
+    detachLimitSwitchArgs.din     = arg_int1(NULL, NULL, "DIN", "[1-4]");
+    detachLimitSwitchArgs.end     = arg_end(4);
+
+    const esp_console_cmd_t cmd = {
+        .command = "detach-limit-switch",
+        .help = "Detach a limit switch from the specified motor",
+        .hint = NULL,
+        .func = &detachLimitSwitch,
+        .argtable = &detachLimitSwitchArgs
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
 }
@@ -531,7 +572,7 @@ static int getStatus(int argc, char **argv)
 static void _registerGetStatus(void)
 {
     getStatusArgs.motor = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
-    getStatusArgs.raw   = arg_lit0(NULL, "raw", "output raw register value as uint16_t");
+    getStatusArgs.raw   = arg_lit0("r", "raw", "Output raw register value as uint16_t");
     getStatusArgs.end   = arg_end(3);
 
     const esp_console_cmd_t cmd = {
@@ -546,7 +587,8 @@ static void _registerGetStatus(void)
 
 int MotorStepper::_registerCLI(void)
 {
-    _registerLimitSwitch();
+    _registerAttachLimitSwitch();
+    _registerDetachLimitSwitch();
     _registerStepResolution();
     _registerSetMaxSpeed();
     _registerGetPosition();

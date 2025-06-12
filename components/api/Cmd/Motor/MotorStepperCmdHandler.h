@@ -176,6 +176,12 @@ public:
             MotorStepperParam::getAdvancedParam(args.motor, args.advParam, args.value);
         });
 
+        Slave::addCallback(CALLBACK_MOTOR_RESET_ALL_ADVANCED_PARAM, [](std::vector<uint8_t> &data) {
+            MotorNum_t motor         = static_cast<MotorNum_t>(data[1]);
+            MotorStepperParam::resetAllAdvancedParamPS01(motor);
+            data.clear();
+        });
+
         Slave::addCallback(CALLBACK_MOTOR_GET_SUPPLY_VOLTAGE, [](std::vector<uint8_t> &data) {
             float voltage    = MotorStepper::getSupplyVoltage();
             uint8_t *ptr     = reinterpret_cast<uint8_t *>(&voltage);

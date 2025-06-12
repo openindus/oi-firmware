@@ -119,21 +119,6 @@ static bool eq(const char * reference, const char * to_compare) {
     return strncmp(reference, to_compare, length) == 0;
 }
 
-static void deviceReset(uint8_t motor)
-{
-    uint8_t device = motor - 1;
-    PS01_Hal_Reset(device);
-    vTaskDelay(10/portTICK_PERIOD_MS);
-    PS01_Hal_ReleaseReset(device);
-    vTaskDelay(10/portTICK_PERIOD_MS);
-    int errorCode = MotorStepperParam::setAllAdvancedParamPS01((MotorNum_t) device, defaultParameters);
-    if (errorCode != 0) {
-        printf("Error while setting default parameters\n");
-    } else {
-        MotorStepperParam::setNVSParam((MotorNum_t) device, defaultParameters);
-    }
-}
-
 int deviceSetAdvancedParameter(uint8_t motorId, const char* parameter, double *args, int nargs) {
     uint8_t deviceId = motorId - 1;
     /* set given parameter */
@@ -717,7 +702,7 @@ static int stepperParser(int argc, char **argv) {
     int getAdvancedParametersErrors = arg_parse(argc, argv, (void **) &getAdvancedParametersArgtable);
 
     if (resetErrors == 0) {
-        deviceReset(resetArgtable.motor->ival[0]);
+        MotorStepperParam::resetAllAdvancedParamPS01(static_cast<MotorNum_t>(resetArgtable.motor->ival[0]));
         exitcode = 0;
 
     } else if (setAdvancedParametersErrors == 0) {

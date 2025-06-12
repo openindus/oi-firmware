@@ -177,6 +177,12 @@ int MotorStepperCmd::setAdvancedParam(MotorNum_t motor, AdvancedParameter_t advP
     return _module->runCallback(CALLBACK_MOTOR_SET_ADVANCED_PARAM, args);
 }
 
+int MotorStepperCmd::resetAllAdvancedParam(MotorNum_t motor)
+{
+    std::vector<uint8_t> msgBytes = {CALLBACK_MOTOR_RESET_ALL_ADVANCED_PARAM, (uint8_t)motor};
+    return _module->runCallback(msgBytes);
+}
+
 int MotorStepperCmd::getAdvancedParam(MotorNum_t motor, AdvancedParameter_t advParam, void* value)
 {
     std::vector<uint8_t> args = GetAdvancedParamArgs_s{motor, advParam, value};

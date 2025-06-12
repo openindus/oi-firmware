@@ -93,10 +93,10 @@ const std::map<std::string, AdvancedParameterInfo_s> advancedParamMap = {
 
 static struct {
     struct arg_int *id;
-    struct arg_str *cmd;
     struct arg_int *motor;
+    struct arg_str *cmd;
     struct arg_str *param;
-    struct arg_rex *value;
+    struct arg_dbl *value;
     struct arg_end *end;
 } advancedParamArgs;
 
@@ -104,7 +104,7 @@ static int advancedParamFunc(int argc, char **argv)
 {
     PARSE_ARGS_OR_RETURN(argc, argv, advancedParamArgs);
 
-    uint16_t id      = advancedParamArgs.id->ival[0];
+    uint16_t id = advancedParamArgs.id->ival[0];
     MotorNum_t motor = (MotorNum_t)(advancedParamArgs.motor->ival[0] - 1);
 
     if (motor >= MOTOR_MAX_NUM) {
@@ -112,9 +112,6 @@ static int advancedParamFunc(int argc, char **argv)
                  advancedParamArgs.motor->ival[0], 0, MOTOR_MAX_NUM);
         return 1;
     }
-    
-    AdvancedParameterInfo_s AdvancedParameterInfo_s =
-        advancedParamMap.at(advancedParamArgs.param->sval[0]);
 
     MotorStepperCmd *stepper = new MotorStepperCmd(id);
     if (stepper == nullptr) {
@@ -122,7 +119,9 @@ static int advancedParamFunc(int argc, char **argv)
         return 1;
     }
 
-    if (strcmp(advancedParamArgs.cmd->sval[0], "get") == 0) {
+    if (strcmp(advancedParamArgs.cmd->sval[0], "get") == 0) 
+    {
+        AdvancedParameterInfo_s AdvancedParameterInfo_s = advancedParamMap.at(advancedParamArgs.param->sval[0]);
         if (AdvancedParameterInfo_s.type == TYPE_FLOAT) {
             float value = 0.0f;
             stepper->getAdvancedParam(motor, AdvancedParameterInfo_s.param, &value);
@@ -132,15 +131,26 @@ static int advancedParamFunc(int argc, char **argv)
             stepper->getAdvancedParam(motor, AdvancedParameterInfo_s.param, &value);
             printf("%d\n", value);
         }
-    } else if (strcmp(advancedParamArgs.cmd->sval[0], "set") == 0) {
-        const char *str_value = advancedParamArgs.value->sval[0];
+    } 
+    else if (strcmp(advancedParamArgs.cmd->sval[0], "set") == 0) 
+    {
+        AdvancedParameterInfo_s AdvancedParameterInfo_s = advancedParamMap.at(advancedParamArgs.param->sval[0]);
         if (AdvancedParameterInfo_s.type == TYPE_FLOAT) {
-            float value = strtof(str_value, NULL);
+            float value = static_cast<float>(advancedParamArgs.value->dval[0]);
             stepper->setAdvancedParam(motor, AdvancedParameterInfo_s.param, &value);
         } else {
-            int value = strtoul(str_value, NULL, 10);
+            int value = static_cast<int>(advancedParamArgs.value->dval[0]);
             stepper->setAdvancedParam(motor, AdvancedParameterInfo_s.param, &value);
         }
+    } 
+    else if (strcmp(advancedParamArgs.cmd->sval[0], "reset") == 0) 
+    {
+        stepper->resetAllAdvancedParam(motor);
+    } 
+    else {
+        ESP_LOGE(TAG, "Unknown command: %s", advancedParamArgs.cmd->sval[0]);
+        delete stepper;
+        return 1;
     }
 
     delete stepper;
@@ -152,7 +162,7 @@ static struct {
     struct arg_int *id;
     struct arg_int *motor;
     struct arg_int *din;
-    struct arg_str *logic;
+    struct arg_int *logic;
     struct arg_end *end;
 } attachLimitSwitchArgs;
 
@@ -176,12 +186,7 @@ static int attachLimitSwitchFunc(int argc, char **argv)
                  attachLimitSwitchArgs.din->ival[0], 0, DIN_MAX_NUM);
         return 1;
     }
-    
-    if (attachLimitSwitchArgs.logic->count > 0) {
-        if (strcmp(attachLimitSwitchArgs.logic->sval[0], "low") == 0) {
-            logic = ACTIVE_LOW;
-        }
-    }
+
 
     MotorStepperCmd *stepper = new MotorStepperCmd(id);
     if (stepper == nullptr) {
@@ -189,7 +194,12 @@ static int attachLimitSwitchFunc(int argc, char **argv)
         return 1;
     }
 
-    stepper->attachLimitSwitch(motor, din, logic);
+    if (attachLimitSwitchArgs.logic->count > 0) {
+        Logic_t logic = (Logic_t)(attachLimitSwitchArgs.logic->ival[0]);
+        stepper->attachLimitSwitch(motor, din, logic);
+    } else {
+        stepper->attachLimitSwitch(motor, din);
+    }
 
     delete stepper;
 
@@ -264,6 +274,35 @@ static int setStepResolutionFunc(int argc, char **argv)
     }
 
     stepper->setStepResolution(motor, resolution);
+
+    delete stepper;
+
+    return 0;
+}
+
+/** 'set-speed' */
+
+static struct {
+    struct arg_int *id;
+    struct arg_int *motor;
+    struct arg_int *speed;
+    struct arg_end *end;
+} setMaxSpeedArgs;
+
+static int setMaxSpeedFunc(int argc, char **argv)
+{
+    PARSE_ARGS_OR_RETURN(argc, argv, setMaxSpeedArgs);
+
+    uint16_t id = setStepResolutionArgs.id->ival[0];
+    MotorNum_t motor = (MotorNum_t)(setMaxSpeedArgs.motor->ival[0] - 1);
+    float speed = (float)(setMaxSpeedArgs.speed->ival[0]);
+
+    MotorStepperCmd *stepper = new MotorStepperCmd(id);
+    if (stepper == nullptr) {
+        ESP_LOGE(TAG, "Failed to create MotorStepperCmd instance");
+        return 1;
+    }
+    stepper->setMaxSpeed(motor, speed);
 
     delete stepper;
 
@@ -534,10 +573,11 @@ static int getStatusFunc(int argc, char **argv)
 
     MotorStepperStatus_t status = stepper->getStatus(motor);
     
+    delete stepper;
+
     if (getStatusArgs.raw->count > 0) {
         uint16_t statusReg = *reinterpret_cast<uint16_t*>(&status);
         printf("0x%04X\n", statusReg);
-        delete stepper;
         return 0;
     }
 
@@ -562,8 +602,6 @@ static int getStatusFunc(int argc, char **argv)
     printf("  Overcurrent Detection: %s\n", !status.ocd ? "YES" : "NO");
     printf("  Stall Detection A: %s\n", !status.stall_a ? "YES" : "NO");
     printf("  Stall Detection B: %s\n", !status.stall_b ? "YES" : "NO");
-
-    delete stepper;
 
     return 0;
 }
@@ -685,7 +723,6 @@ static struct {
     struct arg_int *id;
     struct arg_int *motor;
     struct arg_int *position;
-    struct arg_lit *microstep;
     struct arg_end *end;
 } moveAbsoluteArgs;
 
@@ -696,7 +733,6 @@ static int moveAbsoluteFunc(int argc, char **argv)
     uint16_t id = moveAbsoluteArgs.id->ival[0];
     MotorNum_t motor = (MotorNum_t)(moveAbsoluteArgs.motor->ival[0] - 1);
     uint32_t position = (uint32_t)moveAbsoluteArgs.position->ival[0];
-    bool microStep = moveAbsoluteArgs.microstep->count > 0;
 
     if (motor >= MOTOR_MAX_NUM) {
         ESP_LOGE(TAG, "Invalid motor number: %d. Must be between %d and %d", 
@@ -710,7 +746,7 @@ static int moveAbsoluteFunc(int argc, char **argv)
         return 1;
     }
 
-    stepper->moveAbsolute(motor, position, microStep);
+    stepper->moveAbsolute(motor, position);
 
     delete stepper;
 
@@ -721,7 +757,6 @@ static struct {
     struct arg_int *id;
     struct arg_int *motor;
     struct arg_int *position;
-    struct arg_lit *microstep;
     struct arg_int *dir;
     struct arg_end *end;
 } moveRelativeArgs;
@@ -733,7 +768,6 @@ static int moveRelativeFunc(int argc, char **argv)
     uint16_t id = moveRelativeArgs.id->ival[0];
     MotorNum_t motor = (MotorNum_t)(moveRelativeArgs.motor->ival[0] - 1);
     int32_t position = moveRelativeArgs.position->ival[0];
-    bool microStep = moveRelativeArgs.microstep->count > 0;
 
     if (motor >= MOTOR_MAX_NUM) {
         ESP_LOGE(TAG, "Invalid motor number: %d. Must be between %d and %d", 
@@ -759,7 +793,7 @@ static int moveRelativeFunc(int argc, char **argv)
         return 1;
     }
 
-    stepper->moveRelative(motor, position, microStep);
+    stepper->moveRelative(motor, position);
 
     delete stepper;
 
@@ -769,8 +803,8 @@ static int moveRelativeFunc(int argc, char **argv)
 static struct {
     struct arg_int *id;
     struct arg_int *motor;
-    struct arg_str *direction;
-    struct arg_dbl *speed;
+    struct arg_int *direction;
+    struct arg_int *speed;
     struct arg_end *end;
 } runArgs;
 
@@ -780,22 +814,13 @@ static int runFunc(int argc, char **argv)
 
     uint16_t id = runArgs.id->ival[0];
     MotorNum_t motor = (MotorNum_t)(runArgs.motor->ival[0] - 1);
-    float speed = (float)runArgs.speed->dval[0];
-    MotorDirection_t direction = FORWARD; // Default direction
+    MotorDirection_t direction = (MotorDirection_t)(runArgs.direction->ival[0]);
+    float speed = (float)runArgs.speed->ival[0];
 
     if (motor >= MOTOR_MAX_NUM) {
         ESP_LOGE(TAG, "Invalid motor number: %d. Must be between %d and %d", 
                  runArgs.motor->ival[0], 0, MOTOR_MAX_NUM);
         return 1;
-    }
-
-    if (runArgs.direction->count > 0) {
-        const char *dir_str = runArgs.direction->sval[0];
-        if (strcmp(dir_str, "forward") == 0 || strcmp(dir_str, "fwd") == 0) {
-            direction = FORWARD;
-        } else if (strcmp(dir_str, "reverse") == 0 || strcmp(dir_str, "rev") == 0) {
-            direction = REVERSE;
-        }
     }
 
     MotorStepperCmd *stepper = new MotorStepperCmd(id);
@@ -814,7 +839,7 @@ static int runFunc(int argc, char **argv)
 static struct {
     struct arg_int *id;
     struct arg_int *motor;
-    struct arg_dbl *speed;
+    struct arg_int *speed;
     struct arg_end *end;
 } homingArgs;
 
@@ -824,7 +849,7 @@ static int homingFunc(int argc, char **argv)
 
     uint16_t id = homingArgs.id->ival[0];
     MotorNum_t motor = (MotorNum_t)(homingArgs.motor->ival[0] - 1);
-    float speed = (float)homingArgs.speed->dval[0];
+    float speed = (float)homingArgs.speed->ival[0];
 
     if (motor >= MOTOR_MAX_NUM) {
         ESP_LOGE(TAG, "Invalid motor number: %d. Must be between %d and %d", 
@@ -874,24 +899,24 @@ void MotorStepperCmd::_registerCLI(void)
 {
     /* Advanced parameters command */
     advancedParamArgs.id    = arg_int1("i", "id", "<id>", "ModuleControl ID");
-    advancedParamArgs.cmd   = arg_str1(NULL, NULL, "<cmd>", "Command: get/set");
-    advancedParamArgs.motor = arg_int1(NULL, NULL, "<motor>", "Motor number");
-    advancedParamArgs.param = arg_str0(NULL, NULL, "<param>", "Parameter to set/get");
-    advancedParamArgs.value = arg_rex0(NULL, NULL, "^-?([0-9]+\\.?[0-9]*|\\.[0-9]+)$", "<value>",
-                                       REG_EXTENDED, "Value to set (integer or float)");
-    advancedParamArgs.end   = arg_end(5);
+    advancedParamArgs.motor = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
+    advancedParamArgs.cmd   = arg_str1(NULL, NULL, "COMMAND", "<get/set/reset>");
+    advancedParamArgs.param = arg_str0(NULL, NULL, "PARAMETERS", "Parameter to set/get");
+    advancedParamArgs.value = arg_dbln(NULL, NULL, "<double>", 1, 10, "Arguments");
+    advancedParamArgs.end   = arg_end(20);
+
     const esp_console_cmd_t setCmd = {.command  = "stepper-advanced-param",
                                       .help     = "Get/set stepper motor advanced parameters",
-                                      .hint     = NULL,
+                                      .hint     = "MOTOR <get/set/reset> PARAMETER ARGUMENT",
                                       .func     = &advancedParamFunc,
                                       .argtable = &advancedParamArgs};
     esp_console_cmd_register(&setCmd);
 
     /* Attach limit switch command */
     attachLimitSwitchArgs.id    = arg_int1("i", "id", "<id>", "ModuleControl ID");
-    attachLimitSwitchArgs.motor = arg_int1("m", "motor", "<motor>", "Motor number");
-    attachLimitSwitchArgs.din   = arg_int1("d", "din", "<din>", "Digital input number");
-    attachLimitSwitchArgs.logic = arg_str0("l", "logic", "<logic>", "Logic level (high/low)");
+    attachLimitSwitchArgs.motor = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
+    attachLimitSwitchArgs.din   = arg_int1(NULL, NULL, "DIN", "[1-4]");
+    attachLimitSwitchArgs.logic = arg_int0(NULL, NULL, "logic", "[0: Active low, 1: Active high]");
     attachLimitSwitchArgs.end   = arg_end(4);
     const esp_console_cmd_t attachCmd = {
         .command  = "stepper-attach-limit-switch",
@@ -904,8 +929,8 @@ void MotorStepperCmd::_registerCLI(void)
 
     /* Detach limit switch command */
     detachLimitSwitchArgs.id    = arg_int1("i", "id", "<id>", "ModuleControl ID");
-    detachLimitSwitchArgs.motor = arg_int1("m", "motor", "<motor>", "Motor number");
-    detachLimitSwitchArgs.din   = arg_int1("d", "din", "<din>", "Digital input number");
+    detachLimitSwitchArgs.motor = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
+    detachLimitSwitchArgs.din   = arg_int1(NULL, NULL, "DIN", "[1-10]");
     detachLimitSwitchArgs.end   = arg_end(3);
     const esp_console_cmd_t detachCmd = {
         .command  = "stepper-detach-limit-switch",
@@ -918,20 +943,33 @@ void MotorStepperCmd::_registerCLI(void)
 
     /* Set step resolution command */
     setStepResolutionArgs.id         = arg_int1("i", "id", "<id>", "ModuleControl ID");
-    setStepResolutionArgs.motor      = arg_int1("m", "motor", "<motor>", "Motor number");
-    setStepResolutionArgs.resolution = arg_int1("r", "resolution", "<resolution>",
-                                                "Step resolution (0: 1/1, 1: 1/2, 2: 1/4, "
-                                                "3: 1/8, 4: 1/16, 5: 1/32, 6: 1/64, "
-                                                "7: 1/128)");
+    setStepResolutionArgs.motor      = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
+    setStepResolutionArgs.resolution = arg_int1(NULL, NULL, "RESOLUTION", "[0: Full step, 1: Half step, 2: 1/4 step, 3: 1/8 step, 4: 1/16 step, 5: 1/32 step, 6: 1/64 step, 7: 1/128 step]");
     setStepResolutionArgs.end        = arg_end(3);
+
     const esp_console_cmd_t setResCmd = {
-        .command  = "stepper-set-step-resolution",
+        .command  = "stepper-step-resolution",
         .help     = "Set step resolution for the specified motor",
         .hint     = NULL,
         .func     = &setStepResolutionFunc,
         .argtable = &setStepResolutionArgs
     };
     esp_console_cmd_register(&setResCmd);
+
+    /* Set max speed */
+    setStepResolutionArgs.id    = arg_int1("i", "id", "<id>", "ModuleControl ID");
+    setMaxSpeedArgs.motor       = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
+    setMaxSpeedArgs.speed       = arg_int1(NULL, NULL, "SPEED", "motor max speed in step/s");
+    setMaxSpeedArgs.end         = arg_end(3);
+
+    const esp_console_cmd_t cmd = {
+        .command = "stepper-set-speed",
+        .help = "set motor speed",
+        .hint = NULL,
+        .func = &setMaxSpeedFunc,
+        .argtable = &setMaxSpeedArgs
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
 
     /* Set acceleration command */
     setAccelerationArgs.id    = arg_int1("i", "id", "<id>", "ModuleControl ID");
@@ -1005,7 +1043,7 @@ void MotorStepperCmd::_registerCLI(void)
 
     /* Get position command */
     getPositionArgs.id    = arg_int1("i", "id", "<id>", "ModuleControl ID");
-    getPositionArgs.motor = arg_int1("m", "motor", "<motor>", "Motor number");
+    getPositionArgs.motor = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
     getPositionArgs.end   = arg_end(2);
     const esp_console_cmd_t getPosCmd = {
         .command  = "stepper-get-position",
@@ -1018,7 +1056,7 @@ void MotorStepperCmd::_registerCLI(void)
 
     /* Get speed command */
     getSpeedArgs.id    = arg_int1("i", "id", "<id>", "ModuleControl ID");
-    getSpeedArgs.motor = arg_int1("m", "motor", "<motor>", "Motor number");
+    getSpeedArgs.motor = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
     getSpeedArgs.end   = arg_end(2);
     const esp_console_cmd_t getSpdCmd = {
         .command  = "stepper-get-speed",
@@ -1031,7 +1069,7 @@ void MotorStepperCmd::_registerCLI(void)
 
     /* Get status command */
     getStatusArgs.id    = arg_int1("i", "id", "<id>", "ModuleControl ID");
-    getStatusArgs.motor = arg_int1("m", "motor", "<motor>", "Motor number");
+    getStatusArgs.motor = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
     getStatusArgs.raw   = arg_lit0("r", "raw", "Output raw register value as uint16_t");
     getStatusArgs.end   = arg_end(3);
     const esp_console_cmd_t getStatusCmd = {
@@ -1072,8 +1110,8 @@ void MotorStepperCmd::_registerCLI(void)
 
     /* Stop command */
     stopArgs.id    = arg_int1("i", "id", "<id>", "ModuleControl ID");
-    stopArgs.motor = arg_int1("m", "motor", "<motor>", "Motor number");
-    stopArgs.mode  = arg_str0("mo", "mode", "<mode>", "Stop mode (soft-stop, hard-stop, soft-hiz, hard-hiz)");
+    stopArgs.motor = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
+    stopArgs.mode  = arg_str0(NULL, NULL, "MODE", "[soft-stop, hard-stop, soft-hiz, hard-hiz]");
     stopArgs.end   = arg_end(3);
     const esp_console_cmd_t stopCmd = {
         .command  = "stepper-stop",
@@ -1086,10 +1124,9 @@ void MotorStepperCmd::_registerCLI(void)
 
     /* Move absolute command */
     moveAbsoluteArgs.id    = arg_int1("i", "id", "<id>", "ModuleControl ID");
-    moveAbsoluteArgs.motor = arg_int1("m", "motor", "<motor>", "Motor number");
-    moveAbsoluteArgs.position = arg_int1("p", "position", "<position>", "Position (uint)");
-    moveAbsoluteArgs.microstep = arg_lit0("ms", "microstep", "Enable microstepping");
-    moveAbsoluteArgs.end   = arg_end(4);
+    moveAbsoluteArgs.motor = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
+    moveAbsoluteArgs.position = arg_int1(NULL, NULL, "POSITION", "position in step");
+    moveAbsoluteArgs.end   = arg_end(3);
     const esp_console_cmd_t moveAbsCmd = {
         .command  = "stepper-move-absolute",
         .help     = "Move motor to absolute position",
@@ -1101,11 +1138,10 @@ void MotorStepperCmd::_registerCLI(void)
 
     /* Move relative command */
     moveRelativeArgs.id    = arg_int1("i", "id", "<id>", "ModuleControl ID");
-    moveRelativeArgs.motor = arg_int1("m", "motor", "<motor>", "Motor number");
-    moveRelativeArgs.position = arg_int1("p", "position", "<position>", "Position (int)");
-    moveRelativeArgs.microstep = arg_lit0("ms", "microstep", "Enable microstepping");
-    moveRelativeArgs.dir   = arg_int0("d", "direction", "<direction>", "[0: Reverse/negative, 1: Forward/positive] (optional position sign)");
-    moveRelativeArgs.end   = arg_end(5);
+    moveRelativeArgs.motor = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
+    moveRelativeArgs.position = arg_int1(NULL, NULL, "POSITION", "position in step");
+    moveRelativeArgs.dir   =arg_int0(NULL, NULL, "DIRECTION", "[1: Forward, 0: Reverse] (optional, position sign)");
+    moveRelativeArgs.end   = arg_end(4);
     const esp_console_cmd_t moveRelCmd = {
         .command  = "stepper-move-relative",
         .help     = "Move motor to relative position (optional direction sign)",
@@ -1117,9 +1153,9 @@ void MotorStepperCmd::_registerCLI(void)
 
     /* Run command */
     runArgs.id    = arg_int1("i", "id", "<id>", "ModuleControl ID");
-    runArgs.motor = arg_int1("m", "motor", "<motor>", "Motor number");
-    runArgs.direction = arg_str0("d", "direction", "<direction>", "Direction (forward/reverse)");
-    runArgs.speed  = arg_dbl1("s", "speed", "<speed>", "Speed (float)");
+    runArgs.motor = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
+    runArgs.direction = arg_int1(NULL, NULL, "DIRECTION", "[1: Forward, 0: Reverse]");
+    runArgs.speed  = arg_int1(NULL, NULL, "SPEED", "speed in step/s");
     runArgs.end   = arg_end(4);
     const esp_console_cmd_t runCmd = {
         .command  = "stepper-run",
@@ -1132,8 +1168,8 @@ void MotorStepperCmd::_registerCLI(void)
 
     /* Homing command */
     homingArgs.id    = arg_int1("i", "id", "<id>", "ModuleControl ID");
-    homingArgs.motor = arg_int1("m", "motor", "<motor>", "Motor number");
-    homingArgs.speed  = arg_dbl1("s", "speed", "<speed>", "Homing speed (float)");
+    homingArgs.motor = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
+    homingArgs.speed = arg_int1(NULL, NULL, "SPEED", "speed in step/s");
     homingArgs.end   = arg_end(3);
     const esp_console_cmd_t homeCmd = {
         .command  = "stepper-homing",

@@ -1465,6 +1465,23 @@ int MotorStepperParam::setAllAdvancedParamPS01(MotorNum_t motor, PS01_AdvancedPa
     return errorCode;
 }
 
+int resetAllAdvancedParamPS01(MotorNum_t motor) {
+    // Reset hardware chip
+    PS01_Hal_Reset(motor);
+    vTaskDelay(10/portTICK_PERIOD_MS);
+    PS01_Hal_ReleaseReset(motor);
+    vTaskDelay(10/portTICK_PERIOD_MS);
+
+    // Set default parameters
+    int errorCode = MotorStepperParam::setAllAdvancedParamPS01(motor, defaultParameters);
+    if (errorCode != 0) {
+        printf("Error while setting default parameters\n");
+    } else {
+        MotorStepperParam::setNVSParam(motor, defaultParameters);
+    }
+}
+
+
 int MotorStepperParam::initNVSParam(void) 
 {        
     int err = 0;
