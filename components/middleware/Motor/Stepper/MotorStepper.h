@@ -153,12 +153,21 @@ public:
     static float getSpeed(MotorNum_t motor);
 
     /**
-     * @brief Get the motor status
+     * @brief Get the motor status without clearing it
      *
      * @param motor Motor num
      * @return MotorStepperStatus_t Structure containing parsed motor status information
      */
     static MotorStepperStatus_t getStatus(MotorNum_t motor);
+
+    
+    /**
+     * @brief Clear the motor status and reset errors
+     *
+     * @param motor Motor num
+     * @return MotorStepperStatus_t Structure containing parsed motor status information
+     */
+    static void clearStatus(MotorNum_t motor);
 
     /**
      * @brief Reset home position without perform homing
