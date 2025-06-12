@@ -574,6 +574,38 @@ static struct {
     struct arg_int *id;
     struct arg_int *motor;
     struct arg_end *end;
+} clearStatusArgs;
+
+static int clearStatusFunc(int argc, char **argv)
+{
+    PARSE_ARGS_OR_RETURN(argc, argv, clearStatusArgs);
+
+    uint16_t id = clearStatusArgs.id->ival[0];
+    MotorNum_t motor = (MotorNum_t)(clearStatusArgs.motor->ival[0] - 1);
+
+    if (motor >= MOTOR_MAX_NUM) {
+        ESP_LOGE(TAG, "Invalid motor number: %d. Must be between %d and %d", 
+                 clearStatusArgs.motor->ival[0], 0, MOTOR_MAX_NUM);
+        return 1;
+    }
+
+    MotorStepperCmd *stepper = new MotorStepperCmd(id);
+    if (stepper == nullptr) {
+        ESP_LOGE(TAG, "Failed to create MotorStepperCmd instance");
+        return 1;
+    }
+
+    stepper->clearStatus(motor);
+
+    delete stepper;
+
+    return 0;
+}
+
+static struct { 
+    struct arg_int *id;
+    struct arg_int *motor;
+    struct arg_end *end;
 } resetHomePositionArgs;
 
 static int resetHomePositionFunc(int argc, char **argv)
@@ -1030,6 +1062,19 @@ void MotorStepperCmd::_registerCLI(void)
         .argtable = &getStatusArgs
     };
     esp_console_cmd_register(&getStatusCmd);
+
+    /* Clear status command */
+    clearStatusArgs.id    = arg_int1("i", "id", "<id>", "ModuleControl ID");
+    clearStatusArgs.motor = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
+    clearStatusArgs.end   = arg_end(2);
+    const esp_console_cmd_t clearStatusCmd = {
+        .command  = "stepper-clear-status",
+        .help     = "Clear motor status information",
+        .hint     = NULL,
+        .func     = &clearStatusFunc,
+        .argtable = &clearStatusArgs
+    };
+    esp_console_cmd_register(&clearStatusCmd);
 
     /* Reset home position command */
     resetHomePositionArgs.id    = arg_int1("i", "id", "<id>", "ModuleControl ID");

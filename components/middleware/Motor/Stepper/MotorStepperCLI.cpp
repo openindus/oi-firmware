@@ -796,6 +796,43 @@ static void _registerGetStatus(void)
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
 }
 
+/** 'clear-status' */
+static struct {
+    struct arg_int *motor;
+    struct arg_end *end;
+} clearStatusArgs;
+
+static int clearStatus(int argc, char **argv)
+{
+    int nerrors = arg_parse(argc, argv, (void **) &clearStatusArgs);
+    if (nerrors != 0) {
+        arg_print_errors(stderr, clearStatusArgs.end, argv[0]);
+        return 1;
+    }
+
+    MotorNum_t motor = (MotorNum_t)(clearStatusArgs.motor->ival[0] - 1);
+
+    MotorStepper::clearStatus(motor);
+
+    return 0;
+}
+
+static void _registerClearStatus(void)
+{
+    clearStatusArgs.motor = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
+    clearStatusArgs.end   = arg_end(1);
+
+    const esp_console_cmd_t cmd = {
+        .command = "clear-status",
+        .help = "clear motor status",
+        .hint = NULL,
+        .func = &clearStatus,
+        .argtable = &clearStatusArgs
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+}
+
+
 int MotorStepper::_registerCLI(void)
 {
     _registerAttachLimitSwitch();
@@ -809,6 +846,7 @@ int MotorStepper::_registerCLI(void)
     _registerGetPosition();
     _registerGetSpeed();
     _registerGetStatus();
+    _registerClearStatus();
     _registerResetHomePosition();
     _registerSetPosition();
     _registerStop();
