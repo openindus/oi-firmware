@@ -177,7 +177,7 @@ public:
         });
 
         Slave::addCallback(CALLBACK_MOTOR_RESET_ALL_ADVANCED_PARAM, [](std::vector<uint8_t> &data) {
-            MotorNum_t motor         = static_cast<MotorNum_t>(data[1]);
+            MotorNum_t motor = static_cast<MotorNum_t>(data[1]);
             MotorStepperParam::resetAllAdvancedParamPS01(motor);
             data.clear();
         });

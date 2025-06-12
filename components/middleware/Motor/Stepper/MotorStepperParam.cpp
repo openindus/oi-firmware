@@ -1465,7 +1465,7 @@ int MotorStepperParam::setAllAdvancedParamPS01(MotorNum_t motor, PS01_AdvancedPa
     return errorCode;
 }
 
-int resetAllAdvancedParamPS01(MotorNum_t motor) {
+int MotorStepperParam::resetAllAdvancedParamPS01(MotorNum_t motor) {
     // Reset hardware chip
     PS01_Hal_Reset(motor);
     vTaskDelay(10/portTICK_PERIOD_MS);
@@ -1479,6 +1479,7 @@ int resetAllAdvancedParamPS01(MotorNum_t motor) {
     } else {
         MotorStepperParam::setNVSParam(motor, defaultParameters);
     }
+    return errorCode;
 }
 
 

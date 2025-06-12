@@ -211,7 +211,7 @@ public:
      * @param motor Motor num
      * @return int 0 if success, -1 if error
      */
-    int MotorStepperCmd::resetAllAdvancedParam(MotorNum_t motor);
+    int resetAllAdvancedParam(MotorNum_t motor);
 
     /**
      * @brief Get the supply voltage

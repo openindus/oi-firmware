@@ -173,7 +173,6 @@ static int attachLimitSwitchFunc(int argc, char **argv)
     uint16_t id = attachLimitSwitchArgs.id->ival[0];
     MotorNum_t motor = (MotorNum_t)(attachLimitSwitchArgs.motor->ival[0] - 1);
     DIn_Num_t din = (DIn_Num_t)(attachLimitSwitchArgs.din->ival[0] - 1);
-    Logic_t logic = ACTIVE_HIGH;
 
     if (motor >= MOTOR_MAX_NUM) {
         ESP_LOGE(TAG, "Invalid motor number: %d. Must be between %d and %d", 
@@ -186,7 +185,6 @@ static int attachLimitSwitchFunc(int argc, char **argv)
                  attachLimitSwitchArgs.din->ival[0], 0, DIN_MAX_NUM);
         return 1;
     }
-
 
     MotorStepperCmd *stepper = new MotorStepperCmd(id);
     if (stepper == nullptr) {
@@ -312,7 +310,7 @@ static int setMaxSpeedFunc(int argc, char **argv)
 static struct {
     struct arg_int *id;
     struct arg_int *motor;
-    struct arg_dbl *acc;
+    struct arg_int *acc;
     struct arg_end *end;
 } setAccelerationArgs;
 
@@ -322,7 +320,7 @@ static int setAccelerationFunc(int argc, char **argv)
 
     uint16_t id = setAccelerationArgs.id->ival[0];
     MotorNum_t motor = (MotorNum_t)(setAccelerationArgs.motor->ival[0] - 1);
-    float acc = (float)setAccelerationArgs.acc->dval[0];
+    float acc = (float)setAccelerationArgs.acc->ival[0];
 
     if (motor >= MOTOR_MAX_NUM) {
         ESP_LOGE(TAG, "Invalid motor number: %d. Must be between %d and %d", 
@@ -346,7 +344,7 @@ static int setAccelerationFunc(int argc, char **argv)
 static struct {
     struct arg_int *id;
     struct arg_int *motor;
-    struct arg_dbl *dec;
+    struct arg_int *dec;
     struct arg_end *end;
 } setDecelerationArgs;
 
@@ -356,7 +354,7 @@ static int setDecelerationFunc(int argc, char **argv)
 
     uint16_t id = setDecelerationArgs.id->ival[0];
     MotorNum_t motor = (MotorNum_t)(setDecelerationArgs.motor->ival[0] - 1);
-    float dec = (float)setDecelerationArgs.dec->dval[0];
+    float dec = (float)setDecelerationArgs.dec->ival[0];
 
     if (motor >= MOTOR_MAX_NUM) {
         ESP_LOGE(TAG, "Invalid motor number: %d. Must be between %d and %d", 
@@ -380,41 +378,7 @@ static int setDecelerationFunc(int argc, char **argv)
 static struct {
     struct arg_int *id;
     struct arg_int *motor;
-    struct arg_dbl *speed;
-    struct arg_end *end;
-} setMaxSpeedArgs;
-
-static int setMaxSpeedFunc(int argc, char **argv)
-{
-    PARSE_ARGS_OR_RETURN(argc, argv, setMaxSpeedArgs);
-
-    uint16_t id = setMaxSpeedArgs.id->ival[0];
-    MotorNum_t motor = (MotorNum_t)(setMaxSpeedArgs.motor->ival[0] - 1);
-    float speed = (float)setMaxSpeedArgs.speed->dval[0];
-
-    if (motor >= MOTOR_MAX_NUM) {
-        ESP_LOGE(TAG, "Invalid motor number: %d. Must be between %d and %d", 
-                 setMaxSpeedArgs.motor->ival[0], 0, MOTOR_MAX_NUM);
-        return 1;
-    }
-
-    MotorStepperCmd *stepper = new MotorStepperCmd(id);
-    if (stepper == nullptr) {
-        ESP_LOGE(TAG, "Failed to create MotorStepperCmd instance");
-        return 1;
-    }
-
-    stepper->setMaxSpeed(motor, speed);
-
-    delete stepper;
-
-    return 0;
-}
-
-static struct {
-    struct arg_int *id;
-    struct arg_int *motor;
-    struct arg_dbl *speed;
+    struct arg_int *speed;
     struct arg_end *end;
 } setMinSpeedArgs;
 
@@ -424,7 +388,7 @@ static int setMinSpeedFunc(int argc, char **argv)
 
     uint16_t id = setMinSpeedArgs.id->ival[0];
     MotorNum_t motor = (MotorNum_t)(setMinSpeedArgs.motor->ival[0] - 1);
-    float speed = (float)setMinSpeedArgs.speed->dval[0];
+    float speed = (float)setMinSpeedArgs.speed->ival[0];
 
     if (motor >= MOTOR_MAX_NUM) {
         ESP_LOGE(TAG, "Invalid motor number: %d. Must be between %d and %d", 
@@ -448,7 +412,7 @@ static int setMinSpeedFunc(int argc, char **argv)
 static struct {
     struct arg_int *id;
     struct arg_int *motor;
-    struct arg_dbl *speed;
+    struct arg_int *speed;
     struct arg_end *end;
 } setFullStepSpeedArgs;
 
@@ -458,7 +422,7 @@ static int setFullStepSpeedFunc(int argc, char **argv)
 
     uint16_t id = setFullStepSpeedArgs.id->ival[0];
     MotorNum_t motor = (MotorNum_t)(setFullStepSpeedArgs.motor->ival[0] - 1);
-    float speed = (float)setFullStepSpeedArgs.speed->dval[0];
+    float speed = (float)setFullStepSpeedArgs.speed->ival[0];
 
     if  (motor >= MOTOR_MAX_NUM) {
         ESP_LOGE(TAG, "Invalid motor number: %d. Must be between %d and %d", 
@@ -969,12 +933,12 @@ void MotorStepperCmd::_registerCLI(void)
         .func = &setMaxSpeedFunc,
         .argtable = &setMaxSpeedArgs
     };
-    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+    esp_console_cmd_register(&cmd);
 
     /* Set acceleration command */
     setAccelerationArgs.id    = arg_int1("i", "id", "<id>", "ModuleControl ID");
-    setAccelerationArgs.motor = arg_int1("m", "motor", "<motor>", "Motor number");
-    setAccelerationArgs.acc   = arg_dbl1("a", "acceleration", "<acc>", "Acceleration (float)");
+    setAccelerationArgs.motor = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
+    setAccelerationArgs.acc   = arg_int1(NULL, NULL, "ACCELERATION", "motor acceleration in step/s²");
     setAccelerationArgs.end   = arg_end(3);
     const esp_console_cmd_t setAccCmd = {
         .command  = "stepper-set-acceleration",
@@ -987,8 +951,8 @@ void MotorStepperCmd::_registerCLI(void)
 
     /* Set deceleration command */
     setDecelerationArgs.id    = arg_int1("i", "id", "<id>", "ModuleControl ID");
-    setDecelerationArgs.motor = arg_int1("m", "motor", "<motor>", "Motor number");
-    setDecelerationArgs.dec   = arg_dbl1("d", "deceleration", "<dec>", "Deceleration (float)");
+    setDecelerationArgs.motor = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
+    setDecelerationArgs.dec   = arg_int1(NULL, NULL, "DECELERATION", "motor deceleration speed in step/s²");
     setDecelerationArgs.end   = arg_end(3);
     const esp_console_cmd_t setDecCmd = {
         .command  = "stepper-set-deceleration",
@@ -999,25 +963,11 @@ void MotorStepperCmd::_registerCLI(void)
     };
     esp_console_cmd_register(&setDecCmd);
 
-    /* Set max speed command */
-    setMaxSpeedArgs.id    = arg_int1("i", "id", "<id>", "ModuleControl ID");
-    setMaxSpeedArgs.motor = arg_int1("m", "motor", "<motor>", "Motor number");
-    setMaxSpeedArgs.speed  = arg_dbl1("s", "speed", "<speed>", "Max speed (float)");
-    setMaxSpeedArgs.end    = arg_end(3);
-    const esp_console_cmd_t setMaxSpdCmd = {
-        .command  = "stepper-set-max-speed",
-        .help     = "Set motor maximum speed",
-        .hint     = NULL,
-        .func     = &setMaxSpeedFunc,
-        .argtable = &setMaxSpeedArgs
-    };
-    esp_console_cmd_register(&setMaxSpdCmd);
-
     /* Set min speed command */
     setMinSpeedArgs.id    = arg_int1("i", "id", "<id>", "ModuleControl ID");
-    setMinSpeedArgs.motor = arg_int1("m", "motor", "<motor>", "Motor number");
-    setMinSpeedArgs.speed  = arg_dbl1("s", "speed", "<speed>", "Min speed (float)");
-    setMinSpeedArgs.end    = arg_end(3);
+    setMinSpeedArgs.motor = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
+    setMinSpeedArgs.speed = arg_int1(NULL, NULL, "MIN_SPEED", "motor min speed in step/s");
+    setMinSpeedArgs.end   = arg_end(3);
     const esp_console_cmd_t setMinSpdCmd = {
         .command  = "stepper-set-min-speed",
         .help     = "Set motor minimum speed",
@@ -1030,8 +980,8 @@ void MotorStepperCmd::_registerCLI(void)
     /* Set full step speed command */
     setFullStepSpeedArgs.id    = arg_int1("i", "id", "<id>", "ModuleControl ID");
     setFullStepSpeedArgs.motor = arg_int1("m", "motor", "<motor>", "Motor number");
-    setFullStepSpeedArgs.speed  = arg_dbl1("s", "speed", "<speed>", "Full step speed (float)");
-    setFullStepSpeedArgs.end    = arg_end(3);
+    setFullStepSpeedArgs.speed = arg_int1(NULL, NULL, "FULL_STEP_SPEED", "motor full step speed in step/s");
+    setFullStepSpeedArgs.end   = arg_end(3);
     const esp_console_cmd_t setFullSpdCmd = {
         .command  = "stepper-set-full-step-speed",
         .help     = "Set motor full step speed",
@@ -1083,7 +1033,7 @@ void MotorStepperCmd::_registerCLI(void)
 
     /* Reset home position command */
     resetHomePositionArgs.id    = arg_int1("i", "id", "<id>", "ModuleControl ID");
-    resetHomePositionArgs.motor = arg_int1("m", "motor", "<motor>", "Motor number");
+    resetHomePositionArgs.motor = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
     resetHomePositionArgs.end   = arg_end(2);
     const esp_console_cmd_t resetHomePosCmd = {
         .command  = "stepper-reset-home-position",
@@ -1096,8 +1046,8 @@ void MotorStepperCmd::_registerCLI(void)
 
     /* Set position command */
     setPositionArgs.id    = arg_int1("i", "id", "<id>", "ModuleControl ID");
-    setPositionArgs.motor = arg_int1("m", "motor", "<motor>", "Motor number");
-    setPositionArgs.position = arg_int1("p", "position", "<position>", "Position (int)");
+    setPositionArgs.motor = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
+    setPositionArgs.position = arg_int1(NULL, NULL, "<position>", "Position (int)");
     setPositionArgs.end   = arg_end(3);
     const esp_console_cmd_t setPosCmd = {
         .command  = "stepper-set-position",
