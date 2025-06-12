@@ -116,6 +116,13 @@ public:
     MotorStepperStatus_t getStatus(MotorNum_t motor);
 
     /**
+     * @brief Clear the motor status and reset errors
+     *
+     * @param motor Motor num
+     */
+    void clearStatus(MotorNum_t motor);
+
+    /**
      * @brief Reset home position without perform homing
      *
      * @param motor

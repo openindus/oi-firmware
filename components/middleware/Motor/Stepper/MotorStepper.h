@@ -165,7 +165,6 @@ public:
      * @brief Clear the motor status and reset errors
      *
      * @param motor Motor num
-     * @return MotorStepperStatus_t Structure containing parsed motor status information
      */
     static void clearStatus(MotorNum_t motor);
 
