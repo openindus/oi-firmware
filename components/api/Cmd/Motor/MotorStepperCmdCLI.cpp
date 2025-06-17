@@ -35,7 +35,7 @@ const std::map<std::string, AdvancedParameterInfo_s> advancedParamMap = {
     {"min-speed", {MIN_SPEED, TYPE_FLOAT}},
     {"min-speed-lspd-opt", {MIN_SPEED_LSPD_OPT, TYPE_INT}},
     {"adc-out", {ADC_OUT, TYPE_INT}},
-    {"ocd-th", {OCD_TH, TYPE_INT}},
+    {"ocd-th", {OCD_TH, TYPE_FLOAT}},
     {"fs-spd", {FS_SPD, TYPE_FLOAT}},
     {"fs-spd-boost-mode", {FS_SPD_BOOST_MODE, TYPE_INT}},
     {"step-mode-step-sel", {STEP_MODE_STEP_SEL, TYPE_INT}},
@@ -75,7 +75,7 @@ const std::map<std::string, AdvancedParameterInfo_s> advancedParamMap = {
     {"fn-slp-acc", {VM_FN_SLP_ACC, TYPE_FLOAT}},
     {"fn-slp-dec", {VM_FN_SLP_DEC, TYPE_FLOAT}},
     {"k-therm", {VM_K_THERM, TYPE_FLOAT}},
-    {"stall-th", {VM_STALL_TH, TYPE_INT}}
+    {"stall-th", {VM_STALL_TH, TYPE_FLOAT}}
 #else
     {"config-en-tqreg", {CM_CONFIG_EN_TQREG, TYPE_INT}},
     {"config-tsw", {CM_CONFIG_TSW, TYPE_INT}},
@@ -898,7 +898,7 @@ void MotorStepperCmd::_registerCLI(void)
     advancedParamArgs.motor = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
     advancedParamArgs.cmd   = arg_str1(NULL, NULL, "COMMAND", "<get/set/reset>");
     advancedParamArgs.param = arg_str0(NULL, NULL, "PARAMETERS", "Parameter to set/get");
-    advancedParamArgs.value = arg_dbln(NULL, NULL, "<double>", 1, 10, "Arguments");
+    advancedParamArgs.value = arg_dbl0(NULL, NULL, "VALUE", "Arguments");
     advancedParamArgs.end   = arg_end(20);
 
     const esp_console_cmd_t setCmd = {.command  = "stepper-advanced-param",
