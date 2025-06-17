@@ -953,7 +953,7 @@ void MotorStepperCmd::_registerCLI(void)
     esp_console_cmd_register(&setResCmd);
 
     /* Set max speed */
-    setStepResolutionArgs.id    = arg_int1("i", "id", "<id>", "ModuleControl ID");
+    setMaxSpeedArgs.id    = arg_int1("i", "id", "<id>", "ModuleControl ID");
     setMaxSpeedArgs.motor       = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
     setMaxSpeedArgs.speed       = arg_int1(NULL, NULL, "SPEED", "motor max speed in step/s");
     setMaxSpeedArgs.end         = arg_end(3);
