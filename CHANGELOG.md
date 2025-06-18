@@ -125,3 +125,8 @@ Board which are ready to use :
 - Added Stepper motor CLI commands.
 - Fix Stepper errors.
 - Fix Library compilation error.
+
+# 1.7.3
+
+- Added stepper motor CLI commands on Master module
+- Add clearStatus and modify getStatus on MotorStepper
