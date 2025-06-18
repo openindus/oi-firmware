@@ -102,6 +102,12 @@ MotorStepperStatus_t MotorStepperCmd::getStatus(MotorNum_t motor)
     return *status;
 }
 
+void MotorStepperCmd::clearStatus(MotorNum_t motor)
+{
+    std::vector<uint8_t> msgBytes = {CALLBACK_MOTOR_CLEAR_STATUS, (uint8_t)motor};
+    _module->runCallback(msgBytes);
+}
+
 void MotorStepperCmd::resetHomePosition(MotorNum_t motor)
 {
     std::vector<uint8_t> msgBytes = {CALLBACK_MOTOR_RESET_HOME_POSITION, (uint8_t)motor};
@@ -175,6 +181,12 @@ int MotorStepperCmd::setAdvancedParam(MotorNum_t motor, AdvancedParameter_t advP
 {
     std::vector<uint8_t> args = SetAdvancedParamArgs_s{motor, advParam, value};
     return _module->runCallback(CALLBACK_MOTOR_SET_ADVANCED_PARAM, args);
+}
+
+int MotorStepperCmd::resetAllAdvancedParam(MotorNum_t motor)
+{
+    std::vector<uint8_t> msgBytes = {CALLBACK_MOTOR_RESET_ALL_ADVANCED_PARAM, (uint8_t)motor};
+    return _module->runCallback(msgBytes);
 }
 
 int MotorStepperCmd::getAdvancedParam(MotorNum_t motor, AdvancedParameter_t advParam, void* value)
