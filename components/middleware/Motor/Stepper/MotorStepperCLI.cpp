@@ -52,7 +52,7 @@ static void _registerAttachLimitSwitch(void)
     attachLimitSwitchArgs.end     = arg_end(4);
 
     const esp_console_cmd_t cmd = {
-        .command = "attach-limit-switch",
+        .command = "stepper-attach-limit-switch",
         .help = "set limit switch",
         .hint = NULL,
         .func = &attachLimitSwitch,
@@ -93,7 +93,7 @@ static void _registerDetachLimitSwitch(void)
     detachLimitSwitchArgs.end     = arg_end(4);
 
     const esp_console_cmd_t cmd = {
-        .command = "detach-limit-switch",
+        .command = "stepper-detach-limit-switch",
         .help = "Detach a limit switch from the specified motor",
         .hint = NULL,
         .func = &detachLimitSwitch,
@@ -133,7 +133,7 @@ static void _registerStepResolution(void)
     stepResolutionArgs.end      = arg_end(3);
 
     const esp_console_cmd_t cmd = {
-        .command = "step-resolution",
+        .command = "stepper-step-resolution",
         .help = "set step resolution",
         .hint = NULL,
         .func = &stepResolution,
@@ -173,7 +173,7 @@ static void _registerSetMaxSpeed(void)
     setMaxSpeedArgs.end    = arg_end(3);
 
     const esp_console_cmd_t cmd = {
-        .command = "set-speed",
+        .command = "stepper-set-speed",
         .help = "set motor speed",
         .hint = NULL,
         .func = &setMaxSpeed,
@@ -207,7 +207,7 @@ static void _registerSetAcceleration(void)
     setAccelerationArgs.acceleration = arg_int1(NULL, NULL, "ACCELERATION", "motor acceleration in step/s²");
     setAccelerationArgs.end = arg_end(2);
     const esp_console_cmd_t cmd = {
-        .command = "set-acceleration",
+        .command = "stepper-set-acceleration",
         .help = "set motor acceleration",
         .hint = NULL,
         .func = &setAcceleration,
@@ -241,7 +241,7 @@ static void _registerSetDeceleration(void)
     setDecelerationArgs.deceleration = arg_int1(NULL, NULL, "DECELERATION", "motor deceleration speed in step/s²");
     setDecelerationArgs.end = arg_end(2);
     const esp_console_cmd_t cmd = {
-        .command = "set-deceleration",
+        .command = "stepper-set-deceleration",
         .help = "set motor deceleration",
         .hint = NULL,
         .func = &setDeceleration,
@@ -275,7 +275,7 @@ static void _registerSetMinSpeed(void)
     setMinSpeedArgs.speed = arg_int1(NULL, NULL, "MIN_SPEED", "motor min speed in step/s");
     setMinSpeedArgs.end = arg_end(2);
     const esp_console_cmd_t cmd = {
-        .command = "set-min-speed",
+        .command = "stepper-set-min-speed",
         .help = "set motor minimum speed",
         .hint = NULL,
         .func = &setMinSpeed,
@@ -309,7 +309,7 @@ static void _registerSetFullStepSpeed(void)
     setFullStepSpeedArgs.speed = arg_int1(NULL, NULL, "FULL_STEP_SPEED", "motor full step speed in step/s");
     setFullStepSpeedArgs.end = arg_end(2);
     const esp_console_cmd_t cmd = {
-        .command = "set-full-step-speed",
+        .command = "stepper-set-full-step-speed",
         .help = "set motor full step speed",
         .hint = NULL,
         .func = &setFullStepSpeed,
@@ -346,7 +346,7 @@ static void _registerGetPosition(void)
     getPositionArgs.end    = arg_end(2);
 
     const esp_console_cmd_t cmd = {
-        .command = "get-position",
+        .command = "stepper-get-position",
         .help = "get current motor position",
         .hint = NULL,
         .func = &getPosition,
@@ -383,7 +383,7 @@ static void _registerGetSpeed(void)
     getSpeedArgs.end    = arg_end(2);
 
     const esp_console_cmd_t cmd = {
-        .command = "get-speed",
+        .command = "stepper-get-speed",
         .help = "get current motor speed",
         .hint = NULL,
         .func = &getSpeed,
@@ -419,7 +419,7 @@ static void _registerResetHomePosition(void)
     resetHomePositionArgs.end   = arg_end(1);
 
     const esp_console_cmd_t cmd = {
-        .command  = "reset-home-position",
+        .command  = "stepper-reset-home-position",
         .help     = "Reset motor home position",
         .hint     = NULL,
         .func     = &resetHomePosition,
@@ -458,7 +458,7 @@ static void _registerSetPosition(void)
     setPositionArgs.position = arg_int1(NULL, NULL, "<position>", "Position (int)");
     setPositionArgs.end   = arg_end(2);
     const esp_console_cmd_t setPosCmd = {
-        .command  = "set-position",
+        .command  = "stepper-set-position",
         .help     = "Set motor position",
         .hint     = NULL,
         .func     = &setPosition,
@@ -514,7 +514,7 @@ static void _registerStop(void)
     stopArgs.end    = arg_end(3);
 
     const esp_console_cmd_t cmd = {
-        .command = "stop",
+        .command = "stepper-stop",
         .help = "stop the motor with specified mode",
         .hint = NULL,
         .func = &stop,
@@ -554,7 +554,7 @@ static void _registerMoveAbsolute(void)
     moveAbsoluteArgs.end    = arg_end(3);
 
     const esp_console_cmd_t cmd = {
-        .command = "move-absolute",
+        .command = "stepper-move-absolute",
         .help = "move absolute",
         .hint = NULL,
         .func = &moveAbsolute,
@@ -605,7 +605,7 @@ static void _registerMoveRelative(void)
     moveRelativeArgs.end    = arg_end(4);
 
     const esp_console_cmd_t cmd = {
-        .command = "move-relative",
+        .command = "stepper-move-relative",
         .help = "move relative",
         .hint = NULL,
         .func = &moveRelative,
@@ -648,7 +648,7 @@ static void _registerRun(void)
     runArgs.end     = arg_end(4);
 
     const esp_console_cmd_t cmd = {
-        .command = "run",
+        .command = "stepper-run",
         .help = "run",
         .hint = NULL,
         .func = &run,
@@ -688,7 +688,7 @@ static void _registerHoming(void)
     homingArgs.end      = arg_end(3);
 
     const esp_console_cmd_t cmd = {
-        .command = "homing",
+        .command = "stepper-homing",
         .help = "homing",
         .hint = NULL,
         .func = &homing,
@@ -721,7 +721,7 @@ static void _registerGetSupplyVoltage(void)
     getSupplyVoltageArgs.end = arg_end(0);
 
     const esp_console_cmd_t cmd = {
-        .command = "get-supply-voltage",
+        .command = "stepper-get-supply-voltage",
         .help = "get supply voltage",
         .hint = NULL,
         .func = &getSupplyVoltage,
@@ -787,7 +787,7 @@ static void _registerGetStatus(void)
     getStatusArgs.end   = arg_end(3);
 
     const esp_console_cmd_t cmd = {
-        .command = "get-status",
+        .command = "stepper-get-status",
         .help = "get motor status information",
         .hint = NULL,
         .func = &getStatus,
@@ -823,7 +823,7 @@ static void _registerClearStatus(void)
     clearStatusArgs.end   = arg_end(1);
 
     const esp_console_cmd_t cmd = {
-        .command = "clear-status",
+        .command = "stepper-clear-status",
         .help = "clear motor status",
         .hint = NULL,
         .func = &clearStatus,
