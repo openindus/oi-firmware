@@ -116,6 +116,13 @@ public:
     MotorStepperStatus_t getStatus(MotorNum_t motor);
 
     /**
+     * @brief Clear the motor status and reset errors
+     *
+     * @param motor Motor num
+     */
+    void clearStatus(MotorNum_t motor);
+
+    /**
      * @brief Reset home position without perform homing
      *
      * @param motor
@@ -204,6 +211,14 @@ public:
      * @return int 0 if success, -1 if error
      */
     int getAdvancedParam(MotorNum_t motor, AdvancedParameter_t advParam, void* value);
+
+    /**
+     * @brief Reset all advanced parameters to default values
+     *
+     * @param motor Motor num
+     * @return int 0 if success, -1 if error
+     */
+    int resetAllAdvancedParam(MotorNum_t motor);
 
     /**
      * @brief Get the supply voltage

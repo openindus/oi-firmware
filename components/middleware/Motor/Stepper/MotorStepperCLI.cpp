@@ -14,28 +14,28 @@
 #include "esp_console.h"
 #include "argtable3/argtable3.h"
 
-/** 'limit-switch' */
+/** 'attach-limit-switch' */
 
 static struct {
     struct arg_int *motor;
     struct arg_int *din;
     struct arg_int *logic;
     struct arg_end *end;
-} limitSwitchArgs;
+} attachLimitSwitchArgs;
 
-static int limitSwitch(int argc, char **argv)
+static int attachLimitSwitch(int argc, char **argv)
 {
-    int nerrors = arg_parse(argc, argv, (void **) &limitSwitchArgs);
+    int nerrors = arg_parse(argc, argv, (void **) &attachLimitSwitchArgs);
     if (nerrors != 0) {
-        arg_print_errors(stderr, limitSwitchArgs.end, argv[0]);
+        arg_print_errors(stderr, attachLimitSwitchArgs.end, argv[0]);
         return 1;
     }
 
-    MotorNum_t motor = (MotorNum_t)(limitSwitchArgs.motor->ival[0] - 1);
-    DIn_Num_t din = (DIn_Num_t)(limitSwitchArgs.din->ival[0] - 1);
+    MotorNum_t motor = (MotorNum_t)(attachLimitSwitchArgs.motor->ival[0] - 1);
+    DIn_Num_t din = (DIn_Num_t)(attachLimitSwitchArgs.din->ival[0] - 1);
 
-    if (limitSwitchArgs.logic->count > 0) {
-        Logic_t logic = (Logic_t)(limitSwitchArgs.logic->ival[0]);
+    if (attachLimitSwitchArgs.logic->count > 0) {
+        Logic_t logic = (Logic_t)(attachLimitSwitchArgs.logic->ival[0]);
         MotorStepper::attachLimitSwitch(motor, din, logic);
     } else {
         MotorStepper::attachLimitSwitch(motor, din);
@@ -44,19 +44,60 @@ static int limitSwitch(int argc, char **argv)
     return 0;
 }
 
-static void _registerLimitSwitch(void)
+static void _registerAttachLimitSwitch(void)
 {
-    limitSwitchArgs.motor   = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
-    limitSwitchArgs.din    = arg_int1(NULL, NULL, "DIN", "[1-10]");
-    limitSwitchArgs.logic   = arg_int0(NULL, NULL, "logic", "[0: Active low, 1: Active high]");
-    limitSwitchArgs.end     = arg_end(4);
+    attachLimitSwitchArgs.motor   = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
+    attachLimitSwitchArgs.din    = arg_int1(NULL, NULL, "DIN", "[1-4]");
+    attachLimitSwitchArgs.logic   = arg_int0(NULL, NULL, "logic", "[0: Active low, 1: Active high]");
+    attachLimitSwitchArgs.end     = arg_end(4);
 
     const esp_console_cmd_t cmd = {
-        .command = "attach-limit-switch",
+        .command = "stepper-attach-limit-switch",
         .help = "set limit switch",
         .hint = NULL,
-        .func = &limitSwitch,
-        .argtable = &limitSwitchArgs
+        .func = &attachLimitSwitch,
+        .argtable = &attachLimitSwitchArgs
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+}
+
+/** 'detach-limit-switch' */
+
+static struct {
+    struct arg_int *motor;
+    struct arg_int *din;
+    struct arg_int *logic;
+    struct arg_end *end;
+} detachLimitSwitchArgs;
+
+static int detachLimitSwitch(int argc, char **argv)
+{
+    int nerrors = arg_parse(argc, argv, (void **) &detachLimitSwitchArgs);
+    if (nerrors != 0) {
+        arg_print_errors(stderr, detachLimitSwitchArgs.end, argv[0]);
+        return 1;
+    }
+
+    MotorNum_t motor = (MotorNum_t)(detachLimitSwitchArgs.motor->ival[0] - 1);
+    DIn_Num_t din = (DIn_Num_t)(detachLimitSwitchArgs.din->ival[0] - 1);
+
+    MotorStepper::detachLimitSwitch(motor, din);
+
+    return 0;
+}
+
+static void _registerDetachLimitSwitch(void)
+{
+    detachLimitSwitchArgs.motor   = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
+    detachLimitSwitchArgs.din     = arg_int1(NULL, NULL, "DIN", "[1-4]");
+    detachLimitSwitchArgs.end     = arg_end(4);
+
+    const esp_console_cmd_t cmd = {
+        .command = "stepper-detach-limit-switch",
+        .help = "Detach a limit switch from the specified motor",
+        .hint = NULL,
+        .func = &detachLimitSwitch,
+        .argtable = &detachLimitSwitchArgs
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
 }
@@ -92,7 +133,7 @@ static void _registerStepResolution(void)
     stepResolutionArgs.end      = arg_end(3);
 
     const esp_console_cmd_t cmd = {
-        .command = "step-resolution",
+        .command = "stepper-step-resolution",
         .help = "set step resolution",
         .hint = NULL,
         .func = &stepResolution,
@@ -132,11 +173,147 @@ static void _registerSetMaxSpeed(void)
     setMaxSpeedArgs.end    = arg_end(3);
 
     const esp_console_cmd_t cmd = {
-        .command = "set-speed",
+        .command = "stepper-set-speed",
         .help = "set motor speed",
         .hint = NULL,
         .func = &setMaxSpeed,
         .argtable = &setMaxSpeedArgs
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+}
+
+/** 'set-acceleration' */
+
+static struct {
+    struct arg_int *motor;
+    struct arg_int *acceleration;
+    struct arg_end *end;
+} setAccelerationArgs;
+static int setAcceleration(int argc, char **argv)
+{
+    int nerrors = arg_parse(argc, argv, (void **) &setAccelerationArgs);
+    if (nerrors != 0) {
+        arg_print_errors(stderr, setAccelerationArgs.end, argv[0]);
+        return 1;
+    }
+    MotorNum_t motor = (MotorNum_t)(setAccelerationArgs.motor->ival[0] - 1);
+    float acceleration = (float)(setAccelerationArgs.acceleration->ival[0]);
+    MotorStepper::setAcceleration(motor, acceleration);
+    return 0;
+}
+static void _registerSetAcceleration(void)
+{
+    setAccelerationArgs.motor = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
+    setAccelerationArgs.acceleration = arg_int1(NULL, NULL, "ACCELERATION", "motor acceleration in step/s²");
+    setAccelerationArgs.end = arg_end(2);
+    const esp_console_cmd_t cmd = {
+        .command = "stepper-set-acceleration",
+        .help = "set motor acceleration",
+        .hint = NULL,
+        .func = &setAcceleration,
+        .argtable = &setAccelerationArgs
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+}
+/** 'set-deceleration' */
+static struct {
+    struct arg_int *motor;
+    struct arg_int *deceleration;
+    struct arg_end *end;
+} setDecelerationArgs;
+
+static int setDeceleration(int argc, char **argv)
+{
+    int nerrors = arg_parse(argc, argv, (void **) &setDecelerationArgs);
+    if (nerrors != 0) {
+        arg_print_errors(stderr, setDecelerationArgs.end, argv[0]);
+        return 1;
+    }
+    MotorNum_t motor = (MotorNum_t)(setDecelerationArgs.motor->ival[0] - 1);
+    float deceleration = (float)(setDecelerationArgs.deceleration->ival[0]);
+    MotorStepper::setDeceleration(motor, deceleration);
+    return 0;
+}
+
+static void _registerSetDeceleration(void)
+{
+    setDecelerationArgs.motor = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
+    setDecelerationArgs.deceleration = arg_int1(NULL, NULL, "DECELERATION", "motor deceleration speed in step/s²");
+    setDecelerationArgs.end = arg_end(2);
+    const esp_console_cmd_t cmd = {
+        .command = "stepper-set-deceleration",
+        .help = "set motor deceleration",
+        .hint = NULL,
+        .func = &setDeceleration,
+        .argtable = &setDecelerationArgs
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+}
+/** 'set-min-speed' */
+static struct {
+    struct arg_int *motor;
+    struct arg_int *speed;
+    struct arg_end *end;
+} setMinSpeedArgs;
+
+static int setMinSpeed(int argc, char **argv)
+{
+    int nerrors = arg_parse(argc, argv, (void **) &setMinSpeedArgs);
+    if (nerrors != 0) {
+        arg_print_errors(stderr, setMinSpeedArgs.end, argv[0]);
+        return 1;
+    }
+    MotorNum_t motor = (MotorNum_t)(setMinSpeedArgs.motor->ival[0] - 1);
+    float speed = (float)(setMinSpeedArgs.speed->ival[0]);
+    MotorStepper::setMinSpeed(motor, speed);
+    return 0;
+}
+
+static void _registerSetMinSpeed(void)
+{
+    setMinSpeedArgs.motor = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
+    setMinSpeedArgs.speed = arg_int1(NULL, NULL, "MIN_SPEED", "motor min speed in step/s");
+    setMinSpeedArgs.end = arg_end(2);
+    const esp_console_cmd_t cmd = {
+        .command = "stepper-set-min-speed",
+        .help = "set motor minimum speed",
+        .hint = NULL,
+        .func = &setMinSpeed,
+        .argtable = &setMinSpeedArgs
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+}
+/** 'set-full-step-speed' */
+static struct {
+    struct arg_int *motor;
+    struct arg_int *speed;
+    struct arg_end *end;
+} setFullStepSpeedArgs;
+
+static int setFullStepSpeed(int argc, char **argv)
+{
+    int nerrors = arg_parse(argc, argv, (void **) &setFullStepSpeedArgs);
+    if (nerrors != 0) {
+        arg_print_errors(stderr, setFullStepSpeedArgs.end, argv[0]);
+        return 1;
+    }
+    MotorNum_t motor = (MotorNum_t)(setFullStepSpeedArgs.motor->ival[0] - 1);
+    float speed = (float)(setFullStepSpeedArgs.speed->ival[0]);
+    MotorStepper::setFullStepSpeed(motor, speed);
+    return 0;
+}
+
+static void _registerSetFullStepSpeed(void)
+{
+    setFullStepSpeedArgs.motor = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
+    setFullStepSpeedArgs.speed = arg_int1(NULL, NULL, "FULL_STEP_SPEED", "motor full step speed in step/s");
+    setFullStepSpeedArgs.end = arg_end(2);
+    const esp_console_cmd_t cmd = {
+        .command = "stepper-set-full-step-speed",
+        .help = "set motor full step speed",
+        .hint = NULL,
+        .func = &setFullStepSpeed,
+        .argtable = &setFullStepSpeedArgs
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
 }
@@ -169,7 +346,7 @@ static void _registerGetPosition(void)
     getPositionArgs.end    = arg_end(2);
 
     const esp_console_cmd_t cmd = {
-        .command = "get-position",
+        .command = "stepper-get-position",
         .help = "get current motor position",
         .hint = NULL,
         .func = &getPosition,
@@ -206,13 +383,88 @@ static void _registerGetSpeed(void)
     getSpeedArgs.end    = arg_end(2);
 
     const esp_console_cmd_t cmd = {
-        .command = "get-speed",
+        .command = "stepper-get-speed",
         .help = "get current motor speed",
         .hint = NULL,
         .func = &getSpeed,
         .argtable = &getSpeedArgs
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+}
+
+/** 'reset-home-position' */
+static struct {
+    struct arg_int *motor;
+    struct arg_end *end;
+} resetHomePositionArgs;
+
+static int resetHomePosition(int argc, char **argv)
+{
+    int nerrors = arg_parse(argc, argv, (void **) &resetHomePositionArgs);
+    if (nerrors != 0) {
+        arg_print_errors(stderr, resetHomePositionArgs.end, argv[0]);
+        return 1;
+    }
+
+    MotorNum_t motor = (MotorNum_t)(resetHomePositionArgs.motor->ival[0] - 1);
+
+    MotorStepper::resetHomePosition(motor);
+
+    return 0;
+}
+
+static void _registerResetHomePosition(void) 
+{
+    resetHomePositionArgs.motor = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
+    resetHomePositionArgs.end   = arg_end(1);
+
+    const esp_console_cmd_t cmd = {
+        .command  = "stepper-reset-home-position",
+        .help     = "Reset motor home position",
+        .hint     = NULL,
+        .func     = &resetHomePosition,
+        .argtable = &resetHomePositionArgs
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+
+}
+
+/** 'set-position' */
+static struct {
+    struct arg_int *motor;
+    struct arg_int *position;
+    struct arg_end *end;
+} setPositionArgs;
+
+static int setPosition(int argc, char **argv)
+{
+    int nerrors = arg_parse(argc, argv, (void **) &setPositionArgs);
+    if (nerrors != 0) {
+        arg_print_errors(stderr, setPositionArgs.end, argv[0]);
+        return 1;
+    }
+
+    MotorNum_t motor = (MotorNum_t)(setPositionArgs.motor->ival[0] - 1);
+    int32_t position = (int32_t)(setPositionArgs.position->ival[0]);
+
+    MotorStepper::setPosition(motor, position);
+
+    return 0;
+}
+
+static void _registerSetPosition(void) 
+{
+    setPositionArgs.motor = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
+    setPositionArgs.position = arg_int1(NULL, NULL, "<position>", "Position (int)");
+    setPositionArgs.end   = arg_end(2);
+    const esp_console_cmd_t setPosCmd = {
+        .command  = "stepper-set-position",
+        .help     = "Set motor position",
+        .hint     = NULL,
+        .func     = &setPosition,
+        .argtable = &setPositionArgs
+    };
+    esp_console_cmd_register(&setPosCmd);
 }
 
 /** 'stop' */
@@ -262,7 +514,7 @@ static void _registerStop(void)
     stopArgs.end    = arg_end(3);
 
     const esp_console_cmd_t cmd = {
-        .command = "stop",
+        .command = "stepper-stop",
         .help = "stop the motor with specified mode",
         .hint = NULL,
         .func = &stop,
@@ -302,7 +554,7 @@ static void _registerMoveAbsolute(void)
     moveAbsoluteArgs.end    = arg_end(3);
 
     const esp_console_cmd_t cmd = {
-        .command = "move-absolute",
+        .command = "stepper-move-absolute",
         .help = "move absolute",
         .hint = NULL,
         .func = &moveAbsolute,
@@ -353,7 +605,7 @@ static void _registerMoveRelative(void)
     moveRelativeArgs.end    = arg_end(4);
 
     const esp_console_cmd_t cmd = {
-        .command = "move-relative",
+        .command = "stepper-move-relative",
         .help = "move relative",
         .hint = NULL,
         .func = &moveRelative,
@@ -396,7 +648,7 @@ static void _registerRun(void)
     runArgs.end     = arg_end(4);
 
     const esp_console_cmd_t cmd = {
-        .command = "run",
+        .command = "stepper-run",
         .help = "run",
         .hint = NULL,
         .func = &run,
@@ -436,7 +688,7 @@ static void _registerHoming(void)
     homingArgs.end      = arg_end(3);
 
     const esp_console_cmd_t cmd = {
-        .command = "homing",
+        .command = "stepper-homing",
         .help = "homing",
         .hint = NULL,
         .func = &homing,
@@ -469,7 +721,7 @@ static void _registerGetSupplyVoltage(void)
     getSupplyVoltageArgs.end = arg_end(0);
 
     const esp_console_cmd_t cmd = {
-        .command = "get-supply-voltage",
+        .command = "stepper-get-supply-voltage",
         .help = "get supply voltage",
         .hint = NULL,
         .func = &getSupplyVoltage,
@@ -531,11 +783,11 @@ static int getStatus(int argc, char **argv)
 static void _registerGetStatus(void)
 {
     getStatusArgs.motor = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
-    getStatusArgs.raw   = arg_lit0(NULL, "raw", "output raw register value as uint16_t");
+    getStatusArgs.raw   = arg_lit0("r", "raw", "Output raw register value as uint16_t");
     getStatusArgs.end   = arg_end(3);
 
     const esp_console_cmd_t cmd = {
-        .command = "get-status",
+        .command = "stepper-get-status",
         .help = "get motor status information",
         .hint = NULL,
         .func = &getStatus,
@@ -544,20 +796,65 @@ static void _registerGetStatus(void)
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
 }
 
+/** 'clear-status' */
+static struct {
+    struct arg_int *motor;
+    struct arg_end *end;
+} clearStatusArgs;
+
+static int clearStatus(int argc, char **argv)
+{
+    int nerrors = arg_parse(argc, argv, (void **) &clearStatusArgs);
+    if (nerrors != 0) {
+        arg_print_errors(stderr, clearStatusArgs.end, argv[0]);
+        return 1;
+    }
+
+    MotorNum_t motor = (MotorNum_t)(clearStatusArgs.motor->ival[0] - 1);
+
+    MotorStepper::clearStatus(motor);
+
+    return 0;
+}
+
+static void _registerClearStatus(void)
+{
+    clearStatusArgs.motor = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
+    clearStatusArgs.end   = arg_end(1);
+
+    const esp_console_cmd_t cmd = {
+        .command = "stepper-clear-status",
+        .help = "clear motor status",
+        .hint = NULL,
+        .func = &clearStatus,
+        .argtable = &clearStatusArgs
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+}
+
+
 int MotorStepper::_registerCLI(void)
 {
-    _registerLimitSwitch();
+    _registerAttachLimitSwitch();
+    _registerDetachLimitSwitch();
     _registerStepResolution();
     _registerSetMaxSpeed();
+    _registerSetAcceleration();
+    _registerSetDeceleration();
+    _registerSetMinSpeed();
+    _registerSetFullStepSpeed();
     _registerGetPosition();
     _registerGetSpeed();
+    _registerGetStatus();
+    _registerClearStatus();
+    _registerResetHomePosition();
+    _registerSetPosition();
     _registerStop();
     _registerMoveAbsolute();
     _registerMoveRelative();
     _registerRun();
     _registerHoming();
     _registerGetSupplyVoltage();
-    _registerGetStatus();
 
     return 0;
 }

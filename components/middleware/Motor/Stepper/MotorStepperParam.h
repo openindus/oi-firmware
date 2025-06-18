@@ -248,7 +248,8 @@ public:
 
     static PS01_AdvancedParam_t getAllAdvancedParamPS01(MotorNum_t motor);
     static int setAllAdvancedParamPS01(MotorNum_t motor, PS01_AdvancedParam_t advancedParam);
-
+    static int resetAllAdvancedParamPS01(MotorNum_t motor);
+    
     static PS01_AdvancedParam_t getNVSParam(MotorNum_t motor);
     static int setNVSParam(MotorNum_t motor, PS01_AdvancedParam_t param);
     static int initNVSParam(void);
