@@ -726,7 +726,7 @@ static int stepperParser(int argc, char **argv) {
 static void _registerDevice(void)
 {
     const esp_console_cmd_t cmd = {
-        .command = "advanced-param",
+        .command = "stepper-advanced-param",
         .help = "powerSTEP01 advanced param commands",
         .hint = "MOTOR <get/set/reset> PARAMETER ARGUMENT",
         .func = &stepperParser,
