@@ -1521,8 +1521,9 @@ PS01_AdvancedParam_t MotorStepperParam::getNVSParam(MotorNum_t motor)
     /* Open NVS */
     nvs_handle_t handle;
     ESP_ERROR_CHECK_WITHOUT_ABORT(nvs_open_from_partition(MOTOR_STEPPER_NVS_PARTITION, MOTOR_STEPPER_NVS_NAMESPACE, NVS_READWRITE, &handle));
-    if (nvs_get_blob(handle, MOTOR_STEPPER_NVS_KEY[(uint8_t) motor], NULL, &nvsParamSize) != ESP_OK) {
-        // If the key doesn't exist in NVS, create it
+    if (nvs_get_blob(handle, MOTOR_STEPPER_NVS_KEY[(uint8_t) motor], &nvsParam, &nvsParamSize) != ESP_OK 
+        || nvsParamSize != sizeof(PS01_AdvancedParam_t)) {
+        // If the key doesn't exist in NVS or size is not good, (re)-create it
         nvsParam = defaultParameters;
         int errorCode = MotorStepperParam::setAllAdvancedParamPS01(motor, nvsParam);
         // Check if the motor is active
@@ -1533,9 +1534,6 @@ PS01_AdvancedParam_t MotorStepperParam::getNVSParam(MotorNum_t motor)
             ESP_ERROR_CHECK_WITHOUT_ABORT(nvs_set_blob(handle, MOTOR_STEPPER_NVS_KEY[(uint8_t) motor], &defaultParameters, sizeof(defaultParameters)));
             ESP_ERROR_CHECK_WITHOUT_ABORT(nvs_commit(handle));
         }
-    } else {
-        // If the key already exists, get the blob
-        ESP_ERROR_CHECK_WITHOUT_ABORT(nvs_get_blob(handle, MOTOR_STEPPER_NVS_KEY[(uint8_t) motor], &nvsParam, &nvsParamSize));
     }
     nvs_close(handle);
 
