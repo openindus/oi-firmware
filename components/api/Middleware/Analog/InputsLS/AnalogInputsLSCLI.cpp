@@ -1,5 +1,5 @@
 /**
- * @file CLI_AnalogInputsLS_CLI.cpp
+ * @file CLI_AnalogInputsLSCLI.cpp
  * @brief Command line interface
  * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
  * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.

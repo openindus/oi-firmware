@@ -1,5 +1,5 @@
 /**
- * @file AnalogInputsHV_CLI.cpp
+ * @file AnalogInputsHVCLI.cpp
  * @brief Command line interface - Anlog Inputs HV
  * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
  * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.

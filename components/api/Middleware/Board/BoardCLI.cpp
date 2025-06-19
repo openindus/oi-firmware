@@ -1,5 +1,5 @@
 /**
- * @file Board_CLI.cpp
+ * @file BoardCLI.cpp
  * @brief Command line interface - Board
  * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
  * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.

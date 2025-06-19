@@ -1,5 +1,5 @@
 /**
- * @file Bus_CLI.cpp
+ * @file BusCLI.cpp
  * @brief Command line interface - Bus
  * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
  * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
@@ -11,7 +11,7 @@
 #include "esp_console.h"
 #include "argtable3/argtable3.h"
 
-static const char TAG[] = "Bus_CLI";
+static const char TAG[] = "BusCLI";
 
 /* --- read-id --- */
 

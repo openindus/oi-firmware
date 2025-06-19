@@ -1,5 +1,5 @@
 /**
- * @file Relays_CLI.h
+ * @file RelaysCLI.h
  * @brief Command line interface for Relays module
  * @author Georges de Massol
  * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.

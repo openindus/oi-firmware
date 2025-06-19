@@ -1,5 +1,5 @@
 /**
- * @file AnalogOutputs_CLI.cpp
+ * @file AnalogOutputsCLI.cpp
  * @brief Command line interface - Anlog Outputs
  * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
  * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.

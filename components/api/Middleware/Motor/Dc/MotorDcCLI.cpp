@@ -1,5 +1,5 @@
 /**
- * @file MotorDc_CLI.cpp
+ * @file MotorDcCLI.cpp
  * @brief Command line interface - Motor DC
  * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
  * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.

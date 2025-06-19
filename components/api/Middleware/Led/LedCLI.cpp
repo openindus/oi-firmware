@@ -1,5 +1,5 @@
 /**
- * @file Led_CLI.cpp
+ * @file LedCLI.cpp
  * @brief Command line interface - Led
  * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
  * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.

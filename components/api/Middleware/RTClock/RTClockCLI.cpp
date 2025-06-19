@@ -1,5 +1,5 @@
 /**
- * @file RTClock_CLI.cpp
+ * @file RTClockCLI.cpp
  * @brief Command line interface
  * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
  * @copyright (c) [2024] OpenIndus, Inc. All rights reserved.
