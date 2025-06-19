@@ -71,7 +71,13 @@ void MotorStepper::attachLimitSwitch(MotorNum_t motor, DIn_Num_t din, Logic_t lo
     _limitSwitchDigitalInput[motor].push_back({din, logic});
 
     /* Attach interrupt to limit switch */
-    DigitalInputs::attachInterrupt(din, _triggerLimitSwitch, (logic == ACTIVE_HIGH) ? RISING_MODE : FALLING_MODE, &_motorNums[motor]);
+    DigitalInputs* _limitSwitches = new DigitalInputs();
+    if (_limitSwitches != nullptr) {
+        _limitSwitches->attachInterrupt(din, _triggerLimitSwitch, (logic == ACTIVE_HIGH) ? RISING_MODE : FALLING_MODE, &_motorNums[motor]);
+        delete _limitSwitches;
+    } else {
+        ESP_LOGE(TAG, "DigitalInputs not initialized. Please call DigitalInputs::init() before attaching limit switches.");
+    }
 }
 
 void MotorStepper::detachLimitSwitch(MotorNum_t motor, DIn_Num_t din) 
@@ -84,7 +90,13 @@ void MotorStepper::detachLimitSwitch(MotorNum_t motor, DIn_Num_t din)
     if(it != _limitSwitchDigitalInput[motor].end()) _limitSwitchDigitalInput[motor].erase(it);
 
     /* Remove the interrupt */
-    DigitalInputs::detachInterrupt(din);
+    DigitalInputs* _limitSwitches = new DigitalInputs();
+    if (_limitSwitches != nullptr) {
+        _limitSwitches->detachInterrupt(din);
+        delete _limitSwitches;
+    } else {
+        ESP_LOGE(TAG, "DigitalInputs not initialized. Please call DigitalInputs::init() before detaching limit switches.");
+    }
 }
 
 void MotorStepper::setStepResolution(MotorNum_t motor, MotorStepResolution_t res) 
@@ -311,6 +323,12 @@ static void _triggerLimitSwitch(void *arg)
 static void _homingTask(void* arg)
 {
     MotorNum_t motor = *(MotorNum_t*)arg;
+    DigitalInputs* limitSwitches = new DigitalInputs();
+
+    if (limitSwitches == nullptr) {
+        ESP_LOGE(TAG, "DigitalInputs not initialized. Please call DigitalInputs::init() before homing.");
+        vTaskDelete(NULL);
+    }
 
     xSemaphoreTake(_homingSemaphore[motor], portMAX_DELAY);
 
@@ -328,13 +346,13 @@ static void _homingTask(void* arg)
     xSemaphoreGive(_taskHomingStopSemaphore[motor]);
     
     /* Check if motor is at home */
-    if (DigitalInputs::digitalRead(din) != logic) {
+    if (limitSwitches->digitalRead(din) != logic) {
         /* Perform go until command and wait */
         PS01_Cmd_GoUntil(motor, ACTION_RESET, (motorDir_t)REVERSE, stepPerTick);
         /* Empty the queue if a precedent interrupt happened */
         xQueueReset(_busyEvent[motor]);
         /* Check if status if not already high */
-        while (!PS01_Hal_GetBusyLevel(motor) && (DigitalInputs::digitalRead(din) != logic)) {
+        while (!PS01_Hal_GetBusyLevel(motor) && (limitSwitches->digitalRead(din) != logic)) {
             /* Wait for an interrupt (rising edge) on busy pin */
             xQueueReceive(_busyEvent[motor], NULL, pdMS_TO_TICKS(10));
         }
@@ -347,7 +365,7 @@ static void _homingTask(void* arg)
     }
 
     /* Invert the switch logic to stop the motor when it leaves the sensor */
-    DigitalInputs::attachInterrupt(din, _triggerLimitSwitch, (logic == ACTIVE_HIGH) ? FALLING_MODE : RISING_MODE, &_motorNums[motor]);
+    limitSwitches->attachInterrupt(din, _triggerLimitSwitch, (logic == ACTIVE_HIGH) ? FALLING_MODE : RISING_MODE, &_motorNums[motor]);
 
     /* If a stop command was issued, do not launch the second action --> homing is aborted */
     xSemaphoreTake(_taskHomingStopSemaphore[motor], portMAX_DELAY);
@@ -358,7 +376,7 @@ static void _homingTask(void* arg)
         /* Perform release SW command and wait */
         PS01_Cmd_ReleaseSw(motor, ACTION_RESET, (motorDir_t)FORWARD);
         /* Check if motor is not already out of limitswitch (sometimes motor is already out of limitswitch after the releaseSw command and motor will run to infinite) */
-        if (DigitalInputs::digitalRead(din) != logic) {
+        if (limitSwitches->digitalRead(din) != logic) {
             PS01_Hal_SetSwitchLevel((MotorNum_t)motor, 1);
             vTaskDelay(pdTICKS_TO_MS(1));
             PS01_Hal_SetSwitchLevel((MotorNum_t)motor, 0);
@@ -368,7 +386,7 @@ static void _homingTask(void* arg)
             /* Empty the queue is a precedent interrupt happened */
             xQueueReset(_busyEvent[motor]);
             /* Check if status if not already high */
-            while (!PS01_Hal_GetBusyLevel(motor) && (DigitalInputs::digitalRead(din) == logic)) {
+            while (!PS01_Hal_GetBusyLevel(motor) && (limitSwitches->digitalRead(din) == logic)) {
                 /* Wait for an interrupt (rising edge) on busy pin */
                 xQueueReceive(_busyEvent[motor], NULL, pdMS_TO_TICKS(10));
             }
@@ -384,12 +402,13 @@ static void _homingTask(void* arg)
     }
 
     /* Re-invert the switch logic */
-    DigitalInputs::attachInterrupt(din, _triggerLimitSwitch, (logic == ACTIVE_HIGH) ? RISING_MODE : FALLING_MODE, &_motorNums[motor]);
+    limitSwitches->attachInterrupt(din, _triggerLimitSwitch, (logic == ACTIVE_HIGH) ? RISING_MODE : FALLING_MODE, &_motorNums[motor]);
 
     /* Release semaphore */
     xSemaphoreGive(_homingSemaphore[motor]);
 
-    /* Delete task */
+    delete limitSwitches;
+    limitSwitches = nullptr;
     vTaskDelete(NULL);
 }
 

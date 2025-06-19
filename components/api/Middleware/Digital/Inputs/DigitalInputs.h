@@ -9,8 +9,13 @@
 #pragma once
 
 #include "Common.h"
-#include "pcal6524.h"
 #include "DigitalInputsInterface.h"
+
+#if defined(OI_CORE)
+#include "pcal6524.h"
+#else
+#include "driver/gpio.h"
+#endif
 
 class DigitalInputs : public DigitalInputsInterface
 {

@@ -26,6 +26,7 @@
 #include "MotorDc.h"
 #include "DcCmdHandler.h"
 #include "DcCmd.h"
+#include "DigitalInputsCLI.h"
 
 #if defined(OI_DC)
 

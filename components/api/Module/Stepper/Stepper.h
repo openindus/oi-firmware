@@ -25,6 +25,7 @@
 #include "StepperConfig.h"
 #include "StepperParam.h"
 #include "StepperPinout.h"
+#include "DigitalInputsCLI.h"
 
 #define STEPPER_ENCODER_MAX 2
 

@@ -271,8 +271,8 @@ int Core::init(void)
     xTaskCreate(_moduleTask, "Slave task", 4096, NULL, 1, NULL);
 
     /* Command line interface */
-    DigitalInputsCLI::init();
-    DigitalOutputsCLI::init();
+    err |= DigitalInputsCLI::init();
+    err |= DigitalOutputsCLI::init();
     MotorStepperCmd::_registerCLI();
 
     return err;

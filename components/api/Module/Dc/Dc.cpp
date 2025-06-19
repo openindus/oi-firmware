@@ -50,6 +50,8 @@ int Dc::init(void)
     err |= DcCmdHandler::init();
 #endif
 
+    err |= DigitalInputsCLI::init();
+
     return err;
 }
 

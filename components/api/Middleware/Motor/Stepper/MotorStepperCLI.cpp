@@ -66,7 +66,6 @@ static void _registerAttachLimitSwitch(void)
 static struct {
     struct arg_int *motor;
     struct arg_int *din;
-    struct arg_int *logic;
     struct arg_end *end;
 } detachLimitSwitchArgs;
 
@@ -90,7 +89,7 @@ static void _registerDetachLimitSwitch(void)
 {
     detachLimitSwitchArgs.motor   = arg_int1(NULL, NULL, "MOTOR", "[1-2]");
     detachLimitSwitchArgs.din     = arg_int1(NULL, NULL, "DIN", "[1-4]");
-    detachLimitSwitchArgs.end     = arg_end(4);
+    detachLimitSwitchArgs.end     = arg_end(3);
 
     const esp_console_cmd_t cmd = {
         .command = "stepper-detach-limit-switch",

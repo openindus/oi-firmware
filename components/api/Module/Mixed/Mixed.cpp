@@ -106,6 +106,10 @@ int Mixed::init(void)
     err |= DigitalInputsCmdHandler::init();
 #endif
 
+    /* CLI */
+    err |= DigitalInputsCLI::init();
+    err |= DigitalOutputsCLI::init();
+
     return err;
 }
 

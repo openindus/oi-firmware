@@ -23,6 +23,8 @@
 #include "AnalogInputsLVCmd.h"
 #include "DigitalInputsCmd.h"
 #include "DigitalOutputsCmd.h"
+#include "DigitalInputsCLI.h"
+#include "DigitalOutputsCLI.h"
 
 #if defined(OI_MIXED)
 
