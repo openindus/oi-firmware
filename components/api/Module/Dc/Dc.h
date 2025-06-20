@@ -20,13 +20,13 @@
 #include "Module.h"
 #include "Slave.h"
 #include "ModuleControl.h"
-#include "DigitalDefs.h"
 #include "DigitalInputs.h"
 #include "DigitalInputsCmd.h"
 #include "DigitalInputsCmdHandler.h"
 #include "MotorDc.h"
 #include "DcCmdHandler.h"
 #include "DcCmd.h"
+#include "DigitalInputsCLI.h"
 
 #if defined(OI_DC)
 

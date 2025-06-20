@@ -20,3 +20,4 @@ sdkconfig.stepper-s2
 sdkconfig.stepperve-s2
 *.old
 dependencies.lock
+__pycache__

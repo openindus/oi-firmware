@@ -14,7 +14,6 @@
 #include "AnalogOutputs.h"
 #include "AnalogInputsLV.h"
 #include "DigitalOutputs.h"
-#include "DigitalDefs.h"
 #include "DigitalInputs.h"
 #include "AnalogOutputsCmdHandler.h"
 #include "AnalogInputsLVCmdHandler.h"
@@ -24,6 +23,8 @@
 #include "AnalogInputsLVCmd.h"
 #include "DigitalInputsCmd.h"
 #include "DigitalOutputsCmd.h"
+#include "DigitalInputsCLI.h"
+#include "DigitalOutputsCLI.h"
 
 #if defined(OI_MIXED)
 
