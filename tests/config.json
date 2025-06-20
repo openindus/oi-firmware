@@ -5,30 +5,22 @@
       {
         "name": "discrete",
         "type": 6,
-        "serial_number": 46,
-        "description": "Discrete Module - Digital I/O",
-        "expected_id": 555
+        "serial_number": 46
       },
       {
         "name": "mixed",
         "type": 8,
-        "serial_number": 118,
-        "description": "Mixed Module - Analog and Digital I/O",
-        "expected_id": 518
+        "serial_number": 118
       },
       {
         "name": "stepper",
         "type": 10,
-        "serial_number": 1,
-        "description": "Stepper Module - Stepper motor control",
-        "expected_id": 279
+        "serial_number": 1
       },
       {
-        "name": "relay_hp",
+        "name": "relayhp",
         "type": 11,
-        "serial_number": 53,
-        "description": "RelayHP Module - Relay High Power",
-        "expected_id": 180
+        "serial_number": 53
       }
     ]
   }

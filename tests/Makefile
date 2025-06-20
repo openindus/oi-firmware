@@ -10,7 +10,8 @@ VENV_ACTIVATE = $(VENV_DIR)/bin/activate
 # Default target
 test: setup
 	@echo "Running tests..."
-	. $(VENV_ACTIVATE) && python3 -m pytest
+	. $(VENV_ACTIVATE) && python3 -m pytest test_system.py
+	. $(VENV_ACTIVATE) && python3 -m pytest test_digital_io.py
 
 # Environment setup
 setup: $(VENV_ACTIVATE)

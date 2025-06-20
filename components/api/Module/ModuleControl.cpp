@@ -32,7 +32,7 @@ int ModuleControl::runCallback(std::vector<uint8_t> &msgBytes, bool ackNeeded)
 
 void ModuleControl::restart(void)
 { 
-    Master::restart(_id);
+    Master::moduleRestart(_id);
 }
 
 void ModuleControl::ledOn(LedColor_t color)

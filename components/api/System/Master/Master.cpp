@@ -72,8 +72,6 @@ int Master::getStatus(void)
 
 bool Master::autoId(void)
 {
-    ESP_LOGI(TAG, "Auto ID");
-
     /* Check if IDs are in bus order or by Serial Number */
     int numIdAuto = 0;
     int numIdSN = 0;
@@ -290,7 +288,7 @@ void Master::ledCtrl(const uint16_t slaveId, const uint8_t state, const uint8_t 
     BusRS::write(&frame, 100);
 }
 
-void Master::restart(const uint16_t slaveId)
+void Master::moduleRestart(const uint16_t slaveId)
 {
     std::vector<uint8_t> args;
     BusRS::Frame_t frame;
