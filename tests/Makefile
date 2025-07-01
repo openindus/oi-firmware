@@ -12,6 +12,8 @@ test: setup
 	@echo "Running tests..."
 	. $(VENV_ACTIVATE) && python3 -m pytest test_system.py
 	. $(VENV_ACTIVATE) && python3 -m pytest test_digital_io.py
+	. $(VENV_ACTIVATE) && python3 -m pytest test_rs.py
+	. $(VENV_ACTIVATE) && python3 -m pytest test_can.py
 
 # Environment setup
 setup: $(VENV_ACTIVATE)

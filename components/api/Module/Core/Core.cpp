@@ -19,6 +19,8 @@
 #include "DigitalOutputsCmd.h"
 #include "DigitalInputsCLI.h"
 #include "DigitalOutputsCLI.h"
+#include "RSCLI.h"
+#include "CANCLI.h"
 
 #if defined(OI_CORE)
 
@@ -274,6 +276,8 @@ int Core::init(void)
     err |= DigitalInputsCLI::init();
     err |= DigitalOutputsCLI::init();
     MotorStepperCmd::_registerCLI();
+    err |= RSCLI::init();
+    err |= CANCLI::init();
 
     return err;
 }
