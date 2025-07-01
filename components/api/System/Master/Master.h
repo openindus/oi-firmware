@@ -14,7 +14,7 @@
 #include "Board.h"
 #include "Led.h"
 #include "Bus.h"
-#include "Definitions.h"
+#include "Types.h"
 #include "ModuleControl.h"
 
 class Master
@@ -29,7 +29,7 @@ public:
     static bool autoId(void);
     static void program(uint16_t boardType, uint32_t boardSN);
 
-    static void restart(const uint16_t slaveId);
+    static void moduleRestart(const uint16_t slaveId);
     static bool ping(uint16_t boardType, uint32_t boardSN);
     static void ledCtrl(const uint16_t slaveId, const uint8_t state, const uint8_t color = LED_NONE, const uint32_t period = 0);
 

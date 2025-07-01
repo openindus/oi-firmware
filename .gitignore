@@ -18,6 +18,7 @@ sdkconfig.dc
 sdkconfig.discrete-s2
 sdkconfig.stepper-s2
 sdkconfig.stepperve-s2
+sdkconfig.test
 *.old
 dependencies.lock
 __pycache__

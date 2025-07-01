@@ -1,4 +1,6 @@
 set(COMPONENT_SRCS
+    "Main.cpp"
+
     "System/System.cpp"
     "System/Master/Master.cpp"
     "System/Master/MasterCLI.cpp"

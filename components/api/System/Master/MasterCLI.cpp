@@ -247,37 +247,37 @@ static struct {
     struct arg_lit *dateCode;
     struct arg_lit *versionSW;
     struct arg_end *end;
-} getSlaveInfoArgs;
+} getBoardInfoArgs;
 
-static int getSlaveInfoCmd(int argc, char **argv)
+static int getBoardInfoCmd(int argc, char **argv)
 {
-    int nerrors = arg_parse(argc, argv, (void **) &getSlaveInfoArgs);
+    int nerrors = arg_parse(argc, argv, (void **) &getBoardInfoArgs);
     if (nerrors != 0) {
-        arg_print_errors(stderr, getSlaveInfoArgs.end, argv[0]);
+        arg_print_errors(stderr, getBoardInfoArgs.end, argv[0]);
         return 1;
     }
 
     Board_Info_t boardInfo;
 
-    if (getSlaveInfoArgs.type->count == 1 && getSlaveInfoArgs.sn->count == 1) {
-        Master::getBoardInfo((uint16_t)getSlaveInfoArgs.type->ival[0], (uint32_t)getSlaveInfoArgs.sn->ival[0], &boardInfo);
+    if (getBoardInfoArgs.type->count == 1 && getBoardInfoArgs.sn->count == 1) {
+        Master::getBoardInfo((uint16_t)getBoardInfoArgs.type->ival[0], (uint32_t)getBoardInfoArgs.sn->ival[0], &boardInfo);
     } else {
         return -1;
     }
 
-    if (getSlaveInfoArgs.boardType->count > 0) {
+    if (getBoardInfoArgs.boardType->count > 0) {
         printf("%u\n", boardInfo.efuse.board_type);
     }
-    if (getSlaveInfoArgs.versionHW->count > 0) {
+    if (getBoardInfoArgs.versionHW->count > 0) {
         printf("%u\n", boardInfo.efuse.hardware_variant);
     }
-    if (getSlaveInfoArgs.serialNum->count > 0) {
+    if (getBoardInfoArgs.serialNum->count > 0) {
         printf("%u\n", boardInfo.efuse.serial_number);
     }
-    if (getSlaveInfoArgs.dateCode->count > 0) {
+    if (getBoardInfoArgs.dateCode->count > 0) {
         printf("%lli\n", boardInfo.efuse.timestamp);
     }
-    if (getSlaveInfoArgs.versionSW->count > 0) {
+    if (getBoardInfoArgs.versionSW->count > 0) {
         printf("%s\n", boardInfo.software_version);
     }
 
@@ -286,20 +286,20 @@ static int getSlaveInfoCmd(int argc, char **argv)
 
 static int _registerGetSlaveInfoCmd(void)
 {
-    getSlaveInfoArgs.type = arg_int1(NULL, NULL, "<TYPE>", "Board type");
-    getSlaveInfoArgs.sn = arg_int1(NULL, NULL, "<SN>", "Board serial number");
-    getSlaveInfoArgs.boardType = arg_lit0("t", "type", "Board type");
-    getSlaveInfoArgs.serialNum = arg_lit0("n", "serial-num","Serial number");
-    getSlaveInfoArgs.versionHW = arg_lit0("h", "version-hw", "Hardware version");
-    getSlaveInfoArgs.dateCode = arg_lit0("d", "timestamp", "Board timestamp");
-    getSlaveInfoArgs.versionSW = arg_lit0("s", "version-sw", "Software version");
-    getSlaveInfoArgs.end = arg_end(2);
+    getBoardInfoArgs.type = arg_int1(NULL, NULL, "<TYPE>", "Board type");
+    getBoardInfoArgs.sn = arg_int1(NULL, NULL, "<SN>", "Board serial number");
+    getBoardInfoArgs.boardType = arg_lit0("t", "type", "Board type");
+    getBoardInfoArgs.serialNum = arg_lit0("n", "serial-num","Serial number");
+    getBoardInfoArgs.versionHW = arg_lit0("h", "version-hw", "Hardware version");
+    getBoardInfoArgs.dateCode = arg_lit0("d", "timestamp", "Board timestamp");
+    getBoardInfoArgs.versionSW = arg_lit0("s", "version-sw", "Software version");
+    getBoardInfoArgs.end = arg_end(2);
 
     const esp_console_cmd_t cmd = {
         .command = "get-slave-info",
-        .help = "Get info from a slave board",
+        .help = "Get board information from slave",
         .hint = NULL,
-        .func = &getSlaveInfoCmd,
+        .func = &getBoardInfoCmd,
         .argtable = &pingArgs
     };
 
@@ -454,6 +454,40 @@ static int _registerRunCallback(void)
     }
 }
 
+/* --- module-restart --- */
+
+static struct {
+    struct arg_int *id;
+    struct arg_end *end;
+} moduleRestartArgs;
+
+static int moduleRestartCmd(int argc, char **argv)
+{
+    int nerrors = arg_parse(argc, argv, (void **) &moduleRestartArgs);
+    if (nerrors != 0) {
+        arg_print_errors(stderr, moduleRestartArgs.end, argv[0]);
+        return 1;
+    }
+    uint16_t slaveId = moduleRestartArgs.id->ival[0];
+    Master::moduleRestart(slaveId);
+    printf("Restart command sent to module ID: %u\n", slaveId);
+    return 0;
+}
+
+static int _registerModuleRestartCmd(void)
+{
+    moduleRestartArgs.id = arg_int1("i", "id", "<ID>", "Slave ID");
+    moduleRestartArgs.end = arg_end(1);
+    const esp_console_cmd_t cmd = {
+        .command = "module-restart",
+        .help = "Restart a slave module by ID",
+        .hint = NULL,
+        .func = &moduleRestartCmd,
+        .argtable = &moduleRestartArgs
+    };
+    return esp_console_cmd_register(&cmd);
+}
+
 int Master::_registerCLI(void)
 {
     int err = 0;
@@ -467,6 +501,7 @@ int Master::_registerCLI(void)
     err |= _registerStartCmd();
     err |= _registerGetStatusCmd();
     err |= _registerRunCallback();
+    err |= _registerModuleRestartCmd();
     return err;
 }
 

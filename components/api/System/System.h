@@ -1,6 +1,6 @@
 /**
  * @file System.h
- * @brief System main
+ * @brief System
  * @author Kévin Lefeuvre (kevin.lefeuvre@openindus.com)
  * @copyright (c) [2025] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
@@ -9,6 +9,7 @@
 #pragma once
 
 #include "Common.h"
+#include "Types.h"
 
 class System
 {
@@ -20,6 +21,6 @@ public:
     __attribute__((weak)) static void handleError(int errorCode);
 
 private:
-    static void _mainTask(void *pvParameters);
+    static void _createMainTask(void);
     static TaskHandle_t _mainTaskHandle;
 };

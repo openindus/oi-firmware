@@ -1,6 +1,6 @@
 /**
- * @file Definitions.h
- * @brief OpenIndus API - Definitions header file
+ * @file Types.h
+ * @brief OpenIndus Types
  * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
  * @copyright (c) [2025] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
@@ -154,9 +154,9 @@ enum Event_e {
  */
 enum ErrorCode_e {
     ERROR_NONE          = (int) 0,
-    ERROR_BOOT          = (int) 1,
-    ERROR_MODULE_INIT   = (int) 2,
-    ERROR_AUTO_ID       = (int) 3,
+    ERROR_HARDWARE_INIT = (int) -1,
+    ERROR_AUTO_ID       = (int) -2,
+    ERROR_BOOT          = (int) -3,
 };
 
 /**
