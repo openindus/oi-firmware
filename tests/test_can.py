@@ -1,13 +1,12 @@
 """
 @file test_can.py
-@brief Test script for CAN CLI functions
+@brief Test script for CAN functions
 @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
 @copyright (c) [2025] OpenIndus, Inc. All rights reserved.
 @see https://openindus.com
 """
 
 import pytest
-import subprocess
 import time
 import can
 from utils.cli import CLI
@@ -22,32 +21,18 @@ def cli(dut, module_type):
 
 @pytest.fixture
 def can_interface():
-    """Setup PEAK CAN interface with python-can"""
+    """Setup PEAK CAN interface"""
     interface = "can0"
     
-    # Setup CAN interface
     try:
-        subprocess.run(["sudo", "modprobe", "peak_usb"], check=True)
-        subprocess.run(["sudo", "modprobe", "peak_pci"], check=True)
-        subprocess.run(["sudo", "ip", "link", "set", interface, "down"], check=False)
-        subprocess.run(["sudo", "ip", "link", "set", interface, "up", "type", "can", "bitrate", "500000"], check=True)
-        print(f"CAN interface {interface} setup successful")
-        
-        # Create CAN bus instance
         bus = can.interface.Bus(channel=interface, interface='socketcan')
-        
         yield bus
         
-    except (subprocess.CalledProcessError, ImportError) as e:
-        pytest.skip(f"Failed to setup CAN interface or python-can not available: {e}")
+    except Exception as e:
+        pytest.skip(f"Failed to create CAN interface: {e}")
+    
     finally:
-        # Cleanup
-        try:
-            if 'bus' in locals():
-                bus.shutdown()
-            subprocess.run(["sudo", "ip", "link", "set", interface, "down"], check=False)
-        except:
-            pass
+        bus.shutdown()
 
 def can_send(bus, can_id, data_bytes, extended=False):
     """Send CAN message using python-can"""
@@ -83,8 +68,8 @@ def can_receive(bus, timeout=2.0):
     
     return messages
 
-def test_can_init_and_basic_commands(dut, cli):
-    """Test CAN initialization and basic commands"""
+def test_can_init(dut, cli):
+    """Test CAN initialization"""
     
     # Wait for prompt
     dut.expect(cli.prompt, timeout=10)
@@ -99,6 +84,11 @@ def test_can_init_and_basic_commands(dut, cli):
     response = dut.expect(r"(\d+)\s*\n" + cli.prompt, timeout=5)
     available = int(response.group(1))
     assert available == 0, f"Expected 0 messages available, got {available}"
+    
+    # End CAN communication
+    dut.write("can-end")
+    dut.expect("CAN communication ended", timeout=5)
+    dut.expect(cli.prompt, timeout=5)
 
 def test_can_init_with_parameters(dut, cli):
     """Test CAN initialization with specific parameters"""
@@ -115,6 +105,11 @@ def test_can_init_with_parameters(dut, cli):
     dut.write("can-begin --baudrate 250000 --extended")
     dut.expect("CAN initialized", timeout=5)
     dut.expect("mode=Extended", timeout=5)
+    dut.expect(cli.prompt, timeout=5)
+    
+    # End CAN communication
+    dut.write("can-end")
+    dut.expect("CAN communication ended", timeout=5)
     dut.expect(cli.prompt, timeout=5)
 
 def test_can_write_standard_frame(dut, cli, can_interface):
@@ -151,6 +146,11 @@ def test_can_write_standard_frame(dut, cli, can_interface):
             break
     
     assert found, f"Expected CAN message with ID 0x{test_id:X} and data {test_data} not received"
+    
+    # End CAN communication
+    dut.write("can-end")
+    dut.expect("CAN communication ended", timeout=5)
+    dut.expect(cli.prompt, timeout=5)
 
 def test_can_write_extended_frame(dut, cli, can_interface):
     """Test CAN extended frame writing"""
@@ -184,6 +184,11 @@ def test_can_write_extended_frame(dut, cli, can_interface):
             break
     
     assert found, f"Expected extended CAN message with ID 0x{test_id:X} not received"
+    
+    # End CAN communication
+    dut.write("can-end")
+    dut.expect("CAN communication ended", timeout=5)
+    dut.expect(cli.prompt, timeout=5)
 
 @pytest.mark.skip(reason="RTR frame testing temporarily disabled")
 def test_can_write_rtr_frame(dut, cli, can_interface):
@@ -204,6 +209,11 @@ def test_can_write_rtr_frame(dut, cli, can_interface):
     dut.expect(f"ID=0x{test_id:X}", timeout=5)
     dut.expect("RTR=Yes", timeout=5)
     dut.expect("Size=0", timeout=5)
+    dut.expect(cli.prompt, timeout=5)
+    
+    # End CAN communication
+    dut.write("can-end")
+    dut.expect("CAN communication ended", timeout=5)
     dut.expect(cli.prompt, timeout=5)
 
 def test_can_read_loopback(dut, cli, can_interface):
@@ -238,6 +248,11 @@ def test_can_read_loopback(dut, cli, can_interface):
     dut.expect(f"ID=0x{test_id:X}", timeout=5)
     dut.expect("Size=8", timeout=5)
     dut.expect(cli.prompt, timeout=5)
+    
+    # End CAN communication
+    dut.write("can-end")
+    dut.expect("CAN communication ended", timeout=5)
+    dut.expect(cli.prompt, timeout=5)
 
 @pytest.mark.skip(reason="CAN filter testing temporarily disabled")
 def test_can_filters(dut, cli):
@@ -268,6 +283,11 @@ def test_can_filters(dut, cli):
     dut.expect("Extended CAN filter set", timeout=5)
     dut.expect(f"mask=0x{ext_mask:08X}", timeout=5)
     dut.expect(f"filter=0x{ext_filter:08X}", timeout=5)
+    dut.expect(cli.prompt, timeout=5)
+    
+    # End CAN communication
+    dut.write("can-end")
+    dut.expect("CAN communication ended", timeout=5)
     dut.expect(cli.prompt, timeout=5)
 
 def test_can_multiple_messages(dut, cli, can_interface):
@@ -306,16 +326,6 @@ def test_can_multiple_messages(dut, cli, can_interface):
         dut.write("can-read")
         dut.expect("CAN message received", timeout=5)
         dut.expect(cli.prompt, timeout=5)
-
-def test_can_end(dut, cli):
-    """Test CAN termination"""
-    
-    dut.expect(cli.prompt, timeout=10)
-    
-    # Initialize CAN first
-    dut.write("can-begin --baudrate 500000")
-    dut.expect("CAN initialized", timeout=5)
-    dut.expect(cli.prompt, timeout=5)
     
     # End CAN communication
     dut.write("can-end")

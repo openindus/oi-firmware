@@ -1,6 +1,6 @@
 """
 @file test_rs.py
-@brief Test script for RS485/232 CLI functions
+@brief Test script for RS485/232 functions
 @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
 @copyright (c) [2025] OpenIndus, Inc. All rights reserved.
 @see https://openindus.com
@@ -31,8 +31,8 @@ def ftdi_port():
         stopbits=serial.STOPBITS_ONE
     )
 
-def test_rs_init_and_basic_commands(dut, cli):
-    """Test RS initialization and basic commands"""
+def test_rs_init(dut, cli):
+    """Test RS initialization"""
     
     # Wait for prompt
     dut.expect(cli.prompt, timeout=10)
@@ -53,6 +53,11 @@ def test_rs_init_and_basic_commands(dut, cli):
     response = dut.expect(r"(\d+)\s*\n" + cli.prompt, timeout=5)
     available = int(response.group(1))
     assert available == 0, f"Expected 0 bytes available, got {available}"
+    
+    # End RS communication
+    dut.write("rs-end")
+    dut.expect("RS communication ended", timeout=5)
+    dut.expect(cli.prompt, timeout=5)
 
 def test_rs_write_byte(dut, cli, ftdi_port):
     """Test RS byte writing"""
@@ -79,6 +84,11 @@ def test_rs_write_byte(dut, cli, ftdi_port):
     
     assert len(received) == 1, f"Expected 1 byte, got {len(received)}"
     assert received[0] == test_byte, f"Expected 0x{test_byte:02X}, got 0x{received[0]:02X}"
+    
+    # End RS communication
+    dut.write("rs-end")
+    dut.expect("RS communication ended", timeout=5)
+    dut.expect(cli.prompt, timeout=5)
 
 def test_rs_write_buffer(dut, cli, ftdi_port):
     """Test RS buffer writing"""
@@ -105,6 +115,11 @@ def test_rs_write_buffer(dut, cli, ftdi_port):
     received_str = received.decode('utf-8', errors='ignore')
     
     assert received_str == test_string, f"Expected '{test_string}', got '{received_str}'"
+    
+    # End RS communication
+    dut.write("rs-end")
+    dut.expect("RS communication ended", timeout=5)
+    dut.expect(cli.prompt, timeout=5)
 
 def test_rs_read_loopback(dut, cli, ftdi_port):
     """Test RS reading by sending from FTDI"""
@@ -134,6 +149,11 @@ def test_rs_read_loopback(dut, cli, ftdi_port):
     dut.write(f"rs-read-buffer --size {available}")
     dut.expect("Read", timeout=5)
     dut.expect(cli.prompt, timeout=5)
+    
+    # End RS communication
+    dut.write("rs-end")
+    dut.expect("RS communication ended", timeout=5)
+    dut.expect(cli.prompt, timeout=5)
 
 def test_rs_single_byte_read(dut, cli, ftdi_port):
     """Test single byte reading"""
@@ -155,16 +175,6 @@ def test_rs_single_byte_read(dut, cli, ftdi_port):
     # Read single byte
     dut.write("rs-read")
     dut.expect(f"0x{test_byte:02X}", timeout=5)
-    dut.expect(cli.prompt, timeout=5)
-
-def test_rs_end(dut, cli):
-    """Test RS termination"""
-    
-    dut.expect(cli.prompt, timeout=10)
-    
-    # Initialize RS first
-    dut.write("rs-begin")
-    dut.expect("RS initialized", timeout=5)
     dut.expect(cli.prompt, timeout=5)
     
     # End RS communication

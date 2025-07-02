@@ -12,3 +12,4 @@ def pytest_addoption(parser):
 # @pytest.fixture(autouse=True)
 # def wait_prompt(request, dut):
 #     dut.expect(">", timeout=10)
+#     yield
