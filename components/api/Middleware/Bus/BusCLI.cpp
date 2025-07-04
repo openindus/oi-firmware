@@ -129,7 +129,7 @@ static int _registerBusPowerCmd(void)
     return esp_console_cmd_register(&cmd);
 }
 
-/* --- can-write --- */
+/* --- bus-can-write --- */
 
 static struct {
     struct arg_int *id;
@@ -168,7 +168,7 @@ static int _registerCANWriteCmd(void)
     CANWriteArgs.end = arg_end(1);
 
     const esp_console_cmd_t cmd = {
-        .command = "can-write",
+        .command = "bus-can-write",
         .help = "Write data to the CAN bus",
         .hint = NULL,
         .func = &CANWriteCmd,
@@ -182,7 +182,7 @@ static int _registerCANWriteCmd(void)
     }
 }
 
-/* --- can-read --- */
+/* --- bus-can-read --- */
 
 static int CANReadCmd(int argc, char **argv)
 {
@@ -209,7 +209,7 @@ static int CANReadCmd(int argc, char **argv)
 static int _registerCANReadCmd(void)
 {
     const esp_console_cmd_t cmd = {
-        .command = "can-read",
+        .command = "bus-can-read",
         .help = "Read data from the CAN bus",
         .hint = NULL,
         .func = &CANReadCmd,
@@ -223,7 +223,7 @@ static int _registerCANReadCmd(void)
     }
 }
 
-/* --- rs-write --- */
+/* --- bus-rs-write --- */
 
 static struct {
     struct arg_int *cmd;
@@ -272,7 +272,7 @@ static int _registerRSWriteCmd(void)
     RSWriteArgs.end = arg_end(1);
 
     const esp_console_cmd_t cmd = {
-        .command = "rs-write",
+        .command = "bus-rs-write",
         .help = "Write data to the RS bus",
         .hint = NULL,
         .func = &RSWriteCmd,
@@ -286,7 +286,7 @@ static int _registerRSWriteCmd(void)
     }
 }
 
-/* --- rs-read --- */
+/* --- bus-rs-read --- */
 
 static int RSReadCmd(int argc, char **argv)
 {
@@ -317,7 +317,7 @@ static int RSReadCmd(int argc, char **argv)
 static int _registerRSReadCmd(void)
 {
     const esp_console_cmd_t cmd = {
-        .command = "rs-read",
+        .command = "bus-rs-read",
         .help = "Read data from the RS bus",
         .hint = NULL,
         .func = &RSReadCmd,

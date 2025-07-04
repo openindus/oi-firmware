@@ -1,20 +1,20 @@
 # OpenIndus Framework
 
-[![Version](https://img.shields.io/badge/version-1.7.3-blue.svg)](https://github.com/openindus/oi-firmware)
-[![Platform](https://img.shields.io/badge/platform-ESP32-green.svg)](https://docs.espressif.com/projects/esp-idf/en/latest/)
-[![Framework](https://img.shields.io/badge/framework-ESP--IDF%20%7C%20Arduino-orange.svg)](https://platformio.org/)
+[![Version](https://img.shields.io/badge/version-1.8.0-blue.svg)]()
+[![Platform](https://img.shields.io/badge/platform-PlatformIO-green.svg)](https://docs.platformio.org/en/latest/)
+[![Framework](https://img.shields.io/badge/framework-ESP--IDF%20%7C%20Arduino-orange.svg)](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/index.html)
 
-OpenIndus Framework is a library for developing applications on OpenIndus industrial modules. It provides a unified API to control digital/analog I/O, stepper motors, relays, and communication protocols (CAN, RS485, Ethernet, Wi-Fi, Bluetooth).
+The OpenIndus Framework is a library for developing applications on OpenIndus industrial modules. It provides a unified API to control digital and analog I/O, stepper motors, relays, and communication protocols such as RS485, CAN, and Ethernet.
 
 ## Supported Modules
 
-- **OI-Core** - Main module
-- **OI-Discrete** - Digital I/O
-- **OI-Mixed** - Digital and Analog I/O
-- **OI-Stepper** - Stepper motor
-- **OI-RelayHP** - High power relays
-- **OI-Dc** - DC motor
-- **OI-AnalogLS** - Analog sensors (PT100, PT1000, Thermocouples, etc.)
+- OICore / OICoreLite
+- OIDiscrete
+- OIMixed
+- OIStepper
+- OIRelayHP
+- OIDc
+- OIAnalogLS
 
 ## Quick Start
 

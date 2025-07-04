@@ -5,8 +5,7 @@ Core core;
 
 void setup(void)
 {
-    /* Initialize RS. Mode: RS485, Baudrate 9600 */
-    core.rs.begin(RS_485, 9600);
+    core.rs.begin(115200);
 }
 
 void loop(void)

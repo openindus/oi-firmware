@@ -3,3 +3,4 @@ pyserial>=3.5
 pytest-embedded>=1.0.0
 pytest-embedded-serial>=1.0.0
 pytest-embedded-serial-esp>=1.0.0
+python-can>=4.5.0
