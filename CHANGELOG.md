@@ -131,3 +131,12 @@ Board which are ready to use :
 - Added stepper motor CLI commands on Master module
 - Add clearStatus and modify getStatus on MotorStepper
 - Fix a mistake in setNVSparam for stepper for compatibility
+
+# 1.8.0
+
+- Move Middleware components to API.
+- Refactor Digital Inputs/Outputs API.
+- Add CLI for Digital Inputs/Outputs, RS485, and CAN.
+- Add functional tests for System, Digital I/O, RS485, and CAN.
+- Update the System start sequence and add Main.cpp.
+- Update README.md.

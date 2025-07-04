@@ -1,6 +1,6 @@
 # OpenIndus Framework
 
-[![Version](https://img.shields.io/badge/version-1.7.3-blue.svg)]()
+[![Version](https://img.shields.io/badge/version-1.8.0-blue.svg)]()
 [![Platform](https://img.shields.io/badge/platform-PlatformIO-green.svg)](https://docs.platformio.org/en/latest/)
 [![Framework](https://img.shields.io/badge/framework-ESP--IDF%20%7C%20Arduino-orange.svg)](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/index.html)
 
