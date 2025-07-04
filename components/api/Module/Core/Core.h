@@ -13,8 +13,8 @@
 
 #ifndef OI_CORE_PLUS
 
-#include "DigitalOutputsExp.h"
-#include "DigitalInputsExp.h"
+#include "DigitalOutputs.h"
+#include "DigitalInputs.h"
 #include "AnalogInputsHV.h"
 #include "RTClock.h"
 #include "CAN.h"
@@ -25,8 +25,8 @@
 
 class Core : 
     public Module, 
-    public DigitalInputsExp, 
-    public DigitalOutputsExp, 
+    public DigitalInputs, 
+    public DigitalOutputs, 
     public AnalogInputsHV
 {
 public:

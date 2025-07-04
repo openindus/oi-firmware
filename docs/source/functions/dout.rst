@@ -97,5 +97,5 @@ If you want to get current on :ref:`OI-Core<OI-Core>`, you will get '0' is curre
 Software API
 ------------
 
-.. doxygenclass:: DigitalOutputs
+.. doxygenclass:: DigitalOutputsInterface
    :members:

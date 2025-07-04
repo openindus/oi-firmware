@@ -78,6 +78,6 @@ This one, shows you how to use interrupt on an :ref:`OI-Discrete` module.
 Software API
 ------------
 
-.. doxygenclass:: DigitalInputs
+.. doxygenclass:: DigitalInputsInterface
    :members:
 

@@ -64,6 +64,8 @@ int Stepper::init(void)
     err |= EncoderCmdHandler::init(encoder);
 #endif
 
+    err |= DigitalInputsCLI::init();
+
     return err;
 }
 

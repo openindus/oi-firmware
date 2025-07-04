@@ -10,7 +10,6 @@
 
 #include "Common.h"
 #include "ModuleControl.h"
-#include "DigitalDefs.h"
 #include "DigitalInputs.h"
 #include "DigitalInputsCmd.h"
 #include "DigitalInputsCmdHandler.h"
@@ -26,6 +25,7 @@
 #include "StepperConfig.h"
 #include "StepperParam.h"
 #include "StepperPinout.h"
+#include "DigitalInputsCLI.h"
 
 #define STEPPER_ENCODER_MAX 2
 

@@ -14,7 +14,7 @@ OIStepper stepper;
 void setup(void)
 {
     printf("Hello OpenIndus!\n");
-    stepper.encoder[0]->begin(DIN1, DIN2, 1024);
+    stepper.encoder[0]->begin(DIN_1, DIN_2, 1024);
 }
 
 void loop(void)

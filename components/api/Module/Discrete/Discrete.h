@@ -11,7 +11,6 @@
 #include "Common.h"
 #include "Module.h"
 #include "DiscretePinout.h"
-#include "DigitalDefs.h"
 #include "DigitalInputs.h"
 #include "DigitalOutputs.h"
 #include "AnalogInputsHV.h"
@@ -23,6 +22,8 @@
 #include "DigitalInputsCmd.h"
 #include "DigitalOutputsCmd.h"
 #include "AnalogInputsHVCmd.h"
+#include "DigitalInputsCLI.h"
+#include "DigitalOutputsCLI.h"
 
 #if (defined(OI_DISCRETE) || defined(OI_DISCRETE_VE))
 
