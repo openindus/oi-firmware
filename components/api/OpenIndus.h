@@ -22,6 +22,7 @@
 #else
 #include "CorePlus.h"
 #endif
+#include "Cloud.hpp"
 
 /* Arduino */
 void setup(void);
@@ -44,3 +45,6 @@ void loop(void);
 
 /* Arduino RS485 */
 class RS485Class : public RS {};
+
+/* OI-Cloud */
+#define OICloud Cloud

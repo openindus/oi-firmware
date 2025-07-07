@@ -87,7 +87,9 @@ set(COMPONENT_SRCS
     "Middleware/Board/Board.cpp"
     "Middleware/Board/BoardCLI.cpp"
     "Middleware/Modem/Modem.cpp"
-    "Middleware/Modem/Modem_private.cpp"  
+    "Middleware/Modem/Modem_private.cpp"
+
+    "Cloud/Cloud.cpp"
 )
 
 set(COMPONENT_INCLUDE_DIRS
@@ -138,6 +140,8 @@ set(COMPONENT_INCLUDE_DIRS
     "Middleware/RS"
     "Middleware/Board"
     "Middleware/Modem"
+
+    "Cloud"
 )
 
 set(COMPONENT_PRIV_REQUIRES
