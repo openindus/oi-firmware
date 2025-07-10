@@ -90,6 +90,7 @@ set(COMPONENT_SRCS
     "Middleware/Modem/Modem_private.cpp"
 
     "Cloud/Cloud.cpp"
+    "Cloud/MQTT/MQTTManager.cpp"
 )
 
 set(COMPONENT_INCLUDE_DIRS
