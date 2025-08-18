@@ -1,0 +1,3 @@
+# Configuration for OI_MIXED module
+CONFIG_OI_MIXED=y
+CONFIG_MODULE_SLAVE=y

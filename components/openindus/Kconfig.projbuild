@@ -1,0 +1,68 @@
+menu "OpenIndus Configuration"
+
+    choice MODULE_TYPE
+        bool "Module"
+        default OI_CORE
+        help
+            Select module
+
+        config OI_CORE
+            bool "OICore"
+        config OI_DISCRETE
+            bool "OIDiscrete"
+        config OI_DISCRETE_VE
+            bool "OIDiscreteVertical"
+        config OI_STEPPER
+            bool "OIStepper"
+        config OI_STEPPER_VE
+            bool "OIStepperVertical"
+        config OI_MIXED
+            bool "OIMixed"
+        config OI_RELAY_HP
+            bool "OIRelayHP"
+        config OI_RELAY_LP
+            bool "OIRelayLP"
+        config OI_ANALOG_LS
+            bool "OIAnalogLS"
+    endchoice
+
+    choice MODULE_MODE
+        bool "Mode"
+        default MODULE_MASTER
+        help
+            Select mode
+
+        config MODULE_MASTER
+            bool "Master"
+        config MODULE_SLAVE
+            bool "Slave"
+        config MODULE_STANDALONE
+            bool "Standalone"
+    endchoice
+
+    config FORCE_CONSOLE
+        bool "Force console"
+        default false
+        help
+            Force the console
+
+    config FORCE_MAIN_TASK
+        bool "Force main task"
+        default false
+        help
+            Force the main task
+
+    menu "Stepper motor Configuration"
+        choice STEPPER_MODE
+            bool "Stepper mode"
+            default VOLTAGE_MODE
+            help
+                powerSTEP01 mode
+            config VOLTAGE_MODE
+                bool "voltage mode"
+            config CURRENT_MODE
+                bool "current mode"
+        endchoice
+    endmenu
+
+endmenu

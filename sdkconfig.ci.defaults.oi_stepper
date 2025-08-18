@@ -1,0 +1,3 @@
+# Configuration for OI_STEPPER module
+CONFIG_OI_STEPPER=y
+CONFIG_MODULE_SLAVE=y

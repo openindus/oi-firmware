@@ -36,7 +36,7 @@ void loop()
     if(core.can.available())
     {
         rx_msg = core.can.read();
-        Serial.printf("NEW MESSAGE // ID : %d, length : %d MSG :  ", rx_msg.id, rx_msg.size);
+        Serial.printf("NEW MESSAGE // ID : %ld, length : %d MSG :  ", rx_msg.id, rx_msg.size);
         for(int i =0; i <rx_msg.size; i++)
         {
             Serial.printf("%x", rx_msg.msg[i]);

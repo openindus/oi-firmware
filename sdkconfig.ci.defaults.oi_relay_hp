@@ -1,0 +1,3 @@
+# Configuration for OI_RELAY_HP module
+CONFIG_OI_RELAY_HP=y
+CONFIG_MODULE_SLAVE=y

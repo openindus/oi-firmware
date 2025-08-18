@@ -14,7 +14,5 @@ The connectivity is based on a MAX3421E chip. You can use the `USB Host shield l
 Code examples
 -------------
 
-The example code above demonstrates how to use the usb host library to connect an HID mouse. 
-
-.. literalinclude:: ../../examples/USBHostHIDMouse.cpp
-    :language: cpp
+.. note::
+    Example to be added.
