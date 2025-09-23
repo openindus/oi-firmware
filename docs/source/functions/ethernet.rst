@@ -45,9 +45,10 @@ Features of the W5500 chip include:
 Code examples
 -------------
 
-The example code above demonstrates how to get the time from a remote server.
+The example code below demonstrates how to initialize the Ethernet interface using the W5500 chip and establish a connection. 
+It also includes a simple web server that responds to HTTP requests.
 
-.. literalinclude:: ../../examples/EthernetUdpTime.cpp
+.. literalinclude:: ../../examples/Ethernet.cpp
     :language: cpp
 
 For a complete list of examples, please check the `ethernet library on github <https://github.com/PaulStoffregen/Ethernet/tree/master/examples>`_.

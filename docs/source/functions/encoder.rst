@@ -46,7 +46,7 @@ Code examples
 
 The example code below demonstrates how to use an encoder with the OI-Stepper module:
 
-.. literalinclude:: ../../../examples/Encoder.cpp
+.. literalinclude:: ../../../components/openindus/examples/Encoder.cpp
     :language: cpp
 
 Software API

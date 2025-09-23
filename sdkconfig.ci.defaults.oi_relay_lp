@@ -1,0 +1,3 @@
+# Configuration for OI_RELAY_LP module
+CONFIG_OI_RELAY_LP=y
+CONFIG_MODULE_SLAVE=y

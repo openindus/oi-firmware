@@ -1,0 +1,3 @@
+# Configuration for OI_CORE module
+CONFIG_OI_CORE=y
+CONFIG_MODULE_MASTER=y

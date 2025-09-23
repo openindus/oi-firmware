@@ -18,7 +18,6 @@ Activate your environment
 ```
 source venv/bin/activate
 ```
->To deactivate your environment use: deactivate
 
 Install dependencies
 ```
@@ -28,5 +27,12 @@ pip3 install -r requirements.txt
 ## Build documentation
 
 ```
-./build.py
+doxygen doxygen/Doxyfile
+make html
+```
+
+## Clean documentation
+
+```
+make clean
 ```

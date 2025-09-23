@@ -6,7 +6,7 @@ OIStepper stepper;
 void printTask(void*)
 {
     while (1) {    
-        Serial.printf("position: %d | speed: %f\n", 
+        Serial.printf("position: %ld | speed: %f\n", 
             stepper.getPosition(MOTOR_1), stepper.getSpeed(MOTOR_1));
         delay(100);
     }
@@ -30,25 +30,25 @@ void setup(void)
     stepper.attachLimitSwitch(MOTOR_1, DIN_1, ACTIVE_HIGH);
     stepper.homing(MOTOR_1, 800);
     stepper.wait(MOTOR_1);
-    Serial.printf("position: %d\n", stepper.getPosition(MOTOR_1));
+    Serial.printf("position: %ld\n", stepper.getPosition(MOTOR_1));
 
     /* Move relative */
     Serial.printf("moveRelative\n");
     stepper.moveRelative(MOTOR_1, 100);
     stepper.wait(MOTOR_1);
-    Serial.printf("position: %d\n", stepper.getPosition(MOTOR_1));
+    Serial.printf("position: %ld\n", stepper.getPosition(MOTOR_1));
 
     /* Move relative */
     Serial.printf("moveRelative\n");
     stepper.moveRelative(MOTOR_1, -200);
     stepper.wait(MOTOR_1);
-    Serial.printf("position: %d\n", stepper.getPosition(MOTOR_1));
+    Serial.printf("position: %ld\n", stepper.getPosition(MOTOR_1));
 
     /* Move absolute */
     Serial.printf("moveAbsolute\n");
     stepper.moveAbsolute(MOTOR_1, 200);
     stepper.wait(MOTOR_1);
-    Serial.printf("position: %d\n", stepper.getPosition(MOTOR_1));
+    Serial.printf("position: %ld\n", stepper.getPosition(MOTOR_1));
 }
 
 void loop(void) 

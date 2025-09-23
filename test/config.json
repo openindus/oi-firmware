@@ -1,0 +1,117 @@
+{
+  "test_bench": {
+    "description": "Test bench configuration",
+    "modules": [
+      {
+        "name": "discrete",
+        "type": 6,
+        "serial_number": 46
+      },
+      {
+        "name": "mixed",
+        "type": 8,
+        "serial_number": 118
+      },
+      {
+        "name": "stepper",
+        "type": 10,
+        "serial_number": 1
+      },
+      {
+        "name": "relayhp",
+        "type": 11,
+        "serial_number": 53
+      }
+    ],
+    "wiring": {
+      "digital_io": [
+        {
+          "module_dout": "core",
+          "dout": 1,
+          "module_din": "discrete",
+          "din": 1
+        },
+        {
+          "module_dout": "core",
+          "dout": 2,
+          "module_din": "discrete",
+          "din": 2
+        },
+        {
+          "module_dout": "core",
+          "dout": 3,
+          "module_din": "discrete",
+          "din": 3
+        },
+        {
+          "module_dout": "core",
+          "dout": 4,
+          "module_din": "discrete",
+          "din": 4
+        },
+        {
+          "module_dout": "discrete",
+          "dout": 1,
+          "module_din": "mixed",
+          "din": 1
+        },
+        {
+          "module_dout": "discrete",
+          "dout": 2,
+          "module_din": "mixed",
+          "din": 2
+        },
+        {
+          "module_dout": "discrete",
+          "dout": 3,
+          "module_din": "mixed",
+          "din": 3
+        },
+        {
+          "module_dout": "discrete",
+          "dout": 4,
+          "module_din": "mixed",
+          "din": 4
+        },
+        {
+          "module_dout": "mixed",
+          "dout": 1,
+          "module_din": "core",
+          "din": 1
+        },
+        {
+          "module_dout": "mixed",
+          "dout": 2,
+          "module_din": "core",
+          "din": 2
+        },
+        {
+          "module_dout": "mixed",
+          "dout": 3,
+          "module_din": "core",
+          "din": 3
+        },
+        {
+          "module_dout": "mixed",
+          "dout": 4,
+          "module_din": "core",
+          "din": 4
+        }
+      ],
+      "analog_io": [
+        {
+          "module_dout": "discrete",
+          "dout": 5,
+          "module_ain": "core",
+          "ain": 1
+        },
+        {
+          "module_dout": "discrete",
+          "dout": 6,
+          "module_ain": "core",
+          "ain": 2
+        }
+      ]
+    }
+  }
+}

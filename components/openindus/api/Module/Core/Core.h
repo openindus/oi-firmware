@@ -1,0 +1,42 @@
+/**
+ * @file Core.h
+ * @brief Module Core
+ * @author Kevin Lefeuvre (kevin.lefeuvre@openindus.com)
+ * @copyright (c) [2025] OpenIndus, Inc. All rights reserved.
+ * @see https://openindus.com
+ */
+
+#pragma once
+
+#include "Common.h"
+#include "Module.h"
+#include "DigitalOutputs.h"
+#include "DigitalInputs.h"
+#include "AnalogInputsHV.h"
+#include "RTClock.h"
+#include "CAN.h"
+#include "RS.h"
+#include "Modem.hpp"
+
+#if defined(CONFIG_OI_CORE)
+
+class Core : 
+    public Module, 
+    public DigitalInputs, 
+    public DigitalOutputs, 
+    public AnalogInputsHV
+{
+public:
+    static int init(void);
+
+    static CAN can;
+    static RS rs;
+    static RTClock rtc;
+    static Modem *modem;
+
+private:
+    static ioex_device_t *_ioex;
+    static void _powerMonitoringTask(void *pvParameters);
+};
+
+#endif
