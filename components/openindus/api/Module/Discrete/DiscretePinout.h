@@ -37,8 +37,7 @@
 /* DIN */
 #define DISCRETE_GPIO_DIN_1             GPIO_NUM_20
 #define DISCRETE_GPIO_DIN_2             GPIO_NUM_21
-// GPIO_NUM_26 <-> IO22 (SPICS1 pin 28) 
-#define DISCRETE_GPIO_DIN_3             GPIO_NUM_26 // Different GPIO pin compared to CONFIG_OI_DISCRETE
+#define DISCRETE_GPIO_DIN_3             GPIO_NUM_26
 #define DISCRETE_GPIO_DIN_4             GPIO_NUM_31 // Different GPIO pin compared to CONFIG_OI_DISCRETE
 #define DISCRETE_GPIO_DIN_5             GPIO_NUM_32 // Different GPIO pin compared to CONFIG_OI_DISCRETE
 #define DISCRETE_GPIO_DIN_6             GPIO_NUM_33
