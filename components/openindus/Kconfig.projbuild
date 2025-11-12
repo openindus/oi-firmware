@@ -24,6 +24,8 @@ menu "OpenIndus Configuration"
             bool "OIRelayLP"
         config OI_ANALOG_LS
             bool "OIAnalogLS"
+        config OI_DC
+            bool "OIDc"
     endchoice
 
     choice MODULE_MODE
