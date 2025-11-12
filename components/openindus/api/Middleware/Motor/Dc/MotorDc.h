@@ -27,26 +27,7 @@ typedef struct {
 
 class MotorDc : public Motor
 {
-private:
-
-    static std::vector<MotorDC_PinConfig_t> _motorsConfig;
-    static gpio_num_t _faultPin;
-
-    static int _registerCLI(void);
-
-protected:
-
-    /**
-     * @brief 
-     * 
-     * @param motorsConfig 
-     * @param faultPin 
-     * @return int 
-     */
-    static int init(std::vector<MotorDC_PinConfig_t> motorsConfig, gpio_num_t faultPin);
-
 public:
-
     /**
      * @brief 
      * 
@@ -61,5 +42,23 @@ public:
      * 
      * @param motor 
      */
-    static void stop(MotorNum_t motor); 
-};;
+    static void stop(MotorNum_t motor);
+
+    /**
+     * @brief 
+     * 
+     * @param motor 
+     * @return float current in A
+     */
+    static float getCurrent(MotorNum_t motor);
+
+protected:
+    static int init(std::vector<MotorDC_PinConfig_t> motorsConfig, gpio_num_t faultPin);
+    static void initADC(void);
+
+private:
+    static std::vector<MotorDC_PinConfig_t> _motorsConfig;
+    static gpio_num_t _faultPin;
+
+    static int _registerCLI(void);
+};

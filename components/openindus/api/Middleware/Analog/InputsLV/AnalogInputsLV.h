@@ -28,6 +28,7 @@ typedef enum {
     AIN_NUM_2 = 1,
     AIN_NUM_3 = 2,
     AIN_NUM_4 = 3,
+    AIN_NUM_MAX
 } ain_num_t;
 
 class AnalogInputAds866x

@@ -7,12 +7,15 @@
  */
 
 #include "MotorDc.h"
+#include "ads866x.h"
 
 #define LEDC_TIMER              LEDC_TIMER_0
 #define LEDC_MODE               LEDC_LOW_SPEED_MODE
 #define LEDC_DUTY_RES           LEDC_TIMER_13_BIT // Set duty resolution to 13 bits
 #define LEDC_DUTY_MAX           (8191) // Duty cycle max. ((2 ** 13) - 1)
 #define LEDC_FREQUENCY          (5000) // Frequency in Hertz. Set frequency at 5 kHz
+
+static const char* TAG = "MotorDc";
 
 std::vector<MotorDC_PinConfig_t> MotorDc::_motorsConfig;
 gpio_num_t MotorDc::_faultPin;
@@ -75,6 +78,9 @@ int MotorDc::init(std::vector<MotorDC_PinConfig_t> motorsConfig, gpio_num_t faul
         err |= ledc_channel_config(&ledc_channel);
     }
 
+    // Initialize ADC for current reading
+    initADC();
+
     /* CLI */
     _registerCLI();
 
@@ -121,4 +127,74 @@ void MotorDc::stop(MotorNum_t motor)
 
     // Disable motor
     gpio_set_level(_motorsConfig.at(motor).disable, 1);
+}
+
+float MotorDc::getCurrent(MotorNum_t motor)
+{
+    // Motor to ADC channel mapping table
+    static const uint8_t motorToChannel[] = {2, 0, 5, 6};
+
+    if (motor < 0 || motor >= sizeof(motorToChannel)/sizeof(motorToChannel[0])) {
+        ESP_LOGE(TAG, "Invalid motor number");
+        return 0.0f;
+    }
+
+    uint8_t channel = motorToChannel[motor];
+    float sum = 0.0f;
+    for (int j = 0; j < 1000; ++j) {
+        float raw = ads866x_analog_read(channel);
+        float voltage = ads866x_convert_raw_2_volt(raw, 6);
+        sum += voltage;
+    }
+    float avg = sum / 1000.0f;
+
+    // Convert voltage to current (I = U / R)
+    float current = avg * 1100.0f / 430.0f; // k=1100, R=430Ohm
+    return current;
+}
+
+void MotorDc::initADC(void)
+{
+    esp_err_t err = ESP_OK;
+
+    /* Initialize the SPI bus */
+    static spi_bus_config_t busConfig = {
+        .mosi_io_num = GPIO_NUM_15,
+        .miso_io_num = GPIO_NUM_11,
+        .sclk_io_num = GPIO_NUM_13,
+        .quadwp_io_num = -1,
+        .quadhd_io_num = -1,
+        .data4_io_num = -1,
+        .data5_io_num = -1,
+        .data6_io_num = -1,
+        .data7_io_num = -1,
+        .max_transfer_sz = 32,
+        .flags = 0,
+        .intr_flags = 0
+    };
+    err |= spi_bus_initialize(SPI2_HOST, &busConfig, SPI_DMA_CH_AUTO);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to initialize SPI bus: %d", err);
+        return;
+    }
+
+    /* Initialize Analog Inputs */
+    static ads866x_config_t adcSPIConfig = {
+        .spi_host = SPI2_HOST,
+        .spi_freq = SPI_MASTER_FREQ_8M,
+        .spi_pin_cs = GPIO_NUM_1,
+        .pin_rst = GPIO_NUM_17,
+        .pin_alarm = GPIO_NUM_12,
+        .adc_channel_nb = 8
+    };
+    err |= ads866x_init(&adcSPIConfig);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to initialize ADC: %d", err);
+        return;
+    }
+
+    /* Configure analog inputs */
+    for (size_t i = 0; i < 8; i++) {
+        ads866x_set_channel_voltage_range(i, 6);
+    }
 }
