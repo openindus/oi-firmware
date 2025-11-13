@@ -28,6 +28,15 @@ static int run(int argc, char **argv)
         return 1;
     }
 
+    if (runArgs.motor->ival[0] < 1 || runArgs.motor->ival[0] > 4) {
+        fprintf(stderr, "Error: MOTOR must be in range [1-4].\n");
+        return 1;
+    }
+    if (runArgs.dir->ival[0] < 0 || runArgs.dir->ival[0] > 1) {
+        fprintf(stderr, "Error: DIRECTION must be 0 (Reverse) or 1 (Forward).\n");
+        return 1;
+    }
+
     MotorNum_t motor = (MotorNum_t)(runArgs.motor->ival[0] - 1);
     MotorDirection_t direction = (MotorDirection_t)(runArgs.dir->ival[0]);
 
