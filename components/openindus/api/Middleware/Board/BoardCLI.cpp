@@ -198,7 +198,21 @@ static int logCmd(int argc, char **argv)
 
 static int _registerLogCmd(void)
 {
-    logArgs.level = arg_str1(NULL, NULL, "<LEVEL>", "[NONE, ERROR, WARN, INFO, DEBUG, VERBOSE]");
+    // Build help string based on CONFIG_LOG_MAXIMUM_LEVEL
+    // ESP_LOG_NONE=0, ERROR=1, WARN=2, INFO=3, DEBUG=4, VERBOSE=5
+#if CONFIG_LOG_MAXIMUM_LEVEL >= 5
+    static const char level_help[] = "[NONE, ERROR, WARN, INFO, DEBUG, VERBOSE]";
+#elif CONFIG_LOG_MAXIMUM_LEVEL >= 4
+    static const char level_help[] = "[NONE, ERROR, WARN, INFO, DEBUG]";
+#elif CONFIG_LOG_MAXIMUM_LEVEL >= 3
+    static const char level_help[] = "[NONE, ERROR, WARN, INFO]";
+#elif CONFIG_LOG_MAXIMUM_LEVEL >= 2
+    static const char level_help[] = "[NONE, ERROR, WARN]";
+#else
+    static const char level_help[] = "[NONE, ERROR]";
+#endif
+
+    logArgs.level = arg_str1(NULL, NULL, "<LEVEL>", level_help);
     logArgs.tag = arg_str0(NULL, NULL, "<TAG>", "specific tag");
     logArgs.end = arg_end(2);
 
