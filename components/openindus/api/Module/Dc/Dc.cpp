@@ -35,7 +35,7 @@ int Dc::init(void)
     err |= Module::init(TYPE_OI_DC);
 
     /* Digital inputs */
-    err |= DigitalInputs::init(_dinGpio, 4);
+    err |= DigitalInputs::init(_dinGpio, sizeof(_dinGpio)/sizeof(_dinGpio[0]));// 4
 
     /* Stepper motor */
     std::vector<MotorDC_PinConfig_t> motorsConfig;

@@ -77,9 +77,9 @@ int Discrete::init(void)
 #endif
 
     /* Initialize digital and analog IOs */
-    err |= DigitalOutputs::init(_doutGpio, _doutAdcUnits, _doutAdcChannels, 8, adcHandles[0], adcHandles[1]);
-    err |= DigitalInputs::init(_dinGpio, 10);
-    err |= AnalogInputsHV::init(_ainUnits, _ainChannels, 2, adcHandles[0]);
+    err |= DigitalOutputs::init(_doutGpio, _doutAdcUnits, _doutAdcChannels, sizeof(_doutGpio)/sizeof(_doutGpio[0]), adcHandles[0], adcHandles[1]);// 8
+    err |= DigitalInputs::init(_dinGpio, sizeof(_dinGpio)/sizeof(_dinGpio[0]));// 10
+    err |= AnalogInputsHV::init(_ainUnits, _ainChannels, sizeof(_ainChannels)/sizeof(_ainChannels[0]), adcHandles[0]);// 2
 
 #if defined(CONFIG_MODULE_SLAVE)
     err |= AnalogInputsHVCmdHandler::init();
