@@ -59,6 +59,7 @@ protected:
 private:
     static std::vector<MotorDC_PinConfig_t> _motorsConfig;
     static gpio_num_t _faultPin;
+    static std::vector<MotorDirection_t> _directions;
 
     static int _registerCLI(void);
 };

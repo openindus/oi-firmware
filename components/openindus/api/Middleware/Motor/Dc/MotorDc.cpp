@@ -19,6 +19,7 @@ static const char* TAG = "MotorDc";
 
 std::vector<MotorDC_PinConfig_t> MotorDc::_motorsConfig;
 gpio_num_t MotorDc::_faultPin;
+std::vector<MotorDirection_t> MotorDc::_directions;
 
 int MotorDc::init(std::vector<MotorDC_PinConfig_t> motorsConfig, gpio_num_t faultPin)
 {    
@@ -27,6 +28,7 @@ int MotorDc::init(std::vector<MotorDC_PinConfig_t> motorsConfig, gpio_num_t faul
     // Save config
     _faultPin = faultPin;
     _motorsConfig = motorsConfig;
+    _directions.resize(_motorsConfig.size(), FORWARD);
 
     // Configure fault pin
     gpio_config_t input_conf;
@@ -120,6 +122,7 @@ void MotorDc::run(MotorNum_t motor, MotorDirection_t direction, float dutyCycle)
         ledc_set_duty(LEDC_MODE, _motorsConfig.at(motor).in2.channel, LEDC_DUTY_MAX);
         ledc_update_duty(LEDC_MODE, _motorsConfig.at(motor).in2.channel);
     }
+    _directions.at(motor) = direction;
 }
 
 void MotorDc::stop(MotorNum_t motor)
@@ -139,14 +142,14 @@ void MotorDc::stop(MotorNum_t motor)
 float MotorDc::getCurrent(MotorNum_t motor)
 {
     // Motor to ADC channel mapping table
-    static const uint8_t motorToChannel[] = {2, 0, 5, 6};
+    static const uint8_t motorToChannel[][2] = {{2, 3}, {0, 1}, {5, 4}, {6, 7}};
 
     if (motor < 0 || motor >= sizeof(motorToChannel)/sizeof(motorToChannel[0])) {
         ESP_LOGE(TAG, "Invalid motor number");
         return 0.0f;
     }
 
-    uint8_t channel = motorToChannel[motor];
+    uint8_t channel = motorToChannel[motor][(_directions.at(motor) == FORWARD) ? 0 : 1];
     float sum = 0.0f;
     for (int j = 0; j < 1000; ++j) {
         float raw = ads866x_analog_read(channel);
