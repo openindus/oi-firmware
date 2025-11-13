@@ -35,7 +35,7 @@ int System::init(void)
     err |= RelayHP::init();
 #elif defined(OI_ANALOG_LS)
     err |= AnalogLS::init();
-#elif defined(OI_DC)
+#elif defined(CONFIG_OI_DC)
     err |= Dc::init();
 #endif
 

@@ -15,7 +15,7 @@
 
 #include "Dc.h"
 
-#if defined(OI_DC)
+#if defined(CONFIG_OI_DC)
 
 static const char TAG[] = "Dc";
 

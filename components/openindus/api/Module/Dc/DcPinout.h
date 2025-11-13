@@ -15,7 +15,7 @@
 
 #pragma once
 
-#if defined(OI_DC)
+#if defined(CONFIG_OI_DC)
 
 /* Config */
 #define DC_MOTOR_NB     4

@@ -28,7 +28,7 @@
 #include "DcCmd.h"
 #include "DigitalInputsCLI.h"
 
-#if defined(OI_DC)
+#if defined(CONFIG_OI_DC)
 
 class Dc : 
     public Module, 
