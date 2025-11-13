@@ -60,12 +60,19 @@ int MotorDc::init(std::vector<MotorDC_PinConfig_t> motorsConfig, gpio_num_t faul
         err |= gpio_config(&output_conf);
 
         // Configure LEDC PWM channel
-        ledc_channel_config_t ledc_channel;
-        ledc_channel.speed_mode = LEDC_MODE;
-        ledc_channel.intr_type = LEDC_INTR_DISABLE;
-        ledc_channel.timer_sel = LEDC_TIMER;
-        ledc_channel.duty = 0;
-        ledc_channel.hpoint = 0;
+        ledc_channel_config_t ledc_channel = {
+            .gpio_num       = motorConfig->in1.gpio, // Placeholder, will be updated below
+            .speed_mode     = LEDC_MODE,
+            .channel        = motorConfig->in1.channel, // Placeholder, will be updated below
+            .intr_type      = LEDC_INTR_DISABLE,
+            .timer_sel      = LEDC_TIMER,
+            .duty           = 0, // Set duty to 0%
+            .hpoint         = 0,
+            .sleep_mode     = LEDC_SLEEP_MODE_NO_ALIVE_NO_PD,
+            .flags = {
+            .output_invert = 0
+            }
+        };
 
         // Config IN1
         ledc_channel.gpio_num = motorConfig->in1.gpio;
@@ -168,8 +175,10 @@ void MotorDc::initADC(void)
         .data5_io_num = -1,
         .data6_io_num = -1,
         .data7_io_num = -1,
+        .data_io_default_level = false,
         .max_transfer_sz = 32,
         .flags = 0,
+        .isr_cpu_id = ESP_INTR_CPU_AFFINITY_AUTO,
         .intr_flags = 0
     };
     err |= spi_bus_initialize(SPI2_HOST, &busConfig, SPI_DMA_CH_AUTO);
