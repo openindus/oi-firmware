@@ -93,7 +93,7 @@ build:examples:
       find components/openindus/examples/ -name "*.cpp" | while read -r f; do
         echo "Build $f"
         cp $f main/main.cpp
-        cp sdkconfig.ci.defaults.oi_core sdkconfig
+        cp sdkconfig.ci.defaults.core sdkconfig
         idf.py reconfigure
         idf.py build || { echo "Error: Build failed for $f"; exit 1; }
       done
@@ -130,7 +130,7 @@ build:docs:examples:
       find docs/examples/ -name "*.cpp" | while read -r f; do
         echo "Build $f"
         cp $f main/main.cpp
-        cp sdkconfig.ci.defaults.oi_core sdkconfig
+        cp sdkconfig.ci.defaults.core sdkconfig
         idf.py reconfigure
         idf.py build || { echo "Error: Build failed for $f"; exit 1; }
       done
