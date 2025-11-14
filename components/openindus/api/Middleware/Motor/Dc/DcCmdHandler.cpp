@@ -47,14 +47,13 @@ int DcCmdHandler::init() {
     });
 
     Slave::addCallback(CALLBACK_MOTOR_DC_GET_CURRENT, [](std::vector<uint8_t>& data) {
-        // if (data.size() < 2) { // 1 byte cmd + 1 byte motor
-        //     ESP_LOGE(TAG, "Invalid data size for GET_CURRENT: %d", data.size());
-        //     return;
-        // }
         MotorNum_t motor = static_cast<MotorNum_t>(data[1]);
         float current = MotorDc::getCurrent(motor);
         uint8_t *ptr = reinterpret_cast<uint8_t *>(&current);
         data.insert(data.end(), ptr, ptr + sizeof(float));
+        data[0] = EVENT_MOTOR_DC_CURRENT;
+        // Send response on CAN Bus because slow ADC reading
+        Slave::sendEvent(data);
     });
 
     return err;

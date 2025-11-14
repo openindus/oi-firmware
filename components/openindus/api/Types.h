@@ -140,6 +140,7 @@ enum Event_e {
     /* MOTOR */
     EVENT_MOTOR_READY                       = 0x01,
     EVENT_MOTOR_FLAG_INTERRUPT              = 0x02,
+    EVENT_MOTOR_DC_CURRENT                  = 0x03,
 
     /* SENSOR */
     EVENT_SENSOR_VALUE                      = 0xB0,

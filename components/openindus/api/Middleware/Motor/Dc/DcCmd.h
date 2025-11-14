@@ -26,6 +26,7 @@ class DcCmd
 public:
 
     DcCmd(ModuleControl* module);
+    ~DcCmd() { if (_currentEvent) vQueueDelete(_currentEvent); }
     
     /**
      * @brief Send a command to run the motor in the given direction
@@ -55,6 +56,7 @@ public:
 private:
 
     ModuleControl* _module;
+    QueueHandle_t _currentEvent;
 
 };
 
