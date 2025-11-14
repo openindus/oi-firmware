@@ -47,32 +47,42 @@ setup:
 build:bin:core:
   extends: .build:bin
   variables:
-    MODULE_TYPE: "OI_CORE"
+    MODULE_TYPE: "core"
 
 build:bin:discrete:
   extends: .build:bin
   variables:
-    MODULE_TYPE: "OI_DISCRETE"
+    MODULE_TYPE: "discrete"
 
 build:bin:stepper:
   extends: .build:bin
   variables:
-    MODULE_TYPE: "OI_STEPPER"
+    MODULE_TYPE: "stepper"
 
 build:bin:mixed:
   extends: .build:bin
   variables:
-    MODULE_TYPE: "OI_MIXED"
+    MODULE_TYPE: "mixed"
 
 build:bin:relayhp:
   extends: .build:bin
   variables:
-    MODULE_TYPE: "OI_RELAY_HP"
+    MODULE_TYPE: "relayhp"
 
 build:bin:relaylp:
   extends: .build:bin
   variables:
-    MODULE_TYPE: "OI_RELAY_LP"
+    MODULE_TYPE: "relaylp"
+
+build:bin:analogls:
+  extends: .build:bin
+  variables:
+    MODULE_TYPE: "analogls"
+
+build:bin:dc:
+  extends: .build:bin
+  variables:
+    MODULE_TYPE: "dc"
 
 build:examples:
   stage: build:examples
@@ -83,7 +93,7 @@ build:examples:
       find components/openindus/examples/ -name "*.cpp" | while read -r f; do
         echo "Build $f"
         cp $f main/main.cpp
-        cp sdkconfig.ci.defaults.oi_core sdkconfig
+        cp sdkconfig.ci.defaults.core sdkconfig
         idf.py reconfigure
         idf.py build || { echo "Error: Build failed for $f"; exit 1; }
       done
@@ -120,7 +130,7 @@ build:docs:examples:
       find docs/examples/ -name "*.cpp" | while read -r f; do
         echo "Build $f"
         cp $f main/main.cpp
-        cp sdkconfig.ci.defaults.oi_core sdkconfig
+        cp sdkconfig.ci.defaults.core sdkconfig
         idf.py reconfigure
         idf.py build || { echo "Error: Build failed for $f"; exit 1; }
       done
@@ -150,6 +160,9 @@ deploy:bin:
     - job: build:bin:mixed
     - job: build:bin:relayhp
     - job: build:bin:relaylp
+    - job: build:bin:analogls
+    - job: build:bin:dc
+
   before_script:
     - apt update
     - apt install -y lftp
