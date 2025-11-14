@@ -14,10 +14,9 @@
  * @copyright Copyright (c) 2024
 **/
 
+#include "DcCmdHandler.h"
 
 #if defined(CONFIG_MODULE_SLAVE)
-
-#include "DcCmdHandler.h"
 
 int DcCmdHandler::init() {
     
