@@ -149,6 +149,22 @@ float MotorDc::getCurrent(MotorNum_t motor)
         return 0.0f;
     }
 
+    // Check if _directions is properly initialized
+    if (motor >= _directions.size()) {
+        ESP_LOGW(TAG, "Motor %d direction not initialized, assuming FORWARD", motor);
+        // Default to channel 0 (FORWARD)
+        uint8_t channel = motorToChannel[motor][0];
+        float sum = 0.0f;
+        for (int j = 0; j < 1000; ++j) {
+            float raw = ads866x_analog_read(channel);
+            float voltage = ads866x_convert_raw_2_volt(raw, 6);
+            sum += voltage;
+        }
+        float avg = sum / 1000.0f;
+        float current = avg * 1100.0f / 430.0f;
+        return current;
+    }
+
     uint8_t channel = motorToChannel[motor][(_directions.at(motor) == FORWARD) ? 0 : 1];
     float sum = 0.0f;
     for (int j = 0; j < 1000; ++j) {

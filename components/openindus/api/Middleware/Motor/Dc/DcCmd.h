@@ -44,6 +44,14 @@ public:
      */
     void stop(MotorNum_t motor);
 
+    /**
+     * @brief Get the current consumption of the motor
+     * 
+     * @param motor Motor number
+     * @return float Current in Amperes
+     */
+    float getCurrent(MotorNum_t motor);
+
 private:
 
     ModuleControl* _module;

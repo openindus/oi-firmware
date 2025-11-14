@@ -11,10 +11,9 @@
  * For more information on OpenIndus:
  * @see https://openindus.com
  */
+#include "DcCmd.h"
 
 #if defined(CONFIG_MODULE_MASTER)
-
-#include "DcCmd.h"
 
 DcCmd::DcCmd(ModuleControl* module) : _module(module) 
 {
@@ -33,6 +32,14 @@ void DcCmd::stop(MotorNum_t motor)
 {
     std::vector<uint8_t> msgBytes = {CALLBACK_MOTOR_DC_STOP, (uint8_t)motor};
     _module->runCallback(msgBytes);
+}
+
+float DcCmd::getCurrent(MotorNum_t motor)
+{
+    std::vector<uint8_t> msgBytes = {CALLBACK_MOTOR_DC_GET_CURRENT, (uint8_t)motor};
+    _module->runCallback(msgBytes);
+    float *current = reinterpret_cast<float *>(&msgBytes[2]);
+    return *current;
 }
 
 #endif

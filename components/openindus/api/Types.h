@@ -116,6 +116,7 @@ enum Callback_e {
     /* DC MOTOR */
     CALLBACK_MOTOR_DC_RUN                   = 0xA0,
     CALLBACK_MOTOR_DC_STOP                  = 0xA1,
+    CALLBACK_MOTOR_DC_GET_CURRENT           = 0xA2,
 
     /* SENSOR */
     CALLBACK_ADD_SENSOR                     = 0xB0,
