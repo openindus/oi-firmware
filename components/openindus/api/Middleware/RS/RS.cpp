@@ -21,10 +21,10 @@ void RS::begin(unsigned long baudrate, uint16_t config, RS_Mode_e mode)
     _mode = mode;
     
     SC16IS750_DeviceConfig_t device_config;
-    device_config.spi_host = _spi_host;
-    device_config.spi_pin_cs = _pin_cs;
+    device_config.spi_host = _spiHost;
+    device_config.spi_pin_cs = _csPin;
     device_config.spi_freq = SC16IS750_SPI_FREQ;
-    device_config.spi_pin_int = _pin_intr;
+    device_config.spi_pin_int = _intrPin;
 
     SC16IS750_create(&device_config); 
 

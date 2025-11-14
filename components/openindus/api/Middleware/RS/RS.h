@@ -21,9 +21,9 @@ class RS
 public:
 
     inline RS(spi_host_device_t host, gpio_num_t cs, gpio_num_t intr) :
-        _spi_host(host),
-        _pin_cs(cs),
-        _pin_intr(intr) {}
+        _spiHost(host),
+        _csPin(cs),
+        _intrPin(intr) {}
 
     void begin(unsigned long baudrate = 115200, uint16_t config = 0x001c, RS_Mode_e mode = RS_485);
     void end(void);
@@ -47,19 +47,19 @@ public:
     }
 
     inline size_t write(unsigned long n) {
-        return write((uint8_t) n);
+        return write((uint8_t*)&n, sizeof(unsigned long));
     }
 
     inline size_t write(long n) {
-        return write((uint8_t) n);
+        return write((uint8_t*)&n, sizeof(long));
     }
 
     inline size_t write(unsigned int n) {
-        return write((uint8_t) n);
+        return write((uint8_t*)&n, sizeof(unsigned int));
     }
 
     inline size_t write(int n) {
-        return write((uint8_t) n);
+        return write((uint8_t*)&n, sizeof(int));
     }
 
     inline void noReceive(void) {}
@@ -70,9 +70,9 @@ public:
     inline size_t readBytes(uint8_t *buffer, int size) { return read(buffer, size); }
 
 private:
-
-    spi_host_device_t _spi_host; 
-    gpio_num_t _pin_cs; 
-    gpio_num_t _pin_intr;
+    spi_host_device_t _spiHost;
+    gpio_num_t _csPin;
+    gpio_num_t _intrPin;
     RS_Mode_e _mode;
+
 };
