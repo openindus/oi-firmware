@@ -15,7 +15,7 @@
 
 #if defined(CONFIG_MODULE_MASTER)
 
-DcCmd::DcCmd(ModuleControl* module) : _module(module) 
+DcCmd::DcCmd(ModuleControl* module) : _module(module), _callbackRegistered(false)
 {
     // Create queue for event-based current reading
     _currentEvent = xQueueCreate(1, sizeof(uint8_t*));
@@ -37,12 +37,14 @@ void DcCmd::stop(MotorNum_t motor)
 
 float DcCmd::getCurrent(MotorNum_t motor)
 {
-    // Add event callback (remove if it already exists)
-    Master::removeEventCallback(EVENT_MOTOR_DC_CURRENT, _module->getId());
-    Master::addEventCallback(EVENT_MOTOR_DC_CURRENT, _module->getId(), [this](uint8_t* data) {
-        xQueueSend(_currentEvent, &data, pdMS_TO_TICKS(100));
-    });
-
+    // Register event callback on first use to avoid static initialization order issues
+    if (!_callbackRegistered) {
+        Master::addEventCallback(EVENT_MOTOR_DC_CURRENT, _module->getId(), [this](uint8_t* data) {
+            xQueueSend(_currentEvent, &data, pdMS_TO_TICKS(100));
+        });
+        _callbackRegistered = true;
+    }
+    
     // Send a message to slave to request current read but do not wait for response
     std::vector<uint8_t> msgBytes = {CALLBACK_MOTOR_DC_GET_CURRENT, (uint8_t)motor};
     _module->runCallback(msgBytes, false);

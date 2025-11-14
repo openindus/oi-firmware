@@ -26,7 +26,10 @@ class DcCmd
 public:
 
     DcCmd(ModuleControl* module);
-    ~DcCmd() { if (_currentEvent) vQueueDelete(_currentEvent); }
+    ~DcCmd() { 
+        if (_currentEvent) vQueueDelete(_currentEvent);
+        if (_callbackRegistered) Master::removeEventCallback(EVENT_MOTOR_DC_CURRENT, _module->getId());
+    }
     
     /**
      * @brief Send a command to run the motor in the given direction
@@ -57,6 +60,7 @@ private:
 
     ModuleControl* _module;
     QueueHandle_t _currentEvent;
+    bool _callbackRegistered;
 
 };
 
