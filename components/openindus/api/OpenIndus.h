@@ -37,8 +37,5 @@ void loop(void);
 #define OIBrushless Brushless
 #define OIDc Dc
 
-/* Arduino RS485 */
-class RS485Class : public RS {};
-
 /* OI-Cloud */
 #define OICloud Cloud

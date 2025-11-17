@@ -6,8 +6,7 @@
  */
 
 #ifdef ARDUINO
-#include "OpenIndus.h"
-#include "Arduino.h"
+#include <ArduinoRS485.h>
 
 #ifndef DEBUG
 #define printf(...) {}

@@ -5,17 +5,15 @@ Core core;
 
 void setup(void)
 {
-    core.rs.begin(115200);
+    core.rs.begin(115200, RS::Config::_8N1, RS::Mode::RS485);
 }
 
 void loop(void)
 {
     static int counter = 0;
 
-    if (core.rs.availableForWrite()) {
-        core.rs.write(counter);
-        counter++;
-    }
+    core.rs.write(counter);
+    counter++;
     
     delay(1000);
 }

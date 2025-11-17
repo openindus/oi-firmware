@@ -21,7 +21,7 @@
 #define _MODBUS_RTU_CLIENT_H_INCLUDED
 
 #include "ModbusClient.h"
-#include "OpenIndus.h"
+#include <ArduinoRS485.h>
 
 class ModbusRTUClientClass : public ModbusClient {
 public:
@@ -37,15 +37,11 @@ public:
    *
    * Return 1 on success, 0 on failure
    */
-  int begin(unsigned long baudrate, uint32_t config = SERIAL_8N1);
-  int begin(RS485Class& rs485, unsigned long baudrate, uint32_t config = SERIAL_8N1);
+  int begin(unsigned long baudrate, uint16_t config = SERIAL_8N1);
+  int begin(RS485Class& rs485, unsigned long baudrate, uint16_t config = SERIAL_8N1);
 
 private:
-#if defined(CONFIG_OI_CORE)
-  RS485Class* _rs485 = (RS485Class*)&OICore::rs;
-#else
-  RS485Class* _rs485 = nullptr;
-#endif
+  RS485Class* _rs485 = &RS485;
 };
 
 extern ModbusRTUClientClass ModbusRTUClient;

@@ -434,4 +434,9 @@ config ARDUINO_SELECTIVE_ArduinoModbus
     depends on ARDUINO_SELECTIVE_COMPILATION
     default y
 
+config ARDUINO_SELECTIVE_ArduinoRS485
+    bool "Enable ArduinoRS485"
+    depends on ARDUINO_SELECTIVE_COMPILATION
+    default y
+
 endmenu

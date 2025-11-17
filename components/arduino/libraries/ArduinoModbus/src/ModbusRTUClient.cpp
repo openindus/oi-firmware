@@ -40,7 +40,7 @@ ModbusRTUClientClass::~ModbusRTUClientClass()
 {
 }
 
-int ModbusRTUClientClass::begin(unsigned long baudrate, uint32_t config)
+int ModbusRTUClientClass::begin(unsigned long baudrate, uint16_t config)
 {
   modbus_t* mb = modbus_new_rtu(_rs485, baudrate, config);
 
@@ -51,7 +51,7 @@ int ModbusRTUClientClass::begin(unsigned long baudrate, uint32_t config)
   return 1;
 }
 
-int ModbusRTUClientClass::begin(RS485Class& rs485, unsigned long baudrate, uint32_t config)
+int ModbusRTUClientClass::begin(RS485Class& rs485, unsigned long baudrate, uint16_t config)
 {
   _rs485 = &rs485;
   return begin(baudrate, config);
