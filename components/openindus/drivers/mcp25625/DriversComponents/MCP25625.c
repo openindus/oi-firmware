@@ -186,6 +186,9 @@ int mcp25625_init
     if( mcp25625_hw_init() )
         return MCP25625_HW_ERR;
 
+    if( mcp25625_hw_reset() )
+        return MCP25625_COM_ERR;
+
     // Setup Control
     can_ctl.clkpre  = 0;
     can_ctl.clken   = false;
