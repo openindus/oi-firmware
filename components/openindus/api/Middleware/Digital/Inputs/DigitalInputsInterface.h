@@ -24,7 +24,8 @@ typedef enum {
     DIN_6,
     DIN_7,
     DIN_8,
-#elif defined(CONFIG_OI_DISCRETE) || defined(CONFIG_MODULE_MASTER)
+#endif
+#if defined(CONFIG_OI_DISCRETE) || defined(CONFIG_MODULE_MASTER)
     DIN_9,
     DIN_10,
 #endif
