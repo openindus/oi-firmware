@@ -52,7 +52,11 @@ float DcCmd::getCurrent(MotorNum_t motor)
     // Wait for event from slave
     uint8_t* data = NULL;
     xQueueReset(_currentEvent);
-    xQueueReceive(_currentEvent, &data, portMAX_DELAY);
+    if (xQueueReceive(_currentEvent, &data, pdMS_TO_TICKS(500)) != pdPASS) {
+        // Crash or handle timeout error
+        ESP_LOGE("DcCmd", "Timeout waiting for current event from module ID %d", _module->getId());
+        ESP_ERROR_CHECK(ESP_ERR_TIMEOUT);
+    }
     float* current = reinterpret_cast<float*>(&data[2]);
     return *current;
 }
