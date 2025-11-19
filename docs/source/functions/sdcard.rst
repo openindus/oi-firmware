@@ -1,7 +1,7 @@
-.. _usdcard_s:
+.. _sdcard_s:
 
-µSD Card Holder
-===============
+SD Card
+=======
 
 Description
 -----------

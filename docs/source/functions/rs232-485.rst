@@ -52,12 +52,6 @@ Characteristics
    * - Driver differential voltage (max)
      - 5V
      -
-   * -
-     -
-     -
-   * -
-     -
-     - 
 
 Code examples
 -------------
