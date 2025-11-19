@@ -23,7 +23,11 @@ const gpio_num_t _dinGpio[] = {
     DC_GPIO_PIN_DIN_1,
     DC_GPIO_PIN_DIN_2,
     DC_GPIO_PIN_DIN_3,
-    DC_GPIO_PIN_DIN_4
+    DC_GPIO_PIN_DIN_4,
+    DC_GPIO_PIN_DIN_5,
+    DC_GPIO_PIN_DIN_6,
+    DC_GPIO_PIN_DIN_7,
+    DC_GPIO_PIN_DIN_8
 };
 
 int Dc::init(void)
@@ -35,7 +39,7 @@ int Dc::init(void)
     err |= Module::init(TYPE_OI_DC);
 
     /* Digital inputs */
-    err |= DigitalInputs::init(_dinGpio, sizeof(_dinGpio)/sizeof(_dinGpio[0]));// 4
+    err |= DigitalInputs::init(_dinGpio, sizeof(_dinGpio)/sizeof(_dinGpio[0]));
 
     /* Stepper motor */
     std::vector<MotorDC_PinConfig_t> motorsConfig;

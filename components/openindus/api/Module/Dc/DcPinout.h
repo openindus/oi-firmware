@@ -17,10 +17,6 @@
 
 #if defined(CONFIG_OI_DC)
 
-/* Config */
-#define DC_MOTOR_NB     4
-#define DC_DIN_NUM      4
-
 /* DIN */   
 #define DC_GPIO_PIN_DIN_1           GPIO_NUM_7
 #define DC_GPIO_PIN_DIN_2           GPIO_NUM_8
