@@ -141,6 +141,8 @@ void MotorDc::stop(MotorNum_t motor)
 
 float MotorDc::getCurrent(MotorNum_t motor)
 {
+    ESP_LOGD(TAG, "Requested measure current for motor %d", motor);
+
     // Motor to ADC channel mapping table
     static const uint8_t motorToChannel[][2] = {{2, 3}, {0, 1}, {5, 4}, {6, 7}};
 
@@ -176,6 +178,9 @@ float MotorDc::getCurrent(MotorNum_t motor)
 
     // Convert voltage to current (I = U / R)
     float current = avg * 1100.0f / 430.0f; // k=1100, R=430Ohm
+
+    ESP_LOGD(TAG, "Motor %d current: %.3f A", motor, current);
+
     return current;
 }
 
