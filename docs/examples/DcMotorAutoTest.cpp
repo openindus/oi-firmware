@@ -139,12 +139,77 @@ bool checkCurrent(const MotorNum_t motor, const char* motorName, const float exp
     }
 }
 
+bool checkAndPrintDInValues(const char* label, const int activeMotorIndex = -1)
+{
+    // measure and display all eight gpios called DC_GPIO_PIN_DIN_1 to DC_GPIO_PIN_DIN_8
+    bool dinValues[8];
+    for (int j = 1; j <= 8; j++) {
+        dinValues[j - 1] = dc.digitalRead(static_cast<DIn_Num_t>(j - 1));
+    }
+
+    // Log the DIn values
+    ESP_LOGI(TAG, "DIn values: %d %d %d %d %d %d %d %d", dinValues[0], dinValues[1], dinValues[2], dinValues[3], dinValues[4], dinValues[5], dinValues[6], dinValues[7]);
+    
+    // Validate DIN values based on motor state
+    // Expected mapping (based on log analysis):
+    // Motor 1: No associated DIns
+    // Motor 2 FORWARD: DIN5 (index 4), Motor 2 REVERSE: DIN6 (index 5)
+    // Motor 3: No associated DIns 
+    // Motor 4 FORWARD: DIN7 (index 6), Motor 4 REVERSE: DIN8 (index 7)
+    
+    bool isStopped = (strcmp(label, "STOPPED") == 0);
+    bool isForward = (strcmp(label, "FORWARD") == 0);
+    bool isReverse = (strcmp(label, "REVERSE") == 0);
+    
+    bool allPassed = true;
+    
+    if (isStopped) {
+        // All DIns should be LOW when all motors are stopped
+        for (int i = 0; i < 8; i++) {
+            if (dinValues[i]) {
+                ESP_LOGE(TAG, "DIN%d FAILED: Expected LOW when stopped, got HIGH", i + 1);
+                allPassed = false;
+            }
+        }
+    } else if (activeMotorIndex >= 0) {
+        // Check motor-specific DIN expectations
+        int expectedDinIndex = -1;
+        
+        if (activeMotorIndex == 1) { // MOTOR_2
+            expectedDinIndex = isForward ? 4 : 5; // DIN5 or DIN6
+        } else if (activeMotorIndex == 3) { // MOTOR_4
+            expectedDinIndex = isForward ? 6 : 7; // DIN7 or DIN8
+        }
+        // Note: MOTOR_1 and MOTOR_3 don't have associated DIns based on the log pattern
+        
+        // Validate expected DIN
+        if (expectedDinIndex >= 0) {
+            if (!dinValues[expectedDinIndex]) {
+                ESP_LOGE(TAG, "DIN%d FAILED: Expected HIGH for Motor_%d %s, got LOW", 
+                         expectedDinIndex + 1, activeMotorIndex + 1, label);
+                allPassed = false;
+            }
+        }
+        
+        // Check that all other DIns are LOW
+        for (int i = 0; i < 8; i++) {
+            if (i != expectedDinIndex && dinValues[i]) {
+                ESP_LOGE(TAG, "DIN%d FAILED: Expected LOW, got HIGH", i + 1);
+                allPassed = false;
+            }
+        }
+    }
+    
+    return allPassed;
+}
+
 void setup(void)
 {
     esp_log_level_set("*", ESP_LOG_DEBUG);
 
     // Array of motors for sequential operation
     const MotorNum_t motors[] = {MOTOR_1, MOTOR_2, MOTOR_3, MOTOR_4};
+    bool allTestsPassed = true;
 
     delay(100);
 
@@ -152,21 +217,38 @@ void setup(void)
     for (int i = 0; i < 4; i++) {
         dc.run(motors[i], FORWARD, 100);
         // delay(100);
-        readAndLogCurrents("FORWARD", i);
+        bool currentOk = readAndLogCurrents("FORWARD", i);
+        bool dinOk = checkAndPrintDInValues("FORWARD", i);
+        allTestsPassed &= (currentOk && dinOk);
         // delay(900);
 
         dc.run(motors[i], REVERSE, 100);
         // delay(100);
-        readAndLogCurrents("REVERSE", i);
+        currentOk = readAndLogCurrents("REVERSE", i);
+        dinOk = checkAndPrintDInValues("REVERSE", i);
+        allTestsPassed &= (currentOk && dinOk);
         // delay(900);
 
         //stop motor
         dc.stop(motors[i]);
         // delay(100);
-        readAndLogCurrents("STOPPED", i);
+        currentOk = readAndLogCurrents("STOPPED", i);
+        dinOk = checkAndPrintDInValues("STOPPED", i);
+        allTestsPassed &= (currentOk && dinOk);
         
         // Yield to allow IDLE task to run and feed watchdog
         delay(100);
+    }
+    
+    // Final test summary
+    if (allTestsPassed) {
+        ESP_LOGI(TAG, "========================================");
+        ESP_LOGI(TAG, "ALL TESTS PASSED");
+        ESP_LOGI(TAG, "========================================");
+    } else {
+        ESP_LOGE(TAG, "========================================");
+        ESP_LOGE(TAG, "SOME TESTS FAILED - CHECK LOGS ABOVE");
+        ESP_LOGE(TAG, "========================================");
     }
 }
 
