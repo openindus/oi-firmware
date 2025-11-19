@@ -7,6 +7,11 @@
  * It tests each of the 4 motor outputs sequentially in both forward and reverse directions,
  * verifying proper current readings and ensuring no cross-talk between channels.
  * 
+ * WARNING:
+ * --------
+ * Do not plug digital inputs (sensors, switches, etc.) on DIN pins 5 to 8 during this test. 
+ * These pins are used for motors and may create a short circuit if connected.
+ * 
  * Test Setup:
  * - Power supply: 24V DC
  * - Load per channel: 25Ω resistor (expected current: 0.96A)
@@ -236,7 +241,7 @@ void setup(void)
         allTestsPassed &= (currentOk && dinOk);
         
         // Yield to allow IDLE task to run and feed watchdog
-        delay(100);
+        //delay(100);
     }
     
     // Final test summary
