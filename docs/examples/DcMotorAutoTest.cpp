@@ -159,7 +159,6 @@ bool checkAndPrintDInValues(const char* label, const int activeMotorIndex = -1)
     
     bool isStopped = (strcmp(label, "STOPPED") == 0);
     bool isForward = (strcmp(label, "FORWARD") == 0);
-    bool isReverse = (strcmp(label, "REVERSE") == 0);
     
     bool allPassed = true;
     
