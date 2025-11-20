@@ -157,7 +157,7 @@ esp_err_t drv8873_set_current_regulation(drv8873_current_regulation_t disable_fl
         return ret;
     }
 
-    ESP_LOGI(TAG, "Current regulation disabled for OUT1/OUT2: 0x%02X", disable_flags);
+    ESP_LOGI(TAG, "Current regulation for OUT1/OUT2: 0x%02X", disable_flags);
     return ESP_OK;
 }
 
@@ -525,6 +525,7 @@ esp_err_t drv8873_get_fault_status(uint16_t *fault_status) {
         // Analyze specific fault causes according to documentation
         if (*fault_status & DRV8873_FAULT_UVLO_MASK) {
             ESP_LOGE(TAG, "FAULT: Undervoltage Lockout (UVLO) - VM < 4.45V");
+            return ret; // Stop further analysis when UVLO is detected
         }
         if (*fault_status & DRV8873_FAULT_CPUV_MASK) {
             ESP_LOGE(TAG, "FAULT: Charge Pump Undervoltage (CPUV) - VCP < VVM + 2.25V");
