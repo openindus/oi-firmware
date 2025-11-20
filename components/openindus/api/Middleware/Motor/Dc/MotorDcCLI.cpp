@@ -170,7 +170,8 @@ static int getFault(int argc, char **argv)
         return 1;
     }
 
-    uint16_t fault_status = MotorDc::getFault();
+    MotorNum_t motor = (MotorNum_t)(getFaultArgs.motor->ival[0] - 1);
+    uint16_t fault_status = MotorDc::getFault(motor);
 
     printf("Motor %d fault status: 0x%04X\n", getFaultArgs.motor->ival[0], fault_status);
 
@@ -241,7 +242,7 @@ static int clearFault(int argc, char **argv)
 
     MotorNum_t motor = (MotorNum_t)(clearFaultArgs.motor->ival[0] - 1);
 
-    esp_err_t result = MotorDc::clear_fault();
+    esp_err_t result = MotorDc::clear_fault(motor);
 
     if (result == ESP_OK) {
         printf("Motor %d faults cleared successfully\n", clearFaultArgs.motor->ival[0]);
@@ -297,7 +298,7 @@ static int setMode(int argc, char **argv)
     MotorNum_t motor = (MotorNum_t)(setModeArgs.motor->ival[0] - 1);
     drv8873_mode_t mode = (drv8873_mode_t)(setModeArgs.mode->ival[0]);
 
-    esp_err_t result = MotorDc::setMode(mode);
+    esp_err_t result = MotorDc::setMode(mode, motor);
 
     if (result == ESP_OK) {
         const char* mode_str[] = {"PH/EN", "PWM", "Independent", "Disabled"};

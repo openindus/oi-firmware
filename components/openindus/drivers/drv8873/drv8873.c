@@ -11,12 +11,21 @@ drv8873_spi_config_t *drv8873_global_config = NULL;
 esp_err_t drv8873_spi_init(drv8873_spi_config_t *config) {
     esp_err_t ret;
 
+    // Validate configuration
+    if (!config || config->device_count < 1 || config->device_count > 4) {
+        ESP_LOGE(TAG, "Invalid daisy chain configuration: device_count must be 1-4");
+        return ESP_ERR_INVALID_ARG;
+    }
+
     // Configure the SPI device (DRV8873)
     spi_device_interface_config_t dev_config = {
         .clock_speed_hz = 1 * 1000 * 1000,  // 1 MHz (adjustable as needed)
         .mode = 0,                          // SPI Mode 0 (CPOL=0, CPHA=0)
         .spics_io_num = config->nSCS_pin,   // Chip Select pin
         .queue_size = 7,                    // Queue size
+        .command_bits = 0,                  // No command phase
+        .address_bits = 0,                  // No address phase
+        .dummy_bits = 0,                    // No dummy bits
     };
 
     ret = spi_bus_add_device(SPI2_HOST, &dev_config, &config->spi_handle);
@@ -28,178 +37,261 @@ esp_err_t drv8873_spi_init(drv8873_spi_config_t *config) {
     // Store the config globally for future use
     drv8873_global_config = config;
 
-    ESP_LOGI(TAG, "SPI initialized successfully");
+    ESP_LOGI(TAG, "SPI daisy chain initialized with %d devices", config->device_count);
     return ESP_OK;
 }
 
-esp_err_t drv8873_spi_read_register(drv8873_register_t reg_address, uint16_t *reg_value) {
-    // Use global config only (no config parameter anymore)
+esp_err_t drv8873_spi_read_register(drv8873_register_t reg_address, uint8_t *reg_value, int device_index) {
+    // Validate parameters
     if (!drv8873_global_config || !drv8873_global_config->spi_handle) {
         ESP_LOGE(TAG, "DRV8873 SPI not initialized");
         return ESP_ERR_INVALID_STATE;
     }
 
-    uint16_t command = (1 << 14) | (reg_address << 9);  // Bit 14=1 (Read), bits 13-9=Register address
+    if (device_index < 0 || device_index >= drv8873_global_config->device_count) {
+        ESP_LOGE(TAG, "Invalid device index: %d (valid range: 0-%d)", 
+                 device_index, drv8873_global_config->device_count - 1);
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    // Calculate total transaction length: 
+    // 2 bytes for headers, plus device_count * (1 address + 1 data)
+    int total_bytes = 2 + 2 * drv8873_global_config->device_count;
+    
+    // Create full transaction buffer: 16 bits per device
+    uint8_t *tx_buffer = (uint8_t*)calloc(total_bytes, sizeof(uint8_t));
+    uint8_t *rx_buffer = (uint8_t*)calloc(total_bytes, sizeof(uint8_t));
+
+    if (!tx_buffer || !rx_buffer) {
+        ESP_LOGE(TAG, "Failed to allocate memory for SPI transaction");
+        free(tx_buffer);
+        free(rx_buffer);
+        return ESP_ERR_NO_MEM;
+    }
+
+    // first header byte MSBs are 10, and other bits is the device count.
+    tx_buffer[0] = 0b10000000 | (drv8873_global_config->device_count & 0x0F);
+    // second header byte MSBs are 10. then, if we clear faults, and last 4 bits are don't care.
+    tx_buffer[1] = 0b10000000;
+
+    // then, for each device, address bytes. starts by the last device in chain.
+    int index_of_address_for_device = 2 + drv8873_global_config->device_count - 1 - device_index;
+    // Create command: Read bit (1<<6) + register address (bits 5-1)
+    uint8_t command = (1 << 6) | (reg_address << 1);
+    tx_buffer[index_of_address_for_device] = (uint8_t)(command & 0xFF);
+
+    // then, for each device, data bytes. starts by the last device in chain.
+    int index_of_data_for_device = 2 + (2 * drv8873_global_config->device_count) - 1 - device_index;
+
+    // Configure SPI transaction
     spi_transaction_t trans = {
-        .length = 16 * 2,  // 16 bits for command + 16 bits for response
-        .tx_buffer = &command,
-        .rx_buffer = reg_value,
+        .length = total_bytes * 8, // Total bits to transmit
+        .tx_buffer = tx_buffer,
+        .rx_buffer = rx_buffer,
     };
 
     esp_err_t ret = spi_device_transmit(drv8873_global_config->spi_handle, &trans);
     if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to read register 0x%02X: %s", reg_address, esp_err_to_name(ret));
+        ESP_LOGE(TAG, "Failed to read register 0x%02X from device %d: %s", 
+                 reg_address, device_index, esp_err_to_name(ret));
+        free(tx_buffer);
+        free(rx_buffer);
+        return ret;
     }
-    return ret;
+
+    // Extract the response for the target device (last device in chain responds first)
+    *reg_value = rx_buffer[index_of_data_for_device];
+
+    free(tx_buffer);
+    free(rx_buffer);
+    return ESP_OK;
 }
 
-esp_err_t drv8873_spi_write_register(drv8873_register_t reg_address, uint16_t reg_value) {
-    // Use global config only (no config parameter anymore)
+esp_err_t drv8873_spi_write_register(drv8873_register_t reg_address, uint8_t reg_value, int device_index) {
+    // Validate parameters
     if (!drv8873_global_config || !drv8873_global_config->spi_handle) {
         ESP_LOGE(TAG, "DRV8873 SPI not initialized");
         return ESP_ERR_INVALID_STATE;
     }
 
-    uint16_t command = (0 << 14) | (reg_address << 9) | reg_value;  // Bit 14=0 (Write), bits 13-9=Register address, bits 8-0=Data
+    if (device_index < 0 || device_index >= drv8873_global_config->device_count) {
+        ESP_LOGE(TAG, "Invalid device index: %d (valid range: 0-%d)", 
+                 device_index, drv8873_global_config->device_count - 1);
+        return ESP_ERR_INVALID_ARG;
+    }
 
+    // Calculate total transaction length: 
+    // 2 bytes for headers, plus device_count * (1 address + 1 data)
+    int total_bytes = 2 + 2 * drv8873_global_config->device_count;
+    
+    // Create full transaction buffer: bytes
+    uint8_t *tx_buffer = (uint8_t*)calloc(total_bytes, sizeof(uint8_t));
+
+    if (!tx_buffer) {
+        ESP_LOGE(TAG, "Failed to allocate memory for SPI transaction");
+        return ESP_ERR_NO_MEM;
+    }
+
+    // first header byte MSBs are 10, and other bits is the device count.
+    tx_buffer[0] = 0b10000000 | (drv8873_global_config->device_count & 0x0F);
+    // second header byte MSBs are 10. then, if we clear faults, and last 4 bits are don't care.
+    tx_buffer[1] = 0b10000000;
+
+    // then, for each device, address bytes. starts by the last device in chain.
+    int index_of_address_for_device = 2 + drv8873_global_config->device_count - 1 - device_index;
+    // Create command: Write bit (0<<6) + register address (bits 5-1)
+    uint8_t command = (0 << 6) | (reg_address << 1);
+    tx_buffer[index_of_address_for_device] = (uint8_t)(command & 0xFF);
+
+    // then, for each device, data bytes. starts by the last device in chain.
+    int index_of_data_for_device = 2 + (2 * drv8873_global_config->device_count) - 1 - device_index;
+    tx_buffer[index_of_data_for_device] = reg_value;
+
+    // Configure SPI transaction
     spi_transaction_t trans = {
-        .length = 16,  // 16 bits for command
-        .tx_buffer = &command,
+        .length = total_bytes * 8, // Total bits to transmit
+        .tx_buffer = tx_buffer,
+        .rx_buffer = NULL,              // No need to receive data for write
     };
 
     esp_err_t ret = spi_device_transmit(drv8873_global_config->spi_handle, &trans);
     if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to write register 0x%02X: %s", reg_address, esp_err_to_name(ret));
+        ESP_LOGE(TAG, "Failed to write register 0x%02X to device %d: %s", 
+                 reg_address, device_index, esp_err_to_name(ret));
     }
+
+    free(tx_buffer);
     return ret;
 }
 
-esp_err_t drv8873_set_mode(drv8873_mode_t mode) {
-    uint16_t reg_value;
+esp_err_t drv8873_set_mode(drv8873_mode_t mode, int device_index) {
+    uint8_t reg_value;
     esp_err_t ret;
 
-    // Use global config only (no config parameter anymore)
-    if (!drv8873_global_config || !drv8873_global_config->spi_handle) {
-        ESP_LOGE(TAG, "DRV8873 SPI not initialized");
-        return ESP_ERR_INVALID_STATE;
+    // Validate device index
+    if (device_index < 0 || device_index >= drv8873_global_config->device_count) {
+        ESP_LOGE(TAG, "Invalid device index: %d", device_index);
+        return ESP_ERR_INVALID_ARG;
     }
 
     // Read IC1 Control register
-    ret = drv8873_spi_read_register(DRV8873_REG_IC1_CONTROL, &reg_value);
+    ret = drv8873_spi_read_register(DRV8873_REG_IC1_CONTROL, &reg_value, device_index);
     if (ret != ESP_OK) {
         return ret;
     }
 
     // Update MODE field (bits 1-0)
-    reg_value = (reg_value & 0xFFFC) | (mode & 0x0003);
+    reg_value = (reg_value & 0b11111100) | (mode & 0b00000011);
 
     // Write updated register
-    ret = drv8873_spi_write_register(DRV8873_REG_IC1_CONTROL, reg_value);
+    ret = drv8873_spi_write_register(DRV8873_REG_IC1_CONTROL, reg_value, device_index);
     if (ret != ESP_OK) {
         return ret;
     }
 
-    ESP_LOGI(TAG, "Mode set to 0x%02X", mode);
+    ESP_LOGI(TAG, "Device %d: Mode set to 0x%02X", device_index, mode);
     return ESP_OK;
 }
 
-esp_err_t drv8873_set_current_limit(drv8873_itrip_level_t itrip_level) {
-    uint16_t reg_value;
+esp_err_t drv8873_set_current_limit(drv8873_itrip_level_t itrip_level, int device_index) {
+    uint8_t reg_value;
     esp_err_t ret;
 
-    // Use global config only (no config parameter anymore)
-    if (!drv8873_global_config || !drv8873_global_config->spi_handle) {
-        ESP_LOGE(TAG, "DRV8873 SPI not initialized");
-        return ESP_ERR_INVALID_STATE;
+    // Validate device index
+    if (device_index < 0 || device_index >= drv8873_global_config->device_count) {
+        ESP_LOGE(TAG, "Invalid device index: %d", device_index);
+        return ESP_ERR_INVALID_ARG;
     }
 
     // Read IC4 Control register
-    ret = drv8873_spi_read_register(DRV8873_REG_IC4_CONTROL, &reg_value);
+    ret = drv8873_spi_read_register(DRV8873_REG_IC4_CONTROL, &reg_value, device_index);
     if (ret != ESP_OK) {
         return ret;
     }
 
     // Update ITRIP_LVL field (bits 3-2)
-    reg_value = (reg_value & 0xFFC3) | ((itrip_level & 0x0003) << 2);
+    reg_value = (reg_value & 0xC3) | ((itrip_level & 0x03) << 2);
 
     // Write updated register
-    ret = drv8873_spi_write_register(DRV8873_REG_IC4_CONTROL, reg_value);
+    ret = drv8873_spi_write_register(DRV8873_REG_IC4_CONTROL, reg_value, device_index);
     if (ret != ESP_OK) {
         return ret;
     }
 
-    ESP_LOGI(TAG, "Current limit set to 0x%02X", itrip_level);
+    ESP_LOGI(TAG, "Device %d: Current limit set to 0x%02X", device_index, itrip_level);
     return ESP_OK;
 }
 
-esp_err_t drv8873_set_current_regulation(drv8873_current_regulation_t disable_flags) {
-    uint16_t reg_value;
+esp_err_t drv8873_set_current_regulation(drv8873_current_regulation_t disable_flags, int device_index) {
+    uint8_t reg_value;
     esp_err_t ret;
 
-    // Use global config only (no config parameter anymore)
-    if (!drv8873_global_config || !drv8873_global_config->spi_handle) {
-        ESP_LOGE(TAG, "DRV8873 SPI not initialized");
-        return ESP_ERR_INVALID_STATE;
+    // Validate device index
+    if (device_index < 0 || device_index >= drv8873_global_config->device_count) {
+        ESP_LOGE(TAG, "Invalid device index: %d", device_index);
+        return ESP_ERR_INVALID_ARG;
     }
 
     // Read IC4 Control register
-    ret = drv8873_spi_read_register(DRV8873_REG_IC4_CONTROL, &reg_value);
+    ret = drv8873_spi_read_register(DRV8873_REG_IC4_CONTROL, &reg_value, device_index);
     if (ret != ESP_OK) {
         return ret;
     }
 
     // Update DIS_ITRIP field (bits 1-0)
-    reg_value = (reg_value & 0xFFFC) | (disable_flags & 0x0003);
+    reg_value = (reg_value & 0xFC) | (disable_flags & 0x03);
 
     // Write updated register
-    ret = drv8873_spi_write_register(DRV8873_REG_IC4_CONTROL, reg_value);
+    ret = drv8873_spi_write_register(DRV8873_REG_IC4_CONTROL, reg_value, device_index);
     if (ret != ESP_OK) {
         return ret;
     }
 
-    ESP_LOGI(TAG, "Current regulation for OUT1/OUT2: 0x%02X", disable_flags);
+    ESP_LOGI(TAG, "Device %d: Current regulation for OUT1/OUT2: 0x%02X", device_index, disable_flags);
     return ESP_OK;
 }
 
-esp_err_t drv8873_set_ocp_mode(drv8873_ocp_mode_t ocp_mode) {
-    uint16_t reg_value;
+esp_err_t drv8873_set_ocp_mode(drv8873_ocp_mode_t ocp_mode, int device_index) {
+    uint8_t reg_value;
     esp_err_t ret;
 
-    if (!drv8873_global_config || !drv8873_global_config->spi_handle) {
-        ESP_LOGE(TAG, "DRV8873 SPI not initialized");
-        return ESP_ERR_INVALID_STATE;
+    // Validate device index
+    if (device_index < 0 || device_index >= drv8873_global_config->device_count) {
+        ESP_LOGE(TAG, "Invalid device index: %d", device_index);
+        return ESP_ERR_INVALID_ARG;
     }
 
     // Read IC2 Control register
-    ret = drv8873_spi_read_register(DRV8873_REG_IC2_CONTROL, &reg_value);
+    ret = drv8873_spi_read_register(DRV8873_REG_IC2_CONTROL, &reg_value, device_index);
     if (ret != ESP_OK) {
         return ret;
     }
 
     // Update OCP_MODE field (bits 1-0)
-    reg_value = (reg_value & 0xFFFC) | (ocp_mode & 0x0003);
+    reg_value = (reg_value & 0xFC) | (ocp_mode & 0x03);
 
     // Write updated register
-    ret = drv8873_spi_write_register(DRV8873_REG_IC2_CONTROL, reg_value);
+    ret = drv8873_spi_write_register(DRV8873_REG_IC2_CONTROL, reg_value, device_index);
     if (ret != ESP_OK) {
         return ret;
     }
 
-    ESP_LOGI(TAG, "OCP mode set to 0x%02X", ocp_mode);
+    ESP_LOGI(TAG, "Device %d: OCP mode set to 0x%02X", device_index, ocp_mode);
     return ESP_OK;
 }
 
-esp_err_t drv8873_set_tsd_mode(int auto_recovery) {
-    uint16_t reg_value;
+esp_err_t drv8873_set_tsd_mode(int auto_recovery, int device_index) {
+    uint8_t reg_value;
     esp_err_t ret;
 
-    if (!drv8873_global_config || !drv8873_global_config->spi_handle) {
-        ESP_LOGE(TAG, "DRV8873 SPI not initialized");
-        return ESP_ERR_INVALID_STATE;
+    // Validate device index
+    if (device_index < 0 || device_index >= drv8873_global_config->device_count) {
+        ESP_LOGE(TAG, "Invalid device index: %d", device_index);
+        return ESP_ERR_INVALID_ARG;
     }
 
     // Read IC2 Control register
-    ret = drv8873_spi_read_register(DRV8873_REG_IC2_CONTROL, &reg_value);
+    ret = drv8873_spi_read_register(DRV8873_REG_IC2_CONTROL, &reg_value, device_index);
     if (ret != ESP_OK) {
         return ret;
     }
@@ -212,26 +304,27 @@ esp_err_t drv8873_set_tsd_mode(int auto_recovery) {
     }
 
     // Write updated register
-    ret = drv8873_spi_write_register(DRV8873_REG_IC2_CONTROL, reg_value);
+    ret = drv8873_spi_write_register(DRV8873_REG_IC2_CONTROL, reg_value, device_index);
     if (ret != ESP_OK) {
         return ret;
     }
 
-    ESP_LOGI(TAG, "TSD mode set to %s", auto_recovery ? "auto-recovery" : "latched");
+    ESP_LOGI(TAG, "Device %d: TSD mode set to %s", device_index, auto_recovery ? "auto-recovery" : "latched");
     return ESP_OK;
 }
 
-esp_err_t drv8873_set_itrip_rep(int report) {
-    uint16_t reg_value;
+esp_err_t drv8873_set_itrip_rep(int report, int device_index) {
+    uint8_t reg_value;
     esp_err_t ret;
 
-    if (!drv8873_global_config || !drv8873_global_config->spi_handle) {
-        ESP_LOGE(TAG, "DRV8873 SPI not initialized");
-        return ESP_ERR_INVALID_STATE;
+    // Validate device index
+    if (device_index < 0 || device_index >= drv8873_global_config->device_count) {
+        ESP_LOGE(TAG, "Invalid device index: %d", device_index);
+        return ESP_ERR_INVALID_ARG;
     }
 
     // Read IC2 Control register
-    ret = drv8873_spi_read_register(DRV8873_REG_IC2_CONTROL, &reg_value);
+    ret = drv8873_spi_read_register(DRV8873_REG_IC2_CONTROL, &reg_value, device_index);
     if (ret != ESP_OK) {
         return ret;
     }
@@ -244,26 +337,27 @@ esp_err_t drv8873_set_itrip_rep(int report) {
     }
 
     // Write updated register
-    ret = drv8873_spi_write_register(DRV8873_REG_IC2_CONTROL, reg_value);
+    ret = drv8873_spi_write_register(DRV8873_REG_IC2_CONTROL, reg_value, device_index);
     if (ret != ESP_OK) {
         return ret;
     }
 
-    ESP_LOGI(TAG, "ITRIP report %s", report ? "enabled" : "disabled");
+    ESP_LOGI(TAG, "Device %d: ITRIP report %s", device_index, report ? "enabled" : "disabled");
     return ESP_OK;
 }
 
-esp_err_t drv8873_set_otw_rep(int report) {
-    uint16_t reg_value;
+esp_err_t drv8873_set_otw_rep(int report, int device_index) {
+    uint8_t reg_value;
     esp_err_t ret;
 
-    if (!drv8873_global_config || !drv8873_global_config->spi_handle) {
-        ESP_LOGE(TAG, "DRV8873 SPI not initialized");
-        return ESP_ERR_INVALID_STATE;
+    // Validate device index
+    if (device_index < 0 || device_index >= drv8873_global_config->device_count) {
+        ESP_LOGE(TAG, "Invalid device index: %d", device_index);
+        return ESP_ERR_INVALID_ARG;
     }
 
     // Read IC2 Control register
-    ret = drv8873_spi_read_register(DRV8873_REG_IC2_CONTROL, &reg_value);
+    ret = drv8873_spi_read_register(DRV8873_REG_IC2_CONTROL, &reg_value, device_index);
     if (ret != ESP_OK) {
         return ret;
     }
@@ -276,26 +370,27 @@ esp_err_t drv8873_set_otw_rep(int report) {
     }
 
     // Write updated register
-    ret = drv8873_spi_write_register(DRV8873_REG_IC2_CONTROL, reg_value);
+    ret = drv8873_spi_write_register(DRV8873_REG_IC2_CONTROL, reg_value, device_index);
     if (ret != ESP_OK) {
         return ret;
     }
 
-    ESP_LOGI(TAG, "OTW report %s", report ? "enabled" : "disabled");
+    ESP_LOGI(TAG, "Device %d: OTW report %s", device_index, report ? "enabled" : "disabled");
     return ESP_OK;
 }
 
-esp_err_t drv8873_set_dis_cpuv(int disable) {
-    uint16_t reg_value;
+esp_err_t drv8873_set_dis_cpuv(int disable, int device_index) {
+    uint8_t reg_value;
     esp_err_t ret;
 
-    if (!drv8873_global_config || !drv8873_global_config->spi_handle) {
-        ESP_LOGE(TAG, "DRV8873 SPI not initialized");
-        return ESP_ERR_INVALID_STATE;
+    // Validate device index
+    if (device_index < 0 || device_index >= drv8873_global_config->device_count) {
+        ESP_LOGE(TAG, "Invalid device index: %d", device_index);
+        return ESP_ERR_INVALID_ARG;
     }
 
     // Read IC2 Control register
-    ret = drv8873_spi_read_register(DRV8873_REG_IC2_CONTROL, &reg_value);
+    ret = drv8873_spi_read_register(DRV8873_REG_IC2_CONTROL, &reg_value, device_index);
     if (ret != ESP_OK) {
         return ret;
     }
@@ -308,54 +403,56 @@ esp_err_t drv8873_set_dis_cpuv(int disable) {
     }
 
     // Write updated register
-    ret = drv8873_spi_write_register(DRV8873_REG_IC2_CONTROL, reg_value);
+    ret = drv8873_spi_write_register(DRV8873_REG_IC2_CONTROL, reg_value, device_index);
     if (ret != ESP_OK) {
         return ret;
     }
 
-    ESP_LOGI(TAG, "CPUV %s", disable ? "disabled" : "enabled");
+    ESP_LOGI(TAG, "Device %d: CPUV %s", device_index, disable ? "disabled" : "enabled");
     return ESP_OK;
 }
 
-esp_err_t drv8873_set_ocp_tretry(int retry_time) {
-    uint16_t reg_value;
+esp_err_t drv8873_set_ocp_tretry(int retry_time, int device_index) {
+    uint8_t reg_value;
     esp_err_t ret;
 
-    if (!drv8873_global_config || !drv8873_global_config->spi_handle) {
-        ESP_LOGE(TAG, "DRV8873 SPI not initialized");
-        return ESP_ERR_INVALID_STATE;
+    // Validate device index
+    if (device_index < 0 || device_index >= drv8873_global_config->device_count) {
+        ESP_LOGE(TAG, "Invalid device index: %d", device_index);
+        return ESP_ERR_INVALID_ARG;
     }
 
     // Read IC2 Control register
-    ret = drv8873_spi_read_register(DRV8873_REG_IC2_CONTROL, &reg_value);
+    ret = drv8873_spi_read_register(DRV8873_REG_IC2_CONTROL, &reg_value, device_index);
     if (ret != ESP_OK) {
         return ret;
     }
 
     // Update OCP_TRETRY field (bits 3-2)
-    reg_value = (reg_value & 0xFFF3) | ((retry_time & 0x0003) << 2);
+    reg_value = (reg_value & 0xF3) | ((retry_time & 0x03) << 2);
 
     // Write updated register
-    ret = drv8873_spi_write_register(DRV8873_REG_IC2_CONTROL, reg_value);
+    ret = drv8873_spi_write_register(DRV8873_REG_IC2_CONTROL, reg_value, device_index);
     if (ret != ESP_OK) {
         return ret;
     }
 
-    ESP_LOGI(TAG, "OCP retry time set to %dms", retry_time * 500);
+    ESP_LOGI(TAG, "Device %d: OCP retry time set to %dms", device_index, retry_time * 500);
     return ESP_OK;
 }
 
-esp_err_t drv8873_set_en_olp(int enable) {
-    uint16_t reg_value;
+esp_err_t drv8873_set_en_olp(int enable, int device_index) {
+    uint8_t reg_value;
     esp_err_t ret;
 
-    if (!drv8873_global_config || !drv8873_global_config->spi_handle) {
-        ESP_LOGE(TAG, "DRV8873 SPI not initialized");
-        return ESP_ERR_INVALID_STATE;
+    // Validate device index
+    if (device_index < 0 || device_index >= drv8873_global_config->device_count) {
+        ESP_LOGE(TAG, "Invalid device index: %d", device_index);
+        return ESP_ERR_INVALID_ARG;
     }
 
     // Read IC4 Control register
-    ret = drv8873_spi_read_register(DRV8873_REG_IC4_CONTROL, &reg_value);
+    ret = drv8873_spi_read_register(DRV8873_REG_IC4_CONTROL, &reg_value, device_index);
     if (ret != ESP_OK) {
         return ret;
     }
@@ -368,26 +465,27 @@ esp_err_t drv8873_set_en_olp(int enable) {
     }
 
     // Write updated register
-    ret = drv8873_spi_write_register(DRV8873_REG_IC4_CONTROL, reg_value);
+    ret = drv8873_spi_write_register(DRV8873_REG_IC4_CONTROL, reg_value, device_index);
     if (ret != ESP_OK) {
         return ret;
     }
 
-    ESP_LOGI(TAG, "OLP diagnostic %s", enable ? "enabled" : "disabled");
+    ESP_LOGI(TAG, "Device %d: OLP diagnostic %s", device_index, enable ? "enabled" : "disabled");
     return ESP_OK;
 }
 
-esp_err_t drv8873_set_olp_delay(int delay) {
-    uint16_t reg_value;
+esp_err_t drv8873_set_olp_delay(int delay, int device_index) {
+    uint8_t reg_value;
     esp_err_t ret;
 
-    if (!drv8873_global_config || !drv8873_global_config->spi_handle) {
-        ESP_LOGE(TAG, "DRV8873 SPI not initialized");
-        return ESP_ERR_INVALID_STATE;
+    // Validate device index
+    if (device_index < 0 || device_index >= drv8873_global_config->device_count) {
+        ESP_LOGE(TAG, "Invalid device index: %d", device_index);
+        return ESP_ERR_INVALID_ARG;
     }
 
     // Read IC4 Control register
-    ret = drv8873_spi_read_register(DRV8873_REG_IC4_CONTROL, &reg_value);
+    ret = drv8873_spi_read_register(DRV8873_REG_IC4_CONTROL, &reg_value, device_index);
     if (ret != ESP_OK) {
         return ret;
     }
@@ -400,26 +498,27 @@ esp_err_t drv8873_set_olp_delay(int delay) {
     }
 
     // Write updated register
-    ret = drv8873_spi_write_register(DRV8873_REG_IC4_CONTROL, reg_value);
+    ret = drv8873_spi_write_register(DRV8873_REG_IC4_CONTROL, reg_value, device_index);
     if (ret != ESP_OK) {
         return ret;
     }
 
-    ESP_LOGI(TAG, "OLP delay set to %s", delay ? "1.2ms" : "300us");
+    ESP_LOGI(TAG, "Device %d: OLP delay set to %s", device_index, delay ? "1.2ms" : "300us");
     return ESP_OK;
 }
 
-esp_err_t drv8873_set_en_ola(int enable) {
-    uint16_t reg_value;
+esp_err_t drv8873_set_en_ola(int enable, int device_index) {
+    uint8_t reg_value;
     esp_err_t ret;
 
-    if (!drv8873_global_config || !drv8873_global_config->spi_handle) {
-        ESP_LOGE(TAG, "DRV8873 SPI not initialized");
-        return ESP_ERR_INVALID_STATE;
+    // Validate device index
+    if (device_index < 0 || device_index >= drv8873_global_config->device_count) {
+        ESP_LOGE(TAG, "Invalid device index: %d", device_index);
+        return ESP_ERR_INVALID_ARG;
     }
 
     // Read IC4 Control register
-    ret = drv8873_spi_read_register(DRV8873_REG_IC4_CONTROL, &reg_value);
+    ret = drv8873_spi_read_register(DRV8873_REG_IC4_CONTROL, &reg_value, device_index);
     if (ret != ESP_OK) {
         return ret;
     }
@@ -432,26 +531,172 @@ esp_err_t drv8873_set_en_ola(int enable) {
     }
 
     // Write updated register
-    ret = drv8873_spi_write_register(DRV8873_REG_IC4_CONTROL, reg_value);
+    ret = drv8873_spi_write_register(DRV8873_REG_IC4_CONTROL, reg_value, device_index);
     if (ret != ESP_OK) {
         return ret;
     }
 
-    ESP_LOGI(TAG, "OLA diagnostic %s", enable ? "enabled" : "disabled");
+    ESP_LOGI(TAG, "Device %d: OLA diagnostic %s", device_index, enable ? "enabled" : "disabled");
     return ESP_OK;
 }
 
-esp_err_t drv8873_clear_fault(void) {
-    uint16_t reg_value;
+esp_err_t drv8873_set_dis_itrip(drv8873_current_regulation_t disable_flags, int device_index) {
+    uint8_t reg_value;
     esp_err_t ret;
 
+    // Validate device index
+    if (device_index < 0 || device_index >= drv8873_global_config->device_count) {
+        ESP_LOGE(TAG, "Invalid device index: %d", device_index);
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    // Read IC4 Control register
+    ret = drv8873_spi_read_register(DRV8873_REG_IC4_CONTROL, &reg_value, device_index);
+    if (ret != ESP_OK) {
+        return ret;
+    }
+
+    // Update DIS_ITRIP field (bits 1-0)
+    reg_value = (reg_value & 0xFC) | (disable_flags & 0x03);
+
+    // Write updated register
+    ret = drv8873_spi_write_register(DRV8873_REG_IC4_CONTROL, reg_value, device_index);
+    if (ret != ESP_OK) {
+        return ret;
+    }
+
+    ESP_LOGI(TAG, "Device %d: ITRIP disabled for OUT1/OUT2: 0x%02X", device_index, disable_flags);
+    return ESP_OK;
+}
+
+esp_err_t drv8873_get_fault_status(uint8_t fault_status, int device_index) {
+    // Validate parameters
     if (!drv8873_global_config || !drv8873_global_config->spi_handle) {
         ESP_LOGE(TAG, "DRV8873 SPI not initialized");
         return ESP_ERR_INVALID_STATE;
     }
 
+    if (device_index < 0 || device_index >= drv8873_global_config->device_count) {
+        ESP_LOGE(TAG, "Invalid device index: %d", device_index);
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    // Read FAULT_STATUS register (16-bit register, two 8-bit bytes)
+    uint8_t fault_status;
+    esp_err_t ret = drv8873_spi_read_register(DRV8873_REG_FAULT_STATUS, &fault_status, device_index);
+    if (ret != ESP_OK) {
+        return ret;
+    }
+
+    // TODO FIX
+
+    // Check if FAULT bit is set
+    if (fault_status & DRV8873_FAULT_FAULT_MASK) {
+        uint16_t diag_status;
+        ret = drv8873_spi_read_register(DRV8873_REG_DIAG_STATUS, &diag_status, device_index);
+        if (ret != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to read DIAG register after FAULT detected on device %d", device_index);
+            return ret;
+        }
+
+        // Analyze specific fault causes according to documentation
+        if (fault_status & DRV8873_FAULT_UVLO_MASK) {
+            ESP_LOGE(TAG, "Device %d: FAULT: Undervoltage Lockout (UVLO) - VM < 4.45V", device_index);
+            return ret; // Stop further analysis when UVLO is detected
+        }
+        if (fault_status & DRV8873_FAULT_CPUV_MASK) {
+            ESP_LOGE(TAG, "Device %d: FAULT: Charge Pump Undervoltage (CPUV) - VCP < VVM + 2.25V", device_index);
+        }
+        if (fault_status & DRV8873_FAULT_OCP_MASK) {
+            ESP_LOGE(TAG, "Device %d: FAULT: Overcurrent Protection (OCP) - Current limit exceeded", device_index);
+        }
+        if (fault_status & DRV8873_FAULT_TSD_MASK) {
+            ESP_LOGE(TAG, "Device %d: FAULT: Thermal Shutdown (TSD) - TJ > 165°C", device_index);
+        }
+        if (fault_status & DRV8873_FAULT_OLD_MASK) {
+            ESP_LOGE(TAG, "Device %d: FAULT: Open-Load Detection (OLD) - No load detected", device_index);
+        }
+        if (fault_status & DRV8873_FAULT_OTW_MASK) {
+            ESP_LOGE(TAG, "Device %d: FAULT: Overtemperature Warning (OTW) - TJ > 140°C", device_index);
+        }
+
+        // Analyze DIAG register details
+        if (diag_status & DRV8873_DIAG_OL1_MASK) {
+            ESP_LOGI(TAG, "Device %d: DIAG: Open Load on Half-Bridge 1", device_index);
+        }
+        if (diag_status & DRV8873_DIAG_OL2_MASK) {
+            ESP_LOGI(TAG, "Device %d: DIAG: Open Load on Half-Bridge 2", device_index);
+        }
+        if (diag_status & DRV8873_DIAG_OCP_H1_MASK) {
+            ESP_LOGE(TAG, "Device %d: DIAG: Overcurrent on High-Side FET 1", device_index);
+        }
+        if (diag_status & DRV8873_DIAG_OCP_L1_MASK) {
+            ESP_LOGE(TAG, "Device %d: DIAG: Overcurrent on Low-Side FET 1", device_index);
+        }
+        if (diag_status & DRV8873_DIAG_OCP_H2_MASK) {
+            ESP_LOGE(TAG, "Device %d: DIAG: Overcurrent on High-Side FET 2", device_index);
+        }
+        if (diag_status & DRV8873_DIAG_OCP_L2_MASK) {
+            ESP_LOGE(TAG, "Device %d: DIAG: Overcurrent on Low-Side FET 2", device_index);
+        }
+        if (diag_status & DRV8873_DIAG_ITRIP1_MASK) {
+            ESP_LOGW(TAG, "Device %d: DIAG: Current Regulation Active on Half-Bridge 1", device_index);
+        }
+        if (diag_status & DRV8873_DIAG_ITRIP2_MASK) {
+            ESP_LOGW(TAG, "Device %d: DIAG: Current Regulation Active on Half-Bridge 2", device_index);
+        }
+
+        if (diag_status & (DRV8873_DIAG_OL1_MASK | DRV8873_DIAG_OL2_MASK)) {
+            ESP_LOGI(TAG, "Device %d: FAULT detected. DIAG status: 0x%04X (open-load detection is normal when outputs are disabled)", device_index, diag_status);
+        } else {
+            ESP_LOGE(TAG, "Device %d: FAULT detected. DIAG status: 0x%04X", device_index, diag_status);
+        }
+    }
+
+    return ret;
+}
+
+esp_err_t drv8873_get_diag_status(uint16_t *diag_status, int device_index) {
+    // Validate parameters
+    if (!drv8873_global_config || !drv8873_global_config->spi_handle) {
+        ESP_LOGE(TAG, "DRV8873 SPI not initialized");
+        return ESP_ERR_INVALID_STATE;
+    }
+
+    if (device_index < 0 || device_index >= drv8873_global_config->device_count) {
+        ESP_LOGE(TAG, "Invalid device index: %d", device_index);
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    // Read DIAG_STATUS register (16-bit register, two 8-bit bytes)
+    uint8_t diag_low, diag_high;
+    esp_err_t ret = drv8873_spi_read_register(DRV8873_REG_DIAG_STATUS, &diag_low, device_index);
+    if (ret != ESP_OK) {
+        return ret;
+    }
+    ret = drv8873_spi_read_register(DRV8873_REG_DIAG_STATUS + 1, &diag_high, device_index);
+    if (ret != ESP_OK) {
+        return ret;
+    }
+
+    // Combine bytes into 16-bit value (low byte first, then high byte)
+    *diag_status = (diag_high << 8) | diag_low;
+
+    return ret;
+}
+
+esp_err_t drv8873_clear_fault(int device_index) {
+    uint8_t reg_value;
+    esp_err_t ret;
+
+    // Validate device index
+    if (device_index < 0 || device_index >= drv8873_global_config->device_count) {
+        ESP_LOGE(TAG, "Invalid device index: %d", device_index);
+        return ESP_ERR_INVALID_ARG;
+    }
+
     // Read IC3 Control register
-    ret = drv8873_spi_read_register(DRV8873_REG_IC3_CONTROL, &reg_value);
+    ret = drv8873_spi_read_register(DRV8873_REG_IC3_CONTROL, &reg_value, device_index);
     if (ret != ESP_OK) {
         return ret;
     }
@@ -460,131 +705,44 @@ esp_err_t drv8873_clear_fault(void) {
     reg_value |= (1 << 7);
 
     // Write updated register
-    ret = drv8873_spi_write_register(DRV8873_REG_IC3_CONTROL, reg_value);
+    ret = drv8873_spi_write_register(DRV8873_REG_IC3_CONTROL, reg_value, device_index);
     if (ret != ESP_OK) {
         return ret;
     }
 
-    ESP_LOGI(TAG, "Faults cleared via CLR_FLT");
+    ESP_LOGI(TAG, "Device %d: Faults cleared via CLR_FLT", device_index);
     return ESP_OK;
 }
 
-esp_err_t drv8873_lock_registers(int lock) {
-    uint16_t reg_value;
+esp_err_t drv8873_lock_registers(int lock, int device_index) {
+    uint8_t reg_value;
     esp_err_t ret;
 
-    if (!drv8873_global_config || !drv8873_global_config->spi_handle) {
-        ESP_LOGE(TAG, "DRV8873 SPI not initialized");
-        return ESP_ERR_INVALID_STATE;
+    // Validate device index
+    if (device_index < 0 || device_index >= drv8873_global_config->device_count) {
+        ESP_LOGE(TAG, "Invalid device index: %d", device_index);
+        return ESP_ERR_INVALID_ARG;
     }
 
     // Read IC3 Control register
-    ret = drv8873_spi_read_register(DRV8873_REG_IC3_CONTROL, &reg_value);
+    ret = drv8873_spi_read_register(DRV8873_REG_IC3_CONTROL, &reg_value, device_index);
     if (ret != ESP_OK) {
         return ret;
     }
 
     // Update LOCK field (bits 6-4)
     if (lock) {
-        reg_value = (reg_value & 0x8FFF) | (0x03 << 4); // 011b = Locked
+        reg_value = (reg_value & 0x8F) | (0x03 << 4); // 011b = Locked
     } else {
-        reg_value = (reg_value & 0x8FFF) | (0x04 << 4); // 100b = Unlocked
+        reg_value = (reg_value & 0x8F) | (0x04 << 4); // 100b = Unlocked
     }
 
     // Write updated register
-    ret = drv8873_spi_write_register(DRV8873_REG_IC3_CONTROL, reg_value);
+    ret = drv8873_spi_write_register(DRV8873_REG_IC3_CONTROL, reg_value, device_index);
     if (ret != ESP_OK) {
         return ret;
     }
 
-    ESP_LOGI(TAG, "Registers %s", lock ? "locked" : "unlocked");
+    ESP_LOGI(TAG, "Device %d: Registers %s", device_index, lock ? "locked" : "unlocked");
     return ESP_OK;
-}
-
-esp_err_t drv8873_get_fault_status(uint16_t *fault_status) {
-    // Use global config only (no config parameter anymore)
-    if (!drv8873_global_config || !drv8873_global_config->spi_handle) {
-        ESP_LOGE(TAG, "DRV8873 SPI not initialized");
-        return ESP_ERR_INVALID_STATE;
-    }
-
-    esp_err_t ret = drv8873_spi_read_register(DRV8873_REG_FAULT_STATUS, fault_status);
-    if (ret != ESP_OK) {
-        return ret;
-    }
-
-    // Check if FAULT bit is set
-    if (*fault_status & DRV8873_FAULT_FAULT_MASK) {
-        uint16_t diag_status;
-        ret = drv8873_spi_read_register(DRV8873_REG_DIAG_STATUS, &diag_status);
-        if (ret != ESP_OK) {
-            ESP_LOGE(TAG, "Failed to read DIAG register after FAULT detected");
-            return ret;
-        }
-
-        // Analyze specific fault causes according to documentation
-        if (*fault_status & DRV8873_FAULT_UVLO_MASK) {
-            ESP_LOGE(TAG, "FAULT: Undervoltage Lockout (UVLO) - VM < 4.45V");
-            return ret; // Stop further analysis when UVLO is detected
-        }
-        if (*fault_status & DRV8873_FAULT_CPUV_MASK) {
-            ESP_LOGE(TAG, "FAULT: Charge Pump Undervoltage (CPUV) - VCP < VVM + 2.25V");
-        }
-        if (*fault_status & DRV8873_FAULT_OCP_MASK) {
-            ESP_LOGE(TAG, "FAULT: Overcurrent Protection (OCP) - Current limit exceeded");
-        }
-        if (*fault_status & DRV8873_FAULT_TSD_MASK) {
-            ESP_LOGE(TAG, "FAULT: Thermal Shutdown (TSD) - TJ > 165°C");
-        }
-        if (*fault_status & DRV8873_FAULT_OLD_MASK) {
-            ESP_LOGE(TAG, "FAULT: Open-Load Detection (OLD) - No load detected");
-        }
-        if (*fault_status & DRV8873_FAULT_OTW_MASK) {
-            ESP_LOGE(TAG, "FAULT: Overtemperature Warning (OTW) - TJ > 140°C");
-        }
-
-        // Analyze DIAG register details
-        if (diag_status & DRV8873_DIAG_OL1_MASK) {
-            ESP_LOGI(TAG, "DIAG: Open Load on Half-Bridge 1");
-        }
-        if (diag_status & DRV8873_DIAG_OL2_MASK) {
-            ESP_LOGI(TAG, "DIAG: Open Load on Half-Bridge 2");
-        }
-        if (diag_status & DRV8873_DIAG_OCP_H1_MASK) {
-            ESP_LOGE(TAG, "DIAG: Overcurrent on High-Side FET 1");
-        }
-        if (diag_status & DRV8873_DIAG_OCP_L1_MASK) {
-            ESP_LOGE(TAG, "DIAG: Overcurrent on Low-Side FET 1");
-        }
-        if (diag_status & DRV8873_DIAG_OCP_H2_MASK) {
-            ESP_LOGE(TAG, "DIAG: Overcurrent on High-Side FET 2");
-        }
-        if (diag_status & DRV8873_DIAG_OCP_L2_MASK) {
-            ESP_LOGE(TAG, "DIAG: Overcurrent on Low-Side FET 2");
-        }
-        if (diag_status & DRV8873_DIAG_ITRIP1_MASK) {
-            ESP_LOGW(TAG, "DIAG: Current Regulation Active on Half-Bridge 1");
-        }
-        if (diag_status & DRV8873_DIAG_ITRIP2_MASK) {
-            ESP_LOGW(TAG, "DIAG: Current Regulation Active on Half-Bridge 2");
-        }
-
-        if (diag_status & (DRV8873_DIAG_OL1_MASK | DRV8873_DIAG_OL2_MASK)) {
-            ESP_LOGI(TAG, "FAULT detected. DIAG status: 0x%04X", diag_status);
-        } else {
-            ESP_LOGE(TAG, "FAULT detected. DIAG status: 0x%04X", diag_status);
-        }
-    }
-
-    return ret;
-}
-
-esp_err_t drv8873_get_diag_status(uint16_t *diag_status) {
-    // Use global config only (no config parameter anymore)
-    if (!drv8873_global_config || !drv8873_global_config->spi_handle) {
-        ESP_LOGE(TAG, "DRV8873 SPI not initialized");
-        return ESP_ERR_INVALID_STATE;
-    }
-
-    return drv8873_spi_read_register(DRV8873_REG_DIAG_STATUS, diag_status);
 }

@@ -59,23 +59,26 @@ public:
     static float getCurrent(MotorNum_t motor);
 
     /**
-     * @brief Get the current fault status from DRV8873
+     * @brief Get the current fault status from DRV8873 for a specific motor
+     * @param motor Motor number (0-3)
      * @return uint16_t Fault status register value (0 if no fault)
      */
-    static uint16_t getFault();
+    static uint16_t getFault(MotorNum_t motor);
 
     /**
-     * @brief Clear all faults in DRV8873
+     * @brief Clear all faults in DRV8873 for a specific motor
+     * @param motor Motor number (0-3)
      * @return esp_err_t ESP_OK on success, error code otherwise
      */
-    static esp_err_t clear_fault();
+    static esp_err_t clear_fault(MotorNum_t motor);
 
     /**
-     * @brief Set the control mode of DRV8873
+     * @brief Set the control mode of DRV8873 for a specific motor
      * @param mode Control mode to set (PH/EN, PWM, Independent, Disabled)
+     * @param motor Motor number (0-3)
      * @return esp_err_t ESP_OK on success, error code otherwise
      */
-    static esp_err_t setMode(drv8873_mode_t mode);
+    static esp_err_t setMode(drv8873_mode_t mode, MotorNum_t motor);
 
 protected:
     static int init(std::vector<MotorDC_PinConfig_t> motorsConfig, gpio_num_t faultPin);

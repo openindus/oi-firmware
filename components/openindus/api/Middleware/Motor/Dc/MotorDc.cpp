@@ -253,77 +253,135 @@ void MotorDc::initHBridge(void)
 
     esp_err_t err = ESP_OK;
 
-    /* Configure the DRV8873 device */
+    /* Configure the DRV8873 device for daisy chain */
     static drv8873_spi_config_t drv8873_cfg = {
         .spi_handle = NULL,
         .nSCS_pin = GPIO_NUM_48,  // Chip Select pin
+        .device_count = 4        // 4 daisy-chained H-bridges
     };
 
     // Initialize SPI bus and device
     err |= drv8873_spi_init(&drv8873_cfg);
     if (err != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to initialize DRV8873 SPI: %d", err);
+        ESP_LOGE(TAG, "Failed to initialize DRV8873 SPI daisy chain: %d", err);
         return;
     }
 
-    // Configure the H-Bridge in PWM mode
-    err |= drv8873_set_mode(DRV8873_MODE_PWM);
-    if (err != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to set DRV8873 mode: %d", err);
-        return;
-    }
+    // Configure all 4 H-bridges in PWM mode
+    for (int i = 0; i < 4; i++) {
+        err |= drv8873_set_mode(DRV8873_MODE_PWM, i);
+        if (err != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to set DRV8873 mode for device %d: %d", i, err);
+            return;
+        }
 
-    // Set current limit to 4 A (0x00)
-    err |= drv8873_set_current_limit(DRV8873_ITRIP_LEVEL_4A);
-    if (err != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to set DRV8873 current limit: %d", err);
-        return;
-    }
+        // Set current limit to 4 A (0x00)
+        err |= drv8873_set_current_limit(DRV8873_ITRIP_LEVEL_4A, i);
+        if (err != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to set DRV8873 current limit for device %d: %d", i, err);
+            return;
+        }
 
-    // Enable current regulation for both OUT1 and OUT2
-    err |= drv8873_set_current_regulation(DRV8873_CURR_REG_ENABLED);
-    if (err != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to set DRV8873 current regulation: %d", err);
-        return;
-    }
+        // Disable current regulation for both OUT1 and OUT2
+        err |= drv8873_set_current_regulation(DRV8873_CURR_REG_DISABLE_BOTH, i);
+        if (err != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to set DRV8873 current regulation for device %d: %d", i, err);
+            return;
+        }
 
-    // Clear any existing faults
-    err |= drv8873_clear_fault();
-    if (err != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to clear DRV8873 faults: %d", err);
-        return;
+        // Disable OCP protection
+        err |= drv8873_set_ocp_mode(DRV8873_OCP_MODE_DISABLED, i);
+        if (err != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to set DRV8873 OCP mode for device %d: %d", i, err);
+            return;
+        }
+
+        // Disable CPUV detection
+        err |= drv8873_set_dis_cpuv(1, i);
+        if (err != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to disable DRV8873 CPUV detection for device %d: %d", i, err);
+            return;
+        }
+
+        // Enable TSD auto-recovery
+        err |= drv8873_set_tsd_mode(1, i);
+        if (err != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to enable DRV8873 TSD auto-recovery for device %d: %d", i, err);
+            return;
+        }
+
+        // Enable passive OLP
+        err |= drv8873_set_en_olp(1, i);
+        if (err != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to enable DRV8873 OLP for device %d: %d", i, err);
+            return;
+        }
+
+        // Set OLP delay to 300us
+        err |= drv8873_set_olp_delay(0, i);
+        if (err != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to set DRV8873 OLP delay for device %d: %d", i, err);
+            return;
+        }
+
+        // Clear any existing faults
+        err |= drv8873_clear_fault(i);
+        if (err != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to clear DRV8873 faults for device %d: %d", i, err);
+            return;
+        }
     }
 
     // Wait 10ms for stabilization
     vTaskDelay(pdMS_TO_TICKS(10));
 
-    // Read and log fault status
-    uint16_t fault_status;
-    err |= drv8873_get_fault_status(&fault_status);
-    if (err == ESP_OK) {
-        ESP_LOGI(TAG, "DRV8873 Fault status: 0x%04X", fault_status);
-    } else {
-        ESP_LOGE(TAG, "Failed to read DRV8873 fault status: %d", err);
+    // Read and log fault status for all devices
+    for (int i = 0; i < 4; i++) {
+        uint16_t fault_status;
+        err |= drv8873_get_fault_status(&fault_status, i);
+        if (err == ESP_OK) {
+            ESP_LOGI(TAG, "DRV8873 Device %d Fault status: 0x%04X", i, fault_status);
+        } else {
+            ESP_LOGE(TAG, "Failed to read DRV8873 Device %d fault status: %d", i, err);
+        }
     }
 
     if (err == ESP_OK) {
-        ESP_LOGI(TAG, "DRV8873 H-Bridge initialized successfully");
+        ESP_LOGI(TAG, "DRV8873 H-Bridge daisy chain initialized successfully");
     }
 }
 
-esp_err_t MotorDc::setMode(drv8873_mode_t mode) {
-    return drv8873_set_mode(mode);
+esp_err_t MotorDc::setMode(drv8873_mode_t mode, MotorNum_t motor) {
+    // Validate motor number
+    if (motor < 0 || motor >= 4) {
+        ESP_LOGE(TAG, "Invalid motor number: %d", motor);
+        return ESP_ERR_INVALID_ARG;
+    }
+    
+    return drv8873_set_mode(mode, motor);
 }
 
-uint16_t MotorDc::getFault() {
+uint16_t MotorDc::getFault(MotorNum_t motor) {
+    // Validate motor number
+    if (motor < 0 || motor >= 4) {
+        ESP_LOGE(TAG, "Invalid motor number: %d", motor);
+        return 0;
+    }
+    
     uint16_t fault_status;
-    esp_err_t ret = drv8873_get_fault_status(&fault_status);
+    esp_err_t ret = drv8873_get_fault_status(&fault_status, motor);
     if (ret != ESP_OK) {
         return 0; // Return 0 if read fails
     }
     return fault_status;
 }
 
-esp_err_t MotorDc::clear_fault() {
-    return drv8873_clear_fault();
+esp_err_t MotorDc::clear_fault(MotorNum_t motor) {
+    // Validate motor number
+    if (motor < 0 || motor >= 4) {
+        ESP_LOGE(TAG, "Invalid motor number: %d", motor);
+        return ESP_ERR_INVALID_ARG;
+    }
+    
+    return drv8873_clear_fault(motor);
 }
