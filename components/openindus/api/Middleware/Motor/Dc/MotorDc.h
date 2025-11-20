@@ -12,6 +12,7 @@
 #include <vector>
 #include "driver/gpio.h"
 #include "driver/ledc.h"
+#include "drv8873.h"
 
 typedef struct {
     struct {
@@ -56,6 +57,25 @@ public:
      * @return float current in A
      */
     static float getCurrent(MotorNum_t motor);
+
+    /**
+     * @brief Get the current fault status from DRV8873
+     * @return uint16_t Fault status register value (0 if no fault)
+     */
+    static uint16_t getFault();
+
+    /**
+     * @brief Clear all faults in DRV8873
+     * @return esp_err_t ESP_OK on success, error code otherwise
+     */
+    static esp_err_t clear_fault();
+
+    /**
+     * @brief Set the control mode of DRV8873
+     * @param mode Control mode to set (PH/EN, PWM, Independent, Disabled)
+     * @return esp_err_t ESP_OK on success, error code otherwise
+     */
+    static esp_err_t setMode(drv8873_mode_t mode);
 
 protected:
     static int init(std::vector<MotorDC_PinConfig_t> motorsConfig, gpio_num_t faultPin);

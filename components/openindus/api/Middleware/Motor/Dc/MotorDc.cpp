@@ -310,3 +310,20 @@ void MotorDc::initHBridge(void)
         ESP_LOGI(TAG, "DRV8873 H-Bridge initialized successfully");
     }
 }
+
+esp_err_t MotorDc::setMode(drv8873_mode_t mode) {
+    return drv8873_set_mode(mode);
+}
+
+uint16_t MotorDc::getFault() {
+    uint16_t fault_status;
+    esp_err_t ret = drv8873_get_fault_status(&fault_status);
+    if (ret != ESP_OK) {
+        return 0; // Return 0 if read fails
+    }
+    return fault_status;
+}
+
+esp_err_t MotorDc::clear_fault() {
+    return drv8873_clear_fault();
+}
