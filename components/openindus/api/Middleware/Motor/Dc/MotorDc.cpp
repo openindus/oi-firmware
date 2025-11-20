@@ -280,12 +280,22 @@ void MotorDc::initHBridge(void)
         return;
     }
 
-    // Disable current regulation for OUT1 (0x01)
+    // Enable current regulation for both OUT1 and OUT2
     err |= drv8873_set_current_regulation(DRV8873_CURR_REG_ENABLED);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Failed to set DRV8873 current regulation: %d", err);
         return;
     }
+
+    // Clear any existing faults
+    err |= drv8873_clear_fault();
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to clear DRV8873 faults: %d", err);
+        return;
+    }
+
+    // Wait 10ms for stabilization
+    vTaskDelay(pdMS_TO_TICKS(10));
 
     // Read and log fault status
     uint16_t fault_status;
