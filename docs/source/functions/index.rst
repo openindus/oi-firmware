@@ -26,3 +26,4 @@ Functions list
    rtc.rst
    motorstepper.rst
    encoder.rst
+   motordc.rst

@@ -25,29 +25,34 @@ typedef struct {
     gpio_num_t disable;
 } MotorDC_PinConfig_t;
 
+/**
+ * @class MotorDc
+ * @brief DC Motor control class
+ */
 class MotorDc : public Motor
 {
 public:
+
     /**
-     * @brief 
+     * @brief Run a DC motor with specified direction and duty cycle
      * 
-     * @param motor 
-     * @param direction 
-     * @param dutyCycle 
+     * @param motor Motor number
+     * @param direction Motor direction (FORWARD/REVERSE)
+     * @param dutyCycle Duty cycle percentage (0..100)
      */
     static void run(MotorNum_t motor, MotorDirection_t direction, float dutyCycle);
 
     /**
-     * @brief 
+     * @brief Stop a DC motor
      * 
-     * @param motor 
+     * @param motor Motor number
      */
     static void stop(MotorNum_t motor);
 
     /**
-     * @brief 
+     * @brief Get current consumption of a DC motor
      * 
-     * @param motor 
+     * @param motor Motor number
      * @return float current in A
      */
     static float getCurrent(MotorNum_t motor);

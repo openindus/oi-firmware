@@ -13,3 +13,4 @@ Modules list
    oistepper.rst
    oirelaylp.rst
    oirelayhp.rst
+   oidc.rst
