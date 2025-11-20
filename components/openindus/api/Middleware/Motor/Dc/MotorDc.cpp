@@ -8,6 +8,7 @@
 
 #include "MotorDc.h"
 #include "ads866x.h"
+#include "drv8873.h"
 
 #define LEDC_TIMER              LEDC_TIMER_0
 #define LEDC_MODE               LEDC_LOW_SPEED_MODE
@@ -89,6 +90,9 @@ int MotorDc::init(std::vector<MotorDC_PinConfig_t> motorsConfig, gpio_num_t faul
 
     // Initialize ADC for current reading
     initADC();
+
+    // Initialize H-Bridge driver (DRV8873)
+    initHBridge();
 
     /* CLI */
     _registerCLI();
@@ -184,12 +188,15 @@ float MotorDc::getCurrent(MotorNum_t motor)
     return current;
 }
 
-void MotorDc::initADC(void)
+void MotorDc::initSPI(void)
 {
-    esp_err_t err = ESP_OK;
+    static bool initialized = false;
+    if(initialized){
+        return;
+    }
 
     /* Initialize the SPI bus */
-    static spi_bus_config_t busConfig = {
+    const spi_bus_config_t busConfig = {
         .mosi_io_num = GPIO_NUM_15,
         .miso_io_num = GPIO_NUM_11,
         .sclk_io_num = GPIO_NUM_13,
@@ -205,11 +212,19 @@ void MotorDc::initADC(void)
         .isr_cpu_id = ESP_INTR_CPU_AFFINITY_AUTO,
         .intr_flags = 0
     };
-    err |= spi_bus_initialize(SPI2_HOST, &busConfig, SPI_DMA_CH_AUTO);
-    if (err != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to initialize SPI bus: %d", err);
-        return;
+    esp_err_t err = spi_bus_initialize(SPI2_HOST, &busConfig, SPI_DMA_CH_AUTO);
+    if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
+        ESP_LOGE(TAG, "Failed to initialize SPI bus: %s", esp_err_to_name(err));
+    } else if (err == ESP_OK) {
+        initialized = true;
     }
+}
+
+void MotorDc::initADC(void)
+{
+    MotorDc::initSPI();
+
+    esp_err_t err = ESP_OK;
 
     /* Initialize Analog Inputs */
     static ads866x_config_t adcSPIConfig = {
@@ -229,5 +244,59 @@ void MotorDc::initADC(void)
     /* Configure analog inputs */
     for (size_t i = 0; i < 8; i++) {
         ads866x_set_channel_voltage_range(i, 6);
+    }
+}
+
+void MotorDc::initHBridge(void)
+{
+    MotorDc::initSPI();
+
+    esp_err_t err = ESP_OK;
+
+    /* Configure the DRV8873 device */
+    static drv8873_spi_config_t drv8873_cfg = {
+        .spi_handle = NULL,
+        .nSCS_pin = GPIO_NUM_48,  // Chip Select pin
+    };
+
+    // Initialize SPI bus and device
+    err |= drv8873_spi_init(&drv8873_cfg);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to initialize DRV8873 SPI: %d", err);
+        return;
+    }
+
+    // Configure the H-Bridge in PWM mode
+    err |= drv8873_set_mode(DRV8873_MODE_PWM);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to set DRV8873 mode: %d", err);
+        return;
+    }
+
+    // Set current limit to 4 A (0x00)
+    err |= drv8873_set_current_limit(DRV8873_ITRIP_LEVEL_4A);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to set DRV8873 current limit: %d", err);
+        return;
+    }
+
+    // Disable current regulation for OUT1 (0x01)
+    err |= drv8873_set_current_regulation(DRV8873_CURR_REG_ENABLED);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to set DRV8873 current regulation: %d", err);
+        return;
+    }
+
+    // Read and log fault status
+    uint16_t fault_status;
+    err |= drv8873_get_fault_status(&fault_status);
+    if (err == ESP_OK) {
+        ESP_LOGI(TAG, "DRV8873 Fault status: 0x%04X", fault_status);
+    } else {
+        ESP_LOGE(TAG, "Failed to read DRV8873 fault status: %d", err);
+    }
+
+    if (err == ESP_OK) {
+        ESP_LOGI(TAG, "DRV8873 H-Bridge initialized successfully");
     }
 }
