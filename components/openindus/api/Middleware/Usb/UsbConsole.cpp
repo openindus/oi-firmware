@@ -21,7 +21,7 @@
 #define PROMPT_STR "Discrete"
 #elif defined(CONFIG_OI_STEPPER) || defined(CONFIG_OI_STEPPER_VE)
 #define PROMPT_STR "Stepper"
-#elif defined(OI_DC)
+#elif defined(CONFIG_OI_DC)
 #define PROMPT_STR "Dc"
 #elif defined(CONFIG_OI_MIXED)
 #define PROMPT_STR "Mixed"

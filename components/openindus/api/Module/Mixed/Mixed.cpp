@@ -71,8 +71,8 @@ int Mixed::init(void)
     err |= Module::init(TYPE_OI_MIXED);
 
     /* Initialize digital IOs */
-    err |= DigitalInputs::init(_dinGpio, 4);
-    err |= DigitalOutputs::init(_doutGpio, _doutAdcUnits, _doutAdcChannels, 4, adcHandles[0], adcHandles[1]);
+    err |= DigitalInputs::init(_dinGpio, sizeof(_dinGpio)/sizeof(_dinGpio[0])); // 4
+    err |= DigitalOutputs::init(_doutGpio, _doutAdcUnits, _doutAdcChannels, sizeof(_doutGpio)/sizeof(_doutGpio[0]), adcHandles[0], adcHandles[1]); // 4
 
     /* Initialize the SPI bus */
     spi_bus_config_t busConfig = {};

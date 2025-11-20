@@ -28,6 +28,15 @@ static int run(int argc, char **argv)
         return 1;
     }
 
+    if (runArgs.motor->ival[0] < 1 || runArgs.motor->ival[0] > 4) {
+        fprintf(stderr, "Error: MOTOR must be in range [1-4].\n");
+        return 1;
+    }
+    if (runArgs.dir->ival[0] < 0 || runArgs.dir->ival[0] > 1) {
+        fprintf(stderr, "Error: DIRECTION must be 0 (Reverse) or 1 (Forward).\n");
+        return 1;
+    }
+
     MotorNum_t motor = (MotorNum_t)(runArgs.motor->ival[0] - 1);
     MotorDirection_t direction = (MotorDirection_t)(runArgs.dir->ival[0]);
 
@@ -68,6 +77,11 @@ static int stop(int argc, char **argv)
         return 1;
     }
 
+    if (stopArgs.motor->ival[0] < 1 || stopArgs.motor->ival[0] > 4) {
+        fprintf(stderr, "Error: MOTOR must be in range [1-4].\n");
+        return 1;
+    }
+
     MotorNum_t motor = (MotorNum_t)(stopArgs.motor->ival[0] - 1);
 
     MotorDc::stop(motor);
@@ -92,10 +106,56 @@ static void _registerStop(void)
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
 }
 
+/** 'getcurrent' */
+static struct {
+    struct arg_int *motor;
+    struct arg_end *end;
+} getCurrentArgs;
+
+static int getCurrent(int argc, char **argv)
+{
+    int nerrors = arg_parse(argc, argv, (void **) &getCurrentArgs);
+    if (nerrors != 0) {
+        arg_print_errors(stderr, getCurrentArgs.end, argv[0]);
+        return 1;
+    }
+
+    if (getCurrentArgs.motor->ival[0] < 1 || getCurrentArgs.motor->ival[0] > 4) {
+        fprintf(stderr, "Error: MOTOR must be in range [1-4].\n");
+        return 1;
+    }
+
+    MotorNum_t motor = (MotorNum_t)(getCurrentArgs.motor->ival[0] - 1);
+
+    float current = MotorDc::getCurrent(motor);
+
+    printf("Motor %d current: %.3f A\n", getCurrentArgs.motor->ival[0], current);
+
+    return 0;
+}
+
+static void _registerGetCurrent(void)
+{
+    getCurrentArgs.motor  = arg_int1(NULL, NULL, "MOTOR", "[1-4]");
+    getCurrentArgs.end    = arg_end(2);
+
+    const esp_console_cmd_t cmd = {
+        .command = "getcurrent",
+        .help = "get motor current",
+        .hint = NULL,
+        .func = &getCurrent,
+        .argtable = &getCurrentArgs,
+        .func_w_context = NULL,
+        .context = NULL
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+}
+
 int MotorDc::_registerCLI(void)
 {
-    _registerStop();
     _registerRun();
+    _registerStop();
+    _registerGetCurrent();
 
     return 0;
 }

@@ -26,6 +26,10 @@ class DcCmd
 public:
 
     DcCmd(ModuleControl* module);
+    ~DcCmd() { 
+        if (_currentEvent) vQueueDelete(_currentEvent);
+        if (_callbackRegistered) Master::removeEventCallback(EVENT_MOTOR_DC_CURRENT, _module->getId());
+    }
     
     /**
      * @brief Send a command to run the motor in the given direction
@@ -44,9 +48,19 @@ public:
      */
     void stop(MotorNum_t motor);
 
+    /**
+     * @brief Get the current consumption of the motor
+     * 
+     * @param motor Motor number
+     * @return float Current in Amperes
+     */
+    float getCurrent(MotorNum_t motor);
+
 private:
 
     ModuleControl* _module;
+    QueueHandle_t _currentEvent;
+    bool _callbackRegistered;
 
 };
 

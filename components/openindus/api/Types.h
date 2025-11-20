@@ -116,6 +116,7 @@ enum Callback_e {
     /* DC MOTOR */
     CALLBACK_MOTOR_DC_RUN                   = 0xA0,
     CALLBACK_MOTOR_DC_STOP                  = 0xA1,
+    CALLBACK_MOTOR_DC_GET_CURRENT           = 0xA2,
 
     /* SENSOR */
     CALLBACK_ADD_SENSOR                     = 0xB0,
@@ -139,6 +140,7 @@ enum Event_e {
     /* MOTOR */
     EVENT_MOTOR_READY                       = 0x01,
     EVENT_MOTOR_FLAG_INTERRUPT              = 0x02,
+    EVENT_MOTOR_DC_CURRENT                  = 0x03,
 
     /* SENSOR */
     EVENT_SENSOR_VALUE                      = 0xB0,

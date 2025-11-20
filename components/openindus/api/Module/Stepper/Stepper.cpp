@@ -45,7 +45,7 @@ int Stepper::init(void)
 #endif
 
     /* Digital inputs */
-    err |= DigitalInputs::init(_dinGpio, sizeof(_dinGpio) / sizeof(gpio_num_t));
+    err |= DigitalInputs::init(_dinGpio, sizeof(_dinGpio)/sizeof(_dinGpio[0]));
 
     /* Stepper motor */
     PS01_Hal_Config_t ps01Conf = STEPPER_CONFIG_MOTOR_DEFAULT();

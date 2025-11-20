@@ -162,7 +162,7 @@ void AnalogInputsLV::_controlTask(void *pvParameters)
 
 AnalogInputAds866x::AnalogInputAds866x(uint8_t num, gpio_num_t cmdGpio)
 {
-    if (num >= 4) {
+    if (num >= AIN_NUM_MAX) {
         ESP_LOGE(TAG, "Invalid Analog Input Number");
     } else {
         _num = num;
@@ -173,9 +173,9 @@ AnalogInputAds866x::AnalogInputAds866x(uint8_t num, gpio_num_t cmdGpio)
 int AnalogInputAds866x::init(AnalogInput_VoltageRange_t range, AnalogInput_Mode_t mode)
 {
     int err = 0;
-    gpio_config_t cfg;
-        
+    
     /* Configure Cmd pin */
+    gpio_config_t cfg;
     cfg.pin_bit_mask = (1ULL << _modePin);
     cfg.mode = GPIO_MODE_OUTPUT;
     cfg.pull_up_en = GPIO_PULLUP_DISABLE;
@@ -183,7 +183,7 @@ int AnalogInputAds866x::init(AnalogInput_VoltageRange_t range, AnalogInput_Mode_
     cfg.intr_type = GPIO_INTR_DISABLE;
 
     err |= gpio_config(&cfg);
-    
+
     _mutex = xSemaphoreCreateMutex();
     xSemaphoreGive(_mutex);
 
@@ -238,8 +238,8 @@ void AnalogInputAds866x::setMode(AnalogInput_Mode_t mode)
     if (mode != AIN_MODE_VOLTAGE && mode != AIN_MODE_CURRENT) {
             ESP_LOGE(TAG, "Invalid mode");
     } else {
-        xSemaphoreTake(_mutex, portMAX_DELAY);
         _mode = mode;
+        xSemaphoreTake(_mutex, portMAX_DELAY);
         gpio_set_level(_modePin, _mode);
         xSemaphoreGive(_mutex);
 
