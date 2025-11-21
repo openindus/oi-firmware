@@ -61,9 +61,9 @@ public:
     /**
      * @brief Get the current fault status from DRV8873 for a specific motor
      * @param motor Motor number (0-3)
-     * @return uint16_t Fault status register value (0 if no fault)
+     * @return uint8_t Fault status register value (0 if no fault)
      */
-    static uint16_t getFault(MotorNum_t motor);
+    static uint8_t getFault(MotorNum_t motor);
 
     /**
      * @brief Clear all faults in DRV8873 for a specific motor

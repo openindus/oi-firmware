@@ -569,7 +569,7 @@ esp_err_t drv8873_set_dis_itrip(drv8873_current_regulation_t disable_flags, int 
     return ESP_OK;
 }
 
-esp_err_t drv8873_get_fault_status(uint8_t fault_status, int device_index) {
+esp_err_t drv8873_get_fault_status(uint8_t *fault_status, int device_index) {
     // Validate parameters
     if (!drv8873_global_config || !drv8873_global_config->spi_handle) {
         ESP_LOGE(TAG, "DRV8873 SPI not initialized");
@@ -582,17 +582,22 @@ esp_err_t drv8873_get_fault_status(uint8_t fault_status, int device_index) {
     }
 
     // Read FAULT_STATUS register (16-bit register, two 8-bit bytes)
-    uint8_t fault_status;
-    esp_err_t ret = drv8873_spi_read_register(DRV8873_REG_FAULT_STATUS, &fault_status, device_index);
+    uint8_t fault_low, fault_high;
+    esp_err_t ret = drv8873_spi_read_register(DRV8873_REG_FAULT_STATUS, &fault_low, device_index);
+    if (ret != ESP_OK) {
+        return ret;
+    }
+    ret = drv8873_spi_read_register(DRV8873_REG_FAULT_STATUS + 1, &fault_high, device_index);
     if (ret != ESP_OK) {
         return ret;
     }
 
-    // TODO FIX
+    // Combine bytes into 16-bit value (low byte first, then high byte)
+    *fault_status = (fault_high << 8) | fault_low;
 
     // Check if FAULT bit is set
-    if (fault_status & DRV8873_FAULT_FAULT_MASK) {
-        uint16_t diag_status;
+    if (*fault_status & DRV8873_FAULT_FAULT_MASK) {
+        uint8_t diag_status;
         ret = drv8873_spi_read_register(DRV8873_REG_DIAG_STATUS, &diag_status, device_index);
         if (ret != ESP_OK) {
             ESP_LOGE(TAG, "Failed to read DIAG register after FAULT detected on device %d", device_index);
@@ -600,23 +605,23 @@ esp_err_t drv8873_get_fault_status(uint8_t fault_status, int device_index) {
         }
 
         // Analyze specific fault causes according to documentation
-        if (fault_status & DRV8873_FAULT_UVLO_MASK) {
+        if (*fault_status & DRV8873_FAULT_UVLO_MASK) {
             ESP_LOGE(TAG, "Device %d: FAULT: Undervoltage Lockout (UVLO) - VM < 4.45V", device_index);
             return ret; // Stop further analysis when UVLO is detected
         }
-        if (fault_status & DRV8873_FAULT_CPUV_MASK) {
+        if (*fault_status & DRV8873_FAULT_CPUV_MASK) {
             ESP_LOGE(TAG, "Device %d: FAULT: Charge Pump Undervoltage (CPUV) - VCP < VVM + 2.25V", device_index);
         }
-        if (fault_status & DRV8873_FAULT_OCP_MASK) {
+        if (*fault_status & DRV8873_FAULT_OCP_MASK) {
             ESP_LOGE(TAG, "Device %d: FAULT: Overcurrent Protection (OCP) - Current limit exceeded", device_index);
         }
-        if (fault_status & DRV8873_FAULT_TSD_MASK) {
+        if (*fault_status & DRV8873_FAULT_TSD_MASK) {
             ESP_LOGE(TAG, "Device %d: FAULT: Thermal Shutdown (TSD) - TJ > 165°C", device_index);
         }
-        if (fault_status & DRV8873_FAULT_OLD_MASK) {
+        if (*fault_status & DRV8873_FAULT_OLD_MASK) {
             ESP_LOGE(TAG, "Device %d: FAULT: Open-Load Detection (OLD) - No load detected", device_index);
         }
-        if (fault_status & DRV8873_FAULT_OTW_MASK) {
+        if (*fault_status & DRV8873_FAULT_OTW_MASK) {
             ESP_LOGE(TAG, "Device %d: FAULT: Overtemperature Warning (OTW) - TJ > 140°C", device_index);
         }
 
@@ -656,7 +661,7 @@ esp_err_t drv8873_get_fault_status(uint8_t fault_status, int device_index) {
     return ret;
 }
 
-esp_err_t drv8873_get_diag_status(uint16_t *diag_status, int device_index) {
+esp_err_t drv8873_get_diag_status(uint8_t *diag_status, int device_index) {
     // Validate parameters
     if (!drv8873_global_config || !drv8873_global_config->spi_handle) {
         ESP_LOGE(TAG, "DRV8873 SPI not initialized");

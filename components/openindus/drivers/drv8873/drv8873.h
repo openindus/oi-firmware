@@ -220,7 +220,7 @@ esp_err_t drv8873_set_dis_itrip(drv8873_current_regulation_t disable_flags, int 
  * @details Reads register 0x00 and analyzes fault causes
  * @return ESP_OK on success, error code otherwise
  */
-esp_err_t drv8873_get_fault_status(uint16_t *fault_status, int device_index);
+esp_err_t drv8873_get_fault_status(uint8_t *fault_status, int device_index);
 
 /**
  * @brief Read the DIAG Status Register for a specific device in daisy chain
@@ -229,7 +229,7 @@ esp_err_t drv8873_get_fault_status(uint16_t *fault_status, int device_index);
  * @details Reads register 0x01 containing diagnostic details
  * @return ESP_OK on success, error code otherwise
  */
-esp_err_t drv8873_get_diag_status(uint16_t *diag_status, int device_index);
+esp_err_t drv8873_get_diag_status(uint8_t *diag_status, int device_index);
 
 /**
  * @brief Clear all faults by writing 1 to CLR_FLT bit for a specific device in daisy chain

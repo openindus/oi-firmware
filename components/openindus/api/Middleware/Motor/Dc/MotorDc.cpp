@@ -337,7 +337,7 @@ void MotorDc::initHBridge(void)
 
     // Read and log fault status for all devices
     for (int i = 0; i < 4; i++) {
-        uint16_t fault_status;
+        uint8_t fault_status;
         err |= drv8873_get_fault_status(&fault_status, i);
         if (err == ESP_OK) {
             ESP_LOGI(TAG, "DRV8873 Device %d Fault status: 0x%04X", i, fault_status);
@@ -361,14 +361,14 @@ esp_err_t MotorDc::setMode(drv8873_mode_t mode, MotorNum_t motor) {
     return drv8873_set_mode(mode, motor);
 }
 
-uint16_t MotorDc::getFault(MotorNum_t motor) {
+uint8_t MotorDc::getFault(MotorNum_t motor) {
     // Validate motor number
     if (motor < 0 || motor >= 4) {
         ESP_LOGE(TAG, "Invalid motor number: %d", motor);
         return 0;
     }
     
-    uint16_t fault_status;
+uint8_t fault_status;
     esp_err_t ret = drv8873_get_fault_status(&fault_status, motor);
     if (ret != ESP_OK) {
         return 0; // Return 0 if read fails
