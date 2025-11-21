@@ -5,7 +5,7 @@ Core core;
 
 void setup(void)
 {
-    core.rs.begin(115200);
+    core.rs.begin(115200, RS::Config::_8N1, RS::Mode::RS485);
 }
 
 void loop(void)

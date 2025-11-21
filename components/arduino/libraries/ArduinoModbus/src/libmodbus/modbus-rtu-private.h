@@ -17,7 +17,7 @@
 #if defined(_WIN32)
 #include <windows.h>
 #elif defined(ARDUINO)
-#include "OpenIndus.h"
+#include <ArduinoRS485.h>
 #else
 #include <termios.h>
 #endif

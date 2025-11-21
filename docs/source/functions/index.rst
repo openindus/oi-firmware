@@ -21,8 +21,9 @@ Functions list
    ethernet.rst
    wifi.rst
    bluetooth.rst
-   usdcard.rst
+   sdcard.rst
    usbhost.rst
    rtc.rst
    motorstepper.rst
    encoder.rst
+   motordc.rst

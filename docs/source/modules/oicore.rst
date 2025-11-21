@@ -79,7 +79,7 @@ Below are the specifications for the OI-Core module. Click on the links in the f
      - 1
    * - :ref:`I2C (5V Compatible) <i2cttl_s>`
      - 1
-   * - :ref:`µSD Card Holder <usdcard_s>`
+   * - :ref:`µSD Card Holder <sdcard_s>`
      - 1
    * - :ref:`USB Host 2.0 <usbhost_s>`
      - 1 (OI-Core only)

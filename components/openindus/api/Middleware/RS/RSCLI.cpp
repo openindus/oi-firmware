@@ -24,8 +24,8 @@ int RSCLI::rsBeginFunc(int argc, char **argv)
     PARSE_ARGS_OR_RETURN(argc, argv, rsBeginArgs);
 
     unsigned long baudrate = 115200;
-    uint16_t config = 0x001c;
-    RS_Mode_e mode = RS_485;
+    RS::Config config = RS::_8N1;
+    RS::Mode mode = RS::RS485;
 
     // Parse baudrate if provided
     if (rsBeginArgs.baudrate->count > 0) {
@@ -34,15 +34,15 @@ int RSCLI::rsBeginFunc(int argc, char **argv)
 
     // Parse config if provided
     if (rsBeginArgs.config->count > 0) {
-        config = (uint16_t)rsBeginArgs.config->ival[0];
+        config = static_cast<RS::Config>(rsBeginArgs.config->ival[0]);
     }
 
     // Parse mode if provided
     if (rsBeginArgs.mode->count > 0) {
         if (strcmp(rsBeginArgs.mode->sval[0], "RS485") == 0 || strcmp(rsBeginArgs.mode->sval[0], "485") == 0) {
-            mode = RS_485;
+            mode = RS::RS485;
         } else if (strcmp(rsBeginArgs.mode->sval[0], "RS232") == 0 || strcmp(rsBeginArgs.mode->sval[0], "232") == 0) {
-            mode = RS_232;
+            mode = RS::RS232;
         } else {
             ESP_LOGE(TAG, "Invalid mode: %s. Use RS485 or RS232", rsBeginArgs.mode->sval[0]);
             return -1;
@@ -52,7 +52,7 @@ int RSCLI::rsBeginFunc(int argc, char **argv)
     if (_rsInstance != nullptr) {
         _rsInstance->begin(baudrate, config, mode);
         printf("RS initialized: baudrate=%lu, config=0x%04X, mode=%s\n", 
-               baudrate, config, (mode == RS_485) ? "RS485" : "RS232");
+               baudrate, config, (mode == RS::RS485) ? "RS485" : "RS232");
     } else {
         ESP_LOGE(TAG, "Failed to create RS instance");
         return -1;
@@ -79,19 +79,6 @@ int RSCLI::rsAvailableFunc(int argc, char **argv)
     if (_rsInstance != nullptr) {
         int available = _rsInstance->available();
         printf("%d\n", available);
-    } else {
-        ESP_LOGE(TAG, "Failed to create RS instance");
-        return -1;
-    }
-
-    return 0;
-}
-
-int RSCLI::rsAvailableForWriteFunc(int argc, char **argv)
-{
-    if (_rsInstance != nullptr) {
-        int availableForWrite = _rsInstance->availableForWrite();
-        printf("%d\n", availableForWrite);
     } else {
         ESP_LOGE(TAG, "Failed to create RS instance");
         return -1;
@@ -229,18 +216,6 @@ int RSCLI::init(void)
         .context = nullptr
     };
     err |= esp_console_cmd_register(&rsAvailableCmd);
-
-    // Register rs-available-for-write command
-    const esp_console_cmd_t rsAvailableForWriteCmd = {
-        .command = "rs-available-for-write",
-        .help = "Get number of bytes available for writing",
-        .hint = NULL,
-        .func = &RSCLI::rsAvailableForWriteFunc,
-        .argtable = NULL,
-        .func_w_context = nullptr,
-        .context = nullptr
-    };
-    err |= esp_console_cmd_register(&rsAvailableForWriteCmd);
 
     // Register rs-read command
     const esp_console_cmd_t rsReadCmd = {

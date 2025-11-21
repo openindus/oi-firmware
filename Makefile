@@ -11,57 +11,47 @@ PROJECT_NAME = OI-Firmware
 
 # Setup ESP-IDF environment
 get-idf:
-	@echo "=== Setting up ESP-IDF environment ==="
 	@echo "source $(IDF_EXPORT_SCRIPT)"
 	@source $(IDF_EXPORT_SCRIPT)
 
 # Project build
 build: get-idf
-	@echo "=== Building project ==="
 	@idf.py build
 
 # Complete cleanup
 clean:
-	@echo "=== Project cleanup ==="
 	@rm -rf $(BUILD_DIR)
 
 # Full cleanup
 fullclean:
-	@echo "=== Full project cleanup ==="
 	@rm -rf $(BUILD_DIR)
 	@rm -f sdkconfig
 
 # Flash firmware
 flash: get-idf
-	@echo "=== Firmware flashing ==="
 	@idf.py flash
 
 # Serial monitoring
 monitor: get-idf
-	@echo "=== Serial monitoring ==="
 	@idf.py monitor
 
 # Flash and monitor
 flash-monitor: get-idf
-	@echo "=== Flash and monitor ==="
 	@idf.py flash monitor
 
 # Menu configuration
 menuconfig: get-idf
-	@echo "=== Menu configuration ==="
 	@idf.py menuconfig
 
-# Run tests
-test:
-	@echo "=== Running tests ==="
-	@cd test
-	@pip install -r requirements.txt
-	@python -m pytest
-
-# Build documentation
-docs:
-	@echo "=== Documentation build ==="
-	@cd docs && make html
+# Examples
+build-examples: get-idf
+	find $(EXAMPLES_DIR) -name "*.cpp" | while read -r f; do \
+		echo "Build $$f"; \
+		cp "$$f" main/main.cpp; \
+		cp sdkconfig.ci.defaults.core sdkconfig; \
+		idf.py reconfigure; \
+		idf.py build || { echo "Error: Build failed for $$f"; exit 1; }; \
+	done
 
 # Help
 help:
@@ -70,7 +60,7 @@ help:
 	@echo "Environment variables:"
 	@echo "  IDF_PATH          Path to ESP-IDF (default: ~/esp/esp-idf)"
 	@echo ""
-	@echo "Main targets:"
+	@echo "Targets:"
 	@echo "  build             Build firmware (default)"
 	@echo "  clean             Clean build files"
 	@echo "  fullclean         Full cleanup"
@@ -78,12 +68,7 @@ help:
 	@echo "  monitor           Serial monitoring"
 	@echo "  flash-monitor     Flash and monitor"
 	@echo "  menuconfig        Menu configuration"
-	@echo ""
-	@echo "Tests:"
-	@echo "  test              Run tests"
-	@echo ""
-	@echo "Documentation:"
-	@echo "  docs              Build documentation"
+	@echo "  build-examples    Build all examples (use EXAMPLES_DIR variable)"
 	@echo ""
 	@echo "Other:"
 	@echo "  help              Show this help"
@@ -92,5 +77,4 @@ help:
 .DEFAULT_GOAL := build
 
 # Targets that don't correspond to files
-.PHONY: build clean fullclean flash monitor flash-monitor menuconfig \
-        test docs help
+.PHONY: build clean fullclean flash monitor flash-monitor menuconfig build-examples help

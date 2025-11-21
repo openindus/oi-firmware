@@ -26,9 +26,16 @@ pip3 install -r requirements.txt
 
 ## Build documentation
 
+Current version:
 ```
 doxygen doxygen/Doxyfile
 make html
+```
+
+Multi-version (all branches/tags):
+```
+doxygen doxygen/Doxyfile
+make multiversion
 ```
 
 ## Clean documentation

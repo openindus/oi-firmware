@@ -46,7 +46,7 @@ set(CORE_SRCS
   cores/esp32/esp32-hal-time.c
   cores/esp32/esp32-hal-timer.c
   cores/esp32/esp32-hal-tinyusb.c
-  cores/esp32/esp32-hal-touch.c
+  # cores/esp32/esp32-hal-touch.c
   cores/esp32/esp32-hal-touch-ng.c
   cores/esp32/esp32-hal-uart.c
   cores/esp32/esp32-hal-rmt.c
@@ -82,6 +82,7 @@ set(CORE_SRCS
 set(ARDUINO_ALL_LIBRARIES
   ArduinoModbus
   ArduinoOTA
+  ArduinoRS485
   AsyncUDP
   BLE
   BluetoothSerial
@@ -356,6 +357,10 @@ set(ARDUINO_LIBRARY_ArduinoModbus_SRCS
   libraries/ArduinoModbus/src/ModbusServer.cpp
   )
 
+set(ARDUINO_LIBRARY_ArduinoRS485_SRCS
+  libraries/ArduinoRS485/src/ArduinoRS485.cpp
+  )
+
 set(ARDUINO_LIBRARIES_SRCS)
 set(ARDUINO_LIBRARIES_REQUIRES)
 set(ARDUINO_LIBRARIES_INCLUDEDIRS)
@@ -407,7 +412,9 @@ target_compile_options(${COMPONENT_TARGET} PUBLIC
     -DARDUINO_ARCH_ESP32
     -DARDUINO_BOARD="${idf_target_caps}_DEV"
     -DARDUINO_VARIANT="${CONFIG_ARDUINO_VARIANT}"
-    -DESP32=ESP32)
+    -DESP32=ESP32
+    -Wno-overflow  # Disable overflow warning for SERIAL_8N1 enum truncation in ArduinoModbus
+)
 
 if(CONFIG_AUTOSTART_ARDUINO)
     # in autostart mode, arduino-esp32 contains app_main() function and needs to

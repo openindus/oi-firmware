@@ -8,12 +8,11 @@
 
 #include "CAN.h"
 
-/**
- * @brief Initialize the CAN communication
- * @note You must use a standard baudrate (50KBPS, 100KBPS, 125KBPS, 250KBPS, 500KBPS, 1000kBPS)
- * 
- * @param baudrate CAN baudrate in bits/s
- */
+CAN::CAN(spi_host_device_t host, gpio_num_t cs, gpio_num_t intr)
+    : _spi_host(host), _pin_cs(cs), _pin_intr(intr)
+{
+}
+
 void CAN::begin(unsigned long baudrate, bool extended_mode)
 {
     MCP25625_DeviceConfig_t deviceConfig;
@@ -26,41 +25,21 @@ void CAN::begin(unsigned long baudrate, bool extended_mode)
 
 }
 
-/**
- * @brief Delete CAN instance
- * 
- */
 void CAN::end(void)
 {
     mcp25625_delete();
 }
 
-/**
- * @brief Writes binary data to the CAN bus.
- * 
- * @param data an array to send as a series of bytes.
- * @param len the number of bytes to be sent from the array.
- */
 void CAN::write(CAN_Message_t msg)
 {
     mcp25625_msg_transfer(msg.msg, msg.size, msg.id, msg.IDE, msg.RTR);
 }
 
-/**
- * @brief Get the number of bytes available for reading
- * 
- * @return the number of bytes available to read
- */
 int CAN::available(void)
 {
     return mcp25625_queue_available();
 }
 
-/**
- * @brief Reads incoming CAN data.
- * 
- * @return the first message of incoming CAN data available (or -1 if no data is available)
- */
 CAN_Message_t CAN::read(void)
 {
     CAN_Message_t canMsg;
@@ -69,12 +48,6 @@ CAN_Message_t CAN::read(void)
     return canMsg;
 }
 
-/**
- * @brief Set CAN bus standard IDs filter.
- * 
- * @param mask CAN mask for ID filter.
- * @param filter CAN IDs filter.
- */
 void CAN::setStandardFilter(uint16_t mask, uint16_t filter)
 {
     mcp25625_mask_config(RXB0, mask, 0);
@@ -83,12 +56,6 @@ void CAN::setStandardFilter(uint16_t mask, uint16_t filter)
     mcp25625_filter_config(RXF_1, filter, 0, false);
 }
 
-/**
- * @brief Set CAN bus extended IDs filter.
- * 
- * @param mask CAN mask for ID filter.
- * @param filter CAN IDs filter.
- */
 void CAN::setExtendedFilter(uint32_t mask, uint32_t filter)
 {
     mcp25625_mask_config(RXB0, 0, mask);

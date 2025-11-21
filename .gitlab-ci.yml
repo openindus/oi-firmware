@@ -33,14 +33,14 @@ setup:
   needs:
     - job: setup
   script:
-    - cp sdkconfig.ci.defaults.${MODULE_TYPE,,} sdkconfig
+    - cp sdkconfig.ci.defaults.${MODULE_TYPE} sdkconfig
     - idf.py reconfigure
     - idf.py build
   after_script:
-    - cp build/OI-Firmware.bin .oi/bin/oi-firmware-$(cat version.txt)/${MODULE_TYPE,,}_firmware-$(cat version.txt).bin
-    - cp build/ota_data_initial.bin .oi/bin/oi-firmware-$(cat version.txt)/${MODULE_TYPE,,}_ota_data_initial-$(cat version.txt).bin
-    - cp build/bootloader/bootloader.bin .oi/bin/oi-firmware-$(cat version.txt)/${MODULE_TYPE,,}_bootloader-$(cat version.txt).bin
-    - cp build/partition_table/partition-table.bin .oi/bin/oi-firmware-$(cat version.txt)/${MODULE_TYPE,,}_partitions-$(cat version.txt).bin
+    - cp build/OI-Firmware.bin .oi/bin/oi-firmware-$(cat version.txt)/${MODULE_TYPE}_firmware-$(cat version.txt).bin
+    - cp build/ota_data_initial.bin .oi/bin/oi-firmware-$(cat version.txt)/${MODULE_TYPE}_ota_data_initial-$(cat version.txt).bin
+    - cp build/bootloader/bootloader.bin .oi/bin/oi-firmware-$(cat version.txt)/${MODULE_TYPE}_bootloader-$(cat version.txt).bin
+    - cp build/partition_table/partition-table.bin .oi/bin/oi-firmware-$(cat version.txt)/${MODULE_TYPE}_partitions-$(cat version.txt).bin
   tags:
     - oi-firmware
 
@@ -89,14 +89,7 @@ build:examples:
   needs:
     - job: setup
   script:
-    - |
-      find components/openindus/examples/ -name "*.cpp" | while read -r f; do
-        echo "Build $f"
-        cp $f main/main.cpp
-        cp sdkconfig.ci.defaults.core sdkconfig
-        idf.py reconfigure
-        idf.py build || { echo "Error: Build failed for $f"; exit 1; }
-      done
+    - make build-examples EXAMPLES_DIR=components/openindus/examples/
   after_script:
     - git restore main/main.cpp
   tags:
@@ -126,14 +119,7 @@ build:docs:examples:
   needs:
     - job: setup
   script:
-    - |
-      find docs/examples/ -name "*.cpp" | while read -r f; do
-        echo "Build $f"
-        cp $f main/main.cpp
-        cp sdkconfig.ci.defaults.core sdkconfig
-        idf.py reconfigure
-        idf.py build || { echo "Error: Build failed for $f"; exit 1; }
-      done
+    - make build-examples EXAMPLES_DIR=docs/examples/
   after_script:
     - git restore main/main.cpp
   tags:
@@ -167,7 +153,7 @@ deploy:bin:
     - apt update
     - apt install -y lftp
   script:
-    - lftp $FTP_SERVER -u $FTP_USERNAME,$FTP_PASSWORD -e "set ssl:verify-certificate no; mirror -R ./.oi/bin/ bin/; exit;"
+    - lftp ${FTP_SERVER} -u ${FTP_USERNAME},${FTP_PASSWORD} -e "set ssl:verify-certificate no; mirror -R ./.oi/bin/ bin/; exit;"
   artifacts:
     name: "bin"
     paths:
@@ -185,7 +171,7 @@ deploy:library:
     - apt update
     - apt install -y lftp
   script:
-    - lftp $FTP_SERVER -u $FTP_USERNAME,$FTP_PASSWORD -e "set ssl:verify-certificate no; mirror -R ./.oi/lib/ lib/; exit;"
+    - lftp ${FTP_SERVER} -u ${FTP_USERNAME},${FTP_PASSWORD} -e "set ssl:verify-certificate no; mirror -R ./.oi/lib/ lib/; exit;"
   artifacts:
     name: "library"
     paths:
@@ -204,7 +190,7 @@ deploy:docs:
     - apt update
     - apt install -y lftp
   script:
-    - lftp $FTP_SERVER -u $FTP_USERNAME,$FTP_PASSWORD -e "set ssl:verify-certificate no; mirror -R ./.oi/docs/html/ doc/; exit;"
+    - lftp ${FTP_SERVER} -u ${FTP_USERNAME},${FTP_PASSWORD} -e "set ssl:verify-certificate no; mirror -R ./.oi/docs/html/ doc/; exit;"
   artifacts:
     name: "docs"
     paths:

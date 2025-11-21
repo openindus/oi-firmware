@@ -17,13 +17,12 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'OpenIndus Documentation'
+project = 'OpenIndus documentation'
 copyright = '2024, OpenIndus'
 author = 'OpenIndus team'
 
 # The full version, including alpha/beta/rc tags
 release = '0'
-
 
 # -- General configuration ---------------------------------------------------
 
@@ -32,8 +31,8 @@ release = '0'
 # ones.
 extensions = [
     "sphinx_rtd_theme",
-    # "myst_parser",
     "breathe",
+    "sphinx_multiversion",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -52,6 +51,18 @@ exclude_patterns = []
 #
 html_theme = 'sphinx_rtd_theme'
 
+# Theme options for sphinx_rtd_theme
+html_theme_options = {
+    'prev_next_buttons_location': 'bottom',
+    'style_external_links': False,
+    # Toc options
+    'collapse_navigation': False,
+    'sticky_navigation': True,
+    'navigation_depth': 4,
+    'includehidden': True,
+    'titles_only': False
+}
+
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
@@ -65,3 +76,32 @@ breathe_projects = { "OI-Firmware": "../build/xml/" }
 breathe_default_project = "OI-Firmware"
 
 collapse_navigation = False
+
+# -- Sphinx-multiversion configuration ---------------------------------------
+
+# Whitelist pattern for branches (set to your branch pattern)
+smv_branch_whitelist = r'^(main|develop)$'
+
+# Whitelist pattern for tags (set to your tag pattern, e.g., v1.0, v2.0)
+smv_tag_whitelist = r'^v\d+\.\d+.*$'
+
+# Whitelist pattern for remotes (set to your remote pattern)
+smv_remote_whitelist = r'^(origin)$'
+
+# Format for versioned output directories
+smv_outputdir_format = '{ref.name}'
+
+# Additional settings
+smv_prefer_remote_refs = False
+
+# Latest version to redirect to (main or latest tag)
+smv_latest_version = 'main'
+
+# Custom HTML context for version selector
+html_context = {
+    'display_github': True,
+    'github_user': 'openindus',
+    'github_repo': 'oi-firmware',
+    'github_version': 'main',
+    'conf_py_path': '/docs/source/',
+}
