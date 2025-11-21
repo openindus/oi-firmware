@@ -134,12 +134,13 @@ Click on the build button on the bottom bar to build your project.
 Upload your project
 *******************
 
-Plug the device you want to upload to your computer with an USB cable.
+Plug the device you want to program to your computer with an USB cable.
 Windows should detect the chip and automatically download the driver. If you cannot see your device in the device manager, please download manually the driver from this link: `Silicon Labs driver <https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers>`_.
 
-Then click on the upload button on the bottom bar. 
+You have to select the rigth COM port by cliking to the "Select port to USE button" in the bottom bar.
+Then you can upoload the program to your device with the "Flash Device" button in the bottombar. You must chosse "UART" if asked for flashing method.
 
-.. image:: ../_static/gif/upload_project.gif
+.. image:: ../_static/gif/upload_project_idf.gif
     :width: 800
     :alt: Upload a project
     :align: center
@@ -153,9 +154,9 @@ Then click on the upload button on the bottom bar.
 Monitor your project
 ********************
 
-After a successful upload, click on the monitor button on the bottom bar to see the log output of your device.
+After a successful upload, click on the "Monitor deice" button in the bottom bar to see the log output of your device.
 
-.. image:: ../_static/gif/monitor_project.gif
+.. image:: ../_static/gif/monitor_project_idf.gif
     :width: 800
     :alt: Monitor a project
     :align: center
