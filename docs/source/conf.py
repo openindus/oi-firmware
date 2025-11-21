@@ -82,8 +82,9 @@ collapse_navigation = False
 # Whitelist pattern for branches (set to your branch pattern)
 smv_branch_whitelist = r'^(main|develop)$'
 
-# Whitelist pattern for tags (set to your tag pattern, e.g., v1.0, v2.0)
-smv_tag_whitelist = r'^v\d+\.\d+.*$'
+# Whitelist pattern for tags - only latest versions
+# smv_tag_whitelist = r'^v\d+\.\d+.*$'
+smv_tag_whitelist = r'^v(1\.8\.0|1\.7\.3)$'
 
 # Whitelist pattern for remotes (set to your remote pattern)
 smv_remote_whitelist = r'^(origin)$'
