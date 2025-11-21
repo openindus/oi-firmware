@@ -76,7 +76,7 @@ The page to configure ESP-IDF extension should be automaticcaly oppen at launch 
 On the configuration page, do the following :
 * Select "Express"
 * Select the last ESP-IDF version (currently v5.5.1)
-* You can customize the installtion folder
+* You can customize the installation folder
 * Launch the installation and wait for it to complete
 
 .. image:: ../_static/gif/configure_idf.gif
