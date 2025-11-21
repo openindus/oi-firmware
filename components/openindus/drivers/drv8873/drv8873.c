@@ -56,7 +56,7 @@ esp_err_t drv8873_spi_read_register(drv8873_register_t reg_address, uint8_t *reg
 
     // Calculate total transaction length: 
     // 2 bytes for headers, plus device_count * (1 address + 1 data)
-    int total_bytes = 2 + 2 * drv8873_global_config->device_count;
+    const int total_bytes = 2 + (2 * drv8873_global_config->device_count);
     
     // Create full transaction buffer: 16 bits per device
     uint8_t *tx_buffer = (uint8_t*)calloc(total_bytes, sizeof(uint8_t));
@@ -70,15 +70,15 @@ esp_err_t drv8873_spi_read_register(drv8873_register_t reg_address, uint8_t *reg
     }
 
     // first header byte MSBs are 10, and other bits is the device count.
-    tx_buffer[0] = 0b10000000 | (drv8873_global_config->device_count & 0x0F);
+    tx_buffer[0] = 0b10000000 | (drv8873_global_config->device_count & 0b00111111);
     // second header byte MSBs are 10. then, if we clear faults, and last 4 bits are don't care.
     tx_buffer[1] = 0b10000000;
 
     // then, for each device, address bytes. starts by the last device in chain.
     int index_of_address_for_device = 2 + drv8873_global_config->device_count - 1 - device_index;
     // Create command: Read bit (1<<6) + register address (bits 5-1)
-    uint8_t command = (1 << 6) | (reg_address << 1);
-    tx_buffer[index_of_address_for_device] = (uint8_t)(command & 0xFF);
+    uint8_t command = (1 << 6) | ((reg_address << 1) & 0b00111110);
+    tx_buffer[index_of_address_for_device] = command;
 
     // then, for each device, data bytes. starts by the last device in chain.
     int index_of_data_for_device = 2 + (2 * drv8873_global_config->device_count) - 1 - device_index;
@@ -101,6 +101,17 @@ esp_err_t drv8873_spi_read_register(drv8873_register_t reg_address, uint8_t *reg
 
     // Extract the response for the target device (last device in chain responds first)
     *reg_value = rx_buffer[index_of_data_for_device];
+
+    // logd full buffers
+    if(total_bytes == 10){
+    ESP_LOGD(TAG, "TX: %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X", 
+             tx_buffer[0], tx_buffer[1], tx_buffer[2], tx_buffer[3], tx_buffer[4],
+             tx_buffer[5], tx_buffer[6], tx_buffer[7], tx_buffer[8], tx_buffer[9]);
+    ESP_LOGD(TAG, "RX: %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X", 
+             rx_buffer[0], rx_buffer[1], rx_buffer[2], rx_buffer[3], rx_buffer[4],
+             rx_buffer[5], rx_buffer[6], rx_buffer[7], rx_buffer[8], rx_buffer[9]);
+    ESP_LOGD(TAG, "SPI Read Reg 0x%02X from Device %d: RX: %02X", reg_address, device_index, *reg_value);
+    }
 
     free(tx_buffer);
     free(rx_buffer);
@@ -133,15 +144,15 @@ esp_err_t drv8873_spi_write_register(drv8873_register_t reg_address, uint8_t reg
     }
 
     // first header byte MSBs are 10, and other bits is the device count.
-    tx_buffer[0] = 0b10000000 | (drv8873_global_config->device_count & 0x0F);
+    tx_buffer[0] = 0b10000000 | (drv8873_global_config->device_count & 0b00111111);
     // second header byte MSBs are 10. then, if we clear faults, and last 4 bits are don't care.
     tx_buffer[1] = 0b10000000;
 
     // then, for each device, address bytes. starts by the last device in chain.
     int index_of_address_for_device = 2 + drv8873_global_config->device_count - 1 - device_index;
     // Create command: Write bit (0<<6) + register address (bits 5-1)
-    uint8_t command = (0 << 6) | (reg_address << 1);
-    tx_buffer[index_of_address_for_device] = (uint8_t)(command & 0xFF);
+    uint8_t command = (0 << 6) | ((reg_address << 1) & 0b00111110);
+    tx_buffer[index_of_address_for_device] = command;
 
     // then, for each device, data bytes. starts by the last device in chain.
     int index_of_data_for_device = 2 + (2 * drv8873_global_config->device_count) - 1 - device_index;
