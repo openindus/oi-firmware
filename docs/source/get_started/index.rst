@@ -15,7 +15,7 @@ Let's start by understanding how OpenIndus' modules work.
 
 Each module embeds specific hardware functions. The idea is to gather all the modules you need for your system.
 
-For systems with multiple modules, a rail is required to interconnect them. In such setups, one module operates as the "master," while the rest are designated as "slaves." 
+For systems with multiple modules, a rail is required to interconnect them. In such setups, one module operates as the "master," while the others are designated as "slaves." 
 This setup means that programming is only required for the master module; other modules do not need individual programming. 
 
 .. note:: Currently, the "master" module must be either an :ref:`OI-Core<OI-Core>` or :ref:`OI-CoreLite<OI-CoreLite>`, but we are actively working to enable the use of any module as a "master."
@@ -46,7 +46,7 @@ VSCode is supported on Windows, Linux and Mac. Please check the `installation li
 Install OpenIndus VSCode Extension
 **********************************
 
-Once you have installed VSCode, you'll be able to add the OpenIndus extension. $
+Once you have installed VSCode, you'll be able to add the OpenIndus extension.
 This extension will add some commands to VSCode, such as creating a new project or retrieving information about connected modules.
 
 * Open the **Extension** panel
@@ -60,9 +60,33 @@ This extension will add some commands to VSCode, such as creating a new project 
 
 |
 
-The first time it can takes several minutes because VSCode will also install PlatformIO.
-PlatformIO is a powerful tools which will allow you to have a build system for a great number of boards including ours, without external dependencies.
-If you want more information please check `PlatformIO documentation <https://docs.platformio.org/en/latest/what-is-platformio.html>`_. 
+The first time it can takes several minutes because VSCode will also install ESP-IDF.
+
+Configure ESP-IDF Extension
+***************************
+
+ESP-IDF extension is the official vscode tool to compile, flash and monitor your code. At the first installation, you need to configure it.
+The official documentation can be found here : `ESP-IDF official documentation<https://docs.espressif.com/projects/vscode-esp-idf-extension/en/latest/>`_.
+
+In this section, you will found a guide to install with default paramters. Depending on you internet connection, it can take  some minutes to download and install all ressources (compler, libraries, examples, ...). 
+But d'ont worry, once configured you won't need to do it everytime.
+
+The page to configure ESP-IDF extension should be automaticcaly oppen at launch (if no, click on the ESP-IDF logo on le left side pannel and in the "Advanced" section, click on "Configure ESP-ISD Expension").
+
+On the configuration page, do the following :
+* Select "Express"
+* Select the last ESP-IDF version (currently v5.5.1)
+* You can customize the installation folder
+* Launch the installation and wait for it to complete
+
+.. image:: ../_static/gif/configure_idf.gif
+    :width: 800
+    :alt: ESP-IDF recommanded configuration
+    :align: center
+
+|
+
+.. info:: ESP-IDF Extension download and configure all packages necessary (toolchain, uploader, monitor tool, ...).
 
 Begin with your first project
 -----------------------------
@@ -75,20 +99,18 @@ At this point, you have all you need to begin your first program.
 * Click on the OpenIndus logo on the left bar
 * Click on **create a new project**.
 * Choose the device you will program. We recommend to start by programming on an :ref:`OI-Core<OI-Core>` or an :ref:`OI-CoreLite<OI-CoreLite>`.
-* Choose a root folder for your application (if you answer 'yes' for default location, the project will be stored in "Documents/PlatformIO/Projects").
-* Choose a name for your application
-* Choose the 'type' of project. If you have a system with several modules, choose 'master' and if you have a system with only one module, choose 'slave'.
-* Wait while the project is been created. A new folder will open up with your new project !
+* Choose a root folder for your application.
+* Choose a name for your application.
+* Choose the 'type' of project. If you have a system with several modules, choose 'master' and if you have a system with only one module, choose 'standalone'.
+* Choose if you want to use the Arduino Libraries (cecommended) or only the ESP-IDF framework (for advanced users).
+* Wait while the project is been created. A new folder will open up with your new project!
 
-.. image:: ../_static/gif/create_project.gif
+.. image:: ../_static/gif/create_project_idf.gif
     :width: 800
     :alt: Create a project
     :align: center
 
 |
-
-.. warning:: First time you create a project, PlatformIO will automatically install the toolchain and Espressif libraries. This can take a while depending on your internet connection (several minutes).
-
 
 Build your project
 ********************
@@ -99,27 +121,26 @@ If you are familiar with Arduino, you will recognize the 'setup' and 'loop' func
 Before uploading this code to the console, you will have to build this code.
 Click on the build button on the bottom bar to build your project. 
 
-.. image:: ../_static/gif/build_project.gif
+.. image:: ../_static/gif/build_project_idf.gif
     :width: 800
     :alt: Build a project
     :align: center
 
 |
 
-.. note:: First time you build a project, all sources files from Espressif library are built, don't worry it is a normal behaviour. Next build will be faster.
-
-.. warning:: If you get an error message saying "command 'platformio-ide.build' not found" it is because PlatformIO is not ready yet. Wait until the end of the process (you can see it running on the bottom status bar).
+.. note:: First time you build a project, all sources files from Espressif library are downloaded and built, don't worry it is a normal behaviour. Next build will be faster.
 
 
 Upload your project
 *******************
 
-Plug the device you want to upload to your computer with an USB cable.
+Plug the device you want to program to your computer with an USB cable.
 Windows should detect the chip and automatically download the driver. If you cannot see your device in the device manager, please download manually the driver from this link: `Silicon Labs driver <https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers>`_.
 
-Then click on the upload button on the bottom bar. 
+You have to select the rigth COM port by cliking to the "Select port to USE button" in the bottom bar.
+Then you can upoload the program to your device with the "Flash Device" button in the bottombar. You must chosse "UART" if asked for flashing method.
 
-.. image:: ../_static/gif/upload_project.gif
+.. image:: ../_static/gif/upload_project_idf.gif
     :width: 800
     :alt: Upload a project
     :align: center
@@ -133,9 +154,9 @@ Then click on the upload button on the bottom bar.
 Monitor your project
 ********************
 
-After a successful upload, click on the monitor button on the bottom bar to see the log output of your device.
+After a successful upload, click on the "Monitor deice" button in the bottom bar to see the log output of your device.
 
-.. image:: ../_static/gif/monitor_project.gif
+.. image:: ../_static/gif/monitor_project_idf.gif
     :width: 800
     :alt: Monitor a project
     :align: center
