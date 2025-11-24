@@ -11,7 +11,7 @@ You can find specification of each module in the :ref:`modules<modules-index>` s
 
 .. toctree::
    :maxdepth: 2
-   :caption: Get Started ! 
+   :caption: Get Started
       
    get_started/index.rst
 

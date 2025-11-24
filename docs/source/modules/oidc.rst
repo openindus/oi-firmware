@@ -45,7 +45,7 @@ Below are the specifications for the OI-Dc module. Click on the links in the fun
    :widths: 55 45
    :align: center
 
-   * - :ref:`Power Supply Voltage <power_s>`
+   * - Power Supply Voltage
      - 9..30V DC
    * - :ref:`DC motor drivers <motordc_s>`
      - 4

@@ -53,7 +53,7 @@ Below are the specifications for the OI-Core module. Click on the links in the f
    :widths: 55 45
    :align: center
 
-   * - :ref:`Power Supply Voltage <power_s>`
+   * - Power Supply Voltage
      - 9..30V DC
    * - **I/O**
      - 

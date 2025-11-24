@@ -6,7 +6,6 @@ Functions list
 .. toctree::
    :maxdepth: 1
 
-   power.rst
    din.rst
    dout.rst
    ain0-30.rst
