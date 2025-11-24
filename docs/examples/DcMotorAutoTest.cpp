@@ -78,7 +78,7 @@ static const float EXPECTED_MOTOR_CURRENT = (POWER_SUPPLY_VOLTAGE / RESISTOR_VAL
 static const float MOTOR_CURRENT_TOLERANCE = EXPECTED_MOTOR_CURRENT * 0.10f; // A (10% resistor tolerance)
 static const float INACTIVE_MOTOR_TOLERANCE = 0.001f; // A
 
-bool readAndLogCurrents(const char* label, const int activeMotorIndex = -1)
+bool readAndLogCurrents(const char* label, const int activeMotorIndex = -1, float percentage = 100.0f)
 {
     float currents[4];
     currents[0] = dc.getCurrent(MOTOR_1);
@@ -105,8 +105,8 @@ bool readAndLogCurrents(const char* label, const int activeMotorIndex = -1)
             tolerance = INACTIVE_MOTOR_TOLERANCE;
         } else {
             // Active motor should be at 0.9A, others at 0A
-            expectedCurrent = (i == activeMotorIndex) ? EXPECTED_MOTOR_CURRENT : 0.0;
-            tolerance = (i == activeMotorIndex) ? MOTOR_CURRENT_TOLERANCE : INACTIVE_MOTOR_TOLERANCE;
+            expectedCurrent = (i == activeMotorIndex) ? (EXPECTED_MOTOR_CURRENT * percentage / 100.0f) : 0.0;
+            tolerance = (i == activeMotorIndex) ? (MOTOR_CURRENT_TOLERANCE * percentage / 100.0f) : INACTIVE_MOTOR_TOLERANCE;
         }
         
         float diff = fabs(currents[i] - expectedCurrent);
@@ -219,16 +219,18 @@ void setup(void)
 
     // Run each motor sequentially forward then backward
     for (int i = 0; i < 4; i++) {
-        dc.run(motors[i], FORWARD, 100);
+        float percentage = 70.0f;//% of max speed
+        dc.run(motors[i], FORWARD, percentage);
         // delay(100);
-        bool currentOk = readAndLogCurrents("FORWARD", i);
+        bool currentOk = readAndLogCurrents("FORWARD", i, percentage);
         bool dinOk = checkAndPrintDInValues("FORWARD", i);
         allTestsPassed &= (currentOk && dinOk);
         // delay(900);
 
-        dc.run(motors[i], REVERSE, 100);
+        percentage = 50.0f;//% of max speed
+        dc.run(motors[i], REVERSE, percentage);
         // delay(100);
-        currentOk = readAndLogCurrents("REVERSE", i);
+        currentOk = readAndLogCurrents("REVERSE", i, percentage);
         dinOk = checkAndPrintDInValues("REVERSE", i);
         allTestsPassed &= (currentOk && dinOk);
         // delay(900);
@@ -243,7 +245,18 @@ void setup(void)
         // Yield to allow IDLE task to run and feed watchdog
         //delay(100);
     }
-    
+
+    // check if H bridge fault is raised
+    for (int i = MOTOR_1; i < MOTOR_MAX; i++) {
+        uint8_t fault = dc.getFault((MotorNum_t)i);
+        if (fault != 0) {
+            ESP_LOGE(TAG, "Motor_%d DRV8873 Fault detected: 0x%02X", i + 1, fault);
+            allTestsPassed = false;
+        } else {
+            ESP_LOGI(TAG, "Motor_%d DRV8873 No Fault detected", i + 1);
+        }
+    }
+
     // Final test summary
     if (allTestsPassed) {
         ESP_LOGI(TAG, "========================================");
