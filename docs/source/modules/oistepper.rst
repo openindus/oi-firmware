@@ -41,7 +41,7 @@ Below are the specifications for the OI-Stepper module. Click on the links in th
    :widths: 55 45
    :align: center
 
-   * - :ref:`Power Supply Voltage <power_s>`
+   * - Power Supply Voltage
      - 9..30V DC
    * - :ref:`Stepper motor driver <motorstepper_s>`
      - 2

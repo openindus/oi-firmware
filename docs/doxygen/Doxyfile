@@ -14,6 +14,7 @@
 
 
 PROJECT_NAME = "OpenIndus"
+PROJECT_NUMBER = "v2.0.0-dev"
 
 OUTPUT_DIRECTORY = ./build
 

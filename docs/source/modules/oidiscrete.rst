@@ -47,7 +47,7 @@ Below are the specifications for the OI-Discrete module. Click on the links in t
    :widths: 55 45
    :align: center
 
-   * - :ref:`Power Supply Voltage <power_s>`
+   * - Power Supply Voltage
      - 9..30V DC
    * - :ref:`Digital inputs (DIN) <din_s>`
      - 10

@@ -29,7 +29,7 @@ Functions
    :widths: 55 45
    :align: center
    
-   * - :ref:`Power Supply Voltage <power_s>`
+   * - Power Supply Voltage
      - 9..30V DC
    * - :ref:`Static Relay outputs <staticrelay_s>`
      - 6
