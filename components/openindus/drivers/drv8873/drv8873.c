@@ -26,7 +26,7 @@ esp_err_t drv8873_spi_init(const drv8873_spi_config_t *config) {
 
     // Configure the SPI device (DRV8873)
     const spi_device_interface_config_t dev_config = {
-        .clock_speed_hz = 4 * 1000 * 1000,  // 4 MHz (adjustable as needed)
+        .clock_speed_hz = SPI_MASTER_FREQ_8M,  // 8 MHz (tested: working up to 16 MHz)
         .mode = 1,                          // SPI Mode 1 (CPOL=0, CPHA=1)
         .spics_io_num = config->nSCS_pin,   // Chip Select pin
         .queue_size = 10,                   // Queue size
