@@ -10,7 +10,7 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
+import os
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
@@ -32,7 +32,6 @@ release = '0'
 extensions = [
     "sphinx_rtd_theme",
     "breathe",
-    "sphinx_multiversion",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -77,32 +76,19 @@ breathe_default_project = "OI-Firmware"
 
 collapse_navigation = False
 
-# -- Sphinx-multiversion configuration ---------------------------------------
+# Get version from environment variable (set by build.sh)
+current_version_name = os.environ.get('DOCS_VERSION', 'latest')
 
-# Whitelist pattern for branches (set to your branch pattern)
-smv_branch_whitelist = r'^(main|develop)$'
-
-# Whitelist pattern for tags - only latest versions
-# smv_tag_whitelist = r'^v\d+\.\d+.*$'
-smv_tag_whitelist = r'^v(1\.8\.0|1\.7\.3)$'
-
-# Whitelist pattern for remotes (set to your remote pattern)
-smv_remote_whitelist = r'^(origin)$'
-
-# Format for versioned output directories
-smv_outputdir_format = '{ref.name}'
-
-# Additional settings
-smv_prefer_remote_refs = False
-
-# Latest version to redirect to (main or latest tag)
-smv_latest_version = 'main'
-
-# Custom HTML context for version selector
 html_context = {
     'display_github': True,
     'github_user': 'openindus',
     'github_repo': 'oi-firmware',
     'github_version': 'main',
     'conf_py_path': '/docs/source/',
+    # Versioning configuration for the templates
+    'versions': [
+        {'name': 'latest', 'url': '../latest/'},
+        {'name': 'v1.8.0', 'url': '../v1.8.0/'},
+    ],
+    'current_version': {'name': current_version_name},
 }

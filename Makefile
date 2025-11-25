@@ -43,16 +43,6 @@ flash-monitor: get-idf
 menuconfig: get-idf
 	@idf.py menuconfig
 
-# Examples
-build-examples: get-idf
-	find $(EXAMPLES_DIR) -name "*.cpp" | while read -r f; do \
-		echo "Build $$f"; \
-		cp "$$f" main/main.cpp; \
-		cp sdkconfig.ci.defaults.core sdkconfig; \
-		idf.py reconfigure; \
-		idf.py build || { echo "Error: Build failed for $$f"; exit 1; }; \
-	done
-
 # Help
 help:
 	@echo "Makefile for OI-Firmware"
@@ -68,7 +58,6 @@ help:
 	@echo "  monitor           Serial monitoring"
 	@echo "  flash-monitor     Flash and monitor"
 	@echo "  menuconfig        Menu configuration"
-	@echo "  build-examples    Build all examples (use EXAMPLES_DIR variable)"
 	@echo ""
 	@echo "Other:"
 	@echo "  help              Show this help"
