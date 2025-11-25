@@ -65,6 +65,15 @@ esp_err_t drv8873_spi_write_register(drv8873_register_t reg_address, uint8_t reg
     return drv8873_spi_transfer_register(reg_address, &reg_value, device_index, 0);
 }
 
+static inline uint8_t lfsr(void)
+{
+    static uint8_t lfsr = 0xAA;
+    /* 8‑bit Galois LFSR with polynomial 0xE0 (x⁸ + x⁶ + x⁵ + x⁴ + 1) */
+    lfsr ^= (lfsr << 1);
+    if (lfsr & 0x80) lfsr ^= 0x1D;   /* apply the feedback term */
+    return lfsr;
+}
+
 // Unified SPI register transfer (read/write)
 static esp_err_t drv8873_spi_transfer_register(drv8873_register_t reg_address, uint8_t *reg_value, int device_index, int is_read)
 {
@@ -88,7 +97,9 @@ static esp_err_t drv8873_spi_transfer_register(drv8873_register_t reg_address, u
     }
     tx_buffer[0] = HEADER_BYTE | (device_count & 0b00111111);
     if (is_read) {
-        tx_buffer[1] = HEADER_BYTE | 0b00010101;
+        // Pseudo-randomize validation byte using a simple runtime value
+        uint8_t validation = (lfsr() & 0x3F); // 6 bits pseudo-random
+        tx_buffer[1] = HEADER_BYTE | validation;
     } else {
         tx_buffer[1] = HEADER_BYTE;
     }
