@@ -8,12 +8,15 @@ static const char *TAG = "DRV8873_SPI";
 // Global configuration instance (defined here, declared in .h)
 drv8873_spi_config_t *drv8873_global_config = NULL;
 
+#define HEADER_BYTE 0b10000000
+#define READ_ADDRESS_BYTE (1 << 6)
+
 esp_err_t drv8873_spi_init(const drv8873_spi_config_t *config) {
     esp_err_t ret;
 
     // Validate configuration
-    if (!config || config->device_count < 1 || config->device_count > 4) {
-        ESP_LOGE(TAG, "Invalid daisy chain configuration: device_count must be 1-4");
+    if (!config || config->device_count < 1 || config->device_count > 63) {
+        ESP_LOGE(TAG, "Invalid daisy chain configuration: device_count must be 1-63");
         return ESP_ERR_INVALID_ARG;
     }
 
@@ -26,7 +29,8 @@ esp_err_t drv8873_spi_init(const drv8873_spi_config_t *config) {
         .command_bits = 0,                  // No command phase
         .address_bits = 0,                  // No address phase
         .dummy_bits = 0,                    // No dummy bits
-        .flags = SPI_DEVICE_NO_DUMMY
+        .flags = SPI_DEVICE_NO_DUMMY,
+        .cs_ena_pretrans = 1                // add 1 period between CS and first clock beat
     };
 
     ret = spi_bus_add_device(SPI2_HOST, &dev_config, &config->spi_handle);
@@ -37,6 +41,12 @@ esp_err_t drv8873_spi_init(const drv8873_spi_config_t *config) {
 
     // Store the config globally for future use
     drv8873_global_config = config;
+
+    // TODO: Remove debug 
+    // get reg 0 of device 0
+    uint8_t reg_value;
+    drv8873_spi_read_register(0, &reg_value, 0);
+    ESP_LOGD(TAG, "Read register 0 of device 0: %02X", reg_value);
 
     ESP_LOGI(TAG, "SPI daisy chain initialized with %d devices", config->device_count);
     return ESP_OK;
@@ -57,7 +67,7 @@ esp_err_t drv8873_spi_read_register(drv8873_register_t reg_address, uint8_t *reg
 
     // Calculate total transaction length: 
     // 2 bytes for headers, plus device_count * (1 address + 1 data)
-    const int total_bytes = 2 + (2 * drv8873_global_config->device_count);
+    const int total_bytes = (2 + (2 * drv8873_global_config->device_count));
     
     // Create full transaction buffer: 16 bits per device
     uint8_t *tx_buffer = (uint8_t*)calloc(total_bytes, sizeof(uint8_t));
@@ -71,14 +81,20 @@ esp_err_t drv8873_spi_read_register(drv8873_register_t reg_address, uint8_t *reg
     }
 
     // first header byte MSBs are 10, and other bits is the device count.
-    tx_buffer[0] = 0b10000000 | (drv8873_global_config->device_count & 0b00111111);
-    // second header byte MSBs are 10. then, if we clear faults, and last 4 bits are don't care.
-    tx_buffer[1] = 0b10000000;
+    tx_buffer[0] = HEADER_BYTE | (drv8873_global_config->device_count & 0b00111111);
+    // second header byte MSBs are 10. then, if we clear faults, 
+    // and last 4 bits can be integrity bits.
+    tx_buffer[1] = HEADER_BYTE | 0b00010101;
+
+    tx_buffer[2] = READ_ADDRESS_BYTE;// init read
+    tx_buffer[3] = READ_ADDRESS_BYTE;// init read
+    tx_buffer[4] = READ_ADDRESS_BYTE;// init read
+    tx_buffer[5] = READ_ADDRESS_BYTE;// init read
 
     // then, for each device, address bytes. starts by the last device in chain.
     int index_of_address_for_device = 2 + drv8873_global_config->device_count - 1 - device_index;
     // Create command: Read bit (1<<6) + register address (bits 5-1)
-    uint8_t command = (1 << 6) | ((reg_address << 1) & 0b00111110);
+    uint8_t command = READ_ADDRESS_BYTE | ((reg_address << 1) & 0b00111110);
     tx_buffer[index_of_address_for_device] = command;
 
     // then, for each device, data bytes. starts by the last device in chain.
@@ -105,17 +121,17 @@ esp_err_t drv8873_spi_read_register(drv8873_register_t reg_address, uint8_t *reg
 
 // logd full buffers
     if(total_bytes == 10){
-    // TX:   HDR1  HDR2  A4   A3   A2   A1   D4   D3   D2   D1
-    // RX:   S4    S3    S2   S1   HDR1 HDR2  R4   R3   R2   R1
-    ESP_LOGD(TAG, "TX: HDR1 HDR2 A4 A3 A2 A1 D4 D3 D2 D1");
-    ESP_LOGD(TAG, "TX:  %02X   %02X  %02X %02X %02X %02X %02X %02X %02X %02X", 
-             tx_buffer[0], tx_buffer[1], tx_buffer[2], tx_buffer[3], tx_buffer[4],
-             tx_buffer[5], tx_buffer[6], tx_buffer[7], tx_buffer[8], tx_buffer[9]);
-    ESP_LOGD(TAG, "RX: S4 S3 S2 S1 HDR1 HDR2 R4 R3 R2 R1");
-    ESP_LOGD(TAG, "RX: %02X %02X %02X %02X  %02X   %02X  %02X %02X %02X %02X", 
-             rx_buffer[0], rx_buffer[1], rx_buffer[2], rx_buffer[3], rx_buffer[4],
-             rx_buffer[5], rx_buffer[6], rx_buffer[7], rx_buffer[8], rx_buffer[9]);
-    ESP_LOGD(TAG, "SPI Read Reg 0x%02X from Device %d: RX: %02X", reg_address, device_index, *reg_value);
+        // TX:   HDR1  HDR2  A4   A3   A2   A1   D4   D3   D2   D1
+        // RX:   S4    S3    S2   S1   HDR1 HDR2  R4   R3   R2   R1
+        ESP_LOGD(TAG, "TX: HDR1 HDR2 A4 A3 A2 A1 D4 D3 D2 D1");
+        ESP_LOGD(TAG, "TX:  %02X   %02X  %02X %02X %02X %02X %02X %02X %02X %02X", 
+                tx_buffer[0], tx_buffer[1], tx_buffer[2], tx_buffer[3], tx_buffer[4],
+                tx_buffer[5], tx_buffer[6], tx_buffer[7], tx_buffer[8], tx_buffer[9]);
+        ESP_LOGD(TAG, "RX: S4 S3 S2 S1 HDR1 HDR2 R4 R3 R2 R1");
+        ESP_LOGD(TAG, "RX: %02X %02X %02X %02X  %02X   %02X  %02X %02X %02X %02X", 
+                rx_buffer[0], rx_buffer[1], rx_buffer[2], rx_buffer[3], rx_buffer[4],
+                rx_buffer[5], rx_buffer[6], rx_buffer[7], rx_buffer[8], rx_buffer[9]);
+        ESP_LOGD(TAG, "SPI Read Reg 0x%02X from Device %d: RX: %02X", reg_address, device_index, *reg_value);
     }
 
     free(tx_buffer);
@@ -153,9 +169,9 @@ esp_err_t drv8873_spi_write_register(drv8873_register_t reg_address, uint8_t reg
     }
 
     // first header byte MSBs are 10, and other bits is the device count.
-    tx_buffer[0] = 0b10000000 | (drv8873_global_config->device_count & 0b00111111);
+    tx_buffer[0] = HEADER_BYTE | (drv8873_global_config->device_count & 0b00111111);
     // second header byte MSBs are 10. then, if we clear faults, and last 4 bits are don't care.
-    tx_buffer[1] = 0b10000000;
+    tx_buffer[1] = HEADER_BYTE;
 
     // then, for each device, address bytes. starts by the last device in chain.
     int index_of_address_for_device = 2 + drv8873_global_config->device_count - 1 - device_index;
