@@ -22,7 +22,7 @@ esp_err_t drv8873_spi_init(const drv8873_spi_config_t *config) {
 
     // Configure the SPI device (DRV8873)
     const spi_device_interface_config_t dev_config = {
-        .clock_speed_hz = 200 * 1000,       // 200 kHz (adjustable as needed)
+        .clock_speed_hz = 1 * 1000 * 1000,  // 1 MHz (adjustable as needed)
         .mode = 1,                          // SPI Mode 1 (CPOL=0, CPHA=1)
         .spics_io_num = config->nSCS_pin,   // Chip Select pin
         .queue_size = 10,                   // Queue size
@@ -53,13 +53,15 @@ esp_err_t drv8873_spi_init(const drv8873_spi_config_t *config) {
 }
 
 esp_err_t drv8873_spi_read_register(drv8873_register_t reg_address, uint8_t *reg_value, int device_index) {
+
+    const int device_count = drv8873_global_config->device_count;
     // Validate parameters
     if (!drv8873_global_config || !drv8873_global_config->spi_handle) {
         ESP_LOGE(TAG, "DRV8873 SPI not initialized");
         return ESP_ERR_INVALID_STATE;
     }
 
-    if (device_index < 0 || device_index >= drv8873_global_config->device_count) {
+    if (device_index < 0 || device_index >= device_count) {
         ESP_LOGE(TAG, "Invalid device index: %d (valid range: 0-%d)", 
                  device_index, drv8873_global_config->device_count - 1);
         return ESP_ERR_INVALID_ARG;
@@ -67,7 +69,7 @@ esp_err_t drv8873_spi_read_register(drv8873_register_t reg_address, uint8_t *reg
 
     // Calculate total transaction length: 
     // 2 bytes for headers, plus device_count * (1 address + 1 data)
-    const int total_bytes = (2 + (2 * drv8873_global_config->device_count));
+    const int total_bytes = (2 + (2 * device_count));
     
     // Create full transaction buffer: 16 bits per device
     uint8_t *tx_buffer = (uint8_t*)calloc(total_bytes, sizeof(uint8_t));
@@ -81,7 +83,7 @@ esp_err_t drv8873_spi_read_register(drv8873_register_t reg_address, uint8_t *reg
     }
 
     // first header byte MSBs are 10, and other bits is the device count.
-    tx_buffer[0] = HEADER_BYTE | (drv8873_global_config->device_count & 0b00111111);
+    tx_buffer[0] = HEADER_BYTE | (device_count & 0b00111111);
     // second header byte MSBs are 10. then, if we clear faults, 
     // and last 4 bits can be integrity bits.
     tx_buffer[1] = HEADER_BYTE | 0b00010101;
@@ -92,13 +94,13 @@ esp_err_t drv8873_spi_read_register(drv8873_register_t reg_address, uint8_t *reg
     tx_buffer[5] = READ_ADDRESS_BYTE;// init read
 
     // then, for each device, address bytes. starts by the last device in chain.
-    int index_of_address_for_device = 2 + drv8873_global_config->device_count - 1 - device_index;
+    int index_of_address_for_device = 2 + device_count - 1 - device_index;
     // Create command: Read bit (1<<6) + register address (bits 5-1)
     uint8_t command = READ_ADDRESS_BYTE | ((reg_address << 1) & 0b00111110);
     tx_buffer[index_of_address_for_device] = command;
 
     // then, for each device, data bytes. starts by the last device in chain.
-    int index_of_data_for_device = 2 + (2 * drv8873_global_config->device_count) - 1 - device_index;
+    int index_of_data_for_device = 2 + (2 * device_count) - 1 - device_index;
 
     // Configure SPI transaction
     spi_transaction_t trans = {
@@ -119,6 +121,15 @@ esp_err_t drv8873_spi_read_register(drv8873_register_t reg_address, uint8_t *reg
     // Extract the response for the target device (last device in chain responds first)
     *reg_value = rx_buffer[index_of_data_for_device];
 
+    // header validation
+    if(tx_buffer[0] != rx_buffer[device_count]){
+        ESP_LOGE(TAG, "Header byte 1 mismatch: sent %02X, received %02X", tx_buffer[0], rx_buffer[device_count]);
+        ret = ESP_ERR_INVALID_RESPONSE;
+    }
+    if (tx_buffer[1] != rx_buffer[device_count + 1]){
+        ESP_LOGE(TAG, "Header byte 2 mismatch: sent %02X, received %02X", tx_buffer[1], rx_buffer[device_count + 1]);
+        ret = ESP_ERR_INVALID_RESPONSE;
+    }
 // logd full buffers
     if(total_bytes == 10){
         // TX:   HDR1  HDR2  A4   A3   A2   A1   D4   D3   D2   D1
@@ -136,7 +147,7 @@ esp_err_t drv8873_spi_read_register(drv8873_register_t reg_address, uint8_t *reg
 
     free(tx_buffer);
     free(rx_buffer);
-    return ESP_OK;
+    return ret;
 }
 
 esp_err_t drv8873_spi_write_register(drv8873_register_t reg_address, uint8_t reg_value, int device_index) {
