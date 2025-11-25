@@ -265,7 +265,10 @@ esp_err_t MotorDc::initHBridge(void)
     // Initialize SPI bus and device
     err |= drv8873_spi_init(&drv8873_cfg);
     if (err != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to initialize DRV8873 SPI daisy chain: %d", err);
+        ESP_LOGE(TAG, "Failed to initialize DRV8873 SPI daisy chain: %s", esp_err_to_name(err));
+        if (err == ESP_ERR_INVALID_RESPONSE) {
+        ESP_LOGE(TAG, "Check that your module is connected to the power supply.");
+        }
         return err;
     }
 
