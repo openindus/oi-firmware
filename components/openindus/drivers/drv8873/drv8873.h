@@ -81,11 +81,9 @@ typedef enum {
 // Configuration structure for daisy-chained DRV8873 devices
 typedef struct {
     spi_device_handle_t spi_handle;  // SPI handle for DRV8873
-    const int nSCS_pin;                    // Chip Select (CS) pin
-    const int device_count;                // Number of daisy-chained devices (1-4)
+    int nSCS_pin;                    // Chip Select (CS) pin
+    int device_count;                // Number of daisy-chained devices (1-4)
 } drv8873_spi_config_t;
-
-extern drv8873_spi_config_t *drv8873_global_config;
 
 // Initialize SPI bus for DRV8873 daisy chain
 esp_err_t drv8873_spi_init(const drv8873_spi_config_t *config);

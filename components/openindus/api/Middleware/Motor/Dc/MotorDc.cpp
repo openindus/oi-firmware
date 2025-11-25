@@ -363,7 +363,7 @@ esp_err_t MotorDc::setMode(drv8873_mode_t mode, MotorNum_t motor) {
 
 uint8_t MotorDc::getFault(MotorNum_t motor) {
     // Validate motor number
-    if (motor < 0 || motor >= 4) {
+    if (motor < 0 || motor >= MOTOR_MAX) {
         ESP_LOGE(TAG, "Invalid motor number: %d", motor);
         return 0;
     }

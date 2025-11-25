@@ -5,8 +5,8 @@
 
 static const char *TAG = "DRV8873_SPI";
 
-// Global configuration instance (defined here, declared in .h)
-drv8873_spi_config_t *drv8873_global_config = NULL;
+// Static storage for configuration
+static drv8873_spi_config_t drv8873_config = {0};
 
 #define HEADER_BYTE 0b10000000
 #define READ_ADDRESS_BYTE (1 << 6)
@@ -37,14 +37,15 @@ esp_err_t drv8873_spi_init(const drv8873_spi_config_t *config) {
         .cs_ena_pretrans = 1                // add 1 period between CS and first clock beat
     };
 
-    ret = spi_bus_add_device(SPI2_HOST, &dev_config, &config->spi_handle);
+    ret = spi_bus_add_device(SPI2_HOST, &dev_config, &drv8873_config.spi_handle);
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "Failed to add SPI device: %s", esp_err_to_name(ret));
         return ret;
     }
 
-    // Store the config globally for future use
-    drv8873_global_config = (drv8873_spi_config_t *) config;
+    // Copy configuration to static storage
+    drv8873_config.nSCS_pin = config->nSCS_pin;
+    drv8873_config.device_count = config->device_count;
 
     // TODO: Remove debug 
     // get reg 0 of device 0
@@ -67,11 +68,11 @@ esp_err_t drv8873_spi_write_register(drv8873_register_t reg_address, uint8_t reg
 // Unified SPI register transfer (read/write)
 static esp_err_t drv8873_spi_transfer_register(drv8873_register_t reg_address, uint8_t *reg_value, int device_index, int is_read)
 {
-    if (!drv8873_global_config || !drv8873_global_config->spi_handle) {
+    if (!drv8873_config.spi_handle) {
         ESP_LOGE(TAG, "DRV8873 SPI not initialized");
         return ESP_ERR_INVALID_STATE;
     }
-    const int device_count = drv8873_global_config->device_count;
+    const int device_count = drv8873_config.device_count;
     if (device_index < 0 || device_index >= device_count) {
         ESP_LOGE(TAG, "Invalid device index: %d (valid range: 0-%d)", device_index, device_count - 1);
         return ESP_ERR_INVALID_ARG;
@@ -107,7 +108,7 @@ static esp_err_t drv8873_spi_transfer_register(drv8873_register_t reg_address, u
         .tx_buffer = tx_buffer,
         .rx_buffer = rx_buffer,
     };
-    esp_err_t ret = spi_device_transmit(drv8873_global_config->spi_handle, &trans);
+    esp_err_t ret = spi_device_transmit(drv8873_config.spi_handle, &trans);
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "%s register 0x%02X %s device %d: %s", is_read ? "Failed to read" : "Failed to write", reg_address, is_read ? "from" : "to", device_index, esp_err_to_name(ret));
         free(tx_buffer);
@@ -145,7 +146,7 @@ esp_err_t drv8873_set_mode(drv8873_mode_t mode, int device_index) {
     esp_err_t ret;
 
     // Validate device index
-    if (device_index < 0 || device_index >= drv8873_global_config->device_count) {
+    if (device_index < 0 || device_index >= drv8873_config.device_count) {
         ESP_LOGE(TAG, "Invalid device index: %d", device_index);
         return ESP_ERR_INVALID_ARG;
     }
@@ -174,7 +175,7 @@ esp_err_t drv8873_set_current_limit(drv8873_itrip_level_t itrip_level, int devic
     esp_err_t ret;
 
     // Validate device index
-    if (device_index < 0 || device_index >= drv8873_global_config->device_count) {
+    if (device_index < 0 || device_index >= drv8873_config.device_count) {
         ESP_LOGE(TAG, "Invalid device index: %d", device_index);
         return ESP_ERR_INVALID_ARG;
     }
@@ -203,7 +204,7 @@ esp_err_t drv8873_set_current_regulation(drv8873_current_regulation_t disable_fl
     esp_err_t ret;
 
     // Validate device index
-    if (device_index < 0 || device_index >= drv8873_global_config->device_count) {
+    if (device_index < 0 || device_index >= drv8873_config.device_count) {
         ESP_LOGE(TAG, "Invalid device index: %d", device_index);
         return ESP_ERR_INVALID_ARG;
     }
@@ -232,7 +233,7 @@ esp_err_t drv8873_set_ocp_mode(drv8873_ocp_mode_t ocp_mode, int device_index) {
     esp_err_t ret;
 
     // Validate device index
-    if (device_index < 0 || device_index >= drv8873_global_config->device_count) {
+    if (device_index < 0 || device_index >= drv8873_config.device_count) {
         ESP_LOGE(TAG, "Invalid device index: %d", device_index);
         return ESP_ERR_INVALID_ARG;
     }
@@ -261,7 +262,7 @@ esp_err_t drv8873_set_tsd_mode(int auto_recovery, int device_index) {
     esp_err_t ret;
 
     // Validate device index
-    if (device_index < 0 || device_index >= drv8873_global_config->device_count) {
+    if (device_index < 0 || device_index >= drv8873_config.device_count) {
         ESP_LOGE(TAG, "Invalid device index: %d", device_index);
         return ESP_ERR_INVALID_ARG;
     }
@@ -294,7 +295,7 @@ esp_err_t drv8873_set_itrip_rep(int report, int device_index) {
     esp_err_t ret;
 
     // Validate device index
-    if (device_index < 0 || device_index >= drv8873_global_config->device_count) {
+    if (device_index < 0 || device_index >= drv8873_config.device_count) {
         ESP_LOGE(TAG, "Invalid device index: %d", device_index);
         return ESP_ERR_INVALID_ARG;
     }
@@ -327,7 +328,7 @@ esp_err_t drv8873_set_otw_rep(int report, int device_index) {
     esp_err_t ret;
 
     // Validate device index
-    if (device_index < 0 || device_index >= drv8873_global_config->device_count) {
+    if (device_index < 0 || device_index >= drv8873_config.device_count) {
         ESP_LOGE(TAG, "Invalid device index: %d", device_index);
         return ESP_ERR_INVALID_ARG;
     }
@@ -360,7 +361,7 @@ esp_err_t drv8873_set_dis_cpuv(int disable, int device_index) {
     esp_err_t ret;
 
     // Validate device index
-    if (device_index < 0 || device_index >= drv8873_global_config->device_count) {
+    if (device_index < 0 || device_index >= drv8873_config.device_count) {
         ESP_LOGE(TAG, "Invalid device index: %d", device_index);
         return ESP_ERR_INVALID_ARG;
     }
@@ -393,7 +394,7 @@ esp_err_t drv8873_set_ocp_tretry(int retry_time, int device_index) {
     esp_err_t ret;
 
     // Validate device index
-    if (device_index < 0 || device_index >= drv8873_global_config->device_count) {
+    if (device_index < 0 || device_index >= drv8873_config.device_count) {
         ESP_LOGE(TAG, "Invalid device index: %d", device_index);
         return ESP_ERR_INVALID_ARG;
     }
@@ -422,7 +423,7 @@ esp_err_t drv8873_set_en_olp(int enable, int device_index) {
     esp_err_t ret;
 
     // Validate device index
-    if (device_index < 0 || device_index >= drv8873_global_config->device_count) {
+    if (device_index < 0 || device_index >= drv8873_config.device_count) {
         ESP_LOGE(TAG, "Invalid device index: %d", device_index);
         return ESP_ERR_INVALID_ARG;
     }
@@ -455,7 +456,7 @@ esp_err_t drv8873_set_olp_delay(int delay, int device_index) {
     esp_err_t ret;
 
     // Validate device index
-    if (device_index < 0 || device_index >= drv8873_global_config->device_count) {
+    if (device_index < 0 || device_index >= drv8873_config.device_count) {
         ESP_LOGE(TAG, "Invalid device index: %d", device_index);
         return ESP_ERR_INVALID_ARG;
     }
@@ -488,7 +489,7 @@ esp_err_t drv8873_set_en_ola(int enable, int device_index) {
     esp_err_t ret;
 
     // Validate device index
-    if (device_index < 0 || device_index >= drv8873_global_config->device_count) {
+    if (device_index < 0 || device_index >= drv8873_config.device_count) {
         ESP_LOGE(TAG, "Invalid device index: %d", device_index);
         return ESP_ERR_INVALID_ARG;
     }
@@ -521,7 +522,7 @@ esp_err_t drv8873_set_dis_itrip(drv8873_current_regulation_t disable_flags, int 
     esp_err_t ret;
 
     // Validate device index
-    if (device_index < 0 || device_index >= drv8873_global_config->device_count) {
+    if (device_index < 0 || device_index >= drv8873_config.device_count) {
         ESP_LOGE(TAG, "Invalid device index: %d", device_index);
         return ESP_ERR_INVALID_ARG;
     }
@@ -547,12 +548,12 @@ esp_err_t drv8873_set_dis_itrip(drv8873_current_regulation_t disable_flags, int 
 
 esp_err_t drv8873_get_fault_status(uint8_t *fault_status, int device_index) {
     // Validate parameters
-    if (!drv8873_global_config || !drv8873_global_config->spi_handle) {
+    if (!drv8873_config.spi_handle) {
         ESP_LOGE(TAG, "DRV8873 SPI not initialized");
         return ESP_ERR_INVALID_STATE;
     }
 
-    if (device_index < 0 || device_index >= drv8873_global_config->device_count) {
+    if (device_index < 0 || device_index >= drv8873_config.device_count) {
         ESP_LOGE(TAG, "Invalid device index: %d", device_index);
         return ESP_ERR_INVALID_ARG;
     }
@@ -631,12 +632,12 @@ esp_err_t drv8873_get_fault_status(uint8_t *fault_status, int device_index) {
 
 esp_err_t drv8873_get_diag_status(uint8_t *diag_status, int device_index) {
     // Validate parameters
-    if (!drv8873_global_config || !drv8873_global_config->spi_handle) {
+    if (!drv8873_config.spi_handle) {
         ESP_LOGE(TAG, "DRV8873 SPI not initialized");
         return ESP_ERR_INVALID_STATE;
     }
 
-    if (device_index < 0 || device_index >= drv8873_global_config->device_count) {
+    if (device_index < 0 || device_index >= drv8873_config.device_count) {
         ESP_LOGE(TAG, "Invalid device index: %d", device_index);
         return ESP_ERR_INVALID_ARG;
     }
@@ -663,7 +664,7 @@ esp_err_t drv8873_clear_fault(int device_index) {
     esp_err_t ret;
 
     // Validate device index
-    if (device_index < 0 || device_index >= drv8873_global_config->device_count) {
+    if (device_index < 0 || device_index >= drv8873_config.device_count) {
         ESP_LOGE(TAG, "Invalid device index: %d", device_index);
         return ESP_ERR_INVALID_ARG;
     }
@@ -692,7 +693,7 @@ esp_err_t drv8873_lock_registers(int lock, int device_index) {
     esp_err_t ret;
 
     // Validate device index
-    if (device_index < 0 || device_index >= drv8873_global_config->device_count) {
+    if (device_index < 0 || device_index >= drv8873_config.device_count) {
         ESP_LOGE(TAG, "Invalid device index: %d", device_index);
         return ESP_ERR_INVALID_ARG;
     }
