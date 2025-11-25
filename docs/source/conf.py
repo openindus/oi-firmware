@@ -32,7 +32,6 @@ release = '0'
 extensions = [
     "sphinx_rtd_theme",
     "breathe",
-    "sphinx_multiversion",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -77,28 +76,7 @@ breathe_default_project = "OI-Firmware"
 
 collapse_navigation = False
 
-# -- Sphinx-multiversion configuration ---------------------------------------
-
-# Whitelist pattern for branches (set to your branch pattern)
-smv_branch_whitelist = r'^(main|develop)$'
-
-# Whitelist pattern for tags - only latest versions
-# smv_tag_whitelist = r'^v\d+\.\d+.*$'
-smv_tag_whitelist = r'^v(1\.8\.0|1\.7\.3)$'
-
-# Whitelist pattern for remotes (set to your remote pattern)
-smv_remote_whitelist = r'^(origin)$'
-
-# Format for versioned output directories
-smv_outputdir_format = '{ref.name}'
-
-# Additional settings
-smv_prefer_remote_refs = False
-
-# Latest version to redirect to (main or latest tag)
-smv_latest_version = 'main'
-
-# Custom HTML context for version selector
+# Custom HTML context
 html_context = {
     'display_github': True,
     'github_user': 'openindus',
