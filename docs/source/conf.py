@@ -10,7 +10,7 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
+import os
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
@@ -76,11 +76,19 @@ breathe_default_project = "OI-Firmware"
 
 collapse_navigation = False
 
-# Custom HTML context
+# Get version from environment variable (set by build.sh)
+current_version_name = os.environ.get('DOCS_VERSION', 'latest')
+
 html_context = {
     'display_github': True,
     'github_user': 'openindus',
     'github_repo': 'oi-firmware',
     'github_version': 'main',
     'conf_py_path': '/docs/source/',
+    # Versioning configuration for the templates
+    'versions': [
+        {'name': 'latest', 'url': '../latest/'},
+        {'name': 'v1.8.0', 'url': '../v1.8.0/'},
+    ],
+    'current_version': {'name': current_version_name},
 }

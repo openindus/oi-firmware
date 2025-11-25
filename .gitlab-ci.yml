@@ -11,6 +11,7 @@ workflow:
 stages:
   - setup
   - build:firmware
+  - build:examples
   - build:docs
   - deploy
 
@@ -85,12 +86,23 @@ build:bin:dc:
   variables:
     MODULE_TYPE: "dc"
 
-build:examples:
-  stage: build:firmware
+build:examples:library:
+  stage: build:examples
   needs:
     - job: setup
   script:
-    - make build-examples EXAMPLES_DIR=components/openindus/examples/
+    - ./build_examples.sh components/openindus/examples/
+  after_script:
+    - git restore main/main.cpp
+  tags:
+    - oi-firmware
+
+build:examples:docs:
+  stage: build:examples
+  needs:
+    - job: setup
+  script:
+    - ./build_examples.sh docs/examples/
   after_script:
     - git restore main/main.cpp
   tags:
@@ -106,23 +118,11 @@ build:docs:
     - pip3 install -r docs/requirements.txt
   script:
     - cd docs
-    - make clean
     - doxygen doxygen/Doxyfile
-    - make multiversion
+    - ./build_multiversion.sh "$CI_COMMIT_TAG"
     - cd ..
   after_script:
     - cp -r docs/build/html/ .oi/docs/
-  tags:
-    - oi-firmware
-
-build:docs:examples:
-  stage: build:docs
-  needs:
-    - job: setup
-  script:
-    - make build-examples EXAMPLES_DIR=docs/examples/
-  after_script:
-    - git restore main/main.cpp
   tags:
     - oi-firmware
 
@@ -152,7 +152,15 @@ deploy:bin:
 deploy:library:
   stage: deploy
   needs:
-    - job: build:examples
+    - job: build:bin:core
+    - job: build:bin:discrete
+    - job: build:bin:stepper
+    - job: build:bin:mixed
+    - job: build:bin:relayhp
+    - job: build:bin:relaylp
+    - job: build:bin:analogls
+    - job: build:bin:dc
+    - job: build:examples:library
   before_script:
     - apt update
     - apt install -y lftp
@@ -171,12 +179,12 @@ deploy:docs:
   stage: deploy
   needs:
     - job: build:docs
-    - job: build:docs:examples
+    - job: build:examples:docs
   before_script:
     - apt update
     - apt install -y lftp
   script:
-    - lftp ${FTP_SERVER} -u ${FTP_USERNAME},${FTP_PASSWORD} -e "set ssl:verify-certificate no; set mirror:parallel-transfer-count 4; mirror -R --only-newer --verbose ./.oi/docs/html/ doc/; exit;"
+    - lftp ${FTP_SERVER} -u ${FTP_USERNAME},${FTP_PASSWORD} -e "set ssl:verify-certificate no; set mirror:parallel-transfer-count 4; mirror -R --only-newer --verbose ./.oi/docs/ doc/; exit;"
   artifacts:
     name: "docs"
     paths:
