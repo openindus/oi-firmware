@@ -82,9 +82,9 @@ public:
 
 protected:
     static int init(std::vector<MotorDC_PinConfig_t> motorsConfig, gpio_num_t faultPin);
-    static void initADC(void);
-    static void initHBridge(void);
-    static void initSPI(void);
+    static esp_err_t initADC(void);
+    static esp_err_t initHBridge(void);
+    static esp_err_t initSPI(void);
 
 private:
     static std::vector<MotorDC_PinConfig_t> _motorsConfig;

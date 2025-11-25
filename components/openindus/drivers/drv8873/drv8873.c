@@ -50,9 +50,13 @@ esp_err_t drv8873_spi_init(const drv8873_spi_config_t *config) {
     // TODO: Remove debug 
     // get reg 0 of device 0
     uint8_t reg_value;
-    drv8873_spi_read_register(0, &reg_value, 0);
+    ret = drv8873_spi_read_register(0, &reg_value, 0);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to initialize SPI daisy chain, cannot read register 0 of device 0: %s", esp_err_to_name(ret));
+        ESP_LOGE(TAG, "Check that your module is connected to the power supply.");
+        return ret;
+    }
     ESP_LOGD(TAG, "Read register 0 of device 0: %02X", reg_value);
-
     ESP_LOGI(TAG, "SPI daisy chain initialized with %d devices", config->device_count);
     return ESP_OK;
 }
