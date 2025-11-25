@@ -287,43 +287,43 @@ esp_err_t MotorDc::initHBridge(void)
             return err;
         }
 
-        // Disable current regulation for both OUT1 and OUT2
-        err |= drv8873_set_current_regulation(DRV8873_CURR_REG_DISABLE_BOTH, i);
+        // Enable current regulation for both OUT1 and OUT2
+        err |= drv8873_set_current_regulation(DRV8873_CURR_REG_ENABLED, i);
         if (err != ESP_OK) {
             ESP_LOGE(TAG, "Failed to set DRV8873 current regulation for device %d: %d", i, err);
             return err;
         }
 
-        // Disable OCP protection
-        err |= drv8873_set_ocp_mode(DRV8873_OCP_MODE_DISABLED, i);
+        // Set OCP protection to latched
+        err |= drv8873_set_ocp_mode(DRV8873_OCP_MODE_LATCHED, i);
         if (err != ESP_OK) {
             ESP_LOGE(TAG, "Failed to set DRV8873 OCP mode for device %d: %d", i, err);
             return err;
         }
 
-        // Disable CPUV detection
-        err |= drv8873_set_dis_cpuv(1, i);
+        // Do NOT disable CPUV detection
+        err |= drv8873_set_dis_cpuv(0, i);
         if (err != ESP_OK) {
-            ESP_LOGE(TAG, "Failed to disable DRV8873 CPUV detection for device %d: %d", i, err);
+            ESP_LOGE(TAG, "Failed to enable DRV8873 CPUV detection for device %d: %d", i, err);
             return err;
         }
 
-        // Enable TSD auto-recovery
-        err |= drv8873_set_tsd_mode(1, i);
+        // Disable TSD auto-recovery (maximum security: require manual intervention)
+        err |= drv8873_set_tsd_mode(0, i);
         if (err != ESP_OK) {
-            ESP_LOGE(TAG, "Failed to enable DRV8873 TSD auto-recovery for device %d: %d", i, err);
+            ESP_LOGE(TAG, "Failed to disable DRV8873 TSD auto-recovery for device %d: %d", i, err);
             return err;
         }
 
-        // Enable passive OLP
-        err |= drv8873_set_en_olp(1, i);
+        // Disable OLP (overload protection)
+        err |= drv8873_set_en_olp(0, i);
         if (err != ESP_OK) {
-            ESP_LOGE(TAG, "Failed to enable DRV8873 OLP for device %d: %d", i, err);
+            ESP_LOGE(TAG, "Failed to disable DRV8873 OLP for device %d: %d", i, err);
             return err;
         }
 
-        // Set OLP delay to 300us
-        err |= drv8873_set_olp_delay(0, i);
+        // Set OLP delay to maximum 
+        err |= drv8873_set_olp_delay(1, i);
         if (err != ESP_OK) {
             ESP_LOGE(TAG, "Failed to set DRV8873 OLP delay for device %d: %d", i, err);
             return err;
