@@ -254,7 +254,7 @@ void MotorDc::initHBridge(void)
     esp_err_t err = ESP_OK;
 
     /* Configure the DRV8873 device for daisy chain */
-    static drv8873_spi_config_t drv8873_cfg = {
+    const drv8873_spi_config_t drv8873_cfg = {
         .spi_handle = NULL,
         .nSCS_pin = GPIO_NUM_48,  // Chip Select pin
         .device_count = 4        // 4 daisy-chained H-bridges

@@ -88,7 +88,7 @@ typedef struct {
 extern drv8873_spi_config_t *drv8873_global_config;
 
 // Initialize SPI bus for DRV8873 daisy chain
-esp_err_t drv8873_spi_init(drv8873_spi_config_t *config);
+esp_err_t drv8873_spi_init(const drv8873_spi_config_t *config);
 
 // Read a SPI register from DRV8873 (read-only)
 esp_err_t drv8873_spi_read_register(drv8873_register_t reg_address, uint8_t *reg_value, int device_index);

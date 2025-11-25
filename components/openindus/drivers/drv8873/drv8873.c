@@ -8,7 +8,7 @@ static const char *TAG = "DRV8873_SPI";
 // Global configuration instance (defined here, declared in .h)
 drv8873_spi_config_t *drv8873_global_config = NULL;
 
-esp_err_t drv8873_spi_init(drv8873_spi_config_t *config) {
+esp_err_t drv8873_spi_init(const drv8873_spi_config_t *config) {
     esp_err_t ret;
 
     // Validate configuration
@@ -18,14 +18,15 @@ esp_err_t drv8873_spi_init(drv8873_spi_config_t *config) {
     }
 
     // Configure the SPI device (DRV8873)
-    spi_device_interface_config_t dev_config = {
-        .clock_speed_hz = 1 * 1000 * 1000,  // 1 MHz (adjustable as needed)
-        .mode = 0,                          // SPI Mode 0 (CPOL=0, CPHA=0)
+    const spi_device_interface_config_t dev_config = {
+        .clock_speed_hz = 200 * 1000,       // 200 kHz (adjustable as needed)
+        .mode = 1,                          // SPI Mode 1 (CPOL=0, CPHA=1)
         .spics_io_num = config->nSCS_pin,   // Chip Select pin
-        .queue_size = 7,                    // Queue size
+        .queue_size = 10,                   // Queue size
         .command_bits = 0,                  // No command phase
         .address_bits = 0,                  // No address phase
         .dummy_bits = 0,                    // No dummy bits
+        .flags = SPI_DEVICE_NO_DUMMY
     };
 
     ret = spi_bus_add_device(SPI2_HOST, &dev_config, &config->spi_handle);
@@ -102,12 +103,16 @@ esp_err_t drv8873_spi_read_register(drv8873_register_t reg_address, uint8_t *reg
     // Extract the response for the target device (last device in chain responds first)
     *reg_value = rx_buffer[index_of_data_for_device];
 
-    // logd full buffers
+// logd full buffers
     if(total_bytes == 10){
-    ESP_LOGD(TAG, "TX: %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X", 
+    // TX:   HDR1  HDR2  A4   A3   A2   A1   D4   D3   D2   D1
+    // RX:   S4    S3    S2   S1   HDR1 HDR2  R4   R3   R2   R1
+    ESP_LOGD(TAG, "TX: HDR1 HDR2 A4 A3 A2 A1 D4 D3 D2 D1");
+    ESP_LOGD(TAG, "TX:  %02X   %02X  %02X %02X %02X %02X %02X %02X %02X %02X", 
              tx_buffer[0], tx_buffer[1], tx_buffer[2], tx_buffer[3], tx_buffer[4],
              tx_buffer[5], tx_buffer[6], tx_buffer[7], tx_buffer[8], tx_buffer[9]);
-    ESP_LOGD(TAG, "RX: %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X", 
+    ESP_LOGD(TAG, "RX: S4 S3 S2 S1 HDR1 HDR2 R4 R3 R2 R1");
+    ESP_LOGD(TAG, "RX: %02X %02X %02X %02X  %02X   %02X  %02X %02X %02X %02X", 
              rx_buffer[0], rx_buffer[1], rx_buffer[2], rx_buffer[3], rx_buffer[4],
              rx_buffer[5], rx_buffer[6], rx_buffer[7], rx_buffer[8], rx_buffer[9]);
     ESP_LOGD(TAG, "SPI Read Reg 0x%02X from Device %d: RX: %02X", reg_address, device_index, *reg_value);
@@ -130,6 +135,10 @@ esp_err_t drv8873_spi_write_register(drv8873_register_t reg_address, uint8_t reg
                  device_index, drv8873_global_config->device_count - 1);
         return ESP_ERR_INVALID_ARG;
     }
+
+    // temporary return to debug.
+    ESP_LOGW(TAG, "Writing disabled for debug purposes.");
+    return ESP_OK;
 
     // Calculate total transaction length: 
     // 2 bytes for headers, plus device_count * (1 address + 1 data)
@@ -164,6 +173,13 @@ esp_err_t drv8873_spi_write_register(drv8873_register_t reg_address, uint8_t reg
         .tx_buffer = tx_buffer,
         .rx_buffer = NULL,              // No need to receive data for write
     };
+
+    // logd full buffers
+    if(total_bytes == 10){
+    ESP_LOGD(TAG, "TX: %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X", 
+             tx_buffer[0], tx_buffer[1], tx_buffer[2], tx_buffer[3], tx_buffer[4],
+             tx_buffer[5], tx_buffer[6], tx_buffer[7], tx_buffer[8], tx_buffer[9]);
+    }
 
     esp_err_t ret = spi_device_transmit(drv8873_global_config->spi_handle, &trans);
     if (ret != ESP_OK) {
