@@ -540,34 +540,6 @@ esp_err_t drv8873_set_en_ola(drv8873_enable_t enable, int device_index) {
     return ESP_OK;
 }
 
-esp_err_t drv8873_set_dis_itrip(drv8873_current_regulation_t disable_flags, int device_index) {
-    uint8_t reg_value;
-    esp_err_t ret;
-
-    // Validate device index
-    if (device_index < 0 || device_index >= drv8873_config.device_count) {
-        ESP_LOGE(TAG, "Invalid device index: %d", device_index);
-        return ESP_ERR_INVALID_ARG;
-    }
-
-    // Read IC4 Control register
-    ret = drv8873_spi_read_register(DRV8873_REG_IC4_CONTROL, &reg_value, device_index);
-    if (ret != ESP_OK) {
-        return ret;
-    }
-
-    // Update DIS_ITRIP field (bits 1-0)
-    reg_value = (reg_value & 0xFC) | (disable_flags & 0x03);
-
-    // Write updated register
-    ret = drv8873_spi_write_register(DRV8873_REG_IC4_CONTROL, reg_value, device_index);
-    if (ret != ESP_OK) {
-        return ret;
-    }
-
-    ESP_LOGD(TAG, "Device %d: ITRIP (Current Trip) regulation configuration for OUT1/OUT2", device_index);
-    return ESP_OK;
-}
 
 esp_err_t drv8873_get_fault_status(uint8_t *fault_status, int device_index) {
     // Validate parameters

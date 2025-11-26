@@ -241,15 +241,6 @@ esp_err_t drv8873_set_olp_delay(drv8873_olp_delay_t delay, int device_index);
 esp_err_t drv8873_set_en_ola(drv8873_enable_t enable, int device_index);
 
 /**
- * @brief Disable current regulation (ITRIP) on half-bridges for a specific device in daisy chain
- * @param disable_flags Flags to disable regulation (none, OUT1, OUT2, both)
- * @param device_index Device index in daisy chain (0-3)
- * @details Writes to bits 1-0 of IC4_CONTROL register (0x05)
- * @return ESP_OK on success, error code otherwise
- */
-esp_err_t drv8873_set_dis_itrip(drv8873_current_regulation_t disable_flags, int device_index);
-
-/**
  * @brief Read the FAULT Status Register for a specific device in daisy chain
  * @param fault_status Pointer to receive register content
  * @param device_index Device index in daisy chain (0-3)
