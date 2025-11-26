@@ -101,7 +101,7 @@ static esp_err_t drv8873_spi_transfer_register(drv8873_register_t reg_address, u
     tx_buffer[0] = HEADER_BYTE | (device_count & 0b00111111);
     if (is_read) {
         // Pseudo-randomize validation byte using a simple runtime value
-        uint8_t validation = (lfsr() & 0x3F); // 6 bits pseudo-random
+        uint8_t validation = (lfsr() & 0x1F); // 5 bits pseudo-random
         tx_buffer[1] = HEADER_BYTE | validation;
     } else {
         tx_buffer[1] = HEADER_BYTE;
@@ -271,7 +271,7 @@ esp_err_t drv8873_set_ocp_mode(drv8873_ocp_mode_t ocp_mode, int device_index) {
     return ESP_OK;
 }
 
-esp_err_t drv8873_set_tsd_mode(int auto_recovery, int device_index) {
+esp_err_t drv8873_set_tsd_mode(drv8873_tsd_mode_t tsd_mode, int device_index) {
     uint8_t reg_value;
     esp_err_t ret;
 
@@ -288,7 +288,7 @@ esp_err_t drv8873_set_tsd_mode(int auto_recovery, int device_index) {
     }
 
     // Update TSD_MODE bit (bit 6)
-    if (auto_recovery) {
+    if (tsd_mode == DRV8873_TSD_AUTO_RECOVERY) {
         reg_value |= (1 << 6);
     } else {
         reg_value &= ~(1 << 6);
@@ -300,11 +300,11 @@ esp_err_t drv8873_set_tsd_mode(int auto_recovery, int device_index) {
         return ret;
     }
 
-    ESP_LOGI(TAG, "Device %d: TSD mode set to %s", device_index, auto_recovery ? "auto-recovery" : "latched");
+    ESP_LOGI(TAG, "Device %d: TSD mode set to %s", device_index, tsd_mode == DRV8873_TSD_AUTO_RECOVERY ? "auto-recovery" : "latched");
     return ESP_OK;
 }
 
-esp_err_t drv8873_set_itrip_rep(int report, int device_index) {
+esp_err_t drv8873_set_itrip_rep(drv8873_enable_t enable, int device_index) {
     uint8_t reg_value;
     esp_err_t ret;
 
@@ -321,7 +321,7 @@ esp_err_t drv8873_set_itrip_rep(int report, int device_index) {
     }
 
     // Update ITRIP_REP bit (bit 7)
-    if (report) {
+    if (enable == DRV8873_ENABLE) {
         reg_value |= (1 << 7);
     } else {
         reg_value &= ~(1 << 7);
@@ -333,11 +333,11 @@ esp_err_t drv8873_set_itrip_rep(int report, int device_index) {
         return ret;
     }
 
-    ESP_LOGI(TAG, "Device %d: ITRIP report %s", device_index, report ? "enabled" : "disabled");
+    ESP_LOGI(TAG, "Device %d: ITRIP report %s", device_index, enable == DRV8873_ENABLE ? "enabled" : "disabled");
     return ESP_OK;
 }
 
-esp_err_t drv8873_set_otw_rep(int report, int device_index) {
+esp_err_t drv8873_set_otw_rep(drv8873_enable_t enable, int device_index) {
     uint8_t reg_value;
     esp_err_t ret;
 
@@ -354,7 +354,7 @@ esp_err_t drv8873_set_otw_rep(int report, int device_index) {
     }
 
     // Update OTW_REP bit (bit 5)
-    if (report) {
+    if (enable == DRV8873_ENABLE) {
         reg_value |= (1 << 5);
     } else {
         reg_value &= ~(1 << 5);
@@ -366,11 +366,11 @@ esp_err_t drv8873_set_otw_rep(int report, int device_index) {
         return ret;
     }
 
-    ESP_LOGI(TAG, "Device %d: OTW report %s", device_index, report ? "enabled" : "disabled");
+    ESP_LOGI(TAG, "Device %d: OTW report %s", device_index, enable == DRV8873_ENABLE ? "enabled" : "disabled");
     return ESP_OK;
 }
 
-esp_err_t drv8873_set_dis_cpuv(int disable, int device_index) {
+esp_err_t drv8873_set_dis_cpuv(drv8873_enable_t disable, int device_index) {
     uint8_t reg_value;
     esp_err_t ret;
 
@@ -387,7 +387,7 @@ esp_err_t drv8873_set_dis_cpuv(int disable, int device_index) {
     }
 
     // Update DIS_CPUV bit (bit 4)
-    if (disable) {
+    if (disable == DRV8873_ENABLE) {
         reg_value |= (1 << 4);
     } else {
         reg_value &= ~(1 << 4);
@@ -399,11 +399,11 @@ esp_err_t drv8873_set_dis_cpuv(int disable, int device_index) {
         return ret;
     }
 
-    ESP_LOGI(TAG, "Device %d: CPUV %s", device_index, disable ? "disabled" : "enabled");
+    ESP_LOGI(TAG, "Device %d: CPUV %s", device_index, disable == DRV8873_ENABLE ? "disabled" : "enabled");
     return ESP_OK;
 }
 
-esp_err_t drv8873_set_ocp_tretry(int retry_time, int device_index) {
+esp_err_t drv8873_set_ocp_tretry(drv8873_ocp_retry_time_t retry_time, int device_index) {
     uint8_t reg_value;
     esp_err_t ret;
 
@@ -428,11 +428,19 @@ esp_err_t drv8873_set_ocp_tretry(int retry_time, int device_index) {
         return ret;
     }
 
-    ESP_LOGI(TAG, "Device %d: OCP retry time set to %dms", device_index, retry_time * 500);
+    // Map retry time enum to milliseconds for logging
+    uint8_t retry_ms = 500; // default
+    switch (retry_time) {
+        case DRV8873_OCP_TRETRY_0_5MS: retry_ms = 500; break;
+        case DRV8873_OCP_TRETRY_1MS: retry_ms = 1000; break;
+        case DRV8873_OCP_TRETRY_2MS: retry_ms = 2000; break;
+        case DRV8873_OCP_TRETRY_4MS: retry_ms = 4000; break;
+    }
+    ESP_LOGI(TAG, "Device %d: OCP retry time set to %dms", device_index, retry_ms);
     return ESP_OK;
 }
 
-esp_err_t drv8873_set_en_olp(int enable, int device_index) {
+esp_err_t drv8873_set_en_olp(drv8873_enable_t enable, int device_index) {
     uint8_t reg_value;
     esp_err_t ret;
 
@@ -449,7 +457,7 @@ esp_err_t drv8873_set_en_olp(int enable, int device_index) {
     }
 
     // Update EN_OLP bit (bit 6)
-    if (enable) {
+    if (enable == DRV8873_ENABLE) {
         reg_value |= (1 << 6);
     } else {
         reg_value &= ~(1 << 6);
@@ -461,11 +469,11 @@ esp_err_t drv8873_set_en_olp(int enable, int device_index) {
         return ret;
     }
 
-    ESP_LOGI(TAG, "Device %d: OLP diagnostic %s", device_index, enable ? "enabled" : "disabled");
+    ESP_LOGI(TAG, "Device %d: OLP diagnostic %s", device_index, enable == DRV8873_ENABLE ? "enabled" : "disabled");
     return ESP_OK;
 }
 
-esp_err_t drv8873_set_olp_delay(int delay, int device_index) {
+esp_err_t drv8873_set_olp_delay(drv8873_olp_delay_t delay, int device_index) {
     uint8_t reg_value;
     esp_err_t ret;
 
@@ -482,7 +490,7 @@ esp_err_t drv8873_set_olp_delay(int delay, int device_index) {
     }
 
     // Update OLP_DLY bit (bit 5)
-    if (delay) {
+    if (delay == DRV8873_OLP_DELAY_1_2MS) {
         reg_value |= (1 << 5);
     } else {
         reg_value &= ~(1 << 5);
@@ -494,11 +502,11 @@ esp_err_t drv8873_set_olp_delay(int delay, int device_index) {
         return ret;
     }
 
-    ESP_LOGI(TAG, "Device %d: OLP delay set to %s", device_index, delay ? "1.2ms" : "300us");
+    ESP_LOGI(TAG, "Device %d: OLP delay set to %s", device_index, delay == DRV8873_OLP_DELAY_1_2MS ? "1.2ms" : "300us");
     return ESP_OK;
 }
 
-esp_err_t drv8873_set_en_ola(int enable, int device_index) {
+esp_err_t drv8873_set_en_ola(drv8873_enable_t enable, int device_index) {
     uint8_t reg_value;
     esp_err_t ret;
 
@@ -515,7 +523,7 @@ esp_err_t drv8873_set_en_ola(int enable, int device_index) {
     }
 
     // Update EN_OLA bit (bit 4)
-    if (enable) {
+    if (enable == DRV8873_ENABLE) {
         reg_value |= (1 << 4);
     } else {
         reg_value &= ~(1 << 4);
@@ -527,7 +535,7 @@ esp_err_t drv8873_set_en_ola(int enable, int device_index) {
         return ret;
     }
 
-    ESP_LOGI(TAG, "Device %d: OLA diagnostic %s", device_index, enable ? "enabled" : "disabled");
+    ESP_LOGI(TAG, "Device %d: OLA diagnostic %s", device_index, enable == DRV8873_ENABLE ? "enabled" : "disabled");
     return ESP_OK;
 }
 
@@ -702,7 +710,7 @@ esp_err_t drv8873_clear_fault(int device_index) {
     return ESP_OK;
 }
 
-esp_err_t drv8873_lock_registers(int lock, int device_index) {
+esp_err_t drv8873_lock_registers(drv8873_lock_t lock, int device_index) {
     uint8_t reg_value;
     esp_err_t ret;
 
@@ -719,7 +727,7 @@ esp_err_t drv8873_lock_registers(int lock, int device_index) {
     }
 
     // Update LOCK field (bits 6-4)
-    if (lock) {
+    if (lock == DRV8873_REG_LOCKED) {
         reg_value = (reg_value & 0x8F) | (0x03 << 4); // 011b = Locked
     } else {
         reg_value = (reg_value & 0x8F) | (0x04 << 4); // 100b = Unlocked
@@ -731,6 +739,6 @@ esp_err_t drv8873_lock_registers(int lock, int device_index) {
         return ret;
     }
 
-    ESP_LOGI(TAG, "Device %d: Registers %s", device_index, lock ? "locked" : "unlocked");
+    ESP_LOGI(TAG, "Device %d: Registers %s", device_index, lock == DRV8873_REG_LOCKED ? "locked" : "unlocked");
     return ESP_OK;
 }

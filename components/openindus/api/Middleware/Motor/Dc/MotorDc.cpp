@@ -294,38 +294,49 @@ esp_err_t MotorDc::initHBridge(void)
             return err;
         }
 
+        err |= drv8873_set_itrip_rep(DRV8873_ENABLE, i);
+        if (err != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to enable ITRIP report for device %d: %d", i, err);
+            return err;
+        }
+
+        err |= drv8873_set_otw_rep(DRV8873_ENABLE, i);
+        if (err != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to enable Overtemperature Warning (OTW) report for device %d: %d", i, err);
+            return err;
+        }
+
+        err |= drv8873_set_dis_cpuv(DRV8873_ENABLE, i);
+        if (err != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to enable Charge Pump Undervoltage (CPUV) detection for device %d: %d", i, err);
+            return err;
+        }   
+
         // Set OCP protection to latched
         err |= drv8873_set_ocp_mode(DRV8873_OCP_MODE_LATCHED, i);
         if (err != ESP_OK) {
-            ESP_LOGE(TAG, "Failed to set DRV8873 OCP mode for device %d: %d", i, err);
+            ESP_LOGE(TAG, "Failed to set Overcurrent Protection (OCP) mode for device %d: %d", i, err);
             return err;
         }
 
-        // Do NOT disable CPUV detection
-        err |= drv8873_set_dis_cpuv(0, i);
+        // Set Thermal Shutdown (TSD) to auto-recovery
+        err |= drv8873_set_tsd_mode(DRV8873_TSD_AUTO_RECOVERY, i);
         if (err != ESP_OK) {
-            ESP_LOGE(TAG, "Failed to enable DRV8873 CPUV detection for device %d: %d", i, err);
+            ESP_LOGE(TAG, "Failed to enable Thermal Shutdown (TSD) auto-recovery for device %d: %d", i, err);
             return err;
         }
 
-        // Disable TSD auto-recovery (maximum security: require manual intervention)
-        err |= drv8873_set_tsd_mode(0, i);
+        // Disable OLP (Open-Load Detection)
+        err |= drv8873_set_en_olp(DRV8873_ENABLE, i);
         if (err != ESP_OK) {
-            ESP_LOGE(TAG, "Failed to disable DRV8873 TSD auto-recovery for device %d: %d", i, err);
-            return err;
-        }
-
-        // Disable OLP (overload protection)
-        err |= drv8873_set_en_olp(0, i);
-        if (err != ESP_OK) {
-            ESP_LOGE(TAG, "Failed to disable DRV8873 OLP for device %d: %d", i, err);
+            ESP_LOGE(TAG, "Failed to disable Open-Load Detection (OLP) for device %d: %d", i, err);
             return err;
         }
 
         // Set OLP delay to maximum 
-        err |= drv8873_set_olp_delay(1, i);
+        err |= drv8873_set_olp_delay(DRV8873_OLP_DELAY_1_2MS, i);
         if (err != ESP_OK) {
-            ESP_LOGE(TAG, "Failed to set DRV8873 OLP delay for device %d: %d", i, err);
+            ESP_LOGE(TAG, "Failed to set Open-Load Detection (OLP) delay for device %d: %d", i, err);
             return err;
         }
 

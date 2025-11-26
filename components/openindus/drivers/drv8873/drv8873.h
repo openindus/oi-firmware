@@ -78,6 +78,38 @@ typedef enum {
     DRV8873_DIAG_OCP_L2_MASK = 0x01,      // Overcurrent on low-side FET 2 (bit 0)
 } drv8873_diag_mask_t;
 
+// Enable/Disable Options
+typedef enum {
+    DRV8873_DISABLE = 0x00,   // Disabled
+    DRV8873_ENABLE = 0x01,    // Enabled
+} drv8873_enable_t;
+
+// Thermal Shutdown Auto-Recovery Options
+typedef enum {
+    DRV8873_TSD_LATCHED = 0x00,     // Latched shutdown
+    DRV8873_TSD_AUTO_RECOVERY = 0x01, // Auto-recovery
+} drv8873_tsd_mode_t;
+
+// OCP Auto-Retry Time Options (IC2 Control Register, bits 3-2)
+typedef enum {
+    DRV8873_OCP_TRETRY_0_5MS = 0x00,   // 0.5 ms
+    DRV8873_OCP_TRETRY_1MS = 0x01,     // 1 ms
+    DRV8873_OCP_TRETRY_2MS = 0x02,     // 2 ms
+    DRV8873_OCP_TRETRY_4MS = 0x03,     // 4 ms
+} drv8873_ocp_retry_time_t;
+
+// Open-Load Detection Delay Options (IC4 Control Register, bit 5)
+typedef enum {
+    DRV8873_OLP_DELAY_300US = 0x00,    // 300 µs
+    DRV8873_OLP_DELAY_1_2MS = 0x01,    // 1.2 ms
+} drv8873_olp_delay_t;
+
+// Register Lock Options (IC3 Control Register, bits 6-4)
+typedef enum {
+    DRV8873_REG_UNLOCKED = 0x00,  // Unlocked (100b)
+    DRV8873_REG_LOCKED = 0x01,    // Locked (011b)
+} drv8873_lock_t;
+
 // Configuration structure for daisy-chained DRV8873 devices
 typedef struct {
     spi_device_handle_t spi_handle;  // SPI handle for DRV8873
@@ -132,75 +164,75 @@ esp_err_t drv8873_set_ocp_mode(drv8873_ocp_mode_t ocp_mode, int device_index);
 
 /**
  * @brief Configure Thermal Shutdown (TSD) behavior for a specific device in daisy chain
- * @param auto_recovery 1 for auto-recovery, 0 for latched shutdown
+ * @param tsd_mode TSD mode to set (Latched, Auto-recovery)
  * @param device_index Device index in daisy chain (0-3)
  * @details Writes to bit 6 of IC2_CONTROL register (0x03)
  * @return ESP_OK on success, error code otherwise
  */
-esp_err_t drv8873_set_tsd_mode(int auto_recovery, int device_index);
+esp_err_t drv8873_set_tsd_mode(drv8873_tsd_mode_t tsd_mode, int device_index);
 
 /**
  * @brief Enable/disable ITRIP event reporting on nFAULT for a specific device in daisy chain
- * @param report 1 to enable reporting, 0 to disable
+ * @param enable Enable or disable reporting
  * @param device_index Device index in daisy chain (0-3)
  * @details Writes to bit 7 of IC2_CONTROL register (0x03)
  * @return ESP_OK on success, error code otherwise
  */
-esp_err_t drv8873_set_itrip_rep(int report, int device_index);
+esp_err_t drv8873_set_itrip_rep(drv8873_enable_t enable, int device_index);
 
 /**
  * @brief Enable/disable Overtemperature Warning (OTW) reporting on nFAULT for a specific device in daisy chain
- * @param report 1 to enable reporting, 0 to disable
+ * @param enable Enable or disable reporting
  * @param device_index Device index in daisy chain (0-3)
  * @details Writes to bit 5 of IC2_CONTROL register (0x03)
  * @return ESP_OK on success, error code otherwise
  */
-esp_err_t drv8873_set_otw_rep(int report, int device_index);
+esp_err_t drv8873_set_otw_rep(drv8873_enable_t enable, int device_index);
 
 /**
  * @brief Enable/disable Charge Pump Undervoltage (CPUV) detection for a specific device in daisy chain
- * @param disable 1 to disable detection (H-bridge remains active), 0 to enable (H-bridge goes to Hi-Z)
+ * @param disable Disable detection (H-bridge remains active), enable detection (H-bridge goes to Hi-Z)
  * @param device_index Device index in daisy chain (0-3)
  * @details Writes to bit 4 of IC2_CONTROL register (0x03)
  * @return ESP_OK on success, error code otherwise
  */
-esp_err_t drv8873_set_dis_cpuv(int disable, int device_index);
+esp_err_t drv8873_set_dis_cpuv(drv8873_enable_t disable, int device_index);
 
 /**
  * @brief Configure OCP auto-retry time for a specific device in daisy chain
- * @param retry_time Retry time (0=0.5ms, 1=1ms, 2=2ms, 3=4ms)
+ * @param retry_time Retry time to set
  * @param device_index Device index in daisy chain (0-3)
  * @details Writes to bits 3-2 of IC2_CONTROL register (0x03)
  * @return ESP_OK on success, error code otherwise
  */
-esp_err_t drv8873_set_ocp_tretry(int retry_time, int device_index);
+esp_err_t drv8873_set_ocp_tretry(drv8873_ocp_retry_time_t retry_time, int device_index);
 
 /**
  * @brief Enable passive Open-Load detection (OLP) for a specific device in daisy chain
- * @param enable 1 to enable, 0 to disable
+ * @param enable Enable or disable passive detection
  * @param device_index Device index in daisy chain (0-3)
  * @details Writes to bit 6 of IC4_CONTROL register (0x05)
  * @return ESP_OK on success, error code otherwise
  */
-esp_err_t drv8873_set_en_olp(int enable, int device_index);
+esp_err_t drv8873_set_en_olp(drv8873_enable_t enable, int device_index);
 
 /**
  * @brief Configure OLP diagnostic delay for a specific device in daisy chain
- * @param delay 1 for 1.2ms, 0 for 300µs
+ * @param delay Delay to set
  * @param device_index Device index in daisy chain (0-3)
  * @details Writes to bit 5 of IC4_CONTROL register (0x05)
  * @return ESP_OK on success, error code otherwise
  */
-esp_err_t drv8873_set_olp_delay(int delay, int device_index);
+esp_err_t drv8873_set_olp_delay(drv8873_olp_delay_t delay, int device_index);
 
 /**
  * @brief Enable active Open-Load detection (OLA) for a specific device in daisy chain
- * @param enable 1 to enable, 0 to disable
+ * @param enable Enable or disable active detection
  * @param device_index Device index in daisy chain (0-3)
  * @details Writes to bit 4 of IC4_CONTROL register (0x05)
  * @return ESP_OK on success, error code otherwise
  */
-esp_err_t drv8873_set_en_ola(int enable, int device_index);
+esp_err_t drv8873_set_en_ola(drv8873_enable_t enable, int device_index);
 
 /**
  * @brief Disable current regulation (ITRIP) on half-bridges for a specific device in daisy chain
@@ -239,12 +271,12 @@ esp_err_t drv8873_clear_fault(int device_index);
 
 /**
  * @brief Lock/unlock control registers for a specific device in daisy chain
- * @param lock 1 to lock (011b), 0 to unlock (100b)
+ * @param lock Lock or unlock registers
  * @param device_index Device index in daisy chain (0-3)
  * @details Writes to bits 6-4 of IC3_CONTROL register (0x04)
  * @return ESP_OK on success, error code otherwise
  */
-esp_err_t drv8873_lock_registers(int lock, int device_index);
+esp_err_t drv8873_lock_registers(drv8873_lock_t lock, int device_index);
 
 #ifdef __cplusplus
 }
