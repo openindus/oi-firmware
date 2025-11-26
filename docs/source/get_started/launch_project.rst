@@ -314,20 +314,130 @@ With the configuration above, you can instantiate modules as follow without cari
     This way of instantiate is not scalable. If you change one module, the part number will be different and you will have to update your code. 
     The advantage is that you can place your module where you want on the rail.
 
+Use Arduino code
+----------------
+
+
+If you are beginner with Arduino programming, you will find a lot of examples codes on the internet. You can use them with adaptation in the code source.
+You will also find some example codes using arduino libraries under the folder "component/arduino/libraries/.../examples".
+
+
+Use Ticker to control timing
+****************************
+
+Here, we will show you how to adapt the Ticker example to run it on an OICore.
+Ticker is a libraries taht allow you to use timer in a simple manner. The library expose an API taht wrap low level timer settting with simple.
+
+The example code for Arduino is the following :
+
+.. code-block:: cpp
+
+    #include <Arduino.h>
+    #include <Ticker.h>
+
+    // attach a LED to pPIO 21
+    #define LED_PIN 21
+
+    Ticker blinker;
+    Ticker toggler;
+    Ticker changer;
+    float blinkerPace = 0.1;       //seconds
+    const float togglePeriod = 5;  //seconds
+
+    void change() {
+        blinkerPace = 0.5;
+    }
+
+    void blink() {
+        digitalWrite(LED_PIN, !digitalRead(LED_PIN));
+    }
+
+    void toggle() {
+        static bool isBlinking = false;
+        if (isBlinking) {
+            blinker.detach();
+            isBlinking = false;
+        } else {
+            blinker.attach(blinkerPace, blink);
+            isBlinking = true;
+        }
+        digitalWrite(LED_PIN, LOW);  //make sure LED on on after toggling (pin LOW = led ON)
+    }
+
+    void setup() {
+        pinMode(LED_PIN, OUTPUT);
+        toggler.attach(togglePeriod, toggle);
+        changer.once(30, change);
+    }
+
+    void loop() {}
+
+
+What do you need to modify to use it on an OICore ?
+
+* First, include "openindus.h" and declare an OICore
+* Change the LED pin with DOUT_1 (or any other output pin)
+* Change all call to `digitalRead` and `digitalWrite` with `core.digitalRead` and `core.digitalWrite`
+* Remove the call to `pinMode` because it is not needed
+* And that's it ! You can now run your build and flash your code !
+
+Here is the full code modified :
+
+.. code-block:: cpp
+
+    #include "OpenIndus.h"
+    #include <Arduino.h>
+    #include <Ticker.h>
+
+    OICore core;
+
+    // attach a LED to pPIO 21
+    #define LED_PIN DOUT_1
+
+    Ticker blinker;
+    Ticker toggler;
+    Ticker changer;
+    float blinkerPace = 0.1;       //seconds
+    const float togglePeriod = 5;  //seconds
+
+    void change() {
+        blinkerPace = 0.5;
+    }
+
+    void blink() {
+        core.digitalWrite(LED_PIN, !core.digitalRead(LED_PIN));
+    }
+
+    void toggle() {
+        static bool isBlinking = false;
+        if (isBlinking) {
+            blinker.detach();
+            isBlinking = false;
+        } else {
+            blinker.attach(blinkerPace, blink);
+            isBlinking = true;
+        }
+        core.digitalWrite(LED_PIN, LOW);  //make sure LED on on after toggling (pin LOW = led ON)
+    }
+
+    void setup() {
+        toggler.attach(togglePeriod, toggle);
+        changer.once(30, change);
+    }
+
+    void loop() {}
+
+
+.. danger:: Be carefful to not use direrctly the arduino function `digitalWrite` and `digitalRead` because the behaviour is undefinned and your code will not work as expected.
+
+
 Add external library to the code
 --------------------------------
 
-One of the main advantage of using pio is the wide range of library compatible with OpenIndus modules which is supported. It can helps you to quickly implements functions in your code.
+You can use many librairies written for Arduino or for ESP32. Depending on the library, we will have to do small modification or a full reintegration.
 
-To add a library, use the libraries tool from PlatformIO:
+You can find a lot of arduino libraries on the official website (convert to ling: https://docs.arduino.cc/libraries/). 
+Most of the time, you can adapt them by adding a CMakeList.txt file (convet to link: https://docs.espressif.com/projects/esp-idf/en/stable/esp32s3/api-guides/build-system.html#component-cmakelists-files)
 
-* Open PlatformIO Home
-* Click on the "Libraries" panel
-* Search for a library 
-* Select a library
-* Click on "Add to project"
-* Select the project
-* Click on "Add"
-
-.. note::
-    Most or libraries compatible with "framework:arduino" and "platform:espressif32" will work with :ref:`OI-Core<OI-Core>` module
+You can also found libraries written with esp-idf framework here : (convert to link: https://components.espressif.com/)
+These librarie can be addded to the prohect using ESP-IDF Component manager (convert to link: https://docs.espressif.com/projects/esp-idf/en/stable/esp32s3/api-guides/tools/idf-component-manager.html)
