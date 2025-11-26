@@ -104,6 +104,12 @@ typedef enum {
     DRV8873_OLP_DELAY_1_2MS = 0x01,    // 1.2 ms
 } drv8873_olp_delay_t;
 
+// CPUV (Charge Pump Undervoltage) Detection Options (IC2 Control Register, bit 4)
+typedef enum {
+    DRV8873_CPUV_DETECTION_ENABLED = 0x00,   // CPUV detection enabled (H-bridge goes to Hi-Z)
+    DRV8873_CPUV_DETECTION_DISABLED = 0x01,  // CPUV detection disabled (H-bridge remains active)
+} drv8873_cpuv_detection_t;
+
 // Register Lock Options (IC3 Control Register, bits 6-4)
 typedef enum {
     DRV8873_REG_UNLOCKED = 0x00,  // Unlocked (100b)
@@ -190,13 +196,13 @@ esp_err_t drv8873_set_itrip_rep(drv8873_enable_t enable, int device_index);
 esp_err_t drv8873_set_otw_rep(drv8873_enable_t enable, int device_index);
 
 /**
- * @brief Enable/disable Charge Pump Undervoltage (CPUV) detection for a specific device in daisy chain
- * @param disable Disable detection (H-bridge remains active), enable detection (H-bridge goes to Hi-Z)
+ * @brief Configure Charge Pump Undervoltage (CPUV) detection for a specific device in daisy chain
+ * @param detection Detection mode to set
  * @param device_index Device index in daisy chain (0-3)
  * @details Writes to bit 4 of IC2_CONTROL register (0x03)
  * @return ESP_OK on success, error code otherwise
  */
-esp_err_t drv8873_set_dis_cpuv(drv8873_enable_t disable, int device_index);
+esp_err_t drv8873_set_dis_cpuv(drv8873_cpuv_detection_t detection, int device_index);
 
 /**
  * @brief Configure OCP auto-retry time for a specific device in daisy chain

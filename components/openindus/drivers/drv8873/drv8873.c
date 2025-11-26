@@ -142,12 +142,12 @@ static esp_err_t drv8873_spi_transfer_register(drv8873_register_t reg_address, u
         ret = ESP_ERR_INVALID_RESPONSE;
     }
     if (total_bytes == 10) {
-        ESP_LOGD(TAG, "TX: H1 H2 A4 A3 A2 A1 D4 D3 D2 D1");
-        ESP_LOGD(TAG, "TX: %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X", tx_buffer[0], tx_buffer[1], tx_buffer[2], tx_buffer[3], tx_buffer[4], tx_buffer[5], tx_buffer[6], tx_buffer[7], tx_buffer[8], tx_buffer[9]);
-        ESP_LOGD(TAG, "RX: S4 S3 S2 S1 H1 H2 R4 R3 R2 R1");
-        ESP_LOGD(TAG, "RX: %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X", rx_buffer[0], rx_buffer[1], rx_buffer[2], rx_buffer[3], rx_buffer[4], rx_buffer[5], rx_buffer[6], rx_buffer[7], rx_buffer[8], rx_buffer[9]);
+        ESP_LOGV(TAG, "TX: H1 H2 A4 A3 A2 A1 D4 D3 D2 D1");
+        ESP_LOGV(TAG, "TX: %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X", tx_buffer[0], tx_buffer[1], tx_buffer[2], tx_buffer[3], tx_buffer[4], tx_buffer[5], tx_buffer[6], tx_buffer[7], tx_buffer[8], tx_buffer[9]);
+        ESP_LOGV(TAG, "RX: S4 S3 S2 S1 H1 H2 R4 R3 R2 R1");
+        ESP_LOGV(TAG, "RX: %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X", rx_buffer[0], rx_buffer[1], rx_buffer[2], rx_buffer[3], rx_buffer[4], rx_buffer[5], rx_buffer[6], rx_buffer[7], rx_buffer[8], rx_buffer[9]);
         if (is_read) {
-            ESP_LOGD(TAG, "SPI Read Reg 0x%02X from Device %d: RX: %02X", reg_address, device_index, *reg_value);
+            ESP_LOGV(TAG, "SPI Read Reg 0x%02X from Device %d: RX: %02X", reg_address, device_index, *reg_value);
         }
     }
     free(tx_buffer);
@@ -180,7 +180,8 @@ esp_err_t drv8873_set_mode(drv8873_mode_t mode, int device_index) {
         return ret;
     }
 
-    ESP_LOGI(TAG, "Device %d: Mode set to 0x%02X", device_index, mode);
+    const char *mode_str[] = {"Phase/Enable", "PWM", "Independent", "Disabled"};
+    ESP_LOGD(TAG, "Device %d: Control mode set to %s", device_index, mode_str[mode]);
     return ESP_OK;
 }
 
@@ -209,7 +210,7 @@ esp_err_t drv8873_set_current_limit(drv8873_itrip_level_t itrip_level, int devic
         return ret;
     }
 
-    ESP_LOGI(TAG, "Device %d: Current limit set to 0x%02X", device_index, itrip_level);
+    ESP_LOGD(TAG, "Device %d: ITRIP (current limit) threshold configured to level %d", device_index, itrip_level);
     return ESP_OK;
 }
 
@@ -238,7 +239,7 @@ esp_err_t drv8873_set_current_regulation(drv8873_current_regulation_t disable_fl
         return ret;
     }
 
-    ESP_LOGI(TAG, "Device %d: Current regulation for OUT1/OUT2: 0x%02X", device_index, disable_flags);
+    ESP_LOGD(TAG, "Device %d: Current regulation configuration disable flags set to 0x%02X", device_index, disable_flags);
     return ESP_OK;
 }
 
@@ -267,7 +268,7 @@ esp_err_t drv8873_set_ocp_mode(drv8873_ocp_mode_t ocp_mode, int device_index) {
         return ret;
     }
 
-    ESP_LOGI(TAG, "Device %d: OCP mode set to 0x%02X", device_index, ocp_mode);
+    ESP_LOGD(TAG, "Device %d: OCP (Overcurrent Protection) mode configured to %d", device_index, ocp_mode);
     return ESP_OK;
 }
 
@@ -300,7 +301,7 @@ esp_err_t drv8873_set_tsd_mode(drv8873_tsd_mode_t tsd_mode, int device_index) {
         return ret;
     }
 
-    ESP_LOGI(TAG, "Device %d: TSD mode set to %s", device_index, tsd_mode == DRV8873_TSD_AUTO_RECOVERY ? "auto-recovery" : "latched");
+    ESP_LOGD(TAG, "Device %d: TSD (Thermal Shutdown) mode set to %s", device_index, tsd_mode == DRV8873_TSD_AUTO_RECOVERY ? "auto-recovery" : "latched");
     return ESP_OK;
 }
 
@@ -333,7 +334,7 @@ esp_err_t drv8873_set_itrip_rep(drv8873_enable_t enable, int device_index) {
         return ret;
     }
 
-    ESP_LOGI(TAG, "Device %d: ITRIP report %s", device_index, enable == DRV8873_ENABLE ? "enabled" : "disabled");
+    ESP_LOGD(TAG, "Device %d: ITRIP (Current Trip) fault reporting %s", device_index, enable == DRV8873_ENABLE ? "enabled" : "disabled");
     return ESP_OK;
 }
 
@@ -366,11 +367,11 @@ esp_err_t drv8873_set_otw_rep(drv8873_enable_t enable, int device_index) {
         return ret;
     }
 
-    ESP_LOGI(TAG, "Device %d: OTW report %s", device_index, enable == DRV8873_ENABLE ? "enabled" : "disabled");
+    ESP_LOGD(TAG, "Device %d: OTW (Overtemperature Warning) reporting %s", device_index, enable == DRV8873_ENABLE ? "enabled" : "disabled");
     return ESP_OK;
 }
 
-esp_err_t drv8873_set_dis_cpuv(drv8873_enable_t disable, int device_index) {
+esp_err_t drv8873_set_dis_cpuv(drv8873_cpuv_detection_t detection, int device_index) {
     uint8_t reg_value;
     esp_err_t ret;
 
@@ -387,7 +388,7 @@ esp_err_t drv8873_set_dis_cpuv(drv8873_enable_t disable, int device_index) {
     }
 
     // Update DIS_CPUV bit (bit 4)
-    if (disable == DRV8873_ENABLE) {
+    if (detection == DRV8873_CPUV_DETECTION_DISABLED) {
         reg_value |= (1 << 4);
     } else {
         reg_value &= ~(1 << 4);
@@ -399,7 +400,7 @@ esp_err_t drv8873_set_dis_cpuv(drv8873_enable_t disable, int device_index) {
         return ret;
     }
 
-    ESP_LOGI(TAG, "Device %d: CPUV %s", device_index, disable == DRV8873_ENABLE ? "disabled" : "enabled");
+    ESP_LOGD(TAG, "Device %d: CPUV (Charge Pump Undervoltage) detection %s", device_index, detection == DRV8873_CPUV_DETECTION_DISABLED ? "disabled" : "enabled");
     return ESP_OK;
 }
 
@@ -436,7 +437,7 @@ esp_err_t drv8873_set_ocp_tretry(drv8873_ocp_retry_time_t retry_time, int device
         case DRV8873_OCP_TRETRY_2MS: retry_ms = 2000; break;
         case DRV8873_OCP_TRETRY_4MS: retry_ms = 4000; break;
     }
-    ESP_LOGI(TAG, "Device %d: OCP retry time set to %dms", device_index, retry_ms);
+    ESP_LOGD(TAG, "Device %d: OCP (Overcurrent Protection) auto-retry time set to %dms", device_index, retry_ms);
     return ESP_OK;
 }
 
@@ -469,7 +470,7 @@ esp_err_t drv8873_set_en_olp(drv8873_enable_t enable, int device_index) {
         return ret;
     }
 
-    ESP_LOGI(TAG, "Device %d: OLP diagnostic %s", device_index, enable == DRV8873_ENABLE ? "enabled" : "disabled");
+    ESP_LOGD(TAG, "Device %d: OLP (Open-Load Detection) passive diagnostic %s", device_index, enable == DRV8873_ENABLE ? "enabled" : "disabled");
     return ESP_OK;
 }
 
@@ -502,7 +503,7 @@ esp_err_t drv8873_set_olp_delay(drv8873_olp_delay_t delay, int device_index) {
         return ret;
     }
 
-    ESP_LOGI(TAG, "Device %d: OLP delay set to %s", device_index, delay == DRV8873_OLP_DELAY_1_2MS ? "1.2ms" : "300us");
+    ESP_LOGD(TAG, "Device %d: OLP (Open-Load Detection) delay set to %s", device_index, delay == DRV8873_OLP_DELAY_1_2MS ? "1.2ms" : "300us");
     return ESP_OK;
 }
 
@@ -535,7 +536,7 @@ esp_err_t drv8873_set_en_ola(drv8873_enable_t enable, int device_index) {
         return ret;
     }
 
-    ESP_LOGI(TAG, "Device %d: OLA diagnostic %s", device_index, enable == DRV8873_ENABLE ? "enabled" : "disabled");
+    ESP_LOGD(TAG, "Device %d: OLA (Active Open-Load Detection) diagnostic %s", device_index, enable == DRV8873_ENABLE ? "enabled" : "disabled");
     return ESP_OK;
 }
 
@@ -564,7 +565,7 @@ esp_err_t drv8873_set_dis_itrip(drv8873_current_regulation_t disable_flags, int 
         return ret;
     }
 
-    ESP_LOGI(TAG, "Device %d: ITRIP disabled for OUT1/OUT2: 0x%02X", device_index, disable_flags);
+    ESP_LOGD(TAG, "Device %d: ITRIP (Current Trip) regulation configuration for OUT1/OUT2", device_index);
     return ESP_OK;
 }
 
@@ -706,7 +707,7 @@ esp_err_t drv8873_clear_fault(int device_index) {
         return ret;
     }
 
-    ESP_LOGI(TAG, "Device %d: Faults cleared via CLR_FLT", device_index);
+    ESP_LOGD(TAG, "Device %d: Faults cleared via CLR_FLT (Clear Fault bit)", device_index);
     return ESP_OK;
 }
 
@@ -739,6 +740,6 @@ esp_err_t drv8873_lock_registers(drv8873_lock_t lock, int device_index) {
         return ret;
     }
 
-    ESP_LOGI(TAG, "Device %d: Registers %s", device_index, lock == DRV8873_REG_LOCKED ? "locked" : "unlocked");
+    ESP_LOGD(TAG, "Device %d: Control registers %s", device_index, lock == DRV8873_REG_LOCKED ? "locked" : "unlocked");
     return ESP_OK;
 }

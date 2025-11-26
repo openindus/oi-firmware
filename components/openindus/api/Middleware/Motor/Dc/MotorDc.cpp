@@ -306,7 +306,7 @@ esp_err_t MotorDc::initHBridge(void)
             return err;
         }
 
-        err |= drv8873_set_dis_cpuv(DRV8873_ENABLE, i);
+        err |= drv8873_set_dis_cpuv(DRV8873_CPUV_DETECTION_ENABLED, i);
         if (err != ESP_OK) {
             ESP_LOGE(TAG, "Failed to enable Charge Pump Undervoltage (CPUV) detection for device %d: %d", i, err);
             return err;
@@ -326,10 +326,10 @@ esp_err_t MotorDc::initHBridge(void)
             return err;
         }
 
-        // Disable OLP (Open-Load Detection)
+        // Enable OLP (Open-Load Detection)
         err |= drv8873_set_en_olp(DRV8873_ENABLE, i);
         if (err != ESP_OK) {
-            ESP_LOGE(TAG, "Failed to disable Open-Load Detection (OLP) for device %d: %d", i, err);
+            ESP_LOGE(TAG, "Failed to enable Open-Load Detection (OLP) for device %d: %d", i, err);
             return err;
         }
 
@@ -356,7 +356,7 @@ esp_err_t MotorDc::initHBridge(void)
         uint8_t fault_status;
         err |= drv8873_get_fault_status(&fault_status, i);
         if (err == ESP_OK) {
-            ESP_LOGI(TAG, "DRV8873 Device %d Fault status: 0x%04X", i, fault_status);
+            ESP_LOGD(TAG, "DRV8873 Device %d Fault status: 0x%04X", i, fault_status);
         } else {
             ESP_LOGE(TAG, "Failed to read DRV8873 Device %d fault status: %d", i, err);
         }
