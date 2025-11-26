@@ -29,9 +29,9 @@ You can find specification of each module in the :ref:`modules<modules-index>` s
 
 .. toctree::
    :maxdepth: 2
-   :caption: Wiring and mechanics
+   :caption: Mechanical
 
-   wiring_mechanics/index.rst
+   mechanicals/index.rst
 
 .. toctree::
    :maxdepth: 2
