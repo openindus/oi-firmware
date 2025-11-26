@@ -3,16 +3,96 @@
 Hardware Setup
 ==============
 
-This guide will help you set up your OpenIndus module hardware, including power supply wiring.
+This guide will help you set up your OpenIndus module hardware, including system assembly, terminal block wiring, and power supply configuration.
+
+
+System Assembly
+---------------
+
+OpenIndus system uses rails for communications between modules. 
+
+Rail Types
+**********
+
+There are four types of rails depending on your needs and the OpenIndus kit you have:
+
+- Head rail with only one USB-C connector at its tail
+- Middle rail with two USB-C connectors
+- End rail with one USB-C connector at its head
+- Single rail with no USB-C connector (for standalone use)
+
+.. image:: ../_static/systeme_rail.png
+    :width: 500
+    :alt: Rail system
+    :align: center
+
+Connecting Rails with USB-C Cables
+***********************************
+
+To connect multiple rails together:
+
+1. Identify the USB-C connectors on each rail (head and/or tail)
+2. Use the provided USB-C cables to connect the tail of one rail to the head of the next rail
+3. Continue chaining rails as needed for your system configuration
+
+.. warning:: 
+    USB-C wires are provided with our products to connect your rails. 
+    Please use only those wires because they are specific for this usage.
+
+.. DANGER:: 
+    Please do not connect OpenIndus rails to a computer or any other devices that do not belong to OpenIndus products. 
+    We deny any responsibilities in case of damages.
+
+
+Plugging Modules onto Rails
+****************************
+
+Once your rails are assembled and connected, you can plug your OpenIndus modules onto them.
+
+.. note::
+    An image showing how to plug modules onto rails will be added soon.
+
+1. Align the module with the rail connector
+2. Firmly press the module onto the rail until it clicks into place
+3. Ensure the module is securely attached before powering the system
+
+.. note::
+    Modules communicate through the rail system, so proper connection is essential for system operation.
+
+
+Terminal Block Wiring
+---------------------
+
+In all OpenIndus kits we provide you terminal blocks to wire your system easily.
+
+.. image:: ../_static/bornier.png
+    :width: 200
+    :alt: Terminal block
+    :align: center
+
+It is a 16 contacts board connector with a pitch of 3.5mm. 
+It support wire cross section from 0.2mm² up to 1.5mm².
+
+.. warning:: 
+    Do not use wire ferrules with these terminal blocks. 
+    Ferrules with insulating collar do not fit properly in the connector, and ferrules without insulating collar get stuck inside the terminal mechanism. 
+    The terminal blocks are designed for bare wire connections only.
+
+Wiring steps:
+
+1. Strip the wire insulation over a length of 7 to 8 mm.
+2. Press the spring of the terminal block using a flat-head screwdriver, then insert the stripped wire until it is securely held.
+
+Make sure no copper strands are exposed outside the terminal block and that the wire is firmly held.
+
+
+Power Supply
+------------
+
+All OpenIndus modules can be powered through the terminal block with a voltage between 9VDC and 30VDC (typically 24V DC).
 
 .. warning:: 
     Always disconnect power before wiring or modifying connections. Work in a safe environment following electrical safety standards.
-
-
-Power Supply Connection
------------------------
-
-All OpenIndus modules can be powered through the terminal block with a voltage between 9VDC and 30VDC (typically 24V DC).
 
 Power Supply Requirements
 *************************
