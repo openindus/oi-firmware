@@ -17,6 +17,7 @@
 static struct {
     struct arg_int *motor;
     struct arg_int *dir;
+    struct arg_int *percentage;
     struct arg_end *end;
 } runArgs;
 
@@ -36,11 +37,16 @@ static int run(int argc, char **argv)
         fprintf(stderr, "Error: DIRECTION must be 0 (Reverse) or 1 (Forward).\n");
         return 1;
     }
+    if (runArgs.percentage->ival[0] < 0 || runArgs.percentage->ival[0] > 100) {
+        fprintf(stderr, "Error: PERCENTAGE must be in range [0-100].\n");
+        return 1;
+    }
 
     MotorNum_t motor = (MotorNum_t)(runArgs.motor->ival[0] - 1);
     MotorDirection_t direction = (MotorDirection_t)(runArgs.dir->ival[0]);
+    uint8_t percentage = (uint8_t)(runArgs.percentage->ival[0]);
 
-    MotorDc::run(motor, direction, 100);
+    MotorDc::run(motor, direction, percentage);
 
     return 0;
 }
@@ -49,11 +55,12 @@ static void _registerRun(void)
 {
     runArgs.motor   = arg_int1(NULL, NULL, "MOTOR", "[1-4]");
     runArgs.dir     = arg_int1(NULL, NULL, "DIRECTION", "[1: Forward, 0: Reverse]");
-    runArgs.end     = arg_end(4);
+    runArgs.percentage = arg_int1(NULL, NULL, "PERCENTAGE", "[0-100]");
+    runArgs.end     = arg_end(5);
 
     const esp_console_cmd_t cmd = {
         .command = "run",
-        .help = "run",
+        .help = "run motor with specified direction and percentage",
         .hint = NULL,
         .func = &run,
         .argtable = &runArgs,
