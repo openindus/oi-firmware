@@ -51,6 +51,13 @@ public:
     static void stop(MotorNum_t motor);
 
     /**
+     * @brief Brake a DC motor by calling run with speed 0
+     * 
+     * @param motor Motor number
+     */
+    static void brake(MotorNum_t motor);
+
+    /**
      * @brief Get current consumption of a DC motor
      * 
      * @param motor Motor number

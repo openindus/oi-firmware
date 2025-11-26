@@ -109,9 +109,12 @@ int MotorDc::init(std::vector<MotorDC_PinConfig_t> motorsConfig, gpio_num_t faul
 
 void MotorDc::run(MotorNum_t motor, MotorDirection_t direction, float dutyCycle)
 {
-    // Check duty cycle
-    if (dutyCycle < 0) dutyCycle = 0;
     if (dutyCycle > 100) dutyCycle = 100;
+    // Check duty cycle
+    if (dutyCycle <= 0) {
+        brake(motor);
+        return;
+    }
 
     // Enable motor
     gpio_set_level(_motorsConfig.at(motor).disable, 0);
@@ -134,6 +137,17 @@ void MotorDc::run(MotorNum_t motor, MotorDirection_t direction, float dutyCycle)
         ledc_update_duty(LEDC_MODE, _motorsConfig.at(motor).in2.channel);
     }
     _directions.at(motor) = direction;
+}
+
+void MotorDc::brake(MotorNum_t motor)
+{
+    ledc_set_duty(LEDC_MODE, _motorsConfig.at(motor).in1.channel, LEDC_DUTY_MAX);
+    ledc_update_duty(LEDC_MODE, _motorsConfig.at(motor).in1.channel);
+    
+    ledc_set_duty(LEDC_MODE, _motorsConfig.at(motor).in2.channel, LEDC_DUTY_MAX);
+    ledc_update_duty(LEDC_MODE, _motorsConfig.at(motor).in2.channel);
+    // Enable motor (brake active)
+    gpio_set_level(_motorsConfig.at(motor).disable, 0);
 }
 
 void MotorDc::stop(MotorNum_t motor)

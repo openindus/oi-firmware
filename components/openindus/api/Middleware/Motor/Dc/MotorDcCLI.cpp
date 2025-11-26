@@ -113,6 +113,49 @@ static void _registerStop(void)
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
 }
 
+/** 'brake' */
+static struct {
+    struct arg_int *motor;
+    struct arg_end *end;
+} brakeArgs;
+
+static int brake(int argc, char **argv)
+{
+    int nerrors = arg_parse(argc, argv, (void **) &brakeArgs);
+    if (nerrors != 0) {
+        arg_print_errors(stderr, brakeArgs.end, argv[0]);
+        return 1;
+    }
+
+    if (brakeArgs.motor->ival[0] < 1 || brakeArgs.motor->ival[0] > 4) {
+        fprintf(stderr, "Error: MOTOR must be in range [1-4].\n");
+        return 1;
+    }
+
+    MotorNum_t motor = (MotorNum_t)(brakeArgs.motor->ival[0] - 1);
+
+    MotorDc::brake(motor);
+
+    return 0;
+}
+
+static void _registerBrake(void)
+{
+    brakeArgs.motor  = arg_int1(NULL, NULL, "MOTOR", "[1-4]");
+    brakeArgs.end    = arg_end(2);
+
+    const esp_console_cmd_t cmd = {
+        .command = "brake",
+        .help = "brake the motor by setting speed to 0",
+        .hint = NULL,
+        .func = &brake,
+        .argtable = &brakeArgs,
+        .func_w_context = NULL,
+        .context = NULL
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+}
+
 /** 'getcurrent' */
 static struct {
     struct arg_int *motor;
@@ -339,6 +382,7 @@ int MotorDc::_registerCLI(void)
 {
     _registerRun();
     _registerStop();
+    _registerBrake();
     _registerGetCurrent();
     _registerGetFault();
     _registerClearFault();
