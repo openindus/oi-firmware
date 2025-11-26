@@ -324,12 +324,13 @@ You will also find some example codes using Arduino libraries under the folder "
 
 
 Example: Use Ticker to control timing
-*****************************
+***************************** 
 
 Here, we will show you how to adapt the Ticker example to run it on an OICore.
 Ticker is a library that allows you to use timer in a simple manner. The library exposes an API that wraps low level timer settings with simplicity.
 
 The example code for Arduino is the following:
+
 .. code-block:: cpp
 
     #include <Arduino.h>
@@ -382,6 +383,7 @@ What do you need to modify to use it on an OICore?
 * And that's it! You can now run your build and flash your code!
 
 Here is the full modified code:
+
 .. code-block:: cpp
 
     #include "OpenIndus.h"
@@ -435,8 +437,8 @@ Add external library to the code
 
 You can use many libraries written for Arduino or for ESP32. Depending on the library, we will have to do small modifications or a full reintegration.
 
-You can find a lot of Arduino libraries on the official website: https://docs.arduino.cc/libraries/
-Most of the time, you can adapt them by adding a CMakeLists.txt file: https://docs.espressif.com/projects/esp-idf/en/stable/esp32s3/api-guides/build-system.html#component-cmakelists-files
+You can find a lot of Arduino libraries on the `official Arduino libraries website <https://docs.arduino.cc/libraries/>`_.
+Most of the time, you can adapt them by adding a `CMakeLists.txt file <https://docs.espressif.com/projects/esp-idf/en/stable/esp32s3/api-guides/build-system.html#component-cmakelists-files>`_.
 
-You can also find libraries written with esp-idf framework here: https://components.espressif.com/
-These libraries can be added to the project using ESP-IDF Component manager: https://docs.espressif.com/projects/esp-idf/en/stable/esp32s3/api-guides/tools/idf-component-manager.html
+You can also find libraries written with esp-idf framework on the `ESP-IDF components website <https://components.espressif.com/>`_.
+These libraries can be added to the project using `ESP-IDF Component manager <https://docs.espressif.com/projects/esp-idf/en/stable/esp32s3/api-guides/tools/idf-component-manager.html>`_.
