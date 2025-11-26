@@ -70,7 +70,7 @@ public:
      * @param motor Motor number (0-3)
      * @return esp_err_t ESP_OK on success, error code otherwise
      */
-    static esp_err_t clear_fault(MotorNum_t motor);
+    static esp_err_t clearFault(MotorNum_t motor);
 
     /**
      * @brief Set the control mode of DRV8873 for a specific motor

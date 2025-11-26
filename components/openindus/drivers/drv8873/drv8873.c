@@ -591,10 +591,10 @@ esp_err_t drv8873_get_fault_status(uint8_t *fault_status, int device_index) {
 
         // Analyze DIAG register details
         if (diag_status & DRV8873_DIAG_OL1_MASK) {
-            ESP_LOGI(TAG, "Device %d: DIAG: Open Load on Half-Bridge 1", device_index);
+            ESP_LOGW(TAG, "Device %d: DIAG: Open Load on Half-Bridge 1", device_index);
         }
         if (diag_status & DRV8873_DIAG_OL2_MASK) {
-            ESP_LOGI(TAG, "Device %d: DIAG: Open Load on Half-Bridge 2", device_index);
+            ESP_LOGW(TAG, "Device %d: DIAG: Open Load on Half-Bridge 2", device_index);
         }
         if (diag_status & DRV8873_DIAG_OCP_H1_MASK) {
             ESP_LOGE(TAG, "Device %d: DIAG: Overcurrent on High-Side FET 1", device_index);
@@ -616,10 +616,12 @@ esp_err_t drv8873_get_fault_status(uint8_t *fault_status, int device_index) {
         }
 
         if (diag_status & (DRV8873_DIAG_OL1_MASK | DRV8873_DIAG_OL2_MASK)) {
-            ESP_LOGI(TAG, "Device %d: FAULT detected. DIAG status: 0x%04X (open-load detection is normal when outputs are disabled)", device_index, diag_status);
+            ESP_LOGI(TAG, "Device %d: FAULT detected. DIAG status: 0x%04X", device_index, diag_status);
         } else {
             ESP_LOGE(TAG, "Device %d: FAULT detected. DIAG status: 0x%04X", device_index, diag_status);
         }
+    }else {
+        ESP_LOGD(TAG, "Device %d: No FAULT detected. FAULT status: 0x%02X", device_index, *fault_status);
     }
 
     return ret;

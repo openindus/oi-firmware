@@ -326,7 +326,7 @@ esp_err_t MotorDc::initHBridge(void)
             return err;
         }
 
-        // Enable OLP (Open-Load Detection)
+        // Enable OLP (Open-Load Detection Passive) 
         err |= drv8873_set_en_olp(DRV8873_ENABLE, i);
         if (err != ESP_OK) {
             ESP_LOGE(TAG, "Failed to enable Open-Load Detection (OLP) for device %d: %d", i, err);
@@ -340,14 +340,14 @@ esp_err_t MotorDc::initHBridge(void)
             return err;
         }
 
-        // Clear any existing faults
-        err |= drv8873_clear_fault(i);
+        // Disable OLA (Active Open-Load Detection) 
+        // OLA does not work well. Prevent it from interfering with OLP.
+        err |= drv8873_set_en_ola(DRV8873_DISABLE, i);
         if (err != ESP_OK) {
-            ESP_LOGE(TAG, "Failed to clear DRV8873 faults for device %d: %d", i, err);
+            ESP_LOGE(TAG, "Failed to disable Active Open-Load Detection (OLA) for device %d: %d", i, err);
             return err;
         }
     }
-
     // Wait 10ms for stabilization
     vTaskDelay(pdMS_TO_TICKS(10));
 
@@ -355,10 +355,16 @@ esp_err_t MotorDc::initHBridge(void)
     for (int i = 0; i < 4; i++) {
         uint8_t fault_status;
         err |= drv8873_get_fault_status(&fault_status, i);
-        if (err == ESP_OK) {
-            ESP_LOGD(TAG, "DRV8873 Device %d Fault status: 0x%04X", i, fault_status);
-        } else {
-            ESP_LOGE(TAG, "Failed to read DRV8873 Device %d fault status: %d", i, err);
+        if (err != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to read DRV8873 faults for device %d: %d", i, err);
+            return err;
+        }
+
+        // Clear any existing faults
+        err |= drv8873_clear_fault(i);
+        if (err != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to clear DRV8873 faults for device %d: %d", i, err);
+            return err;
         }
     }
 
@@ -393,7 +399,7 @@ uint8_t fault_status;
     return fault_status;
 }
 
-esp_err_t MotorDc::clear_fault(MotorNum_t motor) {
+esp_err_t MotorDc::clearFault(MotorNum_t motor) {
     // Validate motor number
     if (motor < 0 || motor >= 4) {
         ESP_LOGE(TAG, "Invalid motor number: %d", motor);

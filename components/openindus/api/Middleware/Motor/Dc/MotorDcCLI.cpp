@@ -242,7 +242,7 @@ static int clearFault(int argc, char **argv)
 
     MotorNum_t motor = (MotorNum_t)(clearFaultArgs.motor->ival[0] - 1);
 
-    esp_err_t result = MotorDc::clear_fault(motor);
+    esp_err_t result = MotorDc::clearFault(motor);
 
     if (result == ESP_OK) {
         printf("Motor %d faults cleared successfully\n", clearFaultArgs.motor->ival[0]);
