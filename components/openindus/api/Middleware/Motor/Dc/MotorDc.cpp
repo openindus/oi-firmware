@@ -12,9 +12,15 @@
 
 #define LEDC_TIMER              LEDC_TIMER_0
 #define LEDC_MODE               LEDC_LOW_SPEED_MODE
-#define LEDC_DUTY_RES           LEDC_TIMER_13_BIT // Set duty resolution to 13 bits
-#define LEDC_DUTY_MAX           (8191) // Duty cycle max. ((2 ** 13) - 1)
-#define LEDC_FREQUENCY          (5000) // Frequency in Hertz. Set frequency at 5 kHz
+#define LEDC_DUTY_RES           LEDC_TIMER_11_BIT // 11 bits is enough to get over anyone hearable range
+#define LEDC_DUTY_MAX           0x7FF // 11 bits max
+#define MAX_DRV8873_FREQU       100000 // max driver is 100kHz
+// Frequency in Hertz over the audio range. can be up to 100kHz
+#define LEDC_FREQUENCY          39062 // Approx 39kHz is max at 11 bits resolution
+
+#if (LEDC_FREQUENCY > MAX_DRV8873_FREQU)
+    #error "LEDC_FREQUENCY exceeds maximum frequency supported by DRV8873"
+#endif
 
 static const char* TAG = "MotorDc";
 
