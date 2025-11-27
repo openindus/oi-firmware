@@ -430,14 +430,14 @@ esp_err_t drv8873_set_ocp_tretry(drv8873_ocp_retry_time_t retry_time, int device
     }
 
     // Map retry time enum to milliseconds for logging
-    uint8_t retry_ms = 500; // default
+    char* retry_ms = "0.5"; // default
     switch (retry_time) {
-        case DRV8873_OCP_TRETRY_0_5MS: retry_ms = 500; break;
-        case DRV8873_OCP_TRETRY_1MS: retry_ms = 1000; break;
-        case DRV8873_OCP_TRETRY_2MS: retry_ms = 2000; break;
-        case DRV8873_OCP_TRETRY_4MS: retry_ms = 4000; break;
+        case DRV8873_OCP_TRETRY_0_5MS: retry_ms = "0.5"; break;
+        case DRV8873_OCP_TRETRY_1MS: retry_ms =   "1"; break;
+        case DRV8873_OCP_TRETRY_2MS: retry_ms =   "2"; break;
+        case DRV8873_OCP_TRETRY_4MS: retry_ms =   "4"; break;
     }
-    ESP_LOGD(TAG, "Device %d: OCP (Overcurrent Protection) auto-retry time set to %dms", device_index, retry_ms);
+    ESP_LOGD(TAG, "Device %d: OCP (Overcurrent Protection) auto-retry time set to %sms", device_index, retry_ms);
     return ESP_OK;
 }
 
