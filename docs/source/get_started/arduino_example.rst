@@ -6,9 +6,9 @@ Arduino & External libraries
 Use Arduino code
 ----------------
 
-If you are a beginner with Arduino programming, you will find a lot of example codes on the internet. You can use them with adaptation in the code source.
+If you are a beginner with Arduino programming, you will find many example codes on the internet. You can use them with some adaptation in your source code.
 
-You will also find some example codes using Arduino libraries under the folder "component/arduino/libraries/.../examples".
+You will also find example codes using Arduino libraries under the folder "components/arduino/libraries/.../examples".
 
 
 Example: Use Ticker to control timing
@@ -65,10 +65,10 @@ The example code for Arduino is the following:
 What do you need to modify to use it on an OICore?
 
 * First, include "OpenIndus.h" and declare an OICore
-* Change the LED pin with DOUT_1 (or any other output pin)
-* Change all calls to `digitalRead` and `digitalWrite` with `core.digitalRead` and `core.digitalWrite`
+* Change the LED pin to DOUT_1 (or any other output pin)
+* Change all calls to `digitalRead` and `digitalWrite` to `core.digitalRead` and `core.digitalWrite`
 * Remove the call to `pinMode` because it is not needed
-* And that's it! You can now run your build and flash your code!
+* And that's it! You can now build and flash your code!
 
 Here is the full modified code:
 
@@ -117,7 +117,7 @@ Here is the full modified code:
     void loop() {}
 
 
-.. warning:: Be careful not to use directly the Arduino function `digitalWrite` and `digitalRead` because the behavior is undefined and your code will not work as expected.
+.. warning:: Be careful not to use the Arduino functions `digitalWrite` and `digitalRead` directly, because the behavior is undefined and your code will not work as expected.
 
 
 Add external library to the code
@@ -126,7 +126,7 @@ Add external library to the code
 Arduino libraries
 *****************
 
-You can use many libraries written for Arduino or for ESP32. Depending on the library, we will have to do small modifications or a full reintegration.
+You can use many libraries written for Arduino or for ESP32. Depending on the library, you may have to make small modifications or a full reintegration.
 
 You can find a lot of Arduino libraries on the `official Arduino libraries website <https://docs.arduino.cc/libraries/>`_.
 Most of the time, you can adapt them by adding a `CMakeLists.txt file <https://docs.espressif.com/projects/esp-idf/en/stable/esp32s3/api-guides/build-system.html#component-cmakelists-files>`_.
@@ -135,5 +135,5 @@ Most of the time, you can adapt them by adding a `CMakeLists.txt file <https://d
 Espressif libraries
 *******************
 
-You can also find libraries written with esp-idf framework on the `ESP-IDF components website <https://components.espressif.com/>`_.
-These libraries can be added to the project using `ESP-IDF Component manager <https://docs.espressif.com/projects/esp-idf/en/stable/esp32s3/api-guides/tools/idf-component-manager.html>`_.
+You can also find libraries written with the ESP-IDF framework on the `ESP-IDF components website <https://components.espressif.com/>`_.
+These libraries can be added to the project using the `ESP-IDF Component manager <https://docs.espressif.com/projects/esp-idf/en/stable/esp32s3/api-guides/tools/idf-component-manager.html>`_.
