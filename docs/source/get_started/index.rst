@@ -6,3 +6,4 @@ Get Started
 
    hardware_setup
    launch_project
+   arduino_example
