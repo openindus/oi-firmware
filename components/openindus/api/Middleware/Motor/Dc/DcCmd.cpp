@@ -35,6 +35,12 @@ void DcCmd::stop(MotorNum_t motor)
     _module->runCallback(msgBytes);
 }
 
+void DcCmd::brake(MotorNum_t motor)
+{
+    std::vector<uint8_t> msgBytes = {CALLBACK_MOTOR_DC_BRAKE, (uint8_t)motor};
+    _module->runCallback(msgBytes);
+}
+
 float DcCmd::getCurrent(MotorNum_t motor)
 {
     // Register event callback on first use to avoid static initialization order issues
@@ -59,6 +65,31 @@ float DcCmd::getCurrent(MotorNum_t motor)
     }
     float* current = reinterpret_cast<float*>(&data[2]);
     return *current;
+}
+
+uint8_t DcCmd::getFault(MotorNum_t motor)
+{
+    std::vector<uint8_t> msgBytes = {CALLBACK_MOTOR_DC_GET_FAULT, (uint8_t)motor};
+    int ret = _module->runCallback(msgBytes);
+    if (ret != 0) {
+        ESP_LOGE("DcCmd", "Failed to get fault status from module %d", _module->getId());
+        return 0xFF; // indicate error
+    }
+    if (msgBytes.size() >= 3) {
+        return msgBytes[2];
+    }
+    return 0x00; // No fault
+}
+
+esp_err_t DcCmd::clearFault(MotorNum_t motor)
+{
+    std::vector<uint8_t> msgBytes = {CALLBACK_MOTOR_DC_CLEAR_FAULT, (uint8_t)motor};
+    int ret = _module->runCallback(msgBytes);
+    if (ret != 0) {
+        ESP_LOGE("DcCmd", "Failed to clear fault on module %d", _module->getId());
+        return ESP_FAIL;
+    }
+    return ESP_OK;
 }
 
 #endif
