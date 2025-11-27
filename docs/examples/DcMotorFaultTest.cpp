@@ -79,9 +79,7 @@ void playMelody(bool allTestsPassed)
         melodyLen = sizeof(failureMelody) / sizeof(failureMelody[0]);
     }
 
-    unsigned long startTime = millis();
     for (int n = 0; n < melodyLen; n++) {
-        unsigned long noteStartTime = millis();
         if (melody[n].freq > 0) {
             int period_us = 1000000 / melody[n].freq;
             int cycles = (melody[n].durationMs * 1000) / period_us;
