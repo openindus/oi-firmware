@@ -308,6 +308,6 @@ With the configuration above, you can instantiate modules as follows without car
 
 .. tip::
     Use the ESP-IDF command "Add .vscode subdirectory files" to complete your VSCode setup and facilitate navigation through code with "ctrl+click":
-    * Open ESP-IDF panel
-    * Expand advanced
-    * Click on "+ Add .vscode subdirectory files"
+       - Open ESP-IDF panel
+       - Expand advanced
+       - Click on "+ Add .vscode subdirectory files"
