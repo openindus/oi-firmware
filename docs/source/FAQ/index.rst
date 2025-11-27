@@ -6,9 +6,6 @@ FAQ
 In this section you will find answers to frequently asked question about our product.
 If you cannot find the solution to your problem, please contact us and we will update the FAQ.
 
-Software
---------
-
 My device is not detected by my computer
 ****************************************
 
@@ -21,8 +18,3 @@ I have a space in my ".platformio" directory or in my project directory
 ***********************************************************************
 
 Please see `this link <https://docs.platformio.org/en/latest/frameworks/espidf.html#limitations>`_ on the PlaftormIO documentation for available solutions.
-
-Hardware
---------
-
-We will update this section soon !
