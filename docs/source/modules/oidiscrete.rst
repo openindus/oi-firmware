@@ -36,6 +36,13 @@ The pinout of the module is as follow :
 
 |
 
+.. image:: ../_static/rendu_realiste_bornier.jpg
+    :width: 400
+    :alt: Terminal block pinout
+    :align: center
+
+|
+
 .. note:: The Digital Input [1-8] and Digital Output [1-8] share the same physical pin mapping. This is convenient for reading back the value of an output.
 
 Functions

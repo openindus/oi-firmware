@@ -3,6 +3,9 @@
 OI-DEMO Input/Output
 ====================
 
+.. warning::
+    This section is obsolete, we will update it for version 2.X.X shortly.
+
 Goals
 -----
 * Introducing :ref:`Environment Installation<get_started_oivscodeextension>`

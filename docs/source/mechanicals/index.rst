@@ -27,7 +27,6 @@ This package is used for OI-Discrete, OI-Mixed, and OIAnalogLS modules.
 
 .. tip::
    **STEP file download:**
-   
    `BOI12 OI-Discrete - OI-Mixed - OI-AnalogLS.STEP <https://github.com/openindus/oi-mechanical/raw/main/BOI%2012%20OI-Discrete%20-%20Mixed%20-%20AnalogLS.STEP>`_
 
 .. _boi13_s:
@@ -44,7 +43,6 @@ This package is used for OI-Stepper, OI-DC, OI-RelayLP, OI-RelayHP, and OI-CoreL
 
 .. tip::
    **STEP file download:**
-   
    * `BOI13 OI-Stepper - DC - RelayLP.STEP <https://github.com/openindus/oi-mechanical/raw/main/BOI%2013%20OI-Stepper%20-%20DC%20-%20RelayLP.STEP>`_
    * `BOI13 OI-RelayHP.STEP <https://github.com/openindus/oi-mechanical/raw/main/BOI%2013%20OI-RelayHP.STEP>`_
    * `BOI13 OI-CoreLite.STEP <https://github.com/openindus/oi-mechanical/raw/main/BOI%2013%20OI-CoreLite.STEP>`_
@@ -63,7 +61,6 @@ This package is used for OI-Core module.
 
 .. tip::
    **STEP file download:**
-   
    `BOI23 OI-Core no 4G.STEP <https://github.com/openindus/oi-mechanical/raw/main/BOI%2023%20OI-Core%20no%204G.STEP>`_
 
 .. _rail_s:
@@ -80,5 +77,4 @@ This section presents the mechanical specifications of the DIN rail used for mou
 
 .. tip::
    **STEP file download:**
-
-   `DIN Rail.STEP <https://github.com/openindus/oi-mechanical/raw/main/Rail%209U.STEP>`_
+   `Rail_9U.STEP <https://github.com/openindus/oi-mechanical/raw/main/Rail%209U.STEP>`_

@@ -39,6 +39,13 @@ The pinout is common for OI-Core and OI-CoreLite and is as follow :
     :align: center
 
 |
+
+.. image:: ../_static/rendu_realiste_bornier.jpg
+    :width: 400
+    :alt: Terminal block pinout
+    :align: center
+
+|
 | Digital inputs and outputs are mapped on the same physical pin.
 | RS232 and RS485 are on the same pins. You can not use them all at once.
 | **RS_TX** and **RS_RX** stand for RS232 configuration.
