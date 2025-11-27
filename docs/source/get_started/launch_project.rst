@@ -305,3 +305,9 @@ With the configuration above, you can instantiate modules as follows without car
 .. note:: 
     This way of instantiation is not scalable. If you change one module, the serial number will be different and you will have to update your code. 
     The advantage is that you can place your module wherever you want on the rail.
+
+.. tip::
+    Use the ESP-IDF command "Add .vscode subdirectory files" to complete your VSCode setup and facilitate navigation through code with "ctrl+click":
+    * Open ESP-IDF panel
+    * Expand advanced
+    * Click on "+ Add .vscode subdirectory files"
