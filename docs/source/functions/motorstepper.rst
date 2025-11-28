@@ -36,15 +36,9 @@ Characteristics
      * - Max current per phase
        - 4.2A RMS (6A peak)
        - 
-     * - Number of channels
-       - 2
-       - 
      * - Microstepping
        - Up to 1/128
        - Programmable
-     * - Control interface
-       - SPI, Step/Dir
-       - 
      * - Driver IC
        - PowerSTEP01
        - STMicroelectronics
@@ -91,9 +85,10 @@ Several stop modes are available:
 - **Soft HiZ**: Decelerates to a stop and enters high-impedance (HiZ) mode
 - **Hard HiZ**: Stops immediately and enters HiZ mode
 
-In hold mode, the motor consumes current and may heat up depending on the holding torque. Avoid prolonged holding to prevent overheating.
+.. warning::
+    In hold mode, the motor consumes current and may heat up depending on the holding torque. Avoid prolonged holding to prevent overheating.
 
-In HiZ mode, the motor is unpowered and free to move. Ensure your mechanism is safe if the motor is unpowered.
+    In HiZ mode, the motor is unpowered and free to move. Ensure your mechanism is safe if the motor is unpowered.
 
 Power Control
 *************
@@ -121,7 +116,7 @@ Motor torque is set by several parameters:
        - Holding torque
        - 16%
      * - Back-EMF compensation
-       - Coefficient for compensating back-EMF; increase to boost torque
+       - Coef. for compensating back-EMF; increase to boost torque
        - 6%
 
 .. warning::
