@@ -105,8 +105,8 @@ Below are the specifications for the OI-Core module. Click on the links in the f
    * - Temperature range
      - -20 °C... +70°C
    * - Package OI-Core
-     - BOI23 (??x??x??mm)
+     - :ref:`BOI23 <boi23_s>` 
    * - Package OI-CoreLite
-     - BOI13 (75.97x53.81x27mm)
+     - :ref:`BOI13 <boi13_s>` 
 
 .. _Core_pinout_s:

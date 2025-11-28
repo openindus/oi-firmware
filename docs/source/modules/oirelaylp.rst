@@ -49,4 +49,4 @@ Functions
    * - Temperature range
      - -20 °C... +70°C
    * - Package
-     - BOI13 (75.97x53.81x27mm)
+     - :ref:`BOI13 <boi13_s>` 

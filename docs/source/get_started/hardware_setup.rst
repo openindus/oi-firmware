@@ -22,7 +22,7 @@ There are four types of rails, depending on your needs and the OpenIndus kit you
 - End rail: one USB-C connector at its head
 - Single rail: no USB-C connector (for standalone use)
 
-.. image:: ../_static/systeme_rail.png
+.. image:: ../_static/system_rail.png
     :width: 500
     :alt: Rail system
     :align: center
