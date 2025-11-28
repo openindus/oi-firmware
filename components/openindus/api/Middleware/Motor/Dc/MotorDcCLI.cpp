@@ -17,6 +17,7 @@
 static struct {
     struct arg_int *motor;
     struct arg_int *dir;
+    struct arg_int *percentage;
     struct arg_end *end;
 } runArgs;
 
@@ -36,11 +37,16 @@ static int run(int argc, char **argv)
         fprintf(stderr, "Error: DIRECTION must be 0 (Reverse) or 1 (Forward).\n");
         return 1;
     }
+    if (runArgs.percentage->ival[0] < 0 || runArgs.percentage->ival[0] > 100) {
+        fprintf(stderr, "Error: PERCENTAGE must be in range [0-100].\n");
+        return 1;
+    }
 
     MotorNum_t motor = (MotorNum_t)(runArgs.motor->ival[0] - 1);
     MotorDirection_t direction = (MotorDirection_t)(runArgs.dir->ival[0]);
+    uint8_t percentage = (uint8_t)(runArgs.percentage->ival[0]);
 
-    MotorDc::run(motor, direction, 100);
+    MotorDc::run(motor, direction, percentage);
 
     return 0;
 }
@@ -49,11 +55,12 @@ static void _registerRun(void)
 {
     runArgs.motor   = arg_int1(NULL, NULL, "MOTOR", "[1-4]");
     runArgs.dir     = arg_int1(NULL, NULL, "DIRECTION", "[1: Forward, 0: Reverse]");
-    runArgs.end     = arg_end(4);
+    runArgs.percentage = arg_int1(NULL, NULL, "PERCENTAGE", "[0-100]");
+    runArgs.end     = arg_end(5);
 
     const esp_console_cmd_t cmd = {
         .command = "run",
-        .help = "run",
+        .help = "run motor with specified direction and percentage",
         .hint = NULL,
         .func = &run,
         .argtable = &runArgs,
@@ -106,6 +113,49 @@ static void _registerStop(void)
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
 }
 
+/** 'brake' */
+static struct {
+    struct arg_int *motor;
+    struct arg_end *end;
+} brakeArgs;
+
+static int brake(int argc, char **argv)
+{
+    int nerrors = arg_parse(argc, argv, (void **) &brakeArgs);
+    if (nerrors != 0) {
+        arg_print_errors(stderr, brakeArgs.end, argv[0]);
+        return 1;
+    }
+
+    if (brakeArgs.motor->ival[0] < 1 || brakeArgs.motor->ival[0] > 4) {
+        fprintf(stderr, "Error: MOTOR must be in range [1-4].\n");
+        return 1;
+    }
+
+    MotorNum_t motor = (MotorNum_t)(brakeArgs.motor->ival[0] - 1);
+
+    MotorDc::brake(motor);
+
+    return 0;
+}
+
+static void _registerBrake(void)
+{
+    brakeArgs.motor  = arg_int1(NULL, NULL, "MOTOR", "[1-4]");
+    brakeArgs.end    = arg_end(2);
+
+    const esp_console_cmd_t cmd = {
+        .command = "brake",
+        .help = "brake the motor by setting speed to 0",
+        .hint = NULL,
+        .func = &brake,
+        .argtable = &brakeArgs,
+        .func_w_context = NULL,
+        .context = NULL
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+}
+
 /** 'getcurrent' */
 static struct {
     struct arg_int *motor;
@@ -151,11 +201,192 @@ static void _registerGetCurrent(void)
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
 }
 
+/** 'getfault' */
+static struct {
+    struct arg_int *motor;
+    struct arg_end *end;
+} getFaultArgs;
+
+static int getFault(int argc, char **argv)
+{
+    int nerrors = arg_parse(argc, argv, (void **) &getFaultArgs);
+    if (nerrors != 0) {
+        arg_print_errors(stderr, getFaultArgs.end, argv[0]);
+        return 1;
+    }
+
+    if (getFaultArgs.motor->ival[0] < 1 || getFaultArgs.motor->ival[0] > 4) {
+        fprintf(stderr, "Error: MOTOR must be in range [1-4].\n");
+        return 1;
+    }
+
+    MotorNum_t motor = (MotorNum_t)(getFaultArgs.motor->ival[0] - 1);
+    uint16_t fault_status = MotorDc::getFault(motor);
+
+    printf("Motor %d fault status: 0x%04X\n", getFaultArgs.motor->ival[0], fault_status);
+
+    // Provide human-readable interpretation
+    if (fault_status & DRV8873_FAULT_UVLO_MASK) {
+        printf("  - Undervoltage Lockout (UVLO)\n");
+    }
+    if (fault_status & DRV8873_FAULT_CPUV_MASK) {
+        printf("  - Charge Pump Undervoltage (CPUV)\n");
+    }
+    if (fault_status & DRV8873_FAULT_OCP_MASK) {
+        printf("  - Overcurrent Protection (OCP)\n");
+    }
+    if (fault_status & DRV8873_FAULT_TSD_MASK) {
+        printf("  - Thermal Shutdown (TSD)\n");
+    }
+    if (fault_status & DRV8873_FAULT_OLD_MASK) {
+        printf("  - Open-Load Detection (OLD)\n");
+    }
+    if (fault_status & DRV8873_FAULT_OTW_MASK) {
+        printf("  - Overtemperature Warning (OTW)\n");
+    }
+    if (fault_status & DRV8873_FAULT_FAULT_MASK) {
+        printf("  - Global Fault\n");
+    }
+    if (fault_status == 0) {
+        printf("  - No faults detected\n");
+    }
+
+    return 0;
+}
+
+static void _registerGetFault(void)
+{
+    getFaultArgs.motor  = arg_int1(NULL, NULL, "MOTOR", "[1-4]");
+    getFaultArgs.end    = arg_end(2);
+
+    const esp_console_cmd_t cmd = {
+        .command = "getfault",
+        .help = "get motor fault status",
+        .hint = NULL,
+        .func = &getFault,
+        .argtable = &getFaultArgs,
+        .func_w_context = NULL,
+        .context = NULL
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+}
+
+/** 'clearfault' */
+static struct {
+    struct arg_int *motor;
+    struct arg_end *end;
+} clearFaultArgs;
+
+static int clearFault(int argc, char **argv)
+{
+    int nerrors = arg_parse(argc, argv, (void **) &clearFaultArgs);
+    if (nerrors != 0) {
+        arg_print_errors(stderr, clearFaultArgs.end, argv[0]);
+        return 1;
+    }
+
+    if (clearFaultArgs.motor->ival[0] < 1 || clearFaultArgs.motor->ival[0] > 4) {
+        fprintf(stderr, "Error: MOTOR must be in range [1-4].\n");
+        return 1;
+    }
+
+    MotorNum_t motor = (MotorNum_t)(clearFaultArgs.motor->ival[0] - 1);
+
+    esp_err_t result = MotorDc::clearFault(motor);
+
+    if (result == ESP_OK) {
+        printf("Motor %d faults cleared successfully\n", clearFaultArgs.motor->ival[0]);
+    } else {
+        printf("Failed to clear faults for motor %d (error: %d)\n", clearFaultArgs.motor->ival[0], result);
+    }
+
+    return 0;
+}
+
+static void _registerClearFault(void)
+{
+    clearFaultArgs.motor  = arg_int1(NULL, NULL, "MOTOR", "[1-4]");
+    clearFaultArgs.end    = arg_end(2);
+
+    const esp_console_cmd_t cmd = {
+        .command = "clearfault",
+        .help = "clear motor faults",
+        .hint = NULL,
+        .func = &clearFault,
+        .argtable = &clearFaultArgs,
+        .func_w_context = NULL,
+        .context = NULL
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+}
+
+/** 'setmode' */
+static struct {
+    struct arg_int *motor;
+    struct arg_int *mode;
+    struct arg_end *end;
+} setModeArgs;
+
+static int setMode(int argc, char **argv)
+{
+    int nerrors = arg_parse(argc, argv, (void **) &setModeArgs);
+    if (nerrors != 0) {
+        arg_print_errors(stderr, setModeArgs.end, argv[0]);
+        return 1;
+    }
+
+    if (setModeArgs.motor->ival[0] < 1 || setModeArgs.motor->ival[0] > 4) {
+        fprintf(stderr, "Error: MOTOR must be in range [1-4].\n");
+        return 1;
+    }
+
+    if (setModeArgs.mode->ival[0] < 0 || setModeArgs.mode->ival[0] > 3) {
+        fprintf(stderr, "Error: MODE must be 0 (PH/EN), 1 (PWM), 2 (Independent), or 3 (Disabled).\n");
+        return 1;
+    }
+
+    MotorNum_t motor = (MotorNum_t)(setModeArgs.motor->ival[0] - 1);
+    drv8873_mode_t mode = (drv8873_mode_t)(setModeArgs.mode->ival[0]);
+
+    esp_err_t result = MotorDc::setMode(mode, motor);
+
+    if (result == ESP_OK) {
+        const char* mode_str[] = {"PH/EN", "PWM", "Independent", "Disabled"};
+        printf("Motor %d mode set to: %s\n", setModeArgs.motor->ival[0], mode_str[mode]);
+    } else {
+        printf("Failed to set mode for motor %d (error: %d)\n", setModeArgs.motor->ival[0], result);
+    }
+
+    return 0;
+}
+
+static void _registerSetMode(void)
+{
+    setModeArgs.motor  = arg_int1(NULL, NULL, "MOTOR", "[1-4]");
+    setModeArgs.mode   = arg_int1(NULL, NULL, "MODE", "[0: PH/EN, 1: PWM, 2: Independent, 3: Disabled]");
+    setModeArgs.end    = arg_end(3);
+
+    const esp_console_cmd_t cmd = {
+        .command = "setmode",
+        .help = "set DRV8873 control mode",
+        .hint = NULL,
+        .func = &setMode,
+        .argtable = &setModeArgs,
+        .func_w_context = NULL,
+        .context = NULL
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd));
+}
+
 int MotorDc::_registerCLI(void)
 {
     _registerRun();
     _registerStop();
+    _registerBrake();
     _registerGetCurrent();
+    _registerGetFault();
+    _registerClearFault();
+    _registerSetMode();
 
     return 0;
 }

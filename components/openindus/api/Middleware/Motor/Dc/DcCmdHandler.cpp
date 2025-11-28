@@ -56,6 +56,29 @@ int DcCmdHandler::init() {
         Slave::sendEvent(data);
     });
 
+    // Brake command: set both in1 and in2 to high duty to brake
+    Slave::addCallback(CALLBACK_MOTOR_DC_BRAKE, [](std::vector<uint8_t>& data) {
+        MotorNum_t motor = static_cast<MotorNum_t>(data[1]);
+        MotorDc::brake(motor);
+        data.clear();
+    });
+
+    // Get fault status (synchronous): returns a single byte at index 2
+    Slave::addCallback(CALLBACK_MOTOR_DC_GET_FAULT, [](std::vector<uint8_t>& data) {
+        MotorNum_t motor = static_cast<MotorNum_t>(data[1]);
+        uint8_t fault = MotorDc::getFault(motor);
+        data.push_back(fault);
+    });
+
+    // Clear faults: call clearFault and return status (optional via runCallback return code)
+    Slave::addCallback(CALLBACK_MOTOR_DC_CLEAR_FAULT, [](std::vector<uint8_t>& data) {
+        MotorNum_t motor = static_cast<MotorNum_t>(data[1]);
+        esp_err_t ret = MotorDc::clearFault(motor);
+        // return error conversion as a single byte if needed (0 = OK, 1 = error)
+        uint8_t res = (ret == ESP_OK) ? 0x00 : 0x01;
+        data.push_back(res);
+    });
+
     return err;
 }
 

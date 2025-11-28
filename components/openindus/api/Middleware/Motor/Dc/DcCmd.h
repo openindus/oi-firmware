@@ -16,7 +16,7 @@
 
 #include "Slave.h"
 #include "Master.h"
-#include "MotorStepper.h"
+#include "Motor.h"
 
 #if defined(CONFIG_MODULE_MASTER)
 
@@ -49,12 +49,35 @@ public:
     void stop(MotorNum_t motor);
 
     /**
+     * @brief Brake the DC motor (force brake mode)
+     *
+     * @param motor Motor number
+     */
+    void brake(MotorNum_t motor);
+
+    /**
      * @brief Get the current consumption of the motor
      * 
      * @param motor Motor number
      * @return float Current in Amperes
      */
     float getCurrent(MotorNum_t motor);
+
+    /**
+     * @brief Get the DRV8873 fault status for a motor
+     *
+     * @param motor Motor number
+     * @return uint8_t fault status (0 if none)
+     */
+    uint8_t getFault(MotorNum_t motor);
+
+    /**
+     * @brief Clear any DRV8873 fault for a motor
+     *
+     * @param motor Motor number
+     * @return esp_err_t ESP_OK on success
+     */
+    esp_err_t clearFault(MotorNum_t motor);
 
 private:
 

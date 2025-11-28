@@ -111,6 +111,7 @@ set(COMPONENT_SRCS
     "drivers/dac/ad5413/ad5413.c"
     "drivers/adc/ads114s0x/ads114s0x.c"
     "drivers/adc/ads866x/ads866x.c"
+    "drivers/drv8873/drv8873.c"
 )
 
 set(COMPONENT_INCLUDE_DIRS
@@ -178,6 +179,7 @@ set(COMPONENT_INCLUDE_DIRS
     "drivers/adc"
     "drivers/adc/ads866x"
     "drivers/adc/ads114s0x"
+    "drivers/drv8873"
 )
 
 set(COMPONENT_PRIV_REQUIRES
