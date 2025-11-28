@@ -127,6 +127,8 @@ build:docs:
 
 deploy:bin:
   stage: deploy
+  only:
+    - tags
   needs:
     - job: build:bin:core
     - job: build:bin:discrete
@@ -146,6 +148,8 @@ deploy:bin:
 
 deploy:library:
   stage: deploy
+  only:
+    - tags
   needs:
     - job: build:bin:core
     - job: build:bin:discrete
