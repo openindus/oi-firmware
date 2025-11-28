@@ -18,6 +18,7 @@ PROJECT_NUMBER = "v2.0.0-dev"
 
 OUTPUT_DIRECTORY = ./build
 
+INPUT = ./../components/openindus/api/System/System.h
 INPUT += ./../components/openindus/api/Middleware/Analog/InputsHV/AnalogInputsHV.h
 INPUT += ./../components/openindus/api/Middleware/Analog/InputsLV/AnalogInputsLV.h
 INPUT += ./../components/openindus/api/Middleware/Analog/Outputs/AnalogOutputs.h
