@@ -18,7 +18,7 @@ import os
 # -- Project information -----------------------------------------------------
 
 project = 'OpenIndus documentation'
-copyright = '2024, OpenIndus'
+copyright = '2025, OpenIndus'
 author = 'OpenIndus team'
 
 # The full version, including alpha/beta/rc tags

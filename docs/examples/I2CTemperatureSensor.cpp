@@ -16,6 +16,9 @@
 #define LM75_TEMP_REG       0
 #define LM75_CONFIG_REG     1
 
+#define I2C_SDA_PIN         36
+#define I2C_SCL_PIN         37
+
 unsigned LM75_getReg(uint8_t reg)
 {
     unsigned Result = 0xFFFF;
@@ -69,7 +72,7 @@ void setup()
     Serial.begin(115200);
 
     /* Initialize I2C */
-    Wire.begin();
+    Wire.begin(I2C_SDA_PIN, I2C_SCL_PIN);
     
     /* Set clock speed */
     Wire.setClock(100000);

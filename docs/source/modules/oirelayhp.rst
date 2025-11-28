@@ -51,7 +51,7 @@ Below are the specifications for the OI-RelayHP module. Click on the links in th
    :widths: 55 45
    :align: center
 
-   * - :ref:`Relay outputs <mechanicalrelay_s>`
+   * - :ref:`Relay outputs <relay_s>`
      - 2 NO and 2 NO+NC
    * - CPU
      - ESP32-S3 (8MB)

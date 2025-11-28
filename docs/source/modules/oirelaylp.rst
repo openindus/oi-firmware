@@ -38,7 +38,7 @@ Functions
    
    * - Power Supply Voltage
      - 9..30V DC
-   * - :ref:`Static Relay outputs <staticrelay_s>`
+   * - :ref:`Static Relay outputs <relay_s>`
      - 6
    * - CPU
      - ESP32-S3 (8MB)

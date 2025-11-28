@@ -12,8 +12,7 @@ Functions list
    ain0-10.rst
    ainls.rst
    aout0-10.rst
-   staticrelay.rst
-   mechanicalrelay.rst
+   relay.rst
    i2cttl.rst
    rs232-485.rst
    can.rst
