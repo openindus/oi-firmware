@@ -22,9 +22,6 @@
 class AnalogInputsHV
 {
 public:
-    /**
-     * @brief Initialize the Analog Inputs HV
-     */
     static int init(const adc_unit_t adc_unit,
         const adc_channel_t* adc_channels,
         uint8_t nb_channels,
