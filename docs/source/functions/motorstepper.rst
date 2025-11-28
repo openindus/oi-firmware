@@ -14,7 +14,44 @@ The OI-Stepper board is designed to drive bipolar stepper motors up to NEMA 24 s
 
 The board uses the PowerSTEP01 driver from STMicroelectronics, a high-performance, fully integrated stepper motor driver. The PowerSTEP01 provides advanced motion control, high microstepping resolution, and robust protection features.
 
-**Protections:**
+
+
+Characteristics
+---------------
+
+.. list-table:: Stepper Motor Driver Characteristics
+     :widths: 30 30 40
+     :header-rows: 1
+     :align: center
+
+     * - Parameter
+       - Value
+       - Note
+     * - Supported motor size
+       - Up to NEMA 24
+       - 
+     * - Supply voltage
+       - 9V – 30V
+       - Board limit (PowerSTEP01 supports up to 85V)
+     * - Max current per phase
+       - 4.2A RMS (6A peak)
+       - 
+     * - Number of channels
+       - 2
+       - 
+     * - Microstepping
+       - Up to 1/128
+       - Programmable
+     * - Control interface
+       - SPI, Step/Dir
+       - 
+     * - Driver IC
+       - PowerSTEP01
+       - STMicroelectronics
+
+Protections
+-----------
+
 - Overcurrent protection (programmable threshold)
 - Overtemperature protection (thermal shutdown)
 - Undervoltage lockout (UVLO) on all power supplies
@@ -25,74 +62,10 @@ The board uses the PowerSTEP01 driver from STMicroelectronics, a high-performanc
 
 Software Features
 -----------------
+
 - Rich API for motion and parameter control
 - Homing process with limit switch support
 - VSCode extension for parameter configuration and testing
-
-Characteristics
----------------
-
-.. list-table:: Stepper Motor Driver Characteristics
-     :widths: 30 30 40
-     :header-rows: 1
-     :align: center
-
-     * - Parameter
-         - Value
-         - Note
-     * - Supported motor size
-         - Up to NEMA 24
-         - 
-     * - Supply voltage
-         - 9V – 30V
-         - Board limit (PowerSTEP01 supports up to 85V)
-     * - Max current per phase
-         - 4.2A RMS (6A peak)
-         - 
-     * - Number of channels
-         - 2
-         - 
-     * - Microstepping
-         - Up to 1/128
-         - Programmable
-     * - Control interface
-         - SPI, Step/Dir
-         - 
-     * - Driver IC
-         - PowerSTEP01
-         - STMicroelectronics
-     
-Characteristics
----------------
-
-
-.. list-table:: Stepper Motor Driver Characteristics
-     :widths: 30 30 40
-     :header-rows: 1
-     :align: center
-
-     * - Parameter
-         - Value
-         - Note
-     * - Supported motor size
-         - Up to NEMA 24
-         - 
-     * - Supply voltage
-         - 9V – 30V
-         - 
-     * - Max current per phase
-         - 4.2A RMS (6A peak)
-         - 
-     * - Number of channels
-         - 2
-         - 
-     * - Microstepping
-         - Up to 1/128
-         - Programmable
-     * - Driver IC
-         - PowerSTEP01
-         - STMicroelectronics
-
 
 Operation
 ---------
@@ -124,6 +97,7 @@ In HiZ mode, the motor is unpowered and free to move. Ensure your mechanism is s
 
 Power Control
 *************
+
 Motor torque is set by several parameters:
 
 .. list-table:: PowerSTEP01 Torque Parameters
@@ -132,32 +106,33 @@ Motor torque is set by several parameters:
      :align: center
 
      * - Parameter
-         - Description
-         - Default
+       - Description
+       - Default
      * - KVAL_ACC
-         - Acceleration torque
-         - 16%
+       - Acceleration torque
+       - 16%
      * - KVAL_DEC
-         - Deceleration torque
-         - 16%
+       - Deceleration torque
+       - 16%
      * - KVAL_RUN
-         - Running torque
-         - 16%
+       - Running torque
+       - 16%
      * - KVAL_HOLD
-         - Holding torque
-         - 16%
+       - Holding torque
+       - 16%
      * - Back-EMF compensation
-         - Coefficient for compensating back-EMF; increase to boost torque
-         - 6%
+       - Coefficient for compensating back-EMF; increase to boost torque
+       - 6%
 
 .. warning::
      Do not increase torque or current parameters too quickly. Excessive values can overheat and damage the motor or driver.
 
 Configuration
 *************
+
 Parameters can be set in two ways:
-- Via the VSCode extension: parameters are stored in the module and can be exported/imported as JSON
-- In code: functions allow setting speeds and other parameters during initialization
+  - Via the VSCode extension: parameters are stored in the module and can be exported/imported as JSON
+  - In code: functions allow setting speeds and other parameters during initialization
 
 Code examples
 -------------
