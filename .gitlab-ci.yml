@@ -1,11 +1,18 @@
-image: python:latest
+image: espressif/idf:v5.5
+
+workflow:
+  rules:
+    - if: >
+        ($CI_PIPELINE_SOURCE == "merge_request_event") && 
+        ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || 
+         $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "develop")
+    - if: '$CI_COMMIT_TAG'
 
 stages:
   - setup
-  - build:bin
+  - build:firmware
   - build:examples
   - build:docs
-  - pkg
   - deploy
 
 cache:
@@ -15,127 +22,88 @@ cache:
 setup:
   stage: setup
   script:
-    - curl -fsSL -o get-platformio.py https://raw.githubusercontent.com/platformio/platformio-core-installer/master/get-platformio.py
-    - python3 get-platformio.py
-    - /root/.platformio/penv/bin/pio pkg update  
     - rm -rf .oi/
     - mkdir -p .oi/bin/oi-firmware-$(cat version.txt)
     - mkdir -p .oi/docs/
     - mkdir -p .oi/lib/
-  rules:
-    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")'
-    - if: '$CI_COMMIT_TAG'
   tags:
     - oi-firmware
 
 .build:bin:
-  stage: build:bin
+  stage: build:firmware
   needs:
     - job: setup
+  script:
+    - cp sdkconfig.ci.defaults.${MODULE_TYPE} sdkconfig
+    - idf.py reconfigure
+    - idf.py build
   after_script:
-    - cp .pio/build/${PIOENV}/firmware.bin .oi/bin/oi-firmware-$(cat version.txt)/${PIOENV}_firmware-$(cat version.txt).bin
-    - cp .pio/build/${PIOENV}/ota_data_initial.bin .oi/bin/oi-firmware-$(cat version.txt)/${PIOENV}_ota_data_initial-$(cat version.txt).bin
-    - cp .pio/build/${PIOENV}/bootloader.bin .oi/bin/oi-firmware-$(cat version.txt)/${PIOENV}_bootloader-$(cat version.txt).bin
-    - cp .pio/build/${PIOENV}/partitions.bin .oi/bin/oi-firmware-$(cat version.txt)/${PIOENV}_partitions-$(cat version.txt).bin
-  rules:
-    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")'
-    - if: '$CI_COMMIT_TAG'
+    - cp build/OI-Firmware.bin .oi/bin/oi-firmware-$(cat version.txt)/${MODULE_TYPE}_firmware-$(cat version.txt).bin
+    - cp build/ota_data_initial.bin .oi/bin/oi-firmware-$(cat version.txt)/${MODULE_TYPE}_ota_data_initial-$(cat version.txt).bin
+    - cp build/bootloader/bootloader.bin .oi/bin/oi-firmware-$(cat version.txt)/${MODULE_TYPE}_bootloader-$(cat version.txt).bin
+    - cp build/partition_table/partition-table.bin .oi/bin/oi-firmware-$(cat version.txt)/${MODULE_TYPE}_partitions-$(cat version.txt).bin
   tags:
     - oi-firmware
 
 build:bin:core:
   extends: .build:bin
-  script:
-    - /root/.platformio/penv/bin/pio run -e core
   variables:
-    PIOENV: "core"
+    MODULE_TYPE: "core"
 
 build:bin:discrete:
   extends: .build:bin
-  script:
-    - /root/.platformio/penv/bin/pio run -e discrete
   variables:
-    PIOENV: "discrete"
-
-# build:bin:discreteve:
-#   extends: .build:bin
-#   script:
-#     - /root/.platformio/penv/bin/pio run -e discreteve
-#   variables:
-#     PIOENV: "discreteve"
+    MODULE_TYPE: "discrete"
 
 build:bin:stepper:
   extends: .build:bin
-  script:
-    - /root/.platformio/penv/bin/pio run -e stepper
   variables:
-    PIOENV: "stepper"
-
-# build:bin:stepperve:
-#   extends: .build:bin
-#   script:
-#     - /root/.platformio/penv/bin/pio run -e stepperve
-#   variables:
-#     PIOENV: "stepperve"
+    MODULE_TYPE: "stepper"
 
 build:bin:mixed:
   extends: .build:bin
-  script:
-    - /root/.platformio/penv/bin/pio run -e mixed
   variables:
-    PIOENV: "mixed"
+    MODULE_TYPE: "mixed"
 
 build:bin:relayhp:
   extends: .build:bin
-  script:
-    - /root/.platformio/penv/bin/pio run -e relayhp
   variables:
-    PIOENV: "relayhp"
+    MODULE_TYPE: "relayhp"
 
 build:bin:relaylp:
   extends: .build:bin
-  script:
-    - /root/.platformio/penv/bin/pio run -e relaylp
   variables:
-    PIOENV: "relaylp"
-
-# build:bin:brushless:
-#   extends: .build:bin
-#   script:
-#     - /root/.platformio/penv/bin/pio run -e brushless
-#   variables:
-#     PIOENV: "brushless"
+    MODULE_TYPE: "relaylp"
 
 build:bin:analogls:
   extends: .build:bin
-  script:
-    - /root/.platformio/penv/bin/pio run -e analogls
   variables:
-    PIOENV: "analogls"
+    MODULE_TYPE: "analogls"
 
 build:bin:dc:
   extends: .build:bin
-  script:
-    - /root/.platformio/penv/bin/pio run -e dc
   variables:
-    PIOENV: "dc"
+    MODULE_TYPE: "dc"
 
-build:examples:
+build:examples:library:
   stage: build:examples
   needs:
     - job: setup
   script:
-    - |
-      find examples/ -name "*.cpp" | while read -r f; do
-        echo "Build $f"
-        cat $f > main/main.cpp
-        /root/.platformio/penv/bin/pio run -e core || { echo "Error: Build failed for $f"; exit 1; }
-      done
+    - ./build_examples.sh components/openindus/examples/
   after_script:
     - git restore main/main.cpp
-  rules:
-    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")'
-    - if: '$CI_COMMIT_TAG'
+  tags:
+    - oi-firmware
+
+build:examples:docs:
+  stage: build:examples
+  needs:
+    - job: setup
+  script:
+    - ./build_examples.sh docs/examples/
+  after_script:
+    - git restore main/main.cpp
   tags:
     - oi-firmware
 
@@ -149,94 +117,56 @@ build:docs:
     - pip3 install -r docs/requirements.txt
   script:
     - cd docs
-    - make clean
     - doxygen doxygen/Doxyfile
-    - make html
+    - ./build_multiversion.sh "$CI_COMMIT_TAG"
     - cd ..
   after_script:
-    - cp -r docs/build/html/ .oi/docs/
-  rules:
-    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")'
-    - if: '$CI_COMMIT_TAG'
-  tags:
-    - oi-firmware
-
-build:docs:examples:
-  stage: build:docs
-  needs:
-    - job: setup
-  before_script:
-    - /root/.platformio/penv/bin/pio pkg install --library "felis/USB-Host-Shield-20@^1.6.0"
-    - /root/.platformio/penv/bin/pio pkg install --library "paulstoffregen/Ethernet@^2.0.0"
-  script:
-    - |
-      find docs/examples/ -name "*.cpp" | while read -r f; do
-        echo "Build $f"
-        cat $f > main/main.cpp
-        /root/.platformio/penv/bin/pio run -e core || { echo "Error: Build failed for $f"; exit 1; }
-      done
-  after_script:
-    - git restore main/main.cpp
-  rules:
-    - if: '($CI_PIPELINE_SOURCE == "merge_request_event") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || "develop")'
-    - if: '$CI_COMMIT_TAG'
-  tags:
-    - oi-firmware
-
-pkg:library:
-  stage: pkg
-  needs:
-    - job: setup
-  script:
-    - /root/.platformio/penv/bin/pio pkg pack --output=".oi/lib/"
-  rules:
-    - if: '$CI_COMMIT_TAG'
+    - cp -r docs/build/html/. .oi/docs/
   tags:
     - oi-firmware
 
 deploy:bin:
   stage: deploy
+  only:
+    - tags
   needs:
     - job: build:bin:core
     - job: build:bin:discrete
-    # - job: build:bin:discreteve
     - job: build:bin:stepper
-    # - job: build:bin:stepperve
     - job: build:bin:mixed
     - job: build:bin:relayhp
     - job: build:bin:relaylp
-    # - job: build:bin:brushless
     - job: build:bin:analogls
     - job: build:bin:dc
   before_script:
     - apt update
     - apt install -y lftp
   script:
-    - lftp $FTP_SERVER -u $FTP_USERNAME,$FTP_PASSWORD -e "set ssl:verify-certificate no; mirror -R ./.oi/bin/ bin/; exit;"
-  artifacts:
-    name: "bin"
-    paths:
-      - .oi/bin/
-  rules:
-    - if: '$CI_COMMIT_TAG'
+    - lftp ${FTP_SERVER} -u ${FTP_USERNAME},${FTP_PASSWORD} -e "set ssl:verify-certificate no; mirror -R ./.oi/bin/ bin/; exit;"
   tags:
     - oi-firmware
 
 deploy:library:
   stage: deploy
+  only:
+    - tags
   needs:
-    - job: pkg:library
+    - job: build:bin:core
+    - job: build:bin:discrete
+    - job: build:bin:stepper
+    - job: build:bin:mixed
+    - job: build:bin:relayhp
+    - job: build:bin:relaylp
+    - job: build:bin:analogls
+    - job: build:bin:dc
+    - job: build:examples:library
   before_script:
     - apt update
     - apt install -y lftp
   script:
-    - lftp $FTP_SERVER -u $FTP_USERNAME,$FTP_PASSWORD -e "set ssl:verify-certificate no; mirror -R ./.oi/lib/ lib/; exit;"
-  artifacts:
-    name: "library"
-    paths:
-      - .oi/lib/
-  rules:
-    - if: '$CI_COMMIT_TAG'
+    - tar -czf .oi/lib/openindus-$(cat version.txt).tar.gz components/openindus/
+    - tar -czf .oi/lib/arduino-esp32-$(cat version.txt).tar.gz components/arduino/
+    - lftp ${FTP_SERVER} -u ${FTP_USERNAME},${FTP_PASSWORD} -e "set ssl:verify-certificate no; mirror -R ./.oi/lib/ lib/; exit;"
   tags:
     - oi-firmware
 
@@ -244,17 +174,11 @@ deploy:docs:
   stage: deploy
   needs:
     - job: build:docs
-    - job: build:docs:examples
+    - job: build:examples:docs
   before_script:
     - apt update
     - apt install -y lftp
   script:
-    - lftp $FTP_SERVER -u $FTP_USERNAME,$FTP_PASSWORD -e "set ssl:verify-certificate no; mirror -R ./.oi/docs/html/ doc/; exit;"
-  artifacts:
-    name: "docs"
-    paths:
-      - .oi/docs/
-  rules:
-    - if: '$CI_COMMIT_TAG'
+    - lftp ${FTP_SERVER} -u ${FTP_USERNAME},${FTP_PASSWORD} -e "set ssl:verify-certificate no; set mirror:parallel-transfer-count 4; mirror -R --only-newer --verbose ./.oi/docs/ doc/; exit;"
   tags:
     - oi-firmware

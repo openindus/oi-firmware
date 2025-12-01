@@ -35,6 +35,13 @@ The pinout of the module is as follow :
 
 |
 
+.. image:: ../_static/rendu_realiste_bornier.jpg
+    :width: 400
+    :alt: Terminal block pinout
+    :align: center
+
+|
+
 Functions
 ---------
 
@@ -44,7 +51,7 @@ Below are the specifications for the OI-AnalogLS module. Click on the links in t
    :widths: 55 45
    :align: center
 
-   * - :ref:`Power Supply Voltage <power_s>`
+   * - Power Supply Voltage
      - 9..30V DC
    * - :ref:`Analog intputs low signals <ainls_s>`
      - 10 (5 differential)
@@ -57,4 +64,4 @@ Below are the specifications for the OI-AnalogLS module. Click on the links in t
    * - Temperature range
      - -20 °C... +70°C
    * - Package
-     - BOI12 (50.47x53.81x27mm)
+     - :ref:`BOI12 <boi12_s>`

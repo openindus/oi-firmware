@@ -3,7 +3,7 @@
 Welcome to OpenIndus documentation!
 ===================================
 
-Here you can find all information about OpenIndus' products. If you are using the PLC for the firt time, please go to the :ref:`get started<get_started-index>` page and learn how to upload you code.
+Here you can find all information about OpenIndus' products. If you are using the PLC for the firt time, please go to the :ref:`get started<hardware_setup-index>` page and learn how to wire your system and upload your code.
 
 If you want to go futher, follow our :ref:`projects<projects-index>`.
 
@@ -11,7 +11,7 @@ You can find specification of each module in the :ref:`modules<modules-index>` s
 
 .. toctree::
    :maxdepth: 2
-   :caption: Get Started ! 
+   :caption: Get Started
       
    get_started/index.rst
 
@@ -29,9 +29,9 @@ You can find specification of each module in the :ref:`modules<modules-index>` s
 
 .. toctree::
    :maxdepth: 2
-   :caption: Wiring and mechanics
+   :caption: Mechanical
 
-   wiring_mechanics/index.rst
+   mechanicals/index.rst
 
 .. toctree::
    :maxdepth: 2

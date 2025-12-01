@@ -39,6 +39,13 @@ The pinout is common for OI-Core and OI-CoreLite and is as follow :
     :align: center
 
 |
+
+.. image:: ../_static/rendu_realiste_bornier.jpg
+    :width: 400
+    :alt: Terminal block pinout
+    :align: center
+
+|
 | Digital inputs and outputs are mapped on the same physical pin.
 | RS232 and RS485 are on the same pins. You can not use them all at once.
 | **RS_TX** and **RS_RX** stand for RS232 configuration.
@@ -53,7 +60,7 @@ Below are the specifications for the OI-Core module. Click on the links in the f
    :widths: 55 45
    :align: center
 
-   * - :ref:`Power Supply Voltage <power_s>`
+   * - Power Supply Voltage
      - 9..30V DC
    * - **I/O**
      - 
@@ -79,7 +86,7 @@ Below are the specifications for the OI-Core module. Click on the links in the f
      - 1
    * - :ref:`I2C (5V Compatible) <i2cttl_s>`
      - 1
-   * - :ref:`µSD Card Holder <usdcard_s>`
+   * - :ref:`µSD Card Holder <sdcard_s>`
      - 1
    * - :ref:`USB Host 2.0 <usbhost_s>`
      - 1 (OI-Core only)
@@ -98,8 +105,8 @@ Below are the specifications for the OI-Core module. Click on the links in the f
    * - Temperature range
      - -20 °C... +70°C
    * - Package OI-Core
-     - BOI23 (??x??x??mm)
+     - :ref:`BOI23 <boi23_s>` 
    * - Package OI-CoreLite
-     - BOI13 (75.97x53.81x27mm)
+     - :ref:`BOI13 <boi13_s>` 
 
 .. _Core_pinout_s:

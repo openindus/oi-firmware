@@ -1,0 +1,9 @@
+menu "Main Configuration"
+
+    config TEST
+        bool "Enable test mode"
+        default false
+        help
+            Enable test mode for the OpenIndus framework
+
+endmenu

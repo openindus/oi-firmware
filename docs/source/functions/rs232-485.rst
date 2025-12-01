@@ -52,27 +52,20 @@ Characteristics
    * - Driver differential voltage (max)
      - 5V
      -
-   * -
-     -
-     -
-   * -
-     -
-     - 
-
 
 Code examples
 -------------
-
-The example code above demonstrates how to use RS232 on :ref:`OI-Core<OI-Core>`/:ref:`OI-CoreLite<OI-CoreLite>`.
-
-.. literalinclude:: ../../examples/RS232.cpp
-    :language: cpp
 
 The example code above demonstrates how to use RS485 on :ref:`OI-Core<OI-Core>`/:ref:`OI-CoreLite<OI-CoreLite>`.
 
 .. literalinclude:: ../../examples/RS485.cpp
     :language: cpp
 
+To use RS232 instead of RS485, just change the mode in the begin function:
+
+.. code-block:: cpp
+
+    core.rs.begin(9600, RS::Config::_8N1, RS::Mode::RS232);
 
 
 Software API
