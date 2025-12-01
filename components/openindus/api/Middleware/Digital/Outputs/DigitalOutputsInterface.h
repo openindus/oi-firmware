@@ -42,9 +42,6 @@ typedef enum {
 class DigitalOutputsInterface
 {
 public:
-    /**
-     * @brief Virtual destructor for DigitalOutputsInterface
-     */
     virtual ~DigitalOutputsInterface() {}
 
     /**

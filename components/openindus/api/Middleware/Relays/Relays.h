@@ -25,24 +25,35 @@ typedef enum {
 class Relays
 {
 protected:
-
-    static int init(const gpio_num_t *gpio, int num);
+    static int init(const gpio_num_t *gpio, int nb);
 
 public:
 
+    /**
+     * @brief Set the output state of a relay
+     * @param num Relay number (RELAY_1 to RELAY_MAX)
+     * @param level Output level (0 for LOW/OFF, 1 for HIGH/ON)
+     * @return 0 on success, -1 on error
+     */
     static int digitalWrite(Relay_Num_t num, uint8_t level);
+
+    /**
+     * @brief Read the current state of a relay
+     * @param num Relay number (RELAY_1 to RELAY_MAX)
+     * @return Current relay state (0 for LOW/OFF, 1 for HIGH/ON), -1 on error
+     */
     static int digitalRead(Relay_Num_t num);
+
+    /**
+     * @brief Toggle the output state of a relay
+     * @param num Relay number (RELAY_1 to RELAY_MAX)
+     * @return 0 on success, -1 on error
+     */
     static int toggleOutput(Relay_Num_t num);
 
-
 private:
-
-    /* Number of relay */
-    static uint8_t _nb; 
-
-    /* GPIOs */
-    static const gpio_num_t *_gpio_num;
-
+    static uint8_t _nb; // number of relays
+    static const gpio_num_t *_gpioNum;
     static uint8_t* _level;
     static SemaphoreHandle_t _mutex;
 

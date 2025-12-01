@@ -36,6 +36,13 @@ The pinout of the module is as follow :
 
 |
 
+.. image:: ../_static/rendu_realiste_bornier.jpg
+    :width: 400
+    :alt: Terminal block pinout
+    :align: center
+
+|
+
 Functions
 ---------
 
@@ -60,4 +67,4 @@ Below are the specifications for the OI-Dc module. Click on the links in the fun
    * - Temperature range
      - -20 °C... +70°C
    * - Package
-     - BOI13 (75.97x53.81x27mm)
+     - :ref:`BOI13 <boi13_s>` 

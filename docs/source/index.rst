@@ -3,7 +3,7 @@
 Welcome to OpenIndus documentation!
 ===================================
 
-Here you can find all information about OpenIndus' products. If you are using the PLC for the firt time, please go to the :ref:`get started<get_started-index>` page and learn how to upload you code.
+Here you can find all information about OpenIndus' products. If you are using the PLC for the firt time, please go to the :ref:`get started<hardware_setup-index>` page and learn how to wire your system and upload your code.
 
 If you want to go futher, follow our :ref:`projects<projects-index>`.
 

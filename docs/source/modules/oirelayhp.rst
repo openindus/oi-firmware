@@ -35,6 +35,13 @@ The pinout of the module is as follow :
 
 |
 
+.. image:: ../_static/pinout_relay_hp.gif
+    :width: 400
+    :alt: Terminal block pinout
+    :align: center
+
+|
+
 Functions
 ---------
 
@@ -44,7 +51,7 @@ Below are the specifications for the OI-RelayHP module. Click on the links in th
    :widths: 55 45
    :align: center
 
-   * - :ref:`Relay outputs <mechanicalrelay_s>`
+   * - :ref:`Relay outputs <relay_s>`
      - 2 NO and 2 NO+NC
    * - CPU
      - ESP32-S3 (8MB)
@@ -55,5 +62,5 @@ Below are the specifications for the OI-RelayHP module. Click on the links in th
    * - Temperature range
      - -20 °C... +70°C
    * - Package
-     - BOI13 (75.97x53.81x27mm)
+     - :ref:`BOI13 <boi13_s>` 
 

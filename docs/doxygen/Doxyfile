@@ -18,6 +18,7 @@ PROJECT_NUMBER = "v2.0.0-dev"
 
 OUTPUT_DIRECTORY = ./build
 
+INPUT = ./../components/openindus/api/System/System.h
 INPUT += ./../components/openindus/api/Middleware/Analog/InputsHV/AnalogInputsHV.h
 INPUT += ./../components/openindus/api/Middleware/Analog/InputsLV/AnalogInputsLV.h
 INPUT += ./../components/openindus/api/Middleware/Analog/Outputs/AnalogOutputs.h
@@ -29,7 +30,6 @@ INPUT += ./../components/openindus/api/Middleware/Digital/Outputs/DigitalOutputs
 INPUT += ./../components/openindus/api/Middleware/Motor/Stepper/MotorStepper.h
 INPUT += ./../components/openindus/api/Middleware/Motor/Dc/MotorDc.h
 INPUT += ./../components/openindus/api/Middleware/Encoder/Encoder.h
-INPUT += ./../components/openindus/api/Middleware/Encoder/Encoder.cpp
 INPUT += ./../components/openindus/api/Middleware/Analog/InputsLS/AnalogInputsLS.h
 INPUT += ./../components/openindus/api/Middleware/Analog/InputsLS/AnalogInputsLS.cpp
 INPUT += ./../components/openindus/api/Middleware/Analog/InputsLS/Sensors/RawSensor/RawSensor.h
@@ -40,6 +40,7 @@ INPUT += ./../components/openindus/api/Middleware/Analog/InputsLS/Sensors/Strain
 INPUT += ./../components/openindus/api/Middleware/Analog/InputsLS/Sensors/StrainGauge/StrainGauge.cpp
 INPUT += ./../components/openindus/api/Middleware/Analog/InputsLS/Sensors/Thermocouple/Thermocouple.h
 INPUT += ./../components/openindus/api/Middleware/Analog/InputsLS/Sensors/Thermocouple/Thermocouple.cpp
+INPUT += ./../components/openindus/api/Middleware/Relays/Relays.h
 
 ENABLE_PREPROCESSING   = NO
 

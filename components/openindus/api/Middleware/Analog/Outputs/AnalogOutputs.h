@@ -35,21 +35,7 @@ typedef enum {
 class AnalogOutputs
 {
 public:
-    /**
-     * @brief Initialize Analog Outputs
-     *
-     * @param nb Number of Analog Outputs
-     * @param configs Analog Outputs configurations
-     * @return 0 if success, -1 if error
-     **/
     static int init(uint8_t nb, ad5413_config_t *configs);
-
-    /**
-     * @brief start the devices to enable Outputs
-     *
-     * @return 0 if success, -1 if error
-     **/
-    static int start(void);
 
     /**
      * @brief Set the mode of the specified Analog Output

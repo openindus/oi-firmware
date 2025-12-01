@@ -13,14 +13,6 @@ static const char TAG[] = "Encoder";
 
 static int max_glitch_us = 1;
 
-/**
- * @brief Encoder initialization
- *
- * @param A Digital input number A
- * @param B Digital input number B
- * @param ppr Pulse per revolution
- * @return int
- */
 int Encoder::begin(DIn_Num_t A, DIn_Num_t B, int16_t ppr)
 {
     ESP_LOGI(TAG, "Encoder initialization");
@@ -87,10 +79,6 @@ int Encoder::begin(DIn_Num_t A, DIn_Num_t B, int16_t ppr)
     return 0;
 }
 
-/**
- * @brief Encoder end
- *
- */
 void Encoder::end(void) 
 {
     ESP_LOGI(TAG, "Encoder end");
@@ -102,31 +90,17 @@ void Encoder::end(void)
     }
 }
 
-/**
- * @brief Reset the number of pulses and revolutions
- *
- */
 void Encoder::reset(void)
 {
     _revolutionCnt = 0;
     ESP_ERROR_CHECK(pcnt_unit_clear_count(_pcntUnit));
 }
 
-/**
- * @brief Get the number of revolutions
- *
- * @return int number of revolutions
- */
 int Encoder::getRevolutions(void)
 {
     return _revolutionCnt;
 }
 
-/**
- * @brief Get the number of pulses
- *
- * @return int number of pulses
- */
 int Encoder::getPulses(void)
 {
     int val = 0;
@@ -134,11 +108,6 @@ int Encoder::getPulses(void)
     return (val + (_revolutionCnt * _ppr));
 }
 
-/**
- * @brief Get the angle
- *
- * @return float angle in radians
- */
 float Encoder::getAngle(void)
 {
     int val = 0;
@@ -148,24 +117,11 @@ float Encoder::getAngle(void)
     return (float)(((float)val / (float)_ppr) * 2.0 * 3.141592); // 2 * PI
 }
 
-/**
- * @brief Get the speed
- *
- * @return float speed in pulses per second
- */
 float Encoder::getSpeed(void)
 {
     return _speed;
 }
 
-/**
- * @brief PCNT ISR handler
- *
- * @param unit PCNT unit handle
- * @param edata Event data
- * @param user_ctx User context (pointer to the encoder object)
- * @return bool
- */
 bool Encoder::_pcntIsrHandler(pcnt_unit_handle_t unit, const pcnt_watch_event_data_t *edata, void *user_ctx)
 {
     Encoder* encoder = (Encoder*)user_ctx;
@@ -179,11 +135,6 @@ bool Encoder::_pcntIsrHandler(pcnt_unit_handle_t unit, const pcnt_watch_event_da
     return false; // No task needs to be woken up
 }
 
-/**
- * @brief Task to calculate the speed of the encoder
- *
- * @param pvParameter Pointer to the encoder object
- */
 void Encoder::_speedTask(void *pvParameter)
 {
     Encoder* encoder = (Encoder*)pvParameter;

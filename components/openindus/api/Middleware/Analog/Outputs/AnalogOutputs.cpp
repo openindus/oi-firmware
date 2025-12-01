@@ -60,15 +60,6 @@ int AnalogOutputs::init(uint8_t nb, ad5413_config_t* configs)
         _devicesInitialized[i] = true;
     }
 
-    _registerCLI();
-
-    return err;
-}
-
-int AnalogOutputs::start()  //Should be used after the init of other SPI devices on the bus
-{
-    int err = 0;
-
     /* Perform commands to start the device */
     for (size_t i = 0; i < _nb; i++) {
         if (_devices[i] == NULL) {
@@ -87,6 +78,8 @@ int AnalogOutputs::start()  //Should be used after the init of other SPI devices
         err |= ad5413_dac_out_en(_devices[i], 1);
         err |= analogWrite((AnalogOutput_Num_t)i, 0.0);
     }
+
+    _registerCLI();
 
     return err;
 }

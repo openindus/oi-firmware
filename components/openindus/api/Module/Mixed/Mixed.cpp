@@ -99,9 +99,6 @@ int Mixed::init(void)
     /* Initialize analog inputs */
     err |= AnalogInputsLV::init(&adcSPIConfig, _ainChannel, _ainCmdGpio, 4);
 
-    /* Enable analog outputs */
-    AnalogOutputs::start();
-
 #if defined(CONFIG_MODULE_SLAVE)
     err |= AnalogOutputsCmdHandler::init();
     err |= AnalogInputsLVCmdHandler::init();

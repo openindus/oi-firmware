@@ -44,13 +44,13 @@ menu "OpenIndus Configuration"
 
     config FORCE_CONSOLE
         bool "Force console"
-        default false
+        default n
         help
             Force the console
 
     config FORCE_MAIN_TASK
         bool "Force main task"
-        default false
+        default y
         help
             Force the main task
 

@@ -36,6 +36,13 @@ The pinout of the module is as follow :
 
 |
 
+.. image:: ../_static/rendu_realiste_bornier.jpg
+    :width: 400
+    :alt: Terminal block pinout
+    :align: center
+
+|
+
 .. note:: The Digital Input [1-8] and Digital Output [1-8] share the same physical pin mapping. This is convenient for reading back the value of an output.
 
 Functions
@@ -64,5 +71,5 @@ Below are the specifications for the OI-Discrete module. Click on the links in t
    * - Temperature range
      - -20 °C... +70°C
    * - Package
-     - BOI12 (50.47x53.81x27mm)
+     - :ref:`BOI12 <boi12_s>` 
 

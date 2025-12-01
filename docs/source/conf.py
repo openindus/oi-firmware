@@ -18,7 +18,7 @@ import os
 # -- Project information -----------------------------------------------------
 
 project = 'OpenIndus documentation'
-copyright = '2024, OpenIndus'
+copyright = '2025, OpenIndus'
 author = 'OpenIndus team'
 
 # The full version, including alpha/beta/rc tags
@@ -89,6 +89,7 @@ html_context = {
     'versions': [
         {'name': 'latest', 'url': '../latest/'},
         {'name': 'v1.8.0', 'url': '../v1.8.0/'},
+        {'name': 'v2.0.0', 'url': '../v2.0.0/'},
     ],
     'current_version': {'name': current_version_name},
 }

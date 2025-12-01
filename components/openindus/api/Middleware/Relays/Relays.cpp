@@ -12,7 +12,7 @@
 static const char TAG[] = "Relays";
 
 uint8_t Relays::_nb;
-const gpio_num_t* Relays::_gpio_num;
+const gpio_num_t* Relays::_gpioNum;
 uint8_t* Relays::_level;
 SemaphoreHandle_t Relays::_mutex;
 
@@ -23,8 +23,8 @@ int Relays::init(const gpio_num_t *gpio, int nb)
     /* Save number of DOUT */
     _nb = nb;
 
-    /* Init memory and copy gpio numbers in _gpio_num table */
-    _gpio_num = gpio;
+    /* Init memory and copy gpio numbers in _gpioNum table */
+    _gpioNum = gpio;
 
     /* Init memory of _level */
     _level = (uint8_t*) calloc(nb, sizeof(uint8_t));
@@ -37,7 +37,7 @@ int Relays::init(const gpio_num_t *gpio, int nb)
         .intr_type = GPIO_INTR_DISABLE,
     };
     for (uint8_t i = 0; i < _nb; i++) {
-        doutConf.pin_bit_mask |= (1ULL <<_gpio_num[i]);
+        doutConf.pin_bit_mask |= (1ULL <<_gpioNum[i]);
     }
     err |= gpio_config(&doutConf);
     
@@ -61,7 +61,7 @@ int Relays::digitalWrite(Relay_Num_t num, uint8_t level)
     xSemaphoreTake(_mutex, portMAX_DELAY);
     _level[num] = level;
     xSemaphoreGive(_mutex);
-    gpio_set_level(_gpio_num[num], level);
+    gpio_set_level(_gpioNum[num], level);
 
     return 0;
 }
@@ -88,7 +88,7 @@ int Relays::toggleOutput(Relay_Num_t num)
     xSemaphoreTake(_mutex, portMAX_DELAY);
     _level[num] = !_level[num];
     xSemaphoreGive(_mutex);
-    gpio_set_level(_gpio_num[num], _level[num]);
+    gpio_set_level(_gpioNum[num], _level[num]);
 
     return 0;
 }

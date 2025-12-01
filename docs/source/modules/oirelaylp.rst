@@ -21,6 +21,13 @@ The pinout of the module is as follow :
 
 |
 
+.. image:: ../_static/rendu_realiste_bornier.jpg
+    :width: 400
+    :alt: Terminal block pinout
+    :align: center
+
+|
+
 
 Functions
 ---------
@@ -31,7 +38,7 @@ Functions
    
    * - Power Supply Voltage
      - 9..30V DC
-   * - :ref:`Static Relay outputs <staticrelay_s>`
+   * - :ref:`Static Relay outputs <relay_s>`
      - 6
    * - CPU
      - ESP32-S3 (8MB)
@@ -42,4 +49,4 @@ Functions
    * - Temperature range
      - -20 °C... +70°C
    * - Package
-     - BOI13 (75.97x53.81x27mm)
+     - :ref:`BOI13 <boi13_s>` 

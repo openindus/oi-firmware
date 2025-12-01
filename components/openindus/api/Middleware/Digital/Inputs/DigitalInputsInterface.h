@@ -65,9 +65,6 @@ typedef void (*IsrCallback_t)(void *);
 class DigitalInputsInterface
 {
 public:
-    /**
-     * @brief Virtual destructor for DigitalInputsInterface
-     */
     virtual ~DigitalInputsInterface() {}
 
     /**
