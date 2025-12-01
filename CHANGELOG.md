@@ -140,3 +140,20 @@ Board which are ready to use :
 - Add functional tests for System, Digital I/O, RS485, and CAN.
 - Update the System start sequence and add Main.cpp.
 - Update README.md.
+
+# v2.0.0
+
+### Features
+
+- Migration to ESP-IDF v5.5.0 and major architecture update.
+- Improved RS485 interface and compatibility with OI-Extension modules.
+- Full support for DC motor (DRV8873): current measurement, brake management, fault detection and handling, new CLI commands (getcurrent, getfault, clearfault, setmode, brake), usage examples and auto-test.
+
+### Bugfixes
+
+- RS485 interface fixes (examples, overload, MCP25625 HW reset).
+
+### Documentation
+
+- Complete documentation update: hardware guides, wiring diagrams, API, system functions documentation, Relay HP pinout, OIDc/MotorDc, stepper/encoder, and getting started guide.
+- Added GIFs and tips for VSCode usage and extension module firmware update.
