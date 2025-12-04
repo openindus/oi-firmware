@@ -164,8 +164,8 @@ deploy:library:
     - apt update
     - apt install -y lftp
   script:
-    - tar -czf .oi/lib/openindus-$(cat version.txt).tar.gz components/openindus/
-    - tar -czf .oi/lib/arduino-esp32-$(cat version.txt).tar.gz components/arduino/
+    - tar -czf .oi/lib/openindus-$(cat version.txt).tar.gz -C components/openindus .
+    - tar -czf .oi/lib/arduino-esp32-$(cat version.txt).tar.gz -C components/arduino .
     - lftp ${FTP_SERVER} -u ${FTP_USERNAME},${FTP_PASSWORD} -e "set ssl:verify-certificate no; mirror -R ./.oi/lib/ lib/; exit;"
   tags:
     - oi-firmware
