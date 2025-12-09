@@ -1,0 +1,3 @@
+# Configuration for OI_DISCRETE_VE module
+CONFIG_OI_DISCRETE_VE=y
+CONFIG_MODULE_SLAVE=y

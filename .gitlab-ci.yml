@@ -55,6 +55,11 @@ build:bin:discrete:
   variables:
     MODULE_TYPE: "discrete"
 
+build:bin:discrete_ve:
+  extends: .build:bin
+  variables:
+    MODULE_TYPE: "OI_DISCRETE_VE"
+
 build:bin:stepper:
   extends: .build:bin
   variables:

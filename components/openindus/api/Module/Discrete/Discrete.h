@@ -49,7 +49,11 @@ class Discrete :
 public:
 
     Discrete(uint32_t sn = 0) : 
+#if defined(CONFIG_OI_DISCRETE)
         ModuleControl(TYPE_OI_DISCRETE, sn),
+#elif defined(CONFIG_OI_DISCRETE_VE)
+        ModuleControl(TYPE_OI_DISCRETE_VE, sn),
+#endif
         DigitalInputsCmd(this),
         DigitalOutputsCmd(this),
         AnalogInputsHVCmd(this) {}
