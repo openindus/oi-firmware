@@ -38,6 +38,9 @@ public:
 
 };
 
+/* DiscreteVE is identical to Discrete */
+#define DiscreteVE Discrete
+
 #elif defined(CONFIG_MODULE_MASTER) 
 
 class Discrete : 
