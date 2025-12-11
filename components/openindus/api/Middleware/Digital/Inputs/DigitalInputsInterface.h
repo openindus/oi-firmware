@@ -25,7 +25,7 @@ typedef enum {
     DIN_7,
     DIN_8,
 #endif
-#if defined(CONFIG_OI_DISCRETE) || defined(CONFIG_MODULE_MASTER)
+#if defined(CONFIG_OI_DISCRETE) || defined(CONFIG_OI_DISCRETE_VE)  || defined(CONFIG_MODULE_MASTER)
     DIN_9,
     DIN_10,
 #endif
