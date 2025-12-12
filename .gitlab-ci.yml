@@ -55,10 +55,10 @@ build:bin:discrete:
   variables:
     MODULE_TYPE: "discrete"
 
-build:bin:discrete_ve:
+build:bin:discreteve:
   extends: .build:bin
   variables:
-    MODULE_TYPE: "OI_DISCRETE_VE"
+    MODULE_TYPE: "discreteve"
 
 build:bin:stepper:
   extends: .build:bin
@@ -137,6 +137,7 @@ deploy:bin:
   needs:
     - job: build:bin:core
     - job: build:bin:discrete
+    - job: build:bin:discreteve
     - job: build:bin:stepper
     - job: build:bin:mixed
     - job: build:bin:relayhp
@@ -158,6 +159,7 @@ deploy:library:
   needs:
     - job: build:bin:core
     - job: build:bin:discrete
+    - job: build:bin:discreteve
     - job: build:bin:stepper
     - job: build:bin:mixed
     - job: build:bin:relayhp
