@@ -50,7 +50,7 @@ menu "OpenIndus Configuration"
 
     config FORCE_MAIN_TASK
         bool "Force main task"
-        default y
+        default n
         help
             Force the main task
 
