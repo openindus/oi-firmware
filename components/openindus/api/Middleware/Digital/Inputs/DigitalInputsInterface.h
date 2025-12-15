@@ -19,13 +19,13 @@ typedef enum {
     DIN_2,
     DIN_3,
     DIN_4,
-#if defined(CONFIG_OI_DISCRETE) || defined(CONFIG_OI_DC) || defined(CONFIG_MODULE_MASTER)
+#if defined(CONFIG_OI_DISCRETE) || defined(CONFIG_OI_DISCRETE_VE) || defined(CONFIG_OI_DC) || defined(CONFIG_MODULE_MASTER)
     DIN_5,
     DIN_6,
     DIN_7,
     DIN_8,
 #endif
-#if defined(CONFIG_OI_DISCRETE) || defined(CONFIG_MODULE_MASTER)
+#if defined(CONFIG_OI_DISCRETE) || defined(CONFIG_OI_DISCRETE_VE)  || defined(CONFIG_MODULE_MASTER)
     DIN_9,
     DIN_10,
 #endif

@@ -38,6 +38,9 @@ public:
 
 };
 
+/* DiscreteVE is identical to Discrete */
+#define DiscreteVE Discrete
+
 #elif defined(CONFIG_MODULE_MASTER) 
 
 class Discrete : 
@@ -50,6 +53,21 @@ public:
 
     Discrete(uint32_t sn = 0) : 
         ModuleControl(TYPE_OI_DISCRETE, sn),
+        DigitalInputsCmd(this),
+        DigitalOutputsCmd(this),
+        AnalogInputsHVCmd(this) {}
+};
+
+class DiscreteVE :
+    public ModuleControl, 
+    public DigitalInputsCmd, 
+    public DigitalOutputsCmd, 
+    public AnalogInputsHVCmd
+{
+public:
+
+    DiscreteVE(uint32_t sn = 0) : 
+        ModuleControl(TYPE_OI_DISCRETE_VE, sn),
         DigitalInputsCmd(this),
         DigitalOutputsCmd(this),
         AnalogInputsHVCmd(this) {}

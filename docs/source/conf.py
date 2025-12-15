@@ -90,6 +90,7 @@ html_context = {
         {'name': 'latest', 'url': '../latest/'},
         {'name': 'v1.8.0', 'url': '../v1.8.0/'},
         {'name': 'v2.0.0', 'url': '../v2.0.0/'},
+        {'name': 'v2.1.0', 'url': '../v2.1.0/'},
     ],
     'current_version': {'name': current_version_name},
 }

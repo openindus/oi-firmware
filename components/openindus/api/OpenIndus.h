@@ -30,6 +30,7 @@ void loop(void);
 #endif
 #define OICoreLite Core
 #define OIDiscrete Discrete
+#define OIDiscreteVE DiscreteVE
 #define OIMixed Mixed
 #define OIStepper Stepper
 #define OIRelayHP RelayHP

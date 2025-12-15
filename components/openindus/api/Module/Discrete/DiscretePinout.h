@@ -7,8 +7,7 @@
  */
 
 #pragma once
-
-#if defined(CONFIG_OI_DISCRETE)
+#if defined(CONFIG_OI_DISCRETE) || defined(CONFIG_OI_DISCRETE_VE)
 
 /* DIN */
 #define DISCRETE_GPIO_DIN_1             GPIO_NUM_20
@@ -31,6 +30,7 @@
 #define DISCRETE_GPIO_DOUT_6            GPIO_NUM_17
 #define DISCRETE_GPIO_DOUT_7            GPIO_NUM_18
 #define DISCRETE_GPIO_DOUT_8            GPIO_NUM_19
+
 #define DISCRETE_ADC_CHANNEL_DOUT_1     ADC_CHANNEL_0
 #define DISCRETE_ADC_CHANNEL_DOUT_2     ADC_CHANNEL_1
 #define DISCRETE_ADC_CHANNEL_DOUT_3     ADC_CHANNEL_3
@@ -45,8 +45,5 @@
 #define DISCRETE_ADC_CHANNEL_AIN_1      ADC_CHANNEL_0
 #define DISCRETE_ADC_CHANNEL_AIN_2      ADC_CHANNEL_1
 #define DISCRETE_ADC_UNIT_AIN           ADC_UNIT_2
-
-#elif defined(CONFIG_OI_DISCRETE_VE)
-
 
 #endif
