@@ -157,3 +157,7 @@ Board which are ready to use :
 
 - Complete documentation update: hardware guides, wiring diagrams, API, system functions documentation, Relay HP pinout, OIDc/MotorDc, stepper/encoder, and getting started guide.
 - Added GIFs and tips for VSCode usage and extension module firmware update.
+
+# v2.1.0
+
+- Add OIDiscreteVE.
