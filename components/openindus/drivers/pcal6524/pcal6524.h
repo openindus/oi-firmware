@@ -22,7 +22,7 @@ extern "C" {
 #include "esp_err.h"
 #include "esp_log.h"
 #include "driver/gpio.h"
-#include "driver/i2c.h"
+#include "driver/i2c_master.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
@@ -178,7 +178,7 @@ typedef struct {
 typedef struct 
 {    
     uint8_t address;                               /*<! address of the ioexpander         */
-    uint8_t i2c_port;                              /*<! i2c port of the ioexpander        */
+    i2c_master_dev_handle_t dev_handle;           /*<! i2c device handle ioexpander       */
     TaskHandle_t interrupt_handle;                 /*<! ioexpander interrupt task handle  */
     gpio_num_t interrupt_pin;                      /*<! interrupt pin of the ioexpander   */
     ioex_interrupt_list_t *interrupt_list;         /*!< ISR Struct for interrupt          */
@@ -187,7 +187,7 @@ typedef struct
 /**
  * @brief Create an instance of ioexpander and initialize it
  *
- * @param[in] i2c_port: i2c port of the i2c configured
+ * @param[in] i2c_master_handle: i2c handle
  * @param[in] i2c_address: i2c address of the ioexpander
  * @param[in] use_interrupt: set to true if interrupt management is required
  * @param[in] interrupt_num: gpio use for interrupt; ignored is use_interrupt is set to false
@@ -196,7 +196,7 @@ typedef struct
  *
  * @return ioexpader_pca6524 instance or NULL if an error occured (ex: i2c not configured)
  */
-ioex_device_t *ioex_create(i2c_port_t i2c_port, uint8_t i2c_address, bool use_interrupt, gpio_num_t interrupt_pin);
+ioex_device_t *ioex_create(i2c_master_bus_handle_t i2c_master_handle, uint8_t i2c_address, bool use_interrupt, gpio_num_t interrupt_pin);
 
 /**
  * @brief Uninstall led driver
