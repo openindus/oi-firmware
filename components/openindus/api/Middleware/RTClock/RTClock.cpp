@@ -20,9 +20,12 @@ static QueueHandle_t _alarmEvtQueue = NULL;
 static void _AlarmTask(void* arg);
 static void _alarmIsrHandler(void* arg);
 
+RTClock *RTClock::_instance = NULL;
+
+
 void RTClock::begin(void)
 {
-    rtc_i2c_set_port(_i2c_num);
+    rtc_i2c_begin(_i2c_master_handle, _rtc_i2c_address);
 
     /* Create task for alarm intr. */
     _alarmEvtQueue = xQueueCreate(10, sizeof(int));

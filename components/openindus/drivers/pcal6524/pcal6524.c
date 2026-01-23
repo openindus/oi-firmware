@@ -115,7 +115,7 @@ ioex_device_t *ioex_create(i2c_master_bus_handle_t i2c_master_handle, uint8_t i2
     IOEX_CHECK(i2c_master_bus_add_device(i2c_master_handle, &dev_config, &(io->dev_handle)) != ESP_OK, "error while adding i2c dev", err);
 
     // Reset io <--  dangerous, could reset other I2C devices
-    // uint8_t write_buf = {i2c_address, 0x00, 0x06};
+    // uint8_t write_buf = {0x00, 0x06};
     // i2c_master_transmit(io->dev_handle, write_buf, sizeof(write_buf), I2C_MASTER_TIMEOUT_MS)
 
     if (use_interrupt)
@@ -805,9 +805,9 @@ static uint64_t ioex_get_activated_pin(ioex_device_t *io)
 {
     ESP_LOGV(IOEX_TAG, "READ: device_address:%#04x; register:%#04x", io->address, INTERRUPT_STATUS_PORT_0);
     
-    uint8_t write_buf[] = {io->address, INTERRUPT_STATUS_PORT_0};
+    uint8_t reg = INTERRUPT_STATUS_PORT_0;
     uint8_t data[3] = {0};
-    i2c_master_transmit_receive(io->dev_handle, write_buf, sizeof(write_buf), data, 3, I2C_MASTER_TIMEOUT_MS);
+    i2c_master_transmit_receive(io->dev_handle, &reg, 1, data, 3, I2C_MASTER_TIMEOUT_MS);
 
     return data[2] << 16 | data[1] << 8 | data[0];
 }
@@ -857,7 +857,7 @@ static void ioex_task_interrupt_handler(void* arg)
                 ESP_LOGW(IOEX_TAG, "An interrupt appended but no handler was set for it");
                 ESP_LOGV(IOEX_TAG, "Clearing all interrupts");
                 ESP_LOGV(IOEX_TAG, "WRITE: device_address:%#04x; register:%#04x; data:0xffffff", io->address, INTERRUPT_STATUS_PORT_0);
-                uint8_t write_buf[] = {io->address, INTERRUPT_CLEAR_PORT_0, 0xFF, 0xFF, 0xFF};
+                uint8_t write_buf[] = {INTERRUPT_CLEAR_PORT_0, 0xFF, 0xFF, 0xFF};
                 i2c_master_transmit(io->dev_handle, write_buf, sizeof(write_buf), I2C_MASTER_TIMEOUT_MS);
             }
             pin = ioex_get_activated_pin(io);
@@ -872,7 +872,7 @@ static void ioex_task_interrupt_handler(void* arg)
 esp_err_t i2c_write(i2c_master_dev_handle_t dev_handle, uint8_t address, uint8_t reg, uint8_t data)
 {
     ESP_LOGV(IOEX_TAG, "WRITE: device_address:%#04x; register:%#04x; data:%#04x", address, reg, data);
-    uint8_t write_buf[] = {address, reg, data};
+    uint8_t write_buf[] = {reg, data};
     return i2c_master_transmit(dev_handle, write_buf, sizeof(write_buf), I2C_MASTER_TIMEOUT_MS);
 }
 
@@ -880,8 +880,7 @@ esp_err_t i2c_read(i2c_master_dev_handle_t dev_handle, uint8_t address, uint8_t 
 {
     ESP_LOGV(IOEX_TAG, "READ: device_address:%#04x; register:%#04x", address, reg);
     esp_err_t ret = ESP_OK;
-    uint8_t write_buf[] = {address, reg};
-    ret = i2c_master_transmit_receive(dev_handle, write_buf, sizeof(write_buf), data, 1, I2C_MASTER_TIMEOUT_MS);
+    ret = i2c_master_transmit_receive(dev_handle, &reg, 1, data, 1, I2C_MASTER_TIMEOUT_MS);
     ESP_LOGV(IOEX_TAG, "raw:%#04x", *data);
     return ret;
 }

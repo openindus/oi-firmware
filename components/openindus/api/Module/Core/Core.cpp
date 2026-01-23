@@ -49,7 +49,7 @@ ioex_device_t* Core::_ioex = NULL;
 i2c_master_bus_handle_t Core::_i2cBusHandle = NULL;
 CAN Core::can(CORE_SPI_USER_HOST, CORE_PIN_CAN_SPI_CS, CORE_PIN_CAN_INTERRUPT);
 RS Core::rs(CORE_SPI_USER_HOST, CORE_PIN_RS_SPI_CS, CORE_PIN_RS_INTERRUPT);
-RTClock Core::rtc(CORE_I2C_PORT_NUM, CORE_PIN_RTC_INTERRUPT);
+RTClock Core::rtc(Core::_i2cBusHandle, CORE_I2C_RTC_ADDRESS, CORE_PIN_RTC_INTERRUPT);
 Modem *Core::modem = NULL;
 
 int Core::init(void)
@@ -72,7 +72,7 @@ int Core::init(void)
         .glitch_ignore_cnt = 7,
         .flags = {
             .enable_internal_pullup = true,
-            .allow_pd = true
+            .allow_pd = false
         }
     };
     ESP_ERROR_CHECK(i2c_new_master_bus(&i2cBusConfig, &_i2cBusHandle));

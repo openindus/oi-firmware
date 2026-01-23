@@ -400,11 +400,6 @@ typedef enum {
 #define M41T62_SIGN_CALIBRATION_MASK  (uint8_t)0x20
 
 /**
-* @brief  M41T62 I2C slave address.
-*/
-#define M41T62_I2C_ADDRESS            (uint8_t)0xD0
-
-/**
 * @brief  Driver version.
 */
 #define M41T62_DriverVersion_Major (uint8_t)1
@@ -429,7 +424,7 @@ typedef enum {
 * @retval Error code [M41T62_OK, M41T62_ERROR].
 */
 // the user must redefine the proper M41T62_ReadRegs
-#define M41T62_ReadRegs(RegAddr, NumByteToRead, Data)  HAL_ReadReg(M41T62_I2C_ADDRESS, RegAddr, NumByteToRead, Data)
+#define M41T62_ReadRegs(RegAddr, NumByteToRead, Data)  HAL_ReadReg(RegAddr, NumByteToRead, Data)
 
 /**
 * @brief  Write M41T62 Registers
@@ -439,7 +434,7 @@ typedef enum {
 * @retval Error code [M41T62_OK, M41T62_ERROR].
 */
 // the user must redefine the proper M41T62_WriteRegs
-#define M41T62_WriteRegs(RegAddr, NumByteToWrite, Data)  HAL_WriteReg(M41T62_I2C_ADDRESS, RegAddr, NumByteToWrite, Data)
+#define M41T62_WriteRegs(RegAddr, NumByteToWrite, Data)  HAL_WriteReg(RegAddr, NumByteToWrite, Data)
 
 
 uint8_t DecimalToBCD(uint8_t);
