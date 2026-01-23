@@ -24,7 +24,7 @@ class AnalogLS:
 public:
 
     static int init(void);
-
+    static i2c_master_bus_handle_t _i2cBusHandle;
 };
 
 #elif defined(CONFIG_MODULE_MASTER) 
