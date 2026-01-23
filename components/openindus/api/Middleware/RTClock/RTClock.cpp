@@ -16,7 +16,7 @@ static const uint8_t DAYS_IN_MONTH[] = {31,28,31,30,31,30,31,31,30,31,30,31};
 
 /* Alarm */
 static void (*_alarmCallback)(void);
-static QueueHandle_t _alarmEvtQueue = NULL;
+static SemaphoreHandle_t _alarmSemaphore = NULL;
 static void _AlarmTask(void* arg);
 static void _alarmIsrHandler(void* arg);
 
@@ -28,8 +28,8 @@ void RTClock::begin(void)
     rtc_i2c_begin(_i2c_master_handle, _rtc_i2c_address);
 
     /* Create task for alarm intr. */
-    _alarmEvtQueue = xQueueCreate(10, sizeof(int));
-    xTaskCreate(_AlarmTask, "_AlarmTask", 2048, NULL, 10, NULL);
+    _alarmSemaphore = xSemaphoreCreateBinary();
+    xTaskCreate(_AlarmTask, "_AlarmTask", 4096, NULL, 10, NULL);
 }
 
 time_t RTClock::time(void)
@@ -261,15 +261,15 @@ long DateTime::secondstime(void) const
 
 static void IRAM_ATTR _alarmIsrHandler(void* arg)
 {
-    int tmp = (int) arg;
-    xQueueSendFromISR(_alarmEvtQueue, &tmp, NULL);
+    if (_alarmSemaphore != NULL) {
+        xSemaphoreGiveFromISR(_alarmSemaphore, NULL);
+    }
 }
 
 static void _AlarmTask(void* arg)
 {
-    int tmp;
     while(1) {
-        if (xQueueReceive(_alarmEvtQueue, &tmp, portMAX_DELAY)) {
+        if (_alarmSemaphore != NULL && xSemaphoreTake(_alarmSemaphore, portMAX_DELAY) == pdTRUE) {
             M41T62_AF_State_et flag;
             M41T62_Get_AF_Bit(&flag); // Read alarm flag
             if (flag == M41T62_AF_HIGH) {

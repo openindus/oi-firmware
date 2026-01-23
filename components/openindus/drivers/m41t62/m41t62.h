@@ -67,7 +67,7 @@ esp_err_t rtc_i2c_write(uint8_t reg, uint8_t *data, size_t data_len);
  * @brief Internal interrupt handler for RTC
  * @param arg Optional argument
  */
-void rtc_i2c_begin(i2c_master_bus_handle_t i2c_master_handle, uint8_t rtc_i2c_address);
+void rtc_i2c_begin(i2c_master_bus_handle_t *i2c_master_handle, uint8_t rtc_i2c_address);
 
 #ifdef __cplusplus
 }

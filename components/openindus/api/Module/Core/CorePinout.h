@@ -109,6 +109,6 @@
 #define CORE_SPI_USER_HOST            SPI3_HOST
 
 #define CORE_I2C_IOEXPANDER_ADDRESS   0x23
-#define CORE_I2C_RTC_ADDRESS          0xD0
+#define CORE_I2C_RTC_ADDRESS          0x68
 
 #endif

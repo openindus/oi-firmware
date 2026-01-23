@@ -54,7 +54,7 @@ class RTClock
 {
 public:
 
-    RTClock(i2c_master_bus_handle_t i2c_master_handle, uint8_t rtc_i2c_address, gpio_num_t intr_pin) :
+    RTClock(i2c_master_bus_handle_t *i2c_master_handle, uint8_t rtc_i2c_address, gpio_num_t intr_pin) :
         _i2c_master_handle(i2c_master_handle),
         _rtc_i2c_address(rtc_i2c_address),
         _intr_pin(intr_pin) { _instance = this;}
@@ -130,14 +130,13 @@ public:
     virtual void detachRTCAlarm(void);
 
     static RTClock* getInstance(void) { return _instance;}
+    
+    static int _registerCLI(void);
 
 private:
 
-    i2c_master_bus_handle_t _i2c_master_handle;
+    i2c_master_bus_handle_t *_i2c_master_handle;
     uint8_t _rtc_i2c_address;
     gpio_num_t _intr_pin;
     static RTClock *_instance;
-
-    static int _registerCLI(void);
-
 };

@@ -49,7 +49,7 @@ ioex_device_t* Core::_ioex = NULL;
 i2c_master_bus_handle_t Core::_i2cBusHandle = NULL;
 CAN Core::can(CORE_SPI_USER_HOST, CORE_PIN_CAN_SPI_CS, CORE_PIN_CAN_INTERRUPT);
 RS Core::rs(CORE_SPI_USER_HOST, CORE_PIN_RS_SPI_CS, CORE_PIN_RS_INTERRUPT);
-RTClock Core::rtc(Core::_i2cBusHandle, CORE_I2C_RTC_ADDRESS, CORE_PIN_RTC_INTERRUPT);
+RTClock Core::rtc(&Core::_i2cBusHandle, CORE_I2C_RTC_ADDRESS, CORE_PIN_RTC_INTERRUPT);
 Modem *Core::modem = NULL;
 
 int Core::init(void)
@@ -70,6 +70,8 @@ int Core::init(void)
         .scl_io_num = CORE_PIN_I2C_SCL,
         .clk_source = I2C_CLK_SRC_DEFAULT,
         .glitch_ignore_cnt = 7,
+        .intr_priority = 0,
+        .trans_queue_depth = 0,
         .flags = {
             .enable_internal_pullup = true,
             .allow_pd = false
@@ -203,6 +205,7 @@ int Core::init(void)
     err |= DigitalOutputsCLI::init();
     err |= RSCLI::init();
     err |= CANCLI::init();
+    err |= RTClock::_registerCLI();
 #if defined(CONFIG_MODULE_MASTER)
     MotorStepperCmd::_registerCLI();
 #endif

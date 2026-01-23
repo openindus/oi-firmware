@@ -63,21 +63,19 @@ bool HAL_WriteReg(uint8_t regAddr, uint32_t numByteToWrite, uint8_t *data)
 ///////////////////////////////ESP I2C FUNCTIONS/////////////////////////////////////////////////////////////////////////
 esp_err_t rtc_i2c_write(uint8_t reg, uint8_t *data, size_t data_len)
 {
-    ESP_LOGV(RTC_TAG, "WRITE: register:%#04x;", reg);
+    ESP_LOGI(RTC_TAG, "WRITE: register:%#04x;", reg);
 
-    uint8_t *write_buf = NULL;
-    write_buf = (uint8_t*) malloc(sizeof(uint8_t)*(data_len+1));
-    if (!write_buf) return ESP_ERR_NO_MEM;
-    write_buf[0] = reg;
-    memcpy(&write_buf[1], data, data_len);
-    esp_err_t ret =  i2c_master_transmit(_i2c_dev_handle, write_buf, data_len+1, I2C_MASTER_TIMEOUT_MS);
-    free(write_buf);
-    return ret;
+    i2c_master_transmit_multi_buffer_info_t buffers[2] = {
+        {.write_buffer = &reg, .buffer_size = 1},
+        {.write_buffer = data, .buffer_size = data_len}
+    };
+
+    return i2c_master_multi_buffer_transmit(_i2c_dev_handle, buffers, sizeof(buffers)/sizeof(i2c_master_transmit_multi_buffer_info_t), I2C_MASTER_TIMEOUT_MS);
 }
 
 esp_err_t rtc_i2c_read(uint8_t reg, uint8_t *data, size_t data_len)
 {
-    ESP_LOGV(RTC_TAG, "READ: register:%#04x", reg);
+    ESP_LOGI(RTC_TAG, "READ: register:%#04x, data_len:%d", reg, data_len);
     
     if (data_len == 0) {
         return ESP_OK;
@@ -85,7 +83,7 @@ esp_err_t rtc_i2c_read(uint8_t reg, uint8_t *data, size_t data_len)
     return i2c_master_transmit_receive(_i2c_dev_handle, &reg, 1, data, data_len, I2C_MASTER_TIMEOUT_MS);
 }
 
-void rtc_i2c_begin(i2c_master_bus_handle_t i2c_master_handle, uint8_t rtc_i2c_address)
+void rtc_i2c_begin(i2c_master_bus_handle_t *i2c_master_handle, uint8_t rtc_i2c_address)
 {
     i2c_device_config_t dev_config = {
         .dev_addr_length = I2C_ADDR_BIT_LEN_7,
@@ -93,5 +91,5 @@ void rtc_i2c_begin(i2c_master_bus_handle_t i2c_master_handle, uint8_t rtc_i2c_ad
         .scl_speed_hz = I2C_MASTER_FREQ_HZ,
     };
 
-    i2c_master_bus_add_device(i2c_master_handle, &dev_config, &_i2c_dev_handle);
+    i2c_master_bus_add_device(*i2c_master_handle, &dev_config, &_i2c_dev_handle);
 }
