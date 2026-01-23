@@ -827,28 +827,29 @@ static void ioex_task_interrupt_handler(void* arg)
 
         // We loop to permit reading of interrupts that appen while we process others
         while(pin) {
-            if (io->interrupt_list->first == NULL)
+            if (io->interrupt_list->first != NULL)
+            {
+                /* List is already in order of priority so we just have to iterate through it */
+                ioex_interrupt_element_t *interrupt_element = io->interrupt_list->first;
+                while (interrupt_element != NULL)
+                {
+                    if ((1ULL<<interrupt_element->ioex_num) & pin)
+                    {
+                        /* Clear interrupt */
+                        i2c_write(io->dev_handle, io->address, INTERRUPT_CLEAR_PORT_0 + (interrupt_element->ioex_num / 8), (1U<<(interrupt_element->ioex_num-(8*(interrupt_element->ioex_num / 8)))));
+                        
+                        pin &= ~(1ULL<<interrupt_element->ioex_num);
+                        
+                        /* Call isr for the gpio */
+                        ESP_LOGV(IOEX_TAG, "Interrupt from IOEX_NUM_%u", ioex_num_to_num(interrupt_element->ioex_num));
+                        interrupt_element->isr_handler(interrupt_element->args);
+                    }
+                    interrupt_element = interrupt_element->next;
+                }
+            } 
+            else 
             {
                 ESP_LOGW(IOEX_TAG, "unexpected interrupt from ioexpander");
-                continue;
-            }
-
-            /* List is already in order of priority so we just have to iterate through it */
-            ioex_interrupt_element_t *interrupt_element = io->interrupt_list->first;
-            while (interrupt_element != NULL)
-            {
-                if ((1ULL<<interrupt_element->ioex_num) & pin)
-                {
-                    /* Clear interrupt */
-                    i2c_write(io->dev_handle, io->address, INTERRUPT_CLEAR_PORT_0 + (interrupt_element->ioex_num / 8), (1U<<(interrupt_element->ioex_num-(8*(interrupt_element->ioex_num / 8)))));
-                    
-                    pin &= ~(1ULL<<interrupt_element->ioex_num);
-                    
-                    /* Call isr for the gpio */
-                    ESP_LOGV(IOEX_TAG, "Interrupt from IOEX_NUM_%u", ioex_num_to_num(interrupt_element->ioex_num));
-                    interrupt_element->isr_handler(interrupt_element->args);
-                }
-                interrupt_element = interrupt_element->next;
             }
             // Some interrupt where not handled
             if (pin)
