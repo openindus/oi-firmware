@@ -87,9 +87,9 @@ void System::start(void)
     if (UsbConsole::checkUserActivation(500)) { // Check if user wants to activate console
         UsbConsole::begin();
     } else {
-#if defined(CONFIG_FORCE_CONSOLE)
+// #if defined(CONFIG_FORCE_CONSOLE)
         UsbConsole::begin(); // Force start console
-#endif
+// #endif
         _createMainTask();
     }
 #elif defined(CONFIG_MODULE_SLAVE)

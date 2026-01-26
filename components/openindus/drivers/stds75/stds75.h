@@ -25,7 +25,7 @@ esp_err_t STDS75_i2c_init(void);
 
 float STDS75_get_temperature(void);
 
-esp_err_t STDS75_init(i2c_master_bus_handle_t bus_handle, uint8_t addr, gpio_num_t os_int);
+esp_err_t STDS75_init(i2c_master_bus_handle_t *bus_handle, uint8_t addr, gpio_num_t os_int);
 
 #ifdef __cplusplus
 }

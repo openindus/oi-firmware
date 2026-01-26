@@ -18,7 +18,7 @@ static struct {
     struct arg_end *end;
 } dateArgs;
 
-static int _date(int argc, char **argv) 
+static int _date(int argc, char **argv)
 {
     int nerrors = arg_parse(argc, argv, (void **) &dateArgs);
     if (nerrors != 0) {
@@ -26,7 +26,8 @@ static int _date(int argc, char **argv)
         return 1;
     }
 
-    RTClock *rtc = new RTClock(I2C_NUM_0, GPIO_NUM_0);
+    RTClock *rtc = RTClock::getInstance();
+    if (!rtc) return 1;
     rtc->begin();
     if (dateArgs.date->count == 1) {
         DateTime* setDate =  new DateTime(dateArgs.date->tmval->tm_year + 1900, \

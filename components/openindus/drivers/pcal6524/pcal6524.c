@@ -73,12 +73,15 @@ static const char IOEX_TAG[] = "pcal6524";
 #define INTERRUPT_CLEAR_PORT_1          (0x69)
 #define INTERRUPT_CLEAR_PORT_2          (0x6A)
 
+#define I2C_MASTER_FREQ_HZ              400000
+#define I2C_MASTER_TIMEOUT_MS           pdMS_TO_TICKS(1000)
+
 
 static void ioex_isr_handler(void* arg);
 static void ioex_task_interrupt_handler(void* arg);
 
-esp_err_t i2c_write(i2c_port_t i2c_port, uint8_t address, uint8_t reg, uint8_t data);
-esp_err_t i2c_read(i2c_port_t i2c_port, uint8_t address, uint8_t reg, uint8_t *data);
+esp_err_t i2c_write(i2c_master_dev_handle_t  dev_handle, uint8_t address, uint8_t reg, uint8_t data);
+esp_err_t i2c_read(i2c_master_dev_handle_t dev_handle, uint8_t address, uint8_t reg, uint8_t *data);
 uint8_t ioex_num_to_num(ioex_num_t ioex_num);
 
 esp_err_t add_to_list(ioex_device_t *io, ioex_interrupt_element_t *interrupt_element);
@@ -90,7 +93,7 @@ int find_list_position_from_ioex_num(ioex_device_t *io, ioex_num_t ioex_num);
 /* -------------------------- Driver's functions ---------------------------- */
 /* -------------------------------------------------------------------------- */
 
-ioex_device_t *ioex_create(i2c_port_t i2c_port, uint8_t i2c_address, bool use_interrupt, gpio_num_t interrupt_pin)
+ioex_device_t *ioex_create(i2c_master_bus_handle_t i2c_master_handle, uint8_t i2c_address, bool use_interrupt, gpio_num_t interrupt_pin)
 {
     ioex_device_t *io = NULL;
 
@@ -103,16 +106,17 @@ ioex_device_t *ioex_create(i2c_port_t i2c_port, uint8_t i2c_address, bool use_in
     IOEX_CHECK(io == NULL, "request memory for ioexpander pcal6524 failed", err);
 
     io->address = i2c_address;
-    io->i2c_port = i2c_port;
 
-    // reset io
-    i2c_cmd_handle_t cmd = i2c_cmd_link_create();
-    i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, (0x00 << 1) | I2C_MASTER_WRITE, ACK_CHECK_EN);
-    i2c_master_write_byte(cmd, 0x06, ACK_CHECK_EN);
-    i2c_master_stop(cmd);
-    i2c_master_cmd_begin(io->i2c_port, cmd, 1000 / portTICK_PERIOD_MS);
-    i2c_cmd_link_delete(cmd);
+    i2c_device_config_t dev_config = {
+        .dev_addr_length = I2C_ADDR_BIT_LEN_7,
+        .device_address = i2c_address,
+        .scl_speed_hz = I2C_MASTER_FREQ_HZ,
+    };
+    IOEX_CHECK(i2c_master_bus_add_device(i2c_master_handle, &dev_config, &(io->dev_handle)) != ESP_OK, "error while adding i2c dev", err);
+
+    // Reset io <--  dangerous, could reset other I2C devices
+    // uint8_t write_buf = {0x00, 0x06};
+    // i2c_master_transmit(io->dev_handle, write_buf, sizeof(write_buf), I2C_MASTER_TIMEOUT_MS)
 
     if (use_interrupt)
     {
@@ -273,7 +277,7 @@ esp_err_t ioex_set_level_multiple(ioex_device_t *io, ioex_port_t port, uint8_t p
         goto err;
     }
 
-    IOEX_CHECK(i2c_read(io->i2c_port, io->address, reg, &data), "error while reading ioexpander register", err);
+    IOEX_CHECK(i2c_read(io->dev_handle, io->address, reg, &data), "error while reading ioexpander register", err);
 
     if (level == IOEX_HIGH)
     {
@@ -284,7 +288,7 @@ esp_err_t ioex_set_level_multiple(ioex_device_t *io, ioex_port_t port, uint8_t p
         data &= ~pins;
     }
 
-    IOEX_CHECK(i2c_write(io->i2c_port, io->address, reg, data), "error while writing ioexpander register", err);
+    IOEX_CHECK(i2c_write(io->dev_handle, io->address, reg, data), "error while writing ioexpander register", err);
 
     return ESP_OK;
 
@@ -319,7 +323,7 @@ int ioex_get_level(ioex_device_t *io, ioex_num_t ioex_num)
         goto err;
     }
 
-    IOEX_CHECK(i2c_read(io->i2c_port, io->address, reg, &data), "error while reading ioexpander register", err);
+    IOEX_CHECK(i2c_read(io->dev_handle, io->address, reg, &data), "error while reading ioexpander register", err);
 
     if ((data & bit) == 0)
     {
@@ -385,7 +389,7 @@ esp_err_t ioex_set_direction_multiple(ioex_device_t *io, ioex_port_t port, uint8
         goto err;
     }
 
-    IOEX_CHECK(i2c_read(io->i2c_port, io->address, reg, &data), "error while reading ioexpander register", err);
+    IOEX_CHECK(i2c_read(io->dev_handle, io->address, reg, &data), "error while reading ioexpander register", err);
 
     if (mode == IOEX_INPUT)
     {
@@ -396,7 +400,7 @@ esp_err_t ioex_set_direction_multiple(ioex_device_t *io, ioex_port_t port, uint8
         data &= ~pins;
     }
 
-    IOEX_CHECK(i2c_write(io->i2c_port, io->address, reg, data), "error while writing ioexpander register", err);
+    IOEX_CHECK(i2c_write(io->dev_handle, io->address, reg, data), "error while writing ioexpander register", err);
 
     return ESP_OK;
 
@@ -459,7 +463,7 @@ esp_err_t ioex_set_pull_mode_multiple(ioex_device_t *io, ioex_port_t port, uint8
     }
 
     /* First activate or desactivate pull */
-    IOEX_CHECK(i2c_read(io->i2c_port, io->address, reg1, &data), "error while reading ioexpander register", err);
+    IOEX_CHECK(i2c_read(io->dev_handle, io->address, reg1, &data), "error while reading ioexpander register", err);
 
     if (pull_mode == IOEX_PULLUP || pull_mode == IOEX_PULLDOWN)
     {
@@ -470,12 +474,12 @@ esp_err_t ioex_set_pull_mode_multiple(ioex_device_t *io, ioex_port_t port, uint8
         data &= ~pins;
     }
 
-    IOEX_CHECK(i2c_write(io->i2c_port, io->address, reg1, data), "error while writing ioexpander register", err);
+    IOEX_CHECK(i2c_write(io->dev_handle, io->address, reg1, data), "error while writing ioexpander register", err);
 
     /* Then configure pull up or pull down */
     if (pull_mode != IOEX_FLOATING)
     {
-        IOEX_CHECK(i2c_read(io->i2c_port, io->address, reg2, &data), "error while reading ioexpander register", err);
+        IOEX_CHECK(i2c_read(io->dev_handle, io->address, reg2, &data), "error while reading ioexpander register", err);
 
         if (pull_mode == IOEX_PULLUP)
         {
@@ -486,7 +490,7 @@ esp_err_t ioex_set_pull_mode_multiple(ioex_device_t *io, ioex_port_t port, uint8
             data &= ~pins;
         }
 
-        IOEX_CHECK(i2c_write(io->i2c_port, io->address, reg2, data), "error while writing ioexpander register", err);
+        IOEX_CHECK(i2c_write(io->dev_handle, io->address, reg2, data), "error while writing ioexpander register", err);
     }
 
     return ESP_OK;
@@ -565,8 +569,8 @@ esp_err_t ioex_set_interrupt_type_multiple(ioex_device_t *io, ioex_port_t port, 
     }
 
     /* First activate or desactivate pull */
-    IOEX_CHECK(i2c_read(io->i2c_port, io->address, reg1, &data1), "error while reading ioexpander register", err);
-    IOEX_CHECK(i2c_read(io->i2c_port, io->address, reg2, &data2), "error while reading ioexpander register", err);
+    IOEX_CHECK(i2c_read(io->dev_handle, io->address, reg1, &data1), "error while reading ioexpander register", err);
+    IOEX_CHECK(i2c_read(io->dev_handle, io->address, reg2, &data2), "error while reading ioexpander register", err);
 
     /*****************************************************************************************/
     /*   Bit 1  |  Bit 0   |                      Description                                */
@@ -625,8 +629,8 @@ esp_err_t ioex_set_interrupt_type_multiple(ioex_device_t *io, ioex_port_t port, 
         if (pins & 0x80) { data2 |= (0b11000000);};
     }
 
-    IOEX_CHECK(i2c_write(io->i2c_port, io->address, reg1, data1), "error while writing ioexpander register", err);
-    IOEX_CHECK(i2c_write(io->i2c_port, io->address, reg2, data2), "error while writing ioexpander register", err);
+    IOEX_CHECK(i2c_write(io->dev_handle, io->address, reg1, data1), "error while writing ioexpander register", err);
+    IOEX_CHECK(i2c_write(io->dev_handle, io->address, reg2, data2), "error while writing ioexpander register", err);
 
     return ESP_OK;
 
@@ -661,11 +665,11 @@ esp_err_t ioex_interrupt_enable(ioex_device_t *io, ioex_num_t ioex_num)
         goto errArg;
     }
 
-    IOEX_CHECK(i2c_read(io->i2c_port, io->address, reg, &data), "error while reading ioexpander register", err);
+    IOEX_CHECK(i2c_read(io->dev_handle, io->address, reg, &data), "error while reading ioexpander register", err);
 
     data &= ~bit;
 
-    IOEX_CHECK(i2c_write(io->i2c_port, io->address, reg, data), "error while writing ioexpander register", err);
+    IOEX_CHECK(i2c_write(io->dev_handle, io->address, reg, data), "error while writing ioexpander register", err);
 
     return ESP_OK;
 
@@ -703,11 +707,11 @@ esp_err_t ioex_interrupt_disable(ioex_device_t *io, ioex_num_t ioex_num)
         goto errArg;
     }
 
-    IOEX_CHECK(i2c_read(io->i2c_port, io->address, reg, &data), "error while reading ioexpander register", err);
+    IOEX_CHECK(i2c_read(io->dev_handle, io->address, reg, &data), "error while reading ioexpander register", err);
 
     data |= bit;
 
-    IOEX_CHECK(i2c_write(io->i2c_port, io->address, reg, data), "error while writing ioexpander register", err);
+    IOEX_CHECK(i2c_write(io->dev_handle, io->address, reg, data), "error while writing ioexpander register", err);
 
 
     return ESP_OK;
@@ -799,29 +803,19 @@ static IRAM_ATTR void ioex_isr_handler(void* arg)
 
 static uint64_t ioex_get_activated_pin(ioex_device_t *io)
 {
-    i2c_cmd_handle_t cmd;
+    ESP_LOGV(IOEX_TAG, "READ: device_address:%#04x; register:%#04x", io->address, INTERRUPT_STATUS_PORT_0);
+    
+    uint8_t reg = INTERRUPT_STATUS_PORT_0;
     uint8_t data[3] = {0};
+    i2c_master_transmit_receive(io->dev_handle, &reg, 1, data, 3, I2C_MASTER_TIMEOUT_MS);
 
-    ESP_LOGV(IOEX_TAG, "READ: i2c_port:%#04x; device_address:%#04x; register:%#04x", io->i2c_port, io->address, INTERRUPT_STATUS_PORT_0);
-    cmd = i2c_cmd_link_create();
-    i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, (io->address << 1) | I2C_MASTER_WRITE, ACK_CHECK_EN);
-    i2c_master_write_byte(cmd, INTERRUPT_STATUS_PORT_0, ACK_CHECK_EN);
-    i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, (io->address << 1) | I2C_MASTER_READ, ACK_CHECK_EN);
-    i2c_master_read(cmd, data, 3, I2C_MASTER_LAST_NACK);
-    i2c_master_stop(cmd);
-    i2c_master_cmd_begin(io->i2c_port, cmd, 1000 / portTICK_PERIOD_MS);
-    i2c_cmd_link_delete(cmd);
     return data[2] << 16 | data[1] << 8 | data[0];
 }
 
 static void ioex_task_interrupt_handler(void* arg)
 {
     ioex_device_t *io = (ioex_device_t*)arg;
-    i2c_cmd_handle_t cmd;
     uint64_t pin;
-    uint8_t dataout[] = {0xFF, 0xFF, 0xFF};
     while (1)
     {
         // Wait for an interrupt
@@ -833,42 +827,39 @@ static void ioex_task_interrupt_handler(void* arg)
 
         // We loop to permit reading of interrupts that appen while we process others
         while(pin) {
-            if (io->interrupt_list->first == NULL)
+            if (io->interrupt_list->first != NULL)
+            {
+                /* List is already in order of priority so we just have to iterate through it */
+                ioex_interrupt_element_t *interrupt_element = io->interrupt_list->first;
+                while (interrupt_element != NULL)
+                {
+                    if ((1ULL<<interrupt_element->ioex_num) & pin)
+                    {
+                        /* Clear interrupt */
+                        i2c_write(io->dev_handle, io->address, INTERRUPT_CLEAR_PORT_0 + (interrupt_element->ioex_num / 8), (1U<<(interrupt_element->ioex_num-(8*(interrupt_element->ioex_num / 8)))));
+                        
+                        pin &= ~(1ULL<<interrupt_element->ioex_num);
+                        
+                        /* Call isr for the gpio */
+                        ESP_LOGV(IOEX_TAG, "Interrupt from IOEX_NUM_%u", ioex_num_to_num(interrupt_element->ioex_num));
+                        interrupt_element->isr_handler(interrupt_element->args);
+                    }
+                    interrupt_element = interrupt_element->next;
+                }
+            } 
+            else 
             {
                 ESP_LOGW(IOEX_TAG, "unexpected interrupt from ioexpander");
-                continue;
-            }
-
-            /* List is already in order of priority so we just have to iterate through it */
-            ioex_interrupt_element_t *interrupt_element = io->interrupt_list->first;
-            while (interrupt_element != NULL)
-            {
-                if ((1ULL<<interrupt_element->ioex_num) & pin)
-                {
-                    pin &= ~(1ULL<<interrupt_element->ioex_num);
-                    /* Call isr for the gpio */
-                    ESP_LOGV(IOEX_TAG, "Interrupt from IOEX_NUM_%u", ioex_num_to_num(interrupt_element->ioex_num));
-                    interrupt_element->isr_handler(interrupt_element->args);
-                    /* Clear interrupt */
-                    i2c_write(io->i2c_port, io->address, INTERRUPT_CLEAR_PORT_0 + (interrupt_element->ioex_num / 8), (1U<<(interrupt_element->ioex_num-(8*(interrupt_element->ioex_num / 8)))));
-                }
-                interrupt_element = interrupt_element->next;
             }
             // Some interrupt where not handled
             if (pin)
             {
-                ESP_LOGW(IOEX_TAG, "An interrupt appended but not handler was set for it");
-                ESP_LOGV(IOEX_TAG, "Clearing all interrupts");
-                ESP_LOGV(IOEX_TAG, "WRITE: i2c_port:%#04x; device_address:%#04x; register:%#04x; data:0xffffff", io->i2c_port, io->address, INTERRUPT_STATUS_PORT_0);
                 // clear all pending interrupts
-                cmd = i2c_cmd_link_create();
-                i2c_master_start(cmd);
-                i2c_master_write_byte(cmd, (io->address << 1) | I2C_MASTER_WRITE, ACK_CHECK_EN);
-                i2c_master_write_byte(cmd, INTERRUPT_CLEAR_PORT_0, ACK_CHECK_EN);
-                i2c_master_write(cmd, dataout, 3, ACK_CHECK_EN);
-                i2c_master_stop(cmd);
-                i2c_master_cmd_begin(io->i2c_port, cmd, 1000 / portTICK_PERIOD_MS);
-                i2c_cmd_link_delete(cmd);
+                ESP_LOGW(IOEX_TAG, "An interrupt appended but no handler was set for it");
+                ESP_LOGV(IOEX_TAG, "Clearing all interrupts");
+                ESP_LOGV(IOEX_TAG, "WRITE: device_address:%#04x; register:%#04x; data:0xffffff", io->address, INTERRUPT_STATUS_PORT_0);
+                uint8_t write_buf[] = {INTERRUPT_CLEAR_PORT_0, 0xFF, 0xFF, 0xFF};
+                i2c_master_transmit(io->dev_handle, write_buf, sizeof(write_buf), I2C_MASTER_TIMEOUT_MS);
             }
             pin = ioex_get_activated_pin(io);
         }
@@ -879,37 +870,18 @@ static void ioex_task_interrupt_handler(void* arg)
 /*----------------------- Utility functions ------------------------------*/
 /*------------------------------------------------------------------------*/
 
-esp_err_t i2c_write(i2c_port_t i2c_port, uint8_t address, uint8_t reg, uint8_t data)
+esp_err_t i2c_write(i2c_master_dev_handle_t dev_handle, uint8_t address, uint8_t reg, uint8_t data)
 {
-    ESP_LOGV(IOEX_TAG, "WRITE: i2c_port:%#04x; device_address:%#04x; register:%#04x; data:%#04x", i2c_port, address, reg, data);
-
-    esp_err_t ret = ESP_OK;
-    i2c_cmd_handle_t cmd = i2c_cmd_link_create();
-    i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, (address << 1) | I2C_MASTER_WRITE, ACK_CHECK_EN);
-    i2c_master_write_byte(cmd, reg, ACK_CHECK_EN);
-    i2c_master_write_byte(cmd, data, ACK_CHECK_EN);
-    i2c_master_stop(cmd);
-    ret = i2c_master_cmd_begin(i2c_port, cmd, 1000 / portTICK_PERIOD_MS);
-    i2c_cmd_link_delete(cmd);
-    return ret;
+    ESP_LOGV(IOEX_TAG, "WRITE: device_address:%#04x; register:%#04x; data:%#04x", address, reg, data);
+    uint8_t write_buf[] = {reg, data};
+    return i2c_master_transmit(dev_handle, write_buf, sizeof(write_buf), I2C_MASTER_TIMEOUT_MS);
 }
 
-esp_err_t i2c_read(i2c_port_t i2c_port, uint8_t address, uint8_t reg, uint8_t *data)
+esp_err_t i2c_read(i2c_master_dev_handle_t dev_handle, uint8_t address, uint8_t reg, uint8_t *data)
 {
-    ESP_LOGV(IOEX_TAG, "READ: i2c_port:%#04x; device_address:%#04x; register:%#04x", i2c_port, address, reg);
-
+    ESP_LOGV(IOEX_TAG, "READ: device_address:%#04x; register:%#04x", address, reg);
     esp_err_t ret = ESP_OK;
-    i2c_cmd_handle_t cmd = i2c_cmd_link_create();
-    i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, (address << 1) | I2C_MASTER_WRITE, ACK_CHECK_EN);
-    i2c_master_write_byte(cmd, reg, ACK_CHECK_EN);
-    i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, (address << 1) | I2C_MASTER_READ, ACK_CHECK_EN);
-    i2c_master_read_byte(cmd, data, I2C_MASTER_LAST_NACK);
-    i2c_master_stop(cmd);
-    ret = i2c_master_cmd_begin(i2c_port, cmd, 1000 / portTICK_PERIOD_MS);
-    i2c_cmd_link_delete(cmd);
+    ret = i2c_master_transmit_receive(dev_handle, &reg, 1, data, 1, I2C_MASTER_TIMEOUT_MS);
     ESP_LOGV(IOEX_TAG, "raw:%#04x", *data);
     return ret;
 }
