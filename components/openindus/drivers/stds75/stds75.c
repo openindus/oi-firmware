@@ -39,7 +39,7 @@ float STDS75_get_temperature(void){
  * @brief Initialization of the temperature sensor driver
  * @retval None
 */
-esp_err_t STDS75_init(i2c_master_bus_handle_t bus_handle, uint8_t addr, gpio_num_t os_int)
+esp_err_t STDS75_init(i2c_master_bus_handle_t *bus_handle, uint8_t addr, gpio_num_t os_int)
 {
     esp_err_t ret = ESP_OK;
 
@@ -50,7 +50,7 @@ esp_err_t STDS75_init(i2c_master_bus_handle_t bus_handle, uint8_t addr, gpio_num
         .scl_speed_hz = I2C_CLK,
     };
 
-    ret = i2c_master_bus_add_device(bus_handle, &dev_cfg, &_i2c_dev_handle);
+    ret = i2c_master_bus_add_device(*bus_handle, &dev_cfg, &_i2c_dev_handle);
     if (ret != ESP_OK) {
         return ret;
     }

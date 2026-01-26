@@ -46,9 +46,10 @@ static const adc_channel_t _ainChannel[] = {
 };
 
 ioex_device_t* Core::_ioex = NULL;
+i2c_master_bus_handle_t Core::_i2cBusHandle = NULL;
 CAN Core::can(CORE_SPI_USER_HOST, CORE_PIN_CAN_SPI_CS, CORE_PIN_CAN_INTERRUPT);
 RS Core::rs(CORE_SPI_USER_HOST, CORE_PIN_RS_SPI_CS, CORE_PIN_RS_INTERRUPT);
-RTClock Core::rtc(CORE_I2C_PORT_NUM, CORE_PIN_RTC_INTERRUPT);
+RTClock Core::rtc(&Core::_i2cBusHandle, CORE_I2C_RTC_ADDRESS, CORE_PIN_RTC_INTERRUPT);
 Modem *Core::modem = NULL;
 
 int Core::init(void)
@@ -56,23 +57,27 @@ int Core::init(void)
     int err = Module::init(TYPE_OI_CORE);
 
     /**
-     * @brief I2C init
+     * @brief I2C init - IOExpander + RTC
      * 
      */
     ESP_LOGI(TAG, "Initializes the bus I2C (I2C_NUM_%u)", CORE_I2C_PORT_NUM);
     ESP_LOGI(TAG, "SDA: GPIO_NUM_%u | SCL: GPIO_NUM_%u",
         CORE_PIN_I2C_SDA, CORE_PIN_I2C_SCL);
 
-    i2c_config_t i2cConfig;
-	memset(&i2cConfig, 0, sizeof(i2c_config_t));
-    i2cConfig.mode = I2C_MODE_MASTER;
-    i2cConfig.sda_io_num = CORE_PIN_I2C_SDA;
-    i2cConfig.sda_pullup_en = GPIO_PULLUP_ENABLE;
-    i2cConfig.scl_io_num = CORE_PIN_I2C_SCL;
-    i2cConfig.scl_pullup_en = GPIO_PULLUP_ENABLE;
-    i2cConfig.master.clk_speed = CORE_DEFAULT_I2C_SPEED;
-    err |= i2c_param_config(CORE_I2C_PORT_NUM, &i2cConfig);
-    err |= i2c_driver_install(CORE_I2C_PORT_NUM, i2cConfig.mode, 0, 0, 0);
+    i2c_master_bus_config_t i2cBusConfig = {
+        .i2c_port = CORE_I2C_PORT_NUM,
+        .sda_io_num = CORE_PIN_I2C_SDA,
+        .scl_io_num = CORE_PIN_I2C_SCL,
+        .clk_source = I2C_CLK_SRC_DEFAULT,
+        .glitch_ignore_cnt = 7,
+        .intr_priority = 0,
+        .trans_queue_depth = 0,
+        .flags = {
+            .enable_internal_pullup = true,
+            .allow_pd = false
+        }
+    };
+    ESP_ERROR_CHECK(i2c_new_master_bus(&i2cBusConfig, &_i2cBusHandle));
 
     /**
      * @brief SPI Init - RS User + CAN User
@@ -127,7 +132,7 @@ int Core::init(void)
      * 
      */
     ESP_LOGI(TAG, "Initializes GPIO and IO Expander (PCAL6524)");
-    _ioex = ioex_create(CORE_I2C_PORT_NUM, CORE_I2C_IOEXPANDER_ADDRESS, true, CORE_PIN_DIGITAL_INTERRUPT);
+    _ioex = ioex_create(_i2cBusHandle, CORE_I2C_IOEXPANDER_ADDRESS, true, CORE_PIN_DIGITAL_INTERRUPT);
     if (_ioex == NULL) {
         ESP_LOGE(TAG, "Cannot initialize ioexpander");
         err |= -1;
@@ -200,6 +205,7 @@ int Core::init(void)
     err |= DigitalOutputsCLI::init();
     err |= RSCLI::init();
     err |= CANCLI::init();
+    err |= RTClock::_registerCLI();
 #if defined(CONFIG_MODULE_MASTER)
     MotorStepperCmd::_registerCLI();
 #endif

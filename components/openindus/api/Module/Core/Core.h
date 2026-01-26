@@ -36,6 +36,7 @@ public:
 
 private:
     static ioex_device_t *_ioex;
+    static i2c_master_bus_handle_t _i2cBusHandle;
     static void _powerMonitoringTask(void *pvParameters);
 };
 

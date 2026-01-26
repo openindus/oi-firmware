@@ -12,6 +12,8 @@
 
 static const char TAG[] = "AnalogLS";
 
+i2c_master_bus_handle_t AnalogLS::_i2cBusHandle = NULL;
+
 int AnalogLS::init(void)
 {
     int ret = 0;
@@ -38,21 +40,28 @@ int AnalogLS::init(void)
     };
     ret |= spi_bus_initialize(ANALOG_LS_SPI_HOST, &spiConfig, SPI_DMA_CH_AUTO);
 
-    /* Initialize I2C bus */
-    i2c_config_t i2c_cfg = {
-        .mode = I2C_MODE_MASTER,
+    /**
+     * @brief I2C init - IOExpander + RTC
+     * 
+     */
+    ESP_LOGI(TAG, "Initializes the bus I2C (I2C_NUM_%u)", CORE_I2C_PORT_NUM);
+    ESP_LOGI(TAG, "SDA: GPIO_NUM_%u | SCL: GPIO_NUM_%u",
+        CORE_PIN_I2C_SDA, CORE_PIN_I2C_SCL);
+
+    i2c_master_bus_config_t i2cBusConfig = {
+        .i2c_port = ANALOG_LS_I2C_PORT_NUM,
         .sda_io_num = ANALOG_LS_I2C_PIN_SDA,
         .scl_io_num = ANALOG_LS_I2C_PIN_SCL,
-        .sda_pullup_en = GPIO_PULLUP_ENABLE,
-        .scl_pullup_en = GPIO_PULLUP_ENABLE,
-        .master = {
-            .clk_speed = 400000,
-        },
-        .clk_flags = I2C_SCLK_SRC_FLAG_FOR_NOMAL
+        .clk_source = I2C_CLK_SRC_DEFAULT,
+        .glitch_ignore_cnt = 7,
+        .intr_priority = 0,
+        .trans_queue_depth = 0,
+        .flags = {
+            .enable_internal_pullup = true,
+            .allow_pd = false
+        }
     };
-    ret |= i2c_param_config(ANALOG_LS_I2C_PORT_NUM, &i2c_cfg);
-    ret |= i2c_driver_install(ANALOG_LS_I2C_PORT_NUM, i2c_cfg.mode, 0, 0, 0);
-
+    ESP_ERROR_CHECK(i2c_new_master_bus(&i2cBusConfig, &_i2cBusHandle));
 
     /* Initialize analog inputs low signal */
     _adc = new ADS114S0X {
@@ -78,7 +87,7 @@ int AnalogLS::init(void)
     );
 
     /* Initialize digital temperature sensor */
-    ret |= STDS75_init(ANALOG_LS_I2C_PORT_NUM, ANALOG_LS_THERM_I2C_ADDR, ANALOG_LS_THERM_PIN_OS_INT);
+    ret |= STDS75_init(_i2cBusHandle, ANALOG_LS_THERM_I2C_ADDR, ANALOG_LS_THERM_PIN_OS_INT);
 
     ret |= AnalogInputsLS::_init();
 

@@ -161,3 +161,8 @@ Board which are ready to use :
 # v2.1.0
 
 - Add OIDiscreteVE.
+
+# v2.1.1
+
+- Remplace old i2c driver in component drivers by new one
+- Fix analog read bad adc unit for discreteve

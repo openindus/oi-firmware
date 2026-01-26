@@ -10,7 +10,11 @@
 
 #include <stdint.h>
 #include <time.h>
-#include "driver/i2c.h"
+#include "driver/i2c_master.h"
+#include "driver/gpio.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/queue.h"
+#include "freertos/task.h"
 
 #define SECONDS_FROM_1970_TO_2000 946684800
 
@@ -50,9 +54,10 @@ class RTClock
 {
 public:
 
-    RTClock(i2c_port_t i2c_num, gpio_num_t intr_pin) :
-        _i2c_num(i2c_num),
-        _intr_pin(intr_pin) {}
+    RTClock(i2c_master_bus_handle_t *i2c_master_handle, uint8_t rtc_i2c_address, gpio_num_t intr_pin) :
+        _i2c_master_handle(i2c_master_handle),
+        _rtc_i2c_address(rtc_i2c_address),
+        _intr_pin(intr_pin) { _instance = this;}
 
     /**
      * @brief begin
@@ -124,11 +129,14 @@ public:
      */
     virtual void detachRTCAlarm(void);
 
-private:
-
-    i2c_port_t _i2c_num;
-    gpio_num_t _intr_pin;
-
+    static RTClock* getInstance(void) { return _instance;}
+    
     static int _registerCLI(void);
 
+private:
+
+    i2c_master_bus_handle_t *_i2c_master_handle;
+    uint8_t _rtc_i2c_address;
+    gpio_num_t _intr_pin;
+    static RTClock *_instance;
 };

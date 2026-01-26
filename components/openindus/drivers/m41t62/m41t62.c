@@ -16,7 +16,7 @@
 #include "m41t62/m41t62.h"
 
 static const char RTC_TAG[] = "RTC";
-i2c_port_t rtc_i2c_port = -1;
+i2c_master_dev_handle_t _i2c_dev_handle = NULL;
 
 #define RTC_CHECK(a, str, goto_tag, ...)                                                    \
     do                                                                                      \
@@ -33,11 +33,14 @@ i2c_port_t rtc_i2c_port = -1;
 #define ACK_VAL                         (0x00)  /*!< I2C ack value */
 #define NACK_VAL                        (0x01)  /*!< I2C nack value */
 
+#define I2C_MASTER_FREQ_HZ              400000
+#define I2C_MASTER_TIMEOUT_MS           pdMS_TO_TICKS(1000)
+
 ///////////////////////////////ST I2C INTERFACE/////////////////////////////////////////////////////////////////////////
 
-bool HAL_ReadReg(uint8_t i2cAddr ,uint8_t regAddr, uint32_t numByteToRead, uint8_t *data)
+bool HAL_ReadReg(uint8_t regAddr, uint32_t numByteToRead, uint8_t *data)
 {
-    esp_err_t ret = rtc_i2c_read(rtc_i2c_port, i2cAddr, regAddr, data, numByteToRead);
+    esp_err_t ret = rtc_i2c_read(regAddr, data, numByteToRead);
     if(ret == ESP_OK)
     {
         return false;
@@ -46,9 +49,9 @@ bool HAL_ReadReg(uint8_t i2cAddr ,uint8_t regAddr, uint32_t numByteToRead, uint8
     return true;
 }
 
-bool HAL_WriteReg(uint8_t i2cAddr, uint8_t regAddr, uint32_t numByteToWrite, uint8_t *data)
+bool HAL_WriteReg(uint8_t regAddr, uint32_t numByteToWrite, uint8_t *data)
 {
-    esp_err_t ret = rtc_i2c_write(rtc_i2c_port, i2cAddr, regAddr, data, numByteToWrite);
+    esp_err_t ret = rtc_i2c_write(regAddr, data, numByteToWrite);
     if(ret == ESP_OK)
     {
         return false;
@@ -58,53 +61,35 @@ bool HAL_WriteReg(uint8_t i2cAddr, uint8_t regAddr, uint32_t numByteToWrite, uin
 } 
 
 ///////////////////////////////ESP I2C FUNCTIONS/////////////////////////////////////////////////////////////////////////
-esp_err_t rtc_i2c_write(i2c_port_t i2c_port, uint8_t address, uint8_t reg, uint8_t *data, size_t data_len)
+esp_err_t rtc_i2c_write(uint8_t reg, uint8_t *data, size_t data_len)
 {
-    ESP_LOGV(RTC_TAG, "WRITE: i2c_port:%#04x; device_address:%#04x; register:%#04x;", i2c_port, address, reg);
+    ESP_LOGI(RTC_TAG, "WRITE: register:%#04x;", reg);
 
-    esp_err_t ret = ESP_OK;
-    i2c_cmd_handle_t cmd = i2c_cmd_link_create();
-    i2c_master_start(cmd);
-    // first, send device address (indicating write) & register to be written
-    i2c_master_write_byte(cmd, ( address | I2C_MASTER_WRITE), ACK_CHECK_EN);
-    // send register we want
-    i2c_master_write_byte(cmd, reg, ACK_CHECK_EN);
-    // write the data
-    i2c_master_write(cmd, data, data_len, ACK_CHECK_EN);
-    i2c_master_stop(cmd);
-    ret = i2c_master_cmd_begin(i2c_port, cmd, 1000 / portTICK_PERIOD_MS);
-    i2c_cmd_link_delete(cmd);
-    return ret;
+    i2c_master_transmit_multi_buffer_info_t buffers[2] = {
+        {.write_buffer = &reg, .buffer_size = 1},
+        {.write_buffer = data, .buffer_size = data_len}
+    };
+
+    return i2c_master_multi_buffer_transmit(_i2c_dev_handle, buffers, sizeof(buffers)/sizeof(i2c_master_transmit_multi_buffer_info_t), I2C_MASTER_TIMEOUT_MS);
 }
 
-esp_err_t rtc_i2c_read(i2c_port_t i2c_port, uint8_t address, uint8_t reg, uint8_t *data, size_t data_len)
+esp_err_t rtc_i2c_read(uint8_t reg, uint8_t *data, size_t data_len)
 {
-    ESP_LOGV(RTC_TAG, "READ: i2c_port:%#04x; device_address:%#04x; register:%#04x", i2c_port, address, reg);
-    esp_err_t ret = ESP_OK;
+    ESP_LOGI(RTC_TAG, "READ: register:%#04x, data_len:%d", reg, data_len);
+    
     if (data_len == 0) {
         return ESP_OK;
     }
-    i2c_cmd_handle_t cmd = i2c_cmd_link_create();
-    i2c_master_start(cmd);
-    // first, send device address (indicating write) & register to be read
-    i2c_master_write_byte(cmd, ( address | I2C_MASTER_WRITE), ACK_CHECK_EN);
-    // send register we want
-    i2c_master_write_byte(cmd, reg, ACK_CHECK_EN);
-    // Send repeated start
-    i2c_master_start(cmd);
-    // now send device address (indicating read) & read data
-    i2c_master_write_byte(cmd, ( address | I2C_MASTER_READ), ACK_CHECK_EN);
-    if (data_len > 1) {
-        i2c_master_read(cmd, data, data_len - 1, ACK_VAL);
-    }
-    i2c_master_read_byte(cmd, data + data_len - 1, NACK_VAL);
-    i2c_master_stop(cmd);
-    ret = i2c_master_cmd_begin(i2c_port, cmd, 1000 / portTICK_PERIOD_MS);
-    i2c_cmd_link_delete(cmd);
-    return ret;
+    return i2c_master_transmit_receive(_i2c_dev_handle, &reg, 1, data, data_len, I2C_MASTER_TIMEOUT_MS);
 }
 
-void rtc_i2c_set_port(i2c_port_t i2c_port)
+void rtc_i2c_begin(i2c_master_bus_handle_t *i2c_master_handle, uint8_t rtc_i2c_address)
 {
-    rtc_i2c_port = i2c_port;
+    i2c_device_config_t dev_config = {
+        .dev_addr_length = I2C_ADDR_BIT_LEN_7,
+        .device_address = rtc_i2c_address,
+        .scl_speed_hz = I2C_MASTER_FREQ_HZ,
+    };
+
+    i2c_master_bus_add_device(*i2c_master_handle, &dev_config, &_i2c_dev_handle);
 }
