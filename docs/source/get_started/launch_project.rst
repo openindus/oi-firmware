@@ -10,14 +10,14 @@ Let's start by understanding how OpenIndus modules work.
 
 Each module contains specific hardware functions. The idea is to gather all the modules you need for your system.
 
-For systems with multiple modules, a rail is required to interconnect them. In such setups, one module operates as the "master," while the others are designated as "slaves." 
+For systems with multiple modules, a rail is required to interconnect them. In such setups, one module operates as the "master", while the others are designated as "slaves". 
 This means that programming is only required for the master module; other modules do not need individual programming.
 
 .. note:: Currently, the "master" module must be either an :ref:`OI-Core<OI-Core>` or :ref:`OI-CoreLite<OI-CoreLite>`, but we are actively working to enable the use of any module as a "master."
 
 For single-module setups, no rail is needed, and programming can be done directly on the module itself, which is then referred to as a "standalone" module.
 
-Understanding these distinctions is crucial when starting a new project, as you'll have the option to choose between "master," "standalone," and "slave" configurations.
+Understanding these distinctions is crucial when starting a new project, as you'll have the option to choose between "master", "standalone", and "slave" configurations.
 
 All our modules use Espressif chips and can be programmed using Arduino. If you're familiar with Arduino programming, you'll find it seamless. 
 If not, don't worry; programming with Arduino is straightforward, and this guide will walk you through it step by step.
@@ -58,32 +58,12 @@ This extension will add commands to VSCode, such as creating a new project or re
 .. note::
     The first time, it can take several minutes because VSCode will also install ESP-IDF.
 
-Configure ESP-IDF Extension
-***************************
+Automatic installation of ESP-IDF
+*********************************
 
-The ESP-IDF extension is the official VSCode tool to compile, flash, and monitor your code. At the first installation, you need to configure it.
-The official documentation can be found here: `ESP-IDF official documentation <https://docs.espressif.com/projects/vscode-esp-idf-extension/en/latest/>`_.
-
-In this section, you will find a guide to install with default parameters. Depending on your internet connection, it can take some minutes to download and install all resources (compiler, libraries, examples, ...). 
-But don't worry, once configured you won't need to do it every time.
-
-The page to configure the ESP-IDF extension should open automatically at launch (if not, click on the ESP-IDF logo on the left side panel and in the "Advanced" section, click on "Configure ESP-IDF Extension").
-
-On the configuration page, do the following:
-
-* Select "Express"
-* Select the latest ESP-IDF version (currently v5.5.1)
-* You can customize the installation folder
-* Launch the installation and wait for it to complete
-
-.. image:: ../_static/gif/configure_idf.gif
-    :width: 800
-    :alt: ESP-IDF recommended configuration
-    :align: center
-
-|
-
-.. note:: ESP-IDF Extension downloads and configures all packages necessary (toolchain, uploader, monitor tool, ...).
+The OpenIndus extension will automatically install ESP-IDF the first time you open the newly added OpenIndus panel.
+This installation is necessary to use our modules, but it can take some time depending on your internet connection. Don't worry, you only need to do it once!
+When ESP-IDF finishes installing, you can start creating your projects and programming your devices.
 
 Begin with your first project
 -----------------------------
@@ -94,7 +74,7 @@ Start a new project
 At this point, you have everything you need to begin your first program.
 
 1. Click on the OpenIndus logo on the left bar
-2. Click on **create a new project**.
+2. Click on **start a new project**.
 3. Choose the device you will program. We recommend starting by programming on an :ref:`OI-Core<OI-Core>` or an :ref:`OI-CoreLite<OI-CoreLite>`.
 4. Choose a root folder for your application.
 5. Choose a name for your application.
@@ -109,7 +89,17 @@ At this point, you have everything you need to begin your first program.
 
 |
 
-Build your project
+Initialize your project
+***********************
+Before building and uploading your project, you need to initialize it.
+This step is necessary for VScode to recognize the project and provide you with all the features such as code completion and debugging.
+
+.. note:: By default, the project is initialized with a proper .vscode folder for autocompletion and debugging. You can regenerate it by running "Generate .vscode configuration" in the OpenIndus panel.
+
+To have complete code completion you still need to run a "idf.py reconfigure". This is done by clicking on **Reconfigure project** in the OpenIndus panel.
+It is also automatically proposed when you open a project without a build folder.
+
+
 *******************
 
 The created project prints 'Hello World!' to the serial port. You can find the main code in src/main.cpp. 
