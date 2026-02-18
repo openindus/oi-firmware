@@ -58,6 +58,10 @@ This extension will add commands to VSCode, such as creating a new project or re
 .. note::
     The first time, it can take several minutes because VSCode will also install ESP-IDF.
 
+.. note::
+    Automatic installation of ESP-IDF and dependencies is supported on Windows, macOS (with Homebrew installed), and Linux distributions using `apt` (e.g., Ubuntu, Debian). 
+    Other Linux distributions are compatible with OpenIndus modules, but automatic installation of dependencies is not supported; manual installation will be required.
+
 Automatic installation of ESP-IDF
 *********************************
 
