@@ -22,7 +22,7 @@ Understanding these distinctions is crucial when starting a new project, as you'
 All our modules use Espressif chips and can be programmed using Arduino. If you're familiar with Arduino programming, you'll find it seamless. 
 If not, don't worry; programming with Arduino is straightforward, and this guide will walk you through it step by step.
 
-The easiest way to set up everything is by using Visual Studio Code with the OpenIndus extension, along with the ESP-IDF extensions. 
+The easiest way to set up everything is by using Visual Studio Code with the OpenIndus extension. 
 You'll find a comprehensive installation guide in the `Environment Installation`_ section.
 
 
@@ -65,6 +65,32 @@ The OpenIndus extension will automatically install ESP-IDF the first time you op
 This installation is necessary to use our modules, but it can take some time depending on your internet connection. Don't worry, you only need to do it once!
 When ESP-IDF finishes installing, you can start creating your projects and programming your devices.
 
+.. _troubleshooting_oivscodeextension:
+
+Extension Installation Troubleshooting
+**************************************
+
+If you encounter issues during the installation or usage of the OpenIndus VSCode extension, here are some common problems and their solutions:
+
+**1. Extension not found in VSCode marketplace**
+    - Make sure you are connected to the internet.
+    - Try searching for "OpenIndus" again, or visit the `OpenIndus extension page on VSCode Marketplace <https://marketplace.visualstudio.com/items?itemName=OpenIndus.oi-extension>`_ directly.
+    - If you're behind a corporate firewall, check with your IT department to ensure access to the VSCode marketplace is allowed.
+
+**2. Installation stuck or very slow**
+    - The first-time installation includes ESP-IDF, which may take several minutes depending on your internet speed.
+    - Check the **Output** panel in VSCode (View > Output) and select **OpenIndus** from the dropdown to see detailed installation logs.
+    - If it seems frozen for more than 15 minutes, try restarting VSCode, opening up the OpenIndus panel will resume the installation.
+
+**3. ESP-IDF installation fails**
+    - Check if you have sufficient disk space for the installation (ESP-IDF can require several GBs).
+    - Open the **Terminal** panel in VSCode and look for error messages during the installation process. You may have to install dependencies manually.
+    - Run VSCode as Administrator (Windows) or with sudo (Linux/macOS) temporarily to check if permission issues are causing the problem.
+
+**4. Missing commands in Command Palette**
+    - After installing the extension, reload VSCode by pressing `Ctrl+Shift+P` (or `Cmd+Shift+P` on macOS), typing `Developer: Reload Window`, and pressing Enter.
+
+
 Begin with your first project
 -----------------------------
 
@@ -89,20 +115,22 @@ At this point, you have everything you need to begin your first program.
 
 |
 
-Initialize your project
+Configure your project
 ***********************
 Before building and uploading your project, you need to initialize it.
 This step is necessary for VScode to recognize the project and provide you with all the features such as code completion and debugging.
 
-.. note:: By default, the project is initialized with a proper .vscode folder for autocompletion and debugging. You can regenerate it by running "Generate .vscode configuration" in the OpenIndus panel.
 
 To have complete code completion you still need to run a "idf.py reconfigure". This is done by clicking on **Reconfigure project** in the OpenIndus panel.
+
 It is also automatically proposed when you open a project without a build folder.
 
+.. tip:: By default, the project is initialized with a proper .vscode folder for autocompletion and debugging. You can regenerate it by running "Generate .vscode configuration" in the OpenIndus panel.
 
+Build your project
 *******************
 
-The created project prints 'Hello World!' to the serial port. You can find the main code in src/main.cpp. 
+The created project prints 'Hello World!' to the serial port. You can find the main code in **src/main.cpp**. 
 If you are familiar with Arduino, you will recognize the 'setup' and 'loop' functions.
 
 Before uploading this code to the device, you will have to build it.
@@ -295,9 +323,3 @@ With the configuration above, you can instantiate modules as follows without car
 .. note:: 
     This way of instantiation is not scalable. If you change one module, the serial number will be different and you will have to update your code. 
     The advantage is that you can place your module wherever you want on the rail.
-
-.. tip::
-    Use the ESP-IDF command "Add .vscode subdirectory files" to complete your VSCode setup and facilitate navigation through code with "ctrl+click":
-       - Open ESP-IDF panel
-       - Expand advanced
-       - Click on "+ Add .vscode subdirectory files"
