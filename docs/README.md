@@ -7,6 +7,11 @@
 - [Doxygen](https://www.doxygen.nl/download.html)
 - [CMake](https://cmake.org/download/)
 
+## Build with uv
+``` bash
+# this will generate documentation from folder 'source' in folder 'build'
+uv run sphinx-build source build
+```
 ## Installation
 
 Create a virtual environment

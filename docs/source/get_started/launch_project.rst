@@ -10,19 +10,19 @@ Let's start by understanding how OpenIndus modules work.
 
 Each module contains specific hardware functions. The idea is to gather all the modules you need for your system.
 
-For systems with multiple modules, a rail is required to interconnect them. In such setups, one module operates as the "master," while the others are designated as "slaves." 
+For systems with multiple modules, a rail is required to interconnect them. In such setups, one module operates as the "master", while the others are designated as "slaves". 
 This means that programming is only required for the master module; other modules do not need individual programming.
 
 .. note:: Currently, the "master" module must be either an :ref:`OI-Core<OI-Core>` or :ref:`OI-CoreLite<OI-CoreLite>`, but we are actively working to enable the use of any module as a "master."
 
 For single-module setups, no rail is needed, and programming can be done directly on the module itself, which is then referred to as a "standalone" module.
 
-Understanding these distinctions is crucial when starting a new project, as you'll have the option to choose between "master," "standalone," and "slave" configurations.
+Understanding these distinctions is crucial when starting a new project, as you'll have the option to choose between "master", "standalone", and "slave" configurations.
 
 All our modules use Espressif chips and can be programmed using Arduino. If you're familiar with Arduino programming, you'll find it seamless. 
 If not, don't worry; programming with Arduino is straightforward, and this guide will walk you through it step by step.
 
-The easiest way to set up everything is by using Visual Studio Code with the OpenIndus extension, along with the ESP-IDF extensions. 
+The easiest way to set up everything is by using Visual Studio Code with the OpenIndus extension. 
 You'll find a comprehensive installation guide in the `Environment Installation`_ section.
 
 
@@ -58,32 +58,23 @@ This extension will add commands to VSCode, such as creating a new project or re
 .. note::
     The first time, it can take several minutes because VSCode will also install ESP-IDF.
 
-Configure ESP-IDF Extension
-***************************
 
-The ESP-IDF extension is the official VSCode tool to compile, flash, and monitor your code. At the first installation, you need to configure it.
-The official documentation can be found here: `ESP-IDF official documentation <https://docs.espressif.com/projects/vscode-esp-idf-extension/en/latest/>`_.
+Automatic installation of ESP-IDF
+*********************************
 
-In this section, you will find a guide to install with default parameters. Depending on your internet connection, it can take some minutes to download and install all resources (compiler, libraries, examples, ...). 
-But don't worry, once configured you won't need to do it every time.
+The OpenIndus extension will automatically install ESP-IDF the first time you open the newly added OpenIndus panel.
+This installation is necessary to use our modules, but it can take some time depending on your internet connection. Don't worry, you only need to do it once!
+When ESP-IDF finishes installing, you can start creating your projects and programming your devices.
 
-The page to configure the ESP-IDF extension should open automatically at launch (if not, click on the ESP-IDF logo on the left side panel and in the "Advanced" section, click on "Configure ESP-IDF Extension").
+.. warning::
+    Creating a new project during the ESP-IDF installation process may cause issues, as the extension might attempt to install ESP-IDF twice (once per VSCode window). Please wait until the installation is fully completed before starting a new project.
 
-On the configuration page, do the following:
+.. note::
+    Automatic installation of ESP-IDF and dependencies is supported on Windows, macOS (with Homebrew installed), and Linux distributions using `apt` (e.g., Ubuntu, Debian). 
+    Other Linux distributions are compatible with OpenIndus modules, but automatic installation of dependencies is not supported; manual installation will be required.
 
-* Select "Express"
-* Select the latest ESP-IDF version (currently v5.5.1)
-* You can customize the installation folder
-* Launch the installation and wait for it to complete
+If you have any issues during the installation, please refer to the `Extension Installation Troubleshooting`_ section at the end of this page.
 
-.. image:: ../_static/gif/configure_idf.gif
-    :width: 800
-    :alt: ESP-IDF recommended configuration
-    :align: center
-
-|
-
-.. note:: ESP-IDF Extension downloads and configures all packages necessary (toolchain, uploader, monitor tool, ...).
 
 Begin with your first project
 -----------------------------
@@ -94,7 +85,7 @@ Start a new project
 At this point, you have everything you need to begin your first program.
 
 1. Click on the OpenIndus logo on the left bar
-2. Click on **create a new project**.
+2. Click on **start a new project**.
 3. Choose the device you will program. We recommend starting by programming on an :ref:`OI-Core<OI-Core>` or an :ref:`OI-CoreLite<OI-CoreLite>`.
 4. Choose a root folder for your application.
 5. Choose a name for your application.
@@ -102,23 +93,44 @@ At this point, you have everything you need to begin your first program.
 7. Choose if you want to use the Arduino Libraries (recommended) or only the ESP-IDF framework (for advanced users).
 8. Wait while the project is created. A new folder will open with your new project!
 
-.. image:: ../_static/gif/create_project_idf.gif
+.. image:: ../_static/gif/create_project.gif
     :width: 800
     :alt: Create a project
     :align: center
 
 |
 
+Configure your project
+***********************
+
+To ensure smooth development in VS Code (including proper code completion, navigation, and error detection), your project needs to be configured.
+
+When you create a new project using the OpenIndus extension, VS Code configuration files are automatically generated, so no manual setup is required for basic functionality.
+
+However, to get the most accurate code completion and avoid false errors in VS Code (like undefined symbols or missing includes), you should run a reconfiguration step:
+
+- Click **Reconfigure project** in the OpenIndus panel, or  
+- If you open a project without a build folder, VS Code will automatically prompt you to reconfigure.
+
+.. image:: ../_static/gif/configure_project.gif
+    :width: 800
+    :alt: Configure a project
+    :align: center
+
+| 
+
+.. note:: You can always regenerate the VS Code configuration (the `.vscode` folder) by selecting **Generate .vscode configuration** in the OpenIndus panel. This is also useful for older projects where linkage was not properly done.
+
 Build your project
 *******************
 
-The created project prints 'Hello World!' to the serial port. You can find the main code in src/main.cpp. 
+The created project prints 'Hello World!' to the serial port. You can find the main code in **src/main.cpp**. 
 If you are familiar with Arduino, you will recognize the 'setup' and 'loop' functions.
 
 Before uploading this code to the device, you will have to build it.
 Click on the build button on the bottom bar to build your project. 
 
-.. image:: ../_static/gif/build_project_idf.gif
+.. image:: ../_static/gif/build_project.gif
     :width: 800
     :alt: Build a project
     :align: center
@@ -134,10 +146,10 @@ Upload your project
 Plug the device you want to program into your computer with a USB cable.
 Windows should detect the chip and automatically download the driver. If you cannot see your device in the device manager, please manually download the driver from this link: `Silicon Labs driver <https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers>`_.
 
-You have to select the correct COM port by clicking the "Select port to use" button in the bottom bar.
-Then you can upload the program to your device with the "Flash Device" button in the bottom bar. You must choose "UART" if asked for the flashing method.
+You have to select the correct COM port by clicking the "Select port to use" button in the bottom bar (or let the extension automatically select it).
+Then you can upload the program to your device with the "Flash Device" button in the bottom bar or in the OpenIndus panel.
 
-.. image:: ../_static/gif/upload_project_idf.gif
+.. image:: ../_static/gif/flash_project.gif
     :width: 800
     :alt: Upload a project
     :align: center
@@ -149,9 +161,9 @@ Then you can upload the program to your device with the "Flash Device" button in
 Monitor your project
 ********************
 
-After a successful upload, click on the "Monitor device" button in the bottom bar to see the log output from your device.
+After a successful upload, click on the "Monitor device" button in the bottom bar (or in the OpenIndus panel) to see the log output from your device.
 
-.. image:: ../_static/gif/monitor_project_idf.gif
+.. image:: ../_static/gif/monitor_project.gif
     :width: 800
     :alt: Monitor a project
     :align: center
@@ -306,8 +318,37 @@ With the configuration above, you can instantiate modules as follows without car
     This way of instantiation is not scalable. If you change one module, the serial number will be different and you will have to update your code. 
     The advantage is that you can place your module wherever you want on the rail.
 
-.. tip::
-    Use the ESP-IDF command "Add .vscode subdirectory files" to complete your VSCode setup and facilitate navigation through code with "ctrl+click":
-       - Open ESP-IDF panel
-       - Expand advanced
-       - Click on "+ Add .vscode subdirectory files"
+.. _troubleshooting_oivscodeextension:
+
+Extension Installation Troubleshooting
+--------------------------------------
+
+If you encounter issues during the installation or usage of the OpenIndus VSCode extension, here are some common problems and their solutions:
+
+**1. Extension not found in VSCode marketplace**
+    - Make sure you are connected to the internet.
+    - Try searching for "OpenIndus" again, or visit the `OpenIndus extension page on VSCode Marketplace <https://marketplace.visualstudio.com/items?itemName=OpenIndus.oi-extension>`_ directly.
+    - If you're behind a corporate firewall, check with your IT department to ensure access to the VSCode marketplace is allowed.
+
+**2. Installation stuck or very slow**
+    - The first-time installation includes ESP-IDF, which may take several minutes depending on your internet speed.
+    - Check the **Output** panel in VSCode (View > Output) and select **OpenIndus** from the dropdown to see detailed installation logs.
+    - If it seems frozen for more than 15 minutes, try restarting VSCode and opening the OpenIndus panel will resume the installation.
+
+**3. ESP-IDF installation fails**
+    - Reset and retry the ESP-IDF installation by clicking on **Force complete reinstall** in the OpenIndus panel.
+    - Check if you have sufficient disk space for the installation (ESP-IDF can require several GBs).
+    - Open the **Terminal** panel in VSCode and look for error messages during the installation process. You may have to install dependencies manually.
+
+**4. Missing commands in Command Palette**
+    - After installing the extension, reload VSCode by pressing `Ctrl+Shift+P` (or `Cmd+Shift+P` on macOS), typing `Developer: Reload Window`, and pressing Enter.
+
+**5. Issues with building**
+    - Check the **Terminal** panel for build error messages.
+    - If you use custom Arduino libraries, be sure to check the :ref:`Arduino example section <arduino_example-index>`.
+
+**6. Issues with uploading**
+    - Ensure your device is properly connected and recognized by your computer.
+    - Check the COM port selection in the OpenIndus panel and make sure it matches the port your device is connected to.
+    - If you are on Windows, ensure you have the correct drivers installed for your device. You can manually download the driver from this link: `Silicon Labs driver <https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers>`_.
+    - Make sure no other application is using the COM port (e.g., serial monitor, another instance of VSCode, etc.).
