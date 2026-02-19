@@ -119,7 +119,7 @@ However, to get the most accurate code completion and avoid false errors in VS C
 
 | 
 
-.. tip:: You can always regenerate the VS Code configuration (the `.vscode` folder) by selecting **Generate .vscode configuration** in the OpenIndus panel. This is also useful for older projects were linkage was not properly done.
+.. note:: You can always regenerate the VS Code configuration (the `.vscode` folder) by selecting **Generate .vscode configuration** in the OpenIndus panel. This is also useful for older projects where linkage was not properly done.
 
 Build your project
 *******************
@@ -333,7 +333,7 @@ If you encounter issues during the installation or usage of the OpenIndus VSCode
 **2. Installation stuck or very slow**
     - The first-time installation includes ESP-IDF, which may take several minutes depending on your internet speed.
     - Check the **Output** panel in VSCode (View > Output) and select **OpenIndus** from the dropdown to see detailed installation logs.
-    - If it seems frozen for more than 15 minutes, try restarting VSCode, opening up the OpenIndus panel will resume the installation.
+    - If it seems frozen for more than 15 minutes, try restarting VSCode and opening the OpenIndus panel will resume the installation.
 
 **3. ESP-IDF installation fails**
     - Reset and retry the ESP-IDF installation by clicking on **Force complete reinstall** in the OpenIndus panel.
@@ -350,5 +350,5 @@ If you encounter issues during the installation or usage of the OpenIndus VSCode
 **6. Issues with uploading**
     - Ensure your device is properly connected and recognized by your computer.
     - Check the COM port selection in the OpenIndus panel and make sure it matches the port your device is connected to.
-    - If you are on Windows, ensure you have the correct drivers installed for your device. You canmanually download the driver from this link: `Silicon Labs driver <https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers>`_.
+    - If you are on Windows, ensure you have the correct drivers installed for your device. You can manually download the driver from this link: `Silicon Labs driver <https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers>`_.
     - Make sure no other application is using the COM port (e.g., serial monitor, another instance of VSCode, etc.).
