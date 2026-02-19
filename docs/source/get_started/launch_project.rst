@@ -342,3 +342,8 @@ If you encounter issues during the installation or usage of the OpenIndus VSCode
 **5. Issues with building**
     - Check the **Terminal** panel for build error messages.
     - If you use custom Arduino libraries, be sure to check the :ref:`Arduino example section <arduino_example-index>`.
+
+**6. Issues with uploading**
+    - Ensure your device is properly connected and recognized by your computer.
+    - Check the COM port selection in the OpenIndus panel and make sure it matches the port your device is connected to.
+    - If you are on Windows, ensure you have the correct drivers installed for your device. You canmanually download the driver from this link: `Silicon Labs driver <https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers>`_.
