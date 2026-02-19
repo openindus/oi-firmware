@@ -66,6 +66,9 @@ The OpenIndus extension will automatically install ESP-IDF the first time you op
 This installation is necessary to use our modules, but it can take some time depending on your internet connection. Don't worry, you only need to do it once!
 When ESP-IDF finishes installing, you can start creating your projects and programming your devices.
 
+.. warning::
+    Creating a new project during the ESP-IDF installation process may cause issues, as the extension might attempt to install ESP-IDF twice (once per VSCode window). Please wait until the installation is fully completed before starting a new project.
+
 .. note::
     Automatic installation of ESP-IDF and dependencies is supported on Windows, macOS (with Homebrew installed), and Linux distributions using `apt` (e.g., Ubuntu, Debian). 
     Other Linux distributions are compatible with OpenIndus modules, but automatic installation of dependencies is not supported; manual installation will be required.
@@ -99,23 +102,24 @@ At this point, you have everything you need to begin your first program.
 
 Configure your project
 ***********************
-Before building and uploading your project, you need to initialize it.
-This step is necessary for VScode to recognize the project and provide you with all the features such as code completion and debugging.
 
+To ensure smooth development in VS Code (including proper code completion, navigation, and error detection), your project needs to be configured.
 
-To have complete code completion you still need to run a "idf.py reconfigure". This is done by clicking on **Reconfigure project** in the OpenIndus panel.
+When you create a new project using the OpenIndus extension, VS Code configuration files are automatically generated, so no manual setup is required for basic functionality.
 
-It is also automatically proposed when you open a project without a build folder.
+However, to get the most accurate code completion and avoid false errors in VS Code (like undefined symbols or missing includes), you should run a reconfiguration step:
+
+- Click **Reconfigure project** in the OpenIndus panel, or  
+- If you open a project without a build folder, VS Code will automatically prompt you to reconfigure.
 
 .. image:: ../_static/gif/configure_project.gif
     :width: 800
     :alt: Configure a project
     :align: center
 
-|
+| 
 
-
-.. tip:: By default, the project is initialized with a proper .vscode folder for autocompletion and debugging. You can regenerate it by running "Generate .vscode configuration" in the OpenIndus panel.
+.. tip:: You can always regenerate the VS Code configuration (the `.vscode` folder) by selecting **Generate .vscode configuration** in the OpenIndus panel. This is also useful for older projects were linkage was not properly done.
 
 Build your project
 *******************
@@ -332,9 +336,9 @@ If you encounter issues during the installation or usage of the OpenIndus VSCode
     - If it seems frozen for more than 15 minutes, try restarting VSCode, opening up the OpenIndus panel will resume the installation.
 
 **3. ESP-IDF installation fails**
+    - Reset and retry the ESP-IDF installation by clicking on **Force complete reinstall** in the OpenIndus panel.
     - Check if you have sufficient disk space for the installation (ESP-IDF can require several GBs).
     - Open the **Terminal** panel in VSCode and look for error messages during the installation process. You may have to install dependencies manually.
-    - Reset the esp idf installation by clicking on **Force complete reinstall** in the OpenIndus panel.
 
 **4. Missing commands in Command Palette**
     - After installing the extension, reload VSCode by pressing `Ctrl+Shift+P` (or `Cmd+Shift+P` on macOS), typing `Developer: Reload Window`, and pressing Enter.
@@ -347,3 +351,4 @@ If you encounter issues during the installation or usage of the OpenIndus VSCode
     - Ensure your device is properly connected and recognized by your computer.
     - Check the COM port selection in the OpenIndus panel and make sure it matches the port your device is connected to.
     - If you are on Windows, ensure you have the correct drivers installed for your device. You canmanually download the driver from this link: `Silicon Labs driver <https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers>`_.
+    - Make sure no other application is using the COM port (e.g., serial monitor, another instance of VSCode, etc.).
