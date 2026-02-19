@@ -112,7 +112,7 @@ At this point, you have everything you need to begin your first program.
 7. Choose if you want to use the Arduino Libraries (recommended) or only the ESP-IDF framework (for advanced users).
 8. Wait while the project is created. A new folder will open with your new project!
 
-.. image:: ../_static/gif/create_project_idf.gif
+.. image:: ../_static/gif/create_project.gif
     :width: 800
     :alt: Create a project
     :align: center
@@ -140,7 +140,7 @@ If you are familiar with Arduino, you will recognize the 'setup' and 'loop' func
 Before uploading this code to the device, you will have to build it.
 Click on the build button on the bottom bar to build your project. 
 
-.. image:: ../_static/gif/build_project_idf.gif
+.. image:: ../_static/gif/build_project.gif
     :width: 800
     :alt: Build a project
     :align: center
@@ -156,10 +156,10 @@ Upload your project
 Plug the device you want to program into your computer with a USB cable.
 Windows should detect the chip and automatically download the driver. If you cannot see your device in the device manager, please manually download the driver from this link: `Silicon Labs driver <https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers>`_.
 
-You have to select the correct COM port by clicking the "Select port to use" button in the bottom bar.
-Then you can upload the program to your device with the "Flash Device" button in the bottom bar. You must choose "UART" if asked for the flashing method.
+You have to select the correct COM port by clicking the "Select port to use" button in the bottom bar (or let the extension automatically select it).
+Then you can upload the program to your device with the "Flash Device" button in the bottom bar or in the OpenIndus panel.
 
-.. image:: ../_static/gif/upload_project_idf.gif
+.. image:: ../_static/gif/flash_project.gif
     :width: 800
     :alt: Upload a project
     :align: center
@@ -171,9 +171,9 @@ Then you can upload the program to your device with the "Flash Device" button in
 Monitor your project
 ********************
 
-After a successful upload, click on the "Monitor device" button in the bottom bar to see the log output from your device.
+After a successful upload, click on the "Monitor device" button in the bottom bar (or in the OpenIndus panel) to see the log output from your device.
 
-.. image:: ../_static/gif/monitor_project_idf.gif
+.. image:: ../_static/gif/monitor_project.gif
     :width: 800
     :alt: Monitor a project
     :align: center
