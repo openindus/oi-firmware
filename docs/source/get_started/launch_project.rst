@@ -58,9 +58,6 @@ This extension will add commands to VSCode, such as creating a new project or re
 .. note::
     The first time, it can take several minutes because VSCode will also install ESP-IDF.
 
-.. note::
-    Automatic installation of ESP-IDF and dependencies is supported on Windows, macOS (with Homebrew installed), and Linux distributions using `apt` (e.g., Ubuntu, Debian). 
-    Other Linux distributions are compatible with OpenIndus modules, but automatic installation of dependencies is not supported; manual installation will be required.
 
 Automatic installation of ESP-IDF
 *********************************
@@ -69,30 +66,11 @@ The OpenIndus extension will automatically install ESP-IDF the first time you op
 This installation is necessary to use our modules, but it can take some time depending on your internet connection. Don't worry, you only need to do it once!
 When ESP-IDF finishes installing, you can start creating your projects and programming your devices.
 
-.. _troubleshooting_oivscodeextension:
+.. note::
+    Automatic installation of ESP-IDF and dependencies is supported on Windows, macOS (with Homebrew installed), and Linux distributions using `apt` (e.g., Ubuntu, Debian). 
+    Other Linux distributions are compatible with OpenIndus modules, but automatic installation of dependencies is not supported; manual installation will be required.
 
-Extension Installation Troubleshooting
-**************************************
-
-If you encounter issues during the installation or usage of the OpenIndus VSCode extension, here are some common problems and their solutions:
-
-**1. Extension not found in VSCode marketplace**
-    - Make sure you are connected to the internet.
-    - Try searching for "OpenIndus" again, or visit the `OpenIndus extension page on VSCode Marketplace <https://marketplace.visualstudio.com/items?itemName=OpenIndus.oi-extension>`_ directly.
-    - If you're behind a corporate firewall, check with your IT department to ensure access to the VSCode marketplace is allowed.
-
-**2. Installation stuck or very slow**
-    - The first-time installation includes ESP-IDF, which may take several minutes depending on your internet speed.
-    - Check the **Output** panel in VSCode (View > Output) and select **OpenIndus** from the dropdown to see detailed installation logs.
-    - If it seems frozen for more than 15 minutes, try restarting VSCode, opening up the OpenIndus panel will resume the installation.
-
-**3. ESP-IDF installation fails**
-    - Check if you have sufficient disk space for the installation (ESP-IDF can require several GBs).
-    - Open the **Terminal** panel in VSCode and look for error messages during the installation process. You may have to install dependencies manually.
-    - Run VSCode as Administrator (Windows) or with sudo (Linux/macOS) temporarily to check if permission issues are causing the problem.
-
-**4. Missing commands in Command Palette**
-    - After installing the extension, reload VSCode by pressing `Ctrl+Shift+P` (or `Cmd+Shift+P` on macOS), typing `Developer: Reload Window`, and pressing Enter.
+If you have any issues during the installation, please refer to the `Extension Installation Troubleshooting`_ section at the end of this page.
 
 
 Begin with your first project
@@ -128,6 +106,14 @@ This step is necessary for VScode to recognize the project and provide you with 
 To have complete code completion you still need to run a "idf.py reconfigure". This is done by clicking on **Reconfigure project** in the OpenIndus panel.
 
 It is also automatically proposed when you open a project without a build folder.
+
+.. image:: ../_static/gif/configure_project.gif
+    :width: 800
+    :alt: Configure a project
+    :align: center
+
+|
+
 
 .. tip:: By default, the project is initialized with a proper .vscode folder for autocompletion and debugging. You can regenerate it by running "Generate .vscode configuration" in the OpenIndus panel.
 
@@ -327,3 +313,32 @@ With the configuration above, you can instantiate modules as follows without car
 .. note:: 
     This way of instantiation is not scalable. If you change one module, the serial number will be different and you will have to update your code. 
     The advantage is that you can place your module wherever you want on the rail.
+
+.. _troubleshooting_oivscodeextension:
+
+Extension Installation Troubleshooting
+--------------------------------------
+
+If you encounter issues during the installation or usage of the OpenIndus VSCode extension, here are some common problems and their solutions:
+
+**1. Extension not found in VSCode marketplace**
+    - Make sure you are connected to the internet.
+    - Try searching for "OpenIndus" again, or visit the `OpenIndus extension page on VSCode Marketplace <https://marketplace.visualstudio.com/items?itemName=OpenIndus.oi-extension>`_ directly.
+    - If you're behind a corporate firewall, check with your IT department to ensure access to the VSCode marketplace is allowed.
+
+**2. Installation stuck or very slow**
+    - The first-time installation includes ESP-IDF, which may take several minutes depending on your internet speed.
+    - Check the **Output** panel in VSCode (View > Output) and select **OpenIndus** from the dropdown to see detailed installation logs.
+    - If it seems frozen for more than 15 minutes, try restarting VSCode, opening up the OpenIndus panel will resume the installation.
+
+**3. ESP-IDF installation fails**
+    - Check if you have sufficient disk space for the installation (ESP-IDF can require several GBs).
+    - Open the **Terminal** panel in VSCode and look for error messages during the installation process. You may have to install dependencies manually.
+    - Reset the esp idf installation by clicking on **Force complete reinstall** in the OpenIndus panel.
+
+**4. Missing commands in Command Palette**
+    - After installing the extension, reload VSCode by pressing `Ctrl+Shift+P` (or `Cmd+Shift+P` on macOS), typing `Developer: Reload Window`, and pressing Enter.
+
+**5. Issues with building**
+    - Check the **Terminal** panel for build error messages.
+    - If you use custom Arduino libraries, be sure to check the :ref:`Arduino example section <arduino_example-index>`.
