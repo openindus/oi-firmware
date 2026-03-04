@@ -171,6 +171,8 @@ identifiers throughout the program, declare them once at the top:
 Complete example project
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
+This section will cover the code of the example project in detail, explaining the structure and the role of each function. The full source code is available at the end of this page.
+
 Project structure
 ^^^^^^^^^^^^^^^^^
 
@@ -189,7 +191,7 @@ The project is organized around three logical phases executed in sequence:
    * - ``setup()``
      - Hardware initialization, motor configuration, homing, animation
    * - ``loop()``
-     - Reads the ``switchEvent`` flag and drives motors accordingly
+     - Arduino main loop: This function is called repeatedly. It reads the ``switchEvent`` flag and drives motors accordingly
    * - ``handleSwitchEvent()``
      - ISR: sets ``switchEvent = true`` (kept minimal on purpose)
    * - ``blinkLedLeftTask()``
@@ -222,10 +224,6 @@ Source code details
     ``switchEvent`` is marked ``volatile`` because it is written from an interrupt handler and
     read from the main loop - the compiler must not cache it in a register.
 
-    The two ``*LedBlinking`` flags replace the older ``vTaskSuspend`` / ``vTaskResume`` approach.
-    The LED tasks run continuously and simply check the flag on each iteration, which avoids
-    the brief race window that existed when suspending/resuming from outside the task.
-
 ------------
 
 * **LED tasks**
@@ -252,7 +250,6 @@ Source code details
             }
         }
 
-    Each task copies the volatile flag into a local variable at the start of each iteration.
     When ``isBlinking`` is ``true``, the LED pulses twice and then waits 250 ms before repeating.
     When ``false``, the task simply yields for 50 ms without touching the output.
 
@@ -328,9 +325,9 @@ Source code details
     **attachLimitSwitch(motor, pin, ACTIVE_HIGH)** - when the home sensor goes HIGH, the motor
     stops automatically at its zero position.
 
-    **homing(motor, speed)** - moves the motor toward the home sensor at 100 half-steps per second.
+    **homing(motor, speed)** - moves the motor toward the home sensor at 100 steps per second.
 
-    **wait(motor)** - blocks until the motor has stopped.
+    **wait(motor)** - await the completion of the current motor movement before executing the next command.
 
 * **setup() - startup animation**
 
@@ -371,7 +368,7 @@ Source code details
 
     **setMaxSpeed(motor, steps/s)** - sets the maximum rotation speed in steps per second.
     A stepper motor with 200 full steps per revolution running at 100 steps/s completes
-    one revolution every 2 seconds (or 1/32 s at 6400 steps/s with 1/16 microstepping enabled).
+    one revolution every 2 seconds.
 
     **moveAbsolute(motor, position)** - moves to an absolute step count from the home position.
 
@@ -445,17 +442,17 @@ Source code details
             delay(100);
         }
 
-    The loop only acts when ``switchEvent`` is set, which happens on every switch state change.
+    The loop only acts when ``switchEvent`` is set, which happens on every buttons state change.
 
     **stepper1.run(motor, direction, speed)** - starts continuous rotation at the given speed
     (steps/s). Unlike ``moveAbsolute`` / ``moveRelative``, the motor keeps spinning until
     explicitly stopped.
 
     **stop(motor, SOFT_HIZ)** - decelerates the motor gracefully and then removes power from the
-    coils (shaft free to turn). Both motors are stopped with ``SOFT_HIZ`` in all three switch positions.
+    coils (shaft free to turn).
 
     Each time one motor starts, the *other* motor's direction is reversed with ``reverseMotdir()``.
-    This means that after the switch returns to center and is flipped again, the previously idle
+    This means that after you press a button, the next time you press the other button its corresponding
     motor will rotate in the opposite direction - a small visual effect that makes the demo more lively.
 
 ------------
