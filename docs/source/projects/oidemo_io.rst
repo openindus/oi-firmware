@@ -1,7 +1,7 @@
-.. _OI-DEMO Input-Output:
+.. _Demo Input-Output Kit:
 
-OI-DEMO Input/Output
-====================
+Demo Input/Output Kit
+=====================
 
 .. warning::
     This section is obsolete, we will update it shortly for version 2.X.X.

@@ -1,7 +1,7 @@
-.. _OI-DEMO Motors:
+.. _Demo Motors Kit:
 
-OI-DEMO Motor
-=============
+Demo Motors Kit
+===============
 
 1. Introduction
 ---------------
@@ -34,7 +34,7 @@ What will you learn?
 ------------
 
 2. Discover your kit
-----------------
+--------------------
 
 The Demo Motor kit includes two stepper motors, each with a home and end limit switch.
 It also includes two output LEDs and buttons to test the digital I/O features of the OI-Core master module.
@@ -43,22 +43,29 @@ It also includes two output LEDs and buttons to test the digital I/O features of
     :width: 70%
     :align: center
 
-
-
+|
 
 Download and install the Android app
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Before writing any code, use the **OpenIndus Demo** Android application to familiarize yourself with the default kit firmware.
 
-
 Scan the QR code below or follow the link to install the app:
 
-.. image:: ../_static/androi_app_link.png
+.. figure:: ../_static/androi_app_link.png
    :width: 200px
    :align: center
+   :alt: OpenIndus Demo app QR code
+   :target: https://play.google.com/store/apps/details?id=com.openindus.oidemo
 
-`OpenIndus Demo on Google Play <https://play.google.com/store/apps/details?id=com.openindus.oidemo>`_
+   `OpenIndus Demo on Google Play <https://play.google.com/store/apps/details?id=com.openindus.oidemo>`_
+
+.. note::
+    The **OpenIndus Demo** app requires **Bluetooth permissions** to be granted on your Android device.
+    Without these permissions, the app cannot connect to the Demo Motors kit. The Bluetooth module
+    on the kit remains inactive during the motor initialization and homing sequence, and only becomes
+    available once the startup animation completes and the system enters interactive mode.
+    Currently, the app is **Android-only**; there is no iOS equivalent available at this time.
 
 Check basic features of the kit
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -66,9 +73,26 @@ Check basic features of the kit
 Once the app is installed and connected to the kit via Bluetooth, you can play with the following
 features work correctly before programming:
 
-* **LEDs** - the two output LEDs (left and right) light up when the corresponding motor is running
+* **LEDs** - the two output LEDs (left and right) blink when the corresponding motor is running
 * **Buttons** - pressing the left and right buttons makes the corresponding motor run, and releasing them stops it
 * **Bluetooth** - the app show the motors position in real time and you can change the motor speed with the sliders
+
+Wiring diagram
+~~~~~~~~~~~~~~
+Theses electical diagrams show how the Core and Stepper modules are connected to the different components of the kit.
+
+By following the connections you can see which pins are used for what purpose. Theses pins will be used in the code later on
+to reference each element of the kit.
+
+.. image:: ../_static/electrotech_motor_1.png
+    :width: 95%
+    :align: center
+    :alt: Demo Motor wiring diagram - page 1
+
+.. image:: ../_static/electrotech_motor_2.png
+    :width: 95%
+    :align: center
+    :alt: Demo Motor wiring diagram - page 2
 
 ------------
 
@@ -87,13 +111,28 @@ workspace if you have not done so yet.
 Introduction to OpenIndus modules programming
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Once the extension installed and your workspace set up, you can start writing code for the Demo Motor kit.
+
+In the extension launch **"Start a new project"**
+
+ * select OI Core Lite
+ * select the parent folder of the project
+ * enter the project name (eg: OpenIndus_Demo_Kit)
+ * select **"Master"** as the device type
+ * choose to use Arduino libraries
+ * select the last version available of the OpenIndus library
+
+.. note::
+    In the newly created project, we are going to edit the ``main/main.cpp`` file to implement the motor control logic.
+    All code examples in this section are excerpts from ``main/main.cpp``. The full source code is available at the end of this page.
+
 The OI-Demo Motor kit uses two OpenIndus modules on a shared OI-Rail bus:
 
 * :ref:`OI-Core<OI-Core>` - the master controller that manages digital I/O and orchestrates the system
 * :ref:`OI-Stepper<oi-stepper>` - the stepper motor driver module
 
 In code, each module is declared as a global object. The OpenIndus extension can generate these
-declarations automatically by scanning the OI-Rail:
+declarations automatically by scanning the OI-Rail.
 
 .. code-block:: cpp
 
@@ -129,75 +168,6 @@ identifiers throughout the program, declare them once at the top:
     const DIn_Num_t RIGHT_MOTOR_HOME_SWITCH = DIN_1;
     const DIn_Num_t RIGHT_MOTOR_END_SWITCH  = DIN_2;
 
-Configure and drive a motor with OpenIndus modules
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The PowerSTEP01 stepper driver used by OI-Stepper exposes many parameters that must be tuned
-to match your specific motor and load. The key parameters are:
-
-.. list-table::
-   :header-rows: 1
-   :widths: 25 15 60
-
-   * - Parameter
-     - Example value
-     - Description
-   * - ``VM_KVAL_RUN``
-     - 6
-     - Motor voltage during run phase (affects torque and heating)
-   * - ``VM_KVAL_HOLD``
-     - 6
-     - Motor voltage while holding position
-   * - ``VM_KVAL_ACC``
-     - 6
-     - Motor voltage during acceleration
-   * - ``VM_KVAL_DEC``
-     - 6
-     - Motor voltage during deceleration
-   * - ``VM_INT_SPEED``
-     - 240
-     - Speed threshold between low-speed and high-speed modes
-   * - ``VM_ST_SLP``
-     - 0.0200
-     - BEMF compensation slope at low speed
-   * - ``VM_FN_SLP_ACC``
-     - 0.0620
-     - BEMF compensation slope at high speed (acceleration)
-   * - ``STEP_MODE_STEP_SEL``
-     - ``STEP_1_16``
-     - Microstepping resolution (1/16 step)
-
-.. note::
-    The right values depend on your motor's electrical characteristics and the mechanical load.
-    Start with conservative (low) KVAL values to avoid overheating, then increase them until
-    you get the torque you need.
-
-Parameters are applied with ``stepper1.setAdvancedParam()``:
-
-.. code-block:: cpp
-
-    float kvalRun  = 6;
-    float kvalHold = 6;
-    float kvalDec  = 6;
-    float kvalAcc  = 6;
-    float intSpeed = 240;
-    float stSlope  = 0.0200;
-    float fnSlope  = 0.0620;
-    uint8_t stepMode = STEP_1_16;
-
-    stepper1.setAdvancedParam(MOTOR_RIGHT, VM_KVAL_RUN,        &kvalRun);
-    stepper1.setAdvancedParam(MOTOR_RIGHT, VM_KVAL_HOLD,       &kvalHold);
-    stepper1.setAdvancedParam(MOTOR_RIGHT, VM_KVAL_ACC,        &kvalAcc);
-    stepper1.setAdvancedParam(MOTOR_RIGHT, VM_KVAL_DEC,        &kvalDec);
-    stepper1.setAdvancedParam(MOTOR_RIGHT, VM_INT_SPEED,       &intSpeed);
-    stepper1.setAdvancedParam(MOTOR_RIGHT, VM_ST_SLP,          &stSlope);
-    stepper1.setAdvancedParam(MOTOR_RIGHT, VM_FN_SLP_ACC,      &fnSlope);
-    stepper1.setAdvancedParam(MOTOR_RIGHT, VM_FN_SLP_DEC,      &fnSlope);
-    stepper1.setAdvancedParam(MOTOR_RIGHT, STEP_MODE_STEP_SEL, &stepMode);
-
-The same block must be repeated for ``MOTOR_LEFT``. Both motors always use identical parameters
-in this demo.
-
 Complete example project
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -207,7 +177,7 @@ Project structure
 The project is organized around three logical phases executed in sequence:
 
 1. **Initialization** - motor parameters, LED tasks, homing sequence, and startup animation
-2. **Interactive control** - the 3-position switch drives the motors in real time
+2. **Interactive control** - the buttons drives the motors by triggering an interrupt on every state change
 3. **Interrupt / event handling** - a lightweight ISR sets a flag; the main loop acts on it
 
 .. list-table::
