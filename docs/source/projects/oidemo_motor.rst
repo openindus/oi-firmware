@@ -580,7 +580,7 @@ Source code (full)
         float fnSlope  = 0.0620;
         uint8_t stepMode = STEP_1_16;
 
-        uint8_t pwmDec = 5;
+        uint8_t pwmDec = 7;
         uint8_t pwmInt = 2;
         uint8_t vsComp = 0;
         uint8_t igate  = 7;
