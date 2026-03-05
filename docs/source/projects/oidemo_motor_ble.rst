@@ -12,7 +12,8 @@ Who is this tutorial for?
 This tutorial is intended for developers who have already completed the :ref:`Demo Motors Kit<Demo Motors Kit>`
 basic tutorial and want to go further by adding **Bluetooth Low Energy (BLE)** connectivity to the project.
 It covers a multi-file C++ project structure and shows how to integrate the NimBLE Arduino library into
-an OpenIndus project.
+an OpenIndus project. By the end of this tutorial, you will be able to communicate with the android app
+downloaded in the previous tutorial, control the motors remotely, and monitor their state in real time.
 
 Prerequisites
 ~~~~~~~~~~~~~
@@ -21,6 +22,7 @@ Prerequisites
 * Familiarity with multi-file C++ projects (headers, source files, includes)
 * Basic knowledge of Git (cloning a repository)
 * The OpenIndus VS Code extension installed - see :ref:`Environment Installation<get_started_oivscodeextension>`
+* Basic understanding of BLE concepts (GATT services and characteristics, notifications, read/write operations)
 
 What will you learn?
 ~~~~~~~~~~~~~~~~~~~~
@@ -40,8 +42,8 @@ GitHub repository. Open a terminal and run:
 
 .. code-block:: bash
 
-    git clone https://github.com/openindus/oi-demo-motor-ble.git
-    cd oi-demo-motor-ble
+    git clone https://github.com/openindus/motor-demo-kit.git
+
 
 Then open the folder in VS Code with the OpenIndus extension active. The extension will detect
 the project and let you compile and flash it directly.
@@ -50,6 +52,7 @@ the project and let you compile and flash it directly.
     Make sure you have Git installed on your machine. If you do not, download it from
     `git-scm.com <https://git-scm.com/>`_.
 
+
 ------------
 
 3. Adding the NimBLE library to the project
@@ -57,6 +60,30 @@ the project and let you compile and flash it directly.
 
 The BLE functionality relies on the **NimBLE-Arduino** library. Unlike the standard Arduino
 libraries bundled with OpenIndus, this one must be declared explicitly in the build system.
+
+Download the library with git submodules
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The NimBLE-Arduino library is not copied into the repository: it is referenced as a **Git submodule**.
+A submodule is a pointer to a specific commit of an external repository. This means the project source
+tree stays lean and the library can be updated independently, while everyone working on the project uses
+exactly the same library version.
+
+After cloning, the ``NimBLE-Arduino/`` directory exists but is empty. You must initialise and fetch the
+submodule explicitly:
+
+.. code-block:: bash
+
+    git submodule update --init --recursive
+
+* ``--init`` registers any submodule that has not been set up yet in your local clone.
+* ``--recursive`` also initialises submodules nested inside submodules (NimBLE-Arduino has none, but it is good practice to always use it).
+
+Once this command completes, ``NimBLE-Arduino/src/`` is populated with the library source and the project
+is ready to build.
+
+Referencing the library in CMakeLists.txt
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Open the ``main/CMakeLists.txt`` file:
 
@@ -73,8 +100,83 @@ The key addition compared to a basic project is ``bt NimBLE-Arduino`` in the ``P
 * ``bt`` - the ESP-IDF Bluetooth stack, required as a low-level dependency
 * ``NimBLE-Arduino`` - the NimBLE Arduino wrapper library that provides the C++ BLE API used in ``ble.cpp``
 
-``FILE(GLOB_RECURSE app_sources ...)`` automatically included all ``.cpp`` and ``.h`` files found
+``FILE(GLOB_RECURSE app_sources ...)`` automatically collects all ``.cpp`` and ``.h`` files found
 in the ``main/`` folder so any new file you add to that directory is compiled automatically.
+
+Root CMakeLists.txt - registering the submodule directory
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The root ``CMakeLists.txt`` at the project root tells ESP-IDF where to find extra components:
+
+.. code-block:: cmake
+
+    cmake_minimum_required(VERSION 3.16.0)
+
+    include($ENV{IDF_PATH}/tools/cmake/project.cmake)
+    set(EXTRA_COMPONENT_DIRS components/submodules)
+
+    idf_build_set_property(MINIMAL_BUILD ON)
+    project(kit_controle_moteur)
+
+The critical line is ``set(EXTRA_COMPONENT_DIRS components/submodules)``. ESP-IDF scans every
+directory listed in ``EXTRA_COMPONENT_DIRS`` and treats each sub-folder that contains a
+``CMakeLists.txt`` as a buildable component. This is how ``NimBLE-Arduino`` is discovered and
+made available to the rest of the project.
+
+``idf_build_set_property(MINIMAL_BUILD ON)`` reduces build time by skipping ESP-IDF components
+that are not explicitly required by any component in the dependency graph.
+
+NimBLE-Arduino component wrapper
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+As explained earlier, the NimBLE-Arduino library is included as a **Git submodule** (the actual library source sits in
+a ``components/NimBLE-Arduino/`` folder at the repository root). To integrate it with ESP-IDF without
+touching the submodule itself, a thin wrapper component lives in
+``components/submodules/NimBLE-Arduino/``:
+
+.. code-block:: cmake
+
+    # Collect all .cpp files from the submodule source tree
+    file(GLOB_RECURSE srcs "../../NimBLE-Arduino/src/*.cpp")
+
+    # Register as an ESP-IDF component
+    idf_component_register(
+        SRCS ${srcs}
+        INCLUDE_DIRS "../../NimBLE-Arduino/src"
+        REQUIRES bt nvs_flash arduino
+    )
+
+    # NimBLE compile-time flags
+    target_compile_definitions(${COMPONENT_LIB} PUBLIC
+        CONFIG_BT_NIMBLE_ENABLED=1
+        CONFIG_NIMBLE_CPP_IDF=1
+    )
+
+The relative path ``../../NimBLE-Arduino/src`` walks up two levels from the wrapper folder
+(``components/submodules/NimBLE-Arduino/``) to reach the actual library source at the repository
+root. This keeps the component registration entirely outside of the submodule directory so that
+pulling library updates with ``git submodule update`` never overwrites build configuration.
+
+The overall folder layout is therefore:
+
+.. code-block:: text
+
+    project/
+    ├── CMakeLists.txt                          ← sets EXTRA_COMPONENT_DIRS
+    ├── main/
+    │   ├── CMakeLists.txt                      ← requires NimBLE-Arduino
+    │   ├── main.cpp
+    │   ├── ble.cpp / ble.h
+    │   ├── commands.cpp / commands.h
+    │   └── system_definition.h
+    └── components/
+        ├── openindus/                          ← standard OpenIndus component (untouched)
+        ├── arduino/                            ← standard OpenIndus Arduino component (untouched)
+        ├── NimBLE-Arduino/                     ← git submodule (untouched)
+        |   └── src/
+        └── submodules/
+            └── NimBLE-Arduino/
+                └── CMakeLists.txt              ← wrapper (owned by the project)
 
 ------------
 
