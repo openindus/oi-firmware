@@ -62,7 +62,7 @@ The BLE functionality relies on the **NimBLE-Arduino** library. Unlike the stand
 libraries bundled with OpenIndus, this one must be declared explicitly in the build system.
 
 Download the library with git submodules
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The NimBLE-Arduino library is not copied into the repository: it is referenced as a **Git submodule**.
 A submodule is a pointer to a specific commit of an external repository. This means the project source
@@ -104,7 +104,7 @@ The key addition compared to a basic project is ``bt NimBLE-Arduino`` in the ``P
 in the ``main/`` folder so any new file you add to that directory is compiled automatically.
 
 Root CMakeLists.txt - registering the submodule directory
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The root ``CMakeLists.txt`` at the project root tells ESP-IDF where to find extra components:
 
@@ -127,7 +127,7 @@ made available to the rest of the project.
 that are not explicitly required by any component in the dependency graph.
 
 NimBLE-Arduino component wrapper
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 As explained earlier, the NimBLE-Arduino library is included as a **Git submodule** (the actual library source sits in
 a ``components/NimBLE-Arduino/`` folder at the repository root). To integrate it with ESP-IDF without
@@ -205,7 +205,7 @@ This separation keeps ``main.cpp`` clean and readable. Adding new hardware featu
 changes to ``commands.cpp``, and extending the BLE interface only requires changes to ``ble.cpp``.
 
 system_definition.h - shared constants and types
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 All pin assignments and shared data types live in a single header included by every other file.
 This avoids duplicating the definitions across ``commands.cpp`` and ``ble.cpp``:
@@ -256,7 +256,7 @@ it can be sent as a single BLE notification payload. ``SetAdvancedParamArgs_s`` 
 advanced motor driver registers that the app can read or update over BLE.
 
 commands.cpp - hardware abstraction layer
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``commands.cpp`` owns all interactions with the OpenIndus hardware. The OI module objects are
 declared here, not in ``main.cpp``:
@@ -302,7 +302,7 @@ logical OR so the motor reacts to either source:
     }
 
 main.cpp - entry point
-^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~
 
 ``setup()`` calls the init functions from ``commands.cpp`` and ``ble.cpp`` in order:
 
@@ -360,7 +360,7 @@ The BLE layer exposes a single GATT service with UUID ``A100`` that groups all m
 characteristics. It is set up in ``bleSetup()`` and maintained by ``bleloop()``.
 
 Service and characteristics overview
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
    :header-rows: 1
@@ -424,7 +424,7 @@ Android app to simulate a button press remotely: writing ``1`` sets ``bleLeftBut
 and triggers the same event path as a physical button press.
 
 bleSetup() - GATT server initialization
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``bleSetup()`` initializes the NimBLE stack, creates the server, then builds each characteristic
 and assigns its callback handler before starting the service and advertising:
@@ -461,7 +461,7 @@ The device advertises itself as **"OI Motors Kit"** — the name you will see wh
 scans for nearby devices.
 
 Characteristic callbacks
-^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 Each writable characteristic has a dedicated callback class that inherits from
 ``NimBLECharacteristicCallbacks``. The pattern is always the same: extract the raw bytes from the
@@ -498,7 +498,7 @@ The speed is transmitted as a raw 4-byte IEEE 754 float (little-endian). The And
 must pack it the same way before writing the characteristic.
 
 bleloop() - sending notifications
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``bleloop()`` is called every 50 ms from ``loop()``. It checks whether any client is connected and,
 for each characteristic, compares the current value with the last notified value. A notification is
@@ -530,7 +530,7 @@ The ``static`` keyword inside the ``if`` block means each ``last*`` variable ret
 between calls to ``bleloop()`` without needing a global variable.
 
 Connection and security callbacks
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``ServerCallbacks`` handles connection lifecycle events. On connect, it requests updated
 connection parameters to balance latency and power consumption. On disconnect, it restarts
