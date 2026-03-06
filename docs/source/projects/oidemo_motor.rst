@@ -1,425 +1,466 @@
-.. _OI-DEMO Motors:
+.. _Demo Motors Kit:
 
-OI-DEMO Motor
-====================
+Demo Motors Kit
+===============
 
-.. warning::
-    This section is obsolete, we will update it shortly for version 2.X.X.
+1. Introduction
+---------------
 
-Goals
------
-* Introducing :ref:`Environment Installation<get_started_oivscodeextension>`
-* Introducing Openindus modules : :ref:`OI-Core<OI-Core>` and :ref:`OI-Stepper<oi-stepper>`
-* Drive stepper motors
-* Manage limit switches
+Who is this tutorial for?
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Requirements
-------------
-* Visual Studio Code
-* VSCode Openindus extension (Recommanded)
-* SiliconLabs USB Driver installed (CP2102N - USB<->UART)
-* Understanding :ref:`Start coding<start_coding-index>` chapter
+This tutorial is intended for developers and makers who want to learn how to control stepper motors
+using the **OI-Demo Motor** kit. Whether you are discovering embedded systems or already familiar
+with Arduino-style programming, this guide will walk you through everything step by step.
 
-------------
+Prerequisites
+~~~~~~~~~~~~~
 
-Description
------------
+* Basic knowledge of C++ and Arduino programming
+* A computer with Visual Studio Code installed
+* The OpenIndus VS Code extension installed - see :ref:`Environment Installation<get_started_oivscodeextension>`
+* SiliconLabs USB driver installed (CP2102N - USB↔UART)
+* Familiarity with :ref:`Start coding<start_coding-index>`
 
-.. image:: ../_static/oidemo_motor.png
+What will you learn?
+~~~~~~~~~~~~~~~~~~~~
 
-
-Wiring diagrams
-
-Demo kit is wired as described below : 
-
-.. image:: ../_static/oi-demo_kit_moteurs_[alimentation+automate].png
-
-.. image:: ../_static/oi-demo_kit_moteurs_[capteurs+actionneurs].png
+* How to test the OI-Demo Motor kit using the companion Android application
+* How to use stepper motors (speed, acceleration, ...)
+* How to perform homing sequences using limit switches
+* How to control two stepper motors interactively with our example
+* How to manage LED indicators using FreeRTOS tasks and state variables
 
 ------------
+
+2. Discover your kit
+--------------------
+
+The Demo Motor kit includes two stepper motors, each with a home and end limit switch.
+It also includes two output LEDs and buttons to test the digital I/O features of the OI-Core master module.
+
+.. image:: ../_static/demo_kit_motor_with_text.png
+    :width: 70%
+    :align: center
+
+|
+
+Download and install the Android app
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Before writing any code, use the **OpenIndus Demo** Android application to familiarize yourself with the default kit firmware.
+
+Scan the QR code below or follow the link to install the app:
+
+.. figure:: ../_static/androi_app_link.png
+   :width: 200px
+   :align: center
+   :alt: OpenIndus Demo app QR code
+   :target: https://play.google.com/store/apps/details?id=com.openindus.oidemo
+
+   `OpenIndus Demo on Google Play <https://play.google.com/store/apps/details?id=com.openindus.oidemo>`_
+
+.. note::
+    The **OpenIndus Demo** app requires **Bluetooth permissions** to be granted on your Android device.
+    Without these permissions, the app cannot connect to the Demo Motors kit. The Bluetooth module
+    on the kit remains inactive during the motor initialization and homing sequence, and only becomes
+    available once the startup animation completes and the system enters interactive mode.
+    Currently, the app is **Android-only**; there is no iOS equivalent available at this time.
+
+Check basic features of the kit
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Once the app is installed and connected to the kit via Bluetooth, you can play with the following
+features work correctly before programming:
+
+* **LEDs** - the two output LEDs (left and right) blink when the corresponding motor is running
+* **Buttons** - pressing the left and right buttons makes the corresponding motor run, and releasing them stops it
+* **Bluetooth** - the app show the motors position in real time and you can change the motor speed with the sliders
+
+Wiring diagram
+~~~~~~~~~~~~~~
+Theses electical diagrams show how the Core and Stepper modules are connected to the different components of the kit.
+
+By following the connections you can see which pins are used for what purpose. Theses pins will be used in the code later on
+to reference each element of the kit.
+
+.. image:: ../_static/electrotech_motor_1.png
+    :width: 95%
+    :align: center
+    :alt: Demo Motor wiring diagram - page 1
+
+.. image:: ../_static/electrotech_motor_2.png
+    :width: 95%
+    :align: center
+    :alt: Demo Motor wiring diagram - page 2
+
+------------
+
+3. Develop your own project
+----------------------------
+
+Introduction to OpenIndus IDE
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+OpenIndus projects are developed with **Visual Studio Code** and the **OpenIndus extension**.
+The extension handles project creation, compilation, and flashing directly from the editor.
+
+Refer to the :ref:`Environment Installation<get_started_oivscodeextension>` guide to set up your
+workspace if you have not done so yet.
+
+Introduction to OpenIndus modules programming
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Once the extension installed and your workspace set up, you can start writing code for the Demo Motor kit.
+
+In the extension launch **"Start a new project"**
+
+ * select OI Core Lite
+ * select the parent folder of the project
+ * enter the project name (eg: OpenIndus_Demo_Kit)
+ * select **"Master"** as the device type
+ * choose to use Arduino libraries
+ * select the last version available of the OpenIndus library
+
+.. note::
+    In the newly created project, we are going to edit the ``main/main.cpp`` file to implement the motor control logic.
+    All code examples in this section are excerpts from ``main/main.cpp``. The full source code is available at the end of this page.
+
+The OI-Demo Motor kit uses two OpenIndus modules on a shared OI-Rail bus:
+
+* :ref:`OI-Core<OI-Core>` - the master controller that manages digital I/O and orchestrates the system
+* :ref:`OI-Stepper<oi-stepper>` - the stepper motor driver module
+
+In code, each module is declared as a global object. The OpenIndus extension can generate these
+declarations automatically by scanning the OI-Rail.
+
+.. code-block:: cpp
+
+    #include "OpenIndus.h"
+    #include "Arduino.h"
+
+    // Master device
+    OICore core;
+
+    // Slave devices
+    OIStepper stepper1;
+
+**Named I/O constants** make the code easier to read and maintain. Instead of scattering raw pin
+identifiers throughout the program, declare them once at the top:
+
+.. code-block:: cpp
+
+    // Output LEDs
+    const DOut_Num_t LEFT_LED_OUT  = DOUT_4;
+    const DOut_Num_t RIGHT_LED_OUT = DOUT_3;
+
+    // Input buttons (3-position switch)
+    const DIn_Num_t LEFT_BUTTON  = DIN_2;
+    const DIn_Num_t RIGHT_BUTTON = DIN_1;
+
+    // Motor channels
+    const MotorNum_t MOTOR_LEFT  = MOTOR_2;
+    const MotorNum_t MOTOR_RIGHT = MOTOR_1;
+
+    // Limit switches
+    const DIn_Num_t LEFT_MOTOR_HOME_SWITCH  = DIN_3;
+    const DIn_Num_t LEFT_MOTOR_END_SWITCH   = DIN_4;
+    const DIn_Num_t RIGHT_MOTOR_HOME_SWITCH = DIN_1;
+    const DIn_Num_t RIGHT_MOTOR_END_SWITCH  = DIN_2;
+
+Complete example project
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This section will cover the code of the example project in detail, explaining the structure and the role of each function. The full source code is available at the end of this page.
+
+Project structure
+^^^^^^^^^^^^^^^^^
+
+The project is organized around three logical phases executed in sequence:
+
+1. **Initialization** - motor parameters, LED tasks, homing sequence, and startup animation
+2. **Interactive control** - the buttons drives the motors by triggering an interrupt on every state change
+3. **Interrupt / event handling** - a lightweight ISR sets a flag; the main loop acts on it
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 70
+
+   * - Function
+     - Role
+   * - ``setup()``
+     - Hardware initialization, motor configuration, homing, animation
+   * - ``loop()``
+     - Arduino main loop: This function is called repeatedly. It reads the ``switchEvent`` flag and drives motors accordingly
+   * - ``handleSwitchEvent()``
+     - ISR: sets ``switchEvent = true`` (kept minimal on purpose)
+   * - ``blinkLedLeftTask()``
+     - FreeRTOS task: blinks the left LED when ``leftLedBlinking`` is true
+   * - ``blinkLedRightTask()``
+     - FreeRTOS task: blinks the right LED when ``rightLedBlinking`` is true
+   * - ``changeBlinkingState()``
+     - Helper that maps a motor number to the correct blinking flag
+   * - ``reverseMotdir()``
+     - Returns the opposite ``MotorDirection_t``
 
 Source code details
--------------------
+^^^^^^^^^^^^^^^^^^^
 
-* OI Modules instances
-
-    .. code-block:: cpp
-
-        // First, init the master device
-        OICore core;
-
-        // Then add slaves devices here :
-        OIStepper stepper1;
-
-    These lines should be automatically created while using OpenIndus extension.
-    It creates instances for each OI Module found on the OI-Rail.
-
-------------
-
-* Variables declaration
+* **Global variables**
 
     .. code-block:: cpp
 
-        int mode = 0;
-        bool switchevent = false;
+        volatile bool switchEvent = false;
+
+        volatile bool leftLedBlinking  = false;
+        volatile bool rightLedBlinking = false;
+
         TaskHandle_t xHandle_LED_1 = NULL;
         TaskHandle_t xHandle_LED_2 = NULL;
 
-        MotorDirection_t motor1_dir = FORWARD;
-        MotorDirection_t motor2_dir = FORWARD;
+        MotorDirection_t motor1Dir = FORWARD;
+        MotorDirection_t motor2Dir = FORWARD;
 
-    **TaskHandle_t** variables are used to manage task : suspend, run, ...
-    **MotorDirection_t** variables store direction of each motor (forward or reverse)
-
+    ``switchEvent`` is marked ``volatile`` because it is written from an interrupt handler and
+    read from the main loop - the compiler must not cache it in a register.
 
 ------------
 
-* **Setup()** function
+* **LED tasks**
 
-    This function is executed once at startup. Initialisations have to be done here.
+    .. code-block:: cpp
+
+        void blinkLedLeftTask(void *)
+        {
+            while (1)
+            {
+                bool isBlinking = leftLedBlinking;
+                if (isBlinking) {
+                    core.digitalWrite(LEFT_LED_OUT, HIGH);
+                    delay(50);
+                    core.digitalWrite(LEFT_LED_OUT, LOW);
+                    delay(50);
+                    core.digitalWrite(LEFT_LED_OUT, HIGH);
+                    delay(50);
+                    core.digitalWrite(LEFT_LED_OUT, LOW);
+                    delay(250);
+                } else {
+                    delay(50);
+                }
+            }
+        }
+
+    When ``isBlinking`` is ``true``, the LED pulses twice and then waits 250 ms before repeating.
+    When ``false``, the task simply yields for 50 ms without touching the output.
+
+    ``blinkLedRightTask`` is identical, using ``RIGHT_LED_OUT`` and ``rightLedBlinking``.
+
+    **changeBlinkingState()** provides a clean interface for the rest of the code:
+
+    .. code-block:: cpp
+
+        void changeBlinkingState(MotorNum_t motor, bool state)
+        {
+            if (motor == MOTOR_LEFT) {
+                leftLedBlinking = state;
+            } else if (motor == MOTOR_RIGHT) {
+                rightLedBlinking = state;
+            }
+        }
+
+------------
+
+* **Interrupt handler**
+
+    .. code-block:: cpp
+
+        void handleSwitchEvent(void*)
+        {
+            switchEvent = true;
+            Serial.println(F("Switch mode interrupt detected."));
+        }
+
+    ISRs must be as short as possible. This function only sets the flag; all logic stays in ``loop()``.
+
+------------
+
+* **setup() - initialization**
 
     .. code-block:: cpp
 
         Serial.begin(115200);
-        Serial.println(F("Initializing..."));
+        xTaskCreate(blinkLedLeftTask,  "blinkLedLeftTask",  2048, NULL, 1, &xHandle_LED_1);
+        xTaskCreate(blinkLedRightTask, "blinkLedRightTask", 2048, NULL, 2, &xHandle_LED_2);
 
-    Initialise serial interface (USB) at 115200 bauds. Debug message will be displayed on a terminal software configured à 115200 bauds 8-N-1 (8 bits, Parity Even, 1 stop bit).
+    Two FreeRTOS tasks are created for LED control. Unlike the previous version they are **not**
+    suspended at startup - the ``*LedBlinking`` flags (initialized to ``false``) keep them idle.
 
-    .. code-block:: cpp
-        
-        xTaskCreate(blink_LED_1, "blink_LED_1", 2048, NULL, 1, &xHandle_LED_1);
-        vTaskSuspend(xHandle_LED_1);
-        xTaskCreate(blink_LED_2, "blink_LED_2", 2048, NULL, 2, &xHandle_LED_2);
-        vTaskSuspend(xHandle_LED_2);
+    Motor parameters are then applied to both motors (see *Configure and drive a motor* section above).
 
-    Creation of tasks to manage each Leds.
-    These tasks are disable (**vTaskSuspend**) at startup.
-    A Led task will be activated while a motor is rotating.
+* **setup() - homing sequence**
 
     .. code-block:: cpp
 
-        switch_mode(NULL);
+        // Detach any leftover limit switches from a previous run
+        stepper1.detachLimitSwitch(MOTOR_RIGHT, RIGHT_MOTOR_HOME_SWITCH);
+        stepper1.detachLimitSwitch(MOTOR_RIGHT, RIGHT_MOTOR_END_SWITCH);
+        stepper1.detachLimitSwitch(MOTOR_LEFT,  LEFT_MOTOR_HOME_SWITCH);
+        stepper1.detachLimitSwitch(MOTOR_LEFT,  LEFT_MOTOR_END_SWITCH);
 
-    Call this function to set mode to enable homing at startup working (see below).
+        // Attach only the home switches for homing
+        stepper1.attachLimitSwitch(MOTOR_RIGHT, RIGHT_MOTOR_HOME_SWITCH, ACTIVE_HIGH);
+        stepper1.attachLimitSwitch(MOTOR_LEFT,  LEFT_MOTOR_HOME_SWITCH,  ACTIVE_HIGH);
+
+        changeBlinkingState(MOTOR_RIGHT, true);
+        changeBlinkingState(MOTOR_LEFT,  true);
+
+        stepper1.homing(MOTOR_RIGHT, 100);
+        stepper1.homing(MOTOR_LEFT,  100);
+        stepper1.wait(MOTOR_RIGHT);
+        stepper1.wait(MOTOR_LEFT);
+
+    **detachLimitSwitch** is called first to clear any state left over from a previous software
+    reboot where OI-Stepper may already have been initialized.
+
+    **attachLimitSwitch(motor, pin, ACTIVE_HIGH)** - when the home sensor goes HIGH, the motor
+    stops automatically at its zero position.
+
+    **homing(motor, speed)** - moves the motor toward the home sensor at 100 steps per second.
+
+    **wait(motor)** - await the completion of the current motor movement before executing the next command.
+
+* **setup() - startup animation**
+
+    After homing the motors run a brief demonstration to confirm correct operation:
 
     .. code-block:: cpp
 
-        // Reset Stepper limitswitch
-        stepper1.detachLimitSwitch(MOTOR_1, DIN_1);
-        stepper1.detachLimitSwitch(MOTOR_1, DIN_2);
-        stepper1.detachLimitSwitch(MOTOR_2, DIN_3);
-        stepper1.detachLimitSwitch(MOTOR_2, DIN_4);
-
-    Each can be attached to limit switched for safety purpose : when a limitswitch is reach, motor will automatically stops.
-    These functions are called now, in case of a software reboot of OI-Core while OI-Stepper has been already initialize.
-    Detaching all limit switches to enable homing.
-
-    .. code-block:: cpp
-
-        // move motors to their initial position.
-        // Set right sensors as limit switches for each motor
-        Serial.println(F("Homing motors."));
-        stepper1.attachLimitSwitch(MOTOR_1, DIN_1, ACTIVE_HIGH);
-        stepper1.attachLimitSwitch(MOTOR_2, DIN_3, ACTIVE_HIGH);
-        // blink leds while motor are moving
-        vTaskResume(xHandle_LED_1);
-        vTaskResume(xHandle_LED_2);
-        stepper1.homing(MOTOR_1, 20);
-        stepper1.homing(MOTOR_2, 20);
-        // wait for homing
-        stepper1.wait(MOTOR_1);
-        stepper1.wait(MOTOR_2);
-        Serial.println(F("Motors at their 0 position."));
+        // Move to step 250 at low speed
+        stepper1.setMaxSpeed(MOTOR_RIGHT, 100);
+        stepper1.setMaxSpeed(MOTOR_LEFT,  100);
+        stepper1.moveAbsolute(MOTOR_RIGHT, 250);
+        stepper1.moveAbsolute(MOTOR_LEFT,  250);
+        stepper1.wait(MOTOR_RIGHT);
+        stepper1.wait(MOTOR_LEFT);
         delay(1000);
 
-    **stepper1.attachLimitSwitch()** are used to attach limit switches a motor. When a limit switch is set to true, it stops the motor.
-
-    **vTaskResume(xHandle_LED_x)** as motor will move, Leds have to blink.
-
-    **stepper1.homing()** send motor to its 'homing' position at speed of 20 step/sec.
-
-    **stepper1.wait()** wait motor to reach its position (blocking function)
-
-    .. code-block:: cpp    
-
-        stepper1.detachLimitSwitch(MOTOR_1, DIN_1);
-        stepper1.detachLimitSwitch(MOTOR_2, DIN_3);
-
-        // play an animation
-        // remind : stepper motor = 200 steps/revolution
-        Serial.println(F("Starting animation."));
-        stepper1.setMaxSpeed(MOTOR_1, 100);
-        stepper1.setMaxSpeed(MOTOR_2, 100);
-        stepper1.moveAbsolute(MOTOR_1, 250);
-        stepper1.moveAbsolute(MOTOR_2, 250);
-        stepper1.wait(MOTOR_1);
-        stepper1.wait(MOTOR_2);
-        Serial.println(F("MOTOR_1 position :"));
-        Serial.println(stepper1.getPosition(MOTOR_1));
-        Serial.println(F("MOTOR_2 position :"));
-        Serial.println(stepper1.getPosition(MOTOR_2));
-
+        // Move relatively at medium speed
+        stepper1.setMaxSpeed(MOTOR_RIGHT, 700);
+        stepper1.setMaxSpeed(MOTOR_LEFT,  700);
+        stepper1.moveRelative(MOTOR_RIGHT,  300);
+        stepper1.moveRelative(MOTOR_LEFT,  -100);
+        stepper1.wait(MOTOR_RIGHT);
+        stepper1.wait(MOTOR_LEFT);
         delay(1000);
 
-    **stepper1.detachLimitSwitch()** Disable limit switches , preparing to move more than one revolution. 
-    **stepper1.setMaxSpeed()** Set motor speed rotation
-    **stepper1.moveAbsolute()** Set absolution position to reach (unit : step)
+        // Return to home at higher speed
+        stepper1.setAcceleration(MOTOR_RIGHT, 2000);
+        stepper1.setMaxSpeed(MOTOR_RIGHT, 750);
+        stepper1.setMaxSpeed(MOTOR_LEFT,  750);
+        stepper1.moveAbsolute(MOTOR_RIGHT, 0);
+        stepper1.moveAbsolute(MOTOR_LEFT,  0);
+        stepper1.wait(MOTOR_RIGHT);
+        stepper1.wait(MOTOR_LEFT);
 
-    **stepper1.wait()** wait motor to reach its position (blocking function)
+        // Release shafts
+        stepper1.stop(MOTOR_RIGHT, HARD_HIZ);
+        stepper1.stop(MOTOR_LEFT,  HARD_HIZ);
 
-    Display some debug info with **stepper1.getPosition()** which is the actual position of moto, to confirm that each motor have reach the order.
+    **setMaxSpeed(motor, steps/s)** - sets the maximum rotation speed in steps per second.
+    A stepper motor with 200 full steps per revolution running at 100 steps/s completes
+    one revolution every 2 seconds.
 
-    wait 1 second before doing an other movement.
+    **moveAbsolute(motor, position)** - moves to an absolute step count from the home position.
 
-    .. code-block:: cpp 
+    **moveRelative(motor, delta)** - moves by a signed number of steps relative to the current position.
 
-        stepper1.setMaxSpeed(MOTOR_1, 800);
-        stepper1.setMaxSpeed(MOTOR_2, 800);
-        stepper1.moveRelative(MOTOR_1, 300);
-        stepper1.moveRelative(MOTOR_2, -100);
-        stepper1.wait(MOTOR_1);
-        stepper1.wait(MOTOR_2);
-        Serial.println(F("MOTOR_1 position :"));
-        Serial.println(stepper1.getPosition(MOTOR_1));
-        Serial.println(F("MOTOR_2 position :"));
-        Serial.println(stepper1.getPosition(MOTOR_2));
+    **setAcceleration(motor, steps/s²)** - sets the acceleration ramp. A higher value means quicker
+    speed transitions but also more mechanical stress.
 
-        delay(1000);
+    **stop(motor, HARD_HIZ)** - immediately removes power from the coils, letting the shaft spin freely.
 
-    Same sequence as above but with a relative commande.
-    **stepper1.moveRelative()** set a relative movement to do (unit : step).
+* **setup() - attach interrupts and end switches**
 
-    .. code-block:: cpp 
+    .. code-block:: cpp
 
-        stepper1.setAcceleration(MOTOR_1, 2000);
-        stepper1.setMaxSpeed(MOTOR_1, 10000);
-        stepper1.setMaxSpeed(MOTOR_2, 4000);
-        stepper1.moveAbsolute(MOTOR_1, 0);
-        stepper1.moveAbsolute(MOTOR_2, 0);
-        stepper1.wait(MOTOR_1);
-        stepper1.wait(MOTOR_2);
-        Serial.println(F("MOTOR_1 position :"));
-        Serial.println(stepper1.getPosition(MOTOR_1));
-        Serial.println(F("MOTOR_2 position :"));
-        Serial.println(stepper1.getPosition(MOTOR_2));
+        changeBlinkingState(MOTOR_RIGHT, false);
+        changeBlinkingState(MOTOR_LEFT,  false);
 
-    Same sequence as above but with a higher speed and more steps to run.
+        core.attachInterrupt(DIN_1, handleSwitchEvent, CHANGE_MODE, NULL);
+        core.attachInterrupt(DIN_2, handleSwitchEvent, CHANGE_MODE, NULL);
 
-    .. code-block:: cpp 
+        // Trigger once to initialize the loop state
+        handleSwitchEvent(NULL);
 
-        // Free motors shafts
-        stepper1.stop(MOTOR_1, HARD_HIZ);
-        stepper1.stop(MOTOR_2, HARD_HIZ);
+    **core.attachInterrupt(pin, callback, CHANGE_MODE, arg)** - fires ``handleSwitchEvent`` every
+    time the switch changes state (pressed or released).
 
-        // stop playing...
-        Serial.println(F("Animation ended."));
-
-    **stepper1.stop(MOTOR_1, HARD_HIZ)** Stops motors with **HARD_HIZ** argument, meaning that motor shaft are free (position is not keept).
-
-    .. code-block:: cpp 
-
-        // stops leds blinking
-        vTaskSuspend(xHandle_LED_1);
-        vTaskSuspend(xHandle_LED_2);
-        // force LEDs off
-        core.digitalWrite(DOUT_3, LOW);
-        core.digitalWrite(DOUT_4, LOW);
-
-    Stop Leds blinking by suspending their tasks and force them to 0.
-
-    .. code-block:: cpp 
-
-        Serial.println(F("Setting button and limit switches ..."));
-        // Allow user switch to drive motors
-        core.attachInterrupt(DIN_1, switch_mode, CHANGE_MODE, NULL);
-        core.attachInterrupt(DIN_2, switch_mode, CHANGE_MODE, NULL);
-        
-        // attach sensors as limit switches
-        stepper1.attachLimitSwitch(MOTOR_1, DIN_1, ACTIVE_HIGH);
-        stepper1.attachLimitSwitch(MOTOR_1, DIN_2, ACTIVE_HIGH);
-        stepper1.attachLimitSwitch(MOTOR_2, DIN_3, ACTIVE_HIGH);
-        stepper1.attachLimitSwitch(MOTOR_2, DIN_4, ACTIVE_HIGH);
-
-        Serial.println(F("--------------------------------------"));
-        Serial.println(F("You can now use switch to move motors."));
-        
-    
-    Demo sequence is terminated.
-    user is now allowed to play with the central switch to control motors manually.
-    To allow this :
-
-    * **core.attachInterrupt(DIN_1, switch_mode, CHANGE_MODE, NULL)** 
-        This function create an interrupt call to **switch_mode()** function when OI-Core[DIN_1] changes state.
-
-    * **core.attachInterrupt(DIN_2, switch_mode, CHANGE_MODE, NULL)** 
-        This function create an interrupt call to **switch_mode()** function when OI-Core[DIN_1] changes state.
-
-    * All limit switches are enable
-        When a sensor will detect the motor arm, it will stops the motor.
-
-    
-------------
-
-* **Loop()** function
-
-    .. code-block:: cpp 
-
-        if (switchevent == true)
-            
-    Main loop is waiting for a **switchevent**. This variable is update in **switchmode()** interrupt function when the bouton is changing state.
-
-    .. code-block:: cpp 
-
-        // reset event generated by switch interrupt
-        switchevent = false;
-
-    **switchevent** is reseted  to allow next event to re-enter in this condition.
-
-    .. code-block:: cpp 
-
-        //Switch on pushed on "left" side
-        if (core.digitalRead(DIN_1) == 1 && core.digitalRead(DIN_2) == 0)
-        {
-            mode = 1;
-            stepper1.run(MOTOR_1, motor1_dir, 100);
-            stepper1.stop(MOTOR_2);
-            vTaskResume(xHandle_LED_1);
-            core.digitalWrite(DOUT_4, LOW);
-            Serial.println(F("MOTOR_1 position :"));
-            Serial.println(stepper1.getPosition(MOTOR_1));
-            Serial.println(F("MOTOR_2 position :"));
-            Serial.println(stepper1.getPosition(MOTOR_2));        
-            // reverse direction of the other motor, for fun
-            motor2_dir = reverse_motdir(motor2_dir);
-
-        }
-
-    Reading OI-Core[DIN_1] and OI-Core[DIN_2] inputs to determine on which side the button is pushed.
-    If button is pushed on left side, **MOTOR1** will move 100 steps in **motor1_dir** direction.
-
-    LED 
-    LED of the other motor is forced to low with *core.digitalWrite(DOUT_4, LOW);* 
-
-    For fun, **MOTOR2** direction is reversed with **reverse_motdir()** function.
-
-    .. code-block:: cpp 
-
-        //Switch on pushed on "left" side
-        else if ((core.digitalRead(DIN_1) == 0 && core.digitalRead(DIN_2) == 1))
-        {
-            mode = 2;
-            stepper1.stop(MOTOR_1);
-            stepper1.run(MOTOR_2, motor2_dir, 100);
-            vTaskResume(xHandle_LED_2);
-            core.digitalWrite(DOUT_3, LOW);
-            Serial.println(F("MOTOR_1 position :"));
-            Serial.println(stepper1.getPosition(MOTOR_1));
-            Serial.println(F("MOTOR_2 position :"));
-            Serial.println(stepper1.getPosition(MOTOR_2)); 
-            // reverse direction of the other motor, for fun
-            motor1_dir = reverse_motdir(motor1_dir);
-        }
-
-    Reading OI-Core[DIN_1] and OI-Core[DIN_2] inputs to determine on which side the button is pushed.
-    If button is pushed on right side, **MOTOR2** will move 100 steps in **motor2_dir** direction.
-
-    LED of the other motor is forced to low with *core.digitalWrite(DOUT_3, LOW);* 
-
-    For fun, **MOTOR1** direction is reversed with **reverse_motdir()** function.
-
-    .. code-block:: cpp 
-
-        //Switch on the middle position (do nothing)
-        else
-        {
-            mode = 0;
-            // force motors to stop
-            stepper1.stop(MOTOR_1, SOFT_STOP);
-            stepper1.stop(MOTOR_2, SOFT_HIZ);
-            
-            // stop task that blink leds
-            vTaskSuspend(xHandle_LED_1);
-            vTaskSuspend(xHandle_LED_2);
-            // force LEDs off
-            core.digitalWrite(DOUT_3, LOW);
-            core.digitalWrite(DOUT_4, LOW);
-        }
-        Serial.print("mode : ");
-        Serial.println(mode);
-
-    When button is in the 'middle' position, Leds are stopped (vTaskSuspend) and force to low.
-    **MOTOR_1** is stopped with **SOFT_STOP** , that means that its position is held by software, it should be not possible to move it manually.
-    **MOTOR_2** is stopped with **SOFT_HIZ** , that means that its position is not held, it should be possible to move it manually.
-
+    Calling ``handleSwitchEvent(NULL)`` once at the end of ``setup()`` pre-populates ``switchEvent``
+    so the loop immediately reads the switch position on first entry, even before the user touches anything.
 
 ------------
 
-* **Others functions called in Setup() and Loop() functions**
+* **loop()**
 
-    * switch_mode()
+    .. code-block:: cpp
 
-        .. code-block:: cpp 
-
-            void switch_mode(void*)
+        void loop()
+        {
+            if (switchEvent == true)
             {
-                // set switch event flag to true (minimize software interrupt)
-                switchevent = true;
-                Serial.println(F("Switch mode interrupt detected."));
-            }
+                switchEvent = false;
+                bool leftButtonState  = core.digitalRead(LEFT_BUTTON);
+                bool rightButtonState = core.digitalRead(RIGHT_BUTTON);
 
-        This interrupt function must be as small as possible.
-        **switchevent** is set to true. This event will be managed in the **Loop()** function.
-
-    * blink_LED_1()
-
-        .. code-block:: cpp 
-
-            void blink_LED_1(void *)
-            {
-                while (1)
+                if (rightButtonState == HIGH && leftButtonState == LOW)
                 {
-                    core.digitalWrite(DOUT_3, HIGH);
-                    delay(50);
-                    core.digitalWrite(DOUT_3, LOW);
-                    delay(50);
-                    core.digitalWrite(DOUT_3, HIGH);
-                    delay(50);
-                    core.digitalWrite(DOUT_3, LOW);
-                    delay(250);
+                    // Right side pressed - run MOTOR_RIGHT
+                    stepper1.stop(MOTOR_LEFT, SOFT_HIZ);
+                    stepper1.run(MOTOR_RIGHT, motor1Dir, 100);
+                    changeBlinkingState(MOTOR_RIGHT, true);
+                    changeBlinkingState(MOTOR_LEFT,  false);
+                    motor2Dir = reverseMotdir(motor2Dir);
+                }
+                else if (rightButtonState == LOW && leftButtonState == HIGH)
+                {
+                    // Left side pressed - run MOTOR_LEFT
+                    stepper1.stop(MOTOR_RIGHT, SOFT_HIZ);
+                    stepper1.run(MOTOR_LEFT, motor2Dir, 100);
+                    changeBlinkingState(MOTOR_RIGHT, false);
+                    changeBlinkingState(MOTOR_LEFT,  true);
+                    motor1Dir = reverseMotdir(motor1Dir);
+                }
+                else
+                {
+                    // Middle position - stop both motors
+                    stepper1.stop(MOTOR_RIGHT, SOFT_HIZ);
+                    stepper1.stop(MOTOR_LEFT,  SOFT_HIZ);
+                    changeBlinkingState(MOTOR_RIGHT, false);
+                    changeBlinkingState(MOTOR_LEFT,  false);
                 }
             }
+            delay(100);
+        }
 
-        This function is a task that is suspended or resumed in the **Loop()** function. 
-        It is an infinite loop that switch on and off an output (LED1)
+    The loop only acts when ``switchEvent`` is set, which happens on every buttons state change.
 
-    * blink_LED_2()
+    **stepper1.run(motor, direction, speed)** - starts continuous rotation at the given speed
+    (steps/s). Unlike ``moveAbsolute`` / ``moveRelative``, the motor keeps spinning until
+    explicitly stopped.
 
-        .. code-block:: cpp 
+    **stop(motor, SOFT_HIZ)** - decelerates the motor gracefully and then removes power from the
+    coils (shaft free to turn).
 
-            void blink_LED_2(void *)
-            {
-                while (1)
-                {
-                    core.digitalWrite(DOUT_4, HIGH);
-                    delay(50);
-                    core.digitalWrite(DOUT_4, LOW);
-                    delay(50);
-                    core.digitalWrite(DOUT_4, HIGH);
-                    delay(50);
-                    core.digitalWrite(DOUT_4, LOW);
-                    delay(250);
-                }
-            }
-
-        This function is a task that is suspended or resumed in the **Loop()** function. 
-        It is an infinite loop that switch on and off an output (LED2)
+    Each time one motor starts, the *other* motor's direction is reversed with ``reverseMotdir()``.
+    This means that after you press a button, the next time you press the other button its corresponding
+    motor will rotate in the opposite direction - a small visual effect that makes the demo more lively.
 
 ------------
 
 Source code (full)
--------------------
+^^^^^^^^^^^^^^^^^^
 
-.. code-block:: cpp 
+.. code-block:: cpp
 
     #include "OpenIndus.h"
     #include "Arduino.h"
@@ -430,228 +471,251 @@ Source code (full)
     // Then add slaves devices here :
     OIStepper stepper1;
 
+    // Input and output definitions
+    const DOut_Num_t LEFT_LED_OUT  = DOUT_4;
+    const DOut_Num_t RIGHT_LED_OUT = DOUT_3;
 
-    int mode = 0;
-    bool switchevent = false;
+    const DIn_Num_t LEFT_BUTTON  = DIN_2;
+    const DIn_Num_t RIGHT_BUTTON = DIN_1;
+
+    const MotorNum_t MOTOR_LEFT  = MOTOR_2;
+    const MotorNum_t MOTOR_RIGHT = MOTOR_1;
+
+    const DIn_Num_t LEFT_MOTOR_HOME_SWITCH  = DIN_3;
+    const DIn_Num_t LEFT_MOTOR_END_SWITCH   = DIN_4;
+    const DIn_Num_t RIGHT_MOTOR_HOME_SWITCH = DIN_1;
+    const DIn_Num_t RIGHT_MOTOR_END_SWITCH  = DIN_2;
+
+    // event flag
+    volatile bool switchEvent = false;
+
+    // blinking state of the leds
+    volatile bool leftLedBlinking  = false;
+    volatile bool rightLedBlinking = false;
+
     TaskHandle_t xHandle_LED_1 = NULL;
     TaskHandle_t xHandle_LED_2 = NULL;
 
-    MotorDirection_t motor1_dir = FORWARD;
-    MotorDirection_t motor2_dir = FORWARD;
+    MotorDirection_t motor1Dir = FORWARD;
+    MotorDirection_t motor2Dir = FORWARD;
 
-    MotorDirection_t reverse_motdir(MotorDirection_t dir)
+    MotorDirection_t reverseMotdir(MotorDirection_t dir)
     {
-        // return opposite motor direction
-        if (dir == FORWARD) 
-        {
+        if (dir == FORWARD)
             return REVERSE;
-        }
         else
-        {
             return FORWARD;
-        }
     }
 
-    void switch_mode(void*)
+    void handleSwitchEvent(void*)
     {
-        // set switch event flag to true (minimize software interrupt)
-        switchevent = true;
+        switchEvent = true;
         Serial.println(F("Switch mode interrupt detected."));
     }
 
-
-    void blink_LED_1 (void *)
+    void blinkLedLeftTask(void *)
     {
         while (1)
         {
-            core.digitalWrite(DOUT_3, HIGH);
-            delay(50);
-            core.digitalWrite(DOUT_3, LOW);
-            delay(50);
-            core.digitalWrite(DOUT_3, HIGH);
-            delay(50);
-            core.digitalWrite(DOUT_3, LOW);
-            delay(250);
+            bool isBlinking = leftLedBlinking;
+            if (isBlinking) {
+                core.digitalWrite(LEFT_LED_OUT, HIGH);
+                delay(50);
+                core.digitalWrite(LEFT_LED_OUT, LOW);
+                delay(50);
+                core.digitalWrite(LEFT_LED_OUT, HIGH);
+                delay(50);
+                core.digitalWrite(LEFT_LED_OUT, LOW);
+                delay(250);
+            } else {
+                delay(50);
+            }
         }
     }
 
-    void blink_LED_2 (void *)
+    void blinkLedRightTask(void *)
     {
         while (1)
         {
-            core.digitalWrite(DOUT_4, HIGH);
-            delay(50);
-            core.digitalWrite(DOUT_4, LOW);
-            delay(50);
-            core.digitalWrite(DOUT_4, HIGH);
-            delay(50);
-            core.digitalWrite(DOUT_4, LOW);
-            delay(250);
+            bool isBlinking = rightLedBlinking;
+            if (isBlinking) {
+                core.digitalWrite(RIGHT_LED_OUT, HIGH);
+                delay(50);
+                core.digitalWrite(RIGHT_LED_OUT, LOW);
+                delay(50);
+                core.digitalWrite(RIGHT_LED_OUT, HIGH);
+                delay(50);
+                core.digitalWrite(RIGHT_LED_OUT, LOW);
+                delay(250);
+            } else {
+                delay(50);
+            }
         }
     }
 
+    void changeBlinkingState(MotorNum_t motor, bool state)
+    {
+        if (motor == MOTOR_LEFT) {
+            leftLedBlinking = state;
+        } else if (motor == MOTOR_RIGHT) {
+            rightLedBlinking = state;
+        }
+    }
 
     void setup()
     {
         Serial.begin(115200);
         Serial.println(F("Initializing..."));
-        xTaskCreate(blink_LED_1, "blink_LED_1", 2048, NULL, 1, &xHandle_LED_1);
-        vTaskSuspend(xHandle_LED_1);
-        xTaskCreate(blink_LED_2, "blink_LED_2", 2048, NULL, 2, &xHandle_LED_2);
-        vTaskSuspend(xHandle_LED_2);
-        switch_mode(NULL);
 
-        // Reset Stepper limitswitch
-        stepper1.detachLimitSwitch(MOTOR_1, DIN_1);
-        stepper1.detachLimitSwitch(MOTOR_1, DIN_2);
-        stepper1.detachLimitSwitch(MOTOR_2, DIN_3);
-        stepper1.detachLimitSwitch(MOTOR_2, DIN_4);
+        xTaskCreate(blinkLedLeftTask,  "blinkLedLeftTask",  2048, NULL, 1, &xHandle_LED_1);
+        xTaskCreate(blinkLedRightTask, "blinkLedRightTask", 2048, NULL, 2, &xHandle_LED_2);
 
-        // move motors to their initial position.
-        // Set right sensors as limit switches for each motor
+        // Set default parameters for stepper motors
+        float kvalRun  = 6;
+        float kvalHold = 6;
+        float kvalDec  = 6;
+        float kvalAcc  = 6;
+        float intSpeed = 240;
+        float stSlope  = 0.0200;
+        float fnSlope  = 0.0620;
+        uint8_t stepMode = STEP_1_16;
+
+        uint8_t pwmDec = 7;
+        uint8_t pwmInt = 2;
+        uint8_t vsComp = 0;
+        uint8_t igate  = 7;
+        uint8_t tcc    = 1;
+        uint8_t tboost = 2;
+        uint8_t tdt    = 0;
+        uint8_t tblank = 2;
+
+        for (MotorNum_t m : {MOTOR_LEFT, MOTOR_RIGHT}) {
+            stepper1.setAdvancedParam(m, VM_CONFIG_F_PWM_DEC, &pwmDec);
+            stepper1.setAdvancedParam(m, VM_CONFIG_F_PWM_INT, &pwmInt);
+            stepper1.setAdvancedParam(m, VM_CONFIG_EN_VSCOMP, &vsComp);
+            stepper1.setAdvancedParam(m, VM_KVAL_ACC,         &kvalAcc);
+            stepper1.setAdvancedParam(m, VM_KVAL_DEC,         &kvalDec);
+            stepper1.setAdvancedParam(m, VM_KVAL_HOLD,        &kvalHold);
+            stepper1.setAdvancedParam(m, VM_KVAL_RUN,         &kvalRun);
+            stepper1.setAdvancedParam(m, STEP_MODE_STEP_SEL,  &stepMode);
+            stepper1.setAdvancedParam(m, VM_INT_SPEED,        &intSpeed);
+            stepper1.setAdvancedParam(m, VM_FN_SLP_ACC,       &fnSlope);
+            stepper1.setAdvancedParam(m, VM_FN_SLP_DEC,       &fnSlope);
+            stepper1.setAdvancedParam(m, VM_ST_SLP,           &stSlope);
+            stepper1.setAdvancedParam(m, GATECFG1_IGATE,      &igate);
+            stepper1.setAdvancedParam(m, GATECFG1_TCC,        &tcc);
+            stepper1.setAdvancedParam(m, GATECFG1_TBOOST,     &tboost);
+            stepper1.setAdvancedParam(m, GATECFG2_TDT,        &tdt);
+            stepper1.setAdvancedParam(m, GATECFG2_TBLANK,     &tblank);
+        }
+
+        // Reset limit switches (in case of software reboot while OI-Stepper was initialized)
+        stepper1.detachLimitSwitch(MOTOR_RIGHT, RIGHT_MOTOR_HOME_SWITCH);
+        stepper1.detachLimitSwitch(MOTOR_RIGHT, RIGHT_MOTOR_END_SWITCH);
+        stepper1.detachLimitSwitch(MOTOR_LEFT,  LEFT_MOTOR_HOME_SWITCH);
+        stepper1.detachLimitSwitch(MOTOR_LEFT,  LEFT_MOTOR_END_SWITCH);
+
+        // Homing
         Serial.println(F("Homing motors."));
-        stepper1.attachLimitSwitch(MOTOR_1, DIN_1, ACTIVE_HIGH);
-        stepper1.attachLimitSwitch(MOTOR_2, DIN_3, ACTIVE_HIGH);
-        // blink leds while motor are moving
-        vTaskResume(xHandle_LED_1);
-        vTaskResume(xHandle_LED_2);
-        stepper1.homing(MOTOR_1, 20);
-        stepper1.homing(MOTOR_2, 20);
-        // wait for homing
-        stepper1.wait(MOTOR_1);
-        stepper1.wait(MOTOR_2);
+        stepper1.attachLimitSwitch(MOTOR_RIGHT, RIGHT_MOTOR_HOME_SWITCH, ACTIVE_HIGH);
+        stepper1.attachLimitSwitch(MOTOR_LEFT,  LEFT_MOTOR_HOME_SWITCH,  ACTIVE_HIGH);
+        changeBlinkingState(MOTOR_RIGHT, true);
+        changeBlinkingState(MOTOR_LEFT,  true);
+        stepper1.homing(MOTOR_RIGHT, 100);
+        stepper1.homing(MOTOR_LEFT,  100);
+        stepper1.wait(MOTOR_RIGHT);
+        stepper1.wait(MOTOR_LEFT);
         Serial.println(F("Motors at their 0 position."));
         delay(1000);
 
-        stepper1.detachLimitSwitch(MOTOR_1, DIN_1);
-        stepper1.detachLimitSwitch(MOTOR_2, DIN_3);
+        stepper1.detachLimitSwitch(MOTOR_RIGHT, RIGHT_MOTOR_HOME_SWITCH);
+        stepper1.detachLimitSwitch(MOTOR_LEFT,  LEFT_MOTOR_HOME_SWITCH);
 
-        // play an animation
-        // remind : stepper motor = 200 steps/revolution
+        // Startup animation (stepper motor = 200 steps/revolution)
         Serial.println(F("Starting animation."));
-        stepper1.setMaxSpeed(MOTOR_1, 100);
-        stepper1.setMaxSpeed(MOTOR_2, 100);
-        stepper1.moveAbsolute(MOTOR_1, 250);
-        stepper1.moveAbsolute(MOTOR_2, 250);
-        stepper1.wait(MOTOR_1);
-        stepper1.wait(MOTOR_2);
-        Serial.println(F("MOTOR_1 position :"));
-        Serial.println(stepper1.getPosition(MOTOR_1));
-        Serial.println(F("MOTOR_2 position :"));
-        Serial.println(stepper1.getPosition(MOTOR_2));
-
+        stepper1.setMaxSpeed(MOTOR_RIGHT, 100);
+        stepper1.setMaxSpeed(MOTOR_LEFT,  100);
+        stepper1.moveAbsolute(MOTOR_RIGHT, 250);
+        stepper1.moveAbsolute(MOTOR_LEFT,  250);
+        stepper1.wait(MOTOR_RIGHT);
+        stepper1.wait(MOTOR_LEFT);
+        Serial.println(stepper1.getPosition(MOTOR_RIGHT));
+        Serial.println(stepper1.getPosition(MOTOR_LEFT));
         delay(1000);
 
-        stepper1.setMaxSpeed(MOTOR_1, 800);
-        stepper1.setMaxSpeed(MOTOR_2, 800);
-        stepper1.moveRelative(MOTOR_1, 300);
-        stepper1.moveRelative(MOTOR_2, -100);
-        stepper1.wait(MOTOR_1);
-        stepper1.wait(MOTOR_2);
-        Serial.println(F("MOTOR_1 position :"));
-        Serial.println(stepper1.getPosition(MOTOR_1));
-        Serial.println(F("MOTOR_2 position :"));
-        Serial.println(stepper1.getPosition(MOTOR_2));
-
+        stepper1.setMaxSpeed(MOTOR_RIGHT, 700);
+        stepper1.setMaxSpeed(MOTOR_LEFT,  700);
+        stepper1.moveRelative(MOTOR_RIGHT,  300);
+        stepper1.moveRelative(MOTOR_LEFT,  -100);
+        stepper1.wait(MOTOR_RIGHT);
+        stepper1.wait(MOTOR_LEFT);
+        Serial.println(stepper1.getPosition(MOTOR_RIGHT));
+        Serial.println(stepper1.getPosition(MOTOR_LEFT));
         delay(1000);
 
-        stepper1.setAcceleration(MOTOR_1, 2000);
-        stepper1.setMaxSpeed(MOTOR_1, 10000);
-        stepper1.setMaxSpeed(MOTOR_2, 4000);
-        stepper1.moveAbsolute(MOTOR_1, 0);
-        stepper1.moveAbsolute(MOTOR_2, 0);
-        stepper1.wait(MOTOR_1);
-        stepper1.wait(MOTOR_2);
-        Serial.println(F("MOTOR_1 position :"));
-        Serial.println(stepper1.getPosition(MOTOR_1));
-        Serial.println(F("MOTOR_2 position :"));
-        Serial.println(stepper1.getPosition(MOTOR_2));
+        stepper1.setAcceleration(MOTOR_RIGHT, 2000);
+        stepper1.setMaxSpeed(MOTOR_RIGHT, 750);
+        stepper1.setMaxSpeed(MOTOR_LEFT,  750);
+        stepper1.moveAbsolute(MOTOR_RIGHT, 0);
+        stepper1.moveAbsolute(MOTOR_LEFT,  0);
+        stepper1.wait(MOTOR_RIGHT);
+        stepper1.wait(MOTOR_LEFT);
+        Serial.println(stepper1.getPosition(MOTOR_RIGHT));
+        Serial.println(stepper1.getPosition(MOTOR_LEFT));
 
-        // Free motors shafts
-        stepper1.stop(MOTOR_1, HARD_HIZ);
-        stepper1.stop(MOTOR_2, HARD_HIZ);
-
-        // stop playing...
+        stepper1.stop(MOTOR_RIGHT, HARD_HIZ);
+        stepper1.stop(MOTOR_LEFT,  HARD_HIZ);
         Serial.println(F("Animation ended."));
 
-        // stops leds blinking
-        vTaskSuspend(xHandle_LED_1);
-        vTaskSuspend(xHandle_LED_2);
-        // force LEDs off
-        core.digitalWrite(DOUT_3, LOW);
-        core.digitalWrite(DOUT_4, LOW);
+        changeBlinkingState(MOTOR_RIGHT, false);
+        changeBlinkingState(MOTOR_LEFT,  false);
 
         Serial.println(F("Setting button and limit switches ..."));
-        // Allow user switch to drive motors
-        core.attachInterrupt(DIN_1, switch_mode, CHANGE_MODE, NULL);
-        core.attachInterrupt(DIN_2, switch_mode, CHANGE_MODE, NULL);
-        
-        // attach sensors as limit switches
-        stepper1.attachLimitSwitch(MOTOR_1, DIN_1, ACTIVE_HIGH);
-        stepper1.attachLimitSwitch(MOTOR_1, DIN_2, ACTIVE_HIGH);
-        stepper1.attachLimitSwitch(MOTOR_2, DIN_3, ACTIVE_HIGH);
-        stepper1.attachLimitSwitch(MOTOR_2, DIN_4, ACTIVE_HIGH);
+        core.attachInterrupt(DIN_1, handleSwitchEvent, CHANGE_MODE, NULL);
+        core.attachInterrupt(DIN_2, handleSwitchEvent, CHANGE_MODE, NULL);
+
+        // Trigger once to initialize the loop state
+        handleSwitchEvent(NULL);
 
         Serial.println(F("--------------------------------------"));
         Serial.println(F("You can now use switch to move motors."));
-
     }
 
     void loop()
     {
-        if (switchevent == true)
+        if (switchEvent == true)
         {
-            // reset event generated by switch interrupt
-            switchevent = false;
-            
-            //Switch on pushed on "left" side
-            if (core.digitalRead(DIN_1) == 1 && core.digitalRead(DIN_2) == 0)
-            {
-                mode = 1;
-                stepper1.run(MOTOR_1, motor1_dir, 100);
-                stepper1.stop(MOTOR_2);
-                vTaskResume(xHandle_LED_1);
-                core.digitalWrite(DOUT_4, LOW);
-                Serial.println(F("MOTOR_1 position :"));
-                Serial.println(stepper1.getPosition(MOTOR_1));
-                Serial.println(F("MOTOR_2 position :"));
-                Serial.println(stepper1.getPosition(MOTOR_2));        
-                // reverse direction of the other motor, for fun
-                motor2_dir = reverse_motdir(motor2_dir);
+            switchEvent = false;
+            bool leftButtonState  = core.digitalRead(LEFT_BUTTON);
+            bool rightButtonState = core.digitalRead(RIGHT_BUTTON);
 
-            }
-            //Switch on pushed on "left" side
-            else if ((core.digitalRead(DIN_1) == 0 && core.digitalRead(DIN_2) == 1))
+            if (rightButtonState == HIGH && leftButtonState == LOW)
             {
-                mode = 2;
-                stepper1.stop(MOTOR_1);
-                stepper1.run(MOTOR_2, motor2_dir, 100);
-                vTaskResume(xHandle_LED_2);
-                core.digitalWrite(DOUT_3, LOW);
-                Serial.println(F("MOTOR_1 position :"));
-                Serial.println(stepper1.getPosition(MOTOR_1));
-                Serial.println(F("MOTOR_2 position :"));
-                Serial.println(stepper1.getPosition(MOTOR_2)); 
-                // reverse direction of the other motor, for fun
-                motor1_dir = reverse_motdir(motor1_dir);
+                stepper1.stop(MOTOR_LEFT, SOFT_HIZ);
+                stepper1.run(MOTOR_RIGHT, motor1Dir, 100);
+                changeBlinkingState(MOTOR_RIGHT, true);
+                changeBlinkingState(MOTOR_LEFT,  false);
+                Serial.println(stepper1.getPosition(MOTOR_RIGHT));
+                Serial.println(stepper1.getPosition(MOTOR_LEFT));
+                motor2Dir = reverseMotdir(motor2Dir);
             }
-            //Switch on the middle position (do nothing)
+            else if (rightButtonState == LOW && leftButtonState == HIGH)
+            {
+                stepper1.stop(MOTOR_RIGHT, SOFT_HIZ);
+                stepper1.run(MOTOR_LEFT, motor2Dir, 100);
+                changeBlinkingState(MOTOR_RIGHT, false);
+                changeBlinkingState(MOTOR_LEFT,  true);
+                Serial.println(stepper1.getPosition(MOTOR_RIGHT));
+                Serial.println(stepper1.getPosition(MOTOR_LEFT));
+                motor1Dir = reverseMotdir(motor1Dir);
+            }
             else
             {
-                mode = 0;
-                // force motors to stop
-                stepper1.stop(MOTOR_1, SOFT_STOP);
-                stepper1.stop(MOTOR_2, SOFT_HIZ);
-                
-                // stop task that blink leds
-                vTaskSuspend(xHandle_LED_1);
-                vTaskSuspend(xHandle_LED_2);
-                // force LEDs off
-                core.digitalWrite(DOUT_3, LOW);
-                core.digitalWrite(DOUT_4, LOW);
+                stepper1.stop(MOTOR_RIGHT, SOFT_HIZ);
+                stepper1.stop(MOTOR_LEFT,  SOFT_HIZ);
+                changeBlinkingState(MOTOR_RIGHT, false);
+                changeBlinkingState(MOTOR_LEFT,  false);
             }
-            Serial.print("mode : ");
-            Serial.println(mode);
         }
         delay(100);
     }
