@@ -41,7 +41,7 @@ What will you learn?
 The Demo Input/Output kit combines sensors and actuators to demonstrate the full range of analog
 and digital capabilities of the OI-Mixed module, supervised by an OI-Core master module.
 
-.. image:: ../_static/oidemo_io.png
+.. image:: ../_static/demo_kit_io_with_text.png
 
 Wiring diagrams
 ~~~~~~~~~~~~~~~
