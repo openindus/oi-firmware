@@ -47,6 +47,7 @@ set(COMPONENT_SRCS
     "api/Middleware/Motor/Stepper/MotorStepperCmdCLI.cpp"
     "api/Middleware/Motor/Dc/MotorDc.cpp"
     "api/Middleware/Motor/Dc/MotorDcCLI.cpp"
+    "api/Middleware/Motor/Dc/MotorDcPidCtrl.cpp"
     "api/Middleware/Motor/Dc/DcCmd.cpp"
     "api/Middleware/Motor/Dc/DcCmdHandler.cpp"
     "api/Middleware/Usb/UsbConsole.cpp"
