@@ -10,6 +10,7 @@
 
 #include "MotorDc.h"
 #include "pid_ctrl.h"
+#include "Encoder.h"
 
 /**
  * @class MotorDcPidCtrl
@@ -35,6 +36,21 @@ protected:
     static int init(std::vector<MotorDC_PinConfig_t> motorsConfig, gpio_num_t faultPin, const pid_ctrl_config_f_t *pidConfig = nullptr);
 
 public:
+    /**
+     * @brief Attach an encoder to a motor for position feedback
+     * 
+     * @param motor Motor number
+     * @param encoder Pointer to the Encoder instance
+     */
+    static void attachEncoder(MotorNum_t motor, Encoder* encoder);
+
+    /**
+     * @brief Detach the encoder from a motor
+     * 
+     * @param motor Motor number
+     */
+    static void detachEncoder(MotorNum_t motor);
+
     /**
      * @brief Run the motor to a target position using PID control
      * 
@@ -68,6 +84,15 @@ public:
     static void resetPosition(MotorNum_t motor);
 
 private:
+    /**
+     * @brief Update position feedback from encoder
+     * 
+     * @param motor Motor number
+     * @return float Updated position feedback
+     */
+    static float updatePositionFeedback(MotorNum_t motor);
+
+    static std::vector<Encoder*> _motorEncoders;
     static std::vector<pid_ctrl_block_handle_f_t> _pidBlocks;
     static std::vector<float> _positionSetpoints;
     static std::vector<float> _currentPositions;

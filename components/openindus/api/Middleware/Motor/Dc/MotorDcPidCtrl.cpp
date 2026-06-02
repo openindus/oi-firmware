@@ -14,6 +14,7 @@
 
 static const char* TAG = "MotorDcPidCtrl";
 
+std::vector<Encoder*> MotorDcPidCtrl::_motorEncoders;
 std::vector<pid_ctrl_block_handle_f_t> MotorDcPidCtrl::_pidBlocks;
 std::vector<float> MotorDcPidCtrl::_positionSetpoints;
 std::vector<float> MotorDcPidCtrl::_currentPositions;
@@ -35,6 +36,7 @@ int MotorDcPidCtrl::init(std::vector<MotorDC_PinConfig_t> motorsConfig, gpio_num
     _positionSetpoints.resize(motorsConfig.size(), 0.0f);
     _currentPositions.resize(motorsConfig.size(), 0.0f);
     _positionFeedbacks.resize(motorsConfig.size(), 0.0f);
+    _motorEncoders.resize(motorsConfig.size(), nullptr);
 
     for (size_t i = 0; i < motorsConfig.size(); i++) {
         // Create PID control block with provided configuration
@@ -73,6 +75,28 @@ int MotorDcPidCtrl::init(std::vector<MotorDC_PinConfig_t> motorsConfig, gpio_num
     return 0;
 }
 
+void MotorDcPidCtrl::attachEncoder(MotorNum_t motor, Encoder* encoder)
+{
+    if (motor >= _motorEncoders.size()) {
+        ESP_LOGE(TAG, "Invalid motor number: %d", motor);
+        return;
+    }
+
+    _motorEncoders[motor] = encoder;
+    ESP_LOGI(TAG, "Encoder attached to motor %d", motor);
+}
+
+void MotorDcPidCtrl::detachEncoder(MotorNum_t motor)
+{
+    if (motor >= _motorEncoders.size()) {
+        ESP_LOGE(TAG, "Invalid motor number: %d", motor);
+        return;
+    }
+
+    _motorEncoders[motor] = nullptr;
+    ESP_LOGI(TAG, "Encoder detached from motor %d", motor);
+}
+
 void MotorDcPidCtrl::runToPosition(MotorNum_t motor, MotorDirection_t direction, float positionSetpoint)
 {
     if (motor >= _pidBlocks.size()) {
@@ -80,6 +104,9 @@ void MotorDcPidCtrl::runToPosition(MotorNum_t motor, MotorDirection_t direction,
         return;
     }
 
+    // Update position feedback from encoder
+    updatePositionFeedback(motor);
+    
     // Set position setpoint for PID controller
     _positionSetpoints[motor] = positionSetpoint;
     
@@ -109,6 +136,12 @@ float MotorDcPidCtrl::getCurrentPosition(MotorNum_t motor)
         return 0.0f;
     }
 
+    // If an encoder is attached, use encoder feedback
+    Encoder* enc = _motorEncoders[motor];
+    if (enc != nullptr) {
+        _currentPositions[motor] = static_cast<float>(enc->getPulses());
+    }
+
     return _currentPositions[motor];
 }
 
@@ -121,6 +154,12 @@ void MotorDcPidCtrl::resetPosition(MotorNum_t motor)
 
     _currentPositions[motor] = 0.0f;
     _positionFeedbacks[motor] = 0.0f;
+    
+    // Reset encoder if attached
+    Encoder* enc = _motorEncoders[motor];
+    if (enc != nullptr) {
+        enc->reset();
+    }
     
     // Reset PID integral term
     pid_reset_ctrl_block(_pidBlocks[motor]);
@@ -137,4 +176,21 @@ void MotorDcPidCtrl::setCurrentPosition(MotorNum_t motor, float position)
 
     _currentPositions[motor] = position;
     ESP_LOGD(TAG, "Current position set for motor %d: %.1f", motor, position);
+}
+
+float MotorDcPidCtrl::updatePositionFeedback(MotorNum_t motor)
+{
+    if (motor >= _motorEncoders.size()) {
+        ESP_LOGE(TAG, "Invalid motor number: %d", motor);
+        return 0.0f;
+    }
+
+    Encoder* enc = _motorEncoders[motor];
+    if (enc != nullptr) {
+        // Update position feedback from encoder pulses
+        _positionFeedbacks[motor] = static_cast<float>(enc->getPulses());
+        return _positionFeedbacks[motor];
+    }
+
+    return _positionFeedbacks[motor];
 }
