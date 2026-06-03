@@ -50,6 +50,8 @@ set(COMPONENT_SRCS
     "api/Middleware/Motor/Dc/MotorDcPidCtrl.cpp"
     "api/Middleware/Motor/Dc/MotorDcCmd.cpp"
     "api/Middleware/Motor/Dc/MotorDcCmdHandler.cpp"
+    "api/Middleware/Motor/Dc/MotorDcPidCtrlCmd.cpp"
+    "api/Middleware/Motor/Dc/MotorDcPidCtrlCmdHandler.cpp"
     "api/Middleware/Usb/UsbConsole.cpp"
     "api/Middleware/Usb/UsbSerial.cpp"
     "api/Middleware/FlashLoader/FlashLoader.cpp"
@@ -202,6 +204,7 @@ set(COMPONENT_REQUIRES
     "efuse"
     "driver"
     "esp_timer"
+    "pid_ctrl"
 )
 
 idf_component_register(
