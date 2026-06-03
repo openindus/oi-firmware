@@ -70,8 +70,59 @@ This example demonstrates basic motor control operations:
 .. note::
   The duty cycle parameter in the `run()` function represents the percentage of maximum speed. A value of 100% corresponds to full speed, while 0% effectively stops the motor (though using `stop()` is preferred for this purpose).
 
+PID Position Control
+--------------------
+
+The OI-Dc module supports closed-loop position control using a quadrature encoder and a PID controller.
+This feature allows you to command a motor to move to an absolute target position (in encoder pulses) and hold it.
+
+**How it works:**
+
+1. Connect a quadrature encoder to two digital inputs (e.g., DIN_1 and DIN_2).
+2. The encoder is automatically attached during module initialization.
+3. Use ``moveTo()`` to command the motor to a target position.
+4. The PID controller continuously adjusts the motor speed to minimize the position error.
+5. Use ``stop()`` to immediately brake the motor and disable position control.
+
+.. note::
+  PID parameters (Kp, Ki, Kd, output limits, integral limits) can be tuned at runtime using ``setPidParams()``.
+
+**Wiring example:**
+
+.. code-block:: none
+
+    OI-DC Module — PID Position Control
+    =====================================
+
+    Power Supply (24V)
+         +
+         |
+    +----|-------------------------+
+    |  9V-30V                     |
+    |   VIN        OI-DC          |
+    |                             |
+    |   HB1_1 ─── Motor A         |
+    |   HB1_2 ─── Motor B         |
+    |                             |
+    |   DIN_1 ─── Encoder A       |
+    |   DIN_2 ─── Encoder B       |
+    |                             |
+    |   GND                       |
+    +----|-------------------------+
+         |
+         -
+        GND
+
+The example code below demonstrates closed-loop PID position control:
+
+.. literalinclude:: ../../examples/DcMotorPidCtrl.cpp
+    :language: cpp
+
 Software API
 ------------
 
 .. doxygenclass:: MotorDc
+   :members:
+
+.. doxygenclass:: MotorDcPidCtrl
    :members:
