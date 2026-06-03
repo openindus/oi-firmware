@@ -33,7 +33,7 @@
 class Dc : 
     public Module, 
     public DigitalInputs, 
-    public MotorDc
+    public MotorDcPidCtrl
 {
 public:
 
