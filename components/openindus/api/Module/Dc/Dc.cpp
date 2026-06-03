@@ -51,7 +51,7 @@ int Dc::init(void)
 
 #if defined(CONFIG_MODULE_SLAVE)
     err |= DigitalInputsCmdHandler::init();
-    err |= DcCmdHandler::init();
+    err |= MotorDcCmdHandler::init();
 #endif
 
     err |= DigitalInputsCLI::init();

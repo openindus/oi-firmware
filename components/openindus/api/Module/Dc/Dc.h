@@ -24,8 +24,8 @@
 #include "DigitalInputsCmd.h"
 #include "DigitalInputsCmdHandler.h"
 #include "MotorDc.h"
-#include "DcCmdHandler.h"
-#include "DcCmd.h"
+#include "MotorDcCmdHandler.h"
+#include "MotorDcCmd.h"
 #include "DigitalInputsCLI.h"
 
 #if defined(CONFIG_OI_DC)
@@ -45,14 +45,14 @@ public:
 class Dc : 
     public ModuleControl, 
     public DigitalInputsCmd, 
-    public DcCmd
+    public MotorDcCmd
 {
 public:
 
     Dc(uint32_t sn = 0) : 
         ModuleControl(TYPE_OI_DC, sn),
         DigitalInputsCmd(this),
-        DcCmd(this) {}
+        MotorDcCmd(this) {}
 };
 #endif
 
