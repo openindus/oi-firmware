@@ -18,6 +18,8 @@ int MotorDcPidCtrlCmdHandler::init(void)
 {
     int err = 0;
 
+    err |= MotorDcCmdHandler::init();
+
     Slave::addCallback(CALLBACK_MOTOR_DC_PID_MOVE_TO, [](std::vector<uint8_t>& data) {
         MotorNum_t motor     = static_cast<MotorNum_t>(data[1]);
         float*     position  = reinterpret_cast<float*>(&data[2]);

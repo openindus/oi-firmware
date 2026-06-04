@@ -8,12 +8,13 @@
 
 #pragma once
 
+#include "MotorDcCmdHandler.h"
 #include "Slave.h"
 #include "MotorDcPidCtrl.h"
 
 #if defined(CONFIG_MODULE_SLAVE)
 
-class MotorDcPidCtrlCmdHandler
+class MotorDcPidCtrlCmdHandler : public MotorDcCmdHandler
 {
 public:
     /**

@@ -12,6 +12,7 @@
 
 #if defined(CONFIG_MODULE_MASTER)
 
+#include "MotorDcCmd.h"
 #include "Slave.h"
 #include "Master.h"
 #include "ModuleControl.h"
@@ -20,7 +21,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
 
-class MotorDcPidCtrlCmd
+class MotorDcPidCtrlCmd : public MotorDcCmd
 {
 public:
     /**
@@ -29,10 +30,7 @@ public:
      */
     MotorDcPidCtrlCmd(ModuleControl* module);
 
-    ~MotorDcPidCtrlCmd() {
-        if (_positionEvent) vQueueDelete(_positionEvent);
-        if (_positionCallbackRegistered) Master::removeEventCallback(EVENT_MOTOR_DC_PID_POSITION, _module->getId());
-    }
+    ~MotorDcPidCtrlCmd() = default;
 
     /**
      * @brief Start closed-loop position control toward an absolute target.

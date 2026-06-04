@@ -17,7 +17,8 @@
 static const char* TAG = "MotorDcPidCtrlCmd";
 
 MotorDcPidCtrlCmd::MotorDcPidCtrlCmd(ModuleControl* module)
-    : _module(module)
+    : MotorDcCmd(module)
+    , _module(module)
     , _positionEvent(nullptr)
     , _positionCallbackRegistered(false)
 {
