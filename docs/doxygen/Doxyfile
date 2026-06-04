@@ -29,6 +29,7 @@ INPUT += ./../components/openindus/api/Middleware/Digital/Inputs/DigitalInputsIn
 INPUT += ./../components/openindus/api/Middleware/Digital/Outputs/DigitalOutputsInterface.h
 INPUT += ./../components/openindus/api/Middleware/Motor/Stepper/MotorStepper.h
 INPUT += ./../components/openindus/api/Middleware/Motor/Dc/MotorDc.h
+INPUT += ./../components/openindus/api/Middleware/Motor/Dc/MotorDcPidCtrl.h
 INPUT += ./../components/openindus/api/Middleware/Encoder/Encoder.h
 INPUT += ./../components/openindus/api/Middleware/Analog/InputsLS/AnalogInputsLS.h
 INPUT += ./../components/openindus/api/Middleware/Analog/InputsLS/AnalogInputsLS.cpp
