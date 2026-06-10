@@ -11,9 +11,19 @@
 #include "MotorDc.h"
 #include "pid_ctrl.h"
 #include "Encoder.h"
+#include "DigitalInputs.h"
 #include <vector>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "freertos/semphr.h"
+
+/**
+ * @brief Homing strategy types
+ *
+ */
+enum class HomingType_t : uint8_t {
+    SENSOR_STOP = 0, /*!< Run until sensor triggers, then brake and reset encoder */
+};
 
 /**
  * @class MotorDcPidCtrl
@@ -61,6 +71,21 @@ public:
      * @param params Pointer to the new PID parameter structure
      */
     static void setPidParams(MotorNum_t motor, const pid_ctrl_parameter_f_t* params);
+
+    /**
+     * @brief Perform a homing sequence: run the motor until a sensor triggers,
+     *        then brake and reset the encoder position to zero.
+     *        The encoder must be attached beforehand via attachEncoder().
+     * @param type        Homing strategy (only SENSOR_STOP supported)
+     * @param dinNum      DIN connected to the homing sensor
+     * @param motor       Motor number to drive during homing
+     * @param dutyCycle   Motor duty cycle during homing (0–100 %)
+     * @param invertLogic When false (default): HIGH sensor → FORWARD, LOW → REVERSE.
+     *                    When true: HIGH sensor → REVERSE, LOW → FORWARD.
+     * @param timeoutMs   Maximum time allowed for homing before timeout (ms, default 30000)
+     */
+    static void homing(HomingType_t type, DIn_Num_t dinNum, MotorNum_t motor,
+        float dutyCycle, bool invertLogic = false, uint32_t timeoutMs = 30000);
 
 protected:
     /**
