@@ -20,27 +20,27 @@ public:
     {
         Slave::addCallback(CALLBACK_DIGITAL_READ, [](std::vector<uint8_t> &data) {
             DigitalInputs digitalInputs;
-            int level = digitalInputs.digitalRead((DIn_Num_t)data[1]);
+            int level = digitalInputs.digitalRead((DinNum_t)data[1]);
             data.push_back(static_cast<uint8_t>(level));
         });
 
         Slave::addCallback(CALLBACK_ATTACH_INTERRUPT, [](std::vector<uint8_t> &data) {
             DigitalInputs digitalInputs;
-            digitalInputs.attachInterrupt((DIn_Num_t)data[1], _isrCallback[data[1]],
+            digitalInputs.attachInterrupt((DinNum_t)data[1], _isrCallback[data[1]],
                                            (InterruptMode_t)data[2]);
             data.clear();
         });
 
         Slave::addCallback(CALLBACK_DETACH_INTERRUPT, [](std::vector<uint8_t> &data) {
             DigitalInputs digitalInputs;
-            digitalInputs.detachInterrupt((DIn_Num_t)data[1]);
+            digitalInputs.detachInterrupt((DinNum_t)data[1]);
             data.clear();
         });
 
         Slave::addResetCallback([]() {
             DigitalInputs digitalInputs;
             for (int i = 0; i < DIN_MAX; ++i) {
-                digitalInputs.detachInterrupt((DIn_Num_t)i);
+                digitalInputs.detachInterrupt((DinNum_t)i);
             }
         });
 

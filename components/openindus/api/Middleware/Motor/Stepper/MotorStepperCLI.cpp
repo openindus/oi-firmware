@@ -32,7 +32,7 @@ static int attachLimitSwitch(int argc, char **argv)
     }
 
     MotorNum_t motor = (MotorNum_t)(attachLimitSwitchArgs.motor->ival[0] - 1);
-    DIn_Num_t din = (DIn_Num_t)(attachLimitSwitchArgs.din->ival[0] - 1);
+    DinNum_t din = (DinNum_t)(attachLimitSwitchArgs.din->ival[0] - 1);
 
     if (attachLimitSwitchArgs.logic->count > 0) {
         Logic_t logic = (Logic_t)(attachLimitSwitchArgs.logic->ival[0]);
@@ -80,7 +80,7 @@ static int detachLimitSwitch(int argc, char **argv)
     }
 
     MotorNum_t motor = (MotorNum_t)(detachLimitSwitchArgs.motor->ival[0] - 1);
-    DIn_Num_t din = (DIn_Num_t)(detachLimitSwitchArgs.din->ival[0] - 1);
+    DinNum_t din = (DinNum_t)(detachLimitSwitchArgs.din->ival[0] - 1);
 
     MotorStepper::detachLimitSwitch(motor, din);
 

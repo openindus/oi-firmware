@@ -77,7 +77,7 @@ int DigitalInputs::init(const gpio_num_t *gpio, int nb)
     return err;
 }
 
-int DigitalInputs::digitalRead(DIn_Num_t num)
+int DigitalInputs::digitalRead(DinNum_t num)
 {
     int ret = 0;
     if (num < _nb) {
@@ -93,7 +93,7 @@ int DigitalInputs::digitalRead(DIn_Num_t num)
     return ret;
 }
 
-void DigitalInputs::attachInterrupt(DIn_Num_t num, IsrCallback_t callback, InterruptMode_t mode, void* arg)
+void DigitalInputs::attachInterrupt(DinNum_t num, IsrCallback_t callback, InterruptMode_t mode, void* arg)
 {
     if (num < _nb) {
         if (_callbacks[num] != NULL) {
@@ -117,7 +117,7 @@ void DigitalInputs::attachInterrupt(DIn_Num_t num, IsrCallback_t callback, Inter
     }
 }
 
-void DigitalInputs::detachInterrupt(DIn_Num_t num)
+void DigitalInputs::detachInterrupt(DinNum_t num)
 {
     if (num < _nb) {
         _callbacks[num] = NULL;
@@ -142,7 +142,7 @@ void IRAM_ATTR DigitalInputs::_isr(void* pvParameters)
 
 void DigitalInputs::_task(void* pvParameters)
 {
-    DIn_Num_t din;
+    DinNum_t din;
 
     while(1) {
         if(xQueueReceive(_event, &din, portMAX_DELAY)) {

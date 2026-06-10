@@ -22,7 +22,7 @@
 class Encoder
 {
 public:
-    Encoder(int index, std::map<DIn_Num_t, gpio_num_t> dinGpioMap): 
+    Encoder(int index, std::map<DinNum_t, gpio_num_t> dinGpioMap): 
         _ppr(0), 
         _revolutionCnt(0),
         _index(index), 
@@ -40,7 +40,7 @@ public:
      * @param ppr Pulse per revolution
      * @return int
      */
-    int begin(DIn_Num_t A, DIn_Num_t B, int16_t ppr);
+    int begin(DinNum_t A, DinNum_t B, int16_t ppr);
 
     /**
      * @brief Encoder end
@@ -88,7 +88,7 @@ private:
     int _index;
     float _speed;
 
-    std::map<DIn_Num_t, gpio_num_t> _dinGpioMap;
+    std::map<DinNum_t, gpio_num_t> _dinGpioMap;
     pcnt_unit_handle_t _pcntUnit;
 
     /* PCNT ISR handler */

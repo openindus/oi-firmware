@@ -30,7 +30,7 @@ typedef enum {
     DIN_10,
 #endif
     DIN_MAX
-} DIn_Num_t;
+} DinNum_t;
 
 /**
  * @brief Digital Inputs Logic
@@ -74,7 +74,7 @@ public:
      * @param num DIN to monitor.
      * @return Value of the DIN input (1 or 0).
      */
-    virtual int digitalRead(DIn_Num_t num) = 0;
+    virtual int digitalRead(DinNum_t num) = 0;
 
     /**
      * @brief Attach a user callback to the DIN interrupts.
@@ -84,12 +84,12 @@ public:
      * @param mode Interrupt mode (RISING, FALLING or CHANGE)
      * @param arg argument for the handler
      */
-    virtual void attachInterrupt(DIn_Num_t num, IsrCallback_t callback, InterruptMode_t mode, void *arg = NULL) = 0;
+    virtual void attachInterrupt(DinNum_t num, IsrCallback_t callback, InterruptMode_t mode, void *arg = NULL) = 0;
 
     /**
      * @brief Detach interrupt of a given DIN.
      *
      * @param num DIN to detach interrupt.
      */
-    virtual void detachInterrupt(DIn_Num_t num) = 0;
+    virtual void detachInterrupt(DinNum_t num) = 0;
 };

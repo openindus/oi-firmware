@@ -10,31 +10,31 @@
 
 #if defined(CONFIG_MODULE_MASTER)
 
-DOut_Num_t doutNumTable[DOUT_MAX] = {DOUT_1, DOUT_2, DOUT_3, DOUT_4, 
+DoutNum_t doutNumTable[DOUT_MAX] = {DOUT_1, DOUT_2, DOUT_3, DOUT_4, 
 #if !defined(CONFIG_OI_CORE) and !defined(CONFIG_OI_CORE_LITE)
                                      DOUT_5, DOUT_6, DOUT_7, DOUT_8
 #endif
                                     };
 
-void DigitalOutputsCmd::digitalWrite(DOut_Num_t num, bool level)
+void DigitalOutputsCmd::digitalWrite(DoutNum_t num, bool level)
 {
     std::vector<uint8_t> msgBytes = {CALLBACK_DIGITAL_WRITE, (uint8_t)num, (uint8_t)level};
     _module->runCallback(msgBytes);
 }
 
-void DigitalOutputsCmd::toggleOutput(DOut_Num_t num)
+void DigitalOutputsCmd::toggleOutput(DoutNum_t num)
 {
     std::vector<uint8_t> msgBytes = {CALLBACK_TOGGLE_OUTPUT, (uint8_t)num};
     _module->runCallback(msgBytes);
 }
 
-void DigitalOutputsCmd::outputMode(DOut_Num_t num, DOut_Mode_t mode)
+void DigitalOutputsCmd::outputMode(DoutNum_t num, DoutMode_t mode)
 {
     std::vector<uint8_t> msgBytes = {CALLBACK_OUTPUT_MODE, (uint8_t)num, (uint8_t)mode};
     _module->runCallback(msgBytes);
 }
 
-void DigitalOutputsCmd::setPWMFrequency(DOut_Num_t num, uint32_t freq)
+void DigitalOutputsCmd::setPWMFrequency(DoutNum_t num, uint32_t freq)
 {
     std::vector<uint8_t> msgBytes = {CALLBACK_SET_PWM_FREQUENCY, (uint8_t)num};
     uint8_t *ptr                  = reinterpret_cast<uint8_t *>(&freq);
@@ -42,7 +42,7 @@ void DigitalOutputsCmd::setPWMFrequency(DOut_Num_t num, uint32_t freq)
     _module->runCallback(msgBytes);
 }
 
-void DigitalOutputsCmd::setPWMDutyCycle(DOut_Num_t num, float duty)
+void DigitalOutputsCmd::setPWMDutyCycle(DoutNum_t num, float duty)
 {
     std::vector<uint8_t> msgBytes = {CALLBACK_SET_PWM_DUTY_CYCLE, (uint8_t)num};
     uint8_t *ptr                  = reinterpret_cast<uint8_t *>(&duty);
@@ -50,7 +50,7 @@ void DigitalOutputsCmd::setPWMDutyCycle(DOut_Num_t num, float duty)
     _module->runCallback(msgBytes);
 }
 
-float DigitalOutputsCmd::getOutputCurrent(DOut_Num_t num)
+float DigitalOutputsCmd::getOutputCurrent(DoutNum_t num)
 {
     std::vector<uint8_t> msgBytes = {CALLBACK_GET_OUTPUT_CURRENT, (uint8_t)num};
     _module->runCallback(msgBytes);
@@ -58,7 +58,7 @@ float DigitalOutputsCmd::getOutputCurrent(DOut_Num_t num)
     return *current;
 }
 
-int DigitalOutputsCmd::outputIsOvercurrent(DOut_Num_t num)
+int DigitalOutputsCmd::outputIsOvercurrent(DoutNum_t num)
 {
     std::vector<uint8_t> msgBytes = {CALLBACK_OUTPUT_IS_OVERCURRENT, (uint8_t)num};
     _module->runCallback(msgBytes);

@@ -26,7 +26,7 @@ public:
     
     ~EncoderCmd() {}
 
-    int begin(DIn_Num_t A, DIn_Num_t B, int16_t ppr);
+    int begin(DinNum_t A, DinNum_t B, int16_t ppr);
     void end(void);
 
     void reset(void);

@@ -10,17 +10,17 @@
 
 #if defined(CONFIG_MODULE_MASTER)
 
-DIn_Num_t dinNumTable[DIN_MAX] = {DIN_1, DIN_2, DIN_3, DIN_4, DIN_5,
+DinNum_t dinNumTable[DIN_MAX] = {DIN_1, DIN_2, DIN_3, DIN_4, DIN_5,
                                   DIN_6, DIN_7, DIN_8, DIN_9, DIN_10};
 
-int DigitalInputsCmd::digitalRead(DIn_Num_t num)
+int DigitalInputsCmd::digitalRead(DinNum_t num)
 {
     std::vector<uint8_t> msgBytes = {CALLBACK_DIGITAL_READ, (uint8_t)num};
     _module->runCallback(msgBytes);
     return static_cast<int>(msgBytes[2]);
 }
 
-void DigitalInputsCmd::attachInterrupt(DIn_Num_t num, IsrCallback_t callback, InterruptMode_t mode, void *arg)
+void DigitalInputsCmd::attachInterrupt(DinNum_t num, IsrCallback_t callback, InterruptMode_t mode, void *arg)
 {
     std::vector<uint8_t> msgBytes = {CALLBACK_ATTACH_INTERRUPT, (uint8_t)num, (uint8_t)mode};
     _isrCallback[num]             = callback;
@@ -30,7 +30,7 @@ void DigitalInputsCmd::attachInterrupt(DIn_Num_t num, IsrCallback_t callback, In
     _module->runCallback(msgBytes);
 }
 
-void DigitalInputsCmd::detachInterrupt(DIn_Num_t num)
+void DigitalInputsCmd::detachInterrupt(DinNum_t num)
 {
     std::vector<uint8_t> msgBytes = {CALLBACK_DETACH_INTERRUPT, (uint8_t)num};
     _module->runCallback(msgBytes);

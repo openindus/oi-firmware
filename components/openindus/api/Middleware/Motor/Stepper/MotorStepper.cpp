@@ -16,7 +16,7 @@
 static const char TAG[] = "MotorStepper";
 
 static float _homingSpeed[MOTOR_MAX];
-static std::vector<std::pair<DIn_Num_t, Logic_t>> _limitSwitchDigitalInput[MOTOR_MAX]; 
+static std::vector<std::pair<DinNum_t, Logic_t>> _limitSwitchDigitalInput[MOTOR_MAX]; 
 static MotorNum_t _motorNums[MOTOR_MAX] = {MOTOR_1, MOTOR_2};
 static QueueHandle_t _busyEvent[MOTOR_MAX];
 static SemaphoreHandle_t _homingSemaphore[MOTOR_MAX];
@@ -104,11 +104,11 @@ int MotorStepper::configProtections(adc_oneshot_unit_handle_t adcHandle)
     return 0;
 }
 
-void MotorStepper::attachLimitSwitch(MotorNum_t motor, DIn_Num_t din, Logic_t logic)
+void MotorStepper::attachLimitSwitch(MotorNum_t motor, DinNum_t din, Logic_t logic)
 {   
     /* Remove sensor if it was already added to the list */
     auto it = std::find_if( _limitSwitchDigitalInput[motor].begin(), _limitSwitchDigitalInput[motor].end(),
-        [&din](const std::pair<DIn_Num_t, Logic_t>& element){ return element.first == din;} );
+        [&din](const std::pair<DinNum_t, Logic_t>& element){ return element.first == din;} );
 
     if(it != _limitSwitchDigitalInput[motor].end()) _limitSwitchDigitalInput[motor].erase(it);
 
@@ -125,11 +125,11 @@ void MotorStepper::attachLimitSwitch(MotorNum_t motor, DIn_Num_t din, Logic_t lo
     }
 }
 
-void MotorStepper::detachLimitSwitch(MotorNum_t motor, DIn_Num_t din) 
+void MotorStepper::detachLimitSwitch(MotorNum_t motor, DinNum_t din) 
 {
     /* Find the element in the vector */
     auto it = std::find_if( _limitSwitchDigitalInput[motor].begin(), _limitSwitchDigitalInput[motor].end(),
-        [&din](const std::pair<DIn_Num_t, Logic_t>& element){ return element.first == din;} );
+        [&din](const std::pair<DinNum_t, Logic_t>& element){ return element.first == din;} );
 
     /* Remove the element if found */
     if(it != _limitSwitchDigitalInput[motor].end()) _limitSwitchDigitalInput[motor].erase(it);
@@ -387,7 +387,7 @@ static void _homingTask(void* arg)
         vTaskDelete(NULL);
     }
 
-    DIn_Num_t din = _limitSwitchDigitalInput[motor].front().first;
+    DinNum_t din = _limitSwitchDigitalInput[motor].front().first;
     Logic_t logic = _limitSwitchDigitalInput[motor].front().second;
     uint32_t stepPerTick = PS01_Speed_Steps_s_to_RegVal(_homingSpeed[motor]);
 

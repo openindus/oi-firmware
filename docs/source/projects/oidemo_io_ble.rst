@@ -200,16 +200,16 @@ Key constants and pin assignments:
 .. code-block:: cpp
 
     // Input pins
-    const DIn_Num_t BUTTON_PIN = DIN_1;
-    const DIn_Num_t INDUCTIVE_SENSOR_PIN = DIN_2;
+    const DinNum_t BUTTON_PIN = DIN_1;
+    const DinNum_t INDUCTIVE_SENSOR_PIN = DIN_2;
     const AnalogInput_Num_t POTENTIOMETER_PIN = AIN_1;
     const AnalogInput_Num_t PROXIMITY_SENSOR_PIN = AIN_2;
 
     // Output pins
-    const DOut_Num_t RED_LED_PIN = DOUT_1;
-    const DOut_Num_t GREEN_LED_PIN = DOUT_2;
-    const DOut_Num_t BLUE_LED_PIN = DOUT_3;
-    const DOut_Num_t WHITE_LED_PIN = DOUT_4;
+    const DoutNum_t RED_LED_PIN = DOUT_1;
+    const DoutNum_t GREEN_LED_PIN = DOUT_2;
+    const DoutNum_t BLUE_LED_PIN = DOUT_3;
+    const DoutNum_t WHITE_LED_PIN = DOUT_4;
 
 The ``display_mode`` variable is managed internally by ``inouts.cpp`` with a software debounce
 mechanism (same approach as in the basic tutorial). It is exposed through ``get_display_mode()``

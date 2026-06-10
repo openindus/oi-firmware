@@ -19,31 +19,31 @@ public:
     static int init(void) {
         Slave::addCallback(CALLBACK_DIGITAL_WRITE, [](std::vector<uint8_t> &data) {
             DigitalOutputs digitalOutputs;
-            digitalOutputs.digitalWrite((DOut_Num_t)data[1], (bool)data[2]);
+            digitalOutputs.digitalWrite((DoutNum_t)data[1], (bool)data[2]);
             data.clear();
         });
     
         Slave::addCallback(CALLBACK_TOGGLE_OUTPUT, [](std::vector<uint8_t> &data) {
             DigitalOutputs digitalOutputs;
-            digitalOutputs.toggleOutput((DOut_Num_t)data[1]);
+            digitalOutputs.toggleOutput((DoutNum_t)data[1]);
             data.clear();
         });
     
         Slave::addCallback(CALLBACK_OUTPUT_MODE, [](std::vector<uint8_t> &data) {
             DigitalOutputs digitalOutputs;
-            digitalOutputs.outputMode((DOut_Num_t)data[1], (DOut_Mode_t)data[2]);
+            digitalOutputs.outputMode((DoutNum_t)data[1], (DoutMode_t)data[2]);
             data.clear();
         });
     
         Slave::addCallback(CALLBACK_SET_PWM_FREQUENCY, [](std::vector<uint8_t> &data) {
             DigitalOutputs digitalOutputs;
             uint32_t *freq = reinterpret_cast<uint32_t *>(&data[2]);
-            digitalOutputs.setPWMFrequency((DOut_Num_t)data[1], *freq);
+            digitalOutputs.setPWMFrequency((DoutNum_t)data[1], *freq);
             data.clear();
         });
     
         Slave::addCallback(CALLBACK_SET_PWM_DUTY_CYCLE, [](std::vector<uint8_t> &data) {
-            DOut_Num_t num = (DOut_Num_t)data[1];
+            DoutNum_t num = (DoutNum_t)data[1];
             float *duty    = reinterpret_cast<float *>(&data[2]);
             DigitalOutputs digitalOutputs;
             digitalOutputs.setPWMDutyCycle(num, *duty);
@@ -52,7 +52,7 @@ public:
     
         Slave::addCallback(CALLBACK_GET_OUTPUT_CURRENT, [](std::vector<uint8_t> &data) {
             DigitalOutputs digitalOutputs;
-            float current = digitalOutputs.getOutputCurrent((DOut_Num_t)data[1]);
+            float current = digitalOutputs.getOutputCurrent((DoutNum_t)data[1]);
             uint8_t *ptr  = reinterpret_cast<uint8_t *>(&current);
             data.insert(data.end(), ptr, ptr + sizeof(float));
         });
@@ -78,14 +78,14 @@ public:
         });
 
         Slave::addEventCallback(EVENT_CALLBACK_DIGITAL_WRITE, [](std::vector<uint8_t> &args) {
-            DOut_Num_t num = (DOut_Num_t)args[0];
+            DoutNum_t num = (DoutNum_t)args[0];
             bool level = (bool)args[1];
             DigitalOutputs digitalOutputs;
             digitalOutputs.digitalWrite(num, level);
         });
 
         Slave::addEventCallback(EVENT_CALLBACK_TOGGLE_OUTPUT, [](std::vector<uint8_t> &args) {
-            DOut_Num_t num = (DOut_Num_t)args[0];
+            DoutNum_t num = (DoutNum_t)args[0];
             DigitalOutputs digitalOutputs;
             digitalOutputs.toggleOutput(num);
         });

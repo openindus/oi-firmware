@@ -186,7 +186,7 @@ struct HomingCtx_t {
     SemaphoreHandle_t sem;
 };
 
-void MotorDcPidCtrl::homing(HomingType_t type, DIn_Num_t dinNum, MotorNum_t motor,
+void MotorDcPidCtrl::homing(HomingType_t type, DinNum_t dinNum, MotorNum_t motor,
     float dutyCycle, bool invertLogic, uint32_t timeoutMs)
 {
     if ((size_t)motor >= _motorEncoders.size() || _motorEncoders[motor] == nullptr) {
