@@ -19,9 +19,8 @@
 
 /**
  * @brief Homing strategy types
- *
  */
-enum class HomingType_t : uint8_t {
+enum class HomingType_e : uint8_t {
     SENSOR_STOP = 0, // Run until sensor triggers, then brake and reset encoder
 };
 
@@ -84,7 +83,7 @@ public:
      *                    When true: HIGH sensor → REVERSE, LOW → FORWARD.
      * @param timeoutMs   Maximum time allowed for homing before timeout (ms, default 30000)
      */
-    static void homing(HomingType_t type, DinNum_t dinNum, MotorNum_t motor,
+    static void homing(HomingType_e type, DinNum_t dinNum, MotorNum_t motor,
         float dutyCycle, bool invertLogic = false, uint32_t timeoutMs = 30000);
 
 protected:
@@ -95,7 +94,7 @@ protected:
      * @param pidConfig    Initial PID configuration (optional; defaults to Kp=1, Ki=0, Kd=0)
      * @return int 0 on success, non-zero on error
      */
-    static int init(std::vector<MotorDC_PinConfig_t> motorsConfig,
+    static int init(std::vector<MotorDcPinConfig_t> motorsConfig,
         gpio_num_t faultPin, const pid_ctrl_config_f_t *pidConfig = nullptr);
 
 private:

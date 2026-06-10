@@ -26,7 +26,7 @@ std::vector<float>                      MotorDcPidCtrl::_targetPositions;
 std::vector<bool>                       MotorDcPidCtrl::_controlActive;
 TaskHandle_t                            MotorDcPidCtrl::_pidTask = nullptr;
 
-int MotorDcPidCtrl::init(std::vector<MotorDC_PinConfig_t> motorsConfig,
+int MotorDcPidCtrl::init(std::vector<MotorDcPinConfig_t> motorsConfig,
     gpio_num_t faultPin, const pid_ctrl_config_f_t *pidConfig)
 {
     int err = MotorDc::init(motorsConfig, faultPin);
@@ -186,7 +186,7 @@ struct HomingCtx_t {
     SemaphoreHandle_t sem;
 };
 
-void MotorDcPidCtrl::homing(HomingType_t type, DinNum_t dinNum, MotorNum_t motor,
+void MotorDcPidCtrl::homing(HomingType_e type, DinNum_t dinNum, MotorNum_t motor,
     float dutyCycle, bool invertLogic, uint32_t timeoutMs)
 {
     if ((size_t)motor >= _motorEncoders.size() || _motorEncoders[motor] == nullptr) {

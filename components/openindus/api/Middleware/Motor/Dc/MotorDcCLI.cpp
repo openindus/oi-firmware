@@ -13,7 +13,6 @@
 #include "argtable3/argtable3.h"
 
 /** 'run' */
-
 static struct {
     struct arg_int *motor;
     struct arg_int *dir;

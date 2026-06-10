@@ -1,15 +1,8 @@
 /**
- * Copyright (C) OpenIndus, Inc - All Rights Reserved
- *
- * This file is part of OpenIndus Library.
- *
- * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential
- * 
- * @file DcPinout.h
- * @brief Callbacks for stepper module
- *
- * For more information on OpenIndus:
+ * @file DcConfig.h
+ * @brief DC Motor configuration
+ * @author OpenIndus Team
+ * @copyright (c) [2025] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
 
@@ -17,7 +10,7 @@
 
 #if defined(CONFIG_OI_DC)
 
-/* DIN */   
+/* DIN GPIOs pins */   
 #define DC_GPIO_PIN_DIN_1           GPIO_NUM_7
 #define DC_GPIO_PIN_DIN_2           GPIO_NUM_8
 #define DC_GPIO_PIN_DIN_3           GPIO_NUM_6

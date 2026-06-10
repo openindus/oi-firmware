@@ -1,15 +1,8 @@
 /**
- * Copyright (C) OpenIndus, Inc - All Rights Reserved
- *
- * This file is part of OpenIndus Library.
- *
- * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential
- * 
  * @file Dc.cpp
- * @brief Callbacks for dc module
- *
- * For more information on OpenIndus:
+ * @brief DC Motor Module
+ * @author OpenIndus Team
+ * @copyright (c) [2025] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
 
@@ -55,7 +48,7 @@ int Dc::init(void)
     err |= DigitalInputs::init(dinGpio, sizeof(dinGpio)/sizeof(dinGpio[0]));
 
     /* DC motor */
-    std::vector<MotorDC_PinConfig_t> motorsConfig;
+    std::vector<MotorDcPinConfig_t> motorsConfig;
     motorsConfig.push_back({DC_MOTOR1_IN1, LEDC_CHANNEL_0, DC_MOTOR1_IN2, LEDC_CHANNEL_1, DC_MOTOR1_DISABLE});
     motorsConfig.push_back({DC_MOTOR2_IN1, LEDC_CHANNEL_2, DC_MOTOR2_IN2, LEDC_CHANNEL_3, DC_MOTOR2_DISABLE});
     motorsConfig.push_back({DC_MOTOR3_IN1, LEDC_CHANNEL_4, DC_MOTOR3_IN2, LEDC_CHANNEL_5, DC_MOTOR3_DISABLE});

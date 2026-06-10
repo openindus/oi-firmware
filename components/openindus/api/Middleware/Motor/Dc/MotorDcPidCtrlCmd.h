@@ -69,7 +69,7 @@ public:
      * @param invertLogic Invert sensor logic (default false)
      * @param timeoutMs   Maximum time allowed for homing (ms, default 30000)
      */
-    void homing(HomingType_t type, DinNum_t dinNum, MotorNum_t motor,
+    void homing(HomingType_e type, DinNum_t dinNum, MotorNum_t motor,
         float dutyCycle, bool invertLogic = false, uint32_t timeoutMs = 30000);
 
 private:

@@ -1,18 +1,10 @@
 /**
- * Copyright (C) OpenIndus, Inc - All Rights Reserved
- *
- * This file is part of OpenIndus Library.
- *
- * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential
- * 
  * @file MotorDcCmdHandler.h
- * 
- * For more information on OpenIndus:
+ * @brief MotorDcCmdHandler class definition
+ * @author OpenIndus Team
+ * @copyright (c) [2025] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
- * 
- * @copyright Copyright (c) 2024
-**/
+ */
 
 #pragma once
 
@@ -24,7 +16,7 @@
 class MotorDcCmdHandler
 {
 public:
-    static int init();
+    static int init(void);
 };
 
 #endif

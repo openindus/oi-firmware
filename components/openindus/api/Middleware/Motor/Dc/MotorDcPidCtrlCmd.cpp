@@ -27,7 +27,7 @@ MotorDcPidCtrlCmd::MotorDcPidCtrlCmd(ModuleControl* module)
 
 void MotorDcPidCtrlCmd::moveTo(MotorNum_t motor, float position)
 {
-    std::vector<uint8_t> msgBytes = {CALLBACK_MOTOR_DC_PID_MOVE_TO, (uint8_t)motor};
+    std::vector<uint8_t> msgBytes = {CALLBACK_MOTOR_DC_PID_CTRL_MOVE_TO, (uint8_t)motor};
     uint8_t* ptr = reinterpret_cast<uint8_t*>(&position);
     msgBytes.insert(msgBytes.end(), ptr, ptr + sizeof(float));
     _module->runCallback(msgBytes);
@@ -35,7 +35,7 @@ void MotorDcPidCtrlCmd::moveTo(MotorNum_t motor, float position)
 
 void MotorDcPidCtrlCmd::stop(MotorNum_t motor)
 {
-    std::vector<uint8_t> msgBytes = {CALLBACK_MOTOR_DC_PID_STOP, (uint8_t)motor};
+    std::vector<uint8_t> msgBytes = {CALLBACK_MOTOR_DC_PID_CTRL_STOP, (uint8_t)motor};
     _module->runCallback(msgBytes);
 }
 
@@ -48,7 +48,7 @@ float MotorDcPidCtrlCmd::getPosition(MotorNum_t motor)
         _positionCallbackRegistered = true;
     }
 
-    std::vector<uint8_t> msgBytes = {CALLBACK_MOTOR_DC_PID_GET_POSITION, (uint8_t)motor};
+    std::vector<uint8_t> msgBytes = {CALLBACK_MOTOR_DC_PID_CTRL_GET_POSITION, (uint8_t)motor};
     _module->runCallback(msgBytes, false);
 
     uint8_t* data = nullptr;
@@ -64,17 +64,17 @@ float MotorDcPidCtrlCmd::getPosition(MotorNum_t motor)
 
 void MotorDcPidCtrlCmd::setPidParams(MotorNum_t motor, const pid_ctrl_parameter_f_t* params)
 {
-    std::vector<uint8_t> msgBytes = {CALLBACK_MOTOR_DC_PID_SET_PARAMS, (uint8_t)motor};
+    std::vector<uint8_t> msgBytes = {CALLBACK_MOTOR_DC_PID_CTRL_SET_PARAMS, (uint8_t)motor};
     const uint8_t* ptr = reinterpret_cast<const uint8_t*>(params);
     msgBytes.insert(msgBytes.end(), ptr, ptr + sizeof(pid_ctrl_parameter_f_t));
     _module->runCallback(msgBytes);
 }
 
-void MotorDcPidCtrlCmd::homing(HomingType_t type, DinNum_t dinNum, MotorNum_t motor,
+void MotorDcPidCtrlCmd::homing(HomingType_e type, DinNum_t dinNum, MotorNum_t motor,
     float dutyCycle, bool invertLogic, uint32_t timeoutMs)
 {
     std::vector<uint8_t> msgBytes = {
-        CALLBACK_MOTOR_DC_PID_HOMING,
+        CALLBACK_MOTOR_DC_PID_CTRL_HOMING,
         (uint8_t)type,
         (uint8_t)dinNum,
         (uint8_t)motor
