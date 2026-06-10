@@ -50,7 +50,12 @@ public:
     Dc(uint32_t sn = 0) : 
         ModuleControl(TYPE_OI_DC, sn),
         DigitalInputsCmd(this),
-        MotorDcPidCtrlCmd(this) {}
+        MotorDcPidCtrlCmd(this)
+    {
+        for (int i = 0; i < DC_ENCODER_MAX; i++) {
+            encoder[i] = new EncoderCmd(this, i);
+        }
+    }
     
     EncoderCmd *encoder[DC_ENCODER_MAX];
 };

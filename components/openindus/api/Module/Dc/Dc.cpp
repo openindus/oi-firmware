@@ -62,7 +62,7 @@ int Dc::init(void)
 
 #if defined(CONFIG_MODULE_SLAVE)
     err |= DigitalInputsCmdHandler::init();
-    err |= MotorDcPidCtrlCmdHandler::init();
+    err |= MotorDcPidCtrlCmdHandler::init(encoder);
     err |= EncoderCmdHandler::init(encoder);
 #endif
 

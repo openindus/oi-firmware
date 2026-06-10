@@ -29,6 +29,8 @@ public:
     int begin(DinNum_t A, DinNum_t B, int16_t ppr);
     void end(void);
 
+    int getIndex(void) const { return _instance; }
+
     void reset(void);
     int getRevolutions(void);
     int getPulses(void);

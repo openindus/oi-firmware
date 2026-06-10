@@ -25,6 +25,18 @@ MotorDcPidCtrlCmd::MotorDcPidCtrlCmd(ModuleControl* module)
     _positionEvent = xQueueCreate(1, sizeof(uint8_t*));
 }
 
+void MotorDcPidCtrlCmd::attachEncoder(MotorNum_t motor, EncoderCmd* encoder)
+{
+    std::vector<uint8_t> msgBytes = {CALLBACK_MOTOR_DC_PID_CTRL_ATTACH_ENCODER, (uint8_t)motor, (uint8_t)encoder->getIndex()};
+    _module->runCallback(msgBytes);
+}
+
+void MotorDcPidCtrlCmd::detachEncoder(MotorNum_t motor)
+{
+    std::vector<uint8_t> msgBytes = {CALLBACK_MOTOR_DC_PID_CTRL_DETACH_ENCODER, (uint8_t)motor};
+    _module->runCallback(msgBytes);
+}
+
 void MotorDcPidCtrlCmd::moveTo(MotorNum_t motor, float position)
 {
     std::vector<uint8_t> msgBytes = {CALLBACK_MOTOR_DC_PID_CTRL_MOVE_TO, (uint8_t)motor};

@@ -14,11 +14,32 @@
 
 static const char* TAG = "MotorDcPidCtrlCmdHandler";
 
-int MotorDcPidCtrlCmdHandler::init(void)
+Encoder** MotorDcPidCtrlCmdHandler::_encoders = nullptr;
+
+int MotorDcPidCtrlCmdHandler::init(Encoder** encoders)
 {
     int err = 0;
 
     err |= MotorDcCmdHandler::init();
+
+    _encoders = encoders;
+
+    Slave::addCallback(CALLBACK_MOTOR_DC_PID_CTRL_ATTACH_ENCODER, [](std::vector<uint8_t>& data) {
+        MotorNum_t motor        = static_cast<MotorNum_t>(data[1]);
+        uint8_t    encoderIndex = data[2];
+        if (_encoders != nullptr) {
+            MotorDcPidCtrl::attachEncoder(motor, _encoders[encoderIndex]);
+        } else {
+            ESP_LOGE(TAG, "No encoder array registered");
+        }
+        data.clear();
+    });
+
+    Slave::addCallback(CALLBACK_MOTOR_DC_PID_CTRL_DETACH_ENCODER, [](std::vector<uint8_t>& data) {
+        MotorNum_t motor = static_cast<MotorNum_t>(data[1]);
+        MotorDcPidCtrl::detachEncoder(motor);
+        data.clear();
+    });
 
     Slave::addCallback(CALLBACK_MOTOR_DC_PID_CTRL_MOVE_TO, [](std::vector<uint8_t>& data) {
         MotorNum_t motor     = static_cast<MotorNum_t>(data[1]);

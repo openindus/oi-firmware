@@ -82,6 +82,12 @@ public:
      */
     float getSpeed(void);
 
+    /**
+     * @brief Get the encoder instance index
+     * @return int Encoder index
+     */
+    int getIndex(void) const { return _index; }
+
 private:
     int16_t _ppr;
     int _revolutionCnt;
