@@ -1,32 +1,27 @@
 /**
  * @file Dc.h
  * @brief DC Motor Module
- * @author OpenIndus Team
- * @copyright (c) [2025] OpenIndus, Inc. All rights reserved.
+ * @author Kévin Lefeuvre (kevin.lefeuvre@openindus.com)
+ * @copyright (c) [2026] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
 
 #pragma once
 
 #include "Common.h"
-#include "DcConfig.h"
-#include "Module.h"
-#include "Slave.h"
-#include "ModuleControl.h"
-#include "DigitalInputs.h"
-#include "DigitalInputsCmd.h"
-#include "DigitalInputsCmdHandler.h"
-#include "MotorDc.h"
-#include "MotorDcPidCtrlCmdHandler.h"
-#include "MotorDcPidCtrlCmd.h"
-#include "DigitalInputsCLI.h"
-#include "Encoder.h"
-#include "EncoderCmd.h"
-#include "EncoderCmdHandler.h"
 
 #define DC_ENCODER_MAX 2
 
 #if defined(CONFIG_OI_DC)
+
+#include "Module.h"
+#include "Slave.h"
+#include "DigitalInputs.h"
+#include "MotorDc.h"
+#include "Encoder.h"
+#include "DigitalInputsCmdHandler.h"
+#include "MotorDcPidCtrlCmdHandler.h"
+#include "EncoderCmdHandler.h"
 
 class Dc : 
     public Module, 
@@ -40,6 +35,11 @@ public:
 };
 
 #elif defined(CONFIG_MODULE_MASTER)
+
+#include "ModuleControl.h"
+#include "DigitalInputsCmd.h"
+#include "MotorDcPidCtrlCmd.h"
+#include "EncoderCmd.h"
 
 class Dc : 
     public ModuleControl, 

@@ -1,14 +1,17 @@
 /**
  * @file Dc.cpp
  * @brief DC Motor Module
- * @author OpenIndus Team
- * @copyright (c) [2025] OpenIndus, Inc. All rights reserved.
+ * @author Kévin Lefeuvre (kevin.lefeuvre@openindus.com)
+ * @copyright (c) [2026] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
 
 #include "Dc.h"
 
 #if defined(CONFIG_OI_DC)
+
+#include "DcConfig.h"
+#include "DigitalInputsCLI.h"
 
 static const char TAG[] = "Dc";
 
@@ -40,7 +43,7 @@ int Dc::init(void)
 {
     int err = 0;
 
-    ESP_LOGI(TAG, "Dc init.");
+    ESP_LOGI(TAG, "Dc Module initialization");
 
     err |= Module::init(TYPE_OI_DC);
 

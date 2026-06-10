@@ -1,8 +1,8 @@
 /**
  * @file DcConfig.h
  * @brief DC Motor configuration
- * @author OpenIndus Team
- * @copyright (c) [2025] OpenIndus, Inc. All rights reserved.
+ * @author Kévin Lefeuvre (kevin.lefeuvre@openindus.com)
+ * @copyright (c) [2026] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
 
