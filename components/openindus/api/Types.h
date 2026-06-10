@@ -121,6 +121,12 @@ enum Callback_e {
     CALLBACK_MOTOR_DC_GET_FAULT             = 0xA4,
     CALLBACK_MOTOR_DC_CLEAR_FAULT           = 0xA5,
 
+    /* DC MOTOR PID */
+    CALLBACK_MOTOR_DC_PID_MOVE_TO           = 0xA6,
+    CALLBACK_MOTOR_DC_PID_STOP              = 0xA7,
+    CALLBACK_MOTOR_DC_PID_GET_POSITION      = 0xA8,
+    CALLBACK_MOTOR_DC_PID_SET_PARAMS        = 0xA9,
+
     /* SENSOR */
     CALLBACK_ADD_SENSOR                     = 0xB0,
     CALLBACK_SENSOR_SET_PARAMETER           = 0xB1,
@@ -144,6 +150,7 @@ enum Event_e {
     EVENT_MOTOR_READY                       = 0x01,
     EVENT_MOTOR_FLAG_INTERRUPT              = 0x02,
     EVENT_MOTOR_DC_CURRENT                  = 0x03,
+    EVENT_MOTOR_DC_PID_POSITION             = 0x04,
 
     /* SENSOR */
     EVENT_SENSOR_VALUE                      = 0xB0,

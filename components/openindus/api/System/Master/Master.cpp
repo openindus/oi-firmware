@@ -257,11 +257,13 @@ int Master::runCallback(const uint16_t slaveId, std::vector<uint8_t> &msgBytes, 
     xSemaphoreTake(_callbackMutex, portMAX_DELAY);
     BusRS::write(&frame, pdMS_TO_TICKS(100));
     if (ackNeeded) {
+        msgBytes.resize(1024);
+        frame.data = msgBytes.data();
         err = BusRS::read(&frame, pdMS_TO_TICKS(100));
         if (err < 0) {
             goto error;
         } else {
-            msgBytes.assign(frame.data, frame.data + frame.length);
+            msgBytes.resize(frame.length);
             goto success;
         }
     }

@@ -1,6 +1,7 @@
 .oi
 .vscode
 .clangd
+.github
 build
 sdkconfig
 sdkconfig.old

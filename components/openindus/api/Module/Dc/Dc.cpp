@@ -19,7 +19,7 @@
 
 static const char TAG[] = "Dc";
 
-const gpio_num_t _dinGpio[] = {
+const gpio_num_t dinGpio[] = {
     DC_GPIO_PIN_DIN_1,
     DC_GPIO_PIN_DIN_2,
     DC_GPIO_PIN_DIN_3,
@@ -30,6 +30,19 @@ const gpio_num_t _dinGpio[] = {
     DC_GPIO_PIN_DIN_8
 };
 
+static const std::map<DIn_Num_t, gpio_num_t> dinGpioMap = {
+    {DIN_1, DC_GPIO_PIN_DIN_1},
+    {DIN_2, DC_GPIO_PIN_DIN_2},
+    {DIN_3, DC_GPIO_PIN_DIN_3},
+    {DIN_4, DC_GPIO_PIN_DIN_4},
+    {DIN_5, DC_GPIO_PIN_DIN_5},
+    {DIN_6, DC_GPIO_PIN_DIN_6},
+    {DIN_7, DC_GPIO_PIN_DIN_7},
+    {DIN_8, DC_GPIO_PIN_DIN_8}
+};
+
+Encoder *Dc::encoder[DC_ENCODER_MAX] = {nullptr};
+
 int Dc::init(void)
 {
     int err = 0;
@@ -39,19 +52,25 @@ int Dc::init(void)
     err |= Module::init(TYPE_OI_DC);
 
     /* Digital inputs */
-    err |= DigitalInputs::init(_dinGpio, sizeof(_dinGpio)/sizeof(_dinGpio[0]));
+    err |= DigitalInputs::init(dinGpio, sizeof(dinGpio)/sizeof(dinGpio[0]));
 
-    /* Stepper motor */
+    /* DC motor */
     std::vector<MotorDC_PinConfig_t> motorsConfig;
     motorsConfig.push_back({DC_MOTOR1_IN1, LEDC_CHANNEL_0, DC_MOTOR1_IN2, LEDC_CHANNEL_1, DC_MOTOR1_DISABLE});
     motorsConfig.push_back({DC_MOTOR2_IN1, LEDC_CHANNEL_2, DC_MOTOR2_IN2, LEDC_CHANNEL_3, DC_MOTOR2_DISABLE});
     motorsConfig.push_back({DC_MOTOR3_IN1, LEDC_CHANNEL_4, DC_MOTOR3_IN2, LEDC_CHANNEL_5, DC_MOTOR3_DISABLE});
     motorsConfig.push_back({DC_MOTOR4_IN1, LEDC_CHANNEL_6, DC_MOTOR4_IN2, LEDC_CHANNEL_7, DC_MOTOR4_DISABLE});
-    err |= MotorDc::init(motorsConfig, DC_MOTOR_FAULT);
+    err |= MotorDcPidCtrl::init(motorsConfig, DC_MOTOR_FAULT);
+
+    /* Encoder */
+    for (int i = 0; i < DC_ENCODER_MAX; i++) {
+        encoder[i] = new Encoder(i, dinGpioMap);
+    }
 
 #if defined(CONFIG_MODULE_SLAVE)
     err |= DigitalInputsCmdHandler::init();
-    err |= DcCmdHandler::init();
+    err |= MotorDcPidCtrlCmdHandler::init();
+    err |= EncoderCmdHandler::init(encoder);
 #endif
 
     err |= DigitalInputsCLI::init();

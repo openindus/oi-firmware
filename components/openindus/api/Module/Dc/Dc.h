@@ -24,20 +24,26 @@
 #include "DigitalInputsCmd.h"
 #include "DigitalInputsCmdHandler.h"
 #include "MotorDc.h"
-#include "DcCmdHandler.h"
-#include "DcCmd.h"
+#include "MotorDcPidCtrlCmdHandler.h"
+#include "MotorDcPidCtrlCmd.h"
 #include "DigitalInputsCLI.h"
+#include "Encoder.h"
+#include "EncoderCmd.h"
+#include "EncoderCmdHandler.h"
+
+#define DC_ENCODER_MAX 2
 
 #if defined(CONFIG_OI_DC)
 
 class Dc : 
     public Module, 
     public DigitalInputs, 
-    public MotorDc
+    public MotorDcPidCtrl
 {
 public:
-
     static int init(void);
+
+    static Encoder *encoder[DC_ENCODER_MAX];
 };
 
 #elif defined(CONFIG_MODULE_MASTER)
@@ -45,14 +51,15 @@ public:
 class Dc : 
     public ModuleControl, 
     public DigitalInputsCmd, 
-    public DcCmd
+    public MotorDcPidCtrlCmd
 {
 public:
-
     Dc(uint32_t sn = 0) : 
         ModuleControl(TYPE_OI_DC, sn),
         DigitalInputsCmd(this),
-        DcCmd(this) {}
+        MotorDcPidCtrlCmd(this) {}
+    
+    EncoderCmd *encoder[DC_ENCODER_MAX];
 };
 #endif
 
