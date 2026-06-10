@@ -126,6 +126,7 @@ enum Callback_e {
     CALLBACK_MOTOR_DC_PID_STOP              = 0xA7,
     CALLBACK_MOTOR_DC_PID_GET_POSITION      = 0xA8,
     CALLBACK_MOTOR_DC_PID_SET_PARAMS        = 0xA9,
+    CALLBACK_MOTOR_DC_PID_HOMING            = 0xAA,
 
     /* SENSOR */
     CALLBACK_ADD_SENSOR                     = 0xB0,

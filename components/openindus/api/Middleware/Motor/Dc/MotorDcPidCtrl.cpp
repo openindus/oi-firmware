@@ -16,8 +16,8 @@
 
 static const char* TAG = "MotorDcPidCtrl";
 
-#define PID_TASK_PERIOD_MS  10      /*!< Control loop period in ms (100 Hz) */
-#define PID_DEAD_BAND       1.0f    /*!< Duty cycle threshold below which the motor brakes (%) */
+#define PID_TASK_PERIOD_MS  10      // Control loop period in ms (100 Hz)
+#define PID_DEAD_BAND       1.0f    // Duty cycle threshold below which the motor brakes (%)
 
 /* Static member definitions */
 std::vector<Encoder*>                   MotorDcPidCtrl::_motorEncoders;

@@ -22,7 +22,7 @@
  *
  */
 enum class HomingType_t : uint8_t {
-    SENSOR_STOP = 0, /*!< Run until sensor triggers, then brake and reset encoder */
+    SENSOR_STOP = 0, // Run until sensor triggers, then brake and reset encoder
 };
 
 /**

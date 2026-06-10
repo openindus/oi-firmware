@@ -13,6 +13,7 @@
 #if defined(CONFIG_MODULE_MASTER)
 
 #include "MotorDcCmd.h"
+#include "MotorDcPidCtrl.h"
 #include "Slave.h"
 #include "Master.h"
 #include "ModuleControl.h"
@@ -58,6 +59,18 @@ public:
      * @param params Pointer to the new PID parameter structure
      */
     void setPidParams(MotorNum_t motor, const pid_ctrl_parameter_f_t* params);
+
+    /**
+     * @brief Perform a homing sequence on the remote module.
+     * @param type        Homing strategy (only SENSOR_STOP supported)
+     * @param dinNum      DIN connected to the homing sensor
+     * @param motor       Motor number to drive during homing
+     * @param dutyCycle   Motor duty cycle during homing (0–100 %)
+     * @param invertLogic Invert sensor logic (default false)
+     * @param timeoutMs   Maximum time allowed for homing (ms, default 30000)
+     */
+    void homing(HomingType_t type, DinNum_t dinNum, MotorNum_t motor,
+        float dutyCycle, bool invertLogic = false, uint32_t timeoutMs = 30000);
 
 private:
     ModuleControl* _module;

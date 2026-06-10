@@ -49,6 +49,17 @@ int MotorDcPidCtrlCmdHandler::init(void)
         data.clear();
     });
 
+    Slave::addCallback(CALLBACK_MOTOR_DC_PID_HOMING, [](std::vector<uint8_t>& data) {
+        HomingType_t type        = static_cast<HomingType_t>(data[1]);
+        DinNum_t     dinNum      = static_cast<DinNum_t>(data[2]);
+        MotorNum_t   motor       = static_cast<MotorNum_t>(data[3]);
+        float*       dutyCycle   = reinterpret_cast<float*>(&data[4]);
+        bool         invertLogic = (bool)data[8];
+        uint32_t*    timeoutMs   = reinterpret_cast<uint32_t*>(&data[9]);
+        MotorDcPidCtrl::homing(type, dinNum, motor, *dutyCycle, invertLogic, *timeoutMs);
+        data.clear();
+    });
+
     return err;
 }
 

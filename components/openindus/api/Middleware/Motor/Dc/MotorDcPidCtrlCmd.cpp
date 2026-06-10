@@ -70,4 +70,21 @@ void MotorDcPidCtrlCmd::setPidParams(MotorNum_t motor, const pid_ctrl_parameter_
     _module->runCallback(msgBytes);
 }
 
+void MotorDcPidCtrlCmd::homing(HomingType_t type, DinNum_t dinNum, MotorNum_t motor,
+    float dutyCycle, bool invertLogic, uint32_t timeoutMs)
+{
+    std::vector<uint8_t> msgBytes = {
+        CALLBACK_MOTOR_DC_PID_HOMING,
+        (uint8_t)type,
+        (uint8_t)dinNum,
+        (uint8_t)motor
+    };
+    uint8_t* ptr = reinterpret_cast<uint8_t*>(&dutyCycle);
+    msgBytes.insert(msgBytes.end(), ptr, ptr + sizeof(float));
+    msgBytes.push_back((uint8_t)invertLogic);
+    ptr = reinterpret_cast<uint8_t*>(&timeoutMs);
+    msgBytes.insert(msgBytes.end(), ptr, ptr + sizeof(uint32_t));
+    _module->runCallback(msgBytes);
+}
+
 #endif
