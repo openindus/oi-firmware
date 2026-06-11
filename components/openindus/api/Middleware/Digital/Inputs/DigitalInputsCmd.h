@@ -24,9 +24,9 @@ public:
     DigitalInputsCmd(uint16_t id) : _module(new ModuleControl(id)), _isrCallback{NULL} {}
     ~DigitalInputsCmd() { delete _module; }
 
-    int digitalRead(DIn_Num_t num) override;
-    void attachInterrupt(DIn_Num_t num, IsrCallback_t callback, InterruptMode_t mode, void *arg = NULL) override;
-    void detachInterrupt(DIn_Num_t num) override;
+    int digitalRead(DinNum_t num) override;
+    void attachInterrupt(DinNum_t num, IsrCallback_t callback, InterruptMode_t mode, void *arg = NULL) override;
+    void detachInterrupt(DinNum_t num) override;
 
 private:
     ModuleControl *_module;

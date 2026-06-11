@@ -1,7 +1,7 @@
 /**
  * @file MotorDc.h
  * @brief MotorDc class definition
- * @author 
+ * @author OpenIndus Team
  * @copyright (c) [2025] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
@@ -24,7 +24,7 @@ typedef struct {
         ledc_channel_t channel; 
     } in2;
     gpio_num_t disable;
-} MotorDC_PinConfig_t;
+} MotorDcPinConfig_t;
 
 /**
  * @class MotorDc
@@ -33,7 +33,6 @@ typedef struct {
 class MotorDc : public Motor
 {
 public:
-
     /**
      * @brief Run a DC motor with specified direction and duty cycle
      * 
@@ -88,13 +87,13 @@ public:
     static esp_err_t setMode(drv8873_mode_t mode, MotorNum_t motor);
 
 protected:
-    static int init(std::vector<MotorDC_PinConfig_t> motorsConfig, gpio_num_t faultPin);
+    static int init(std::vector<MotorDcPinConfig_t> motorsConfig, gpio_num_t faultPin);
     static esp_err_t initADC(void);
     static esp_err_t initHBridge(void);
     static esp_err_t initSPI(void);
 
 private:
-    static std::vector<MotorDC_PinConfig_t> _motorsConfig;
+    static std::vector<MotorDcPinConfig_t> _motorsConfig;
     static gpio_num_t _faultPin;
     static std::vector<MotorDirection_t> _directions;
 

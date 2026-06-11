@@ -23,9 +23,9 @@ public:
     DigitalInputs() {}
     ~DigitalInputs() {}
 
-    int digitalRead(DIn_Num_t num) override;
-    void attachInterrupt(DIn_Num_t num, IsrCallback_t callback, InterruptMode_t mode, void *arg = NULL) override;
-    void detachInterrupt(DIn_Num_t num) override;
+    int digitalRead(DinNum_t num) override;
+    void attachInterrupt(DinNum_t num, IsrCallback_t callback, InterruptMode_t mode, void *arg = NULL) override;
+    void detachInterrupt(DinNum_t num) override;
 
 protected:
 #if defined(CONFIG_OI_CORE)

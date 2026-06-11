@@ -1,14 +1,8 @@
 /**
- * Copyright (C) OpenIndus, Inc - All Rights Reserved
- *
- * This file is part of OpenIndus Library.
- *
- * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential
- * 
  * @file MotorDcCmd.h
- * 
- * For more information on OpenIndus:
+ * @brief MotorDcCmd class definition
+ * @author OpenIndus Team
+ * @copyright (c) [2025] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
 
@@ -22,9 +16,7 @@
 
 class MotorDcCmd
 {
-
 public:
-
     MotorDcCmd(ModuleControl* module);
     ~MotorDcCmd() { 
         if (_currentEvent) vQueueDelete(_currentEvent);
@@ -80,11 +72,10 @@ public:
     esp_err_t clearFault(MotorNum_t motor);
 
 private:
-
     ModuleControl* _module;
     QueueHandle_t _currentEvent;
     bool _callbackRegistered;
-
+    
 };
 
 #endif

@@ -12,11 +12,12 @@
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "freertos/semphr.h"
 
 static const char* TAG = "MotorDcPidCtrl";
 
-#define PID_TASK_PERIOD_MS  10      /*!< Control loop period in ms (100 Hz) */
-#define PID_DEAD_BAND       1.0f    /*!< Duty cycle threshold below which the motor brakes (%) */
+#define PID_TASK_PERIOD_MS  10      // Control loop period in ms (100 Hz)
+#define PID_DEAD_BAND       1.0f    // Duty cycle threshold below which the motor brakes (%)
 
 /* Static member definitions */
 std::vector<Encoder*>                   MotorDcPidCtrl::_motorEncoders;
@@ -25,7 +26,7 @@ std::vector<float>                      MotorDcPidCtrl::_targetPositions;
 std::vector<bool>                       MotorDcPidCtrl::_controlActive;
 TaskHandle_t                            MotorDcPidCtrl::_pidTask = nullptr;
 
-int MotorDcPidCtrl::init(std::vector<MotorDC_PinConfig_t> motorsConfig,
+int MotorDcPidCtrl::init(std::vector<MotorDcPinConfig_t> motorsConfig,
     gpio_num_t faultPin, const pid_ctrl_config_f_t *pidConfig)
 {
     int err = MotorDc::init(motorsConfig, faultPin);
@@ -59,7 +60,7 @@ int MotorDcPidCtrl::init(std::vector<MotorDC_PinConfig_t> motorsConfig,
         esp_err_t ret = pid_new_control_block_f(cfg, &_pidHandles[i]);
         if (ret != ESP_OK) {
             ESP_LOGE(TAG, "Failed to create PID block for motor %d: %s",
-                     (int)i, esp_err_to_name(ret));
+                     (int)i+1, esp_err_to_name(ret));
             err = -1;
         }
     }
@@ -80,8 +81,13 @@ void MotorDcPidCtrl::_pidControlTask(void* arg)
             float currentPos = (float)_motorEncoders[i]->getPulses();
             float error      = _targetPositions[i] - currentPos;
 
+            // printf(">Target:%.1f\n>Current:%.1f\n>Error:%.1f\n",
+            //        _targetPositions[i], currentPos, error);
+
             float output = 0.0f;
             pid_compute_f(_pidHandles[i], error, &output);
+
+            // printf(">PID Output: %.1f\n", output);
 
             if (fabsf(output) < PID_DEAD_BAND) {
                 MotorDc::brake((MotorNum_t)i);
@@ -99,34 +105,34 @@ void MotorDcPidCtrl::_pidControlTask(void* arg)
 void MotorDcPidCtrl::attachEncoder(MotorNum_t motor, Encoder* encoder)
 {
     if ((size_t)motor >= _motorEncoders.size()) {
-        ESP_LOGE(TAG, "Invalid motor number: %d", motor);
+        ESP_LOGE(TAG, "Invalid motor number: %d", (int)motor+1);
         return;
     }
 
     _motorEncoders[motor] = encoder;
-    ESP_LOGI(TAG, "Encoder attached to motor %d", motor);
+    ESP_LOGI(TAG, "Encoder attached to motor %d", (int)motor+1);
 }
 
 void MotorDcPidCtrl::detachEncoder(MotorNum_t motor)
 {
     if ((size_t)motor >= _motorEncoders.size()) {
-        ESP_LOGE(TAG, "Invalid motor number: %d", motor);
+        ESP_LOGE(TAG, "Invalid motor number: %d", (int)motor+1);
         return;
     }
 
     _controlActive[motor] = false;
     _motorEncoders[motor] = nullptr;
-    ESP_LOGI(TAG, "Encoder detached from motor %d", motor);
+    ESP_LOGI(TAG, "Encoder detached from motor %d", (int)motor+1);
 }
 
 void MotorDcPidCtrl::moveTo(MotorNum_t motor, float position)
 {
     if ((size_t)motor >= _targetPositions.size()) {
-        ESP_LOGE(TAG, "Invalid motor number: %d", motor);
+        ESP_LOGE(TAG, "Invalid motor number: %d", (int)motor+1);
         return;
     }
     if (_motorEncoders[motor] == nullptr) {
-        ESP_LOGE(TAG, "No encoder attached to motor %d", motor);
+        ESP_LOGE(TAG, "No encoder attached to motor %d", (int)motor+1);
         return;
     }
 
@@ -134,26 +140,26 @@ void MotorDcPidCtrl::moveTo(MotorNum_t motor, float position)
     _targetPositions[motor] = position;
     _controlActive[motor]   = true;
 
-    ESP_LOGI(TAG, "Motor %d: moving to %.1f pulses", motor, position);
+    ESP_LOGI(TAG, "Motor %d: moving to %.1f pulses", (int)motor+1, position);
 }
 
 void MotorDcPidCtrl::stop(MotorNum_t motor)
 {
     if ((size_t)motor >= _controlActive.size()) {
-        ESP_LOGE(TAG, "Invalid motor number: %d", motor);
+        ESP_LOGE(TAG, "Invalid motor number: %d", (int)motor+1);
         return;
     }
 
     _controlActive[motor] = false;
     MotorDc::brake(motor);
 
-    ESP_LOGI(TAG, "Motor %d: position control stopped", motor);
+    ESP_LOGI(TAG, "Motor %d: position control stopped", (int)motor+1);
 }
 
 float MotorDcPidCtrl::getPosition(MotorNum_t motor)
 {
     if ((size_t)motor >= _motorEncoders.size() || _motorEncoders[motor] == nullptr) {
-        ESP_LOGE(TAG, "No encoder attached to motor %d", motor);
+        ESP_LOGE(TAG, "No encoder attached to motor %d", (int)motor+1);
         return 0.0f;
     }
 
@@ -163,14 +169,66 @@ float MotorDcPidCtrl::getPosition(MotorNum_t motor)
 void MotorDcPidCtrl::setPidParams(MotorNum_t motor, const pid_ctrl_parameter_f_t* params)
 {
     if ((size_t)motor >= _pidHandles.size() || _pidHandles[motor] == nullptr) {
-        ESP_LOGE(TAG, "PID not initialized for motor %d", motor);
+        ESP_LOGE(TAG, "PID not initialized for motor %d", (int)motor+1);
         return;
     }
 
     esp_err_t ret = pid_update_parameters_f(_pidHandles[motor], params);
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "Failed to update PID params for motor %d: %s",
-                 motor, esp_err_to_name(ret));
+                 (int)motor+1, esp_err_to_name(ret));
     }
+}
+
+struct HomingCtx_t {
+    MotorNum_t        motor;
+    Encoder*          encoder;
+    SemaphoreHandle_t sem;
+};
+
+void MotorDcPidCtrl::homing(HomingType_e type, DinNum_t dinNum, MotorNum_t motor,
+    float dutyCycle, bool invertLogic, uint32_t timeoutMs)
+{
+    if ((size_t)motor >= _motorEncoders.size() || _motorEncoders[motor] == nullptr) {
+        ESP_LOGE(TAG, "No encoder attached to motor %d — call attachEncoder() first", (int)motor+1);
+        return;
+    }
+
+    SemaphoreHandle_t homingDone = xSemaphoreCreateBinary();
+    if (homingDone == nullptr) {
+        ESP_LOGE(TAG, "Failed to create homing semaphore");
+        return;
+    }
+
+    HomingCtx_t* ctx = new HomingCtx_t{motor, _motorEncoders[motor], homingDone};
+
+    DigitalInputs* din = new DigitalInputs();
+    din->attachInterrupt(dinNum, [](void* arg) {
+        HomingCtx_t* c = static_cast<HomingCtx_t*>(arg);
+        MotorDc::brake(c->motor);
+        c->encoder->reset();
+        xSemaphoreGive(c->sem);
+    }, CHANGE_MODE, ctx);
+
+    int sensorState = din->digitalRead(dinNum);
+    MotorDirection_t dir = (!invertLogic) ?
+        ((sensorState == 1) ? FORWARD : REVERSE) :
+        ((sensorState == 1) ? REVERSE : FORWARD);
+
+    MotorDc::run(motor, dir, dutyCycle);
+
+    ESP_LOGI(TAG, "Homing motor %d on DIN %d (invertLogic=%d)",
+             (int)motor+1, (int)dinNum+1, (int)invertLogic);
+
+    if (xSemaphoreTake(homingDone, pdMS_TO_TICKS(timeoutMs)) != pdPASS) {
+        ESP_LOGW(TAG, "Homing timeout for motor %d", (int)motor+1);
+        MotorDc::brake(motor);
+    } else {
+        ESP_LOGI(TAG, "Homing complete for motor %d", (int)motor+1);
+    }
+
+    din->detachInterrupt(dinNum);
+    vSemaphoreDelete(homingDone);
+    delete ctx;
 }
 

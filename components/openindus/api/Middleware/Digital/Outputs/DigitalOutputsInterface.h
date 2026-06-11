@@ -24,7 +24,7 @@ typedef enum {
     DOUT_7,
     DOUT_8,
     DOUT_MAX
-} DOut_Num_t;
+} DoutNum_t;
 
 /**
  * @brief Digital Outputs Mode
@@ -33,7 +33,7 @@ typedef enum {
 typedef enum { 
     DOUT_MODE_DIGITAL = 0, 
     DOUT_MODE_PWM 
-} DOut_Mode_t;
+} DoutMode_t;
 
 /**
  * @brief Digital Outputs Interface class
@@ -50,14 +50,14 @@ public:
      * @param num DOUT to drive.
      * @param level DOUT level, HIGH or LOW.
      */
-    virtual void digitalWrite(DOut_Num_t num, bool level) = 0;
+    virtual void digitalWrite(DoutNum_t num, bool level) = 0;
 
     /**
      * @brief Toggle a digital output
      *
      * @param num DOUT to toggle
      */
-    virtual void toggleOutput(DOut_Num_t num) = 0;
+    virtual void toggleOutput(DoutNum_t num) = 0;
 
     /**
      * @brief Configure output mode
@@ -65,7 +65,7 @@ public:
      * @param num output number
      * @param mode output mode [DIGITAL, PWM]
      */
-    virtual void outputMode(DOut_Num_t num, DOut_Mode_t mode) = 0;
+    virtual void outputMode(DoutNum_t num, DoutMode_t mode) = 0;
 
     /**
      * @brief Set the frequency value of PWM for a digital output
@@ -73,7 +73,7 @@ public:
      * @param num DOUT to set
      * @param freq PWM frequency [50 - 1000 Hz]
      */
-    virtual void setPWMFrequency(DOut_Num_t num, uint32_t freq) = 0;
+    virtual void setPWMFrequency(DoutNum_t num, uint32_t freq) = 0;
 
     /**
      * @brief Set the duty cycle value of PWM for a digital output
@@ -81,7 +81,7 @@ public:
      * @param num DOUT to set
      * @param duty Duty cycle in percentage [0-100] 
      */
-    virtual void setPWMDutyCycle(DOut_Num_t num, float duty) = 0;
+    virtual void setPWMDutyCycle(DoutNum_t num, float duty) = 0;
 
     /**
      * @brief Get the current of a digital output
@@ -89,7 +89,7 @@ public:
      * @param num DOUT to get
      * @return current in Ampere
      */
-    virtual float getOutputCurrent(DOut_Num_t num) = 0;
+    virtual float getOutputCurrent(DoutNum_t num) = 0;
 
     /**
      * @brief Get the overcurrent status of a digital output
@@ -97,7 +97,7 @@ public:
      * @param num DOUT to get
      * @return 1 if overcurrent, 0 if not
      */
-    virtual int outputIsOvercurrent(DOut_Num_t num) = 0;
+    virtual int outputIsOvercurrent(DoutNum_t num) = 0;
 
     /**
      * @brief Set the Overcurrent Threshold

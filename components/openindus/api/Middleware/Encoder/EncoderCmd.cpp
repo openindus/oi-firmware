@@ -10,7 +10,7 @@
 
 #if defined(CONFIG_MODULE_MASTER)
 
-int EncoderCmd::begin(DIn_Num_t A, DIn_Num_t B, int16_t ppr)
+int EncoderCmd::begin(DinNum_t A, DinNum_t B, int16_t ppr)
 {
     std::vector<uint8_t> msgBytes = {CALLBACK_ENCODER_BEGIN, (uint8_t)_instance, (uint8_t)A,
                                      (uint8_t)B};

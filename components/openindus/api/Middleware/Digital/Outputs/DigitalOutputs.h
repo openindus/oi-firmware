@@ -25,13 +25,13 @@
 class DigitalOutputs : public DigitalOutputsInterface
 {
 public:
-    void digitalWrite(DOut_Num_t num, bool level) override;
-    void toggleOutput(DOut_Num_t num) override;
-    void outputMode(DOut_Num_t num, DOut_Mode_t mode) override;
-    void setPWMFrequency(DOut_Num_t num, uint32_t freq) override;
-    void setPWMDutyCycle(DOut_Num_t num, float duty) override;
-    float getOutputCurrent(DOut_Num_t num) override;
-    int outputIsOvercurrent(DOut_Num_t num) override;
+    void digitalWrite(DoutNum_t num, bool level) override;
+    void toggleOutput(DoutNum_t num) override;
+    void outputMode(DoutNum_t num, DoutMode_t mode) override;
+    void setPWMFrequency(DoutNum_t num, uint32_t freq) override;
+    void setPWMDutyCycle(DoutNum_t num, float duty) override;
+    float getOutputCurrent(DoutNum_t num) override;
+    int outputIsOvercurrent(DoutNum_t num) override;
 
     void setOvercurrentThreshold(float threshold, float thresholdSum = 8.0f) override {
         _overcurrentThreshold = threshold;
@@ -56,7 +56,7 @@ protected:
 
 private:
     static uint8_t _nb; // Number of DOUT
-    static DOut_Mode_t *_mode; // Mode of each output (digital or PWM)
+    static DoutMode_t *_mode; // Mode of each output (digital or PWM)
     static bool *_level; // Level of each DOUT (HIGH or LOW)
 
 #if defined(CONFIG_OI_CORE)
@@ -70,7 +70,7 @@ private:
     static adc_oneshot_unit_handle_t _adc1Handle;
     static adc_oneshot_unit_handle_t _adc2Handle;
     static adc_cali_handle_t *_adcCaliHandles; // Individual calibration handle for each channel
-    static float _adcReadCurrent(DOut_Num_t num);
+    static float _adcReadCurrent(DoutNum_t num);
 #endif
 
     /* Overcurrent threshold */

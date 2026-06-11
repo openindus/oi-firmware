@@ -13,6 +13,8 @@
 #if defined(CONFIG_MODULE_MASTER)
 
 #include "MotorDcCmd.h"
+#include "MotorDcPidCtrl.h"
+#include "EncoderCmd.h"
 #include "Slave.h"
 #include "Master.h"
 #include "ModuleControl.h"
@@ -31,6 +33,19 @@ public:
     MotorDcPidCtrlCmd(ModuleControl* module);
 
     ~MotorDcPidCtrlCmd() = default;
+
+    /**
+     * @brief Attach an encoder to a motor for position feedback.
+     * @param motor   Motor number
+     * @param encoder Pointer to an EncoderCmd instance
+     */
+    void attachEncoder(MotorNum_t motor, EncoderCmd* encoder);
+
+    /**
+     * @brief Detach the encoder from a motor and stop position control.
+     * @param motor Motor number
+     */
+    void detachEncoder(MotorNum_t motor);
 
     /**
      * @brief Start closed-loop position control toward an absolute target.
@@ -58,6 +73,18 @@ public:
      * @param params Pointer to the new PID parameter structure
      */
     void setPidParams(MotorNum_t motor, const pid_ctrl_parameter_f_t* params);
+
+    /**
+     * @brief Perform a homing sequence on the remote module.
+     * @param type        Homing strategy (only SENSOR_STOP supported)
+     * @param dinNum      DIN connected to the homing sensor
+     * @param motor       Motor number to drive during homing
+     * @param dutyCycle   Motor duty cycle during homing (0–100 %)
+     * @param invertLogic Invert sensor logic (default false)
+     * @param timeoutMs   Maximum time allowed for homing (ms, default 30000)
+     */
+    void homing(HomingType_e type, DinNum_t dinNum, MotorNum_t motor,
+        float dutyCycle, bool invertLogic = false, uint32_t timeoutMs = 30000);
 
 private:
     ModuleControl* _module;

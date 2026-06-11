@@ -13,7 +13,7 @@ static const char TAG[] = "Encoder";
 
 static int max_glitch_us = 1;
 
-int Encoder::begin(DIn_Num_t A, DIn_Num_t B, int16_t ppr)
+int Encoder::begin(DinNum_t A, DinNum_t B, int16_t ppr)
 {
     ESP_LOGI(TAG, "Encoder initialization");
 

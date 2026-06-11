@@ -213,22 +213,22 @@ This avoids duplicating the definitions across ``commands.cpp`` and ``ble.cpp``:
 .. code-block:: cpp
 
     // Output LEDs
-    const DOut_Num_t LEFT_LED_OUT  = DOUT_4;
-    const DOut_Num_t RIGHT_LED_OUT = DOUT_3;
+    const DoutNum_t LEFT_LED_OUT  = DOUT_4;
+    const DoutNum_t RIGHT_LED_OUT = DOUT_3;
 
     // Input buttons
-    const DIn_Num_t LEFT_BUTTON  = DIN_2;
-    const DIn_Num_t RIGHT_BUTTON = DIN_1;
+    const DinNum_t LEFT_BUTTON  = DIN_2;
+    const DinNum_t RIGHT_BUTTON = DIN_1;
 
     // Motor channels
     const MotorNum_t MOTOR_LEFT  = MOTOR_2;
     const MotorNum_t MOTOR_RIGHT = MOTOR_1;
 
     // Limit switches
-    const DIn_Num_t LEFT_MOTOR_HOME_SWITCH  = DIN_3;
-    const DIn_Num_t LEFT_MOTOR_END_SWITCH   = DIN_4;
-    const DIn_Num_t RIGHT_MOTOR_HOME_SWITCH = DIN_1;
-    const DIn_Num_t RIGHT_MOTOR_END_SWITCH  = DIN_2;
+    const DinNum_t LEFT_MOTOR_HOME_SWITCH  = DIN_3;
+    const DinNum_t LEFT_MOTOR_END_SWITCH   = DIN_4;
+    const DinNum_t RIGHT_MOTOR_HOME_SWITCH = DIN_1;
+    const DinNum_t RIGHT_MOTOR_END_SWITCH  = DIN_2;
 
     // Shared types used by both commands and BLE layers
     typedef struct MotorStatus {
