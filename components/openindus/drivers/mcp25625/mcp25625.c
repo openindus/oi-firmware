@@ -8,6 +8,7 @@
 
 #include "mcp25625.h"
 #include "OSAL.h"
+#include "driver/gpio.h"
 #include "driver/spi_master.h"
 #include "esp_err.h"
 #include "mcp25625_reg.h"
@@ -193,8 +194,7 @@ void mcp25625_can_task(void *args)
     uint8_t value = 0x00;
     while (1) {
         // Wait for interrupt
-        // Todo (mani)
-        delay(100);
+        ulTaskNotifyTake(0, portMAX_DELAY);
         if (reg_read(REG_CANINTF, &value) != ESP_OK) {
             LOGE(TAG, "Failed to read interrupt register");
             continue;
@@ -215,6 +215,29 @@ void mcp25625_can_task(void *args)
         }
     }
     vTaskDelete(NULL);
+}
+
+IRAM_ATTR void mcp25625_isr(void *args)
+{
+    (void)args;
+    xTaskNotifyGive(mcp25625_can_task_handle);
+}
+
+static esp_err_t mcp25625_init_isr(gpio_num_t intr)
+{
+    gpio_config_t gpio_interrupt_config = {.intr_type    = GPIO_INTR_NEGEDGE,
+                                           .mode         = GPIO_MODE_INPUT,
+                                           .pin_bit_mask = (1ULL << intr),
+                                           .pull_down_en = GPIO_PULLDOWN_DISABLE,
+                                           .pull_up_en   = GPIO_PULLUP_DISABLE};
+    esp_err_t err                       = gpio_config(&gpio_interrupt_config);
+    if (err != ESP_OK) {
+        LOGE(TAG, "Failed to init gpio config for interrupt: %d", err);
+        goto end;
+    }
+    err = gpio_isr_handler_add(intr, mcp25625_isr, NULL);
+end:
+    return err;
 }
 
 esp_err_t mcp25625_can_init(spi_host_device_t host, gpio_num_t cs, gpio_num_t intr)
@@ -256,6 +279,11 @@ void mcp25625_can_begin(unsigned long baudrate, bool extended_mode)
         xTaskCreate(mcp25625_can_task, "mcp25625", 4096, NULL, 10, &mcp25625_can_task_handle);
     if (ret != pdPASS) {
         LOGE(TAG, "Failed to instantiate MCP25625 task");
+        return;
+    }
+    esp_err_t err = mcp25625_init_isr(mcp25625_can_instance.intr);
+    if (err != ESP_OK) {
+        LOGE(TAG, "Failed to instantiate MCP25625 interrupt");
         return;
     }
     reg_bitfield_t canctrl = BITFIELD(CANCTRL, REQOP, NORMAL);
