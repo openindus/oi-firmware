@@ -9,3 +9,5 @@ dependencies.lock
 managed_components
 venv
 __pycache__
+/.cache/
+*~

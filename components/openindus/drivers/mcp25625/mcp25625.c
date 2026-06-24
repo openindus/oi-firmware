@@ -1,303 +1,268 @@
 /**
- * Copyright (C) OpenIndus, Inc - All Rights Reserved
- *
- * This file is part of OpenIndus Library.
- *
- * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential
- * 
- * @file mcp25625.h
- * @brief Functions for MCP25625 SPI to CAN 
- *
- * For more information on OpenIndus:
+ * @file mcp25625.c
+ * @brief MCP25625 Driver
+ * @author Mani Gillier <mani.gillier@openindus.com>
+ * @copyright (c) [2026] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
 
-#include "mcp25625/mcp25625.h"
-#include "DriversComponents/MCP25625.h"
+#include "mcp25625.h"
+#include "OSAL.h"
+#include "driver/spi_master.h"
+#include "esp_err.h"
+#include "mcp25625_reg.h"
+#include <stdint.h>
 
-static const char CAN_USR_TAG[] = __FILE__;
+static char const *const TAG = "MCP25625";
 
-#define CAN_USR_CHECK(a, str, goto_tag, ...)                                                    \
-    do                                                                                      \
-    {                                                                                       \
-        if (a)                                                                              \
-        {                                                                                   \
-            ESP_LOGE(CAN_USR_TAG, "%s(%d): " str, __FUNCTION__, __LINE__, ##__VA_ARGS__);       \
-            goto goto_tag;                                                                  \
-        }                                                                                   \
-    } while (0)
+static uint8_t const MCP25625_COMMAND_BITS_NB = 8;
+static uint8_t const MCP25625_ADDRESS_BITS_NB = 8;
+static int const MCP25625_CLOCK_SPEED         = 4000000U; // Max 10MHz (Table 7-6)
+static int const MCP25625_SPI_QUEUE_SIZE      = 16;
 
-//Private variables
-static MCP25625_DeviceConfig_t _deviceConfig;
-static spi_device_handle_t _spiHandler = NULL;
-static bool _deviceConfigured = false;
-static bool _spiInitialized = false;
-static TaskHandle_t canIsrTaskHandle;
-static SemaphoreHandle_t xSemaphoreQueue;
-static SemaphoreHandle_t xSemaphoreSpi;
+struct mcp25625_can mcp25625_can_instance = {
+    .host = -1, .cs = -1, .intr = -1, .baudrate = 0, .extended_mode = false, .initialized = false};
 
-gpio_num_t _gpio_isr;
+TaskHandle_t mcp25625_can_task_handle = NULL;
 
-static MCP25625_canRxQueue_t rx_queue; // do not remove static
+#define MCP25625_COMMAND_WRITE ((uint8_t)0b00000010)
+#define MCP25625_COMMAND_READ ((uint8_t)0b00000011)
 
-///////////////////////////////INIT & DEINIT FUNCTIONS/////////////////////////////////////////////////////////////////////////
-
-esp_err_t mcp25625_create(MCP25625_DeviceConfig_t *config)
+[[maybe_unused]]
+static esp_err_t reg_write(reg_addr_t reg, reg_value_t value)
 {
-    gpio_config_t intr_config;
-    _gpio_isr = config->spi_pin_int;
-    intr_config.intr_type = GPIO_INTR_NEGEDGE;
-    intr_config.mode = GPIO_MODE_INPUT;
-    intr_config.pull_down_en = GPIO_PULLDOWN_DISABLE;
-    intr_config.pull_up_en = GPIO_PULLUP_DISABLE;
-
-    intr_config.pin_bit_mask = (1ULL<<_gpio_isr);
-
-    ESP_ERROR_CHECK(gpio_config(&intr_config));
-    gpio_isr_handler_add(_gpio_isr, _can_isr_handler, NULL);
-    gpio_intr_enable(_gpio_isr);
-
-    rx_queue.head = 0;
-    rx_queue.tail = 0;
-    rx_queue.count = 0;
-
-    _deviceConfig = *config;
-    
-    spi_device_interface_config_t devConfig = {
-            .command_bits = 8,
-            .address_bits = 8,
-            .dummy_bits = 0,
-            .mode = 0,
-            .duty_cycle_pos = 0,
-            .cs_ena_pretrans = 0,
-            .cs_ena_posttrans = 0,
-            .clock_speed_hz = _deviceConfig.spi_freq,
-            .input_delay_ns = 0,
-            .spics_io_num = _deviceConfig.spi_pin_cs,
-            .flags = 0, //SPI_DEVICE_HALFDUPLEX
-            .queue_size = 1,
-            .pre_cb = NULL,
-            .post_cb = NULL
-        };
-
-    CAN_USR_CHECK(spi_bus_add_device(_deviceConfig.spi_host, &devConfig, &_spiHandler), "error while adding device to spi bus", err);
-    _spiInitialized = true;
-    ESP_LOGV(CAN_USR_TAG, "SPI configured");
-
-    xTaskCreate(can_task_interrupt_handler, "can_task_interrupt_handler", 4096, NULL, 10, &canIsrTaskHandle);
-    xSemaphoreQueue = xSemaphoreCreateMutex();
-    xSemaphoreSpi = xSemaphoreCreateBinary();
-    ESP_LOGV(CAN_USR_TAG, "Internal Tasks created");
-
-    return ESP_OK;
-
-    err:
-        return ESP_FAIL;
-
+    spi_transaction_t transaction = {.flags            = 0,
+                                     .cmd              = MCP25625_COMMAND_WRITE,
+                                     .addr             = reg,
+                                     .length           = 8,
+                                     .rxlength         = 0,
+                                     .override_freq_hz = 0,
+                                     .user             = NULL,
+                                     .tx_buffer        = (uint8_t[]){value},
+                                     .rx_buffer        = NULL};
+    esp_err_t err = spi_device_polling_transmit(mcp25625_can_instance.handle, &transaction);
+    if (err != ESP_OK) {
+        LOGE(TAG, "Failed to write register %#0.2x", reg);
+    }
+    return err;
 }
 
-esp_err_t mcp25625_delete()
+[[maybe_unused]]
+static esp_err_t reg_read(reg_addr_t reg, reg_value_t *value)
 {
-
-    CAN_USR_CHECK(spi_bus_remove_device(_spiHandler), "error while removing device to spi bus", err);
-    _spiInitialized = false;
-
-    gpio_isr_handler_remove(_gpio_isr);
-    gpio_intr_disable(_gpio_isr);
-
-    vTaskDelete(canIsrTaskHandle);
-
-    _deviceConfigured = false;
-    ESP_LOGV(CAN_USR_TAG, "Device deinit successful");
-
-    return ESP_OK;
-    err:
-        return ESP_FAIL;
-
+    spi_transaction_t transaction = {.flags            = 0,
+                                     .cmd              = MCP25625_COMMAND_READ,
+                                     .addr             = reg,
+                                     .length           = 0,
+                                     .rxlength         = BYTESIZE,
+                                     .override_freq_hz = 0,
+                                     .user             = NULL,
+                                     .tx_buffer        = NULL,
+                                     .rx_buffer        = value};
+    esp_err_t err = spi_device_polling_transmit(mcp25625_can_instance.handle, &transaction);
+    if (err != ESP_OK) {
+        LOGE(TAG, "Failed to read register %#0.2x", reg);
+    }
+    return err;
 }
 
-///////////////////////////////SPI FUNCTIONS/////////////////////////////////////////////////////////////////////////
-
-void SPI_Wr_Ptr( unsigned char cmd, unsigned char reg , unsigned char *data_out, int len )
+static char const *error_name(uint8_t mask)
 {
+    switch (mask) {
+    case EFLG_RX1OVR_MASK:
+        return "RX1OVR";
+    case EFLG_RX0OVR_MASK:
+        return "RX0OVR";
+    case EFLG_TXBO_MASK:
+        return "TXBO";
+    case EFLG_TXEP_MASK:
+        return "TXEP";
+    case EFLG_RXEP_MASK:
+        return "RXEP";
+    case EFLG_TXWAR_MASK:
+        return "TXWAR";
+    case EFLG_RXWAR_MASK:
+        return "RXWAR";
+    case EFLG_EWARN_MASK:
+        return "EWARN";
+    default:
+        return NULL;
+    };
+}
 
-    ESP_LOGV(CAN_USR_TAG, "Write SPI byte to the device");
+static char const *interrupt_name(uint8_t mask)
+{
+    switch (mask) {
+    case CANINTF_MERRF_MASK:
+        return "MERRF";
+    case CANINTF_WAKIF_MASK:
+        return "WAKIF";
+    case CANINTF_ERRIF_MASK:
+        return "ERRIF";
+    case CANINTF_TX2IF_MASK:
+        return "TX2IF";
+    case CANINTF_TX1IF_MASK:
+        return "TX1IF";
+    case CANINTF_TX0IF_MASK:
+        return "TX0IF";
+    case CANINTF_RX1IF_MASK:
+        return "RX1IF";
+    case CANINTF_RX0IF_MASK:
+        return "RX0IF";
+    default:
+        return NULL;
+    };
+}
 
-    if (_spiInitialized == true)
-    {
+#define LOG_BUF_SIZE 256
+static void log_register(reg_value_t value, char const *const reg_name,
+                         char const *(*get_name)(uint8_t mask))
+{
+    char buf[LOG_BUF_SIZE] = {0};
+    uint16_t index         = 0;
 
-        spi_transaction_ext_t trans_cmd_addr;
-
-        trans_cmd_addr.command_bits = 8;
-        trans_cmd_addr.address_bits = 0;
-        trans_cmd_addr.dummy_bits = 0;
-
-        trans_cmd_addr.base.flags = SPI_TRANS_VARIABLE_CMD | SPI_TRANS_VARIABLE_ADDR;
-        trans_cmd_addr.base.cmd = cmd;
-        trans_cmd_addr.base.addr = 0;
-        trans_cmd_addr.base.length = 8*len;
-        trans_cmd_addr.base.rxlength = 8;
-        trans_cmd_addr.base.user = NULL;
-        trans_cmd_addr.base.tx_buffer = &data_out[0];
-        trans_cmd_addr.base.rx_buffer = NULL;
-
-
-        if(cmd == MCP25625_SPI_CMD_WRITE_REG || cmd == MCP25625_SPI_CMD_MODIFY_REG)
-        {        
-          trans_cmd_addr.address_bits = 8;
-          trans_cmd_addr.base.addr = reg;
+    for (uint8_t bit_index = 0; bit_index < BYTESIZE; bit_index++) {
+        char const *name = get_name(value & (0x01 << bit_index));
+        if (name == NULL) {
+            continue;
         }
-    
-        xSemaphoreTake(xSemaphoreSpi, portTICK_PERIOD_MS);
-        ESP_ERROR_CHECK(spi_device_polling_transmit(_spiHandler, &trans_cmd_addr.base));
-        xSemaphoreGive(xSemaphoreSpi);
-    }
-
-    else
-    {
-        ESP_LOGE(CAN_USR_TAG, "Configure SPI before transaction");
-    }
-
-}
-
-void SPI_Rd_Ptr( unsigned char cmd, unsigned char reg, unsigned char * buffer, int len )
-{
-
-    ESP_LOGV(CAN_USR_TAG, "Read device SPI byte");
-    uint8_t data_out[len];
-
-    if (_spiInitialized == true)
-    {
-
-        spi_transaction_ext_t trans_cmd_addr;
-
-        trans_cmd_addr.command_bits = 8;
-        trans_cmd_addr.address_bits = 0;
-        trans_cmd_addr.dummy_bits = 0;
-
-        trans_cmd_addr.base.flags = SPI_TRANS_VARIABLE_CMD | SPI_TRANS_VARIABLE_ADDR;
-        trans_cmd_addr.base.cmd = cmd;
-        trans_cmd_addr.base.addr = 0;
-        trans_cmd_addr.base.length = 8*len;
-        trans_cmd_addr.base.rxlength = 8*len;
-        trans_cmd_addr.base.user = NULL;
-        trans_cmd_addr.base.tx_buffer = &data_out[0];
-        trans_cmd_addr.base.rx_buffer = &buffer[0];
-
-    
-        if(cmd == MCP25625_SPI_CMD_READ_REG)
-        {
-            trans_cmd_addr.address_bits = 8;
-            trans_cmd_addr.base.addr = reg;
+        if (index) {
+            index += snprintf(buf + index, sizeof(buf) - index - 1, " ");
         }
-
-        xSemaphoreTake(xSemaphoreSpi, portTICK_PERIOD_MS);
-        ESP_ERROR_CHECK(spi_device_polling_transmit(_spiHandler, &trans_cmd_addr.base));
-        xSemaphoreGive(xSemaphoreSpi);
+        index += snprintf(buf + index, sizeof(buf) - index - 1, "%s", name);
     }
-    else
-    {
-        ESP_LOGE(CAN_USR_TAG, "Configure SPI before transaction");
+    LOGI(TAG, "%s: %#0.2x [%s]", reg_name, value, buf);
+}
+
+esp_err_t reg_write_bitfield(reg_addr_t addr, reg_bitfield_t bitfield)
+{
+
+    esp_err_t err    = ESP_OK;
+    uint8_t mask     = EXTRACT_BF_MASK(bitfield);
+    uint8_t value    = EXTRACT_BF_VALUES(bitfield) & mask;
+    reg_value_t read = 0x00;
+
+    err = reg_read(addr, &read);
+    if (err != ESP_OK) {
+        goto end;
     }
-
+    value |= read & (~mask);
+    err = reg_write(addr, value);
+end:
+    return err;
 }
 
-
-///////////////////////////////MCP25625 RX QUEUE FUNCTION/////////////////////////////////////////////////////////////////////////
-
-int can_queue_push(MCP25625_canMessage_t element)
+static esp_err_t manage_interrupt(reg_value_t mask)
 {
-    xSemaphoreTake(xSemaphoreQueue, portTICK_PERIOD_MS);
-    if((rx_queue.count == MCP25625_CAN_RX_QUEUE_SIZE))
-    {
-        ESP_LOGV(CAN_USR_TAG, "RX internal queue is full");
-        return -1;
+    switch (mask) {
+    case CANINTF_MERRF_MASK:
+        LOGW(TAG, "MERRF interrupt");
+        return ESP_OK;
+    case CANINTF_WAKIF_MASK:
+        LOGW(TAG, "WAKIF interrupt");
+        return ESP_OK;
+    case CANINTF_ERRIF_MASK:
+        LOGW(TAG, "ERRIF interrupt");
+        uint8_t value = 0x00;
+        reg_read(REG_EFLG, &value);
+        log_register(value, "Errors", &error_name);
+        return ESP_OK;
+    case CANINTF_TX2IF_MASK:
+        LOGW(TAG, "TX2IF interrupt");
+        return ESP_OK;
+    case CANINTF_TX1IF_MASK:
+        LOGW(TAG, "TX1IF interrupt");
+        return ESP_OK;
+    case CANINTF_TX0IF_MASK:
+        LOGW(TAG, "TX0IF interrupt");
+        return ESP_OK;
+    case CANINTF_RX1IF_MASK:
+        LOGW(TAG, "RX1IF interrupt");
+        return ESP_OK;
+    case CANINTF_RX0IF_MASK:
+        LOGW(TAG, "RX0IF interrupt");
+        return ESP_OK;
+    default:
+        return ESP_ERR_INVALID_ARG;
     }
-
-    rx_queue.e[rx_queue.tail] = element;
-    rx_queue.tail = (rx_queue.tail + 1) % MCP25625_CAN_RX_QUEUE_SIZE;
-    rx_queue.count++;
-    xSemaphoreGive(xSemaphoreQueue);
-    return 0;
 }
 
-int can_queue_pop(MCP25625_canMessage_t * element)
+void mcp25625_can_task(void *args)
 {
-    xSemaphoreTake(xSemaphoreQueue, portTICK_PERIOD_MS);
-    if(!(rx_queue.count == MCP25625_CAN_RX_QUEUE_SIZE) && (rx_queue.head == rx_queue.tail)) //queue is empty ?
-    {
-        ESP_LOGV(CAN_USR_TAG, "RX internal queue is empty");
-        return -1;
-    }
-    *element = rx_queue.e[rx_queue.head];
-    rx_queue.head = (rx_queue.head + 1) % MCP25625_CAN_RX_QUEUE_SIZE;
-    rx_queue.count--;
-    xSemaphoreGive(xSemaphoreQueue);
-    return 0;
-}
-
-int can_queue_size()
-{
-    int temp;
-    xSemaphoreTake(xSemaphoreQueue, portTICK_PERIOD_MS);
-    temp = rx_queue.count;
-    xSemaphoreGive(xSemaphoreQueue);
-    return temp;
-}
-
-int mcp25625_queue_available()
-{
-    int size = can_queue_size();
-    return size;
-}
-
-int mcp25625_queue_read(MCP25625_canMessage_t *msg)
-{
-    return can_queue_pop(msg);
-}
-
-///////////////////////////////MCP25625 ISR FUNCTIONS/////////////////////////////////////////////////////////////////////////
-void IRAM_ATTR _can_isr_handler(void* arg)
-{
-    xTaskNotifyFromISR(canIsrTaskHandle, 0, eNoAction, NULL);
-}
-
-void can_task_interrupt_handler(void* arg)
-{
-    mcp25625_int_ctl int_flag;
-    mcp25625_eflg_ctl err_flag;
-    err_flag.reg = 0x2D;
-    int_flag.reg = INT_FLG;
-    MCP25625_canMessage_t temp;
-
-    while (1)
-    {
-        // Wait for an interrupt
-        xTaskNotifyWait(0, 0, NULL, portMAX_DELAY);
-        mcp25625_hw_ctl_get(&int_flag);
-        mcp25625_hw_ctl_get(&err_flag);
-        if(int_flag.rx0 | int_flag.rx1)
-        {
-            if((can_queue_size() + 1 < MCP25625_CAN_RX_QUEUE_SIZE))
-            {
-                if(int_flag.rx0)
-                {
-                    mcp25625_msg_read(RXB0, temp.msg, &(temp.count), &(temp.id), &(temp.IDE), &(temp.RTR));
-                }
-                else
-                {
-                    mcp25625_msg_read(RXB1, temp.msg, &(temp.count), &(temp.id), &(temp.IDE), &(temp.RTR));
-                }
-                can_queue_push(temp);
+    (void)args;
+    uint8_t value = 0x00;
+    while (1) {
+        // Wait for interrupt
+        // Todo (mani)
+        delay(100);
+        if (reg_read(REG_CANINTF, &value) != ESP_OK) {
+            LOGE(TAG, "Failed to read interrupt register");
+            continue;
+        }
+        log_register(value, "Interrupts", &interrupt_name);
+        for (uint8_t bit_index = 0; bit_index < BYTESIZE; bit_index++) {
+            if (!(value & (0x01 << bit_index))) {
+                continue;
             }
-
-            else
-            {
-                ESP_LOGW("CAN_EXT", "Internal RX buffer has not enought space to read values");
+            if (manage_interrupt(value & (0x01 << bit_index)) == ESP_OK) {
+                value &= ~(0x01 << bit_index);
             }
-        }   
+        }
+        // Clear treated interrupts
+        reg_write(REG_CANINTF, value);
+        if (value) {
+            LOGW(TAG, "Failed to clear interrupts: %#0.2x", value);
+        }
     }
+    vTaskDelete(NULL);
 }
 
-/*************** END OF FUNCTIONS *********************************************/
+esp_err_t mcp25625_can_init(spi_host_device_t host, gpio_num_t cs, gpio_num_t intr)
+{
+    mcp25625_can_instance.host = host;
+    mcp25625_can_instance.cs   = cs;
+    mcp25625_can_instance.intr = intr;
+    // Init spi device
+    spi_device_interface_config_t device_config = {
+        .command_bits     = MCP25625_COMMAND_BITS_NB,
+        .address_bits     = MCP25625_ADDRESS_BITS_NB,
+        .dummy_bits       = 0,
+        .mode             = 0, // MCP25625 5.0 (0,0)
+        .clock_source     = SPI_CLK_SRC_DEFAULT,
+        .duty_cycle_pos   = 0,
+        .cs_ena_pretrans  = 0,
+        .cs_ena_posttrans = 0,
+        .clock_speed_hz   = MCP25625_CLOCK_SPEED,
+        .input_delay_ns   = 0,
+        .sample_point     = SPI_SAMPLING_POINT_PHASE_0, // default in esp-idf
+        .spics_io_num     = cs,
+        .flags            = SPI_DEVICE_HALFDUPLEX,
+        .queue_size       = MCP25625_SPI_QUEUE_SIZE,
+        .pre_cb           = NULL,
+        .post_cb          = NULL};
+    esp_err_t err = spi_bus_add_device(host, &device_config, &mcp25625_can_instance.handle);
+    if (err != ESP_OK) {
+        LOGE(TAG, "Failed to add the device to the spi bus : %d", err);
+    }
+    return err;
+}
+
+void mcp25625_can_begin(unsigned long baudrate, bool extended_mode)
+{
+    mcp25625_can_instance.baudrate      = baudrate;
+    mcp25625_can_instance.extended_mode = extended_mode;
+
+    BaseType_t ret =
+        xTaskCreate(mcp25625_can_task, "mcp25625", 4096, NULL, 10, &mcp25625_can_task_handle);
+    if (ret != pdPASS) {
+        LOGE(TAG, "Failed to instantiate MCP25625 task");
+        return;
+    }
+    reg_bitfield_t canctrl = BITFIELD(CANCTRL, REQOP, NORMAL);
+    reg_write_bitfield(REG_CANCTRL, canctrl);
+
+    LOGI(TAG, "MCP25625 Can ready");
+    mcp25625_can_instance.initialized = true;
+}
+
+void mcp25625_can_read() {}

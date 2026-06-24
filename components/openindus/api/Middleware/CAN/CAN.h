@@ -10,7 +10,8 @@
 
 #include <stdint.h>
 #include "pcal6524/pcal6524.h"
-#include "mcp25625/DriversComponents/MCP25625.h"
+// #include "mcp25625/DriversComponents/MCP25625.h"
+#include "driver/spi_master.h"
 
 /**
  * @brief CAN message structure
@@ -82,7 +83,7 @@ public:
     void setExtendedFilter(uint32_t mask, uint32_t filter);
 
 private:
-    spi_host_device_t _spi_host; 
-    gpio_num_t _pin_cs; 
+    spi_host_device_t _spi_host;
+    gpio_num_t _pin_cs;
     gpio_num_t _pin_intr;
 };
