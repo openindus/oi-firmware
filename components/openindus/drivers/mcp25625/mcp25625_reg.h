@@ -15,8 +15,10 @@ typedef uint16_t reg_bitfield_t;
 esp_err_t reg_write_bitfield(reg_addr_t addr, reg_bitfield_t bitfield);
 
 #define CONSTRUCT_BITFIELD(mask, value) (uint16_t)(((mask) << 8U) | (value))
-#define BITFIELD(reg, subset, value)                                                     \
+#define BITFIELD(reg, subset, value)                                                               \
     CONSTRUCT_BITFIELD(reg##_##subset##_MASK, reg##_##subset##_##value)
+#define BITFIELD_P(reg, subset, parameter)                                                         \
+    CONSTRUCT_BITFIELD(reg##_##subset##_MASK, reg##_##subset(parameter))
 #define IS_BIT_SET(reg, subset, value) (bool)((value) & (reg##_##subset##_MASK))
 
 #define EXTRACT_BF_MASK(bitfield) ((uint8_t)(((bitfield) & 0xff00U) >> 8U))
@@ -63,6 +65,7 @@ reg_value_t const CANINTE_TX1IE_MASK = 0x08;
 reg_value_t const CANINTE_TX0IE_MASK = 0x04;
 reg_value_t const CANINTE_RX1IE_MASK = 0x02;
 reg_value_t const CANINTE_RX0IE_MASK = 0x01;
+reg_value_t const CANINTE_ALL_ON = 0xFF;
 
 reg_addr_t const REG_EFLG = 0x2D; // Error flag register
 reg_value_t const EFLG_RX1OVR_MASK = 0x80;
@@ -73,3 +76,31 @@ reg_value_t const EFLG_RXEP_MASK = 0x08;
 reg_value_t const EFLG_TXWAR_MASK = 0x04;
 reg_value_t const EFLG_RXWAR_MASK = 0x02;
 reg_value_t const EFLG_EWARN_MASK = 0x01;
+
+reg_addr_t const REG_CNF1 = 0x2A; // Configuration register 1
+reg_value_t const CNF1_SJW_MASK = 0xC0;
+#define CNF1_SJW(value) (((value) << 6U) & CNF1_SJW_MASK)
+reg_value_t const CNF1_BRP_MASK = 0x3F;
+#define CNF1_BRP(value) ((value) & CNF1_BRP_MASK)
+
+reg_addr_t const REG_CNF2 = 0x29; // Configuration register 2
+reg_value_t const CNF2_BTLMODE_MASK = 0x80;
+reg_value_t const CNF2_BTLMODE_ON = 0x80;
+reg_value_t const CNF2_BTLMODE_OFF = 0x00;
+reg_value_t const CNF2_SAM_MASK = 0x40;
+reg_value_t const CNF2_SAM_THRICE = 0x40;
+reg_value_t const CNF2_SAM_ONCE = 0x00;
+reg_value_t const CNF2_PHSEG1_MASK = 0x38;
+#define CNF2_PHSEG1(value) (((value) << 3U) & CNF2_PHSEG1_MASK)
+reg_value_t const CNF2_PRSEG_MASK = 0x07;
+#define CNF2_PRSEG(value) ((value) & CNF2_PRSEG_MASK)
+
+reg_addr_t const REG_CNF3 = 0x28; // Configuration register 3
+reg_value_t const CNF3_SOF_MASK = 0x80;
+reg_value_t const CNF3_SOF_ON = 0x80;
+reg_value_t const CNF3_SOF_OFF = 0x00;
+reg_value_t const CNF3_WAKFIL_MASK = 0x40;
+reg_value_t const CNF3_WAKFIL_ENABLED = 0x40;
+reg_value_t const CNF3_WAKFIL_DISABLED = 0x00;
+reg_value_t const CNF3_PHSEG2_MASK = 0x07;
+#define CNF3_PHSEG2(value) ((value) & CNF3_PHSEG2_MASK)

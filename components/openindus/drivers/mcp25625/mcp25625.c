@@ -11,6 +11,7 @@
 #include "driver/gpio.h"
 #include "driver/spi_master.h"
 #include "esp_err.h"
+#include "freertos/projdefs.h"
 #include "mcp25625_reg.h"
 #include <stdint.h>
 
@@ -153,36 +154,74 @@ end:
     return err;
 }
 
+struct message {
+    uint16_t sid : 11;
+    uint8_t srr : 1;
+    uint8_t ide : 1;
+    uint32_t eid : 29;
+    uint8_t rtr : 1;
+    uint8_t dlc : 4;
+    uint8_t data[8];
+};
+
+static esp_err_t read_message()
+{
+    esp_err_t err = ESP_OK;
+
+    uint8_t buffer[13] = {0};
+    for (uint8_t index = 0; index < sizeof(buffer); index++) {
+        err = reg_read(0x61 + index, &buffer[index]);
+        if (err != ESP_OK) {
+            goto err;
+        }
+    }
+    struct message msg = {.sid = (buffer[0] << 3) | ((buffer[1] & 0xE0) >> 5),
+                          .srr = (buffer[1] & 0x10) >> 4,
+                          .ide = (buffer[1] & 0x08) >> 3,
+                          .eid = (buffer[0] << 21) | ((buffer[1] & 0xE0) << 13) |
+                                 ((buffer[1] & 0x03) << 16) | (buffer[2] << 8) | buffer[3],
+                          .rtr  = ((buffer[4] & 0x40) >> 6),
+                          .dlc  = buffer[4] & 0x0F,
+                          .data = {buffer[5], buffer[6], buffer[7], buffer[8], buffer[9],
+                                   buffer[10], buffer[11], buffer[12]}};
+    LOGI(TAG,
+         "Received message: SID: %#0.3x, EID: %#0.5x, IDE: %d, RTR: %d, DLC: %d, Data: %02x %02x "
+         "%02x %02x %02x %02x %02x %02x",
+         msg.sid, msg.eid, msg.ide, msg.rtr, msg.dlc, msg.data[0], msg.data[1], msg.data[2],
+         msg.data[3], msg.data[4], msg.data[5], msg.data[6], msg.data[7]);
+    return err;
+err:
+    LOGE(TAG, "Failed to read message");
+    return err;
+}
+
 static esp_err_t manage_interrupt(reg_value_t mask)
 {
     switch (mask) {
     case CANINTF_MERRF_MASK:
-        LOGW(TAG, "MERRF interrupt");
+        LOGW(TAG, "CAN MESSAGE ERROR");
         return ESP_OK;
     case CANINTF_WAKIF_MASK:
-        LOGW(TAG, "WAKIF interrupt");
         return ESP_OK;
     case CANINTF_ERRIF_MASK:
-        LOGW(TAG, "ERRIF interrupt");
+        LOGW(TAG, "CAN ERROR");
         uint8_t value = 0x00;
         reg_read(REG_EFLG, &value);
         log_register(value, "Errors", &error_name);
-        return ESP_OK;
+        return ESP_ERR_NOT_SUPPORTED;
     case CANINTF_TX2IF_MASK:
-        LOGW(TAG, "TX2IF interrupt");
         return ESP_OK;
     case CANINTF_TX1IF_MASK:
-        LOGW(TAG, "TX1IF interrupt");
         return ESP_OK;
     case CANINTF_TX0IF_MASK:
-        LOGW(TAG, "TX0IF interrupt");
+        LOGI(TAG, "TX buffer is now empty");
         return ESP_OK;
     case CANINTF_RX1IF_MASK:
-        LOGW(TAG, "RX1IF interrupt");
         return ESP_OK;
     case CANINTF_RX0IF_MASK:
-        LOGW(TAG, "RX0IF interrupt");
-        return ESP_OK;
+        LOGW(TAG, "RX buffer is full, you have an incomming message");
+        esp_err_t err = read_message();
+        return err;
     default:
         return ESP_ERR_INVALID_ARG;
     }
@@ -286,11 +325,39 @@ void mcp25625_can_begin(unsigned long baudrate, bool extended_mode)
         LOGE(TAG, "Failed to instantiate MCP25625 interrupt");
         return;
     }
+    reg_bitfield_t cnf1 = BITFIELD_P(CNF1, SJW, 0b11) | BITFIELD_P(CNF1, BRP, 0);
+    reg_bitfield_t cnf2 = BITFIELD(CNF2, BTLMODE, ON) | BITFIELD(CNF2, SAM, ONCE) |
+                          BITFIELD_P(CNF2, PHSEG1, 3) | BITFIELD_P(CNF2, PRSEG, 1);
+    reg_bitfield_t cnf3 = BITFIELD_P(CNF3, PHSEG2, 2);
+
+    reg_write_bitfield(REG_CNF1, cnf1);
+    reg_write_bitfield(REG_CNF2, cnf2);
+    reg_write_bitfield(REG_CNF3, cnf3);
+    reg_write(REG_CANINTE, CANINTE_ALL_ON);
+    reg_write(0x60, 0x60); // RXB0CTRL - disable masks & filters
+    reg_value_t value = 0x00;
+
     reg_bitfield_t canctrl = BITFIELD(CANCTRL, REQOP, NORMAL);
     reg_write_bitfield(REG_CANCTRL, canctrl);
 
-    LOGI(TAG, "MCP25625 Can ready");
+    reg_read(0x0E, &value);
+
+    LOGI(TAG, "MCP25625 Can ready : %#0.2x", value);
     mcp25625_can_instance.initialized = true;
 }
 
-void mcp25625_can_read() {}
+void mcp25625_can_stop()
+{
+    gpio_isr_handler_remove(mcp25625_can_instance.intr);
+    vTaskDelete(mcp25625_can_task_handle);
+    mcp25625_can_instance.initialized = false;
+}
+
+void mcp25625_can_read()
+{
+    /*
+    reg_value_t value = 0x00;
+    reg_read(REG_CANINTF, &value);
+    log_register(value, "Interrupts", &interrupt_name);
+    */
+}
