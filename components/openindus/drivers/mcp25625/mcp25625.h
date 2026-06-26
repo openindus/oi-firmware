@@ -17,33 +17,6 @@ extern "C" {
 #include "driver/gpio.h"
 #include "driver/spi_master.h"
 #include <stdbool.h>
-#include <stdint.h>
-
-/* STRUCTURES AND ENUMS */
-
-/**
- * @brief MCP25625 data structure
- */
-struct mcp25625_can {
-    spi_host_device_t host;     /**< SPI host device */
-    gpio_num_t cs;              /**< Chip select pin */
-    gpio_num_t intr;            /**< Interrupt pin */
-    unsigned long baudrate;     /**< CAN baudrate in bits/s */
-    bool extended_mode;         /**< Extended frame mode */
-    bool initialized;           /**< Initialization status */
-    spi_device_handle_t handle; /**< SPI device handle */
-};
-
-extern struct mcp25625_can mcp25625_can_instance;
-
-/* TYPES */
-
-typedef uint8_t reg_addr_t;
-typedef uint8_t reg_value_t;
-
-/* CONSTANTS */
-
-#define BYTESIZE 8
 
 /* PROTOTYPES */
 
@@ -95,6 +68,36 @@ bool mcp25625_can_available();
  * @brief Wait for message to be available
  */
 void mcp25625_can_wait();
+
+/* STRUCTS & GLOBALS */
+
+enum { CAN_MAX_BYTES = 8 };
+
+struct mcp25625_can_instance {
+    spi_host_device_t host; /**< SPI host device */
+    gpio_num_t cs;          /**< Chip select pin */
+    gpio_num_t intr;        /**< Interrupt pin */
+    unsigned long baudrate; /**< CAN baudrate in bits/s */
+    bool extended_mode;     /**< Extended frame mode */
+    bool initialized;       /**< Initialization status */
+};
+extern struct mcp25625_can_instance mcp25625_instance;
+
+struct can_message {
+    uint32_t id : 29;           /**< CAN message ID */
+    uint8_t size : 4;           /**< CAN message size */
+    bool IDE : 1;               /**< Extended frame: true, Standard frame: false */
+    bool RTR : 1;               /**< Remote transfer frame or data frame */
+    uint8_t msg[CAN_MAX_BYTES]; /**< CAN message data */
+};
+
+extern StaticQueue_t mcp25625_rx_queue_buffer;
+extern uint8_t mcp25625_rx_buffer[];
+extern QueueHandle_t mcp25625_rx_queue;
+
+extern StaticQueue_t mcp25625_tx_queue_buffer;
+extern uint8_t mcp25625_tx_buffer[];
+extern QueueHandle_t mcp25625_tx_queue;
 
 #ifdef __cplusplus
 }
