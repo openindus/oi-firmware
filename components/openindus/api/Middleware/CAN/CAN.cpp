@@ -22,49 +22,58 @@ void CAN::begin(unsigned long baudrate, bool extended_mode)
 
 void CAN::end(void)
 {
-    // mcp25625_delete();
+    mcp25625_can_stop();
 }
 
-void CAN::write(CAN_Message_t msg)
+esp_err_t CAN::write(CAN_Message_t msg)
 {
-    //mcp25625_msg_transfer(msg.msg, msg.size, msg.id, msg.IDE, msg.RTR);
+    struct can_message can_msg;
+    can_msg.id = msg.id;
+    can_msg.size = msg.size;
+    can_msg.IDE = msg.IDE;
+    can_msg.RTR = msg.RTR;
+    for (int index = 0; index < sizeof(msg.msg); index++) {
+	can_msg.msg[index] = msg.msg[index];
+    }
+    return mcp25625_can_write(&can_msg);
 }
 
 int CAN::available(void)
 {
-    // return mcp25625_queue_available();
-    return false;
+    return mcp25625_can_available();
 }
 
 CAN_Message_t CAN::read(void)
 {
-  /*
-    CAN_Message_t canMsg;
-    mcp25625_queue_read((MCP25625_canMessage_t*)(void*)(&canMsg));
-
-    return canMsg;
-  */
-    mcp25625_can_read();
-    CAN_Message_t canMsg = {0, 0, false, false, {0}};
-    return canMsg;
+    struct can_message msg;
+    mcp25625_can_read(&msg);
+    CAN_Message_t can_msg;
+    can_msg.id = msg.id;
+    can_msg.size = msg.size;
+    can_msg.IDE = msg.IDE;
+    can_msg.RTR = msg.RTR;
+    for (int index = 0; index < sizeof(can_msg.msg); index++) {
+	can_msg.msg[index] = msg.msg[index];
+    }
+    return can_msg;
 }
 
 void CAN::setStandardFilter(uint16_t mask, uint16_t filter)
 {
-  /*
-    mcp25625_mask_config(RXB0, mask, 0);
-    mcp25625_mask_config(RXB1, mask, 0);
-    mcp25625_filter_config(RXF_0, filter, 0, false);
-    mcp25625_filter_config(RXF_1, filter, 0, false);
-  */
+    /*
+      mcp25625_mask_config(RXB0, mask, 0);
+      mcp25625_mask_config(RXB1, mask, 0);
+      mcp25625_filter_config(RXF_0, filter, 0, false);
+      mcp25625_filter_config(RXF_1, filter, 0, false);
+    */
 }
 
 void CAN::setExtendedFilter(uint32_t mask, uint32_t filter)
 {
-  /*
-    mcp25625_mask_config(RXB0, 0, mask);
-    mcp25625_mask_config(RXB1, 0, mask);
-    mcp25625_filter_config(RXF_0, 0, filter, true);
-    mcp25625_filter_config(RXF_1, 0, filter, true);
-  */
+    /*
+      mcp25625_mask_config(RXB0, 0, mask);
+      mcp25625_mask_config(RXB1, 0, mask);
+      mcp25625_filter_config(RXF_0, 0, filter, true);
+      mcp25625_filter_config(RXF_1, 0, filter, true);
+    */
 }

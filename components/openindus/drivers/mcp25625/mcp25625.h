@@ -18,57 +18,6 @@ extern "C" {
 #include "driver/spi_master.h"
 #include <stdbool.h>
 
-/* PROTOTYPES */
-
-/**
- * @brief Init interface
- * @param host SPI host device
- * @param cs SPI Chip Select pin
- * @param intr SPI Interrupt pin
- * @return esp_err_t ESP_OK on success, error code otherwise
- */
-esp_err_t mcp25625_can_init(spi_host_device_t host, gpio_num_t cs, gpio_num_t intr);
-
-/**
- * @brief Begin
- */
-void mcp25625_can_begin(unsigned long baudrate, bool extended_mode);
-
-/**
- * @brief Deinit
- */
-void mcp25625_can_deinit();
-
-/**
- * @brief Write can message
- */
-void mcp25625_can_write();
-
-/**
- * @brief Read can message
- */
-void mcp25625_can_read();
-
-/**
- * @brief Set standard filter
- */
-void mcp25625_can_set_standard_filter();
-
-/**
- * @brief Set extended filter
- */
-void mcp25625_can_set_extended_filter();
-
-/**
- * @brief Does the queue have messages to read
- */
-bool mcp25625_can_available();
-
-/**
- * @brief Wait for message to be available
- */
-void mcp25625_can_wait();
-
 /* STRUCTS & GLOBALS */
 
 enum { CAN_MAX_BYTES = 8 };
@@ -98,6 +47,63 @@ extern QueueHandle_t mcp25625_rx_queue;
 extern StaticQueue_t mcp25625_tx_queue_buffer;
 extern uint8_t mcp25625_tx_buffer[];
 extern QueueHandle_t mcp25625_tx_queue;
+
+/* PROTOTYPES */
+
+/**
+ * @brief Init interface
+ * @param host SPI host device
+ * @param cs SPI Chip Select pin
+ * @param intr SPI Interrupt pin
+ * @return esp_err_t ESP_OK on success, error code otherwise
+ */
+esp_err_t mcp25625_can_init(spi_host_device_t host, gpio_num_t cs, gpio_num_t intr);
+
+void mcp25625_can_stop();
+
+/**
+ * @brief Begin
+ */
+void mcp25625_can_begin(unsigned long baudrate, bool extended_mode);
+
+/**
+ * @brief Deinit
+ */
+void mcp25625_can_deinit();
+
+/**
+ * @brief Write can message
+ * @return esp_err_t ESP_OK on success, ESP_FAIL if queue full
+ */
+esp_err_t mcp25625_can_write(struct can_message *msg_ptr);
+
+/**
+ * @brief Read can message
+ * @note This function is blocking until message is received
+ * Please use @ref mcp25625_can_available() to check if a message is available before calling this
+ * function if you want to avoid blocking
+ */
+void mcp25625_can_read(struct can_message *msg_ptr);
+
+/**
+ * @brief Set standard filter
+ */
+void mcp25625_can_set_standard_filter();
+
+/**
+ * @brief Set extended filter
+ */
+void mcp25625_can_set_extended_filter();
+
+/**
+ * @brief Does the queue have messages to read
+ */
+bool mcp25625_can_available();
+
+/**
+ * @brief Wait for message to be available
+ */
+void mcp25625_can_wait();
 
 #ifdef __cplusplus
 }

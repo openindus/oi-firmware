@@ -18,8 +18,10 @@
 
 static char const *const TAG = "MCP25625_HAL";
 
-TaskHandle_t mcp25625_task_handle       = NULL;
+TaskHandle_t mcp25625_rx_task_handle    = NULL;
+TaskHandle_t mcp25625_tx_task_handle    = NULL;
 spi_device_handle_t mcp25625_spi_handle = NULL;
+SemaphoreHandle_t tx_sem                = NULL;
 
 /* SPI FUNCTIONS */
 
@@ -142,7 +144,7 @@ void log_register(reg_value_t value, char const *reg_name, char const *(*get_nam
         }
         index += snprintf(buf + index, sizeof(buf) - index - 1, "%s", name);
     }
-    LOGI(TAG, "%s: %#0.2x [%s]", reg_name, value, buf);
+    ESP_LOGD(TAG, "%s: %#0.2x [%s]", reg_name, value, buf);
 }
 
 /* CAN Interface */
@@ -168,12 +170,13 @@ esp_err_t read_raw_message(struct raw_can_message *message_ptr)
                                  .dlc  = buffer[4] & 0x0F,
                                  .data = {buffer[5], buffer[6], buffer[7], buffer[8], buffer[9],
                                           buffer[10], buffer[11], buffer[12]}};
-    LOGI(TAG,
-         "Received message: SID: %#0.3x, EID: %#0.5x, IDE: %d, RTR: %d, DLC: %d, Data: %02x %02x "
-         "%02x %02x %02x %02x %02x %02x",
-         message_ptr->sid, message_ptr->eid, message_ptr->ide, message_ptr->rtr, message_ptr->dlc,
-         message_ptr->data[0], message_ptr->data[1], message_ptr->data[2], message_ptr->data[3],
-         message_ptr->data[4], message_ptr->data[5], message_ptr->data[6], message_ptr->data[7]);
+    ESP_LOGD(
+        TAG,
+        "Received message: SID: %#0.3x, EID: %#0.5x, IDE: %d, RTR: %d, DLC: %d, Data: %02x %02x "
+        "%02x %02x %02x %02x %02x %02x",
+        message_ptr->sid, message_ptr->eid, message_ptr->ide, message_ptr->rtr, message_ptr->dlc,
+        message_ptr->data[0], message_ptr->data[1], message_ptr->data[2], message_ptr->data[3],
+        message_ptr->data[4], message_ptr->data[5], message_ptr->data[6], message_ptr->data[7]);
     return err;
 err:
     LOGE(TAG, "Failed to read message");
@@ -195,30 +198,31 @@ esp_err_t manage_interrupt(reg_value_t mask)
         uint8_t value = 0x00;
         reg_read(REG_EFLG, &value);
         log_register(value, "Errors", &error_name);
-        return ESP_FAIL;
+        return ESP_OK;
     case CANINTF_TX2IF_MASK:
         return ESP_OK;
     case CANINTF_TX1IF_MASK:
         return ESP_OK;
     case CANINTF_TX0IF_MASK:
-        LOGI(TAG, "TX buffer is now empty");
+        ESP_LOGV(TAG, "TX buffer is now empty");
+        xSemaphoreGive(tx_sem);
         return ESP_OK;
     case CANINTF_RX1IF_MASK:
         return ESP_OK;
     case CANINTF_RX0IF_MASK:
-        LOGW(TAG, "RX buffer is full, you have an incomming message");
+        ESP_LOGD(TAG, "RX buffer is full, you have an incomming message");
         struct raw_can_message raw_msg;
         esp_err_t err = read_raw_message(&raw_msg);
         if (err != ESP_OK) {
             LOGE(TAG, "Failed to read incomming message");
             return err;
         }
-	struct can_message msg;
-	convert_raw_message(&raw_msg, &msg);
-	BaseType_t ret = xQueueSend(mcp25625_rx_queue, &msg, 0);
-	if (ret != pdPASS) {
-	    LOGW(TAG, "RX queue is full, dropping message");
-	}
+        struct can_message msg;
+        convert_raw_message(&raw_msg, &msg);
+        BaseType_t ret = xQueueSend(mcp25625_rx_queue, &msg, 0);
+        if (ret != pdPASS) {
+            LOGW(TAG, "RX queue is full, dropping message");
+        }
         return err;
     default:
         return ESP_ERR_INVALID_ARG;
@@ -228,17 +232,35 @@ esp_err_t manage_interrupt(reg_value_t mask)
 void convert_raw_message(struct raw_can_message const *source, struct can_message *destination)
 {
     memset(destination->msg, 0, sizeof(destination->msg));
-    destination->id = source->ide ? source->eid : source->sid;
+    destination->id   = source->ide ? source->eid : source->sid;
     destination->size = source->dlc;
-    destination->IDE = source->ide;
-    destination->RTR = source->rtr;
+    destination->IDE  = source->ide;
+    destination->RTR  = source->rtr;
     if (destination->size > 4 || destination->size < 0) {
-	return;
+        return;
     }
     memcpy(destination->msg, source->data, destination->size);
 }
 
-void mcp25625_can_task(void *args)
+void manage_interrupts(reg_value_t value)
+{
+    log_register(value, "Interrupts", &interrupt_name);
+    for (uint8_t bit_index = 0; bit_index < BYTESIZE; bit_index++) {
+        if (!(value & (0x01 << bit_index))) {
+            continue;
+        }
+        if (manage_interrupt(value & (0x01 << bit_index)) == ESP_OK) {
+            value &= ~(0x01 << bit_index);
+        }
+    }
+    // Clear treated interrupts
+    reg_write(REG_CANINTF, value);
+    if (value) {
+        LOGW(TAG, "Failed to clear interrupts: %#0.2x", value);
+    }
+}
+
+void mcp25625_rx_task(void *args)
 {
     (void)args;
     uint8_t value = 0x00;
@@ -249,19 +271,8 @@ void mcp25625_can_task(void *args)
             LOGE(TAG, "Failed to read interrupt register");
             continue;
         }
-        log_register(value, "Interrupts", &interrupt_name);
-        for (uint8_t bit_index = 0; bit_index < BYTESIZE; bit_index++) {
-            if (!(value & (0x01 << bit_index))) {
-                continue;
-            }
-            if (manage_interrupt(value & (0x01 << bit_index)) == ESP_OK) {
-                value &= ~(0x01 << bit_index);
-            }
-        }
-        // Clear treated interrupts
-        reg_write(REG_CANINTF, value);
-        if (value) {
-            LOGW(TAG, "Failed to clear interrupts: %#0.2x", value);
+        if (value != 0) {
+            manage_interrupts(value);
         }
     }
     vTaskDelete(NULL);
@@ -270,7 +281,76 @@ void mcp25625_can_task(void *args)
 void mcp25625_isr(void *args)
 {
     (void)args;
-    xTaskNotifyGive(mcp25625_task_handle);
+    vTaskNotifyGiveIndexedFromISR(mcp25625_rx_task_handle, 0, NULL);
+}
+
+void write_msg_to_tx_buffer(struct can_message *msg)
+{
+    reg_value_t sidh                = 0x00;
+    reg_value_t sidl                = 0x00;
+    reg_value_t eid8                = 0x00;
+    reg_value_t eid0                = 0x00;
+    reg_value_t dlc                 = 0x00;
+    reg_value_t data[CAN_MAX_BYTES] = {0x00};
+
+    /* PREPPING THE REGISTERS */
+
+    // SID | EID
+    if (msg->IDE) {
+        eid0 |= msg->id & 0xFF;
+        eid8 |= (msg->id >> 8) & 0xFF;
+        sidl |= ((msg->id >> 16) & 0x03) | (((msg->id >> 18) & 0x07) << 5);
+        sidh |= (msg->id >> 21) & 0xFF;
+    } else {
+        sidl |= (msg->id & 0x07) << 5;
+        sidh |= (msg->id >> 3) & 0xFF;
+    }
+    // EXIDE
+    sidl |= (msg->IDE ? 0x01 : 0x00) << 3;
+    // RTR
+    dlc |= (msg->RTR ? 0x01 : 0x00) << 6;
+
+    if (msg->size > CAN_MAX_BYTES) {
+        LOGW(TAG, "Message size is greater than 8 bytes, cutting the end off");
+        msg->size = CAN_MAX_BYTES;
+    }
+    if (msg->size < 0) {
+        LOGW(TAG, "Message size is less than 0 bytes, setting to 0");
+        msg->size = 0;
+    }
+    // DLC
+    dlc |= (msg->size & 0x0F);
+    // DATA
+    memcpy(data, msg->msg, msg->size);
+
+    /* WRITING */
+    reg_write(REG_TXB0SIDH, sidh);
+    reg_write(REG_TXB0SIDL, sidl);
+    reg_write(REG_TXB0EID8, eid8);
+    reg_write(REG_TXB0EID0, eid0);
+    reg_write(REG_TXB0DLC, dlc);
+    for (uint8_t index = 0; index < CAN_MAX_BYTES; index++) {
+        reg_write(REG_TXB0DATA + index, data[index]);
+    }
+
+    /* REQUEST */
+    uint16_t txb0ctrl = BITFIELD(TXB0CTRL, TXREQ, SEND);
+    reg_write_bitfield(REG_TXB0CTRL, txb0ctrl);
+}
+
+void mcp25625_tx_task(void *args)
+{
+    (void)args;
+    struct can_message msg;
+
+    while (true) {
+        // Wait for room in MCP25625
+        xSemaphoreTake(tx_sem, portMAX_DELAY);
+        // Wait for data to put in MCP25625
+        xQueueReceive(mcp25625_tx_queue, &msg, portMAX_DELAY);
+        // Write can message inside mcp25625
+        write_msg_to_tx_buffer(&msg);
+    }
 }
 
 esp_err_t mcp25625_init_isr(gpio_num_t intr)
@@ -319,10 +399,17 @@ esp_err_t mcp25625_init_spi()
 
 esp_err_t mcp25625_hal_configure()
 {
+    tx_sem = xSemaphoreCreateBinary();
+    xSemaphoreGive(tx_sem);
     BaseType_t ret =
-        xTaskCreate(mcp25625_can_task, "mcp25625", 4096, NULL, 10, &mcp25625_task_handle);
+        xTaskCreate(mcp25625_rx_task, "mcp25625_rx", 4096, NULL, 10, &mcp25625_rx_task_handle);
     if (ret != pdPASS) {
-        LOGE(TAG, "Failed to instantiate MCP25625 task");
+        LOGE(TAG, "Failed to instantiate MCP25625 RX task");
+        return ESP_FAIL;
+    }
+    ret = xTaskCreate(mcp25625_tx_task, "mcp25625_tx", 2048, NULL, 10, &mcp25625_tx_task_handle);
+    if (ret != pdPASS) {
+        LOGE(TAG, "Failed to instantiate MCP25625 TX task");
         return ESP_FAIL;
     }
     esp_err_t err = mcp25625_init_isr(mcp25625_instance.intr);
@@ -377,5 +464,6 @@ err:
 void mcp25625_hal_stop()
 {
     gpio_isr_handler_remove(mcp25625_instance.intr);
-    vTaskDelete(mcp25625_task_handle);
+    vTaskDelete(mcp25625_rx_task_handle);
+    vTaskDelete(mcp25625_tx_task_handle);
 }

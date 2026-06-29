@@ -60,7 +60,8 @@ enum {
  * @brief MCP25625 data structure
  */
 
-extern TaskHandle_t mcp25625_task_handle;       /**< Task handle for CAN processing */
+extern TaskHandle_t mcp25625_rx_task_handle;    /**< Task handle for RX CAN processing */
+extern TaskHandle_t mcp25625_tx_task_handle;    /**< Task handle for TX CAN processing */
 extern spi_device_handle_t mcp25625_spi_handle; /**< SPI device handle */
 
 struct raw_can_message {
@@ -85,11 +86,20 @@ void convert_raw_message(struct raw_can_message const *source, struct can_messag
 /* INTERRUPT MANAGEMENT */
 //
 
+void manage_interrupts(reg_value_t value);
 esp_err_t manage_interrupt(reg_value_t mask);
-void mcp25625_can_task(void *args);
+void mcp25625_rx_task(void *args);
 IRAM_ATTR void mcp25625_isr(void *args);
 esp_err_t mcp25625_init_isr(gpio_num_t intr);
 
 esp_err_t mcp25625_hal_configure();
 void mcp25625_hal_stop();
 esp_err_t mcp25625_init_spi();
+
+//
+/* Transmit Queue */
+//
+
+void mcp25625_tx_task(void *args);
+void write_msg_to_tx_buffer(struct can_message *msg);
+extern SemaphoreHandle_t tx_sem;

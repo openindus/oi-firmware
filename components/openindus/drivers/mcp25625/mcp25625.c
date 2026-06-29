@@ -65,4 +65,18 @@ void mcp25625_can_stop()
     mcp25625_instance.initialized = false;
 }
 
-void mcp25625_can_read() {}
+void mcp25625_can_read(struct can_message *msg_ptr)
+{
+    xQueueReceive(mcp25625_rx_queue, msg_ptr, portMAX_DELAY);
+}
+
+esp_err_t mcp25625_can_write(struct can_message *msg_ptr)
+{
+    BaseType_t ret = xQueueSend(mcp25625_tx_queue, msg_ptr, 0);
+    return ret == pdPASS ? ESP_OK : ESP_FAIL;
+}
+
+bool mcp25625_can_available()
+{
+    return uxQueueMessagesWaiting(mcp25625_rx_queue) > 0;
+}

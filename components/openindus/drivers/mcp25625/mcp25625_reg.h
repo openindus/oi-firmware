@@ -20,7 +20,7 @@ typedef uint16_t reg_bitfield_t;
 
 /* MACROS AND CONSTANTS */
 
-#define CONSTRUCT_BITFIELD(mask, value) (uint16_t)(((mask) << 8U) | (value))
+#define CONSTRUCT_BITFIELD(mask, value) (((uint16_t)(mask) << 8U) | (uint16_t)(value))
 #define BITFIELD(reg, subset, value)                                                               \
     CONSTRUCT_BITFIELD(reg##_##subset##_MASK, reg##_##subset##_##value)
 #define BITFIELD_P(reg, subset, parameter)                                                         \
@@ -110,3 +110,15 @@ static reg_value_t const CNF3_WAKFIL_ENABLED  = 0x40;
 static reg_value_t const CNF3_WAKFIL_DISABLED = 0x00;
 static reg_value_t const CNF3_PHSEG2_MASK     = 0x07;
 #define CNF3_PHSEG2(value) ((value) & CNF3_PHSEG2_MASK)
+
+static reg_addr_t const REG_TXB0CTRL          = 0x30; // Transmit buffer 0 control
+static reg_value_t const TXB0CTRL_TXREQ_MASK  = 0x08; // Request to send bit
+static reg_value_t const TXB0CTRL_TXREQ_SEND  = 0x08;
+static reg_value_t const TXB0CTRL_TXREQ_ABORT = 0x00;
+
+static reg_addr_t const REG_TXB0SIDH = 0x31; // Transmit buffer 0 standard identifier high
+static reg_addr_t const REG_TXB0SIDL = 0x32; // Transmit buffer 0 standard identifier low
+static reg_addr_t const REG_TXB0EID8 = 0x33; // Transmit buffer 0 extended identifier high
+static reg_addr_t const REG_TXB0EID0 = 0x34; // Transmit buffer 0 extended identifier low
+static reg_addr_t const REG_TXB0DLC  = 0x35; // Transmit buffer 0 data length code
+static reg_addr_t const REG_TXB0DATA = 0x36; // Transmit buffer 0 data byte 0
