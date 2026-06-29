@@ -79,6 +79,8 @@ struct raw_can_message {
  */
 esp_err_t read_raw_message(struct raw_can_message *message_ptr);
 
+void convert_raw_message(struct raw_can_message const *source, struct can_message *destination);
+
 //
 /* INTERRUPT MANAGEMENT */
 //

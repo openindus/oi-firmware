@@ -207,12 +207,14 @@ esp_err_t manage_interrupt(reg_value_t mask)
         return ESP_OK;
     case CANINTF_RX0IF_MASK:
         LOGW(TAG, "RX buffer is full, you have an incomming message");
-        struct raw_can_message msg;
-        esp_err_t err = read_raw_message(&msg); // Todo (mani)
+        struct raw_can_message raw_msg;
+        esp_err_t err = read_raw_message(&raw_msg);
         if (err != ESP_OK) {
             LOGE(TAG, "Failed to read incomming message");
             return err;
         }
+	struct can_message msg;
+	convert_raw_message(&raw_msg, &msg);
 	BaseType_t ret = xQueueSend(mcp25625_rx_queue, &msg, 0);
 	if (ret != pdPASS) {
 	    LOGW(TAG, "RX queue is full, dropping message");
@@ -221,6 +223,19 @@ esp_err_t manage_interrupt(reg_value_t mask)
     default:
         return ESP_ERR_INVALID_ARG;
     }
+}
+
+void convert_raw_message(struct raw_can_message const *source, struct can_message *destination)
+{
+    memset(destination->msg, 0, sizeof(destination->msg));
+    destination->id = source->ide ? source->eid : source->sid;
+    destination->size = source->dlc;
+    destination->IDE = source->ide;
+    destination->RTR = source->rtr;
+    if (destination->size > 4 || destination->size < 0) {
+	return;
+    }
+    memcpy(destination->msg, source->data, destination->size);
 }
 
 void mcp25625_can_task(void *args)
