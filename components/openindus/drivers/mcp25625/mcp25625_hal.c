@@ -416,23 +416,16 @@ esp_err_t mcp25625_hal_configure()
     if (err != ESP_OK) {
         goto err;
     }
-    reg_bitfield_t cnf1 = BITFIELD_P(CNF1, SJW, 0b11) | BITFIELD_P(CNF1, BRP, 0);
-    reg_bitfield_t cnf2 = BITFIELD(CNF2, BTLMODE, ON) | BITFIELD(CNF2, SAM, ONCE) |
-                          BITFIELD_P(CNF2, PHSEG1, 3) | BITFIELD_P(CNF2, PRSEG, 1);
-    reg_bitfield_t cnf3 = BITFIELD_P(CNF3, PHSEG2, 2);
-
-    err = reg_write_bitfield(REG_CNF1, cnf1);
-    if (err != ESP_OK) {
-        goto err;
-    }
+    reg_bitfield_t cnf2 = BITFIELD(CNF2, BTLMODE, ON) | BITFIELD(CNF2, SAM, ONCE);
     err = reg_write_bitfield(REG_CNF2, cnf2);
     if (err != ESP_OK) {
         goto err;
     }
-    err = reg_write_bitfield(REG_CNF3, cnf3);
+    err = apply_baudrate_config(get_baudrate_config(mcp25625_instance.baudrate));
     if (err != ESP_OK) {
         goto err;
     }
+
     err = reg_write(REG_CANINTE, CANINTE_ALL_ON);
     if (err != ESP_OK) {
         goto err;
@@ -463,6 +456,9 @@ err:
 
 esp_err_t apply_baudrate_config(struct baudrate_config const *config)
 {
+    if (!config) {
+	return ESP_FAIL;
+    }
     reg_bitfield_t cnf1 = BITFIELD_P(CNF1, SJW, config->sjw) | BITFIELD_P(CNF1, BRP, config->brp);
     reg_bitfield_t cnf2 = BITFIELD(CNF2, BTLMODE, ON) | BITFIELD_P(CNF2, PHSEG1, config->phseg1) |
                           BITFIELD_P(CNF2, PRSEG, config->prseg);
