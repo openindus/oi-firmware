@@ -38,14 +38,14 @@ esp_err_t mcp25625_can_init(spi_host_device_t host, gpio_num_t cs, gpio_num_t in
     mcp25625_tx_queue      = xQueueCreateStatic(CAN_TX_QUEUE_SIZE, sizeof(struct can_message),
                                                 mcp25625_tx_buffer, &mcp25625_tx_queue_buffer);
     if (!mcp25625_rx_queue || !mcp25625_tx_queue) {
-	LOGE(TAG, "Failed to create queues");
-	return ESP_FAIL;
+        LOGE(TAG, "Failed to create queues");
+        return ESP_FAIL;
     }
     // Init spi device
     return mcp25625_init_spi();
 }
 
-void mcp25625_can_begin(unsigned long baudrate, bool extended_mode)
+void mcp25625_can_begin(enum mcp25625_can_baudrate baudrate, bool extended_mode)
 {
     if (mcp25625_instance.initialized) {
         LOGW(TAG, "MCP25625 is already started, please use mcp25625_can_stop before trying to "
@@ -76,7 +76,11 @@ esp_err_t mcp25625_can_write(struct can_message *msg_ptr)
     return ret == pdPASS ? ESP_OK : ESP_FAIL;
 }
 
-bool mcp25625_can_available()
+bool mcp25625_can_available() { return uxQueueMessagesWaiting(mcp25625_rx_queue) > 0; }
+
+void mcp25625_can_reconfigure(enum mcp25625_can_baudrate baudrate, bool extended_mode)
 {
-    return uxQueueMessagesWaiting(mcp25625_rx_queue) > 0;
+    mcp25625_instance.baudrate      = baudrate;
+    mcp25625_instance.extended_mode = extended_mode;
+    mcp25625_hal_reconfigure();
 }

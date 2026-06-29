@@ -46,6 +46,13 @@ public:
     void begin(unsigned long baudrate = 1000000, bool extended_mode = false);
 
     /**
+     * @brief Reconfigure the CAN communication
+     * @param baudrate CAN baudrate in bits/s (default: 1000000)
+     * @param extended_mode Enable extended frame mode
+     */
+    void reconfigure(unsigned long baudrate = 1000000, bool extended_mode = false);
+
+    /**
      * @brief Delete CAN instance
      */
     void end(void);

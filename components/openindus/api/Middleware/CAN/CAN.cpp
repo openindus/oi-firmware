@@ -17,7 +17,12 @@ CAN::CAN(spi_host_device_t host, gpio_num_t cs, gpio_num_t intr)
 void CAN::begin(unsigned long baudrate, bool extended_mode)
 {
     mcp25625_can_init(_spi_host, _pin_cs, _pin_intr);
-    mcp25625_can_begin(baudrate, extended_mode);
+    mcp25625_can_begin((enum mcp25625_can_baudrate) baudrate, extended_mode);
+}
+
+void CAN::reconfigure(unsigned long baudrate, bool extended_mode)
+{
+    mcp25625_can_reconfigure((enum mcp25625_can_baudrate) baudrate, extended_mode);
 }
 
 void CAN::end(void)

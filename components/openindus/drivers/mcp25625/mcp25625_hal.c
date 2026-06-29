@@ -461,6 +461,65 @@ err:
     return err;
 }
 
+esp_err_t apply_baudrate_config(struct baudrate_config const *config)
+{
+    reg_bitfield_t cnf1 = BITFIELD_P(CNF1, SJW, config->sjw) | BITFIELD_P(CNF1, BRP, config->brp);
+    reg_bitfield_t cnf2 = BITFIELD(CNF2, BTLMODE, ON) | BITFIELD_P(CNF2, PHSEG1, config->phseg1) |
+                          BITFIELD_P(CNF2, PRSEG, config->prseg);
+    reg_bitfield_t cnf3 = BITFIELD_P(CNF3, PHSEG2, config->phseg2);
+
+    esp_err_t err = reg_write_bitfield(REG_CNF1, cnf1);
+    if (err != ESP_OK) {
+        return err;
+    }
+    err = reg_write_bitfield(REG_CNF2, cnf2);
+    if (err != ESP_OK) {
+        return err;
+    }
+    err = reg_write_bitfield(REG_CNF3, cnf3);
+    if (err != ESP_OK) {
+        return err;
+    }
+    return err;
+}
+
+struct baudrate_config const *get_baudrate_config(enum mcp25625_can_baudrate baudrate)
+{
+    switch (baudrate) {
+    case MCP25625_BAUD_1M:
+        return &BAUDRATE_CONFIG_1M;
+    case MCP25625_BAUD_500K:
+        return &BAUDRATE_CONFIG_500K;
+    default:
+        LOGW(TAG, "Invalid baudrate");
+        return NULL;
+    }
+}
+
+esp_err_t mcp25625_hal_reconfigure()
+{
+    reg_bitfield_t canctrl = BITFIELD(CANCTRL, REQOP, CONFIGURATION);
+    esp_err_t err          = reg_write_bitfield(REG_CANCTRL, canctrl);
+    if (err != ESP_OK) {
+        goto err;
+    }
+    err = apply_baudrate_config(get_baudrate_config(mcp25625_instance.baudrate));
+    if (err != ESP_OK) {
+        goto err;
+    }
+    canctrl = BITFIELD(CANCTRL, REQOP, NORMAL);
+    err     = reg_write_bitfield(REG_CANCTRL, canctrl);
+    if (err != ESP_OK) {
+        goto err;
+    }
+
+    LOGI(TAG, "MCP25625 reconfiguration done, CAN ready");
+    return err;
+err:
+    LOGE(TAG, "Failed to reconfigure MCP25625");
+    return err;
+}
+
 void mcp25625_hal_stop()
 {
     gpio_isr_handler_remove(mcp25625_instance.intr);

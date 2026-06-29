@@ -22,13 +22,18 @@ extern "C" {
 
 enum { CAN_MAX_BYTES = 8 };
 
+enum mcp25625_can_baudrate : uint64_t {
+    MCP25625_BAUD_1M   = 1000000U,
+    MCP25625_BAUD_500K = 500000U,
+};
+
 struct mcp25625_can_instance {
-    spi_host_device_t host; /**< SPI host device */
-    gpio_num_t cs;          /**< Chip select pin */
-    gpio_num_t intr;        /**< Interrupt pin */
-    unsigned long baudrate; /**< CAN baudrate in bits/s */
-    bool extended_mode;     /**< Extended frame mode */
-    bool initialized;       /**< Initialization status */
+    spi_host_device_t host;              /**< SPI host device */
+    gpio_num_t cs;                       /**< Chip select pin */
+    gpio_num_t intr;                     /**< Interrupt pin */
+    enum mcp25625_can_baudrate baudrate; /**< CAN baudrate in bits/s */
+    bool extended_mode;                  /**< Extended frame mode */
+    bool initialized;                    /**< Initialization status */
 };
 extern struct mcp25625_can_instance mcp25625_instance;
 
@@ -64,7 +69,12 @@ void mcp25625_can_stop();
 /**
  * @brief Begin
  */
-void mcp25625_can_begin(unsigned long baudrate, bool extended_mode);
+void mcp25625_can_begin(enum mcp25625_can_baudrate baudrate, bool extended_mode);
+
+/**
+ * @brief Modify existing configuration
+ */
+void mcp25625_can_reconfigure(enum mcp25625_can_baudrate baudrate, bool extended_mode);
 
 /**
  * @brief Deinit
@@ -99,11 +109,6 @@ void mcp25625_can_set_extended_filter();
  * @brief Does the queue have messages to read
  */
 bool mcp25625_can_available();
-
-/**
- * @brief Wait for message to be available
- */
-void mcp25625_can_wait();
 
 #ifdef __cplusplus
 }

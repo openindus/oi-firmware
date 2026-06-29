@@ -56,9 +56,40 @@ enum {
     BYTESIZE          = 8
 };
 
-/**
- * @brief MCP25625 data structure
- */
+/* Baudrate config */
+
+enum baudrate_config_sjw : uint8_t {
+    BAUDCONF_SJW_X1 = 0b00,
+    BAUDCONF_SJW_X2 = 0b01,
+    BAUDCONF_SJW_X3 = 0b10,
+    BAUDCONF_SJW_X4 = 0b11
+};
+
+struct baudrate_config {
+    enum baudrate_config_sjw sjw : 2;
+    uint8_t brp : 6;
+    uint8_t phseg1 : 3;
+    uint8_t prseg : 3;
+    uint8_t phseg2 : 3;
+};
+
+static struct baudrate_config const BAUDRATE_CONFIG_1M = {
+    .sjw = BAUDCONF_SJW_X4,
+    .brp = 0,
+    .phseg1 = 3,
+    .prseg = 1,
+    .phseg2 = 2
+};
+static struct baudrate_config const BAUDRATE_CONFIG_500K = {
+    .sjw = BAUDCONF_SJW_X4,
+    .brp = 0,
+    .phseg1 = 4,
+    .prseg = 7,
+    .phseg2 = 5
+};
+
+esp_err_t apply_baudrate_config(struct baudrate_config const *config);
+struct baudrate_config const *get_baudrate_config(enum mcp25625_can_baudrate baudrate);
 
 extern TaskHandle_t mcp25625_rx_task_handle;    /**< Task handle for RX CAN processing */
 extern TaskHandle_t mcp25625_tx_task_handle;    /**< Task handle for TX CAN processing */
@@ -93,6 +124,7 @@ IRAM_ATTR void mcp25625_isr(void *args);
 esp_err_t mcp25625_init_isr(gpio_num_t intr);
 
 esp_err_t mcp25625_hal_configure();
+esp_err_t mcp25625_hal_reconfigure();
 void mcp25625_hal_stop();
 esp_err_t mcp25625_init_spi();
 
