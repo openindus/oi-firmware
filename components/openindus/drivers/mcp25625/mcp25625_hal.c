@@ -40,6 +40,7 @@ esp_err_t reg_write(reg_addr_t reg, reg_value_t value)
     if (err != ESP_OK) {
         LOGE(TAG, "Failed to write register %#0.2x", reg);
     }
+    taskYIELD();
     return err;
 }
 
@@ -58,6 +59,7 @@ esp_err_t reg_read(reg_addr_t reg, reg_value_t *value)
     if (err != ESP_OK) {
         LOGE(TAG, "Failed to read register %#0.2x", reg);
     }
+    taskYIELD();
     return err;
 }
 
@@ -144,7 +146,7 @@ void log_register(reg_value_t value, char const *reg_name, char const *(*get_nam
         }
         index += snprintf(buf + index, sizeof(buf) - index - 1, "%s", name);
     }
-    ESP_LOGD(TAG, "%s: %#0.2x [%s]", reg_name, value, buf);
+    ESP_LOGI(TAG, "%s: %#0.2x [%s]", reg_name, value, buf);
 }
 
 /* CAN Interface */
@@ -244,7 +246,7 @@ void convert_raw_message(struct raw_can_message const *source, struct can_messag
 
 void manage_interrupts(reg_value_t value)
 {
-    log_register(value, "Interrupts", &interrupt_name);
+    // log_register(value, "Interrupts", &interrupt_name);
     for (uint8_t bit_index = 0; bit_index < BYTESIZE; bit_index++) {
         if (!(value & (0x01 << bit_index))) {
             continue;
@@ -281,7 +283,11 @@ void mcp25625_rx_task(void *args)
 void mcp25625_isr(void *args)
 {
     (void)args;
-    vTaskNotifyGiveIndexedFromISR(mcp25625_rx_task_handle, 0, NULL);
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    vTaskNotifyGiveFromISR(mcp25625_rx_task_handle, &xHigherPriorityTaskWoken);
+    if (xHigherPriorityTaskWoken == pdTRUE) {
+        portYIELD_FROM_ISR();
+    }
 }
 
 void write_msg_to_tx_buffer(struct can_message *msg)
@@ -402,12 +408,12 @@ esp_err_t mcp25625_hal_configure()
     tx_sem = xSemaphoreCreateBinary();
     xSemaphoreGive(tx_sem);
     BaseType_t ret =
-        xTaskCreate(mcp25625_rx_task, "mcp25625_rx", 4096, NULL, 10, &mcp25625_rx_task_handle);
+        xTaskCreate(mcp25625_rx_task, "mcp25625_rx", 4096, NULL, 5, &mcp25625_rx_task_handle);
     if (ret != pdPASS) {
         LOGE(TAG, "Failed to instantiate MCP25625 RX task");
         return ESP_FAIL;
     }
-    ret = xTaskCreate(mcp25625_tx_task, "mcp25625_tx", 2048, NULL, 10, &mcp25625_tx_task_handle);
+    ret = xTaskCreate(mcp25625_tx_task, "mcp25625_tx", 2048, NULL, 5, &mcp25625_tx_task_handle);
     if (ret != pdPASS) {
         LOGE(TAG, "Failed to instantiate MCP25625 TX task");
         return ESP_FAIL;
@@ -417,7 +423,7 @@ esp_err_t mcp25625_hal_configure()
         goto err;
     }
     reg_bitfield_t cnf2 = BITFIELD(CNF2, BTLMODE, ON) | BITFIELD(CNF2, SAM, ONCE);
-    err = reg_write_bitfield(REG_CNF2, cnf2);
+    err                 = reg_write_bitfield(REG_CNF2, cnf2);
     if (err != ESP_OK) {
         goto err;
     }
@@ -457,7 +463,7 @@ err:
 esp_err_t apply_baudrate_config(struct baudrate_config const *config)
 {
     if (!config) {
-	return ESP_FAIL;
+        return ESP_FAIL;
     }
     reg_bitfield_t cnf1 = BITFIELD_P(CNF1, SJW, config->sjw) | BITFIELD_P(CNF1, BRP, config->brp);
     reg_bitfield_t cnf2 = BITFIELD(CNF2, BTLMODE, ON) | BITFIELD_P(CNF2, PHSEG1, config->phseg1) |
