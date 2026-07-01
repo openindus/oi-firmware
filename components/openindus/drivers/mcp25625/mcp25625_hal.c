@@ -273,7 +273,11 @@ void mcp25625_rx_task(void *args)
     uint8_t value = 0x00;
     while (1) {
         // Wait for interrupt
-        ulTaskNotifyTake(0, portMAX_DELAY);
+	if (mcp25625_instance.intr == GPIO_NUM_NC) {
+	    vTaskDelay(pdMS_TO_TICKS(TASK_DELAY_MS));
+	} else {
+	    ulTaskNotifyTake(0, portMAX_DELAY);
+	}
         if (reg_read(REG_CANINTF, &value) != ESP_OK) {
             LOGE(TAG, "Failed to read interrupt register");
             continue;
@@ -349,6 +353,18 @@ void write_msg_to_tx_buffer(struct can_message *msg)
     reg_write_bitfield(REG_TXB0CTRL, txb0ctrl);
 }
 
+static void wait_for_tx_space()
+{
+    reg_value_t value = 0x00;
+    while (true) {
+	reg_read(REG_TXB0CTRL, &value);
+	if (!(value & TXB0CTRL_TXREQ_MASK)) {
+	    return;
+	}
+	vTaskDelay(pdMS_TO_TICKS(TASK_DELAY_MS));
+    }
+}
+
 void mcp25625_tx_task(void *args)
 {
     (void)args;
@@ -356,7 +372,11 @@ void mcp25625_tx_task(void *args)
 
     while (true) {
         // Wait for room in MCP25625
-        xSemaphoreTake(tx_sem, portMAX_DELAY);
+	if (mcp25625_instance.intr == GPIO_NUM_NC) {
+	    wait_for_tx_space();
+	} else {
+	    xSemaphoreTake(tx_sem, portMAX_DELAY);
+	}
         // Wait for data to put in MCP25625
         xQueueReceive(mcp25625_tx_queue, &msg, portMAX_DELAY);
         // Write can message inside mcp25625
@@ -366,6 +386,10 @@ void mcp25625_tx_task(void *args)
 
 esp_err_t mcp25625_init_isr(gpio_num_t intr)
 {
+    if (intr == GPIO_NUM_NC) {
+	LOGW(TAG, "Interrupt pin is not configured");
+	return ESP_OK;
+    }
     gpio_config_t gpio_interrupt_config = {.intr_type    = GPIO_INTR_NEGEDGE,
                                            .mode         = GPIO_MODE_INPUT,
                                            .pin_bit_mask = (1ULL << intr),

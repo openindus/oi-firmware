@@ -53,7 +53,8 @@ enum {
     SPI_QUEUE_SIZE    = 16,
     SPI_COMMAND_BITS  = 8,
     SPI_ADDRESS_BITS  = 8,
-    BYTESIZE          = 8
+    BYTESIZE          = 8,
+    TASK_DELAY_MS     = 100,
 };
 
 /* Baudrate config */
