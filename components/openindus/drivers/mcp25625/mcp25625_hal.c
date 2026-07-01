@@ -243,7 +243,7 @@ void convert_raw_message(struct raw_can_message const *source, struct can_messag
     destination->size = source->dlc;
     destination->IDE  = source->ide;
     destination->RTR  = source->rtr;
-    if (destination->size > 4 || destination->size < 0) {
+    if (destination->size > 8 || destination->size < 0) {
         return;
     }
     memcpy(destination->msg, source->data, destination->size);
