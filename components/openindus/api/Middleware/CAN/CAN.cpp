@@ -65,20 +65,10 @@ CAN_Message_t CAN::read(void)
 
 void CAN::setStandardFilter(uint16_t mask, uint16_t filter)
 {
-    /*
-      mcp25625_mask_config(RXB0, mask, 0);
-      mcp25625_mask_config(RXB1, mask, 0);
-      mcp25625_filter_config(RXF_0, filter, 0, false);
-      mcp25625_filter_config(RXF_1, filter, 0, false);
-    */
+    mcp25625_can_set_standard_filter(mask, filter);
 }
 
 void CAN::setExtendedFilter(uint32_t mask, uint32_t filter)
 {
-    /*
-      mcp25625_mask_config(RXB0, 0, mask);
-      mcp25625_mask_config(RXB1, 0, mask);
-      mcp25625_filter_config(RXF_0, 0, filter, true);
-      mcp25625_filter_config(RXF_1, 0, filter, true);
-    */
+    mcp25625_can_set_extended_filter(mask, filter);
 }

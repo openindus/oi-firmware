@@ -97,13 +97,15 @@ void mcp25625_can_read(struct can_message *msg_ptr);
 
 /**
  * @brief Set standard filter
+ * @warn This function cancels precedent call to mcp25625_can_set_extended_filter() and vice versa
  */
-void mcp25625_can_set_standard_filter();
+void mcp25625_can_set_standard_filter(uint16_t mask, uint16_t filter);
 
 /**
  * @brief Set extended filter
+ * @warn This function cancels precedent call to mcp25625_can_set_standard_filter() and vice versa
  */
-void mcp25625_can_set_extended_filter();
+void mcp25625_can_set_extended_filter(uint32_t mask, uint32_t filter);
 
 /**
  * @brief Does the queue have messages to read

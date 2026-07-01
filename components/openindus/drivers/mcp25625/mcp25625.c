@@ -84,3 +84,49 @@ void mcp25625_can_reconfigure(enum mcp25625_can_baudrate baudrate, bool extended
     mcp25625_instance.extended_mode = extended_mode;
     mcp25625_hal_reconfigure();
 }
+
+void mcp25625_can_set_standard_filter(uint16_t mask, uint16_t filter)
+{
+    reg_write_bitfield(REG_CANCTRL, BITFIELD(CANCTRL, REQOP, CONFIGURATION));
+
+    reg_write(REG_RXM0SIDH, (mask >> 3) & 0xFF); // 10:3 placed at 7:0
+    reg_write(REG_RXM0SIDL, (mask << 5) & 0xE0); // 2:0 placed at 7:5
+    reg_write(REG_RXM0EID8, 0x00);
+    reg_write(REG_RXM0EID0, 0x00);
+
+    reg_write(REG_RXF0SIDH, (filter >> 3) & 0xFF);
+    reg_write(REG_RXF0SIDL, (filter << 5) & 0xE0);
+    reg_write(REG_RXF0EID8, 0x00);
+    reg_write(REG_RXF0EID0, 0x00);
+    reg_write(REG_RXF1SIDH, (filter >> 3) & 0xFF);
+    reg_write(REG_RXF1SIDL, (filter << 5) & 0xE0);
+    reg_write(REG_RXF1EID8, 0x00);
+    reg_write(REG_RXF1EID0, 0x00);
+
+    reg_write_bitfield(REG_CANCTRL, BITFIELD(CANCTRL, REQOP, NORMAL));
+}
+
+void mcp25625_can_set_extended_filter(uint32_t mask, uint32_t filter)
+{
+    reg_write_bitfield(REG_CANCTRL, BITFIELD(CANCTRL, REQOP, CONFIGURATION));
+
+    // 28:21 placed at 7:0
+    reg_write(REG_RXM0SIDH, (mask >> 21) & 0xFF);
+    // 20:18 placed at 7:5, 17:16 placed at 1:0
+    reg_write(REG_RXM0SIDL, ((mask >> 13) & 0xE0) | ((mask >> 16) & 0x03));
+    // 15:8 placed at 7:0
+    reg_write(REG_RXM0EID8, (mask >> 8) & 0xFF);
+    // 7:0 placed at 7:0
+    reg_write(REG_RXM0EID0, mask & 0xFF);
+
+    reg_write(REG_RXF1SIDH, (filter >> 21) & 0xFF);
+    reg_write(REG_RXF1SIDL, ((filter >> 13) & 0xE0) | ((filter >> 16) & 0x03) | RXFSIDL_EXIDE);
+    reg_write(REG_RXF1EID8, (filter >> 8) & 0xFF);
+    reg_write(REG_RXF1EID0, filter & 0xFF);
+    reg_write(REG_RXF0SIDH, (filter >> 21) & 0xFF);
+    reg_write(REG_RXF0SIDL, ((filter >> 13) & 0xE0) | ((filter >> 16) & 0x03) | RXFSIDL_EXIDE);
+    reg_write(REG_RXF0EID8, (filter >> 8) & 0xFF);
+    reg_write(REG_RXF0EID0, filter & 0xFF);
+
+    reg_write_bitfield(REG_CANCTRL, BITFIELD(CANCTRL, REQOP, NORMAL));
+}

@@ -122,3 +122,19 @@ static reg_addr_t const REG_TXB0EID8 = 0x33; // Transmit buffer 0 extended ident
 static reg_addr_t const REG_TXB0EID0 = 0x34; // Transmit buffer 0 extended identifier low
 static reg_addr_t const REG_TXB0DLC  = 0x35; // Transmit buffer 0 data length code
 static reg_addr_t const REG_TXB0DATA = 0x36; // Transmit buffer 0 data byte 0
+
+static reg_addr_t const REG_RXM0SIDH = 0x20; // Receive buffer 0 mask standard identifier high
+static reg_addr_t const REG_RXM0SIDL = 0x21; // Transmit buffer 0 mask standard identifier low
+static reg_addr_t const REG_RXM0EID8 = 0x22; // Receive buffer 0 mask extended identifier 8-15
+static reg_addr_t const REG_RXM0EID0 = 0x23; // Transmit buffer 0 mask extended identifier 0-7
+
+static reg_addr_t const REG_RXF0SIDH = 0x00; // Receive buffer 0 filter standard identifier high
+static reg_addr_t const REG_RXF0SIDL = 0x01; // Transmit buffer 0 filter standard identifier low
+static reg_addr_t const REG_RXF0EID8 = 0x02; // Receive buffer 0 filter extended identifier 8-15
+static reg_addr_t const REG_RXF0EID0 = 0x03; // Transmit buffer 0 filter extended identifier 0-7
+static reg_addr_t const REG_RXF1SIDH = 0x04; // Receive buffer 1 filter standard identifier high
+static reg_addr_t const REG_RXF1SIDL = 0x05; // Transmit buffer 1 filter standard identifier low
+static reg_addr_t const REG_RXF1EID8 = 0x06; // Receive buffer 1 filter extended identifier 8-15
+static reg_addr_t const REG_RXF1EID0 = 0x07; // Transmit buffer 1 filter extended identifier 0-7
+
+static reg_value_t const RXFSIDL_EXIDE = 0x08;

@@ -74,19 +74,9 @@ struct baudrate_config {
 };
 
 static struct baudrate_config const BAUDRATE_CONFIG_1M = {
-    .sjw = BAUDCONF_SJW_X4,
-    .brp = 0,
-    .phseg1 = 3,
-    .prseg = 1,
-    .phseg2 = 2
-};
+    .sjw = BAUDCONF_SJW_X4, .brp = 0, .phseg1 = 3, .prseg = 1, .phseg2 = 2};
 static struct baudrate_config const BAUDRATE_CONFIG_500K = {
-    .sjw = BAUDCONF_SJW_X4,
-    .brp = 0,
-    .phseg1 = 4,
-    .prseg = 7,
-    .phseg2 = 5
-};
+    .sjw = BAUDCONF_SJW_X4, .brp = 0, .phseg1 = 4, .prseg = 7, .phseg2 = 5};
 
 esp_err_t apply_baudrate_config(struct baudrate_config const *config);
 struct baudrate_config const *get_baudrate_config(enum mcp25625_can_baudrate baudrate);
@@ -94,6 +84,7 @@ struct baudrate_config const *get_baudrate_config(enum mcp25625_can_baudrate bau
 extern TaskHandle_t mcp25625_rx_task_handle;    /**< Task handle for RX CAN processing */
 extern TaskHandle_t mcp25625_tx_task_handle;    /**< Task handle for TX CAN processing */
 extern spi_device_handle_t mcp25625_spi_handle; /**< SPI device handle */
+extern SemaphoreHandle_t spi_mutex;             /**< Mutex for SPI access to ensure thread safety */
 
 struct raw_can_message {
     uint16_t sid : 11;

@@ -22,6 +22,7 @@ TaskHandle_t mcp25625_rx_task_handle    = NULL;
 TaskHandle_t mcp25625_tx_task_handle    = NULL;
 spi_device_handle_t mcp25625_spi_handle = NULL;
 SemaphoreHandle_t tx_sem                = NULL;
+SemaphoreHandle_t spi_mutex             = NULL;
 
 /* SPI FUNCTIONS */
 
@@ -36,7 +37,9 @@ esp_err_t reg_write(reg_addr_t reg, reg_value_t value)
                                      .user             = NULL,
                                      .tx_buffer        = (uint8_t[]){value},
                                      .rx_buffer        = NULL};
-    esp_err_t err                 = spi_device_polling_transmit(mcp25625_spi_handle, &transaction);
+    xSemaphoreTake(spi_mutex, portMAX_DELAY);
+    esp_err_t err = spi_device_polling_transmit(mcp25625_spi_handle, &transaction);
+    xSemaphoreGive(spi_mutex);
     if (err != ESP_OK) {
         LOGE(TAG, "Failed to write register %#0.2x", reg);
     }
@@ -55,7 +58,9 @@ esp_err_t reg_read(reg_addr_t reg, reg_value_t *value)
                                      .user             = NULL,
                                      .tx_buffer        = NULL,
                                      .rx_buffer        = value};
-    esp_err_t err                 = spi_device_polling_transmit(mcp25625_spi_handle, &transaction);
+    xSemaphoreTake(spi_mutex, portMAX_DELAY);
+    esp_err_t err = spi_device_polling_transmit(mcp25625_spi_handle, &transaction);
+    xSemaphoreGive(spi_mutex);
     if (err != ESP_OK) {
         LOGE(TAG, "Failed to read register %#0.2x", reg);
     }
@@ -397,6 +402,7 @@ esp_err_t mcp25625_init_spi()
         .post_cb          = NULL};
     esp_err_t err =
         spi_bus_add_device(mcp25625_instance.host, &device_config, &mcp25625_spi_handle);
+    spi_mutex = xSemaphoreCreateMutex();
     if (err != ESP_OK) {
         LOGE(TAG, "Failed to add the device to the spi bus : %d", err);
     }
@@ -436,7 +442,7 @@ esp_err_t mcp25625_hal_configure()
     if (err != ESP_OK) {
         goto err;
     }
-    err = reg_write(0x60, 0x60); // RXB0CTRL - disable masks & filters
+    err = reg_write(0x60, 0x00); // RXB0CTRL - enable masks & filters
     if (err != ESP_OK) {
         goto err;
     }
