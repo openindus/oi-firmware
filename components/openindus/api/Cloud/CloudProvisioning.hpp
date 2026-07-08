@@ -34,7 +34,7 @@ struct DeviceStatus {
 namespace CloudProvisioning {
 
 /**
- * @brief POST /api/v1/plateform/{platformUuid}/device
+ * @brief POST /api/v1/platform/{platformUuid}/device
  *
  * Body: {"name","project_id","platform_token"}
  *

@@ -78,7 +78,7 @@ namespace CloudProvisioning {
 int createDevice(const std::string& host, const std::string& platformUuid,
                  const std::string& platformToken, int projectId,
                  const std::string& deviceName, DeviceCredentials& out) {
-    std::string url = "https://" + host + "/api/v1/plateform/" + platformUuid + "/device";
+    std::string url = "https://" + host + "/api/v1/platform/" + platformUuid + "/device";
 
     // Build request body
     cJSON* root = cJSON_CreateObject();

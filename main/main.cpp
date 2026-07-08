@@ -6,10 +6,9 @@
 Core core;
 
 /* Platform credentials (from your OpenIndus cloud platform) */
-#define PLATFORM_UUID  "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-#define PLATFORM_TOKEN "your-platform-token"
+#define PLATFORM_UUID  "ddd3707a-5bc8-49a3-8063-453c1ce624e8"
+#define PLATFORM_TOKEN "268w_4sBMpjppTwwrOAJvye1mGbH02SZRVIcYfPDm_U"
 #define PROJECT_ID     1
-#define CLOUD_HOST     "oicloud.openindus.com"
 
 /* The cloud handles provisioning (device uuid/token) automatically and
  * persists the credentials in NVS. */

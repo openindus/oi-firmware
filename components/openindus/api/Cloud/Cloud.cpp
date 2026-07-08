@@ -182,7 +182,7 @@ void Cloud::_setupDefaultVariables(void) {
 
     ICloudVariable* defaults[] = {_varLog, _varVersion, _varStatus, _varRestart, _varOta};
     for (auto* v : defaults) {
-        v->setTypePrefix('d'); // "def" topic type
+        v->setTypePrefix('def'); // "def" topic type
         _defaultVariables.push_back(v);
         _variables.push_back(v);
     }
