@@ -93,6 +93,7 @@ set(COMPONENT_SRCS
     "api/Middleware/Modem/Modem_private.cpp"
 
     "api/Cloud/Cloud.cpp"
+    "api/Cloud/CloudProvisioning.cpp"
     "api/Cloud/MQTT/MQTTManager.cpp"
 
     "drivers/dac8760/dac8760.c"
@@ -165,6 +166,7 @@ set(COMPONENT_INCLUDE_DIRS
     "api/Middleware/Modem"
 
     "api/Cloud"
+    "api/Cloud/MQTT"
 
     "drivers"
     "drivers/dac8760"
@@ -198,6 +200,8 @@ set(COMPONENT_REQUIRES
     "mqtt"
     "esp_http_client"
     "esp_https_ota"
+    "json"
+    "mbedtls"
     "esp_adc"
     "efuse"
     "driver"

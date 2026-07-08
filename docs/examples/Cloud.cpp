@@ -1,7 +1,5 @@
 #include "OpenIndus.h"
 #include "Arduino.h"
-#include "WiFi.h"
-#include "credentials.h"
 
 Core core;
 
@@ -9,7 +7,7 @@ Core core;
 #define PLATFORM_UUID  "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 #define PLATFORM_TOKEN "your-platform-token"
 #define PROJECT_ID     1
-#define CLOUD_HOST     "oicloud.openindus.com"
+#define CLOUD_HOST     "cloud.openindus.com"
 
 /* The cloud handles provisioning (device uuid/token) automatically and
  * persists the credentials in NVS. */
@@ -26,16 +24,10 @@ void setup(void)
 {
     printf("Hello OpenIndus!\n");
 
-    /* 1. Bring up network connectivity */
-    WiFi.mode(WIFI_STA);
-    WiFi.begin(ssid, password);
-    printf("Connecting to WiFi \"%s\"", ssid);
-    while (WiFi.status() != WL_CONNECTED) {
-        printf(".");
-        delay(500);
-    }
-    printf("\nWiFi connected, IP: %s\n", WiFi.localIP().toString().c_str());
-
+    /* 1. Bring up network connectivity (cellular / PPP) */
+    core.modem = new Modem();
+    core.modem->begin("TM"); // APN of your SIM provider
+    core.modem->connect();
 
     /* 2. React to values pushed from the cloud */
     setpoint.onReceive([](const float &value) {
@@ -48,7 +40,7 @@ void setup(void)
     cloud.addVariable(&counter);
     cloud.addVariable(&buttonOn);
     cloud.addVariable(&setpoint);
-    cloud.begin();
+    cloud.begin(CLOUD_HOST);
 }
 
 void loop(void)
