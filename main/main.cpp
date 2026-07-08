@@ -28,9 +28,9 @@ void setup(void)
     /* 1. Bring up network connectivity */
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
-    printf("Connecting to WiFi \"%s\"", ssid);
+    printf("Connecting to WiFi \"%s\"\n", ssid);
     while (WiFi.status() != WL_CONNECTED) {
-        printf(".");
+        printf("status %d\n", WiFi.status());
         delay(500);
     }
     printf("\nWiFi connected, IP: %s\n", WiFi.localIP().toString().c_str());

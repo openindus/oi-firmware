@@ -20,6 +20,7 @@ static const char* TAG = "Cloud";
 static const char* NVS_NAMESPACE = "oi_cloud";
 static const char* NVS_KEY_UUID = "dev_uuid";
 static const char* NVS_KEY_TOKEN = "dev_token";
+static const char* NVS_KEY_PLATFORM = "plat_uuid";
 
 // Timing (ms)
 static const uint32_t PROVISION_RETRY_MS = 5000;
@@ -253,7 +254,8 @@ bool Cloud::_loadCredentials(void) {
 
     std::string uuid, token, plat;
     bool ok = readStr(NVS_KEY_UUID, uuid) &&
-              readStr(NVS_KEY_TOKEN, token);
+              readStr(NVS_KEY_TOKEN, token) &&
+              readStr(NVS_KEY_PLATFORM, plat);
     nvs_close(handle);
 
     if (!ok) {
@@ -278,6 +280,7 @@ void Cloud::_saveCredentials(void) {
     }
     nvs_set_str(handle, NVS_KEY_UUID, _deviceUuid.c_str());
     nvs_set_str(handle, NVS_KEY_TOKEN, _deviceToken.c_str());
+    nvs_set_str(handle, NVS_KEY_PLATFORM, _platformUuid.c_str());
     nvs_commit(handle);
     nvs_close(handle);
     ESP_LOGI(TAG, "Saved device credentials to NVS");

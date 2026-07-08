@@ -30,7 +30,13 @@ CONFIG_ARDUINO_SELECTIVE_Insights=n
 CONFIG_ETH_SPI_ETHERNET_W5500=y
 CONFIG_FREERTOS_HZ=1000
 CONFIG_LWIP_PPP_SUPPORT=y
+
 CONFIG_MBEDTLS_CERTIFICATE_BUNDLE=y
 CONFIG_MBEDTLS_CERTIFICATE_BUNDLE_DEFAULT_FULL=y
 CONFIG_MQTT_TRANSPORT_WEBSOCKET=y
 CONFIG_MQTT_TRANSPORT_WEBSOCKET_SECURE=y
+# esp_diagnostics (pulled in transitively by arduino) wraps esp_log_write/writev
+# via -Wl,--wrap. ESP-Insights is disabled, so the wrap is unused and its
+# fragile link ordering leaves __wrap_esp_log_write undefined against esp_wifi.
+# Disable the internal wrap; nothing external wraps logging here.
+CONFIG_DIAG_USE_EXTERNAL_LOG_WRAP=y

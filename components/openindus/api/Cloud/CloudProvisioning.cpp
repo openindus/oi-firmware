@@ -94,6 +94,7 @@ int createDevice(const std::string& host, const std::string& platformUuid,
     int status = performRequest(url, HTTP_METHOD_POST, &body, nullptr, response);
 
     if (status == 201) {
+        ESP_LOGI(TAG, "device created");
         cJSON* resp = cJSON_Parse(response.c_str());
         if (resp) {
             cJSON* uuid = cJSON_GetObjectItem(resp, "uuid");
@@ -118,7 +119,7 @@ int createDevice(const std::string& host, const std::string& platformUuid,
 int getStatus(const std::string& host, const std::string& platformUuid,
               const std::string& deviceUuid, const std::string& token,
               DeviceStatus& out) {
-    std::string url = "https://" + host + "/api/v1/plateform/" + platformUuid +
+    std::string url = "https://" + host + "/api/v1/platform/" + platformUuid +
                       "/device/" + deviceUuid + "/status";
 
     std::string response;
