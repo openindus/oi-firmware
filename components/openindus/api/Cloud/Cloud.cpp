@@ -286,6 +286,23 @@ void Cloud::_saveCredentials(void) {
     ESP_LOGI(TAG, "Saved device credentials to NVS");
 }
 
+void Cloud::_clearCredentials(void) {
+    nvs_handle_t handle;
+    if (nvs_open(NVS_NAMESPACE, NVS_READWRITE, &handle) == ESP_OK) {
+        nvs_erase_key(handle, NVS_KEY_UUID);
+        nvs_erase_key(handle, NVS_KEY_TOKEN);
+        nvs_erase_key(handle, NVS_KEY_PLATFORM);
+        nvs_commit(handle);
+        nvs_close(handle);
+    } else {
+        ESP_LOGW(TAG, "Failed to open NVS to clear credentials");
+    }
+    _deviceUuid.clear();
+    _deviceToken.clear();
+    _haveCredentials = false;
+    ESP_LOGW(TAG, "Cleared device credentials");
+}
+
 /* ------------------------------------------------------------------------- */
 /* Background task / state machine                                           */
 /* ------------------------------------------------------------------------- */
@@ -300,52 +317,71 @@ void Cloud::_task(void* arg) {
 }
 
 void Cloud::_run(void) {
-    // 1. Determine credentials
-    if (_haveCredentials) {
-        _state = CloudState::CONNECTING;
-    } else {
+    // Load any persisted credentials before entering the provisioning loop.
+    // Check state machine 3-oiproduct\36-OICLOUD\02 - Architecture\recuperation_token
+    if (!_haveCredentials) {
         _state = CloudState::LOADING_CREDS;
         if (_loadCredentials()) {
-            _state = CloudState::CONNECTING;
-        } else {
+            _haveCredentials = true;
+        }
+    }
+
+    // Provisioning loop. Every branch loops back to START (this while condition)
+    // except acceptance (breaks out to MQTT) and terminal rejection (returns).
+    bool provisioned = false;
+    while (!provisioned) {
+        // START: is the device UUID & token registered?
+        bool registered = !_deviceUuid.empty() && !_deviceToken.empty();
+
+        if (!registered) {
+            // NO -> createDevice (POST /device)
             _state = CloudState::PROVISION_CREATE;
+            DeviceCredentials creds;
+            int status = CloudProvisioning::createDevice(_host, _platformUuid, _platformToken,
+                                                         _projectId, _deviceName, creds);
+            if (status == 201) {
+                // Save the information, then back to START
+                _deviceUuid = creds.uuid;
+                _deviceToken = creds.token;
+                _haveCredentials = true;
+                _saveCredentials();
+            } else if (status == 409) {
+                // Device already exists on the platform but our credentials are lost.
+                // Alert, wait, then back to START (the user must erase the device).
+                ESP_LOGE(TAG, "Device already created on the platform. "
+                              "Please erase the device to re-provision. Waiting...");
+                _state = CloudState::ERR_ALREADY_CREATED;
+                vTaskDelay(pdMS_TO_TICKS(PROVISION_RETRY_MS));
+            } else {
+                ESP_LOGW(TAG, "Device creation failed (status %d), retrying", status);
+                vTaskDelay(pdMS_TO_TICKS(PROVISION_RETRY_MS));
+            }
+            continue; // back to START
         }
-    }
 
-    // 2. Provisioning (POST /device)
-    while (_state == CloudState::PROVISION_CREATE) {
-        DeviceCredentials creds;
-        int status = CloudProvisioning::createDevice(_host, _platformUuid, _platformToken,
-                                                     _projectId, _deviceName, creds);
-        if (status == 201) {
-            _deviceUuid = creds.uuid;
-            _deviceToken = creds.token;
-            _state = CloudState::PROVISION_PENDING;
-        } else if (status == 409) {
-            ESP_LOGE(TAG, "Device already created but credentials are lost. "
-                          "Delete the device on the platform to re-provision.");
-            _state = CloudState::ERR_ALREADY_CREATED;
-            return;
-        } else {
-            ESP_LOGW(TAG, "Device creation failed (status %d), retrying", status);
-            vTaskDelay(pdMS_TO_TICKS(PROVISION_RETRY_MS));
-        }
-    }
-
-    // 3. Wait for user acceptance (GET /status)
-    while (_state == CloudState::PROVISION_PENDING) {
+        // YES -> Check access (GET /status)
+        _state = CloudState::PROVISION_PENDING;
         DeviceStatus st = {false, false};
         int status = CloudProvisioning::getStatus(_host, _platformUuid, _deviceUuid,
                                                   _deviceToken, st);
-        if (status == 200) {
-            if (!st.pending && st.accepted) {
+        if (status == 401) {
+            // Device not recognized: clear memory, back to START (-> createDevice)
+            ESP_LOGW(TAG, "Device not recognized by the platform (401), clearing credentials");
+            _clearCredentials();
+            continue; // back to START
+        } else if (status == 200) {
+            if (st.accepted) {
+                // pending false/true, accepted true -> accepted, launch MQTT
                 _saveCredentials();
                 _state = CloudState::CONNECTING;
-            } else if (!st.pending && !st.accepted) {
+                provisioned = true;
+            } else if (!st.pending) {
+                // pending false, accepted false -> device not accepted, stop the code
                 ESP_LOGE(TAG, "Device was rejected by the user");
                 _state = CloudState::ERR_REJECTED;
                 return;
             } else {
+                // pending true, accepted false -> wait and retry (back to Check access)
                 ESP_LOGI(TAG, "Device pending acceptance...");
                 vTaskDelay(pdMS_TO_TICKS(STATUS_POLL_MS));
             }
@@ -355,7 +391,7 @@ void Cloud::_run(void) {
         }
     }
 
-    // 4. Connect to MQTT broker
+    // Connect to MQTT broker
     std::string uri = "wss://" + _host + "/mqtt";
     MQTTManager* mqtt = MQTTManager::getInstance();
     if (!mqtt->init(uri.c_str(), _deviceUuid.c_str(), _deviceToken.c_str()) || !mqtt->connect()) {

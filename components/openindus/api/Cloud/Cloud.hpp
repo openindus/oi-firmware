@@ -73,6 +73,7 @@ private:
     void _run(void);
     bool _loadCredentials(void);
     void _saveCredentials(void);
+    void _clearCredentials(void);
     void _setupDefaultVariables(void);
     std::string _topicFor(const ICloudVariable* var) const;
     void _subscribeVariable(ICloudVariable* var);

@@ -60,7 +60,7 @@ int createDevice(const std::string& host, const std::string& platformUuid,
  * @param deviceUuid Device UUID
  * @param token Device token
  * @param[out] out Filled with pending/accepted on HTTP 200
- * @return HTTP status code (200 ok), or -1 on transport error
+ * @return HTTP status code (200 ok, 401 device not recognized), or -1 on transport error
  */
 int getStatus(const std::string& host, const std::string& platformUuid,
               const std::string& deviceUuid, const std::string& token,
