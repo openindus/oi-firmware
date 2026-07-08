@@ -74,7 +74,7 @@ void Cloud::useDeviceCredentials(const char* uuid, const char* token) {
 }
 
 bool Cloud::begin() {
-    begin("oicloud.openindus.com");
+    return begin("oicloud.openindus.com");
 }
 
 bool Cloud::begin(const char* host) {
@@ -182,7 +182,7 @@ void Cloud::_setupDefaultVariables(void) {
 
     ICloudVariable* defaults[] = {_varLog, _varVersion, _varStatus, _varRestart, _varOta};
     for (auto* v : defaults) {
-        v->setTypePrefix('def'); // "def" topic type
+        v->setTypePrefix('d'); // "def" topic type
         _defaultVariables.push_back(v);
         _variables.push_back(v);
     }
