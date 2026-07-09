@@ -19,6 +19,7 @@ IntVariable  counter("counter", 0, UpdateMethod::SYNCHRONOUS, UpdateType::PUBLIS
 BoolVariable buttonOn("buttonon", false, UpdateMethod::ASYNCHRONOUS, UpdateType::PUBLISH, 1000, 10000);
 FloatVariable setpoint("setpoint", 0.0f, UpdateMethod::ASYNCHRONOUS, UpdateType::SUBSCRIBE);
 IntVariable  heapSize("heapsize", 0, UpdateMethod::SYNCHRONOUS, UpdateType::PUBLISH, 2000);
+IntVariable  rssi("rssi", 0, UpdateMethod::SYNCHRONOUS, UpdateType::PUBLISH, 2000);
 
 int i = 0;
 
@@ -41,7 +42,7 @@ void setup(void)
     setpoint.onReceive([](const float &value) {
         printf("New setpoint received from cloud: %f\n", value);
     });
-
+ 
     /* 3. Register the variables and start the cloud client.
      *    begin() returns immediately; provisioning and the MQTT connection
      *    run in a background task. */
@@ -57,6 +58,7 @@ void loop(void)
     /* Just update the values; the cloud task publishes them according to
      * each variable's refresh policy. */
     i++;
+    rssi.setValue(WiFi.RSSI());
     counter.setValue(i);
     buttonOn.setValue((i % 2) == 0);
     heapSize.setValue((int)ESP.getFreeHeap());

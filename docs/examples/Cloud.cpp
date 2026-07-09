@@ -7,7 +7,6 @@ Core core;
 #define PLATFORM_UUID  "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 #define PLATFORM_TOKEN "your-platform-token"
 #define PROJECT_ID     1
-#define CLOUD_HOST     "cloud.openindus.com"
 
 /* The cloud handles provisioning (device uuid/token) automatically and
  * persists the credentials in NVS. */
@@ -40,7 +39,7 @@ void setup(void)
     cloud.addVariable(&counter);
     cloud.addVariable(&buttonOn);
     cloud.addVariable(&setpoint);
-    cloud.begin(CLOUD_HOST);
+    cloud.begin();
 }
 
 void loop(void)
