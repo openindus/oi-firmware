@@ -27,6 +27,7 @@ enum class CloudState {
     PROVISION_PENDING,  // Waiting for user acceptance (GET /status)
     CONNECTING,         // Connecting to the MQTT broker
     CONNECTED,          // Connected and operational
+    RECONNECTING,       // Link lost, attempting to re-establish the connection
     ERR_REJECTED,       // Device rejected by the user
     ERR_ALREADY_CREATED // Device already exists but credentials are lost
 };
@@ -68,9 +69,19 @@ private:
     BoolVariable* _varRestart;
     StringVariable* _varOta;
 
+    // Result of the provisioning subgraph (START in the state machine).
+    enum class ProvisionResult {
+        ACCEPTED, // Device registered and accepted, ready to connect MQTT
+        REJECTED  // Device rejected by the user, terminal
+    };
+
     // Internal helpers
     static void _task(void* arg);
     void _run(void);
+    ProvisionResult _ensureProvisioned(void); // START subgraph: register / check access
+    bool _connectMqtt(uint32_t timeoutMs);    // "Lancer la connexion mqtt"
+    void _subscribeAll(void);                 // "Abonnement aux topics"
+    void _serviceLoop(void);                  // SERVE: publish until the link is lost
     bool _loadCredentials(void);
     void _saveCredentials(void);
     void _clearCredentials(void);

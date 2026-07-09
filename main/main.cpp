@@ -28,6 +28,7 @@ void setup(void)
 
     /* 1. Bring up network connectivity */
     WiFi.mode(WIFI_STA);
+    WiFi.setAutoReconnect(true); // re-associate automatically if the AP link drops
     WiFi.begin(ssid, password);
     printf("Connecting to WiFi \"%s\"\n", ssid);
     while (WiFi.status() != WL_CONNECTED) {

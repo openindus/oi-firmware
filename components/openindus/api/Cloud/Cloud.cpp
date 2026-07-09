@@ -26,6 +26,10 @@ static const char* NVS_KEY_PLATFORM = "plat_uuid";
 static const uint32_t PROVISION_RETRY_MS = 5000;
 static const uint32_t STATUS_POLL_MS = 5000;
 static const uint32_t SERVICE_PERIOD_MS = 100;
+static const uint32_t ALREADY_CREATED_WAIT_MS = 10000; // 409: alert + wait before retry
+static const uint32_t CONNECT_TIMEOUT_MS = 30000;      // wait for MQTT_EVENT_CONNECTED
+static const uint32_t RECONNECT_GRACE_MS = 30000;      // tolerate a mid-session drop
+static const uint32_t RECONNECT_WAIT_MS = 5000;        // "Attendre 5s" before START
 
 Cloud::Cloud(const char* platformUuid, const char* platformToken, int projectId)
     : _projectId(projectId)
@@ -318,7 +322,7 @@ void Cloud::_task(void* arg) {
 
 void Cloud::_run(void) {
     // Load any persisted credentials before entering the provisioning loop.
-    // Check state machine 3-oiproduct\36-OICLOUD\02 - Architecture\recuperation_token
+    // Check state machine at 3-oiproduct\36-OICLOUD\02 - Architecture\recuperation_token
     if (!_haveCredentials) {
         _state = CloudState::LOADING_CREDS;
         if (_loadCredentials()) {
@@ -326,10 +330,42 @@ void Cloud::_run(void) {
         }
     }
 
-    // Provisioning loop. Every branch loops back to START (this while condition)
-    // except acceptance (breaks out to MQTT) and terminal rejection (returns).
-    bool provisioned = false;
-    while (!provisioned) {
+    // Top-level state machine (see the provisioning/reconnection flowchart).
+    // Outer loop = START: (re-)provision on every escalation. Inner loop = the MQTT
+    // session: connect, serve, and relaunch on a mid-session disconnect. Any connection
+    // failure falls through to a wait and back to START, which re-validates via
+    // getStatus.
+    while (true) {
+        if (_ensureProvisioned() == ProvisionResult::REJECTED) {
+            return; // terminal: device rejected by the user
+        }
+
+        // "Accepté" -> connect, serve, and relaunch MQTT on a mid-session drop.
+        while (_connectMqtt(CONNECT_TIMEOUT_MS)) {
+            _subscribeAll();
+            _state = CloudState::CONNECTED;
+            ESP_LOGI(TAG, "Cloud connected");
+
+            _serviceLoop(); // returns only when the link is lost past the grace period
+
+            // "Déconnexion mqtt" -> tear down and loop back to relaunch the connection.
+            MQTTManager::getInstance()->disconnect();
+        }
+
+        // "Erreur authentification" / connection failed -> wait, then back to START.
+        MQTTManager::getInstance()->disconnect();
+        _state = CloudState::RECONNECTING;
+        ESP_LOGW(TAG, "MQTT connection failed, re-validating provisioning in %u ms",
+                 (unsigned)RECONNECT_WAIT_MS);
+        vTaskDelay(pdMS_TO_TICKS(RECONNECT_WAIT_MS));
+    }
+}
+
+/* START subgraph: ensure the device is registered and accepted by the platform. */
+Cloud::ProvisionResult Cloud::_ensureProvisioned(void) {
+    // Every branch loops back to START (this while condition) except acceptance
+    // (returns ACCEPTED) and terminal rejection (returns REJECTED).
+    while (true) {
         // START: is the device UUID & token registered?
         bool registered = !_deviceUuid.empty() && !_deviceToken.empty();
 
@@ -351,7 +387,7 @@ void Cloud::_run(void) {
                 ESP_LOGE(TAG, "Device already created on the platform. "
                               "Please erase the device to re-provision. Waiting...");
                 _state = CloudState::ERR_ALREADY_CREATED;
-                vTaskDelay(pdMS_TO_TICKS(PROVISION_RETRY_MS));
+                vTaskDelay(pdMS_TO_TICKS(ALREADY_CREATED_WAIT_MS));
             } else {
                 ESP_LOGW(TAG, "Device creation failed (status %d), retrying", status);
                 vTaskDelay(pdMS_TO_TICKS(PROVISION_RETRY_MS));
@@ -365,21 +401,22 @@ void Cloud::_run(void) {
         int status = CloudProvisioning::getStatus(_host, _platformUuid, _deviceUuid,
                                                   _deviceToken, st);
         if (status == 401) {
-            // Device not recognized: clear memory, back to START (-> createDevice)
+            // Device not recognized: clear memory, wait, back to START (-> createDevice)
             ESP_LOGW(TAG, "Device not recognized by the platform (401), clearing credentials");
             _clearCredentials();
+            vTaskDelay(pdMS_TO_TICKS(RECONNECT_WAIT_MS));
             continue; // back to START
         } else if (status == 200) {
             if (st.accepted) {
                 // pending false/true, accepted true -> accepted, launch MQTT
                 _saveCredentials();
                 _state = CloudState::CONNECTING;
-                provisioned = true;
+                return ProvisionResult::ACCEPTED;
             } else if (!st.pending) {
                 // pending false, accepted false -> device not accepted, stop the code
                 ESP_LOGE(TAG, "Device was rejected by the user");
                 _state = CloudState::ERR_REJECTED;
-                return;
+                return ProvisionResult::REJECTED;
             } else {
                 // pending true, accepted false -> wait and retry (back to Check access)
                 ESP_LOGI(TAG, "Device pending acceptance...");
@@ -390,32 +427,62 @@ void Cloud::_run(void) {
             vTaskDelay(pdMS_TO_TICKS(STATUS_POLL_MS));
         }
     }
+}
 
-    // Connect to MQTT broker
+/* "Lancer la connexion mqtt": (re)start the client and wait for the broker connection. */
+bool Cloud::_connectMqtt(uint32_t timeoutMs) {
     std::string uri = "wss://" + _host + "/mqtt";
     MQTTManager* mqtt = MQTTManager::getInstance();
     if (!mqtt->init(uri.c_str(), _deviceUuid.c_str(), _deviceToken.c_str()) || !mqtt->connect()) {
         ESP_LOGE(TAG, "Failed to start MQTT client");
-        _state = CloudState::IDLE;
-        return;
+        return false;
     }
 
-    // Register subscriptions (deferred until MQTT_EVENT_CONNECTED re-subscribes them)
+    _state = CloudState::CONNECTING;
+    uint32_t start = cloudMillis();
+    while (!mqtt->isConnected()) {
+        if ((cloudMillis() - start) >= timeoutMs) {
+            ESP_LOGW(TAG, "MQTT did not connect within %u ms", (unsigned)timeoutMs);
+            return false;
+        }
+        vTaskDelay(pdMS_TO_TICKS(SERVICE_PERIOD_MS));
+    }
+    return true;
+}
+
+/* "Abonnement aux topics": register subscriptions for every serviced variable. */
+void Cloud::_subscribeAll(void) {
     for (auto* var : _variables) {
         _subscribeVariable(var);
     }
+}
 
-    _state = CloudState::CONNECTED;
-    ESP_LOGI(TAG, "Cloud connected");
+/* SERVE: publish variables per their refresh policy until the link is lost past the
+ * grace period. Short blips are healed transparently by esp-mqtt's auto-reconnect. */
+void Cloud::_serviceLoop(void) {
+    MQTTManager* mqtt = MQTTManager::getInstance();
+    uint32_t downSince = 0; // 0 = currently connected
 
-    // 5. Service variables: publish according to their refresh policy
     while (true) {
         uint32_t now = cloudMillis();
         if (mqtt->isConnected()) {
+            downSince = 0;
+            _state = CloudState::CONNECTED;
             for (auto* var : _variables) {
                 if (var->shouldPublish(now)) {
                     mqtt->publish(_topicFor(var), var->serialize());
                 }
+            }
+        } else {
+            // "Déconnexion mqtt": let esp-mqtt attempt to relaunch the connection, but
+            // escalate to a full reconnection (back to START) if it never recovers.
+            _state = CloudState::RECONNECTING;
+            if (downSince == 0) {
+                downSince = now;
+            } else if ((now - downSince) >= RECONNECT_GRACE_MS) {
+                ESP_LOGW(TAG, "MQTT down for more than %u ms, re-establishing connection",
+                         (unsigned)RECONNECT_GRACE_MS);
+                return;
             }
         }
         vTaskDelay(pdMS_TO_TICKS(SERVICE_PERIOD_MS));
