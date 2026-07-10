@@ -59,10 +59,21 @@ int performRequest(const std::string& url, esp_http_client_method_t method,
 
     int status = -1;
     esp_err_t err = esp_http_client_perform(client);
+    // Even when perform() reports an error, the status line may already have been
+    // received. Notably, esp_http_client tries to auto-handle a 401 by parsing the
+    // WWW-Authenticate header and returns ESP_ERR_NOT_SUPPORTED for schemes it does
+    // not implement (anything other than Basic/Digest, e.g. Bearer). In that case the
+    // HTTP status code is still valid, so surface it instead of masking it as -1.
+    int httpStatus = esp_http_client_get_status_code(client);
     if (err == ESP_OK) {
-        status = esp_http_client_get_status_code(client);
+        status = httpStatus;
         ESP_LOGI(TAG, "%s %s -> %d", (method == HTTP_METHOD_POST ? "POST" : "GET"),
                  url.c_str(), status);
+    } else if (httpStatus > 0) {
+        status = httpStatus;
+        ESP_LOGW(TAG, "%s %s -> %d (perform returned %s)",
+                 (method == HTTP_METHOD_POST ? "POST" : "GET"), url.c_str(), status,
+                 esp_err_to_name(err));
     } else {
         ESP_LOGE(TAG, "HTTP request to %s failed: %s", url.c_str(), esp_err_to_name(err));
     }
