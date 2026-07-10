@@ -91,6 +91,14 @@ int Module::_initBoardInfos(void)
     ESP_LOGI(TAG, "Software version : %s", software_version);
 
     if (local_type != _type) {
+	// Required for testbench, please do not remove without a better solution
+        if (local_type == 0) {
+            ESP_LOGE(TAG,
+                     "Board type is unknown ! You have the compiled firmware of a %s, please "
+                     "contact OpenIndus. ISSUE: Efuse not flashed",
+                     BoardUtils::typeToName(_type, local_name));
+            return err;
+        }
         // Hack because we cannot differentiate CONFIG_OI_CORE and CONFIG_OI_CORELITE for now...
         if (_type == TYPE_OI_CORE && local_type == TYPE_OI_CORELITE) {
             ESP_LOGI(TAG, "OICoreLite type checked");
