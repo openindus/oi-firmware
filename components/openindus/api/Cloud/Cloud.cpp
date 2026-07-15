@@ -232,8 +232,19 @@ void Cloud::_setupDefaultVariables(void) {
     // set once here so the ASYNCHRONOUS variable is published on connection.
     cJSON* modulesArray = cJSON_CreateArray();
 
+    // The local board (master or standalone) is always reported at position 0,
+    // read directly through Board:: getters.
+    cJSON* local = cJSON_CreateObject();
+    cJSON_AddNumberToObject(local, "serial_number", Board::getSerialNum());
+    cJSON_AddNumberToObject(local, "position", 0);
+    cJSON_AddStringToObject(local, "version", version);
+    cJSON_AddNumberToObject(local, "board_type", Board::getBoardType());
+    cJSON_AddNumberToObject(local, "variant", Board::getHardwareVariant());
+    cJSON_AddNumberToObject(local, "timestamp", Board::getTimestamp());
+    cJSON_AddItemToArray(modulesArray, local);
+
 #if defined(CONFIG_MODULE_MASTER)
-    // Master: enumerate the modules on the rail and read each one's board info.
+    // Master: also enumerate the modules on the rail and read each one's board info.
     auto slaves = Master::discoverSlaves();
     for (const auto& slave : slaves) {
         uint16_t id = slave.first;             // bus id = position on the rail
@@ -247,18 +258,15 @@ void Cloud::_setupDefaultVariables(void) {
         cJSON_AddNumberToObject(module, "serial_number", boardSN);
         cJSON_AddNumberToObject(module, "position", id);
         cJSON_AddStringToObject(module, "version", info.software_version);
+        cJSON_AddNumberToObject(module, "board_type", info.efuse.board_type);
+        cJSON_AddNumberToObject(module, "variant", info.efuse.hardware_variant);
+        cJSON_AddNumberToObject(module, "timestamp", info.efuse.timestamp);
         cJSON_AddItemToArray(modulesArray, module);
     }
-#else
-    // Standalone: no bus, just report the device's own information.
-    cJSON* module = cJSON_CreateObject();
-    cJSON_AddNumberToObject(module, "serial_number", Board::getSerialNum());
-    cJSON_AddNumberToObject(module, "position", 0);
-    cJSON_AddStringToObject(module, "version", version);
-    cJSON_AddItemToArray(modulesArray, module);
 #endif
 
     char* modulesStr = cJSON_PrintUnformatted(modulesArray);
+    printf("%s\n", modulesStr);
     if (modulesStr) {
         _varModules->setValue(std::string(modulesStr));
         cJSON_free(modulesStr);

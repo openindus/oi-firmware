@@ -61,10 +61,5 @@ void loop(void)
     counter.setValue(i);
     buttonOn.setValue((i % 2) == 0);
     heapSize.setValue((int)ESP.getFreeHeap());
-
-    if (cloud.isConnected()) {
-        cloud.setStatus(0); // 0: ok, 1: warning, 2: error
-    }
-
     delay(1000);
 }
