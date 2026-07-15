@@ -9,6 +9,11 @@
 #pragma once
 
 #include "Common.h"
+
+// The Cloud library is only available on master and standalone modules
+// (a slave has no network stack of its own and is driven over the bus).
+#if defined(CONFIG_MODULE_MASTER) || defined(CONFIG_MODULE_STANDALONE)
+
 #include "CloudVariable.hpp"
 
 // Include CloudVariable types
@@ -154,3 +159,5 @@ public:
     const std::string& getPlatformToken(void) const { return _platformToken; }
     const std::string& getDeviceUuid(void) const { return _deviceUuid; }
 };
+
+#endif // CONFIG_MODULE_MASTER || CONFIG_MODULE_STANDALONE

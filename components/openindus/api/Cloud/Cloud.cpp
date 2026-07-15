@@ -15,6 +15,10 @@
 #include "nvs.h"
 #include "cJSON.h"
 
+// The Cloud library is only available on master and standalone modules
+// (a slave has no network stack of its own and is driven over the bus).
+#if defined(CONFIG_MODULE_MASTER) || defined(CONFIG_MODULE_STANDALONE)
+
 #if defined(CONFIG_MODULE_MASTER)
 #include "Master.h"
 #endif
@@ -226,8 +230,10 @@ void Cloud::_setupDefaultVariables(void) {
     // Publish the connected modules as a JSON array. Each entry holds the module
     // serial number, its position (bus id) and its software version. The value is
     // set once here so the ASYNCHRONOUS variable is published on connection.
-#if defined(CONFIG_MODULE_MASTER)
     cJSON* modulesArray = cJSON_CreateArray();
+
+#if defined(CONFIG_MODULE_MASTER)
+    // Master: enumerate the modules on the rail and read each one's board info.
     auto slaves = Master::discoverSlaves();
     for (const auto& slave : slaves) {
         uint16_t id = slave.first;             // bus id = position on the rail
@@ -243,13 +249,21 @@ void Cloud::_setupDefaultVariables(void) {
         cJSON_AddStringToObject(module, "version", info.software_version);
         cJSON_AddItemToArray(modulesArray, module);
     }
+#else
+    // Standalone: no bus, just report the device's own information.
+    cJSON* module = cJSON_CreateObject();
+    cJSON_AddNumberToObject(module, "serial_number", Board::getSerialNum());
+    cJSON_AddNumberToObject(module, "position", 0);
+    cJSON_AddStringToObject(module, "version", version);
+    cJSON_AddItemToArray(modulesArray, module);
+#endif
+
     char* modulesStr = cJSON_PrintUnformatted(modulesArray);
     if (modulesStr) {
         _varModules->setValue(std::string(modulesStr));
         cJSON_free(modulesStr);
     }
     cJSON_Delete(modulesArray);
-#endif
 }
 
 void Cloud::log(const std::string& message) {
@@ -513,3 +527,5 @@ void Cloud::_serviceLoop(void) {
         vTaskDelay(pdMS_TO_TICKS(SERVICE_PERIOD_MS));
     }
 }
+
+#endif // CONFIG_MODULE_MASTER || CONFIG_MODULE_STANDALONE
