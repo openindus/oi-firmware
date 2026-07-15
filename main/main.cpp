@@ -26,7 +26,6 @@ int i = 0;
 void setup(void)
 {
     printf("Hello OpenIndus!\n");
-
     /* 1. Bring up network connectivity */
     WiFi.mode(WIFI_STA);
     WiFi.setAutoReconnect(true); // re-associate automatically if the AP link drops

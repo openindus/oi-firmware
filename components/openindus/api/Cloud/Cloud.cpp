@@ -15,6 +15,10 @@
 #include "nvs.h"
 #include "cJSON.h"
 
+#if defined(CONFIG_MODULE_MASTER)
+#include "Master.h"
+#endif
+
 static const char* TAG = "Cloud";
 
 static const char* NVS_NAMESPACE = "oi_cloud";
@@ -38,9 +42,9 @@ Cloud::Cloud(const char* platformUuid, const char* platformToken, int projectId)
     , _taskHandle(nullptr)
     , _varLog(nullptr)
     , _varVersion(nullptr)
-    , _varStatus(nullptr)
     , _varRestart(nullptr)
     , _varOta(nullptr)
+    , _varModules(nullptr)
 {
     if (platformUuid) {
         _platformUuid = platformUuid;
@@ -119,8 +123,7 @@ void Cloud::end(void) {
         delete v;
     }
     _defaultVariables.clear();
-    _varLog = _varVersion = _varOta = nullptr;
-    _varStatus = nullptr;
+    _varLog = _varVersion = _varOta = _varModules = nullptr;
     _varRestart = nullptr;
 }
 
@@ -181,11 +184,11 @@ void Cloud::_setupDefaultVariables(void) {
 
     _varLog = new StringVariable("log", "", UpdateMethod::ASYNCHRONOUS, UpdateType::PUBLISH);
     _varVersion = new StringVariable("version", "", UpdateMethod::ASYNCHRONOUS, UpdateType::PUBLISH);
-    _varStatus = new IntVariable("status", 0, UpdateMethod::ASYNCHRONOUS, UpdateType::PUBLISH);
+    _varModules = new StringVariable("modules", "", UpdateMethod::ASYNCHRONOUS,UpdateType::PUBLISH);
     _varRestart = new BoolVariable("restart", false, UpdateMethod::ASYNCHRONOUS, UpdateType::SUBSCRIBE);
     _varOta = new StringVariable("ota", "", UpdateMethod::ASYNCHRONOUS, UpdateType::SUBSCRIBE);
 
-    ICloudVariable* defaults[] = {_varLog, _varVersion, _varStatus, _varRestart, _varOta};
+    ICloudVariable* defaults[] = {_varLog, _varVersion, _varModules, _varRestart, _varOta};
     for (auto* v : defaults) {
         v->setTypePrefix('d'); // "def" topic type
         _defaultVariables.push_back(v);
@@ -219,17 +222,39 @@ void Cloud::_setupDefaultVariables(void) {
     char version[32] = {0};
     Board::getSoftwareVersion(version);
     _varVersion->setValue(std::string(version));
+
+    // Publish the connected modules as a JSON array. Each entry holds the module
+    // serial number, its position (bus id) and its software version. The value is
+    // set once here so the ASYNCHRONOUS variable is published on connection.
+#if defined(CONFIG_MODULE_MASTER)
+    cJSON* modulesArray = cJSON_CreateArray();
+    auto slaves = Master::discoverSlaves();
+    for (const auto& slave : slaves) {
+        uint16_t id = slave.first;             // bus id = position on the rail
+        uint16_t boardType = slave.second.first;
+        uint32_t boardSN = slave.second.second;
+
+        Board_Info_t info = {};
+        Master::getBoardInfo(boardType, boardSN, &info);
+
+        cJSON* module = cJSON_CreateObject();
+        cJSON_AddNumberToObject(module, "serial_number", boardSN);
+        cJSON_AddNumberToObject(module, "position", id);
+        cJSON_AddStringToObject(module, "version", info.software_version);
+        cJSON_AddItemToArray(modulesArray, module);
+    }
+    char* modulesStr = cJSON_PrintUnformatted(modulesArray);
+    if (modulesStr) {
+        _varModules->setValue(std::string(modulesStr));
+        cJSON_free(modulesStr);
+    }
+    cJSON_Delete(modulesArray);
+#endif
 }
 
 void Cloud::log(const std::string& message) {
     if (_varLog) {
         _varLog->setValue(message);
-    }
-}
-
-void Cloud::setStatus(int status) {
-    if (_varStatus) {
-        _varStatus->setValue(status);
     }
 }
 

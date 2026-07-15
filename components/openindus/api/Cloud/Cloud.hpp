@@ -65,9 +65,9 @@ private:
     // Default variables (spec 2.2)
     StringVariable* _varLog;
     StringVariable* _varVersion;
-    IntVariable* _varStatus;
     BoolVariable* _varRestart;
     StringVariable* _varOta;
+    StringVariable* _varModules;
 
     // Result of the provisioning subgraph (START in the state machine).
     enum class ProvisionResult {
@@ -150,11 +150,6 @@ public:
      * @brief Publish a log message (default "log" variable).
      */
     void log(const std::string& message);
-
-    /**
-     * @brief Set the module status (default "status" variable): 0 ok, 1 warning, 2 error.
-     */
-    void setStatus(int status);
 
     const std::string& getPlatformToken(void) const { return _platformToken; }
     const std::string& getDeviceUuid(void) const { return _deviceUuid; }
