@@ -40,7 +40,7 @@ int Master::init(void)
     xTaskCreate(_busCanTask, "BusCAN task", 4096, NULL, 1, &_busTaskHandle);
     
     ESP_LOGI(TAG, "Create LED synchronization task");
-    xTaskCreate(_ledSyncTask, "LED Sync task", 2048, NULL, 1, &_ledSyncTaskHandle);
+    xTaskCreate(_ledSyncTask, "LED Sync task", 4096, NULL, 1, &_ledSyncTaskHandle);
 
     _state = STATE_RUNNING;
 
