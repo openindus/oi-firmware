@@ -266,7 +266,6 @@ void Cloud::_setupDefaultVariables(void) {
 #endif
 
     char* modulesStr = cJSON_PrintUnformatted(modulesArray);
-    printf("%s\n", modulesStr);
     if (modulesStr) {
         _varModules->setValue(std::string(modulesStr));
         cJSON_free(modulesStr);
