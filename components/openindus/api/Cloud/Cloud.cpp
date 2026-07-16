@@ -240,7 +240,7 @@ void Cloud::_setupDefaultVariables(void) {
     // read directly through Board:: getters.
     cJSON* local = cJSON_CreateObject();
     cJSON_AddNumberToObject(local, "serial_number", Board::getSerialNum());
-    cJSON_AddNumberToObject(local, "position", 0);
+    cJSON_AddNumberToObject(local, "position", 1023); // max value possible is 1023 so we force first
     cJSON_AddStringToObject(local, "version", version);
     cJSON_AddNumberToObject(local, "board_type", Board::getBoardType());
     cJSON_AddNumberToObject(local, "variant", Board::getHardwareVariant());
