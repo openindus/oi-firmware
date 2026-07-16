@@ -186,9 +186,13 @@ void Cloud::_setupDefaultVariables(void) {
         return; // already set up
     }
 
-    _varLog = new StringVariable("log", "", UpdateMethod::ASYNCHRONOUS, UpdateType::PUBLISH);
-    _varVersion = new StringVariable("version", "", UpdateMethod::ASYNCHRONOUS, UpdateType::PUBLISH);
-    _varModules = new StringVariable("modules", "", UpdateMethod::ASYNCHRONOUS,UpdateType::PUBLISH);
+    // These publisher defaults use ASYNCHRONOUS with maxRefreshInterval = 0, which
+    // disables the periodic heartbeat: they are published only when their value
+    // changes. version/modules are set once below (during connection setup) so each
+    // is published exactly once on connection; log is published whenever log() runs.
+    _varLog = new StringVariable("log", "", UpdateMethod::ASYNCHRONOUS, UpdateType::PUBLISH, 0, 0);
+    _varVersion = new StringVariable("version", "", UpdateMethod::ASYNCHRONOUS, UpdateType::PUBLISH, 0, 0);
+    _varModules = new StringVariable("modules", "", UpdateMethod::ASYNCHRONOUS, UpdateType::PUBLISH, 0, 0);
     _varRestart = new BoolVariable("restart", false, UpdateMethod::ASYNCHRONOUS, UpdateType::SUBSCRIBE);
     _varOta = new StringVariable("ota", "", UpdateMethod::ASYNCHRONOUS, UpdateType::SUBSCRIBE);
 
@@ -391,6 +395,16 @@ void Cloud::_run(void) {
             _subscribeAll();
             _state = CloudState::CONNECTED;
             ESP_LOGI(TAG, "Cloud connected");
+
+            // Re-announce the static info (version, modules) once on each new MQTT
+            // session. They carry maxRefreshInterval = 0, so after this single
+            // publish they stay silent until their value actually changes.
+            if (_varVersion) {
+                _varVersion->requestPublish();
+            }
+            if (_varModules) {
+                _varModules->requestPublish();
+            }
 
             _serviceLoop(); // returns only when the link is lost past the grace period
 

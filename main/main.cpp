@@ -15,7 +15,7 @@ Core core;
 OICloud cloud(PLATFORM_UUID, PLATFORM_TOKEN, PROJECT_ID);
 
 /* Cloud variables: each maps to an MQTT topic. */
-IntVariable  counter("counter", 0, UpdateMethod::SYNCHRONOUS, UpdateType::PUBLISH, 1000);
+IntVariable  counter("counter", 0, UpdateMethod::ASYNCHRONOUS, UpdateType::PUBLISH, 0, 0);
 BoolVariable buttonOn("buttonon", false, UpdateMethod::ASYNCHRONOUS, UpdateType::PUBLISH, 1000, 10000);
 FloatVariable setpoint("setpoint", 0.0f, UpdateMethod::ASYNCHRONOUS, UpdateType::SUBSCRIBE);
 IntVariable  heapSize("heapsize", 0, UpdateMethod::SYNCHRONOUS, UpdateType::PUBLISH, 2000);

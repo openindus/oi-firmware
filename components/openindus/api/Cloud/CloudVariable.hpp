@@ -85,6 +85,12 @@ public:
     /** @brief Override the MQTT topic type prefix (used by default variables -> 'd'). */
     void setTypePrefix(char prefix) { _typePrefix = prefix; }
 
+    /**
+     * @brief Force the variable to be published on the next service pass, without
+     * changing its value. Used to re-announce a variable on each new MQTT session.
+     */
+    void requestPublish(void) { _dirty = true; }
+
     bool isPublisher(void) const {
         return _updateType == UpdateType::PUBLISH || _updateType == UpdateType::BOTH;
     }
@@ -104,6 +110,8 @@ public:
      * SYNCHRONOUS  : true once per _syncInterval.
      * ASYNCHRONOUS : true when the value changed and at least _minInterval elapsed,
      *                or when _maxInterval elapsed regardless of change.
+     *                A _maxInterval of 0 disables the periodic heartbeat, so the
+     *                variable is published only when its value actually changes.
      * When it returns true it also records the publish time and clears the dirty flag.
      */
     bool shouldPublish(uint32_t nowMs) {
@@ -120,7 +128,7 @@ public:
             uint32_t elapsed = nowMs - _lastPublishMs;
             if (_dirty && elapsed >= _minInterval) {
                 publish = true;
-            } else if (elapsed >= _maxInterval) {
+            } else if (_maxInterval != 0 && elapsed >= _maxInterval) {
                 publish = true;
             }
         }
