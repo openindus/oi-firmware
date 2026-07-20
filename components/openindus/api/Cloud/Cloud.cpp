@@ -39,7 +39,8 @@ static const uint32_t CONNECT_TIMEOUT_MS = 30000;      // wait for MQTT_EVENT_CO
 static const uint32_t RECONNECT_GRACE_MS = 30000;      // tolerate a mid-session drop
 static const uint32_t RECONNECT_WAIT_MS = 5000;        // "Attendre 5s" before START
 
-Cloud::Cloud(const char* platformUuid, const char* platformToken, int projectId)
+Cloud::Cloud(const char* platformUuid, const char* platformToken, int projectId,
+             const char* projectVersion)
     : _projectId(projectId)
     , _haveCredentials(false)
     , _state(CloudState::IDLE)
@@ -55,6 +56,9 @@ Cloud::Cloud(const char* platformUuid, const char* platformToken, int projectId)
     }
     if (platformToken) {
         _platformToken = platformToken;
+    }
+    if (projectVersion) {
+        _projectVersion = projectVersion;
     }
 
     // Device name = system MAC address (used as provisioning "name")
@@ -226,10 +230,11 @@ void Cloud::_setupDefaultVariables(void) {
         }
     });
 
-    // Publish the firmware version
+    // Publish the version: use the user-provisioned project version if given,
+    // otherwise fall back to the firmware's software version.
     char version[32] = {0};
     Board::getSoftwareVersion(version);
-    _varVersion->setValue(std::string(version));
+    _varVersion->setValue(_projectVersion.empty() ? std::string(version) : _projectVersion);
 
     // Publish the connected modules as a JSON array. Each entry holds the module
     // serial number, its position (bus id) and its software version. The value is

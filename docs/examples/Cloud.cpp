@@ -4,13 +4,14 @@
 Core core;
 
 /* Platform credentials (from your OpenIndus cloud platform) */
-#define PLATFORM_UUID  "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-#define PLATFORM_TOKEN "your-platform-token"
-#define PROJECT_ID     1
+#define PLATFORM_UUID   "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+#define PLATFORM_TOKEN  "your-platform-token"
+#define PROJECT_ID      1
+#define PROJECT_VERSION "1.0.0"
 
 /* The cloud handles provisioning (device uuid/token) automatically and
  * persists the credentials in NVS. */
-OICloud cloud(PLATFORM_UUID, PLATFORM_TOKEN, PROJECT_ID);
+OICloud cloud(PLATFORM_UUID, PLATFORM_TOKEN, PROJECT_ID, PROJECT_VERSION);
 
 /* Cloud variables: each maps to an MQTT topic. */
 IntVariable  counter("counter", 0, UpdateMethod::SYNCHRONOUS, UpdateType::PUBLISH, 1000);
@@ -49,10 +50,6 @@ void loop(void)
     i++;
     counter.setValue(i);
     buttonOn.setValue((i % 2) == 0);
-
-    if (cloud.isConnected()) {
-        cloud.setStatus(0); // 0: ok, 1: warning, 2: error
-    }
 
     delay(1000);
 }

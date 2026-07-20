@@ -6,13 +6,14 @@
 Core core;
 
 /* Platform credentials (from your OpenIndus cloud platform) */
-#define PLATFORM_UUID  "ddd3707a-5bc8-49a3-8063-453c1ce624e8"
-#define PLATFORM_TOKEN "268w_4sBMpjppTwwrOAJvye1mGbH02SZRVIcYfPDm_U"
-#define PROJECT_ID     2
+#define PLATFORM_UUID   "ddd3707a-5bc8-49a3-8063-453c1ce624e8"
+#define PLATFORM_TOKEN  "268w_4sBMpjppTwwrOAJvye1mGbH02SZRVIcYfPDm_U"
+#define PROJECT_ID      2
+#define PROJECT_VERSION "1.0.0"
 
 /* The cloud handles provisioning (device uuid/token) automatically and
  * persists the credentials in NVS. */
-OICloud cloud(PLATFORM_UUID, PLATFORM_TOKEN, PROJECT_ID);
+OICloud cloud(PLATFORM_UUID, PLATFORM_TOKEN, PROJECT_ID, PROJECT_VERSION);
 
 /* Cloud variables: each maps to an MQTT topic. */
 IntVariable  counter("counter", 0, UpdateMethod::ASYNCHRONOUS, UpdateType::PUBLISH, 0, 0);

@@ -51,6 +51,7 @@ private:
     std::string _platformUuid;
     std::string _platformToken;
     int _projectId;
+    std::string _projectVersion; // optional; empty if not provisioned by the user
 
     // Device identity
     std::string _deviceName;  // MAC address, used as provisioning "name"
@@ -101,8 +102,12 @@ public:
      * @param platformUuid Platform UUID
      * @param platformToken Platform authentication token
      * @param projectId Project id the device belongs to
+     * @param projectVersion Project version to publish as the "version" cloud
+     *        variable. If null/empty (not provisioned), falls back to the
+     *        firmware's software version (Board::getSoftwareVersion()).
      */
-    Cloud(const char* platformUuid, const char* platformToken, int projectId);
+    Cloud(const char* platformUuid, const char* platformToken, int projectId,
+          const char* projectVersion = nullptr);
     ~Cloud();
 
     /**
