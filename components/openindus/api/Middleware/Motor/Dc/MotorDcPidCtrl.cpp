@@ -186,18 +186,18 @@ struct HomingCtx_t {
     SemaphoreHandle_t sem;
 };
 
-void MotorDcPidCtrl::homing(HomingType_e type, DinNum_t dinNum, MotorNum_t motor,
+bool MotorDcPidCtrl::homing(HomingType_e type, DinNum_t dinNum, MotorNum_t motor,
     float dutyCycle, bool invertLogic, uint32_t timeoutMs)
 {
     if ((size_t)motor >= _motorEncoders.size() || _motorEncoders[motor] == nullptr) {
         ESP_LOGE(TAG, "No encoder attached to motor %d — call attachEncoder() first", (int)motor+1);
-        return;
+        return false;
     }
 
     SemaphoreHandle_t homingDone = xSemaphoreCreateBinary();
     if (homingDone == nullptr) {
         ESP_LOGE(TAG, "Failed to create homing semaphore");
-        return;
+        return false;
     }
 
     HomingCtx_t* ctx = new HomingCtx_t{motor, _motorEncoders[motor], homingDone};
@@ -223,12 +223,15 @@ void MotorDcPidCtrl::homing(HomingType_e type, DinNum_t dinNum, MotorNum_t motor
     if (xSemaphoreTake(homingDone, pdMS_TO_TICKS(timeoutMs)) != pdPASS) {
         ESP_LOGW(TAG, "Homing timeout for motor %d", (int)motor+1);
         MotorDc::brake(motor);
+        din->detachInterrupt(dinNum);
+        vSemaphoreDelete(homingDone);
+        delete ctx;
+        return false;
     } else {
         ESP_LOGI(TAG, "Homing complete for motor %d", (int)motor+1);
     }
-
     din->detachInterrupt(dinNum);
     vSemaphoreDelete(homingDone);
     delete ctx;
+    return true;
 }
-
