@@ -20,9 +20,16 @@
 static const char* TAG = "CloudOTA";
 
 // Streaming buffer: the image is never staged in RAM, this single chunk is reused
-// for every esp_http_client_read() -> esp_ota_write() hop.
-static const int BUFFER_SIZE = 1024;
+// for every esp_http_client_read() -> esp_ota_write() hop, one flash sector at a time.
+static const int BUFFER_SIZE = 4096;
 static char otaWriteData[BUFFER_SIZE + 1] = {0};
+
+// Writing flash relies on CONFIG_SPI_FLASH_AUTO_SUSPEND (set in sdkconfig.defaults):
+// the controller suspends the erase/program whenever the cache needs the bus. Without
+// it, every esp_ota_write() instead turns the flash cache off and parks the other core,
+// and an application interrupt that is not IRAM-safe firing on the flashing core during
+// that window deadlocks the operation -- an "Interrupt wdt timeout" panic. Keep it on:
+// it is what makes an update independent of what the application code does.
 
 // Timing / sizing
 static const int PROGRESS_STEP_BYTES = 64 * 1024;  // publish PROGRESS every 64 KB

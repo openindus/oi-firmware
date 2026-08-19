@@ -40,3 +40,16 @@ CONFIG_MQTT_TRANSPORT_WEBSOCKET_SECURE=y
 # fragile link ordering leaves __wrap_esp_log_write undefined against esp_wifi.
 # Disable the internal wrap; nothing external wraps logging here.
 CONFIG_DIAG_USE_EXTERNAL_LOG_WRAP=y
+
+# Without auto-suspend, every flash write (i.e. every esp_ota_write) turns the flash
+# cache off and parks the other core, and any application interrupt that is not
+# IRAM-safe and fires on the flashing core during the handshake that gets there
+# deadlocks the operation -- reported as "Interrupt wdt timeout". That makes OTA
+# dependent on what the application does, which it must not be. With auto-suspend the
+# flash controller suspends the erase/program whenever the cache needs the bus, so no
+# cache is disabled, no core is parked and no interrupt is masked.
+# The trade is some latency jitter (tSUS, see CONFIG_SPI_FLASH_SUSPEND_TSUS_VAL_US) and
+# slower erase/write throughput. Requires a flash part whose suspend support has been
+# qualified -- check the part against `Optional Features for Flash` > `Auto Suspend &
+# Resume` in the ESP-IDF Programming Guide, and tSUS against its datasheet.
+CONFIG_SPI_FLASH_AUTO_SUSPEND=y

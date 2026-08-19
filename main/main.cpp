@@ -11,7 +11,7 @@
 /* PROJECT_VERSION must stay identical to the version configured for this
  * project on the OpenIndus web platform, otherwise OTA updates cannot be
  * handled correctly. */
-#define PROJECT_VERSION "propre"
+#define PROJECT_VERSION "1.0.0"
 
 /* The cloud handles provisioning (device uuid/token) automatically and
  * persists the credentials in NVS. */
