@@ -94,6 +94,7 @@ set(COMPONENT_SRCS
 
     "api/Cloud/Cloud.cpp"
     "api/Cloud/CloudProvisioning.cpp"
+    "api/Cloud/CloudOTA.cpp"
     "api/Cloud/MQTT/MQTTManager.cpp"
 
     "drivers/dac8760/dac8760.c"

@@ -55,8 +55,14 @@ The following variables are created and managed automatically to provide base fu
      - Function
    * - ``ota``
      - string
-     - subscribe
-     - Receives a JSON ``{version, url}`` describing a firmware update
+     - subscribe / publish
+     - Firmware update channel. Carries a JSON command envelope
+       ``{"cmd": <int>, "args": <string|int>}`` in both directions:
+       ``cmd = 0`` (UPDATE, cloud to module) with ``args`` the firmware download
+       URL; ``cmd = 1`` (PROGRESS, module to cloud) with ``args`` the number of
+       bytes written so far; ``cmd = 2`` (END, module to cloud) with ``args`` the
+       error code, ``0`` meaning success. On UPDATE the module streams the image
+       into its inactive OTA partition and reboots on it once the image is valid.
    * - ``restart``
      - bool
      - subscribe

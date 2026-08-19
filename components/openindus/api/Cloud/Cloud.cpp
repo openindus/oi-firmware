@@ -9,6 +9,7 @@
 #include "Cloud.hpp"
 #include "MQTTManager.hpp"
 #include "CloudProvisioning.hpp"
+#include "CloudOTA.hpp"
 #include "Board.h"
 #include "esp_mac.h"
 #include "esp_system.h"
@@ -105,6 +106,7 @@ bool Cloud::begin(const char* host) {
     }
 
     _host = host;
+    CloudOTA::getInstance()->setHost(_host);
     _setupDefaultVariables();
 
     BaseType_t ret = xTaskCreate(_task, "Cloud task", 8192, this, 5, &_taskHandle);
@@ -118,6 +120,14 @@ bool Cloud::begin(const char* host) {
 }
 
 void Cloud::end(void) {
+    // The OTA task is independent of the Cloud task and holds no pointer to the
+    // variables freed below, so it is left to finish; it is only muted, since the
+    // MQTT client it published through is about to go away.
+    if (CloudOTA::getInstance()->isInProgress()) {
+        ESP_LOGW(TAG, "Stopping the Cloud while an OTA is in progress");
+    }
+    CloudOTA::getInstance()->setPublisher(nullptr);
+
     if (_taskHandle) {
         vTaskDelete(_taskHandle);
         _taskHandle = nullptr;
@@ -215,19 +225,12 @@ void Cloud::_setupDefaultVariables(void) {
         }
     });
 
-    // ota -> parse {version,url} and log (no download in this iteration)
+    // ota -> the {cmd,args} command envelope is handled by CloudOTA (see CloudOTA.hpp).
+    // This callback runs on the MQTT event task, so it only parses and hands off; the
+    // download itself runs on a task of its own. The matching publisher is installed
+    // in _subscribeAll(), once the device UUID (and therefore the topic) is known.
     _varOta->onReceive([](const std::string& payload) {
-        cJSON* root = cJSON_Parse(payload.c_str());
-        if (root) {
-            cJSON* version = cJSON_GetObjectItem(root, "version");
-            cJSON* url = cJSON_GetObjectItem(root, "url");
-            ESP_LOGI(TAG, "OTA request received - version: %s, url: %s",
-                     cJSON_IsString(version) ? version->valuestring : "?",
-                     cJSON_IsString(url) ? url->valuestring : "?");
-            cJSON_Delete(root);
-        } else {
-            ESP_LOGW(TAG, "OTA payload is not valid JSON: %s", payload.c_str());
-        }
+        CloudOTA::getInstance()->handlePayload(payload);
     });
 
     // Publish the version: use the user-provisioned project version if given,
@@ -358,6 +361,7 @@ void Cloud::_clearCredentials(void) {
     }
     _deviceUuid.clear();
     _deviceToken.clear();
+    CloudOTA::getInstance()->setToken("");
     _haveCredentials = false;
     ESP_LOGW(TAG, "Cleared device credentials");
 }
@@ -498,6 +502,11 @@ Cloud::ProvisionResult Cloud::_ensureProvisioned(void) {
 bool Cloud::_connectMqtt(uint32_t timeoutMs) {
     std::string uri = "wss://" + _host + "/mqtt";
     MQTTManager* mqtt = MQTTManager::getInstance();
+
+    // The device token only exists once provisioning succeeded; install it here,
+    // where it is known to be valid, so the OTA download can authenticate.
+    CloudOTA::getInstance()->setToken(_deviceToken);
+
     if (!mqtt->init(uri.c_str(), _deviceUuid.c_str(), _deviceToken.c_str()) || !mqtt->connect()) {
         ESP_LOGE(TAG, "Failed to start MQTT client");
         return false;
@@ -519,6 +528,17 @@ bool Cloud::_connectMqtt(uint32_t timeoutMs) {
 void Cloud::_subscribeAll(void) {
     for (auto* var : _variables) {
         _subscribeVariable(var);
+    }
+
+    // OTA progress/end are published straight through the MQTT client, on the same
+    // topic the ota variable subscribes to. The topic needs the device UUID, which
+    // only exists once provisioning succeeded, so the publisher is (re)installed
+    // here rather than in _setupDefaultVariables().
+    if (_varOta) {
+        std::string otaTopic = _topicFor(_varOta);
+        CloudOTA::getInstance()->setPublisher([otaTopic](const std::string& payload) {
+            MQTTManager::getInstance()->publish(otaTopic, payload, 1);
+        });
     }
 }
 
