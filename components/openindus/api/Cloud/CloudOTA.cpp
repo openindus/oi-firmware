@@ -8,7 +8,7 @@
 
 #include "CloudOTA.hpp"
 
-#if defined(CONFIG_MODULE_MASTER) || defined(CONFIG_MODULE_STANDALONE)
+#if defined(CONFIG_OI_CORE)
 
 #include "esp_http_client.h"
 #include "esp_crt_bundle.h"

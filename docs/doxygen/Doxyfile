@@ -44,6 +44,7 @@ INPUT += ./../components/openindus/api/Middleware/Analog/InputsLS/Sensors/Thermo
 INPUT += ./../components/openindus/api/Middleware/Relays/Relays.h
 INPUT += ./../components/openindus/api/Cloud/Cloud.hpp
 INPUT += ./../components/openindus/api/Cloud/CloudVariable.hpp
+INPUT += ./../components/openindus/api/Cloud/CloudOTA.hpp
 
 ENABLE_PREPROCESSING   = NO
 

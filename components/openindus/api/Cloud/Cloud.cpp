@@ -18,7 +18,7 @@
 
 // The Cloud library is only available on master and standalone modules
 // (a slave has no network stack of its own and is driven over the bus).
-#if defined(CONFIG_MODULE_MASTER) || defined(CONFIG_MODULE_STANDALONE)
+#if defined(CONFIG_OI_CORE)
 
 #if defined(CONFIG_MODULE_MASTER)
 #include "Master.h"
