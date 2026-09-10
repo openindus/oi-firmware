@@ -7,6 +7,11 @@
  */
 
 #include "CloudProvisioning.hpp"
+
+// The Cloud library is only availableon core module
+// (a slave has no network stack of its own and is driven over the bus).
+#if defined(CONFIG_OI_CORE)
+
 #include "esp_http_client.h"
 #include "esp_crt_bundle.h"
 #include "cJSON.h"
@@ -154,3 +159,5 @@ int getStatus(const std::string& host, const std::string& platformUuid,
 }
 
 } // namespace CloudProvisioning
+
+#endif // CONFIG_OI_CORE

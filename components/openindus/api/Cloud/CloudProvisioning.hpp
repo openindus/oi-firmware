@@ -10,6 +10,10 @@
 
 #include "Common.h"
 
+// The Cloud library is only availableon core module
+// (a slave has no network stack of its own and is driven over the bus).
+#if defined(CONFIG_OI_CORE)
+
 /**
  * @brief Device credentials returned by the platform on device creation.
  */
@@ -67,3 +71,5 @@ int getStatus(const std::string& host, const std::string& platformUuid,
               DeviceStatus& out);
 
 } // namespace CloudProvisioning
+
+#endif // CONFIG_OI_CORE

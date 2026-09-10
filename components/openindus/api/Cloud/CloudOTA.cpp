@@ -388,4 +388,4 @@ fail:
     _send(CloudOtaCmd::END, (int)err);
 }
 
-#endif // CONFIG_MODULE_MASTER || CONFIG_MODULE_STANDALONE
+#endif // CONFIG_OI_CORE

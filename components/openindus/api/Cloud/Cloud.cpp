@@ -16,7 +16,7 @@
 #include "nvs.h"
 #include "cJSON.h"
 
-// The Cloud library is only available on master and standalone modules
+// The Cloud library is only available on core
 // (a slave has no network stack of its own and is driven over the bus).
 #if defined(CONFIG_OI_CORE)
 
@@ -574,4 +574,4 @@ void Cloud::_serviceLoop(void) {
     }
 }
 
-#endif // CONFIG_MODULE_MASTER || CONFIG_MODULE_STANDALONE
+#endif // CONFIG_OI_CORE

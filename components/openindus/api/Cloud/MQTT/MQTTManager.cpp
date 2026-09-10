@@ -7,6 +7,11 @@
  */
 
 #include "MQTTManager.hpp"
+
+// The Cloud library is only availableon core module
+// (a slave has no network stack of its own and is driven over the bus).
+#if defined(CONFIG_OI_CORE)
+
 #include "esp_crt_bundle.h"
 
 static const char* TAG = "MQTTManager";
@@ -215,3 +220,5 @@ void MQTTManager::_mqttEventHandler(void* args, esp_event_base_t base, int32_t e
             break;
     }
 }
+
+#endif // CONFIG_OI_CORE

@@ -10,7 +10,7 @@
 
 #include "Common.h"
 
-// The Cloud library is only available on master and standalone modules
+// The Cloud library is only availableon core module
 // (a slave has no network stack of its own and is driven over the bus).
 #if defined(CONFIG_OI_CORE)
 
@@ -165,4 +165,4 @@ public:
     const std::string& getDeviceUuid(void) const { return _deviceUuid; }
 };
 
-#endif // CONFIG_MODULE_MASTER || CONFIG_MODULE_STANDALONE
+#endif // CONFIG_OI_CORE
