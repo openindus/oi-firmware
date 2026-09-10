@@ -36,7 +36,7 @@ setup:
   script:
     - cp sdkconfig.ci.defaults.${MODULE_TYPE} sdkconfig
     - idf.py reconfigure
-    - idf.py build
+    - idf.py -j 4 build
   after_script:
     - cp build/OI-Firmware.bin .oi/bin/oi-firmware-$(cat version.txt)/${MODULE_TYPE}_firmware-$(cat version.txt).bin
     - cp build/ota_data_initial.bin .oi/bin/oi-firmware-$(cat version.txt)/${MODULE_TYPE}_ota_data_initial-$(cat version.txt).bin
