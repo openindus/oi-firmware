@@ -48,7 +48,6 @@ Cloud::Cloud(const char* platformUuid, const char* platformToken, int projectId,
     , _taskHandle(nullptr)
     , _varLog(nullptr)
     , _varVersion(nullptr)
-    , _varRestart(nullptr)
     , _varOta(nullptr)
     , _varModules(nullptr)
 {
@@ -142,7 +141,6 @@ void Cloud::end(void) {
     }
     _defaultVariables.clear();
     _varLog = _varVersion = _varOta = _varModules = nullptr;
-    _varRestart = nullptr;
 }
 
 CloudState Cloud::getState(void) const {
@@ -207,23 +205,14 @@ void Cloud::_setupDefaultVariables(void) {
     _varLog = new StringVariable("log", "", UpdateMethod::ASYNCHRONOUS, UpdateType::PUBLISH, 0, 0);
     _varVersion = new StringVariable("version", "", UpdateMethod::ASYNCHRONOUS, UpdateType::PUBLISH, 0, 0);
     _varModules = new StringVariable("modules", "", UpdateMethod::ASYNCHRONOUS, UpdateType::PUBLISH, 0, 0);
-    _varRestart = new BoolVariable("restart", false, UpdateMethod::ASYNCHRONOUS, UpdateType::SUBSCRIBE);
     _varOta = new StringVariable("ota", "", UpdateMethod::ASYNCHRONOUS, UpdateType::SUBSCRIBE);
 
-    ICloudVariable* defaults[] = {_varLog, _varVersion, _varModules, _varRestart, _varOta};
+    ICloudVariable* defaults[] = {_varLog, _varVersion, _varModules, _varOta};
     for (auto* v : defaults) {
         v->setTypePrefix('d'); // "def" topic type
         _defaultVariables.push_back(v);
         _variables.push_back(v);
     }
-
-    // restart -> reboot the module
-    _varRestart->onReceive([](const bool& value) {
-        if (value) {
-            ESP_LOGW(TAG, "Restart command received, rebooting");
-            esp_restart();
-        }
-    });
 
     // ota -> the {cmd,args} command envelope is handled by CloudOTA (see CloudOTA.hpp).
     // This callback runs on the MQTT event task, so it only parses and hands off; the

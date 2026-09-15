@@ -68,10 +68,6 @@ They live under the ``def`` topic type (see `MQTT topics`_) and, when they publi
      - string
      - subscribe (+ progress published on the same topic)
      - Firmware update channel, see `Firmware update (OTA)`_ below
-   * - ``restart``
-     - bool
-     - subscribe
-     - Reboots the module when set
    * - ``log``
      - string
      - publish

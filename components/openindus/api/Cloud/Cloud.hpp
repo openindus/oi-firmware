@@ -71,7 +71,6 @@ private:
     // Default variables (spec 2.2)
     StringVariable* _varLog;
     StringVariable* _varVersion;
-    BoolVariable* _varRestart;
     StringVariable* _varOta;
     StringVariable* _varModules;
 
