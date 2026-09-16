@@ -91,6 +91,7 @@ html_context = {
         {'name': 'v1.8.0', 'url': '/oi-content/doc/v1.8.0/'},
         {'name': 'v2.0.0', 'url': '/oi-content/doc/v2.0.0/'},
         {'name': 'v2.1.0', 'url': '/oi-content/doc/v2.1.0/'},
+        {'name': 'v2.2.0', 'url': '/oi-content/doc/v2.2.0/'},
     ],
     'current_version': {'name': current_version_name},
 }

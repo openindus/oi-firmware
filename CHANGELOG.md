@@ -166,3 +166,27 @@ Board which are ready to use :
 
 - Remplace old i2c driver in component drivers by new one
 - Fix analog read bad adc unit for discreteve
+
+# v2.2.0
+
+### Features
+
+- New Cloud API: automatic device provisioning, typed cloud variables, MQTT reconnection and OTA firmware update over the cloud.
+- Added asynchronous homing for the DC motor PID control (`waitHoming()` and the `EVENT_MOTOR_DC_PID_HOMING_DONE` event).
+
+### Bugfixes
+
+- Fixed RS bus timeout errors: fragmented frames are now reassembled byte by byte and the UART RX timeout was increased to avoid needless task wakeups.
+- Fixed a crash on module reset while a stepper wait task was running.
+- Fixed a crash during OTA when the SPI bus is busy.
+- Encoder: clean up the previous PCNT unit and channel before creating a new one.
+- LED synchronization: reset the blink phase on sync so all modules stay aligned, and increased the LED sync task stack size.
+
+### Documentation
+
+- Added the Cloud API documentation and a Cloud example.
+
+### Misc
+
+- Cleaned up build scripts, sdkconfig files and obsolete files.
+- Limited the number of concurrent jobs in the CI to avoid crashes.
