@@ -192,6 +192,7 @@ void Led::sync(void)
     if (_control.installed == true)
     {
         ESP_LOGV(TAG, "led sync");
+        _control.blinkStatus = true; // reset phase to a known reference so all modules align
         xTaskNotify(_taskHandle, 0, eNoAction);
     }
 }
