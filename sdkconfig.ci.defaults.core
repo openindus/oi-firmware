@@ -2,8 +2,6 @@
 CONFIG_OI_CORE=y
 CONFIG_MODULE_MASTER=y
 # Parameters to disable if connectivity or cloud features are not needed
-# Theses parameters can also have an enormous footprint on final firmware size
-# Start looking here if you need to reduce firmware size.
 CONFIG_MBEDTLS_CERTIFICATE_BUNDLE=y
 CONFIG_MBEDTLS_CERTIFICATE_BUNDLE_DEFAULT_FULL=y
 CONFIG_MQTT_TRANSPORT_WEBSOCKET=y

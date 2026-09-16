@@ -24,7 +24,7 @@ idf.py reconfigure
 find "$EXAMPLES_DIR" -name "*.cpp" | while read -r f; do
     echo "Build $f"
     cp "$f" main/main.cpp
-    ninja -C build -j 4 || { echo "Error: Build failed for $f"; exit 1; }
+    idf.py build || { echo "Error: Build failed for $f"; exit 1; }
 done
 
 echo "All examples built successfully!"
