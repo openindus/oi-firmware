@@ -154,6 +154,7 @@ enum Event_e {
     EVENT_MOTOR_FLAG_INTERRUPT              = 0x02,
     EVENT_MOTOR_DC_CURRENT                  = 0x03,
     EVENT_MOTOR_DC_PID_POSITION             = 0x04,
+    EVENT_MOTOR_DC_PID_HOMING_DONE          = 0x05,
 
     /* SENSOR */
     EVENT_SENSOR_VALUE                      = 0xB0,

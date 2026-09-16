@@ -83,7 +83,7 @@ public:
      *                    When true: HIGH sensor → REVERSE, LOW → FORWARD.
      * @param timeoutMs   Maximum time allowed for homing before timeout (ms, default 30000)
      */
-    static void homing(HomingType_e type, DinNum_t dinNum, MotorNum_t motor,
+    static bool homing(HomingType_e type, DinNum_t dinNum, MotorNum_t motor,
         float dutyCycle, bool invertLogic = false, uint32_t timeoutMs = 30000);
 
 protected:

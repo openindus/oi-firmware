@@ -86,10 +86,18 @@ public:
     void homing(HomingType_e type, DinNum_t dinNum, MotorNum_t motor,
         float dutyCycle, bool invertLogic = false, uint32_t timeoutMs = 30000);
 
+    /**
+     * @brief Wait for the result of an asynchronous homing request.
+     * @return true if the sensor was reached, false on timeout or homing failure.
+     */
+    bool waitHoming(MotorNum_t motor, uint32_t timeoutMs = 31000);
+
 private:
     ModuleControl* _module;
     QueueHandle_t  _positionEvent;
     bool           _positionCallbackRegistered;
+    QueueHandle_t  _homingEvent;
+    bool           _homingCallbackRegistered;
 };
 
 #endif

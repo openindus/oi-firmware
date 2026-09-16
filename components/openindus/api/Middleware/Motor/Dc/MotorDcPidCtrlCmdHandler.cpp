@@ -16,6 +16,25 @@ static const char* TAG = "MotorDcPidCtrlCmdHandler";
 
 Encoder** MotorDcPidCtrlCmdHandler::_encoders = nullptr;
 
+struct HomingRequest_t {
+    HomingType_e type;
+    DinNum_t dinNum;
+    MotorNum_t motor;
+    float dutyCycle;
+    bool invertLogic;
+    uint32_t timeoutMs;
+};
+
+static void homingTask(void* arg)
+{
+    HomingRequest_t* request = static_cast<HomingRequest_t*>(arg);
+    bool success = MotorDcPidCtrl::homing(request->type, request->dinNum, request->motor,
+                                          request->dutyCycle, request->invertLogic, request->timeoutMs);
+    Slave::sendEvent({EVENT_MOTOR_DC_PID_HOMING_DONE, (uint8_t)request->motor, (uint8_t)success});
+    delete request;
+    vTaskDelete(nullptr);
+}
+
 int MotorDcPidCtrlCmdHandler::init(Encoder** encoders)
 {
     int err = 0;
@@ -71,13 +90,18 @@ int MotorDcPidCtrlCmdHandler::init(Encoder** encoders)
     });
 
     Slave::addCallback(CALLBACK_MOTOR_DC_PID_CTRL_HOMING, [](std::vector<uint8_t>& data) {
-        HomingType_e type        = static_cast<HomingType_e>(data[1]);
-        DinNum_t     dinNum      = static_cast<DinNum_t>(data[2]);
-        MotorNum_t   motor       = static_cast<MotorNum_t>(data[3]);
-        float*       dutyCycle   = reinterpret_cast<float*>(&data[4]);
-        bool         invertLogic = (bool)data[8];
-        uint32_t*    timeoutMs   = reinterpret_cast<uint32_t*>(&data[9]);
-        MotorDcPidCtrl::homing(type, dinNum, motor, *dutyCycle, invertLogic, *timeoutMs);
+        HomingRequest_t* request = new HomingRequest_t;
+        request->type = static_cast<HomingType_e>(data[1]);
+        request->dinNum = static_cast<DinNum_t>(data[2]);
+        request->motor = static_cast<MotorNum_t>(data[3]);
+        memcpy(&request->dutyCycle, &data[4], sizeof(request->dutyCycle));
+        request->invertLogic = (bool)data[8];
+        memcpy(&request->timeoutMs, &data[9], sizeof(request->timeoutMs));
+        if (xTaskCreate(homingTask, "dc_homing", 4096, request, 5, nullptr) != pdPASS) {
+            ESP_LOGE(TAG, "Failed to create homing task");
+            Slave::sendEvent({EVENT_MOTOR_DC_PID_HOMING_DONE, (uint8_t)request->motor, 0});
+            delete request;
+        }
         data.clear();
     });
 
