@@ -52,7 +52,7 @@ DigitalOutputsInterface* DigitalOutputsCLI::_digitalOutputsInstance = nullptr;
 // Callback function for overcurrent testing
 static void __attribute__((unused)) overcurrentCallback(void *arg)
 {
-    DOut_Num_t dout = (DOut_Num_t)(uintptr_t)arg;
+    DoutNum_t dout = (DoutNum_t)(uintptr_t)arg;
     printf("Overcurrent detected on DOUT_%d\n", dout + 1);
 }
 
@@ -60,7 +60,7 @@ int DigitalOutputsCLI::digitalWriteFunc(int argc, char **argv)
 {
     PARSE_ARGS_OR_RETURN(argc, argv, digitalWriteArgs);
 
-    DOut_Num_t dout = (DOut_Num_t)(digitalWriteArgs.dout->ival[0] - 1);
+    DoutNum_t dout = (DoutNum_t)(digitalWriteArgs.dout->ival[0] - 1);
     bool level = digitalWriteArgs.level->ival[0] != 0;
 
     if (dout >= DOUT_MAX) {
@@ -90,7 +90,7 @@ int DigitalOutputsCLI::toggleOutputFunc(int argc, char **argv)
 {
     PARSE_ARGS_OR_RETURN(argc, argv, toggleOutputArgs);
 
-    DOut_Num_t dout = (DOut_Num_t)(toggleOutputArgs.dout->ival[0] - 1);
+    DoutNum_t dout = (DoutNum_t)(toggleOutputArgs.dout->ival[0] - 1);
     
     if (dout >= DOUT_MAX) {
         ESP_LOGE(TAG, "Invalid DOUT number: %d. Must be between 1 and %d", 
@@ -119,7 +119,7 @@ int DigitalOutputsCLI::outputModeFunc(int argc, char **argv)
 {
     PARSE_ARGS_OR_RETURN(argc, argv, outputModeArgs);
 
-    DOut_Num_t dout = (DOut_Num_t)(outputModeArgs.dout->ival[0] - 1);
+    DoutNum_t dout = (DoutNum_t)(outputModeArgs.dout->ival[0] - 1);
     
     if (dout >= DOUT_MAX) {
         ESP_LOGE(TAG, "Invalid DOUT number: %d. Must be between 1 and %d", 
@@ -127,7 +127,7 @@ int DigitalOutputsCLI::outputModeFunc(int argc, char **argv)
         return -1;
     }
 
-    DOut_Mode_t mode = DOUT_MODE_DIGITAL; // Default mode
+    DoutMode_t mode = DOUT_MODE_DIGITAL; // Default mode
     
     if (outputModeArgs.mode->count > 0) {
         const char *mode_str = outputModeArgs.mode->sval[0];
@@ -164,7 +164,7 @@ int DigitalOutputsCLI::setPWMFrequencyFunc(int argc, char **argv)
 {
     PARSE_ARGS_OR_RETURN(argc, argv, setPWMFrequencyArgs);
 
-    DOut_Num_t dout = (DOut_Num_t)(setPWMFrequencyArgs.dout->ival[0] - 1);
+    DoutNum_t dout = (DoutNum_t)(setPWMFrequencyArgs.dout->ival[0] - 1);
     uint32_t freq = (uint32_t)setPWMFrequencyArgs.freq->ival[0];
     
     if (dout >= DOUT_MAX) {
@@ -195,7 +195,7 @@ int DigitalOutputsCLI::setPWMDutyCycleFunc(int argc, char **argv)
 {
     PARSE_ARGS_OR_RETURN(argc, argv, setPWMDutyCycleArgs);
 
-    DOut_Num_t dout = (DOut_Num_t)(setPWMDutyCycleArgs.dout->ival[0] - 1);
+    DoutNum_t dout = (DoutNum_t)(setPWMDutyCycleArgs.dout->ival[0] - 1);
     float duty = (float)setPWMDutyCycleArgs.duty->dval[0];
     
     if (dout >= DOUT_MAX) {
@@ -231,7 +231,7 @@ int DigitalOutputsCLI::getOutputCurrentFunc(int argc, char **argv)
 {
     PARSE_ARGS_OR_RETURN(argc, argv, getOutputCurrentArgs);
 
-    DOut_Num_t dout = (DOut_Num_t)(getOutputCurrentArgs.dout->ival[0] - 1);
+    DoutNum_t dout = (DoutNum_t)(getOutputCurrentArgs.dout->ival[0] - 1);
     
     if (dout >= DOUT_MAX) {
         ESP_LOGE(TAG, "Invalid DOUT number: %d. Must be between 1 and %d", 
@@ -261,7 +261,7 @@ int DigitalOutputsCLI::outputIsOvercurrentFunc(int argc, char **argv)
 {
     PARSE_ARGS_OR_RETURN(argc, argv, outputIsOvercurrentArgs);
 
-    DOut_Num_t dout = (DOut_Num_t)(outputIsOvercurrentArgs.dout->ival[0] - 1);
+    DoutNum_t dout = (DoutNum_t)(outputIsOvercurrentArgs.dout->ival[0] - 1);
     
     if (dout >= DOUT_MAX) {
         ESP_LOGE(TAG, "Invalid DOUT number: %d. Must be between 1 and %d", 

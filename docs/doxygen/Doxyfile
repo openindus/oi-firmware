@@ -14,7 +14,7 @@
 
 
 PROJECT_NAME = "OpenIndus"
-PROJECT_NUMBER = "v2.1.1"
+PROJECT_NUMBER = "v2.2.0"
 
 OUTPUT_DIRECTORY = ./build
 
@@ -29,6 +29,7 @@ INPUT += ./../components/openindus/api/Middleware/Digital/Inputs/DigitalInputsIn
 INPUT += ./../components/openindus/api/Middleware/Digital/Outputs/DigitalOutputsInterface.h
 INPUT += ./../components/openindus/api/Middleware/Motor/Stepper/MotorStepper.h
 INPUT += ./../components/openindus/api/Middleware/Motor/Dc/MotorDc.h
+INPUT += ./../components/openindus/api/Middleware/Motor/Dc/MotorDcPidCtrl.h
 INPUT += ./../components/openindus/api/Middleware/Encoder/Encoder.h
 INPUT += ./../components/openindus/api/Middleware/Analog/InputsLS/AnalogInputsLS.h
 INPUT += ./../components/openindus/api/Middleware/Analog/InputsLS/AnalogInputsLS.cpp
@@ -41,6 +42,9 @@ INPUT += ./../components/openindus/api/Middleware/Analog/InputsLS/Sensors/Strain
 INPUT += ./../components/openindus/api/Middleware/Analog/InputsLS/Sensors/Thermocouple/Thermocouple.h
 INPUT += ./../components/openindus/api/Middleware/Analog/InputsLS/Sensors/Thermocouple/Thermocouple.cpp
 INPUT += ./../components/openindus/api/Middleware/Relays/Relays.h
+INPUT += ./../components/openindus/api/Cloud/Cloud.hpp
+INPUT += ./../components/openindus/api/Cloud/CloudVariable.hpp
+INPUT += ./../components/openindus/api/Cloud/CloudOTA.hpp
 
 ENABLE_PREPROCESSING   = NO
 

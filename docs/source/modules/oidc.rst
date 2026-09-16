@@ -12,6 +12,7 @@ With its compact form factor and comprehensive array of motor drivers and digita
 **Key Features:**
 
 * Motor Control: The module provides four independent DC motor drivers, enabling precise control of motor speed and direction.
+* PID Position Control: Closed-loop position control using a quadrature encoder, allowing motors to be commanded to absolute target positions.
 * Digital Inputs: It includes 8 digital input channels, facilitating the connection of external sensors, switches, or encoders, which are commonly used in motor control applications.
 * Current Monitoring: Each motor driver includes current sensing capability for monitoring motor load and implementing overcurrent protection.
 * Bidirectional Control: The module supports bidirectional motor control with variable speed control through PWM (Pulse Width Modulation).

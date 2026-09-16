@@ -7,6 +7,7 @@
  */
 
 #include "CAN.h"
+#include "mcp25625.h"
 
 CAN::CAN(spi_host_device_t host, gpio_num_t cs, gpio_num_t intr)
     : _spi_host(host), _pin_cs(cs), _pin_intr(intr)
@@ -15,51 +16,59 @@ CAN::CAN(spi_host_device_t host, gpio_num_t cs, gpio_num_t intr)
 
 void CAN::begin(unsigned long baudrate, bool extended_mode)
 {
-    MCP25625_DeviceConfig_t deviceConfig;
-    deviceConfig.spi_host = _spi_host;
-    deviceConfig.spi_pin_cs = _pin_cs;
-    deviceConfig.spi_freq = MCP25625_SPI_FREQ;
-    deviceConfig.spi_pin_int = _pin_intr;
-    mcp25625_create(&deviceConfig);
-    mcp25625_init(OPMODE_NORMAL, (can_baudrate_t)baudrate, (can_id_mode_t)(extended_mode+1));
+    mcp25625_can_init(_spi_host, _pin_cs, _pin_intr);
+    mcp25625_can_begin((enum mcp25625_can_baudrate) baudrate, extended_mode);
+}
 
+void CAN::reconfigure(unsigned long baudrate, bool extended_mode)
+{
+    mcp25625_can_reconfigure((enum mcp25625_can_baudrate) baudrate, extended_mode);
 }
 
 void CAN::end(void)
 {
-    mcp25625_delete();
+    mcp25625_can_stop();
 }
 
-void CAN::write(CAN_Message_t msg)
+esp_err_t CAN::write(CAN_Message_t msg)
 {
-    mcp25625_msg_transfer(msg.msg, msg.size, msg.id, msg.IDE, msg.RTR);
+    struct can_message can_msg;
+    can_msg.id = msg.id;
+    can_msg.size = msg.size;
+    can_msg.IDE = msg.IDE;
+    can_msg.RTR = msg.RTR;
+    for (int index = 0; index < sizeof(msg.msg); index++) {
+	can_msg.msg[index] = msg.msg[index];
+    }
+    return mcp25625_can_write(&can_msg);
 }
 
 int CAN::available(void)
 {
-    return mcp25625_queue_available();
+    return mcp25625_can_available();
 }
 
 CAN_Message_t CAN::read(void)
 {
-    CAN_Message_t canMsg;
-    mcp25625_queue_read((MCP25625_canMessage_t*)(void*)(&canMsg));
-
-    return canMsg;
+    struct can_message msg;
+    mcp25625_can_read(&msg);
+    CAN_Message_t can_msg;
+    can_msg.id = msg.id;
+    can_msg.size = msg.size;
+    can_msg.IDE = msg.IDE;
+    can_msg.RTR = msg.RTR;
+    for (int index = 0; index < sizeof(can_msg.msg); index++) {
+	can_msg.msg[index] = msg.msg[index];
+    }
+    return can_msg;
 }
 
 void CAN::setStandardFilter(uint16_t mask, uint16_t filter)
 {
-    mcp25625_mask_config(RXB0, mask, 0);
-    mcp25625_mask_config(RXB1, mask, 0);
-    mcp25625_filter_config(RXF_0, filter, 0, false);
-    mcp25625_filter_config(RXF_1, filter, 0, false);
+    mcp25625_can_set_standard_filter(mask, filter);
 }
 
 void CAN::setExtendedFilter(uint32_t mask, uint32_t filter)
 {
-    mcp25625_mask_config(RXB0, 0, mask);
-    mcp25625_mask_config(RXB1, 0, mask);
-    mcp25625_filter_config(RXF_0, 0, filter, true);
-    mcp25625_filter_config(RXF_1, 0, filter, true);
+    mcp25625_can_set_extended_filter(mask, filter);
 }

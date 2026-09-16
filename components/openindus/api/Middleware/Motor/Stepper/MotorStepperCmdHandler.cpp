@@ -24,7 +24,11 @@ void MotorStepperCmdHandler::_waitTask(void *pvParameters)
     MotorNum_t motor = *(MotorNum_t *)pvParameters;    
     MotorStepper::wait(motor); // Wait motor to be ready
     Slave::sendEvent({EVENT_MOTOR_READY, (uint8_t)motor}); // Send a CAN event to master
-    
+
+    /* The task deletes itself: clear the handle first, otherwise CMD_RESET later
+       calls vTaskDelete() on a freed TCB. */
+    _waitTaskHandler[motor] = nullptr;
+
     vTaskDelete(NULL); // Delete task
 }
 

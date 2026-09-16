@@ -12,8 +12,9 @@
 static const char TAG[] = "Encoder";
 
 static int max_glitch_us = 1;
+static pcnt_channel_handle_t pcnt_channel = NULL;
 
-int Encoder::begin(DIn_Num_t A, DIn_Num_t B, int16_t ppr)
+int Encoder::begin(DinNum_t A, DinNum_t B, int16_t ppr)
 {
     ESP_LOGI(TAG, "Encoder initialization");
 
@@ -29,6 +30,7 @@ int Encoder::begin(DIn_Num_t A, DIn_Num_t B, int16_t ppr)
             .accum_count = 0,
         }
     };
+    Encoder::end(); // Ensure any previous unit is cleaned up
     ESP_ERROR_CHECK(pcnt_new_unit(&unit_config, &_pcntUnit));
 
     // Configure channel
@@ -43,7 +45,6 @@ int Encoder::begin(DIn_Num_t A, DIn_Num_t B, int16_t ppr)
             .io_loop_back = 0, // Deprecated, not used
         },
     };
-    pcnt_channel_handle_t pcnt_channel = NULL;
     ESP_ERROR_CHECK(pcnt_new_channel(_pcntUnit, &chan_config, &pcnt_channel));
 
     // Set edge and level actions for the channel
@@ -80,11 +81,18 @@ int Encoder::begin(DIn_Num_t A, DIn_Num_t B, int16_t ppr)
 }
 
 void Encoder::end(void) 
-{
+{    
     ESP_LOGI(TAG, "Encoder end");
+
     if (_pcntUnit) {
         ESP_ERROR_CHECK(pcnt_unit_stop(_pcntUnit));
         ESP_ERROR_CHECK(pcnt_unit_disable(_pcntUnit));
+
+        if (pcnt_channel) {
+            ESP_ERROR_CHECK(pcnt_del_channel(pcnt_channel));
+            pcnt_channel = nullptr;
+        }
+
         ESP_ERROR_CHECK(pcnt_del_unit(_pcntUnit));
         _pcntUnit = nullptr;
     }

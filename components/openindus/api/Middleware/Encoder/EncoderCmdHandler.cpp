@@ -20,8 +20,8 @@ int EncoderCmdHandler::init(Encoder** encoder)
 
     Slave::addCallback(CALLBACK_ENCODER_BEGIN, [](std::vector<uint8_t> &msgBytes) {
         int instance  = msgBytes[1];
-        DIn_Num_t A   = (DIn_Num_t)msgBytes[2];
-        DIn_Num_t B   = (DIn_Num_t)msgBytes[3];
+        DinNum_t A   = (DinNum_t)msgBytes[2];
+        DinNum_t B   = (DinNum_t)msgBytes[3];
         uint32_t *ppr = reinterpret_cast<uint32_t *>(&msgBytes[4]);
         if (_encoder[instance] != nullptr) {
             _encoder[instance]->begin(A, B, *ppr);

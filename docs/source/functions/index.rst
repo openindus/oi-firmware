@@ -26,3 +26,4 @@ Functions list
    sdcard.rst
    usbhost.rst
    rtc.rst
+   cloud.rst

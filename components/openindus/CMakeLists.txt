@@ -47,8 +47,11 @@ set(COMPONENT_SRCS
     "api/Middleware/Motor/Stepper/MotorStepperCmdCLI.cpp"
     "api/Middleware/Motor/Dc/MotorDc.cpp"
     "api/Middleware/Motor/Dc/MotorDcCLI.cpp"
-    "api/Middleware/Motor/Dc/DcCmd.cpp"
-    "api/Middleware/Motor/Dc/DcCmdHandler.cpp"
+    "api/Middleware/Motor/Dc/MotorDcPidCtrl.cpp"
+    "api/Middleware/Motor/Dc/MotorDcCmd.cpp"
+    "api/Middleware/Motor/Dc/MotorDcCmdHandler.cpp"
+    "api/Middleware/Motor/Dc/MotorDcPidCtrlCmd.cpp"
+    "api/Middleware/Motor/Dc/MotorDcPidCtrlCmdHandler.cpp"
     "api/Middleware/Usb/UsbConsole.cpp"
     "api/Middleware/Usb/UsbSerial.cpp"
     "api/Middleware/FlashLoader/FlashLoader.cpp"
@@ -90,6 +93,8 @@ set(COMPONENT_SRCS
     "api/Middleware/Modem/Modem_private.cpp"
 
     "api/Cloud/Cloud.cpp"
+    "api/Cloud/CloudProvisioning.cpp"
+    "api/Cloud/CloudOTA.cpp"
     "api/Cloud/MQTT/MQTTManager.cpp"
 
     "drivers/dac8760/dac8760.c"
@@ -103,9 +108,7 @@ set(COMPONENT_SRCS
     "drivers/m41t62/STM32DriversComponents/M41T62.c"
     "drivers/sc16is750/sc16is750.c"
     "drivers/mcp25625/mcp25625.c"
-    "drivers/mcp25625/DriversComponents/MCP25625.c"
-    "drivers/mcp25625/DriversComponents/MCP25625_hw.c"
-    "drivers/mcp25625/DriversComponents/MCP25625_hal.c"
+    "drivers/mcp25625/mcp25625_hal.c"
     "drivers/stds75/stds75.c"
     "drivers/cd74hc4052/cd74hc4052.c"
     "drivers/dac/ad5413/ad5413.c"
@@ -164,6 +167,7 @@ set(COMPONENT_INCLUDE_DIRS
     "api/Middleware/Modem"
 
     "api/Cloud"
+    "api/Cloud/MQTT"
 
     "drivers"
     "drivers/dac8760"
@@ -197,10 +201,13 @@ set(COMPONENT_REQUIRES
     "mqtt"
     "esp_http_client"
     "esp_https_ota"
+    "json"
+    "mbedtls"
     "esp_adc"
     "efuse"
     "driver"
     "esp_timer"
+    "pid_ctrl"
 )
 
 idf_component_register(

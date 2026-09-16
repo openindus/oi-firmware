@@ -1,7 +1,7 @@
 /**
  * @file MotorDc.cpp
  * @brief MotorDc class implementation
- * @author 
+ * @author OpenIndus Team
  * @copyright (c) [2025] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
@@ -15,6 +15,7 @@
 #define LEDC_DUTY_RES           LEDC_TIMER_11_BIT // 11 bits is enough to get over anyone hearable range
 #define LEDC_DUTY_MAX           0x7FF // 11 bits max
 #define MAX_DRV8873_FREQU       100000 // max driver is 100kHz
+
 // Frequency in Hertz over the audio range. can be up to 100kHz
 #define LEDC_FREQUENCY          39062 // Approx 39kHz is max at 11 bits resolution
 
@@ -24,11 +25,11 @@
 
 static const char* TAG = "MotorDc";
 
-std::vector<MotorDC_PinConfig_t> MotorDc::_motorsConfig;
+std::vector<MotorDcPinConfig_t> MotorDc::_motorsConfig;
 gpio_num_t MotorDc::_faultPin;
 std::vector<MotorDirection_t> MotorDc::_directions;
 
-int MotorDc::init(std::vector<MotorDC_PinConfig_t> motorsConfig, gpio_num_t faultPin)
+int MotorDc::init(std::vector<MotorDcPinConfig_t> motorsConfig, gpio_num_t faultPin)
 {    
     int err = 0;
 
@@ -51,7 +52,7 @@ int MotorDc::init(std::vector<MotorDC_PinConfig_t> motorsConfig, gpio_num_t faul
         .speed_mode       = LEDC_MODE,
         .duty_resolution  = LEDC_DUTY_RES,
         .timer_num        = LEDC_TIMER,
-        .freq_hz          = LEDC_FREQUENCY,  // Set output frequency at 5 kHz
+        .freq_hz          = LEDC_FREQUENCY, // Set output frequency at 5 kHz
         .clk_cfg          = LEDC_AUTO_CLK,
         .deconfigure      = false // Do not deconfigure the timer
     };
@@ -278,8 +279,8 @@ esp_err_t MotorDc::initHBridge(void)
     /* Configure the DRV8873 device for daisy chain */
     const drv8873_spi_config_t drv8873_cfg = {
         .spi_handle = NULL,
-        .nSCS_pin = GPIO_NUM_48,  // Chip Select pin
-        .device_count = 4        // 4 daisy-chained H-bridges
+        .nSCS_pin = GPIO_NUM_48,    // Chip Select pin
+        .device_count = 4           // 4 daisy-chained H-bridges
     };
 
     // Initialize SPI bus and device
@@ -394,7 +395,8 @@ esp_err_t MotorDc::initHBridge(void)
     return err;
 }
 
-esp_err_t MotorDc::setMode(drv8873_mode_t mode, MotorNum_t motor) {
+esp_err_t MotorDc::setMode(drv8873_mode_t mode, MotorNum_t motor)
+{
     // Validate motor number
     if (motor < 0 || motor >= 4) {
         ESP_LOGE(TAG, "Invalid motor number: %d", motor);
@@ -404,14 +406,15 @@ esp_err_t MotorDc::setMode(drv8873_mode_t mode, MotorNum_t motor) {
     return drv8873_set_mode(mode, motor);
 }
 
-uint8_t MotorDc::getFault(MotorNum_t motor) {
+uint8_t MotorDc::getFault(MotorNum_t motor)
+{
     // Validate motor number
     if (motor < 0 || motor >= MOTOR_MAX) {
         ESP_LOGE(TAG, "Invalid motor number: %d", motor);
         return 0;
     }
     
-uint8_t fault_status;
+    uint8_t fault_status;
     esp_err_t ret = drv8873_get_fault_status(&fault_status, motor);
     if (ret != ESP_OK) {
         return 0xFF; // Indicate error in reading fault status
@@ -419,7 +422,8 @@ uint8_t fault_status;
     return fault_status;
 }
 
-esp_err_t MotorDc::clearFault(MotorNum_t motor) {
+esp_err_t MotorDc::clearFault(MotorNum_t motor)
+{
     // Validate motor number
     if (motor < 0 || motor >= 4) {
         ESP_LOGE(TAG, "Invalid motor number: %d", motor);

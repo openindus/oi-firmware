@@ -25,7 +25,7 @@
 static const char TAG[] = "DigitalOutputs";
 
 uint8_t DigitalOutputs::_nb;
-DOut_Mode_t *DigitalOutputs::_mode;
+DoutMode_t *DigitalOutputs::_mode;
 bool *DigitalOutputs::_level;
 #if defined(CONFIG_OI_CORE)
 ioex_num_t *DigitalOutputs::_ioex_num;
@@ -56,8 +56,8 @@ int DigitalOutputs::init(const gpio_num_t *gpio, const adc_unit_t *adc_units, co
     ESP_LOGI(TAG, "Init DigitalOutputs with %d outputs", nb);
 
     _nb = nb;
-    _mode = (DOut_Mode_t *)calloc(nb, sizeof(DOut_Mode_t)); // Initialize all outputs to digital mode
-    memset(_mode, DOUT_MODE_DIGITAL, nb * sizeof(DOut_Mode_t));
+    _mode = (DoutMode_t *)calloc(nb, sizeof(DoutMode_t)); // Initialize all outputs to digital mode
+    memset(_mode, DOUT_MODE_DIGITAL, nb * sizeof(DoutMode_t));
     _level = (bool*)calloc(nb, sizeof(bool)); // Initialize output levels to LOW   
 
 #if defined(CONFIG_OI_CORE)
@@ -185,7 +185,7 @@ int DigitalOutputs::init(const gpio_num_t *gpio, const adc_unit_t *adc_units, co
     return err;
 }
 
-void DigitalOutputs::digitalWrite(DOut_Num_t num, bool level)
+void DigitalOutputs::digitalWrite(DoutNum_t num, bool level)
 {
     if (num < _nb) {
         if (_mode[num] == DOUT_MODE_DIGITAL) {
@@ -205,7 +205,7 @@ void DigitalOutputs::digitalWrite(DOut_Num_t num, bool level)
     }
 }
 
-void DigitalOutputs::toggleOutput(DOut_Num_t num)
+void DigitalOutputs::toggleOutput(DoutNum_t num)
 {
     if (num < _nb) {
         if (_mode[num] == DOUT_MODE_DIGITAL) {
@@ -225,7 +225,7 @@ void DigitalOutputs::toggleOutput(DOut_Num_t num)
     }
 }
 
-void DigitalOutputs::outputMode(DOut_Num_t num, DOut_Mode_t mode)
+void DigitalOutputs::outputMode(DoutNum_t num, DoutMode_t mode)
 {
 #if !defined(CONFIG_OI_CORE)
     if (num < _nb) {
@@ -238,7 +238,7 @@ void DigitalOutputs::outputMode(DOut_Num_t num, DOut_Mode_t mode)
 #endif
 }
 
-void DigitalOutputs::setPWMFrequency(DOut_Num_t num, uint32_t freq)
+void DigitalOutputs::setPWMFrequency(DoutNum_t num, uint32_t freq)
 {
 #if !defined(CONFIG_OI_CORE)
     if (num < _nb) {
@@ -283,7 +283,7 @@ void DigitalOutputs::setPWMFrequency(DOut_Num_t num, uint32_t freq)
 #endif
 }
 
-void DigitalOutputs::setPWMDutyCycle(DOut_Num_t num, float duty)
+void DigitalOutputs::setPWMDutyCycle(DoutNum_t num, float duty)
 {
 #if !defined(CONFIG_OI_CORE)
     if (num < _nb) {
@@ -301,7 +301,7 @@ void DigitalOutputs::setPWMDutyCycle(DOut_Num_t num, float duty)
 #endif
 }
 
-float DigitalOutputs::getOutputCurrent(DOut_Num_t num)
+float DigitalOutputs::getOutputCurrent(DoutNum_t num)
 {
 #if !defined(CONFIG_OI_CORE)
     return _adcReadCurrent(num);
@@ -311,7 +311,7 @@ float DigitalOutputs::getOutputCurrent(DOut_Num_t num)
 #endif
 }
 
-int DigitalOutputs::outputIsOvercurrent(DOut_Num_t num)
+int DigitalOutputs::outputIsOvercurrent(DoutNum_t num)
 {
     if (num < _nb) {
 #if defined(CONFIG_OI_CORE)
@@ -327,7 +327,7 @@ int DigitalOutputs::outputIsOvercurrent(DOut_Num_t num)
 }
 
 #if !defined(CONFIG_OI_CORE)
-float DigitalOutputs::_adcReadCurrent(DOut_Num_t num)
+float DigitalOutputs::_adcReadCurrent(DoutNum_t num)
 {
     if (num < _nb) {
         int current_reading = 0;
@@ -436,7 +436,7 @@ void DigitalOutputs::_controlTask(void *pvParameters)
         /* Checking if individual DOUT is in overcurrent (> 4A) */
         for (uint8_t i = 0; i < _nb; i++) {
             // Read current
-            current = _adcReadCurrent((DOut_Num_t)i);
+            current = _adcReadCurrent((DoutNum_t)i);
             currentSum += current;
             // If error happened
             if (current > _overcurrentThreshold) {

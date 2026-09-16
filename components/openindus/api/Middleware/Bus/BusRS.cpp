@@ -70,8 +70,13 @@ int BusRS::begin(uart_port_t port, gpio_num_t tx_num, gpio_num_t rx_num)
 
     err |= uart_set_pin(_port, tx_num, rx_num, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
 
-    /* Important: trigger an interrupt as soon as one byte time of empty uart rx happened */
-    err |= uart_set_rx_timeout(_port, 1);
+    /*
+     * Do not generate an event after a single byte time of inactivity.  At
+     * 921600 baud this made a normal frame arrive in several UART_DATA events
+     * very frequently.  read() supports fragmented frames, but a slightly
+     * longer timeout also avoids needless task wakeups.
+     */
+    err |= uart_set_rx_timeout(_port, 10);
 
     return err;
 }
@@ -124,35 +129,59 @@ void BusRS::write(Frame_t* frame, uint32_t timeout)
 int BusRS::read(Frame_t* frame, uint32_t timeout)
 {
     uart_event_t event;
-    uint8_t* buffer = (uint8_t*)malloc(BUS_RS_FRAME_LENGTH_MAX);
-    int index = 0;
+    uint8_t buffer[128];
+    uint8_t header[BUS_RS_HEADER_LENGTH];
+    size_t headerLength = 0;
+    size_t dataLength = 0;
+
     while (1) {
         if (xQueueReceive(_eventQueue, (void*)&event, pdMS_TO_TICKS(timeout)) == pdTRUE) {
             if (event.type == UART_DATA) {
-                uart_read_bytes(_port, buffer, event.size, pdMS_TO_TICKS(timeout));
-                if (index == 0) { // Start frame
-                    if (event.size >= BUS_RS_HEADER_LENGTH) { // Get header frame
-                        memcpy(frame, buffer, BUS_RS_HEADER_LENGTH);
-                        memcpy(frame->data, &buffer[BUS_RS_HEADER_LENGTH], event.size - BUS_RS_HEADER_LENGTH);
-                        index += (event.size - BUS_RS_HEADER_LENGTH);
-                        if ((frame->sync != BUS_RS_SYNC_BYTE) || (frame->length > BUS_RS_DATA_LENGTH_MAX)) { // Check header frame
-                            ESP_LOGE(TAG, "Invalid header frame");
+                size_t remaining = event.size;
+                while (remaining > 0) {
+                    size_t chunkLength = (remaining > sizeof(buffer)) ? sizeof(buffer) : remaining;
+                    int bytesRead = uart_read_bytes(_port, buffer, chunkLength, pdMS_TO_TICKS(timeout));
+                    if (bytesRead <= 0) {
+                        ESP_LOGE(TAG, "UART data event without data");
+                        goto error;
+                    }
+                    remaining -= bytesRead;
+
+                    for (int i = 0; i < bytesRead; i++) {
+                        if (headerLength < BUS_RS_HEADER_LENGTH) {
+                            header[headerLength++] = buffer[i];
+                            if (headerLength != BUS_RS_HEADER_LENGTH) {
+                                continue;
+                            }
+
+                            /* Frame_t also contains a pointer; copy only its wire header. */
+                            memcpy(frame, header, BUS_RS_HEADER_LENGTH);
+                            if ((frame->sync != BUS_RS_SYNC_BYTE) || (frame->length > BUS_RS_DATA_LENGTH_MAX)) {
+                                ESP_LOGE(TAG, "Invalid header frame");
+                                goto error;
+                            }
+                            if (frame->length == 0) {
+                                if (_verifyChecksum(frame)) {
+                                    goto success;
+                                }
+                                ESP_LOGE(TAG, "Invalid checksum: %02X, expected: %02X", frame->checksum, _calculateChecksum(frame));
+                                goto error;
+                            }
+                            if (frame->data == NULL) {
+                                ESP_LOGE(TAG, "No buffer provided for received frame");
+                                goto error;
+                            }
+                            continue;
+                        }
+
+                        frame->data[dataLength++] = buffer[i];
+                        if (dataLength == frame->length) {
+                            if (_verifyChecksum(frame)) {
+                                goto success;
+                            }
+                            ESP_LOGE(TAG, "Invalid checksum: %02X, expected: %02X", frame->checksum, _calculateChecksum(frame));
                             goto error;
                         }
-                    } else {
-                        // Ignore data
-                    }
-                } else {
-                    memcpy(&frame->data[index], buffer, event.size);
-                    index += event.size;
-                }
-                if (index >= frame->length || index > BUS_RS_FRAME_LENGTH_MAX) {
-                    xSemaphoreGive(_writeReadMutex);
-                    if (_verifyChecksum(frame)) {
-                        goto success;
-                    } else {
-                        ESP_LOGE(TAG, "Invalid checksum: %02X, expected: %02X", frame->checksum, _calculateChecksum(frame));
-                        goto error;
                     }
                 }
             } else {
@@ -167,13 +196,9 @@ int BusRS::read(Frame_t* frame, uint32_t timeout)
         }
     }
 error:
-    free(buffer);
-    buffer = NULL;
     xSemaphoreGive(_writeReadMutex);
     return -1;
 success:
-    free(buffer);
-    buffer = NULL;
     xSemaphoreGive(_writeReadMutex);
 #if defined(DEBUG_BUS)
     ESP_LOGI(TAG, "READ - ID: %u | CMD: 0x%02X | LENGTH: 0x%02X | CHCK: 0x%02X | DATA:", \

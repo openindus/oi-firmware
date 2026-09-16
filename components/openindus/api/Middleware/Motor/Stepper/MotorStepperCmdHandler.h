@@ -27,7 +27,7 @@ public:
     {
         Slave::addCallback(CALLBACK_MOTOR_ATTACH_LIMIT_SWITCH, [](std::vector<uint8_t> &data) {
             MotorNum_t motor = static_cast<MotorNum_t>(data[1]);
-            DIn_Num_t din    = static_cast<DIn_Num_t>(data[2]);
+            DinNum_t din    = static_cast<DinNum_t>(data[2]);
             Logic_t logic    = static_cast<Logic_t>(data[3]);
             MotorStepper::attachLimitSwitch(motor, din, logic);
             data.clear();
@@ -35,7 +35,7 @@ public:
 
         Slave::addCallback(CALLBACK_MOTOR_DETACH_LIMIT_SWITCH, [](std::vector<uint8_t> &data) {
             MotorNum_t motor = static_cast<MotorNum_t>(data[1]);
-            DIn_Num_t din    = static_cast<DIn_Num_t>(data[2]);
+            DinNum_t din    = static_cast<DinNum_t>(data[2]);
             MotorStepper::detachLimitSwitch(motor, din);
             data.clear();
         });
@@ -206,7 +206,7 @@ public:
             for (int i = 0; i < STEPPER_MOTOR_MAX; ++i) {
                 // Detach all limit switches
                 for (int j = 0; j < STEPPER_DIN_MAX; ++j) {
-                    MotorStepper::detachLimitSwitch(static_cast<MotorNum_t>(i), static_cast<DIn_Num_t>(j));
+                    MotorStepper::detachLimitSwitch(static_cast<MotorNum_t>(i), static_cast<DinNum_t>(j));
                 }
                 // Delete wait task
                 if (_waitTaskHandler[i] != nullptr) {

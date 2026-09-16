@@ -3,3 +3,4 @@ dependencies:
   idf:
     version: ">=5.5"
   espressif/esp_modem: ^1.4.0
+  espressif/pid_ctrl: ^0.3.1

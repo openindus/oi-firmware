@@ -149,7 +149,7 @@ bool checkAndPrintDInValues(const char* label, const int activeMotorIndex = -1)
     // measure and display all eight gpios called DC_GPIO_PIN_DIN_1 to DC_GPIO_PIN_DIN_8
     bool dinValues[8];
     for (int j = 1; j <= 8; j++) {
-        dinValues[j - 1] = dc.digitalRead(static_cast<DIn_Num_t>(j - 1));
+        dinValues[j - 1] = dc.digitalRead(static_cast<DinNum_t>(j - 1));
     }
 
     // Log the DIn values

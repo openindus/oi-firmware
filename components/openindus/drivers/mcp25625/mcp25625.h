@@ -1,160 +1,117 @@
 /**
- * Copyright (C) OpenIndus, Inc - All Rights Reserved
- *
- * This file is part of OpenIndus Library.
- *
- * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential
- * 
  * @file mcp25625.h
- * @brief Functions for MCP25625 SPI to CAN 
- *
- * For more information on OpenIndus:
+ * @brief MCP25625 API
+ * @author Mani Gillier <mani.gillier@openindus.com>
+ * @copyright (c) [2026] OpenIndus, Inc. All rights reserved.
  * @see https://openindus.com
  */
 
-#ifndef _MCP25625_
-#define _MCP25625_
-
 #pragma once
-
-#include <string.h>
-
-#include "esp_err.h"
-#include "esp_log.h"
-#include "driver/gpio.h"
-#include "driver/spi_master.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/semphr.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define __MIKROC_PRO_FOR_ESP32__       1
-#define MCP25625_SPI_FREQ              4000000UL
-#define MCP25625_CAN_RX_QUEUE_SIZE     64
+/* HEADERS */
 
-#define MCP25625_SPI_CMD_WRITE_REG              0x02
-#define MCP25625_SPI_CMD_READ_REG               0x03
-#define MCP25625_SPI_CMD_MODIFY_REG             0x05
+#include "driver/gpio.h"
+#include "driver/spi_master.h"
+#include <stdbool.h>
 
-/**CAN Driver device configuration.
- *
- *  
+/* STRUCTS & GLOBALS */
+
+enum { CAN_MAX_BYTES = 8 };
+
+enum mcp25625_can_baudrate : uint64_t {
+    MCP25625_BAUD_1M   = 1000000U,
+    MCP25625_BAUD_500K = 500000U,
+};
+
+struct mcp25625_can_instance {
+    spi_host_device_t host;              /**< SPI host device */
+    gpio_num_t cs;                       /**< Chip select pin */
+    gpio_num_t intr;                     /**< Interrupt pin */
+    enum mcp25625_can_baudrate baudrate; /**< CAN baudrate in bits/s */
+    bool extended_mode;                  /**< Extended frame mode */
+    bool initialized;                    /**< Initialization status */
+};
+extern struct mcp25625_can_instance mcp25625_instance;
+
+struct can_message {
+    uint32_t id : 29;           /**< CAN message ID */
+    uint8_t size : 4;           /**< CAN message size */
+    bool IDE : 1;               /**< Extended frame: true, Standard frame: false */
+    bool RTR : 1;               /**< Remote transfer frame or data frame */
+    uint8_t msg[CAN_MAX_BYTES]; /**< CAN message data */
+};
+
+extern StaticQueue_t mcp25625_rx_queue_buffer;
+extern uint8_t mcp25625_rx_buffer[];
+extern QueueHandle_t mcp25625_rx_queue;
+
+extern StaticQueue_t mcp25625_tx_queue_buffer;
+extern uint8_t mcp25625_tx_buffer[];
+extern QueueHandle_t mcp25625_tx_queue;
+
+/* PROTOTYPES */
+
+/**
+ * @brief Init interface
+ * @param host SPI host device
+ * @param cs SPI Chip Select pin
+ * @param intr SPI Interrupt pin
+ * @return esp_err_t ESP_OK on success, error code otherwise
  */
-typedef struct
-{
-    spi_host_device_t spi_host;
-    int spi_freq;
-    int spi_pin_cs;
-    gpio_num_t spi_pin_int;
+esp_err_t mcp25625_can_init(spi_host_device_t host, gpio_num_t cs, gpio_num_t intr);
 
-} MCP25625_DeviceConfig_t;
+void mcp25625_can_stop();
 
-/**CAN message structure.
- *
- *  
+/**
+ * @brief Begin
  */
-typedef struct
-{
-    uint32_t id;
-    uint8_t count;
-    bool IDE;
-    bool RTR;
-    uint8_t msg[ 8 ];
-} MCP25625_canMessage_t;
+void mcp25625_can_begin(enum mcp25625_can_baudrate baudrate, bool extended_mode);
 
-/**CAN queue message.
- *
- *  
+/**
+ * @brief Modify existing configuration
  */
-typedef struct 
-{
-    uint16_t head, tail, count;
-    MCP25625_canMessage_t e[MCP25625_CAN_RX_QUEUE_SIZE];
-} MCP25625_canRxQueue_t;
+void mcp25625_can_reconfigure(enum mcp25625_can_baudrate baudrate, bool extended_mode);
 
-/**Driver install function.
-
- *
- *   @return ESP_OK if good result
+/**
+ * @brief Deinit
  */
-esp_err_t mcp25625_create(MCP25625_DeviceConfig_t *config);
+void mcp25625_can_deinit();
 
-
-/**Driver delete function.
-
- *
- *   @return ESP_OK if good result
+/**
+ * @brief Write can message
+ * @return esp_err_t ESP_OK on success, ESP_FAIL if queue full
  */
-esp_err_t mcp25625_delete();
+esp_err_t mcp25625_can_write(struct can_message *msg_ptr);
 
-/**SPI Write function.
-
- *   @params cmd : spi cmd, reg : spi register, data_out : tx data, len : data len
- *   @return none
+/**
+ * @brief Read can message
+ * @note This function is blocking until message is received
+ * Please use @ref mcp25625_can_available() to check if a message is available before calling this
+ * function if you want to avoid blocking
  */
-void SPI_Wr_Ptr( unsigned char cmd, unsigned char reg , unsigned char *data_out, int len );
+void mcp25625_can_read(struct can_message *msg_ptr);
 
-/**SPI Read function.
-
- *   @params cmd : spi cmd, reg : spi register, buffer : rx data buffer, len : data len
- *   @return none
+/**
+ * @brief Set standard filter
+ * @warn This function cancels precedent call to mcp25625_can_set_extended_filter() and vice versa
  */
-void SPI_Rd_Ptr( unsigned char cmd, unsigned char reg, unsigned char * buffer,  int len );
+void mcp25625_can_set_standard_filter(uint16_t mask, uint16_t filter);
 
-/**Read one CAN message of queue.
-
- *   
- *   @return 0 if queue is empty
+/**
+ * @brief Set extended filter
+ * @warn This function cancels precedent call to mcp25625_can_set_standard_filter() and vice versa
  */
-int mcp25625_queue_read(MCP25625_canMessage_t *msg);
+void mcp25625_can_set_extended_filter(uint32_t mask, uint32_t filter);
 
-/**Return number of elements in queue.
-
- *   
- *   @return 0 if queue is full
+/**
+ * @brief Does the queue have messages to read
  */
-int mcp25625_queue_available();
-/**Push one element in queue.
-
- *   
- *   @return -1 if queue is full
- */
-int can_queue_push(MCP25625_canMessage_t element);
-
-/**Pop one element of queue.
-
- *
- *   @return -1 if queue is empty
- */
-int can_queue_pop(MCP25625_canMessage_t *element);
-
-/**Return number of elements in queue.
-
- *
- *   @return 0 if queue is empty
- */
-int can_queue_size();
-
-/**ISR GPIO Handler.
-
- *
- *   @return none
- */
-void _can_isr_handler(void* arg);
-
-/**ISR GPIO Task.
-
- *
- *   @return none
- */
-void can_task_interrupt_handler(void* arg);
+bool mcp25625_can_available();
 
 #ifdef __cplusplus
 }
-#endif
-
 #endif

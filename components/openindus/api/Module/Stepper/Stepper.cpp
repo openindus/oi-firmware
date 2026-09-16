@@ -19,7 +19,7 @@ const gpio_num_t _dinGpio[] = {
 #endif
 };
 
-static const std::map<DIn_Num_t, gpio_num_t> dinGpioMap = {
+static const std::map<DinNum_t, gpio_num_t> dinGpioMap = {
     {DIN_1, STEPPER_GPIO_PIN_DIN_1},
     {DIN_2, STEPPER_GPIO_PIN_DIN_2},
     {DIN_3, STEPPER_GPIO_PIN_DIN_3},

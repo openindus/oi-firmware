@@ -172,7 +172,7 @@ static int attachLimitSwitchFunc(int argc, char **argv)
 
     uint16_t id = attachLimitSwitchArgs.id->ival[0];
     MotorNum_t motor = (MotorNum_t)(attachLimitSwitchArgs.motor->ival[0] - 1);
-    DIn_Num_t din = (DIn_Num_t)(attachLimitSwitchArgs.din->ival[0] - 1);
+    DinNum_t din = (DinNum_t)(attachLimitSwitchArgs.din->ival[0] - 1);
 
     if (motor >= MOTOR_MAX_NUM) {
         ESP_LOGE(TAG, "Invalid motor number: %d. Must be between %d and %d", 
@@ -217,7 +217,7 @@ static int detachLimitSwitchFunc(int argc, char **argv)
 
     uint16_t id = detachLimitSwitchArgs.id->ival[0];
     MotorNum_t motor = (MotorNum_t)(detachLimitSwitchArgs.motor->ival[0] - 1);
-    DIn_Num_t din = (DIn_Num_t)(detachLimitSwitchArgs.din->ival[0] - 1);
+    DinNum_t din = (DinNum_t)(detachLimitSwitchArgs.din->ival[0] - 1);
 
     if (motor >= MOTOR_MAX_NUM) {
         ESP_LOGE(TAG, "Invalid motor number: %d. Must be between %d and %d", 

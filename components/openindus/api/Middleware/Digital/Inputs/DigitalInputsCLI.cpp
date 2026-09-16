@@ -64,7 +64,7 @@ int DigitalInputsCLI::digitalReadFunc(int argc, char **argv)
     PARSE_ARGS_OR_RETURN(argc, argv, digitalReadArgs);
 
     // Parse the digital input number
-    DIn_Num_t din = (DIn_Num_t)(digitalReadArgs.din->ival[0] - 1);
+    DinNum_t din = (DinNum_t)(digitalReadArgs.din->ival[0] - 1);
     if (din >= DIN_MAX) {
         ESP_LOGE(TAG, "Invalid DIN number: %d. Must be between 1 and %d", digitalReadArgs.din->ival[0], DIN_MAX);
         return -1;
@@ -93,7 +93,7 @@ int DigitalInputsCLI::attachInterruptFunc(int argc, char **argv)
     PARSE_ARGS_OR_RETURN(argc, argv, attachInterruptArgs);
 
     // Parse the digital input number
-    DIn_Num_t din = (DIn_Num_t)(attachInterruptArgs.din->ival[0] - 1);
+    DinNum_t din = (DinNum_t)(attachInterruptArgs.din->ival[0] - 1);
     if (din >= DIN_MAX) {
         ESP_LOGE(TAG, "Invalid DIN number: %d. Must be between 1 and %d", attachInterruptArgs.din->ival[0], DIN_MAX);
         return -1;
@@ -140,7 +140,7 @@ int DigitalInputsCLI::detachInterruptFunc(int argc, char **argv)
     PARSE_ARGS_OR_RETURN(argc, argv, detachInterruptArgs);
 
     // Parse the digital input number
-    DIn_Num_t din = (DIn_Num_t)(detachInterruptArgs.din->ival[0] - 1);
+    DinNum_t din = (DinNum_t)(detachInterruptArgs.din->ival[0] - 1);
     if (din >= DIN_MAX) {
         ESP_LOGE(TAG, "Invalid DIN number: %d. Must be between 1 and %d", detachInterruptArgs.din->ival[0], DIN_MAX);
         return -1;

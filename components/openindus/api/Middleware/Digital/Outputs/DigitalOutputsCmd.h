@@ -24,13 +24,13 @@ public:
     DigitalOutputsCmd(uint16_t id) : _module(new ModuleControl(id)), _overcurrentCallback(NULL) {}
     ~DigitalOutputsCmd() { delete _module; }
 
-    void digitalWrite(DOut_Num_t num, bool level) override;
-    void toggleOutput(DOut_Num_t num) override;
-    void outputMode(DOut_Num_t num, DOut_Mode_t mode) override;
-    void setPWMFrequency(DOut_Num_t num, uint32_t freq) override;
-    void setPWMDutyCycle(DOut_Num_t num, float duty) override;
-    float getOutputCurrent(DOut_Num_t num) override;
-    int outputIsOvercurrent(DOut_Num_t num) override;
+    void digitalWrite(DoutNum_t num, bool level) override;
+    void toggleOutput(DoutNum_t num) override;
+    void outputMode(DoutNum_t num, DoutMode_t mode) override;
+    void setPWMFrequency(DoutNum_t num, uint32_t freq) override;
+    void setPWMDutyCycle(DoutNum_t num, float duty) override;
+    float getOutputCurrent(DoutNum_t num) override;
+    int outputIsOvercurrent(DoutNum_t num) override;
     void setOvercurrentThreshold(float threshold, float thresholdSum = 8.0f);
     void attachOvercurrentCallback(void (*callback)(void*), void *arg = NULL) override;
     void detachOvercurrentCallback(void) override;
