@@ -58,6 +58,14 @@ private:
     static SemaphoreHandle_t _writeMutex;
     static SemaphoreHandle_t _writeReadMutex;
 
+    /* Rx stream state kept across read() calls: several frames can be received
+     * in a single UART event, and the surplus must survive until the next call. */
+    static uint8_t _rxBuffer[128];
+    static size_t _rxLength;  // bytes held in _rxBuffer
+    static size_t _rxIndex;   // next byte of _rxBuffer to consume
+    static size_t _rxPending; // bytes announced by the current event, still in the driver
+
+    static void _flushRx(void);
     static uint8_t _calculateChecksum(Frame_t *frame);
     static bool _verifyChecksum(Frame_t *frame);
 
