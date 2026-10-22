@@ -15,10 +15,6 @@ stages:
   - build:docs
   - deploy
 
-cache:
-  paths:
-    - .oi/
-
 setup:
   stage: setup
   script:
@@ -37,11 +33,15 @@ setup:
     - cp sdkconfig.ci.defaults.${MODULE_TYPE} sdkconfig
     - idf.py reconfigure
     - idf.py build
-  after_script:
+    - mkdir -p .oi/bin/oi-firmware-$(cat version.txt)
     - cp build/OI-Firmware.bin .oi/bin/oi-firmware-$(cat version.txt)/${MODULE_TYPE}_firmware-$(cat version.txt).bin
     - cp build/ota_data_initial.bin .oi/bin/oi-firmware-$(cat version.txt)/${MODULE_TYPE}_ota_data_initial-$(cat version.txt).bin
     - cp build/bootloader/bootloader.bin .oi/bin/oi-firmware-$(cat version.txt)/${MODULE_TYPE}_bootloader-$(cat version.txt).bin
     - cp build/partition_table/partition-table.bin .oi/bin/oi-firmware-$(cat version.txt)/${MODULE_TYPE}_partitions-$(cat version.txt).bin
+  artifacts:
+    paths:
+      - .oi/bin/
+    expire_in: 1 week
   tags:
     - oi-firmware
 
@@ -125,15 +125,32 @@ build:docs:
     - doxygen doxygen/Doxyfile
     - ./build_multiversion.sh "$CI_COMMIT_TAG"
     - cd ..
-  after_script:
+    - mkdir -p .oi/docs
     - cp -r docs/build/html/. .oi/docs/
+  artifacts:
+    paths:
+      - .oi/docs/
+    expire_in: 1 week
+  tags:
+    - oi-firmware
+
+# Publication sur openindus.com par SSH (variables PROD_*, tags v* protégés).
+
+.deploy:ssh:
+  stage: deploy
+  rules:
+    - if: $CI_COMMIT_TAG
+  before_script:
+    - ': "${PROD_SSH_HOST:?}" "${PROD_SSH_USER:?}" "${PROD_SSH_KEY:?}" "${PROD_SSH_KNOWN_HOSTS:?}" "${PROD_CONTENT_PATH:?}"'
+    - apt-get update -qq && apt-get install -y -qq rsync openssh-client >/dev/null
+    - mkdir -p ~/.ssh && printf '%s\n' "$PROD_SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts && chmod 600 "$PROD_SSH_KEY"
+    - export RSYNC_RSH="ssh -i $PROD_SSH_KEY -p ${PROD_SSH_PORT:-22} -o BatchMode=yes"
+    - export TARGET="$PROD_SSH_USER@$PROD_SSH_HOST:$PROD_CONTENT_PATH"
   tags:
     - oi-firmware
 
 deploy:bin:
-  stage: deploy
-  only:
-    - tags
+  extends: .deploy:ssh
   needs:
     - job: build:bin:core
     - job: build:bin:discrete
@@ -144,48 +161,45 @@ deploy:bin:
     - job: build:bin:relaylp
     - job: build:bin:analogls
     - job: build:bin:dc
-  before_script:
-    - apt update
-    - apt install -y lftp
   script:
-    - lftp ${FTP_SERVER} -u ${FTP_USERNAME},${FTP_PASSWORD} -e "set ssl:verify-certificate no; mirror -R ./.oi/bin/ bin/; exit;"
-  tags:
-    - oi-firmware
+    - n=$(find .oi/bin -name '*.bin' | wc -l); echo "$n binaires"
+    - 'test "$n" -eq 36 || { echo "36 binaires attendus (9 modules x 4), $n trouvés"; exit 1; }'
+    - rsync -rz --chmod=D2775,F664 --itemize-changes .oi/bin/ "$TARGET/bin/"
 
 deploy:library:
-  stage: deploy
-  only:
-    - tags
+  extends: .deploy:ssh
   needs:
     - job: build:bin:core
+      artifacts: false
     - job: build:bin:discrete
+      artifacts: false
     - job: build:bin:discreteve
+      artifacts: false
     - job: build:bin:stepper
+      artifacts: false
     - job: build:bin:mixed
+      artifacts: false
     - job: build:bin:relayhp
+      artifacts: false
     - job: build:bin:relaylp
+      artifacts: false
     - job: build:bin:analogls
+      artifacts: false
     - job: build:bin:dc
+      artifacts: false
     - job: build:examples:library
-  before_script:
-    - apt update
-    - apt install -y lftp
+      artifacts: false
   script:
+    - mkdir -p .oi/lib
     - tar -czf .oi/lib/openindus-$(cat version.txt).tar.gz -C components/openindus .
     - tar -czf .oi/lib/arduino-esp32-$(cat version.txt).tar.gz -C components/arduino .
-    - lftp ${FTP_SERVER} -u ${FTP_USERNAME},${FTP_PASSWORD} -e "set ssl:verify-certificate no; mirror -R ./.oi/lib/ lib/; exit;"
-  tags:
-    - oi-firmware
+    - rsync -rz --chmod=D2775,F664 --itemize-changes .oi/lib/ "$TARGET/lib/"
 
 deploy:docs:
-  stage: deploy
+  extends: .deploy:ssh
   needs:
     - job: build:docs
     - job: build:examples:docs
-  before_script:
-    - apt update
-    - apt install -y lftp
+      artifacts: false
   script:
-    - lftp ${FTP_SERVER} -u ${FTP_USERNAME},${FTP_PASSWORD} -e "set ssl:verify-certificate no; set mirror:parallel-transfer-count 4; mirror -R --only-newer --verbose ./.oi/docs/ doc/; exit;"
-  tags:
-    - oi-firmware
+    - rsync -rz --update --chmod=D2775,F664 .oi/docs/ "$TARGET/doc/"
