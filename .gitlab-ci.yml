@@ -8,6 +8,11 @@ workflow:
          $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "develop")
     - if: '$CI_COMMIT_TAG'
 
+# Rien n'est réutilisé d'un job à l'autre (git clean au démarrage) : on libère le runner en fin de job.
+default:
+  after_script:
+    - rm -rf build managed_components docs/build
+
 stages:
   - setup
   - build:firmware
@@ -98,6 +103,7 @@ build:examples:library:
     - ./build_examples.sh components/openindus/examples/
   after_script:
     - git restore main/main.cpp
+    - rm -rf build managed_components
   tags:
     - oi-firmware
 
@@ -109,6 +115,7 @@ build:examples:docs:
     - ./build_examples.sh docs/examples/
   after_script:
     - git restore main/main.cpp
+    - rm -rf build managed_components
   tags:
     - oi-firmware
 
