@@ -14,6 +14,30 @@
  * @see https://openindus.com
  */
 
+/* Derived from the SC16IS750 I2C or SPI to UART bridge library for mbed by Wim Huiskamp (WH),
+ * https://os.mbed.com/users/wim/code/SC16IS750/
+ *   v0.1 WH, Nov 2013, Sparkfun WiFly Shield code library alpha 0 used as example, Added I2C I/F and many more methods.
+ *                      https://forum.sparkfun.com/viewtopic.php?f=13&t=21846
+ *   v0.2 WH, Feb 2014, Added Doxygen Documentation, Added Hardware Reset pin methods.
+ *   v0.3 WH, Dec 2014, Added support for SC16IS752 dual UART.
+ *   v0.4 WH, Dec 2014, Added Repeated Start for I2C readRegister(). Set I2C clock at 100kb/s. Fixed and added some comments.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+ * and associated documentation files (the "Software"), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+ * BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 #pragma once
 
 #include <string.h> 
