@@ -190,3 +190,16 @@ Board which are ready to use :
 
 - Cleaned up build scripts, sdkconfig files and obsolete files.
 - Limited the number of concurrent jobs in the CI to avoid crashes.
+
+# v2.2.1
+
+### Bugfixes
+
+- SC16IS750 (RS on the OI-Core): fixed a stack overflow in the RX task and the RX queue mutex misuse (`xTaskPriorityDisinherit` assert), which rebooted the Core after a few RS frames.
+- SC16IS750: the RX task now empties the FIFO until no interrupt is left, so reception can no longer stop for good. Fixed the init order (the presence test no longer overwrites the trigger levels, TCR is written) and `send_break()`. The RX trigger level stays at 56.
+- OI-Core: the SPI2 bus configuration (SD, Ethernet, USB host) left `isr_cpu_id` uninitialised.
+
+### Misc
+
+- The SC16IS750 driver is now under the MIT license: it is a port of Wim Huiskamp's mbed library.
+- CI: binaries are published over SSH and kept as job artifacts, and the runner is cleaned at the end of each job.
