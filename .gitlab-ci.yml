@@ -20,6 +20,17 @@ stages:
   - build:docs
   - deploy
 
+# version.txt plus récent que le dernier tag (ou égal au tag construit), et toutes ses références à jour :
+# README, idf_component.yml, CHANGELOG ; la documentation n'a besoin que de la version mineure.
+check:version:
+  stage: setup
+  needs: []
+  script:
+    - git fetch --quiet --tags origin
+    - python3 check_version.py
+  tags:
+    - oi-firmware
+
 setup:
   stage: setup
   script:
