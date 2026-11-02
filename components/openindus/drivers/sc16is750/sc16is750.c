@@ -120,10 +120,11 @@ esp_err_t SC16IS750_delete()
 
 int queue_push(uint8_t element)
 {
-    xSemaphoreTake(xSemaphoreQueue, portTICK_PERIOD_MS);
+    xSemaphoreTake(xSemaphoreQueue, portMAX_DELAY);
     if((rx_queue.count == SC16IS750_RX_QUEUE_SIZE))
     {
         ESP_LOGV(SC16IS750_TAG, "RX internal queue is full");
+        xSemaphoreGive(xSemaphoreQueue);
         return -1;
     }
 
@@ -136,10 +137,11 @@ int queue_push(uint8_t element)
 
 int queue_pop(uint8_t * element)
 {
-    xSemaphoreTake(xSemaphoreQueue, portTICK_PERIOD_MS);
+    xSemaphoreTake(xSemaphoreQueue, portMAX_DELAY);
     if(!(rx_queue.count == SC16IS750_RX_QUEUE_SIZE) && (rx_queue.head == rx_queue.tail)) //queue is empty ?
     {
         ESP_LOGV(SC16IS750_TAG, "RX internal queue is empty");
+        xSemaphoreGive(xSemaphoreQueue);
         return -1;
     }
     ESP_LOGV(SC16IS750_TAG, "RX internal queue number of chars before reading: %d", rx_queue.count);
@@ -154,7 +156,7 @@ int queue_pop(uint8_t * element)
 int queue_size()
 {
     int temp;
-    xSemaphoreTake(xSemaphoreQueue, portTICK_PERIOD_MS);
+    xSemaphoreTake(xSemaphoreQueue, portMAX_DELAY);
     temp = rx_queue.count;
     xSemaphoreGive(xSemaphoreQueue);
     return temp;
@@ -687,7 +689,7 @@ static void SC16IS750_task(void* arg)
 {
     int readable = 0;
     uint8_t intr_type;
-    uint8_t temp_buff[readable];
+    uint8_t temp_buff[SC16IS750_FIFO_RX];
     while (1)
     {
         // Wait for an interrupt
