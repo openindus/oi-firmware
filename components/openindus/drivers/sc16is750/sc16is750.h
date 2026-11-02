@@ -1,17 +1,32 @@
 
 /**
- * Copyright (C) OpenIndus, Inc - All Rights Reserved
- *
- * This file is part of OpenIndus Library.
- *
- * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential
- * 
  * @file sc16is750.h
  * @brief Functions for SC16IS750 SPI to UART bridge
  *
- * For more information on OpenIndus:
- * @see https://openindus.com
+ * Copyright (c) 2013-2014 Wim Huiskamp (WH): SC16IS750 I2C or SPI to UART bridge library for mbed,
+ * https://os.mbed.com/users/wim/code/SC16IS750/
+ *   v0.1 WH, Nov 2013, Sparkfun WiFly Shield code library alpha 0 used as example, Added I2C I/F and many more methods.
+ *                      https://forum.sparkfun.com/viewtopic.php?f=13&t=21846
+ *   v0.2 WH, Feb 2014, Added Doxygen Documentation, Added Hardware Reset pin methods.
+ *   v0.3 WH, Dec 2014, Added support for SC16IS752 dual UART.
+ *   v0.4 WH, Dec 2014, Added Repeated Start for I2C readRegister(). Set I2C clock at 100kb/s. Fixed and added some comments.
+ * Copyright (c) 2021-2026 OpenIndus: ESP-IDF port, RX interrupt task and queue, fixes.
+ * https://openindus.com
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+ * and associated documentation files (the "Software"), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+ * BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 #pragma once
@@ -174,7 +189,7 @@ extern "C" {
 #define IIR_TX_EMPTY                    (0x02)  /* THR Interrupt                */
 #define IIR_RX_DATA                     (0x04)  /* RHR Interrupt                */
 #define IIR_RX_ERROR                    (0x06)  /* Line Status Error Interrupt  */
-#define IIR_RX_TIMEOUT                  (0x0B)  /* RX Timeout Interrupt         */
+#define IIR_RX_TIMEOUT                  (0x0C)  /* RX Timeout Interrupt         */
 #define IIR_RX_XOFF                     (0x10)  /* RX XOff Interrupt            */
 #define IIR_DCTS_DRTS                   (0x20)  /* Delta CTS or RTS Interrupt   */
 #define IIR_DIO                         (0x30)  /* Delta GPIO pin Interrupt     */
@@ -403,7 +418,7 @@ typedef struct
  */
 typedef struct 
 {
-	uint8_t baudrate;
+	int baudrate;
 	uint8_t dataformat;  
 	uint8_t flowctrl;  
 	uint8_t fifoformat;
@@ -633,7 +648,7 @@ void SC16IS750_ioGetState(uint8_t *data);
 void SC16IS750_swReset();
 
 /** Initialise internal registers
- * If initialisation fails this method does not return.    
+ * If the device does not answer, an error is logged and initialisation goes on.
  *   @param none
  *   @return none 
  */
