@@ -203,3 +203,4 @@ Board which are ready to use :
 
 - The SC16IS750 driver is now under the MIT license: it is a port of Wim Huiskamp's mbed library.
 - CI: binaries are published over SSH and kept as job artifacts, and the runner is cleaned at the end of each job.
+- CI: `check:version` checks `version.txt` against the last tag and every reference to the version (README, component manifest, CHANGELOG; the minor version for the documentation).
