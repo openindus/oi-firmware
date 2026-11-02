@@ -123,7 +123,7 @@ int Core::init(void)
     spiConfig2.data7_io_num = -1;
     spiConfig2.max_transfer_sz = 0;
     spiConfig2.flags = 0;
-    spiConfig1.isr_cpu_id = ESP_INTR_CPU_AFFINITY_AUTO;
+    spiConfig2.isr_cpu_id = ESP_INTR_CPU_AFFINITY_AUTO;
     spiConfig2.intr_flags = 0;
     err |= spi_bus_initialize(CORE_SPI_HOST, &spiConfig2, SPI_DMA_CH_AUTO);
 

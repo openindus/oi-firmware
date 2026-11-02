@@ -1,6 +1,6 @@
 # OpenIndus Firmware
 
-[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)]()
+[![Version](https://img.shields.io/badge/version-2.2.1-blue.svg)]()
 [![Framework](https://img.shields.io/badge/framework-ESP--IDF_V5.5-green.svg)](https://docs.espressif.com/projects/esp-idf/en/v5.5/esp32s3/index.html)
 
 ## Configuration
