@@ -198,7 +198,7 @@ extern "C" {
 #define IIR_TX_EMPTY                    (0x02)  /* THR Interrupt                */
 #define IIR_RX_DATA                     (0x04)  /* RHR Interrupt                */
 #define IIR_RX_ERROR                    (0x06)  /* Line Status Error Interrupt  */
-#define IIR_RX_TIMEOUT                  (0x0B)  /* RX Timeout Interrupt         */
+#define IIR_RX_TIMEOUT                  (0x0C)  /* RX Timeout Interrupt         */
 #define IIR_RX_XOFF                     (0x10)  /* RX XOff Interrupt            */
 #define IIR_DCTS_DRTS                   (0x20)  /* Delta CTS or RTS Interrupt   */
 #define IIR_DIO                         (0x30)  /* Delta GPIO pin Interrupt     */
@@ -427,7 +427,7 @@ typedef struct
  */
 typedef struct 
 {
-	uint8_t baudrate;
+	int baudrate;
 	uint8_t dataformat;  
 	uint8_t flowctrl;  
 	uint8_t fifoformat;
@@ -657,7 +657,7 @@ void SC16IS750_ioGetState(uint8_t *data);
 void SC16IS750_swReset();
 
 /** Initialise internal registers
- * If initialisation fails this method does not return.    
+ * If the device does not answer, an error is logged and initialisation goes on.
  *   @param none
  *   @return none 
  */

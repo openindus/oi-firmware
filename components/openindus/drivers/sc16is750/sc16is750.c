@@ -482,6 +482,7 @@ void SC16IS750_baud(int baudrate)
     SC16IS750_writeRegister(DLL, ( divisor       & 0xFF));            //   write divisor LSB
     SC16IS750_writeRegister(DLH, ((divisor >> 8) & 0xFF));            //   write divisor MSB
     SC16IS750_writeRegister(LCR, lcr_tmp);                            // Restore LCR register, activate regular RBR, THR and IER registers  
+    _config.baudrate = baudrate;                                      // Save baudrate, send_break() divides by it
     ESP_LOGV(SC16IS750_TAG, "Baudrate is set to %d", baudrate);
 }
 
@@ -624,7 +625,9 @@ void SC16IS750_set_fifo_control()
     
     // Note FCR[5:4] (=TX_IRQ_LVL) only accessible when EFR[4] is set (enhanced functions enable)
     //  _config.fifoformat = FCR_RX_IRQ_8 | FCR_TX_IRQ_56;
-    _config.fifoformat = FCR_RX_IRQ_8 | FCR_TX_IRQ_8;  //Default
+    // RX at 56: a frame shorter than that comes in one block, on the RX timeout. It is the level the driver
+    // always ran with, the presence test used to write 0xE9 (RX 56, TX 36) into TLR
+    _config.fifoformat = FCR_RX_IRQ_56 | FCR_TX_IRQ_8;
     
     if (_config.fifoenable)
     {
@@ -661,6 +664,12 @@ void SC16IS750_init(SC16IS750_SerialParams_t cfg)
     // Software reset, assuming there is no access to the HW Reset pin
     SC16IS750_swReset();
     
+    // Test if UART bridge is present and initialised
+    // (before MCR[2] is set: afterwards its SPR address is TLR, and 0xE9 became the RX/TX trigger levels)
+    if(!SC16IS750_connected()) { 
+        ESP_LOGE(SC16IS750_TAG, "Failed to initialise device");  
+    } 
+    
     // Set default baudrate (depends on prescaler) and save in _config
     // DLL/DLH  
     SC16IS750_baud(cfg.baudrate);
@@ -669,22 +678,22 @@ void SC16IS750_init(SC16IS750_SerialParams_t cfg)
     // LCR 
     SC16IS750_format(cfg.format_bits, cfg.parity, cfg.format_stop_bits);  
 
+    // Set dataflow mode and Enables enhanced functions
+    SC16IS750_set_flow_control(cfg.flow_type); 
+    
+    // Modem control, sets prescaler, enable TCR and TLR
+    // Note MCR[7:4] and MCR[2] only accessible when EFR[4] is set (enhanced functions enable)
+    SC16IS750_set_modem_control();
+    
     // Set RTS trigger levels
     // Note TCR only accessible when EFR[4] is set (enhanced functions enable) and MCR[2] is set
     SC16IS750_set_flow_triggers(cfg.trigger_resume, cfg.trigger_halt);
-    
-    // Set dataflow mode and Enables enhanced functions
-    SC16IS750_set_flow_control(cfg.flow_type); 
     
     // FIFO control, sets TX and RX IRQ trigger levels and enables FIFO and save in _config
     // Note FCR[5:4] only accessible when EFR[4] is set (enhanced functions enable)
     // FCR, TLR
     SC16IS750_set_fifo_control();
     SC16IS750_flush();
-    
-    // Modem control, sets prescaler, enable TCR and TLR
-    // Note MCR[7:4] and MCR[2] only accessible when EFR[4] is set (enhanced functions enable)
-    SC16IS750_set_modem_control();
     
     SC16IS750_writeRegister(IER, 0x01); //Enable RX interruption
 
@@ -693,11 +702,6 @@ void SC16IS750_init(SC16IS750_SerialParams_t cfg)
     //set_break();
     
     // The UART bridge should now be successfully initialised.
-    
-    // Test if UART bridge is present and initialised
-    if(!SC16IS750_connected()) { 
-        ESP_LOGE(SC16IS750_TAG, "Failed to initialise device");  
-    } 
 }
 
 static IRAM_ATTR void SC16IS750_isr_handler(void* arg)
@@ -720,26 +724,26 @@ static void SC16IS750_task(void* arg)
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
         SC16IS750_readRegister(IIR, &intr_type);
 
-        if ((intr_type & 0x37) == IIR_RX_DATA)
+        // The IRQ line stays low while an interrupt is pending and the GPIO interrupt fires on its
+        // falling edge only: empty the FIFO until no RX interrupt is left, or reception stops for good
+        while ((intr_type & 0x37) == IIR_RX_DATA) // RX data or RX timeout
         {
             readable = SC16IS750_readableCount();
-            if(readable > 0 )
+            if(readable <= 0)
             {
-                ESP_LOGV(SC16IS750_TAG, "Readable data : %d", readable);
-                if((rx_queue.count + readable < SC16IS750_RX_QUEUE_SIZE))
+                break;
+            }
+            ESP_LOGV(SC16IS750_TAG, "Readable data : %d", readable);
+            SC16IS750_readDataBlock(&temp_buff[0], readable);
+            for(int i = 0; i < readable; i++)
+            {
+                if(queue_push(temp_buff[i]) != 0)
                 {
-                    SC16IS750_readDataBlock(&temp_buff[0], readable);
-                    for(int i = 0; i < readable; i++)
-                    {
-                        queue_push(temp_buff[i]);
-                    }
-                }
-                
-                else
-                {
-                    ESP_LOGW(SC16IS750_TAG, "Internal RX buffer has not enought space to read values");
+                    ESP_LOGW(SC16IS750_TAG, "Internal RX buffer full, %d bytes lost", readable - i);
+                    break;
                 }
             }
+            SC16IS750_readRegister(IIR, &intr_type);
         }
     }
 }
