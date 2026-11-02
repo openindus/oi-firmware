@@ -1,25 +1,16 @@
 /**
- * Copyright (C) OpenIndus, Inc - All Rights Reserved
- *
- * This file is part of OpenIndus Library.
- *
- * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential
- * 
  * @file sc16is750.c
  * @brief Functions for SC16IS750 SPI to UART bridge
  *
- * For more information on OpenIndus:
- * @see https://openindus.com
- */
-
-/* Derived from the SC16IS750 I2C or SPI to UART bridge library for mbed by Wim Huiskamp (WH),
+ * Copyright (c) 2013-2014 Wim Huiskamp (WH): SC16IS750 I2C or SPI to UART bridge library for mbed,
  * https://os.mbed.com/users/wim/code/SC16IS750/
  *   v0.1 WH, Nov 2013, Sparkfun WiFly Shield code library alpha 0 used as example, Added I2C I/F and many more methods.
  *                      https://forum.sparkfun.com/viewtopic.php?f=13&t=21846
  *   v0.2 WH, Feb 2014, Added Doxygen Documentation, Added Hardware Reset pin methods.
  *   v0.3 WH, Dec 2014, Added support for SC16IS752 dual UART.
  *   v0.4 WH, Dec 2014, Added Repeated Start for I2C readRegister(). Set I2C clock at 100kb/s. Fixed and added some comments.
+ * Copyright (c) 2021-2026 OpenIndus: ESP-IDF port, RX interrupt task and queue, fixes.
+ * https://openindus.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
  * and associated documentation files (the "Software"), to deal in the Software without restriction,
